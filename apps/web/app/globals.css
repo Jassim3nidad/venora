@@ -3,6 +3,26 @@
 @source "../../src/**/*.tsx";
 @source "../../../../packages/ui/src/**/*.tsx";
 
+@theme {
+  --font-sans: "Inter", sans-serif;
+  --font-display: "Sora", sans-serif;
+  
+  --color-brand-50:  hsl(217 91% 97%);
+  --color-brand-100: hsl(217 91% 93%);
+  --color-brand-200: hsl(217 91% 85%);
+  --color-brand-300: hsl(217 91% 74%);
+  --color-brand-400: hsl(217 91% 63%);
+  --color-brand-500: hsl(217 91% 55%);
+  --color-brand-600: hsl(217 91% 47%);
+  --color-brand-700: hsl(217 91% 39%);
+  --color-brand-800: hsl(217 91% 31%);
+  --color-brand-900: hsl(217 91% 23%);
+  --color-brand-950: hsl(217 91% 15%);
+  
+  --color-accent-400: hsl(45 96% 65%);
+  --color-accent-500: hsl(45 96% 54%);
+}
+
 /* ─── CSS Custom Properties (Design Tokens) ──────────────────────────────── */
 :root {
   /* Brand (blue) */
