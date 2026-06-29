@@ -1,154 +1,51 @@
-import type { Metadata } from "next";
-import Link from "next/link";
+import { Button } from "@venora/ui/button";
+import { Card, CardContent, CardFooter } from "@venora/ui/card";
+import { Input } from "@venora/ui/input";
 
-export const metadata: Metadata = {
-  title: "Venora — Find & Book Your Perfect Venue",
-};
-
-export default function LandingPage() {
+export default function MarketingHomePage() {
   return (
-    <main>
-      {/* ── Hero ──────────────────────────────────────────────────── */}
-      <section
-        style={{
-          minHeight: "100dvh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          textAlign: "center",
-          padding: "2rem 1.5rem",
-          background:
-            "linear-gradient(135deg, hsl(217 50% 15%) 0%, hsl(217 70% 25%) 50%, hsl(45 96% 30%) 100%)",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        {/* Decorative blobs */}
-        <div
-          aria-hidden
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "radial-gradient(ellipse 80% 60% at 50% -20%, hsl(217 80% 63% / 0.3), transparent)",
-            pointerEvents: "none",
-          }}
-        />
+    <main className="flex-1 max-w-7xl w-full mx-auto p-6 md:p-8 space-y-12">
+      {/* AI Hero Section */}
+      <section className="relative rounded-2xl bg-zinc-900 text-white p-8 md:p-16 shadow-lg flex flex-col items-center text-center justify-center min-h-[320px] border border-zinc-800">
+        <span className="text-xs uppercase tracking-widest text-amber-400 font-semibold mb-3">
+          ✨ AI-Powered Venue Discovery
+        </span>
+        <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-6 max-w-2xl">
+          Find the Perfect Canvas for Your Celebration
+        </h1>
+        
+        <div className="w-full max-w-xl flex gap-2">
+          <Input 
+            placeholder="e.g., Beachfront venue in Batangas for 150 guests under ₱500k..." 
+            className="bg-white text-zinc-900 border-0 h-11"
+            disabled
+          />
+          <Button className="h-11 px-6 bg-amber-500 hover:bg-amber-600 text-zinc-950 font-semibold">
+            AI Search
+          </Button>
+        </div>
+      </section>
 
-        <div className="animate-slide-up" style={{ position: "relative", zIndex: 1, maxWidth: 800 }}>
-          <span
-            style={{
-              display: "inline-block",
-              padding: "0.25rem 1rem",
-              borderRadius: "999px",
-              background: "hsl(217 80% 63% / 0.2)",
-              border: "1px solid hsl(217 80% 63% / 0.4)",
-              color: "hsl(217 100% 87%)",
-              fontSize: "0.875rem",
-              fontWeight: 500,
-              marginBottom: "1.5rem",
-              backdropFilter: "blur(8px)",
-            }}
-          >
-            🎉 Launching in the Philippines
-          </span>
-
-          <h1
-            style={{
-              fontSize: "clamp(2.5rem, 7vw, 5rem)",
-              fontFamily: "var(--font-sora, sans-serif)",
-              fontWeight: 700,
-              lineHeight: 1.1,
-              color: "#fff",
-              marginBottom: "1.5rem",
-            }}
-          >
-            Find & Book Your{" "}
-            <span className="gradient-text">Perfect Venue</span>
-          </h1>
-
-          <p
-            style={{
-              fontSize: "clamp(1rem, 2.5vw, 1.25rem)",
-              color: "hsl(217 30% 85%)",
-              maxWidth: 600,
-              margin: "0 auto 2.5rem",
-              lineHeight: 1.7,
-            }}
-          >
-            From intimate garden weddings to grand corporate galas — Venora
-            connects you with the finest event venues across the Philippines,
-            instantly.
-          </p>
-
-          <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-            <Link
-              href="/venues"
-              id="hero-browse-venues-btn"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                padding: "0.875rem 2rem",
-                borderRadius: "0.75rem",
-                background: "hsl(217 70% 47%)",
-                color: "#fff",
-                fontWeight: 600,
-                fontSize: "1rem",
-                textDecoration: "none",
-                boxShadow: "0 8px 24px -4px hsl(217 70% 47% / 0.5)",
-                transition: "all 0.2s",
-              }}
-            >
-              Browse Venues
-            </Link>
-            <Link
-              href="/register"
-              id="hero-list-venue-btn"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                padding: "0.875rem 2rem",
-                borderRadius: "0.75rem",
-                background: "rgb(255 255 255 / 0.1)",
-                border: "1px solid rgb(255 255 255 / 0.3)",
-                color: "#fff",
-                fontWeight: 600,
-                fontSize: "1rem",
-                textDecoration: "none",
-                backdropFilter: "blur(8px)",
-                transition: "all 0.2s",
-              }}
-            >
-              List Your Venue
-            </Link>
-          </div>
+      {/* Featured Grid Skeleton */}
+      <section className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold tracking-tight">Featured Philippine Venues</h2>
+          <span className="text-sm text-muted-foreground">Showing skeleton UI</span>
         </div>
 
-        {/* Stats bar */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: "2rem",
-            left: "50%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            gap: "3rem",
-            color: "rgb(255 255 255 / 0.8)",
-            fontSize: "0.875rem",
-          }}
-        >
-          {[
-            ["500+", "Venues"],
-            ["12K+", "Happy Customers"],
-            ["₱2B+", "Bookings Processed"],
-          ].map(([n, l]) => (
-            <div key={l} style={{ textAlign: "center" }}>
-              <div style={{ fontWeight: 700, fontSize: "1.5rem", color: "#fff" }}>{n}</div>
-              <div>{l}</div>
-            </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Card key={i} className="overflow-hidden animate-pulse">
+              <div className="h-48 bg-secondary w-full" />
+              <CardContent className="p-5 space-y-3">
+                <div className="h-5 bg-secondary rounded w-3/4" />
+                <div className="h-4 bg-secondary/60 rounded w-1/2" />
+              </CardContent>
+              <CardFooter className="p-5 pt-0 flex justify-between items-center">
+                <div className="h-4 bg-secondary rounded w-1/3" />
+                <div className="h-8 bg-secondary rounded w-1/4" />
+              </CardFooter>
+            </Card>
           ))}
         </div>
       </section>
