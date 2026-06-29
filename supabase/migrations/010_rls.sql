@@ -330,7 +330,7 @@ RETURNS TABLE (
 )
 LANGUAGE sql STABLE SECURITY DEFINER AS $$
   SELECT
-    date_trunc(p_granularity, vad.period) AS period,
+    date_trunc(p_granularity, vad.month) AS period,
     sum(vad.booking_count)::bigint         AS booking_count,
     sum(vad.revenue)                       AS revenue,
     sum(vad.commission)                    AS commission,
@@ -341,6 +341,6 @@ LANGUAGE sql STABLE SECURITY DEFINER AS $$
     AND  (
       public.is_org_member_for_venue(p_venue_id) OR public.is_admin()
     )
-  GROUP  BY date_trunc(p_granularity, vad.period)
+  GROUP  BY date_trunc(p_granularity, vad.month)
   ORDER  BY 1;
 $$;

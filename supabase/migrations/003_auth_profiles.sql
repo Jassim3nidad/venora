@@ -133,41 +133,51 @@ RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER AS $$
 $$;
 
 CREATE OR REPLACE FUNCTION public.is_org_member_for_venue(p_venue_id uuid)
-RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER AS $$
-  SELECT EXISTS (
+RETURNS boolean LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
+BEGIN
+  RETURN EXISTS (
     SELECT 1 FROM public.venues v
     WHERE v.id = p_venue_id AND public.is_org_member(v.organization_id)
   );
+END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.is_booking_customer(p_booking_id uuid)
-RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER AS $$
-  SELECT EXISTS (
+RETURNS boolean LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
+BEGIN
+  RETURN EXISTS (
     SELECT 1 FROM public.bookings
     WHERE id = p_booking_id AND customer_id = auth.uid()
   );
+END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.is_org_member_for_booking(p_booking_id uuid)
-RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER AS $$
-  SELECT EXISTS (
+RETURNS boolean LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
+BEGIN
+  RETURN EXISTS (
     SELECT 1 FROM public.bookings b
     WHERE b.id = p_booking_id AND public.is_org_member_for_venue(b.venue_id)
   );
+END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.is_supplier_owner(p_supplier_id uuid)
-RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER AS $$
-  SELECT EXISTS (
+RETURNS boolean LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
+BEGIN
+  RETURN EXISTS (
     SELECT 1 FROM public.supplier_profiles
     WHERE id = p_supplier_id AND profile_id = auth.uid()
   );
+END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.is_conversation_participant(p_conversation_id uuid)
-RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER AS $$
-  SELECT EXISTS (
+RETURNS boolean LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
+BEGIN
+  RETURN EXISTS (
     SELECT 1 FROM public.ai_conversations
     WHERE id = p_conversation_id AND user_id = auth.uid()
   );
+END;
 $$;
