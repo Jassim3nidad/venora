@@ -1,0 +1,222 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Sora:wght@400..700&display=swap");
+@import "tailwindcss";
+@source "../../src/**/*.tsx";
+@source "../../../../packages/ui/src/**/*.tsx";
+
+/* ─── CSS Custom Properties (Design Tokens) ──────────────────────────────── */
+:root {
+  /* Brand (blue) */
+  --color-brand-50:  hsl(217 91% 97%);
+  --color-brand-100: hsl(217 91% 93%);
+  --color-brand-200: hsl(217 91% 85%);
+  --color-brand-300: hsl(217 91% 74%);
+  --color-brand-400: hsl(217 91% 63%);
+  --color-brand-500: hsl(217 91% 55%);
+  --color-brand-600: hsl(217 91% 47%);
+  --color-brand-700: hsl(217 91% 39%);
+  --color-brand-800: hsl(217 91% 31%);
+  --color-brand-900: hsl(217 91% 23%);
+  --color-brand-950: hsl(217 91% 15%);
+
+  /* Accent (amber-gold) */
+  --color-accent-400: hsl(45 96% 65%);
+  --color-accent-500: hsl(45 96% 54%);
+
+  /* Backgrounds */
+  --bg-base:     hsl(0 0% 100%);
+  --bg-subtle:   hsl(240 5% 98%);
+  --bg-muted:    hsl(240 5% 95%);
+
+  /* Text */
+  --text-primary:   hsl(240 10% 12%);
+  --text-secondary: hsl(240 5% 45%);
+  --text-muted:     hsl(240 5% 65%);
+
+  /* Border */
+  --border-default: hsl(240 6% 90%);
+  --border-strong:  hsl(240 6% 80%);
+
+  /* Shadows */
+  --shadow-sm:  0 1px 3px 0 rgb(0 0 0 / 0.05);
+  --shadow-md:  0 4px 16px -2px rgb(0 0 0 / 0.08);
+  --shadow-lg:  0 20px 40px -8px rgb(0 0 0 / 0.12);
+  --shadow-brand: 0 8px 24px -4px hsl(217 91% 47% / 0.3);
+
+  /* Radii */
+  --radius-sm:  0.375rem;
+  --radius-md:  0.75rem;
+  --radius-lg:  1rem;
+  --radius-xl:  1.5rem;
+  --radius-2xl: 2rem;
+
+  /* Font families */
+  --font-sans:    "Inter", system-ui, sans-serif;
+  --font-display: "Sora", "Inter", system-ui, sans-serif;
+
+  /* Transitions */
+  --transition-fast:    150ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-default: 250ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slow:    400ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Semantic status colors */
+  --color-success:      hsl(142 76% 36%);
+  --color-success-bg:   hsl(142 76% 95%);
+  --color-warning:      hsl(31 67% 54%);
+  --color-warning-bg:   hsl(31 67% 95%);
+  --color-danger:       hsl(12 49% 41%);
+  --color-danger-bg:    hsl(12 49% 95%);
+  --color-info:         hsl(195 33% 36%);
+  --color-info-bg:      hsl(195 33% 95%);
+}
+
+/* Dark mode */
+.dark {
+  --bg-base:     hsl(240 10% 7%);
+  --bg-subtle:   hsl(240 8% 10%);
+  --bg-muted:    hsl(240 6% 14%);
+  --text-primary:   hsl(0 0% 95%);
+  --text-secondary: hsl(240 5% 65%);
+  --text-muted:     hsl(240 5% 50%);
+  --border-default: hsl(240 6% 20%);
+  --border-strong:  hsl(240 6% 28%);
+
+  --color-success-bg:   hsl(142 76% 12%);
+  --color-warning-bg:   hsl(31 67% 12%);
+  --color-danger-bg:    hsl(12 49% 12%);
+  --color-info-bg:      hsl(195 33% 12%);
+}
+
+/* ─── Base Reset & Typography ─────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  min-height: 100dvh;
+}
+
+/* ─── Scrollbar ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* ─── Focus ───────────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ─── Selection ───────────────────────────────────────────────────────────── */
+::selection {
+  background-color: hsl(217 80% 63% / 0.25);
+}
+
+/* ─── Animations ──────────────────────────────────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1);    }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+.animate-fade-in   { animation: fade-in  var(--transition-default) both; }
+.animate-slide-up  { animation: slide-up var(--transition-slow)    both; }
+.animate-scale-in  { animation: scale-in var(--transition-fast)    both; }
+
+/* ─── Skeleton shimmer ────────────────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-muted) 25%,
+    var(--border-default) 50%,
+    var(--bg-muted) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-md);
+}
+
+/* ─── Glassmorphism utility ───────────────────────────────────────────────── */
+.glass {
+  background: rgb(255 255 255 / 0.7);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgb(255 255 255 / 0.3);
+}
+
+.dark .glass {
+  background: rgb(15 15 25 / 0.7);
+  border: 1px solid rgb(255 255 255 / 0.08);
+}
+
+/* ─── Gradient text ───────────────────────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(
+    135deg,
+    var(--color-brand-400),
+    var(--color-brand-600) 40%,
+    var(--color-accent-500)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Gradient background ─────────────────────────────────────────────────── */
+.gradient-brand {
+  background: linear-gradient(
+    135deg,
+    var(--color-brand-600),
+    var(--color-brand-800)
+  );
+}
+
+/* ─── Container ───────────────────────────────────────────────────────────── */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .container { padding-inline: 2rem; }
+}

@@ -1,0 +1,4 @@
+{
+  "extends": "@venora/config/tsconfig",
+  "include": ["src"]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "@venora/config",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    "./eslint-preset": "./eslint-preset.js",
+    "./tailwind-preset": "./tailwind-preset.ts",
+    "./tsconfig": "./tsconfig.base.json"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "extends": "@venora/config/tsconfig",
+  "include": ["src"],
+  "compilerOptions": {
+    "jsx": "react-jsx"
+  }
+}

@@ -1,0 +1,3 @@
+# migrations placeholder
+# Add .sql migration files here.
+# Run: supabase migration new <name>
