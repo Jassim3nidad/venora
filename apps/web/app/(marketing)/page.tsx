@@ -110,7 +110,7 @@ const MOCK_VENUES = [
     avg_rating: 4.88,
     review_count: 15,
     category: "garden",
-    cover_image: "https://images.unsplash.com/photo-1545232979-8bf34eb9757b?auto=format&fit=crop&w=800&h=600&q=80",
+    cover_image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&h=600&q=80",
     description: "Restored pre-war heritage mansion with wide manicured garden grounds.",
   },
   {
@@ -124,7 +124,7 @@ const MOCK_VENUES = [
     avg_rating: 4.92,
     review_count: 42,
     category: "beach",
-    cover_image: "https://images.unsplash.com/photo-1589982424003-83569e5d4816?auto=format&fit=crop&w=800&h=600&q=80",
+    cover_image: "https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&w=800&h=600&q=80",
     description: "Luxury infinity pool beach resort setting in Laiya.",
   },
 ];
@@ -193,10 +193,10 @@ export default async function HomePage({ searchParams }: PageProps) {
   const provincialVenues = filteredVenues.filter((v: any) => v.province !== "Metro Manila");
 
   return (
-    <div className="bg-white">
+    <div className="bg-white w-full flex flex-col items-center">
       {/* ─── Airbnb-style Floating Search Section ─── */}
-      <section className="bg-white py-4 px-6 md:px-12 border-b border-zinc-100">
-        <div className="mx-auto max-w-[1400px] flex justify-center">
+      <section className="bg-white py-4 px-6 md:px-12 border-b border-zinc-100 w-full flex justify-center">
+        <div className="w-full max-w-[1400px] flex justify-center">
           <form
             action="/"
             method="GET"
@@ -259,8 +259,8 @@ export default async function HomePage({ searchParams }: PageProps) {
       </section>
 
       {/* ─── Airbnb-style Category Tabs Bar ─── */}
-      <section className="px-6 md:px-12 border-b border-zinc-100">
-        <div className="mx-auto max-w-[1400px] flex items-center justify-start gap-10 overflow-x-auto py-5 scrollbar-none">
+      <section className="px-6 md:px-12 border-b border-zinc-100 w-full flex justify-center">
+        <div className="w-full max-w-[1400px] flex items-center justify-start gap-10 overflow-x-auto py-5 scrollbar-none">
           {CATEGORIES.map((cat) => {
             const Icon = cat.icon;
             const isActive = activeCategory === cat.slug;
@@ -284,7 +284,7 @@ export default async function HomePage({ searchParams }: PageProps) {
       </section>
 
       {/* ─── Standard Venue Grids ─── */}
-      <section className="mx-auto max-w-[1400px] px-6 md:px-12 py-10">
+      <section className="w-full max-w-[1400px] px-6 md:px-12 py-10">
         {filteredVenues.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <Search className="h-12 w-12 text-zinc-200 mb-3" />

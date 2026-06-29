@@ -34,10 +34,10 @@ export default async function MarketingLayout({ children }: { children: ReactNod
   const initials = user?.email ? user.email.slice(0, 2).toUpperCase() : "U";
 
   return (
-    <div className="flex min-h-screen flex-col bg-white text-zinc-900 font-sans antialiased">
+    <div className="flex min-h-screen flex-col bg-white text-zinc-900 font-sans antialiased w-full">
       {/* ─── Airbnb-style Navbar Header ─── */}
-      <header className="sticky top-0 z-50 h-20 border-b border-zinc-100 bg-white px-6 md:px-20">
-        <div className="mx-auto flex h-full max-w-[1600px] items-center justify-between">
+      <header className="sticky top-0 z-50 h-20 border-b border-zinc-100 bg-white px-6 md:px-20 w-full">
+        <div className="mx-auto flex h-full max-w-[1600px] items-center justify-between w-full">
           {/* Left: Brand Logo */}
           <Link
             href="/"
@@ -91,11 +91,11 @@ export default async function MarketingLayout({ children }: { children: ReactNod
       </header>
 
       {/* Main Page Layout Wrapper */}
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 w-full">{children}</main>
 
       {/* ─── Airbnb-style Clean Site Footer ─── */}
-      <footer className="border-t border-zinc-200 bg-zinc-50 px-6 md:px-20 pb-12 pt-14 text-sm text-zinc-600">
-        <div className="mx-auto max-w-[1600px] space-y-12">
+      <footer className="border-t border-zinc-200 bg-zinc-50 px-6 md:px-20 pb-12 pt-14 text-sm text-zinc-600 w-full">
+        <div className="mx-auto max-w-[1600px] space-y-12 w-full">
           {/* Link Columns */}
           <div className="grid gap-8 sm:grid-cols-3">
             {Object.entries(FOOTER_LINKS).map(([title, links]) => (
