@@ -27,11 +27,11 @@ export function useCurrentUser() {
         // Fetch roles
         const { data: roleRows } = await supabase
           .from("user_roles")
-          .select("roles(name)")
+          .select("role")
           .eq("user_id", session.user.id);
 
         const roles = (roleRows ?? [])
-          .map((row: any) => row.roles?.name)
+          .map((row: any) => row.role)
           .filter(Boolean);
 
         setUser({
