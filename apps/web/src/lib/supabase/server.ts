@@ -1,10 +1,16 @@
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "@venora/database";
 
+type CookieToSet = {
+  name: string;
+  value: string;
+  options?: CookieOptions;
+};
+
 /**
- * Server-side Supabase client (for Server Components, Server Actions, Route Handlers).
- * Must be called inside a Server Component or async function.
+ * Server-side Supabase client
+ * Used for Server Components, Server Actions, and Route Handlers.
  */
 export async function createClient() {
   const cookieStore = await cookies();
@@ -17,16 +23,22 @@ export async function createClient() {
         getAll() {
           return cookieStore.getAll();
         },
-        setAll(cookiesToSet: any[]) {
+
+        setAll(cookiesToSet: CookieToSet[]) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set({
+                name,
+                value,
+                ...options,
+              });
+            });
           } catch {
-            // Server Component — cookies can't be mutated; middleware handles refresh
+            // This can happen in Server Components.
+            // Middleware will handle refreshing the session.
           }
         },
       },
-    }
+    },
   );
 }

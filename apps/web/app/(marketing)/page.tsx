@@ -1,195 +1,293 @@
-import { Button } from "@venora/ui/button";
-import { Card, CardContent, CardFooter } from "@venora/ui/card";
-import { Input } from "@venora/ui/input";
+import React from "react";
+import Link from "next/link";
+import Sidebar from "@/components/layout/Sidebar";
+import {
+  Bell,
+  HelpCircle,
+  Heart,
+  MapPin,
+  Search,
+  SlidersHorizontal,
+  Sparkles,
+  Star,
+  Users,
+} from "lucide-react";
+import { createClient } from "@/src/lib/supabase/server";
 
-export default function MarketingHomePage() {
-  return (
-    <main className="flex-1 max-w-7xl w-full mx-auto p-6 md:p-8 space-y-12">
-      {/* AI Hero Section */}
-      <section className="relative rounded-2xl bg-zinc-900 text-white p-8 md:p-16 shadow-lg flex flex-col items-center text-center justify-center min-h-[320px] border border-zinc-800">
-        <span className="text-xs uppercase tracking-widest text-amber-400 font-semibold mb-3">
-          ✨ AI-Powered Venue Discovery
-        </span>
-        <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-6 max-w-2xl">
-          Find the Perfect Canvas for Your Celebration
-        </h1>
-        
-        <div className="w-full max-w-xl flex gap-2">
-          <Input 
-            placeholder="e.g., Beachfront venue in Batangas for 150 guests under ₱500k..." 
-            className="bg-white text-zinc-900 border-0 h-11"
-            disabled
-          />
-          <Button className="h-11 px-6 bg-amber-500 hover:bg-amber-600 text-zinc-950 font-semibold">
-            AI Search
-          </Button>
-        </div>
-      </section>
-
-      {/* Featured Grid Skeleton */}
-      <section className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold tracking-tight">Featured Philippine Venues</h2>
-          <span className="text-sm text-muted-foreground">Showing skeleton UI</span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Card key={i} className="overflow-hidden animate-pulse">
-              <div className="h-48 bg-secondary w-full" />
-              <CardContent className="p-5 space-y-3">
-                <div className="h-5 bg-secondary rounded w-3/4" />
-                <div className="h-4 bg-secondary/60 rounded w-1/2" />
-              </CardContent>
-              <CardFooter className="p-5 pt-0 flex justify-between items-center">
-                <div className="h-4 bg-secondary rounded w-1/3" />
-                <div className="h-8 bg-secondary rounded w-1/4" />
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      {/* ─── Airbnb-style Category Tabs Bar ─── */}
-      <section className="px-6 md:px-12 border-b border-zinc-100 w-full flex justify-center">
-        <div className="w-full max-w-[1400px] flex items-center justify-start gap-10 overflow-x-auto py-5 scrollbar-none">
-          {CATEGORIES.map((cat) => {
-            const Icon = cat.icon;
-            const isActive = activeCategory === cat.slug;
-
-            return (
-              <Link
-                key={cat.slug}
-                href={`/?category=${cat.slug}&location=${searchLocation}&guests=${params.guests ?? ""}`}
-                className={`flex flex-col items-center gap-2 pb-2 text-[12px] font-semibold tracking-tight transition-all hover:text-zinc-900 border-b-2 hover:border-zinc-300 ${
-                  isActive
-                    ? "border-zinc-950 text-zinc-950 font-bold"
-                    : "border-transparent text-zinc-500"
-                }`}
-              >
-                <Icon className="h-5 w-5" />
-                <span>{cat.name}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* ─── Standard Venue Grids ─── */}
-      <section className="w-full max-w-[1400px] px-6 md:px-12 py-10">
-        {filteredVenues.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <Search className="h-12 w-12 text-zinc-200 mb-3" />
-            <h3 className="font-bold text-zinc-950 text-[15px]">No listings match your search</h3>
-            <p className="text-xs text-zinc-500 mt-1">Try resetting the destination queries or capacity guest counts.</p>
-            <Link
-              href="/"
-              className="mt-5 rounded-xl border border-zinc-250 bg-white px-5 py-2.5 text-xs font-semibold hover:bg-zinc-50 transition-colors"
-            >
-              Clear Filters
-            </Link>
-          </div>
-        ) : showSections ? (
-          <div className="space-y-16 animate-slide-up">
-            {/* Section 1: Metro Manila */}
-            <div className="space-y-6">
-              <div className="flex items-center gap-1.5 cursor-pointer group">
-                <h2 className="text-xl font-bold tracking-tight text-zinc-950 font-display">
-                  Popular wedding estates in Metro Manila
-                </h2>
-                <ChevronRight className="h-5 w-5 text-zinc-800 transition-transform group-hover:translate-x-0.5" />
-              </div>
-              <div className="grid gap-x-6 gap-y-10 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {manilaVenues.map((venue: any) => (
-                  <VenueCard key={venue.id} venue={venue} />
-                ))}
-              </div>
-            </div>
-
-            {/* Section 2: Regional Escapes */}
-            <div className="space-y-6">
-              <div className="flex items-center gap-1.5 cursor-pointer group">
-                <h2 className="text-xl font-bold tracking-tight text-zinc-950 font-display">
-                  Scenic retreats in Cavite & Batangas
-                </h2>
-                <ChevronRight className="h-5 w-5 text-zinc-800 transition-transform group-hover:translate-x-0.5" />
-              </div>
-              <div className="grid gap-x-6 gap-y-10 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {provincialVenues.map((venue: any) => (
-                  <VenueCard key={venue.id} venue={venue} />
-                ))}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-6 animate-slide-up">
-            <h2 className="text-xl font-bold tracking-tight text-zinc-950 font-display">
-              Search Results
-            </h2>
-            <div className="grid gap-x-6 gap-y-10 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {filteredVenues.map((venue: any) => (
-                <VenueCard key={venue.id} venue={venue} />
-              ))}
-            </div>
-          </div>
-        )}
-      </section>
-    </div>
-  );
+export interface Venue {
+  id: string | number;
+  slug?: string;
+  name: string;
+  location: string;
+  price: string;
+  capacity: string;
+  image: string;
+  rating?: number;
+  category?: string;
 }
 
-// ─── Sub-Component: Borderless Venue Card ───
-function VenueCard({ venue }: { venue: any }) {
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=80";
+
+const fallbackVenues: Venue[] = [
+  {
+    id: 1,
+    slug: "the-glasshouse-estate",
+    name: "The Glasshouse Estate",
+    location: "Tagaytay City",
+    price: "₱120,000",
+    capacity: "Up to 300 pax",
+    image:
+      "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+    rating: 4.9,
+    category: "Garden Venue",
+  },
+  {
+    id: 2,
+    slug: "the-foundry-loft",
+    name: "The Foundry Loft",
+    location: "Makati City",
+    price: "₱85,000",
+    capacity: "Up to 150 pax",
+    image:
+      "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1200&q=80",
+    rating: 4.8,
+    category: "Event Hall",
+  },
+];
+
+function formatCurrency(value: unknown) {
+  const amount = Number(value);
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return "Price on request";
+  }
+
+  return `₱${amount.toLocaleString("en-PH")}`;
+}
+
+function buildVenueImageUrl(storagePath?: string | null) {
+  if (!storagePath) return FALLBACK_IMAGE;
+
+  if (storagePath.startsWith("http")) {
+    return storagePath;
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+  if (!supabaseUrl) return FALLBACK_IMAGE;
+
+  return `${supabaseUrl}/storage/v1/object/public/venue-images/${storagePath}`;
+}
+
+export default async function VenuesMarketplacePage() {
+  const supabase = await createClient();
+
+  const { data: dbVenues, error } = await (supabase.from("venues") as any)
+    .select("*, venue_images(storage_path)")
+    .eq("status", "published")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("[venues/page] Supabase fetch error:", error.message);
+  }
+
+  const venues: Venue[] =
+    dbVenues && dbVenues.length > 0
+      ? dbVenues.map((venue: any) => {
+          const firstImage = venue.venue_images?.[0]?.storage_path;
+
+          return {
+            id: venue.id,
+            slug: venue.slug ?? String(venue.id),
+            name: venue.name ?? "Untitled Venue",
+            location:
+              venue.city && venue.province
+                ? `${venue.city}, ${venue.province}`
+                : venue.city || venue.province || "Location unavailable",
+            price: formatCurrency(venue.base_price ?? venue.starting_price),
+            capacity: venue.capacity_max
+              ? `Up to ${venue.capacity_max} pax`
+              : "Capacity unavailable",
+            image: buildVenueImageUrl(firstImage),
+            rating: Number(venue.rating ?? 4.8),
+            category: venue.category ?? venue.venue_type ?? "Event Venue",
+          };
+        })
+      : fallbackVenues;
+
   return (
-    <Link href={`/venues/${venue.slug}`} className="group block space-y-2">
-      {/* Card Image Cover wrapper */}
-      <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-zinc-100">
-        <Image
-          src={venue.cover_image}
-          alt={venue.name}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-[1.015]"
-          sizes="(max-width: 768px) 100vw, 25vw"
-        />
+    <div className="flex min-h-screen w-full flex-col bg-[#F8FAFC]">
+      {/* Top Navigation */}
+      <nav className="sticky top-0 z-50 flex !h-[64px] w-full shrink-0 items-center justify-between border-b border-slate-200 bg-white/95 !px-[32px] backdrop-blur-md">
+        <Link
+          href="/"
+          className="flex items-center !gap-[6px] !text-[20px] !font-extrabold !leading-[28px] tracking-tight text-[#E07A5F]"
+        >
+          Venora
+          <Sparkles className="!h-[16px] !w-[16px] fill-[#E07A5F] text-[#E07A5F]" />
+        </Link>
 
-        {/* Favorite Heart Outline */}
-        <div className="absolute right-3.5 top-3.5 text-white hover:scale-105 transition-transform duration-150">
-          <Heart className="h-6 w-6 stroke-white fill-black/30 stroke-[2px] hover:fill-rose-600 hover:stroke-rose-600" />
+        <div className="hidden h-full items-center !gap-[32px] md:flex">
+          <Link
+            href="/venues"
+            className="flex h-full items-center border-b-2 border-[#E07A5F] !text-[12px] !font-bold uppercase !tracking-[0.14em] text-[#E07A5F]"
+          >
+            Browse
+          </Link>
+
+          <Link
+            href="/bookings"
+            className="flex h-full items-center !text-[12px] !font-bold uppercase !tracking-[0.14em] text-slate-500 transition-colors hover:text-[#E07A5F]"
+          >
+            Bookings
+          </Link>
         </div>
 
-        {/* Guest favorite Tag */}
-        {venue.avg_rating >= 4.8 && (
-          <div className="absolute left-3.5 top-3.5 rounded-full bg-white/95 px-3 py-1.5 text-[10px] font-black tracking-tight text-zinc-950 shadow-sm border border-zinc-150">
-            Guest favorite
+        <div className="flex items-center !gap-[14px]">
+          <button
+            type="button"
+            className="flex !h-[36px] !w-[36px] items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            aria-label="Notifications"
+          >
+            <Bell className="!h-[18px] !w-[18px]" />
+          </button>
+
+          <button
+            type="button"
+            className="flex !h-[36px] !w-[36px] items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            aria-label="Help"
+          >
+            <HelpCircle className="!h-[18px] !w-[18px]" />
+          </button>
+
+          <Link
+            href="/account"
+            className="flex !h-[38px] items-center justify-center rounded-[12px] bg-[#E07A5F] !px-[18px] !text-[12px] !font-bold uppercase !tracking-[0.12em] text-white shadow-sm transition hover:bg-[#d96851]"
+          >
+            Account
+          </Link>
+        </div>
+      </nav>
+
+      {/* Main Layout */}
+      <div className="flex min-h-[calc(100vh-64px)] w-full items-start overflow-hidden">
+        <Sidebar />
+
+        <main className="flex-1 overflow-y-auto !px-[32px] !py-[30px] lg:!px-[40px]">
+          {/* Header */}
+          <div className="mb-[28px] flex flex-col !gap-[18px] xl:flex-row xl:items-end xl:justify-between">
+            <div>
+              <div className="mb-[10px] inline-flex items-center !gap-[8px] rounded-full border border-[#F0A090] bg-[#FFF4F1] !px-[12px] !py-[6px] text-[#E07A5F]">
+                <Sparkles className="!h-[14px] !w-[14px]" />
+                <span className="!text-[12px] !font-extrabold uppercase !tracking-[0.12em]">
+                  AI-powered venue discovery
+                </span>
+              </div>
+
+              <h1 className="!text-[32px] !font-black !leading-[40px] tracking-[-0.03em] text-slate-950 md:!text-[38px] md:!leading-[46px]">
+                Wedding & Event Venues
+              </h1>
+
+              <p className="!mt-[6px] !pb-[14px] !font-medium !leading-[22px] text-slate-500">
+                {venues.length} venue{venues.length === 1 ? "" : "s"} found matching your criteria.
+              </p>
+            </div>
+
+            <div className="flex flex-col !gap-[12px] sm:flex-row sm:items-center">
+              <div className="relative">
+                <Search className="absolute left-[14px] top-1/2 !h-[18px] !w-[18px] -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search venue name..."
+                  className="!h-[44px] w-full rounded-[14px] border border-slate-200 bg-white !pl-[42px] !pr-[16px] !text-[14px] !font-medium text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#E07A5F] focus:ring-4 focus:ring-[#E07A5F]/10 sm:!w-[260px]"
+                />
+              </div>
+
+              <button
+                type="button"
+                className="flex !h-[44px] items-center justify-center !gap-[8px] rounded-[14px] border border-slate-200 bg-white !px-[16px] !text-[13px] !font-bold text-slate-600 shadow-sm transition hover:border-[#E07A5F] hover:text-[#E07A5F]"
+              >
+                <SlidersHorizontal className="!h-[16px] !w-[16px]" />
+                Sort: Recommended
+              </button>
+            </div>
           </div>
-        )}
+
+          {/* Venue Grid */}
+          <div className="grid grid-cols-1 !gap-[24px] md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            {venues.map((venue) => (
+              <Link
+                key={venue.id}
+                href={`/venues/${venue.slug ?? venue.id}`}
+                className="group overflow-hidden rounded-[22px] border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#E07A5F]/40 hover:shadow-xl hover:shadow-slate-200/70"
+              >
+                <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
+                  <img
+                    src={venue.image}
+                    alt={venue.name}
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/0 to-black/0 opacity-80" />
+
+                  <button
+                    type="button"
+                    className="absolute right-[14px] top-[14px] z-10 flex !h-[38px] !w-[38px] items-center justify-center rounded-full bg-white/90 text-slate-600 shadow-sm backdrop-blur-md transition hover:bg-white hover:text-red-500"
+                    aria-label="Save to favorites"
+                  >
+                    <Heart className="!h-[17px] !w-[17px]" />
+                  </button>
+
+                  <div className="absolute bottom-[14px] left-[14px] flex items-center !gap-[6px] rounded-full bg-white/90 !px-[10px] !py-[6px] text-slate-800 shadow-sm backdrop-blur-md">
+                    <Star className="!h-[14px] !w-[14px] fill-[#F59E0B] text-[#F59E0B]" />
+                    <span className="!text-[12px] !font-extrabold">
+                      {venue.rating?.toFixed(1) ?? "4.8"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex min-h-[172px] flex-col justify-between !gap-[18px] !p-[18px]">
+                  <div>
+                    <div className="mb-[10px] flex items-center justify-between !gap-[12px]">
+                      <span className="rounded-full bg-[#FFF4F1] !px-[10px] !py-[5px] !text-[11px] !font-extrabold uppercase !tracking-[0.1em] text-[#E07A5F]">
+                        {venue.category}
+                      </span>
+                    </div>
+
+                    <h3 className="line-clamp-1 !text-[17px] !font-extrabold !leading-[24px] text-slate-950">
+                      {venue.name}
+                    </h3>
+
+                    <p className="!mt-[6px] flex items-center !gap-[6px] !text-[13px] !font-medium !leading-[20px] text-slate-500">
+                      <MapPin className="!h-[15px] !w-[15px] shrink-0 text-slate-400" />
+                      {venue.location}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between border-t border-slate-100 !pt-[14px]">
+                    <div>
+                      <p className="!text-[18px] !font-black !leading-[24px] text-slate-950">
+                        {venue.price}
+                      </p>
+                      <p className="!text-[12px] !font-medium !leading-[16px] text-slate-400">
+                        starting price
+                      </p>
+                    </div>
+
+                    <div className="flex items-center !gap-[6px] rounded-[12px] bg-slate-100 !px-[10px] !py-[8px] text-slate-600">
+                      <Users className="!h-[14px] !w-[14px]" />
+                      <span className="!text-[11px] !font-extrabold uppercase !tracking-[0.08em]">
+                        {venue.capacity}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </main>
       </div>
-
-      {/* Meta Labels Block */}
-      <div className="space-y-1 text-xs">
-        {/* City/Province & Rating */}
-        <div className="flex items-center justify-between text-[14px]">
-          <span className="font-extrabold text-zinc-950">
-            {venue.city}, {venue.province}
-          </span>
-          <span className="flex items-center gap-1 text-zinc-950">
-            <Star className="h-3.5 w-3.5 fill-zinc-950 text-zinc-950" />
-            <span className="font-bold">{venue.avg_rating.toFixed(2)}</span>
-          </span>
-        </div>
-
-        {/* Title */}
-        <p className="text-zinc-500 font-medium text-[13px] line-clamp-1">{venue.name}</p>
-
-        {/* Guest capacity */}
-        <p className="text-zinc-400 font-normal text-[12px]">Max {venue.capacity_max} guests</p>
-
-        {/* Price tag */}
-        <div className="text-[13px] font-bold text-zinc-950 pt-0.5">
-          ₱{venue.base_price.toLocaleString()}
-          <span className="text-zinc-500 font-normal ml-0.5">per event</span>
-        </div>
-      </div>
-    </Link>
+    </div>
   );
 }

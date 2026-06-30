@@ -33,7 +33,7 @@ export async function registerAction(rawInput: unknown): Promise<ActionResult> {
   }
 
   try {
-    const { userId } = await registerUserUseCase({
+    await registerUserUseCase({
       email: parsed.data.email,
       password: parsed.data.password,
       fullName: parsed.data.fullName,
