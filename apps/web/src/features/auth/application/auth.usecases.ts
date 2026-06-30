@@ -25,6 +25,10 @@ export async function authenticateUserUseCase(input: { email: string; password: 
   return repository.signIn(input);
 }
 
+export async function signInWithOAuthUseCase(provider: "google") {
+  return repository.signInWithOAuth(provider);
+}
+
 export async function signOutUseCase() {
   return repository.signOut();
 }
