@@ -1,14 +1,29 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { registerAction, signInWithOAuthAction } from "@/features/auth/actions/auth.actions";
+import { type FormEvent, useState, useTransition } from "react";
+import Link from "next/link";
+import {
+  Building2,
+  CalendarCheck,
+  Check,
+  ClipboardCheck,
+  DraftingCompass,
+  LockKeyhole,
+  Mail,
+  Truck,
+  User,
+} from "lucide-react";
+import {
+  registerAction,
+  signInWithOAuthAction,
+} from "@/features/auth/actions/auth.actions";
 import { registerSchema } from "@/features/auth/schemas/auth.schema";
 
 const ROLES = [
-  { value: "customer",    label: "I want to book a venue",       emoji: "🎉" },
-  { value: "venue_owner", label: "I own / manage a venue",       emoji: "🏛️" },
-  { value: "supplier",    label: "I'm a supplier / vendor",      emoji: "🎨" },
-  { value: "event_coordinator", label: "I coordinate events",      emoji: "🤝" },
+  { value: "customer", label: "Book a Venue", icon: CalendarCheck },
+  { value: "venue_owner", label: "Venue Owner", icon: Building2 },
+  { value: "supplier", label: "Supplier", icon: Truck },
+  { value: "event_coordinator", label: "Coordinator", icon: ClipboardCheck },
 ];
 
 export default function RegisterPage() {
@@ -16,13 +31,13 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState<string>("");
+  const [role, setRole] = useState<string>("customer");
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFieldErrors({});
     setGeneralError(null);
@@ -50,271 +65,368 @@ export default function RegisterPage() {
       });
 
       if (response && !response.success) {
-        setGeneralError(response.error);
-        if (response.fieldErrors) {
-          setFieldErrors(response.fieldErrors);
-        }
+        setGeneralError(response.error || "Unable to create account.");
+        if (response.fieldErrors) setFieldErrors(response.fieldErrors);
       }
     });
   };
 
   return (
-    <div style={{ minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
-      <div
-        className="glass animate-scale-in"
-        style={{ width: "100%", maxWidth: 460, padding: "2.5rem", borderRadius: "1.5rem" }}
-      >
-        <h1
-          style={{
-            fontFamily: "var(--font-sora, sans-serif)",
-            fontSize: "1.75rem",
-            fontWeight: 700,
-            marginBottom: "0.25rem",
-          }}
-        >
-          Create your account
-        </h1>
-        <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", marginBottom: "2rem" }}>
-          Join thousands of event planners on Venora
-        </p>
-
-        {generalError && (
-          <div
-            role="alert"
-            style={{
-              background: "rgba(220, 38, 38, 0.1)",
-              border: "1px solid rgba(220, 38, 38, 0.2)",
-              color: "rgb(220, 38, 38)",
-              padding: "0.75rem 1rem",
-              borderRadius: "0.5rem",
-              fontSize: "0.875rem",
-              marginBottom: "1.25rem",
-            }}
-          >
-            {generalError}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-            <label htmlFor="register-fullname" style={{ fontSize: "0.875rem", fontWeight: 500 }}>Full Name</label>
-            <input
-              id="register-fullname"
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Juan Dela Cruz"
-              disabled={isPending}
-              style={{
-                height: "2.75rem",
-                borderRadius: "0.625rem",
-                border: fieldErrors.fullName ? "1px solid rgb(220, 38, 38)" : "1px solid var(--border-default)",
-                padding: "0 0.875rem",
-                background: "var(--bg-subtle)",
-                color: "var(--text-primary)",
-                fontSize: "0.9375rem",
-                outline: "none",
-                width: "100%",
-              }}
-            />
-            {fieldErrors.fullName && (
-              <span style={{ fontSize: "0.75rem", color: "rgb(220, 38, 38)" }}>{fieldErrors.fullName[0]}</span>
-            )}
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-            <label htmlFor="register-email" style={{ fontSize: "0.875rem", fontWeight: 500 }}>Email</label>
-            <input
-              id="register-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="juan@example.com"
-              disabled={isPending}
-              style={{
-                height: "2.75rem",
-                borderRadius: "0.625rem",
-                border: fieldErrors.email ? "1px solid rgb(220, 38, 38)" : "1px solid var(--border-default)",
-                padding: "0 0.875rem",
-                background: "var(--bg-subtle)",
-                color: "var(--text-primary)",
-                fontSize: "0.9375rem",
-                outline: "none",
-                width: "100%",
-              }}
-            />
-            {fieldErrors.email && (
-              <span style={{ fontSize: "0.75rem", color: "rgb(220, 38, 38)" }}>{fieldErrors.email[0]}</span>
-            )}
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-            <label htmlFor="register-password" style={{ fontSize: "0.875rem", fontWeight: 500 }}>Password</label>
-            <input
-              id="register-password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="At least 8 characters"
-              disabled={isPending}
-              style={{
-                height: "2.75rem",
-                borderRadius: "0.625rem",
-                border: fieldErrors.password ? "1px solid rgb(220, 38, 38)" : "1px solid var(--border-default)",
-                padding: "0 0.875rem",
-                background: "var(--bg-subtle)",
-                color: "var(--text-primary)",
-                fontSize: "0.9375rem",
-                outline: "none",
-                width: "100%",
-              }}
-            />
-            {fieldErrors.password && (
-              <span style={{ fontSize: "0.75rem", color: "rgb(220, 38, 38)" }}>{fieldErrors.password[0]}</span>
-            )}
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-            <label htmlFor="register-confirm-password" style={{ fontSize: "0.875rem", fontWeight: 500 }}>Confirm Password</label>
-            <input
-              id="register-confirm-password"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Re-enter password"
-              disabled={isPending}
-              style={{
-                height: "2.75rem",
-                borderRadius: "0.625rem",
-                border: fieldErrors.confirmPassword ? "1px solid rgb(220, 38, 38)" : "1px solid var(--border-default)",
-                padding: "0 0.875rem",
-                background: "var(--bg-subtle)",
-                color: "var(--text-primary)",
-                fontSize: "0.9375rem",
-                outline: "none",
-                width: "100%",
-              }}
-            />
-            {fieldErrors.confirmPassword && (
-              <span style={{ fontSize: "0.75rem", color: "rgb(220, 38, 38)" }}>{fieldErrors.confirmPassword[0]}</span>
-            )}
-          </div>
-
-          <fieldset style={{ border: "none", padding: 0 }}>
-            <legend style={{ fontSize: "0.875rem", fontWeight: 500, marginBottom: "0.625rem" }}>I am a…</legend>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-              {ROLES.map((roleOption) => (
-                <label
-                  key={roleOption.value}
-                  htmlFor={`role-${roleOption.value}`}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.75rem",
-                    padding: "0.75rem 1rem",
-                    borderRadius: "0.625rem",
-                    border: role === roleOption.value ? "2px solid hsl(217 70% 47%)" : "1px solid var(--border-default)",
-                    background: role === roleOption.value ? "rgba(37, 99, 235, 0.05)" : "transparent",
-                    cursor: "pointer",
-                    fontSize: "0.875rem",
-                    fontWeight: role === roleOption.value ? 600 : 400,
-                  }}
-                >
-                  <input
-                    type="radio"
-                    id={`role-${roleOption.value}`}
-                    name="role"
-                    value={roleOption.value}
-                    checked={role === roleOption.value}
-                    onChange={(e) => setRole(e.target.value)}
-                    disabled={isPending}
-                    style={{ accentColor: "hsl(217 70% 47%)" }}
-                  />
-                  <span>{roleOption.emoji}</span>
-                  <span>{roleOption.label}</span>
-                </label>
-              ))}
-            </div>
-            {fieldErrors.role && (
-              <span style={{ fontSize: "0.75rem", color: "rgb(220, 38, 38)", marginTop: "0.25rem", display: "block" }}>{fieldErrors.role[0]}</span>
-            )}
-          </fieldset>
-
-          <button
-            id="register-submit-btn"
-            type="submit"
-            disabled={isPending}
-            style={{
-              height: "2.75rem",
-              borderRadius: "0.625rem",
-              background: "hsl(217 70% 47%)",
-              color: "#fff",
-              fontWeight: 600,
-              fontSize: "0.9375rem",
-              border: "none",
-              cursor: isPending ? "not-allowed" : "pointer",
-              marginTop: "0.5rem",
-              opacity: isPending ? 0.7 : 1,
-              boxShadow: "0 4px 16px -4px hsl(217 70% 47% / 0.5)",
-            }}
-          >
-            {isPending ? "Creating Account..." : "Create Account"}
-          </button>
-        </form>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", margin: "1.5rem 0" }}>
-          <div style={{ flex: 1, height: "1px", background: "var(--border-default)" }} />
-          <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)", fontWeight: 500 }}>or</span>
-          <div style={{ flex: 1, height: "1px", background: "var(--border-default)" }} />
+    <main className="flex min-h-screen w-full overflow-hidden bg-white">
+      {/* Left Branding Panel */}
+      <section className="relative hidden min-h-screen w-1/2 overflow-hidden bg-[#0F172A] lg:flex">
+        <div className="absolute inset-0 opacity-[0.18]">
+          <div className="absolute left-[18%] top-[10%] h-[360px] w-[260px] rounded-[28px] border border-white/10 bg-white/5 shadow-2xl" />
+          <div className="absolute bottom-[10%] right-[12%] h-[340px] w-[260px] rounded-[28px] border border-white/10 bg-white/5 shadow-2xl" />
+          <div className="absolute left-[42%] top-[13%] h-[220px] w-[220px] rotate-45 bg-white/5" />
+          <div className="absolute bottom-[20%] right-[24%] h-[220px] w-[220px] rotate-45 bg-white/5" />
         </div>
 
-        <button
-          id="google-register-btn"
-          type="button"
-          disabled={isPending}
-          onClick={() => {
-            setGeneralError(null);
-            startTransition(async () => {
-              const res = await signInWithOAuthAction("google");
-              if (res && !res.success) {
-                setGeneralError(res.error);
-              }
-            });
-          }}
-          style={{
-            height: "2.75rem",
-            width: "100%",
-            borderRadius: "0.625rem",
-            background: "#fff",
-            color: "var(--text-primary)",
-            fontWeight: 600,
-            fontSize: "0.9375rem",
-            border: "1px solid var(--border-default)",
-            cursor: isPending ? "not-allowed" : "pointer",
-            opacity: isPending ? 0.7 : 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "0.5rem",
-            transition: "background 0.15s ease",
-          }}
-        >
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
-            <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A9 9 0 009 18z" fill="#34A853"/>
-            <path d="M3.964 10.707A5.41 5.41 0 013.682 9c0-.59.1-1.17.282-1.707V4.96H.957A9 9 0 000 9c0 1.488.364 2.9 1.008 4.148l2.956-2.441z" fill="#FBBC05"/>
-            <path d="M9 3.58c1.32 0 2.505.454 3.436 1.346l2.58-2.58A8.96 8.96 0 009 0 9 9 0 001.008 4.96l2.956 2.441c.708-2.127 2.692-3.711 5.036-3.711z" fill="#EA4335"/>
-          </svg>
-          Continue with Google
-        </button>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/40 to-[#0F172A]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_35%_45%,rgba(255,255,255,0.10),transparent_35%)]" />
 
-        <p style={{ textAlign: "center", marginTop: "1.5rem", fontSize: "0.875rem", color: "var(--text-secondary)" }}>
-          Already have an account?{" "}
-          <a href="/login" style={{ color: "hsl(217 70% 47%)", fontWeight: 600, textDecoration: "none" }}>
-            Sign In
-          </a>
-        </p>
-      </div>
-    </div>
+        <div className="relative z-10 mx-auto flex w-full max-w-[560px] translate-x-[40px] flex-col justify-center px-[64px]">
+          <div className="mb-[58px] flex items-center gap-[12px]">
+            <DraftingCompass className="h-[32px] w-[32px] text-[#F4C7B8]" />
+            <span className="text-[24px] font-extrabold leading-[32px] tracking-[-0.02em] text-white">
+              Venora
+            </span>
+          </div>
+
+          <div>
+            <h1 className="max-w-[560px] text-[50px] font-bold leading-[65px] tracking-[-0.05em] text-white">
+              Where Extraordinary Events Begin.
+            </h1>
+
+            <ul className="mt-[54px] flex translate-y-[20px] flex-col gap-[24px]">
+              {[
+                "Curated, high-quality spaces.",
+                "Transparent, upfront pricing.",
+                "Seamless booking management.",
+              ].map((item) => (
+                <li
+                  key={item}
+                  className="flex items-center gap-[18px] text-white"
+                >
+                  <span className="flex h-[24px] w-[24px] items-center justify-center rounded-full bg-[#FFDACE]">
+                    <Check
+                      className="h-[14px] w-[14px] text-[#0F172A]"
+                      strokeWidth={3}
+                    />
+                  </span>
+                  <span className="text-[18px] leading-[28px]">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* Register Form */}
+      <section className="flex min-h-screen w-full items-center justify-center overflow-y-auto bg-white px-[24px] py-[20px] lg:w-1/2 lg:px-[64px]">
+        <div className="w-full max-w-[400px]">
+          <div className="mb-[18px] text-center">
+            <h2 className="mb-[4px] text-[28px] font-semibold leading-[36px] tracking-[-0.01em] text-[#191C1E]">
+              Create your Venora account
+            </h2>
+            <p className="text-[15px] font-normal leading-[22px] text-[#55423E]">
+              Enter your details to get started.
+            </p>
+          </div>
+
+          {generalError ? (
+            <div
+              role="alert"
+              className="mb-[12px] rounded-[8px] border border-red-200 bg-red-50 px-[14px] py-[10px] text-[14px] font-medium text-red-700"
+            >
+              {generalError}
+            </div>
+          ) : null}
+
+          <form onSubmit={handleSubmit} className="flex flex-col gap-[10px]">
+            {/* Full Name */}
+            <div className="flex flex-col gap-[4px]">
+              <label
+                htmlFor="fullName"
+                className="!pl-[2px] text-[11px] font-bold uppercase leading-[16px] tracking-[0.08em] text-[#191C1E]"
+              >
+                Full Name
+              </label>
+
+              <div className="relative">
+                <User className="pointer-events-none absolute left-[10px] top-1/2 h-[16px] w-[16px] -translate-y-1/2 text-[#55423E]" />
+
+                <input
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Jane Doe"
+                  autoComplete="name"
+                  disabled={isPending}
+                  className={`h-[42px] w-full rounded-[6px] border bg-white !pl-[40px] pr-[16px] text-[15px] font-normal leading-[22px] text-[#191C1E] outline-none transition-shadow placeholder:text-[#55423E]/60 focus:border-[#E07A5F] focus:ring-2 focus:ring-[#E07A5F]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
+                    fieldErrors.fullName
+                      ? "border-red-500"
+                      : "border-[#E2E8F0]"
+                  }`}
+                />
+              </div>
+
+              {fieldErrors.fullName?.[0] ? (
+                <p className="text-[13px] font-medium text-red-600">
+                  {fieldErrors.fullName[0]}
+                </p>
+              ) : null}
+            </div>
+
+            {/* Email */}
+            <div className="flex flex-col gap-[4px]">
+              <label
+                htmlFor="email"
+                className="!pl-[2px] text-[11px] font-bold uppercase leading-[16px] tracking-[0.08em] text-[#191C1E]"
+              >
+                Email Address
+              </label>
+
+              <div className="relative">
+                <Mail className="pointer-events-none absolute left-[10px] top-1/2 h-[16px] w-[16px] -translate-y-1/2 text-[#55423E]" />
+
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="jane@example.com"
+                  autoComplete="email"
+                  disabled={isPending}
+                  className={`h-[42px] w-full rounded-[6px] border bg-white !pl-[40px] pr-[16px] text-[15px] font-normal leading-[22px] text-[#191C1E] outline-none transition-shadow placeholder:text-[#55423E]/60 focus:border-[#E07A5F] focus:ring-2 focus:ring-[#E07A5F]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
+                    fieldErrors.email ? "border-red-500" : "border-[#E2E8F0]"
+                  }`}
+                />
+              </div>
+
+              {fieldErrors.email?.[0] ? (
+                <p className="text-[13px] font-medium text-red-600">
+                  {fieldErrors.email[0]}
+                </p>
+              ) : null}
+            </div>
+
+            {/* Password */}
+            <div className="flex flex-col gap-[4px]">
+              <label
+                htmlFor="password"
+                className="!pl-[2px] text-[11px] font-bold uppercase leading-[16px] tracking-[0.08em] text-[#191C1E]"
+              >
+                Password
+              </label>
+
+              <div className="relative">
+                <LockKeyhole className="pointer-events-none absolute left-[10px] top-1/2 h-[16px] w-[16px] -translate-y-1/2 text-[#55423E]" />
+
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  disabled={isPending}
+                  className={`h-[42px] w-full rounded-[6px] border bg-white !pl-[40px] pr-[16px] text-[15px] font-normal leading-[22px] text-[#191C1E] outline-none transition-shadow placeholder:text-[#55423E]/60 focus:border-[#E07A5F] focus:ring-2 focus:ring-[#E07A5F]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
+                    fieldErrors.password
+                      ? "border-red-500"
+                      : "border-[#E2E8F0]"
+                  }`}
+                />
+              </div>
+
+              {fieldErrors.password?.[0] ? (
+                <p className="text-[13px] font-medium text-red-600">
+                  {fieldErrors.password[0]}
+                </p>
+              ) : (
+                <p className="mt-[2px] text-[13px] font-normal leading-[18px] text-[#55423E]">
+                  Must be at least 8 characters.
+                </p>
+              )}
+            </div>
+
+            {/* Confirm Password */}
+            <div className="flex flex-col gap-[4px]">
+              <label
+                htmlFor="confirmPassword"
+                className="!pl-[2px] text-[11px] font-bold uppercase leading-[16px] tracking-[0.08em] text-[#191C1E]"
+              >
+                Confirm Password
+              </label>
+
+              <div className="relative">
+                <LockKeyhole className="pointer-events-none absolute left-[10px] top-1/2 h-[16px] w-[16px] -translate-y-1/2 text-[#55423E]" />
+
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  disabled={isPending}
+                  className={`h-[42px] w-full rounded-[6px] border bg-white !pl-[40px] pr-[16px] text-[15px] font-normal leading-[22px] text-[#191C1E] outline-none transition-shadow placeholder:text-[#55423E]/60 focus:border-[#E07A5F] focus:ring-2 focus:ring-[#E07A5F]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
+                    fieldErrors.confirmPassword
+                      ? "border-red-500"
+                      : "border-[#E2E8F0]"
+                  }`}
+                />
+              </div>
+
+              {fieldErrors.confirmPassword?.[0] ? (
+                <p className="text-[13px] font-medium text-red-600">
+                  {fieldErrors.confirmPassword[0]}
+                </p>
+              ) : null}
+            </div>
+
+            {/* Account Type */}
+            <fieldset className="border-0 p-0">
+              <legend className="mb-[8px] text-[11px] font-bold uppercase leading-[16px] tracking-[0.08em] text-[#191C1E]">
+                Account Type
+              </legend>
+
+              <div className="grid grid-cols-2 gap-[10px]">
+                {ROLES.map((roleOption) => {
+                  const isSelected = role === roleOption.value;
+                  const Icon = roleOption.icon;
+
+                  return (
+                    <label
+                      key={roleOption.value}
+                      htmlFor={`role-${roleOption.value}`}
+                      className={`flex h-[60px] cursor-pointer flex-col items-center justify-center rounded-[8px] border transition-all ${
+                        isSelected
+                          ? "border-[#E07A5F] bg-[#FFF4F0]"
+                          : "border-[#E2E8F0] bg-white hover:border-[#E07A5F]/60"
+                      }`}
+                    >
+                      <input
+                        id={`role-${roleOption.value}`}
+                        type="radio"
+                        name="role"
+                        value={roleOption.value}
+                        checked={isSelected}
+                        onChange={(e) => setRole(e.target.value)}
+                        disabled={isPending}
+                        className="sr-only"
+                      />
+
+                      <Icon
+                        className={`mb-[8px] h-[22px] w-[22px] ${
+                          isSelected ? "text-[#E07A5F]" : "text-[#5B463F]"
+                        }`}
+                        strokeWidth={2.3}
+                      />
+
+                      <span
+                        className={`text-center text-[14px] font-bold leading-[18px] ${
+                          isSelected ? "text-[#E07A5F]" : "text-[#3F2F2A]"
+                        }`}
+                      >
+                        {roleOption.label}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+
+              {fieldErrors.role?.[0] ? (
+                <p className="mt-[6px] text-[13px] font-medium text-red-600">
+                  {fieldErrors.role[0]}
+                </p>
+              ) : null}
+            </fieldset>
+
+            {/* Submit Button */}
+            <button
+              id="register-submit-btn"
+              type="submit"
+              disabled={isPending}
+              className="mt-[4px] h-[40px] w-full rounded-[4px] bg-[#E07A5F] text-[14px] font-semibold leading-[20px] text-white transition-colors duration-200 hover:bg-[#9A442D] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {isPending ? "Creating Account..." : "Create Account"}
+            </button>
+
+            {/* Divider */}
+            <div className="relative flex items-center py-[4px]">
+              <div className="flex-grow border-t border-[#E2E8F0]" />
+              <span className="mx-[16px] flex-shrink-0 text-[14px] font-normal leading-[20px] text-[#55423E]">
+                or
+              </span>
+              <div className="flex-grow border-t border-[#E2E8F0]" />
+            </div>
+
+            {/* Google Button */}
+            <button
+              id="google-register-btn"
+              type="button"
+              disabled={isPending}
+              onClick={() => {
+                setGeneralError(null);
+
+                startTransition(async () => {
+                  const res = await signInWithOAuthAction("google");
+
+                  if (res && !res.success) {
+                    setGeneralError(res.error);
+                  }
+                });
+              }}
+              className="flex h-[40px] w-full items-center justify-center gap-[8px] rounded-[4px] border border-[#E2E8F0] bg-white text-[14px] font-extrabold leading-[20px] text-[#191C1E] transition-colors duration-200 hover:border-[#88726D] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              <svg
+                className="h-[16px] w-[16px]"
+                fill="none"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <path
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  fill="#4285F4"
+                />
+                <path
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  fill="#34A853"
+                />
+                <path
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                  fill="#FBBC05"
+                />
+                <path
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  fill="#EA4335"
+                />
+              </svg>
+
+              Continue with Google
+            </button>
+          </form>
+
+          <div className="!mt-[10px] text-center">
+            <p className="text-[15px] font-bold leading-[22px] text-[#55423E]">
+              Already have an account?{" "}
+              <Link
+                className="font-bold text-[#E07A5F] hover:underline"
+                href="/login"
+              >
+                Log in.
+              </Link>
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }
