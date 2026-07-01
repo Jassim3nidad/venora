@@ -47,8 +47,8 @@ export async function registerAction(rawInput: unknown): Promise<ActionResult> {
     };
   }
 
-  // Registrations succeed and redirect to login or check-email
-  redirect("/login?registered=true");
+  // Registration successful — user must verify their email before logging in.
+  redirect("/verify-email");
 }
 
 export async function loginAction(rawInput: unknown): Promise<ActionResult> {
@@ -152,6 +152,14 @@ export async function resetPasswordAction(rawInput: unknown): Promise<ActionResu
       success: false,
       error: toErrorMessage(error),
     };
+  }
+
+  // Sign out to clear the temporary recovery session so middleware does not
+  // redirect the user away from the /login page.
+  try {
+    await signOutUseCase();
+  } catch {
+    // Best-effort — the redirect below is the important part.
   }
 
   redirect("/login?reset=true");
