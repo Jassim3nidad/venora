@@ -32,10 +32,6 @@ ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "user_roles.select.self"
   ON public.user_roles FOR SELECT USING (user_id = auth.uid());
 
-CREATE POLICY "user_roles.insert.self"
-  ON public.user_roles FOR INSERT
-  WITH CHECK (user_id = auth.uid() AND role <> 'admin');
-
 CREATE POLICY "user_roles.all.admin"
   ON public.user_roles FOR ALL USING (public.is_admin());
 

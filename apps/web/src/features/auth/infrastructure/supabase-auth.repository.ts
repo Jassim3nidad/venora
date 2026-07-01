@@ -17,11 +17,10 @@ export class SupabaseAuthRepository implements AuthRepository {
     role: RoleName;
   }) {
     const supabase = await createClient();
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+    const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
-    // The profiles row is created automatically by the on_auth_user_created
-    // trigger (see migration 0002_identity_and_organizations.sql) — we only
-    // need to handle role assignment here.
+    // The profiles row and user_roles mapping are created automatically by the on_auth_user_created
+    // trigger (see migration 003_auth_profiles.sql) — we do not need to insert them here.
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -34,15 +33,6 @@ export class SupabaseAuthRepository implements AuthRepository {
     if (error) throw new AuthError(error.message);
     if (!data.user) throw new AuthError("Registration did not return a user.");
 
-    // Direct insert to guarantee role association immediate consistency
-    const { error: assignError } = await (supabase
-      .from("user_roles") as any)
-      .insert({ user_id: data.user.id, role: role as any });
-
-    if (assignError && (assignError as any).code !== "23505") {
-      throw new AuthError("Account created, but we could not assign your account type. Please contact support.");
-    }
-
     return { userId: data.user.id };
   }
 
@@ -54,7 +44,7 @@ export class SupabaseAuthRepository implements AuthRepository {
 
   async signInWithOAuth(provider: "google") {
     const supabase = await createClient();
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+    const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
@@ -72,7 +62,7 @@ export class SupabaseAuthRepository implements AuthRepository {
 
   async requestPasswordReset(email: string) {
     const supabase = await createClient();
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+    const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${siteUrl}/auth/callback?next=/reset-password`,

@@ -104,7 +104,8 @@ CREATE TRIGGER on_auth_user_created
 -- ── RLS helper functions (SECURITY DEFINER) ──────────────────
 
 CREATE OR REPLACE FUNCTION public.has_role(check_role public.user_role)
-RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER AS $$
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = public, pg_catalog AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.user_roles
     WHERE user_id = auth.uid() AND role = check_role
@@ -112,7 +113,8 @@ RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER AS $$
 $$;
 
 CREATE OR REPLACE FUNCTION public.is_admin()
-RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER AS $$
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = public, pg_catalog AS $$
   SELECT public.has_role('admin');
 $$;
 

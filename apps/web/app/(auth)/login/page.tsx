@@ -1,10 +1,79 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { Suspense, useState, useTransition } from "react";
+import { useSearchParams } from "next/navigation";
 import { loginAction, signInWithOAuthAction } from "@/features/auth/actions/auth.actions";
 import { loginSchema } from "@/features/auth/schemas/auth.schema";
 
-export default function LoginPage() {
+// ─── Success alert ─────────────────────────────────────────────────────────────
+
+type AlertVariant = "success" | "info";
+
+function Alert({ variant, children }: { variant: AlertVariant; children: React.ReactNode }) {
+  const styles: Record<AlertVariant, React.CSSProperties> = {
+    success: {
+      background: "linear-gradient(135deg, rgba(22, 163, 74, 0.12), rgba(22, 163, 74, 0.06))",
+      border: "1px solid rgba(22, 163, 74, 0.3)",
+      color: "hsl(142 60% 40%)",
+    },
+    info: {
+      background: "linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(37, 99, 235, 0.06))",
+      border: "1px solid rgba(37, 99, 235, 0.3)",
+      color: "hsl(217 70% 47%)",
+    },
+  };
+
+  const icons: Record<AlertVariant, string> = {
+    success: "✓",
+    info: "✉",
+  };
+
+  return (
+    <div
+      role="status"
+      style={{
+        ...styles[variant],
+        display: "flex",
+        alignItems: "flex-start",
+        gap: "0.75rem",
+        padding: "0.875rem 1rem",
+        borderRadius: "0.625rem",
+        fontSize: "0.8125rem",
+        lineHeight: 1.6,
+        marginBottom: "1.25rem",
+        animation: "slideDown 0.3s ease",
+      }}
+    >
+      <span
+        style={{
+          flexShrink: 0,
+          width: "1.25rem",
+          height: "1.25rem",
+          borderRadius: "50%",
+          background: styles[variant].color as string,
+          color: "#fff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "0.7rem",
+          fontWeight: 700,
+          marginTop: "0.05rem",
+        }}
+      >
+        {icons[variant]}
+      </span>
+      <span>{children}</span>
+    </div>
+  );
+}
+
+// ─── Inner login form (needs useSearchParams, must be inside Suspense) ─────────
+
+function LoginForm() {
+  const searchParams = useSearchParams();
+  const didReset = searchParams.get("reset") === "true";
+  const didRegister = searchParams.get("registered") === "true";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
@@ -35,14 +104,16 @@ export default function LoginPage() {
 
   return (
     <div style={{ minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
+      <style>{`
+        @keyframes slideDown {
+          from { opacity: 0; transform: translateY(-6px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+
       <div
         className="glass animate-scale-in"
-        style={{
-          width: "100%",
-          maxWidth: 420,
-          padding: "2.5rem",
-          borderRadius: "1.5rem",
-        }}
+        style={{ width: "100%", maxWidth: 420, padding: "2.5rem", borderRadius: "1.5rem" }}
       >
         <div style={{ textAlign: "center", marginBottom: "2rem" }}>
           <h1
@@ -63,6 +134,20 @@ export default function LoginPage() {
           </p>
         </div>
 
+        {/* ── Success banners ── */}
+        {didReset && (
+          <Alert variant="success">
+            Your password has been reset successfully. Please sign in with your new password.
+          </Alert>
+        )}
+
+        {didRegister && (
+          <Alert variant="info">
+            Registration successful! Please check your email to verify your account before signing in.
+          </Alert>
+        )}
+
+        {/* ── Error banner ── */}
         {generalError && (
           <div
             role="alert"
@@ -216,5 +301,15 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+// ─── Default export wraps LoginForm in Suspense ────────────────────────────────
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }
