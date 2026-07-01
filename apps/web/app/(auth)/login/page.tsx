@@ -1,7 +1,8 @@
 "use client";
 
-import { type FormEvent, useState, useTransition } from "react";
+import { type FormEvent, useState, useTransition, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Check, DraftingCompass, LockKeyhole, Mail } from "lucide-react";
 import {
   loginAction,
@@ -9,7 +10,11 @@ import {
 } from "@/features/auth/actions/auth.actions";
 import { loginSchema } from "@/features/auth/schemas/auth.schema";
 
-export default function LoginPage() {
+function LoginForm() {
+  const searchParams = useSearchParams();
+  const didReset = searchParams.get("reset") === "true";
+  const didRegister = searchParams.get("registered") === "true";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -143,6 +148,18 @@ export default function LoginPage() {
               Welcome back. Enter your details below.
             </p>
           </div>
+
+          {/* Success Alerts */}
+          {didReset && (
+            <div className="mb-[18px] rounded-[12px] border border-emerald-200 bg-emerald-50 px-[14px] py-[12px] text-[14px] font-medium text-emerald-800">
+              ✓ Your password has been reset successfully. Please sign in below.
+            </div>
+          )}
+          {didRegister && (
+            <div className="mb-[18px] rounded-[12px] border border-blue-200 bg-blue-50 px-[14px] py-[12px] text-[14px] font-medium text-blue-800">
+              ✉ Registration successful! Please check your email to verify your account.
+            </div>
+          )}
 
           {/* Error */}
           {generalError ? (
@@ -319,5 +336,13 @@ export default function LoginPage() {
         </div>
       </section>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }
