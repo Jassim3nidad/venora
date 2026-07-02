@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { updateProfileAction, signOutAction, resetPasswordAction } from "@/features/auth/actions/auth.actions";
-import { updateProfileSchema, resetPasswordSchema } from "@/features/auth/schemas/auth.schema";
+import { updateProfileAction, changePasswordAction } from "@/features/auth/actions/auth.actions";
+import { updateProfileSchema, changePasswordSchema } from "@/features/auth/schemas/auth.schema";
 
 interface AccountFormProps {
   initialFullName: string;
@@ -19,6 +19,7 @@ export default function AccountForm({ initialFullName, initialPhone }: AccountFo
   const [isPending, startTransition] = useTransition();
 
   // Password Change State
+  const [oldPassword, setOldPassword] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [pwdFieldErrors, setPwdFieldErrors] = useState<Record<string, string[]>>({});
@@ -57,16 +58,17 @@ export default function AccountForm({ initialFullName, initialPhone }: AccountFo
     setPwdGeneralError(null);
     setPwdSuccessMessage(null);
 
-    const result = resetPasswordSchema.safeParse({ password, confirmPassword });
+    const result = changePasswordSchema.safeParse({ oldPassword, password, confirmPassword });
     if (!result.success) {
       setPwdFieldErrors(result.error.flatten().fieldErrors);
       return;
     }
 
     startPwdTransition(async () => {
-      const response = await resetPasswordAction({ password, confirmPassword });
+      const response = await changePasswordAction({ oldPassword, password, confirmPassword });
       if (response && response.success) {
         setPwdSuccessMessage("Password changed successfully!");
+        setOldPassword("");
         setPassword("");
         setConfirmPassword("");
       } else if (response) {
@@ -75,12 +77,6 @@ export default function AccountForm({ initialFullName, initialPhone }: AccountFo
           setPwdFieldErrors(response.fieldErrors);
         }
       }
-    });
-  };
-
-  const handleSignOut = () => {
-    startTransition(async () => {
-      await signOutAction();
     });
   };
 
@@ -175,13 +171,13 @@ export default function AccountForm({ initialFullName, initialPhone }: AccountFo
           )}
         </div>
 
-        <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem" }}>
+        <div style={{ marginTop: "0.5rem" }}>
           <button
             id="account-save-btn"
             type="submit"
             disabled={isPending}
             style={{
-              flex: 1,
+              width: "100%",
               height: "2.75rem",
               borderRadius: "0.625rem",
               background: "#E07A5F",
@@ -195,24 +191,6 @@ export default function AccountForm({ initialFullName, initialPhone }: AccountFo
             }}
           >
             {isPending ? "Saving..." : "Save Changes"}
-          </button>
-
-          <button
-            type="button"
-            onClick={handleSignOut}
-            disabled={isPending}
-            style={{
-              height: "2.75rem",
-              borderRadius: "0.625rem",
-              border: "1px solid var(--border-default)",
-              background: "transparent",
-              color: "var(--text-primary)",
-              fontWeight: 600,
-              padding: "0 1.25rem",
-              cursor: isPending ? "not-allowed" : "pointer",
-            }}
-          >
-            Sign Out
           </button>
         </div>
       </form>
@@ -254,6 +232,32 @@ export default function AccountForm({ initialFullName, initialPhone }: AccountFo
             {pwdGeneralError}
           </div>
         )}
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+          <label htmlFor="account-old-password" style={{ fontSize: "0.875rem", fontWeight: 500 }}>Current Password</label>
+          <input
+            id="account-old-password"
+            type="password"
+            value={oldPassword}
+            onChange={(e) => setOldPassword(e.target.value)}
+            placeholder="••••••••"
+            disabled={isPwdPending}
+            style={{
+              height: "2.75rem",
+              borderRadius: "0.625rem",
+              border: pwdFieldErrors.oldPassword ? "1px solid rgb(220, 38, 38)" : "1px solid var(--border-default)",
+              padding: "0 0.875rem",
+              background: "var(--bg-subtle)",
+              color: "var(--text-primary)",
+              fontSize: "0.9375rem",
+              outline: "none",
+              width: "100%",
+            }}
+          />
+          {pwdFieldErrors.oldPassword && (
+            <span style={{ fontSize: "0.75rem", color: "rgb(220, 38, 38)" }}>{pwdFieldErrors.oldPassword[0]}</span>
+          )}
+        </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
           <label htmlFor="account-password" style={{ fontSize: "0.875rem", fontWeight: 500 }}>New Password</label>

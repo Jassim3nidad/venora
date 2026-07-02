@@ -8,6 +8,7 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
   updateProfileSchema,
+  changePasswordSchema,
 } from "../schemas/auth.schema";
 import {
   registerUserUseCase,
@@ -190,6 +191,60 @@ export async function updateProfileAction(rawInput: unknown): Promise<ActionResu
     });
 
     revalidatePath("/account");
+    return {
+      success: true,
+      data: undefined,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: toErrorMessage(error),
+    };
+  }
+}
+
+export async function changePasswordAction(rawInput: unknown): Promise<ActionResult> {
+  const parsed = changePasswordSchema.safeParse(rawInput);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: "Validation failed.",
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
+  }
+
+  try {
+    const user = await getCurrentUserUseCase();
+    if (!user) {
+      return {
+        success: false,
+        error: "You must be logged in to change your password.",
+      };
+    }
+
+    // Verify current/old password via stateless Supabase JS client (no cookies side-effects)
+    const { createClient: createJSClient } = require("@supabase/supabase-js");
+    const tempClient = createJSClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { auth: { persistSession: false } }
+    );
+
+    const { error: verifyError } = await tempClient.auth.signInWithPassword({
+      email: user.email,
+      password: parsed.data.oldPassword,
+    });
+
+    if (verifyError) {
+      return {
+        success: false,
+        error: "Incorrect current password.",
+      };
+    }
+
+    // Old password verified. Execute password update.
+    await resetPasswordUseCase(parsed.data.password);
+
     return {
       success: true,
       data: undefined,
