@@ -32,8 +32,8 @@ type RoleJoinRow = {
     | null;
 };
 
-// In local development, allow frontend developers to preview dashboard pages
-// without needing exact Supabase role rows.
+// Allows frontend preview of dashboard pages during local development.
+// Production will still enforce role guards.
 const SKIP_DASHBOARD_ROLE_GUARD_IN_DEV = process.env.NODE_ENV === "development";
 
 // Routes that require authentication
@@ -47,8 +47,27 @@ const PROTECTED_PREFIXES = [
 
 // Routes that require specific roles
 const ROLE_GUARDS: Array<{ prefix: string; roles: UserRole[] }> = [
+  // Future role dashboard shells
+  {
+    prefix: "/dashboard/customer",
+    roles: ["customer", "admin"],
+  },
+  {
+    prefix: "/dashboard/supplier",
+    roles: ["supplier", "admin"],
+  },
+  {
+    prefix: "/dashboard/coordinator",
+    roles: ["event_coordinator", "admin"],
+  },
+
+  // Venue owner dashboard pages
   {
     prefix: "/dashboard/venues",
+    roles: ["venue_owner", "admin"],
+  },
+  {
+    prefix: "/dashboard/bookings",
     roles: ["venue_owner", "admin"],
   },
   {
@@ -67,9 +86,11 @@ const ROLE_GUARDS: Array<{ prefix: string; roles: UserRole[] }> = [
     prefix: "/dashboard/analytics",
     roles: ["venue_owner", "supplier", "admin"],
   },
+
+  // Admin area
   {
     prefix: "/admin",
-    roles: ["venue_owner", "supplier", "admin"],
+    roles: ["admin"],
   },
 ];
 
