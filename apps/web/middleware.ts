@@ -32,9 +32,9 @@ type RoleJoinRow = {
     | null;
 };
 
-// Allows frontend preview of dashboard pages during local development.
+// Allows frontend preview of dashboard/admin pages during local development.
 // Production will still enforce role guards.
-const SKIP_DASHBOARD_ROLE_GUARD_IN_DEV = process.env.NODE_ENV === "development";
+const SKIP_ROLE_GUARD_IN_DEV = process.env.NODE_ENV === "development";
 
 // Routes that require authentication
 const PROTECTED_PREFIXES = [
@@ -47,15 +47,19 @@ const PROTECTED_PREFIXES = [
 
 // Routes that require specific roles
 const ROLE_GUARDS: Array<{ prefix: string; roles: UserRole[] }> = [
-  // Future role dashboard shells
+  // Customer dashboard
   {
     prefix: "/dashboard/customer",
     roles: ["customer", "admin"],
   },
+
+  // Supplier dashboard
   {
     prefix: "/dashboard/supplier",
     roles: ["supplier", "admin"],
   },
+
+  // Event coordinator dashboard
   {
     prefix: "/dashboard/coordinator",
     roles: ["event_coordinator", "admin"],
@@ -90,7 +94,7 @@ const ROLE_GUARDS: Array<{ prefix: string; roles: UserRole[] }> = [
   // Admin area
   {
     prefix: "/admin",
-    roles: ["admin", "customer", "venue_owner", "event_coordinator", "supplier"],
+    roles: ["admin"],
   },
 ];
 
@@ -170,10 +174,11 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith(guard.prefix),
     );
 
-    const shouldSkipDashboardRoleGuard =
-      SKIP_DASHBOARD_ROLE_GUARD_IN_DEV && pathname.startsWith("/dashboard");
+    const shouldSkipRoleGuardInDev =
+      SKIP_ROLE_GUARD_IN_DEV &&
+      (pathname.startsWith("/dashboard") || pathname.startsWith("/admin"));
 
-    if (matchedGuard && !shouldSkipDashboardRoleGuard) {
+    if (matchedGuard && !shouldSkipRoleGuardInDev) {
       const { data: roleRows, error } = await (
         supabase.from("user_roles") as any
       )
