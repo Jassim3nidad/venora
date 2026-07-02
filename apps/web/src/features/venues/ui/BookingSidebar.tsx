@@ -44,6 +44,7 @@ export default function BookingSidebar({
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [showCalendar, setShowCalendar] = useState(false);
   const [guests, setGuests] = useState<number>(capacityMin);
+  const [inputValue, setInputValue] = useState<string>(capacityMin.toString());
   const [selectedPackageId, setSelectedPackageId] = useState<string>("none");
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
   const [availabilityStatus, setAvailabilityStatus] = useState<"idle" | "available" | "unavailable">("idle");
@@ -95,9 +96,17 @@ export default function BookingSidebar({
 
   // Adjust guests bounds when package selection changes
   useEffect(() => {
-    if (guests < activeMinGuests) setGuests(activeMinGuests);
-    if (guests > activeMaxGuests) setGuests(activeMaxGuests);
-  }, [selectedPackageId, activeMinGuests, activeMaxGuests, guests]);
+    setGuests((prev) => {
+      if (prev < activeMinGuests) return activeMinGuests;
+      if (prev > activeMaxGuests) return activeMaxGuests;
+      return prev;
+    });
+  }, [selectedPackageId, activeMinGuests, activeMaxGuests]);
+
+  // Keep input value in sync when guests count changes from slider or package bounds
+  useEffect(() => {
+    setInputValue(guests.toString());
+  }, [guests]);
 
   const handleBook = () => {
     if (!selectedDate || availabilityStatus !== "available") return;
@@ -219,14 +228,36 @@ export default function BookingSidebar({
               type="range"
               min={activeMinGuests}
               max={activeMaxGuests}
-              value={guests}
+              value={guests < activeMinGuests ? activeMinGuests : guests > activeMaxGuests ? activeMaxGuests : guests}
               onChange={(e) => setGuests(Number(e.target.value))}
               className="w-full h-1.5 bg-[var(--border-default)] rounded-lg appearance-none cursor-pointer accent-[var(--color-brand-600)]"
             />
-            <span className="text-sm font-bold text-[var(--text-primary)] bg-[var(--bg-subtle)] border border-[var(--border-default)] px-3 py-1.5 rounded-xl min-w-[50px] text-center">
-              {guests}
-            </span>
+            <input
+              type="number"
+              value={inputValue}
+              onChange={(e) => {
+                const valStr = e.target.value;
+                setInputValue(valStr);
+                const valNum = Number(valStr);
+                if (valStr !== "" && !isNaN(valNum)) {
+                  setGuests(valNum);
+                } else {
+                  setGuests(0);
+                }
+              }}
+              className="text-sm font-bold text-[var(--text-primary)] bg-[var(--bg-subtle)] border border-[var(--border-default)] px-2 py-1.5 rounded-xl w-[70px] text-center outline-none focus:border-[var(--color-brand-600)]"
+            />
           </div>
+          {guests > activeMaxGuests && (
+            <p className="text-red-500 text-[11px] font-semibold mt-1">
+              ⚠️ This venue can only accommodate up to {activeMaxGuests} guests.
+            </p>
+          )}
+          {guests < activeMinGuests && (
+            <p className="text-red-500 text-[11px] font-semibold mt-1">
+              ⚠️ This venue requires a minimum of {activeMinGuests} guests.
+            </p>
+          )}
         </div>
       </div>
 
@@ -268,7 +299,13 @@ export default function BookingSidebar({
       {/* CTAs */}
       <div className="mt-6 space-y-3">
         <Button
-          disabled={!selectedDate || availabilityStatus !== "available" || isCheckingAvailability}
+          disabled={
+            !selectedDate ||
+            availabilityStatus !== "available" ||
+            isCheckingAvailability ||
+            guests < activeMinGuests ||
+            guests > activeMaxGuests
+          }
           onClick={handleBook}
           className="w-full h-12 rounded-2xl font-bold bg-[var(--color-brand-600)] text-white hover:bg-[var(--color-brand-700)] shadow-lg shadow-[var(--color-brand-500)]/20 transition-all flex items-center justify-center gap-2"
         >
