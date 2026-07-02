@@ -21,16 +21,7 @@ type UserRole =
   | "supplier"
   | "admin";
 
-type RoleJoinRow = {
-  roles:
-    | {
-        name: UserRole;
-      }
-    | {
-        name: UserRole;
-      }[]
-    | null;
-};
+
 
 // Allows frontend preview of dashboard/admin pages during local development.
 // Production will still enforce role guards.
@@ -65,30 +56,30 @@ const ROLE_GUARDS: Array<{ prefix: string; roles: UserRole[] }> = [
     roles: ["event_coordinator", "admin"],
   },
 
-  // Venue owner dashboard pages
+  // Venue owner / coordinator dashboard pages
   {
     prefix: "/dashboard/venues",
-    roles: ["venue_owner", "admin"],
+    roles: ["venue_owner", "event_coordinator", "admin"],
   },
   {
     prefix: "/dashboard/bookings",
-    roles: ["venue_owner", "admin"],
+    roles: ["venue_owner", "event_coordinator", "admin"],
   },
   {
     prefix: "/dashboard/calendar",
-    roles: ["venue_owner", "admin"],
+    roles: ["venue_owner", "event_coordinator", "admin"],
   },
   {
     prefix: "/dashboard/packages",
-    roles: ["venue_owner", "admin"],
+    roles: ["venue_owner", "event_coordinator", "admin"],
   },
   {
     prefix: "/dashboard/staff",
-    roles: ["venue_owner", "admin"],
+    roles: ["venue_owner", "event_coordinator", "admin"],
   },
   {
     prefix: "/dashboard/analytics",
-    roles: ["venue_owner", "supplier", "admin"],
+    roles: ["venue_owner", "event_coordinator", "supplier", "admin"],
   },
 
   // Admin area
@@ -100,17 +91,7 @@ const ROLE_GUARDS: Array<{ prefix: string; roles: UserRole[] }> = [
 
 const AUTH_PATHS = ["/login", "/register", "/forgot-password"];
 
-function extractRoleName(row: RoleJoinRow): UserRole | null {
-  const roles = row.roles;
 
-  if (!roles) return null;
-
-  if (Array.isArray(roles)) {
-    return roles[0]?.name ?? null;
-  }
-
-  return roles.name;
-}
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -179,10 +160,9 @@ export async function middleware(request: NextRequest) {
       (pathname.startsWith("/dashboard") || pathname.startsWith("/admin"));
 
     if (matchedGuard && !shouldSkipRoleGuardInDev) {
-      const { data: roleRows, error } = await (
-        supabase.from("user_roles") as any
-      )
-        .select("roles(name)")
+      const { data: roleRows, error } = await supabase
+        .from("user_roles")
+        .select("role")
         .eq("user_id", user.id);
 
       if (error) {
@@ -192,9 +172,9 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(redirectUrl);
       }
 
-      const userRoles = ((roleRows ?? []) as RoleJoinRow[])
-        .map(extractRoleName)
-        .filter((role): role is UserRole => role !== null);
+      const userRoles = ((roleRows ?? []) as { role: UserRole }[])
+        .map((r) => r.role)
+        .filter(Boolean);
 
       const hasAccess = matchedGuard.roles.some((role) =>
         userRoles.includes(role),

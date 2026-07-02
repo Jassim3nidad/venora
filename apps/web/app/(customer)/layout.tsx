@@ -1,9 +1,22 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { Sparkles, Bell, HelpCircle } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
 import "../globals.css";
 
-export default function CustomerLayout({ children }: { children: ReactNode }) {
+export default async function CustomerLayout({ children }: { children: ReactNode }) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let userRoles: string[] = [];
+  if (user) {
+    const { data: roleRows } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id);
+    userRoles = (roleRows ?? []).map((r: any) => r.role as string);
+  }
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-[#F8FAFC]">
       {/* Premium Top Navigation (matches marketing page layout) */}
@@ -30,6 +43,42 @@ export default function CustomerLayout({ children }: { children: ReactNode }) {
           >
             Bookings
           </Link>
+
+          {userRoles.includes("venue_owner") && (
+            <Link
+              href="/dashboard"
+              className="flex h-full items-center !text-[12px] !font-bold uppercase !tracking-[0.14em] text-slate-500 transition-colors hover:text-[#E07A5F]"
+            >
+              Venue Dashboard
+            </Link>
+          )}
+
+          {userRoles.includes("event_coordinator") && (
+            <Link
+              href="/dashboard"
+              className="flex h-full items-center !text-[12px] !font-bold uppercase !tracking-[0.14em] text-slate-500 transition-colors hover:text-[#E07A5F]"
+            >
+              Coordinator Dashboard
+            </Link>
+          )}
+
+          {userRoles.includes("supplier") && (
+            <Link
+              href="/dashboard/supplier"
+              className="flex h-full items-center !text-[12px] !font-bold uppercase !tracking-[0.14em] text-slate-500 transition-colors hover:text-[#E07A5F]"
+            >
+              Supplier Dashboard
+            </Link>
+          )}
+
+          {userRoles.includes("admin") && (
+            <Link
+              href="/admin"
+              className="flex h-full items-center !text-[12px] !font-bold uppercase !tracking-[0.14em] text-slate-500 transition-colors hover:text-[#E07A5F]"
+            >
+              Admin Panel
+            </Link>
+          )}
         </div>
 
         <div className="flex items-center !gap-[14px]">
