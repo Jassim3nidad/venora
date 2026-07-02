@@ -13,7 +13,7 @@ import {
   Star,
   Users,
 } from "lucide-react";
-import { createClient } from "@/src/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 export interface Venue {
   id: string | number;

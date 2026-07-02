@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import {
   registerSchema,
   loginSchema,
@@ -26,6 +27,7 @@ import { toErrorMessage } from "@/lib/errors";
 
 export async function registerAction(rawInput: unknown): Promise<ActionResult> {
   const parsed = registerSchema.safeParse(rawInput);
+
   if (!parsed.success) {
     return {
       success: false,
@@ -48,12 +50,12 @@ export async function registerAction(rawInput: unknown): Promise<ActionResult> {
     };
   }
 
-  // Registration successful — user must verify their email before logging in.
   redirect("/verify-email");
 }
 
 export async function loginAction(rawInput: unknown): Promise<ActionResult> {
   const parsed = loginSchema.safeParse(rawInput);
+
   if (!parsed.success) {
     return {
       success: false,
@@ -71,21 +73,24 @@ export async function loginAction(rawInput: unknown): Promise<ActionResult> {
     };
   }
 
-  // Get current user to decide where to redirect
   let targetPath = "/venues";
+
   try {
     const user = await getCurrentUserUseCase();
+
     if (user && user.roles.length > 0) {
       targetPath = defaultRouteForRoles(user.roles);
     }
-  } catch (err) {
-    console.error("[loginAction] Could not resolve roles post-login:", err);
+  } catch (error) {
+    console.error("[loginAction] Could not resolve roles post-login:", error);
   }
 
   redirect(targetPath);
 }
 
-export async function signInWithOAuthAction(provider: "google"): Promise<ActionResult> {
+export async function signInWithOAuthAction(
+  provider: "google",
+): Promise<ActionResult> {
   try {
     await signInWithOAuthUseCase(provider);
   } catch (error) {
@@ -94,6 +99,7 @@ export async function signInWithOAuthAction(provider: "google"): Promise<ActionR
       error: toErrorMessage(error),
     };
   }
+
   return {
     success: true,
     data: undefined,
@@ -113,8 +119,11 @@ export async function signOutAction(): Promise<ActionResult> {
   redirect("/login");
 }
 
-export async function forgotPasswordAction(rawInput: unknown): Promise<ActionResult> {
+export async function forgotPasswordAction(
+  rawInput: unknown,
+): Promise<ActionResult> {
   const parsed = forgotPasswordSchema.safeParse(rawInput);
+
   if (!parsed.success) {
     return {
       success: false,
@@ -126,8 +135,10 @@ export async function forgotPasswordAction(rawInput: unknown): Promise<ActionRes
   try {
     await requestPasswordResetUseCase(parsed.data.email);
   } catch (error) {
-    // Deliberately swallow errors here to prevent account enumeration
-    console.error("[forgotPasswordAction] Password reset request error (swallowed):", error);
+    console.error(
+      "[forgotPasswordAction] Password reset request error swallowed:",
+      error,
+    );
   }
 
   return {
@@ -136,8 +147,11 @@ export async function forgotPasswordAction(rawInput: unknown): Promise<ActionRes
   };
 }
 
-export async function resetPasswordAction(rawInput: unknown): Promise<ActionResult> {
+export async function resetPasswordAction(
+  rawInput: unknown,
+): Promise<ActionResult> {
   const parsed = resetPasswordSchema.safeParse(rawInput);
+
   if (!parsed.success) {
     return {
       success: false,
@@ -155,19 +169,20 @@ export async function resetPasswordAction(rawInput: unknown): Promise<ActionResu
     };
   }
 
-  // Sign out to clear the temporary recovery session so middleware does not
-  // redirect the user away from the /login page.
   try {
     await signOutUseCase();
   } catch {
-    // Best-effort — the redirect below is the important part.
+    // Best effort only.
   }
 
   redirect("/login?reset=true");
 }
 
-export async function updateProfileAction(rawInput: unknown): Promise<ActionResult> {
+export async function updateProfileAction(
+  rawInput: unknown,
+): Promise<ActionResult> {
   const parsed = updateProfileSchema.safeParse(rawInput);
+
   if (!parsed.success) {
     return {
       success: false,
@@ -177,23 +192,54 @@ export async function updateProfileAction(rawInput: unknown): Promise<ActionResu
   }
 
   try {
-    const user = await getCurrentUserUseCase();
-    if (!user) {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
       return {
         success: false,
         error: "You must be logged in to update your profile.",
       };
     }
 
-    await updateProfileUseCase(user.id, {
-      fullName: parsed.data.fullName,
-      phone: parsed.data.phone || null,
-    });
+    const { error: updateError } = await (
+      supabase.from("profiles") as any
+    )
+      .update({
+        full_name: parsed.data.fullName,
+        phone: parsed.data.phone?.trim() || null,
+      })
+      .eq("id", user.id);
 
-    revalidatePath("/account");
+    if (updateError) {
+      console.error("[updateProfileAction] Database error:", updateError);
+      return {
+        success: false,
+        error: updateError.message,
+      };
+    }
+
+    // Fetch updated profile to return fresh data
+    const { data: updatedProfile, error: fetchError } = await (
+      supabase.from("profiles") as any
+    )
+      .select("full_name, phone")
+      .eq("id", user.id)
+      .single();
+
+    if (fetchError) {
+      console.error("[updateProfileAction] Fetch error:", fetchError);
+    }
+
+    revalidatePath("/account", "layout");
+
     return {
       success: true,
-      data: undefined,
+      data: updatedProfile,
     };
   } catch (error) {
     return {
@@ -203,8 +249,11 @@ export async function updateProfileAction(rawInput: unknown): Promise<ActionResu
   }
 }
 
-export async function changePasswordAction(rawInput: unknown): Promise<ActionResult> {
+export async function changePasswordAction(
+  rawInput: unknown,
+): Promise<ActionResult> {
   const parsed = changePasswordSchema.safeParse(rawInput);
+
   if (!parsed.success) {
     return {
       success: false,
@@ -215,6 +264,7 @@ export async function changePasswordAction(rawInput: unknown): Promise<ActionRes
 
   try {
     const user = await getCurrentUserUseCase();
+
     if (!user) {
       return {
         success: false,
@@ -222,12 +272,16 @@ export async function changePasswordAction(rawInput: unknown): Promise<ActionRes
       };
     }
 
-    // Verify current/old password via stateless Supabase JS client (no cookies side-effects)
     const { createClient: createJSClient } = require("@supabase/supabase-js");
+
     const tempClient = createJSClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { auth: { persistSession: false } }
+      {
+        auth: {
+          persistSession: false,
+        },
+      },
     );
 
     const { error: verifyError } = await tempClient.auth.signInWithPassword({
@@ -242,7 +296,6 @@ export async function changePasswordAction(rawInput: unknown): Promise<ActionRes
       };
     }
 
-    // Old password verified. Execute password update.
     await resetPasswordUseCase(parsed.data.password);
 
     return {

@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { createClient } from "@/src/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { createServerAction } from "@/src/lib/server-action";
 import { UnauthorizedError } from "@/src/lib/errors";
 

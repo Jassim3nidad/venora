@@ -8,6 +8,8 @@ import {
   Check,
   ClipboardCheck,
   DraftingCompass,
+  Eye,
+  EyeOff,
   LockKeyhole,
   Mail,
   Truck,
@@ -32,6 +34,8 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState<string>("customer");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
@@ -85,7 +89,7 @@ export default function RegisterPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/40 to-[#0F172A]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_35%_45%,rgba(255,255,255,0.10),transparent_35%)]" />
 
-        <div className="relative z-10 mx-auto flex w-full max-w-[560px] translate-x-[-99px] translate-y-[-15px] flex-col justify-center px-[64px]">
+        <div className="relative z-10 mx-auto flex w-full max-w-[560px] translate-x-[-100px] flex-col justify-center px-[64px]">
           <div className="mb-[58px] flex items-center gap-[12px]">
             <span className="text-[24px] font-semibold leading-[32px] translate-y-[50px] tracking-[-0.02em] text-[#E07A5F]">
               Venora
@@ -229,18 +233,30 @@ export default function RegisterPage() {
                 <input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   autoComplete="new-password"
                   disabled={isPending}
-                  className={`h-[42px] w-full rounded-[6px] border bg-white !pl-[40px] pr-[16px] text-[15px] font-normal leading-[22px] text-[#191C1E] outline-none transition-shadow placeholder:text-[#55423E]/60 focus:border-[#E07A5F] focus:ring-2 focus:ring-[#E07A5F]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
+                  className={`h-[42px] w-full rounded-[6px] border bg-white !pl-[40px] pr-[38px] text-[15px] font-normal leading-[22px] text-[#191C1E] outline-none transition-shadow placeholder:text-[#55423E]/60 focus:border-[#E07A5F] focus:ring-2 focus:ring-[#E07A5F]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
                     fieldErrors.password
                       ? "border-red-500"
                       : "border-[#E2E8F0]"
                   }`}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-[10px] top-1/2 -translate-y-1/2 text-[#55423E] transition hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E07A5F]/30"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-[16px] w-[16px]" />
+                  ) : (
+                    <Eye className="h-[16px] w-[16px]" />
+                  )}
+                </button>
               </div>
 
               {fieldErrors.password?.[0] ? (
@@ -269,18 +285,30 @@ export default function RegisterPage() {
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
                   autoComplete="new-password"
                   disabled={isPending}
-                  className={`h-[42px] w-full rounded-[6px] border bg-white !pl-[40px] pr-[16px] text-[15px] font-normal leading-[22px] text-[#191C1E] outline-none transition-shadow placeholder:text-[#55423E]/60 focus:border-[#E07A5F] focus:ring-2 focus:ring-[#E07A5F]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
+                  className={`h-[42px] w-full rounded-[6px] border bg-white !pl-[40px] pr-[38px] text-[15px] font-normal leading-[22px] text-[#191C1E] outline-none transition-shadow placeholder:text-[#55423E]/60 focus:border-[#E07A5F] focus:ring-2 focus:ring-[#E07A5F]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
                     fieldErrors.confirmPassword
                       ? "border-red-500"
                       : "border-[#E2E8F0]"
                   }`}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-[10px] top-1/2 -translate-y-1/2 text-[#55423E] transition hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E07A5F]/30"
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-[16px] w-[16px]" />
+                  ) : (
+                    <Eye className="h-[16px] w-[16px]" />
+                  )}
+                </button>
               </div>
 
               {fieldErrors.confirmPassword?.[0] ? (

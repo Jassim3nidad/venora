@@ -1,39 +1,246 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { updateProfileAction, changePasswordAction } from "@/features/auth/actions/auth.actions";
-import { updateProfileSchema, changePasswordSchema } from "@/features/auth/schemas/auth.schema";
+import Link from "next/link";
+import type { FormEvent, ReactNode } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  KeyRound,
+  Lock,
+  Phone,
+  Save,
+  ShieldCheck,
+  Sparkles,
+  UserRound,
+} from "lucide-react";
+import {
+  changePasswordAction,
+  updateProfileAction,
+} from "@/features/auth/actions/auth.actions";
+import {
+  changePasswordSchema,
+  updateProfileSchema,
+} from "@/features/auth/schemas/auth.schema";
 
 interface AccountFormProps {
   initialFullName: string;
   initialPhone: string;
 }
 
-export default function AccountForm({ initialFullName, initialPhone }: AccountFormProps) {
-  // Profile Details State
+
+type FieldErrors = Record<string, string[]>;
+
+function AlertBanner({
+  type,
+  children,
+}: {
+  type: "success" | "error";
+  children: ReactNode;
+}) {
+  const isSuccess = type === "success";
+  const Icon = isSuccess ? CheckCircle2 : AlertCircle;
+
+  return (
+    <div
+      role={isSuccess ? "status" : "alert"}
+      className={[
+        "flex items-start gap-3 rounded-2xl border px-4 py-3 text-sm font-semibold leading-6",
+        isSuccess
+          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+          : "border-red-200 bg-red-50 text-red-700",
+      ].join(" ")}
+    >
+      <Icon className="mt-0.5 h-4 w-4 shrink-0" />
+      <span>{children}</span>
+    </div>
+  );
+}
+
+function SectionHeader({
+  icon: Icon,
+  eyebrow,
+  title,
+  description,
+}: {
+  icon: React.ElementType;
+  eyebrow: string;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="border-b border-[#E9D5D0]/80 pb-5">
+      <div className="mb-4 flex items-center gap-3">
+        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FFF4F1] text-[#E07A5F] shadow-sm">
+          <Icon className="h-5 w-5" />
+        </div>
+
+        <div>
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#E07A5F]">
+            {eyebrow}
+          </p>
+          <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">
+            {title}
+          </h2>
+        </div>
+      </div>
+
+      <p className="max-w-2xl text-sm font-medium leading-6 text-slate-500">
+        {description}
+      </p>
+    </div>
+  );
+}
+
+function TextField({
+  id,
+  label,
+  type = "text",
+  value,
+  onChange,
+  placeholder,
+  disabled,
+  error,
+  icon: Icon,
+  autoComplete,
+  showPassword,
+  onShowPasswordChange,
+}: {
+  id: string;
+  label: string;
+  type?: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  disabled?: boolean;
+  error?: string | undefined;
+  icon: React.ElementType;
+  autoComplete?: string;
+  showPassword?: boolean;
+  onShowPasswordChange?: (show: boolean) => void;
+}) {
+  const isPasswordField = type === "password";
+  const inputType = isPasswordField && showPassword ? "text" : type;
+
+  return (
+    <div>
+      <label
+        htmlFor={id}
+        className="mb-2 block text-sm font-bold text-slate-700"
+      >
+        {label}
+      </label>
+
+      <div className="relative">
+        <Icon className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+        <input
+          id={id}
+          type={inputType}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={placeholder}
+          disabled={disabled}
+          autoComplete={autoComplete}
+          className={[
+            "h-12 w-full rounded-2xl border bg-[#FFFDFC] pl-11 pr-11 text-sm font-semibold text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-70",
+            error
+              ? "border-red-500 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
+              : "border-slate-200 hover:border-[#E9D5D0] focus:border-[#E07A5F] focus:bg-white focus:ring-4 focus:ring-[#E07A5F]/10",
+          ].join(" ")}
+        />
+
+        {isPasswordField && onShowPasswordChange && (
+          <button
+            type="button"
+            onClick={() => onShowPasswordChange(!showPassword)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E07A5F]/30"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
+          </button>
+        )}
+      </div>
+
+      {error && <p className="mt-2 text-xs font-semibold text-red-600">{error}</p>}
+    </div>
+  );
+}
+
+function SubmitButton({
+  id,
+  isPending,
+  pendingText,
+  children,
+  icon: Icon,
+}: {
+  id: string;
+  isPending: boolean;
+  pendingText: string;
+  children: ReactNode;
+  icon: React.ElementType;
+}) {
+  return (
+    <button
+      id={id}
+      type="submit"
+      disabled={isPending}
+      className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#E07A5F] px-5 text-sm font-extrabold text-white shadow-lg shadow-[#E07A5F]/25 transition hover:bg-[#d96851] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#E07A5F]/25 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+    >
+      <Icon className="h-4 w-4" />
+      {isPending ? pendingText : children}
+    </button>
+  );
+}
+
+export default function AccountForm({
+  initialFullName,
+  initialPhone,
+}: AccountFormProps) {
   const [fullName, setFullName] = useState(initialFullName);
   const [phone, setPhone] = useState(initialPhone);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
-  // Password Change State
   const [oldPassword, setOldPassword] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [pwdFieldErrors, setPwdFieldErrors] = useState<Record<string, string[]>>({});
+  const [pwdFieldErrors, setPwdFieldErrors] = useState<FieldErrors>({});
   const [pwdGeneralError, setPwdGeneralError] = useState<string | null>(null);
-  const [pwdSuccessMessage, setPwdSuccessMessage] = useState<string | null>(null);
+  const [pwdSuccessMessage, setPwdSuccessMessage] = useState<string | null>(
+    null,
+  );
   const [isPwdPending, startPwdTransition] = useTransition();
 
-  const handleProfileSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  useEffect(() => {
+    setFullName(initialFullName);
+    setPhone(initialPhone);
+    setSuccessMessage(null);
+  }, [initialFullName, initialPhone]);
+
+  const handleProfileSubmit = (event: FormEvent) => {
+    event.preventDefault();
     setFieldErrors({});
     setGeneralError(null);
     setSuccessMessage(null);
 
     const result = updateProfileSchema.safeParse({ fullName, phone });
+
     if (!result.success) {
       setFieldErrors(result.error.flatten().fieldErrors);
       return;
@@ -41,9 +248,22 @@ export default function AccountForm({ initialFullName, initialPhone }: AccountFo
 
     startTransition(async () => {
       const response = await updateProfileAction({ fullName, phone });
+
       if (response && response.success) {
-        setSuccessMessage("Profile updated successfully!");
-      } else if (response) {
+        setSuccessMessage("Profile updated successfully.");
+        // Immediately update state with returned data
+        if (response.data) {
+          setFullName(response.data.full_name || fullName);
+          setPhone(response.data.phone || phone);
+        }
+        // Then refresh to ensure page component shows updated data too
+        setTimeout(() => {
+          router.refresh();
+        }, 500);
+        return;
+}
+
+      if (response) {
         setGeneralError(response.error);
         if (response.fieldErrors) {
           setFieldErrors(response.fieldErrors);
@@ -52,26 +272,39 @@ export default function AccountForm({ initialFullName, initialPhone }: AccountFo
     });
   };
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handlePasswordSubmit = (event: FormEvent) => {
+    event.preventDefault();
     setPwdFieldErrors({});
     setPwdGeneralError(null);
     setPwdSuccessMessage(null);
 
-    const result = changePasswordSchema.safeParse({ oldPassword, password, confirmPassword });
+    const result = changePasswordSchema.safeParse({
+      oldPassword,
+      password,
+      confirmPassword,
+    });
+
     if (!result.success) {
       setPwdFieldErrors(result.error.flatten().fieldErrors);
       return;
     }
 
     startPwdTransition(async () => {
-      const response = await changePasswordAction({ oldPassword, password, confirmPassword });
+      const response = await changePasswordAction({
+        oldPassword,
+        password,
+        confirmPassword,
+      });
+
       if (response && response.success) {
-        setPwdSuccessMessage("Password changed successfully!");
+        setPwdSuccessMessage("Password changed successfully.");
         setOldPassword("");
         setPassword("");
         setConfirmPassword("");
-      } else if (response) {
+        return;
+      }
+
+      if (response) {
         setPwdGeneralError(response.error || "Failed to update password.");
         if (response.fieldErrors) {
           setPwdFieldErrors(response.fieldErrors);
@@ -81,257 +314,184 @@ export default function AccountForm({ initialFullName, initialPhone }: AccountFo
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
-      {/* ─── Profile details section ─── */}
-      <form onSubmit={handleProfileSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-        <h3 style={{ fontFamily: "var(--font-sora, sans-serif)", fontSize: "1.125rem", fontWeight: 700, borderBottom: "1px solid var(--border-default)", paddingBottom: "0.5rem", color: "var(--text-primary)" }}>
-          Profile Details
-        </h3>
+    <div className="relative">
+      <div className="absolute left-[-120px] top-[-80px] -z-10 h-[260px] w-[260px] rounded-full bg-[#E07A5F]/10 blur-3xl" />
+      <div className="absolute bottom-[-120px] right-[-80px] -z-10 h-[280px] w-[280px] rounded-full bg-[#F0A090]/10 blur-3xl" />
 
-        {successMessage && (
-          <div
-            role="status"
-            style={{
-              background: "rgba(16, 185, 129, 0.1)",
-              border: "1px solid rgba(16, 185, 129, 0.2)",
-              color: "rgb(16, 185, 129)",
-              padding: "0.75rem 1rem",
-              borderRadius: "0.5rem",
-              fontSize: "0.875rem",
-            }}
-          >
-            {successMessage}
-          </div>
-        )}
-
-        {generalError && (
-          <div
-            role="alert"
-            style={{
-              background: "rgba(220, 38, 38, 0.1)",
-              border: "1px solid rgba(220, 38, 38, 0.2)",
-              color: "rgb(220, 38, 38)",
-              padding: "0.75rem 1rem",
-              borderRadius: "0.5rem",
-              fontSize: "0.875rem",
-            }}
-          >
-            {generalError}
-          </div>
-        )}
-
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-          <label htmlFor="account-full-name" style={{ fontSize: "0.875rem", fontWeight: 500 }}>Full Name</label>
-          <input
-            id="account-full-name"
-            type="text"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            disabled={isPending}
-            style={{
-              height: "2.75rem",
-              borderRadius: "0.625rem",
-              border: fieldErrors.fullName ? "1px solid rgb(220, 38, 38)" : "1px solid var(--border-default)",
-              padding: "0 0.875rem",
-              background: "var(--bg-subtle)",
-              color: "var(--text-primary)",
-              fontSize: "0.9375rem",
-              outline: "none",
-              width: "100%",
-            }}
-          />
-          {fieldErrors.fullName && (
-            <span style={{ fontSize: "0.75rem", color: "rgb(220, 38, 38)" }}>{fieldErrors.fullName[0]}</span>
-          )}
+      <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[#F0A090] bg-[#FFF4F1] px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#E07A5F]">
+          Account settings
         </div>
+      </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-          <label htmlFor="account-phone" style={{ fontSize: "0.875rem", fontWeight: 500 }}>Phone Number</label>
-          <input
-            id="account-phone"
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="09171234567"
-            disabled={isPending}
-            style={{
-              height: "2.75rem",
-              borderRadius: "0.625rem",
-              border: fieldErrors.phone ? "1px solid rgb(220, 38, 38)" : "1px solid var(--border-default)",
-              padding: "0 0.875rem",
-              background: "var(--bg-subtle)",
-              color: "var(--text-primary)",
-              fontSize: "0.9375rem",
-              outline: "none",
-              width: "100%",
-            }}
-          />
-          {fieldErrors.phone && (
-            <span style={{ fontSize: "0.75rem", color: "rgb(220, 38, 38)" }}>{fieldErrors.phone[0]}</span>
-          )}
-        </div>
-
-        <div style={{ marginTop: "0.5rem" }}>
-          <button
-            id="account-save-btn"
-            type="submit"
-            disabled={isPending}
-            style={{
-              width: "100%",
-              height: "2.75rem",
-              borderRadius: "0.625rem",
-              background: "#E07A5F",
-              color: "#fff",
-              fontWeight: 600,
-              border: "none",
-              cursor: isPending ? "not-allowed" : "pointer",
-              opacity: isPending ? 0.7 : 1,
-              boxShadow: "0 4px 16px -4px rgba(224, 122, 95, 0.5)",
-              transition: "background 0.2s",
-            }}
-          >
-            {isPending ? "Saving..." : "Save Changes"}
-          </button>
-        </div>
-      </form>
-
-      {/* ─── Change password section ─── */}
-      <form onSubmit={handlePasswordSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem", marginTop: "1rem" }}>
-        <h3 style={{ fontFamily: "var(--font-sora, sans-serif)", fontSize: "1.125rem", fontWeight: 700, borderBottom: "1px solid var(--border-default)", paddingBottom: "0.5rem", color: "var(--text-primary)" }}>
-          Change Password
-        </h3>
-
-        {pwdSuccessMessage && (
-          <div
-            role="status"
-            style={{
-              background: "rgba(16, 185, 129, 0.1)",
-              border: "1px solid rgba(16, 185, 129, 0.2)",
-              color: "rgb(16, 185, 129)",
-              padding: "0.75rem 1rem",
-              borderRadius: "0.5rem",
-              fontSize: "0.875rem",
-            }}
-          >
-            {pwdSuccessMessage}
-          </div>
-        )}
-
-        {pwdGeneralError && (
-          <div
-            role="alert"
-            style={{
-              background: "rgba(220, 38, 38, 0.1)",
-              border: "1px solid rgba(220, 38, 38, 0.2)",
-              color: "rgb(220, 38, 38)",
-              padding: "0.75rem 1rem",
-              borderRadius: "0.5rem",
-              fontSize: "0.875rem",
-            }}
-          >
-            {pwdGeneralError}
-          </div>
-        )}
-
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-          <label htmlFor="account-old-password" style={{ fontSize: "0.875rem", fontWeight: 500 }}>Current Password</label>
-          <input
-            id="account-old-password"
-            type="password"
-            value={oldPassword}
-            onChange={(e) => setOldPassword(e.target.value)}
-            placeholder="••••••••"
-            disabled={isPwdPending}
-            style={{
-              height: "2.75rem",
-              borderRadius: "0.625rem",
-              border: pwdFieldErrors.oldPassword ? "1px solid rgb(220, 38, 38)" : "1px solid var(--border-default)",
-              padding: "0 0.875rem",
-              background: "var(--bg-subtle)",
-              color: "var(--text-primary)",
-              fontSize: "0.9375rem",
-              outline: "none",
-              width: "100%",
-            }}
-          />
-          {pwdFieldErrors.oldPassword && (
-            <span style={{ fontSize: "0.75rem", color: "rgb(220, 38, 38)" }}>{pwdFieldErrors.oldPassword[0]}</span>
-          )}
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-          <label htmlFor="account-password" style={{ fontSize: "0.875rem", fontWeight: 500 }}>New Password</label>
-          <input
-            id="account-password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            disabled={isPwdPending}
-            style={{
-              height: "2.75rem",
-              borderRadius: "0.625rem",
-              border: pwdFieldErrors.password ? "1px solid rgb(220, 38, 38)" : "1px solid var(--border-default)",
-              padding: "0 0.875rem",
-              background: "var(--bg-subtle)",
-              color: "var(--text-primary)",
-              fontSize: "0.9375rem",
-              outline: "none",
-              width: "100%",
-            }}
-          />
-          {pwdFieldErrors.password && (
-            <span style={{ fontSize: "0.75rem", color: "rgb(220, 38, 38)" }}>{pwdFieldErrors.password[0]}</span>
-          )}
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-          <label htmlFor="account-confirm-password" style={{ fontSize: "0.875rem", fontWeight: 500 }}>Confirm New Password</label>
-          <input
-            id="account-confirm-password"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="••••••••"
-            disabled={isPwdPending}
-            style={{
-              height: "2.75rem",
-              borderRadius: "0.625rem",
-              border: pwdFieldErrors.confirmPassword ? "1px solid rgb(220, 38, 38)" : "1px solid var(--border-default)",
-              padding: "0 0.875rem",
-              background: "var(--bg-subtle)",
-              color: "var(--text-primary)",
-              fontSize: "0.9375rem",
-              outline: "none",
-              width: "100%",
-            }}
-          />
-          {pwdFieldErrors.confirmPassword && (
-            <span style={{ fontSize: "0.75rem", color: "rgb(220, 38, 38)" }}>{pwdFieldErrors.confirmPassword[0]}</span>
-          )}
-        </div>
-
-        <button
-          id="account-change-pwd-btn"
-          type="submit"
-          disabled={isPwdPending}
-          style={{
-            height: "2.75rem",
-            borderRadius: "0.625rem",
-            background: "#E07A5F",
-            color: "#fff",
-            fontWeight: 600,
-            border: "none",
-            cursor: isPwdPending ? "not-allowed" : "pointer",
-            opacity: isPwdPending ? 0.7 : 1,
-            boxShadow: "0 4px 16px -4px rgba(224, 122, 95, 0.5)",
-            transition: "background 0.2s",
-            marginTop: "0.5rem",
-          }}
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)]">
+        <form
+          onSubmit={handleProfileSubmit}
+          className="overflow-hidden rounded-[28px] border border-[#E9D5D0]/80 bg-white shadow-xl shadow-slate-200/60"
         >
-          {isPwdPending ? "Updating Password..." : "Update Password"}
-        </button>
-      </form>
+          <div className="p-6 sm:p-8">
+            <SectionHeader
+              icon={UserRound}
+              eyebrow="Profile"
+              title="Personal details"
+              description="Keep your contact information updated so Venora can personalize your venue browsing and booking experience."
+            />
+
+            <div className="mt-6 space-y-5">
+              {successMessage && (
+                <AlertBanner type="success">{successMessage}</AlertBanner>
+              )}
+
+              {generalError && (
+                <AlertBanner type="error">{generalError}</AlertBanner>
+              )}
+
+              <TextField
+                id="account-full-name"
+                label="Full name"
+                value={fullName}
+                onChange={setFullName}
+                disabled={isPending}
+                error={fieldErrors.fullName?.[0]}
+                icon={UserRound}
+                autoComplete="name"
+              />
+
+              <TextField
+                id="account-phone"
+                label="Phone number"
+                type="tel"
+                value={phone}
+                onChange={setPhone}
+                placeholder="09171234567"
+                disabled={isPending}
+                error={fieldErrors.phone?.[0]}
+                icon={Phone}
+                autoComplete="tel"
+              />
+
+              <div className="rounded-2xl border border-[#E9D5D0]/80 bg-[#FFFDFC] p-4">
+                <div className="flex gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#FFF4F1] text-[#E07A5F]">
+                    <ShieldCheck className="h-5 w-5" />
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-extrabold text-slate-800">
+                      Profile security note
+                    </h3>
+                    <p className="mt-1 text-sm font-medium leading-6 text-slate-500">
+                      Your profile details are used only for your Venora account
+                      and booking-related communication.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-[#E9D5D0]/80 bg-[#FFFDFC] px-6 py-5 sm:px-8">
+            <SubmitButton
+              id="account-save-btn"
+              isPending={isPending}
+              pendingText="Saving profile..."
+              icon={Save}
+            >
+              Save Changes
+            </SubmitButton>
+          </div>
+        </form>
+
+        <form
+          onSubmit={handlePasswordSubmit}
+          className="overflow-hidden rounded-[28px] border border-[#E9D5D0]/80 bg-white shadow-xl shadow-slate-200/60"
+        >
+          <div className="p-6 sm:p-8">
+            <SectionHeader
+              icon={KeyRound}
+              eyebrow="Security"
+              title="Change password"
+              description="Choose a strong password to keep your venue searches, bookings, and account activity protected."
+            />
+
+            <div className="mt-6 space-y-5">
+              {pwdSuccessMessage && (
+                <AlertBanner type="success">{pwdSuccessMessage}</AlertBanner>
+              )}
+
+              {pwdGeneralError && (
+                <AlertBanner type="error">{pwdGeneralError}</AlertBanner>
+              )}
+
+              <TextField
+                id="account-old-password"
+                label="Current password"
+                type="password"
+                value={oldPassword}
+                onChange={setOldPassword}
+                placeholder="••••••••"
+                disabled={isPwdPending}
+                error={pwdFieldErrors.oldPassword?.[0]}
+                icon={Lock}
+                autoComplete="current-password"
+                showPassword={showOldPassword}
+                onShowPasswordChange={setShowOldPassword}
+              />
+
+              <TextField
+                id="account-password"
+                label="New password"
+                type="password"
+                value={password}
+                onChange={setPassword}
+                placeholder="••••••••"
+                disabled={isPwdPending}
+                error={pwdFieldErrors.password?.[0]}
+                icon={KeyRound}
+                autoComplete="new-password"
+                showPassword={showNewPassword}
+                onShowPasswordChange={setShowNewPassword}
+              />
+
+              <TextField
+                id="account-confirm-password"
+                label="Confirm new password"
+                type="password"
+                value={confirmPassword}
+                onChange={setConfirmPassword}
+                placeholder="••••••••"
+                disabled={isPwdPending}
+                error={pwdFieldErrors.confirmPassword?.[0]}
+                icon={ShieldCheck}
+                autoComplete="new-password"
+                showPassword={showConfirmPassword}
+                onShowPasswordChange={setShowConfirmPassword}
+              />
+
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-sm font-bold text-slate-700">
+                  Password tips
+                </p>
+                <p className="mt-1 text-sm font-medium leading-6 text-slate-500">
+                  Use at least 8 characters with a mix of letters, numbers, and
+                  symbols for better protection.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-[#E9D5D0]/80 bg-[#FFFDFC] px-6 py-5 sm:px-8">
+            <SubmitButton
+              id="account-change-pwd-btn"
+              isPending={isPwdPending}
+              pendingText="Updating password..."
+              icon={KeyRound}
+            >
+              Update Password
+            </SubmitButton>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { createClient } from "@/src/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Users — Admin" };
 

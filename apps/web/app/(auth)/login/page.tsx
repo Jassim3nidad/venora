@@ -3,7 +3,7 @@
 import { type FormEvent, useState, useTransition, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Check, DraftingCompass, LockKeyhole, Mail } from "lucide-react";
+import { Check, DraftingCompass, Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import {
   loginAction,
   signInWithOAuthAction,
@@ -17,6 +17,7 @@ function LoginForm() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
@@ -231,18 +232,30 @@ function LoginForm() {
                 <input
                   id="login-password"
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   autoComplete="current-password"
                   disabled={isPending}
-                  className={`h-[46px] w-full rounded-[6px] border bg-white !pl-[42px] pr-[16px] text-[16px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#E07A5F] focus:ring-4 focus:ring-[#E07A5F]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
+                  className={`h-[46px] w-full rounded-[6px] border bg-white !pl-[42px] pr-[42px] text-[16px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#E07A5F] focus:ring-4 focus:ring-[#E07A5F]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
                     fieldErrors.password
                       ? "border-red-500"
                       : "border-[#E2E8F0]"
                   }`}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-[12px] top-1/2 -translate-y-1/2 text-[#55423E] transition hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E07A5F]/30"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-[18px] w-[18px]" />
+                  ) : (
+                    <Eye className="h-[18px] w-[18px]" />
+                  )}
+                </button>
               </div>
 
               {fieldErrors.password?.[0] ? (
