@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { updateProfileAction, signOutAction } from "@/features/auth/actions/auth.actions";
-import { updateProfileSchema } from "@/features/auth/schemas/auth.schema";
+import { updateProfileAction, signOutAction, resetPasswordAction } from "@/features/auth/actions/auth.actions";
+import { updateProfileSchema, resetPasswordSchema } from "@/features/auth/schemas/auth.schema";
 
 interface AccountFormProps {
   initialFullName: string;
@@ -10,6 +10,7 @@ interface AccountFormProps {
 }
 
 export default function AccountForm({ initialFullName, initialPhone }: AccountFormProps) {
+  // Profile Details State
   const [fullName, setFullName] = useState(initialFullName);
   const [phone, setPhone] = useState(initialPhone);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
@@ -17,7 +18,15 @@ export default function AccountForm({ initialFullName, initialPhone }: AccountFo
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Password Change State
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [pwdFieldErrors, setPwdFieldErrors] = useState<Record<string, string[]>>({});
+  const [pwdGeneralError, setPwdGeneralError] = useState<string | null>(null);
+  const [pwdSuccessMessage, setPwdSuccessMessage] = useState<string | null>(null);
+  const [isPwdPending, startPwdTransition] = useTransition();
+
+  const handleProfileSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFieldErrors({});
     setGeneralError(null);
@@ -42,6 +51,33 @@ export default function AccountForm({ initialFullName, initialPhone }: AccountFo
     });
   };
 
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwdFieldErrors({});
+    setPwdGeneralError(null);
+    setPwdSuccessMessage(null);
+
+    const result = resetPasswordSchema.safeParse({ password, confirmPassword });
+    if (!result.success) {
+      setPwdFieldErrors(result.error.flatten().fieldErrors);
+      return;
+    }
+
+    startPwdTransition(async () => {
+      const response = await resetPasswordAction({ password, confirmPassword });
+      if (response && response.success) {
+        setPwdSuccessMessage("Password changed successfully!");
+        setPassword("");
+        setConfirmPassword("");
+      } else if (response) {
+        setPwdGeneralError(response.error || "Failed to update password.");
+        if (response.fieldErrors) {
+          setPwdFieldErrors(response.fieldErrors);
+        }
+      }
+    });
+  };
+
   const handleSignOut = () => {
     startTransition(async () => {
       await signOutAction();
@@ -49,40 +85,45 @@ export default function AccountForm({ initialFullName, initialPhone }: AccountFo
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-      {successMessage && (
-        <div
-          role="status"
-          style={{
-            background: "rgba(16, 185, 129, 0.1)",
-            border: "1px solid rgba(16, 185, 129, 0.2)",
-            color: "rgb(16, 185, 129)",
-            padding: "0.75rem 1rem",
-            borderRadius: "0.5rem",
-            fontSize: "0.875rem",
-          }}
-        >
-          {successMessage}
-        </div>
-      )}
+    <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+      {/* ─── Profile details section ─── */}
+      <form onSubmit={handleProfileSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+        <h3 style={{ fontFamily: "var(--font-sora, sans-serif)", fontSize: "1.125rem", fontWeight: 700, borderBottom: "1px solid var(--border-default)", paddingBottom: "0.5rem", color: "var(--text-primary)" }}>
+          Profile Details
+        </h3>
 
-      {generalError && (
-        <div
-          role="alert"
-          style={{
-            background: "rgba(220, 38, 38, 0.1)",
-            border: "1px solid rgba(220, 38, 38, 0.2)",
-            color: "rgb(220, 38, 38)",
-            padding: "0.75rem 1rem",
-            borderRadius: "0.5rem",
-            fontSize: "0.875rem",
-          }}
-        >
-          {generalError}
-        </div>
-      )}
+        {successMessage && (
+          <div
+            role="status"
+            style={{
+              background: "rgba(16, 185, 129, 0.1)",
+              border: "1px solid rgba(16, 185, 129, 0.2)",
+              color: "rgb(16, 185, 129)",
+              padding: "0.75rem 1rem",
+              borderRadius: "0.5rem",
+              fontSize: "0.875rem",
+            }}
+          >
+            {successMessage}
+          </div>
+        )}
 
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+        {generalError && (
+          <div
+            role="alert"
+            style={{
+              background: "rgba(220, 38, 38, 0.1)",
+              border: "1px solid rgba(220, 38, 38, 0.2)",
+              color: "rgb(220, 38, 38)",
+              padding: "0.75rem 1rem",
+              borderRadius: "0.5rem",
+              fontSize: "0.875rem",
+            }}
+          >
+            {generalError}
+          </div>
+        )}
+
         <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
           <label htmlFor="account-full-name" style={{ fontSize: "0.875rem", fontWeight: 500 }}>Full Name</label>
           <input
@@ -143,13 +184,14 @@ export default function AccountForm({ initialFullName, initialPhone }: AccountFo
               flex: 1,
               height: "2.75rem",
               borderRadius: "0.625rem",
-              background: "hsl(217 70% 47%)",
+              background: "#E07A5F",
               color: "#fff",
               fontWeight: 600,
               border: "none",
               cursor: isPending ? "not-allowed" : "pointer",
               opacity: isPending ? 0.7 : 1,
-              boxShadow: "0 4px 16px -4px hsl(217 70% 47% / 0.5)",
+              boxShadow: "0 4px 16px -4px rgba(224, 122, 95, 0.5)",
+              transition: "background 0.2s",
             }}
           >
             {isPending ? "Saving..." : "Save Changes"}
@@ -173,6 +215,118 @@ export default function AccountForm({ initialFullName, initialPhone }: AccountFo
             Sign Out
           </button>
         </div>
+      </form>
+
+      {/* ─── Change password section ─── */}
+      <form onSubmit={handlePasswordSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem", marginTop: "1rem" }}>
+        <h3 style={{ fontFamily: "var(--font-sora, sans-serif)", fontSize: "1.125rem", fontWeight: 700, borderBottom: "1px solid var(--border-default)", paddingBottom: "0.5rem", color: "var(--text-primary)" }}>
+          Change Password
+        </h3>
+
+        {pwdSuccessMessage && (
+          <div
+            role="status"
+            style={{
+              background: "rgba(16, 185, 129, 0.1)",
+              border: "1px solid rgba(16, 185, 129, 0.2)",
+              color: "rgb(16, 185, 129)",
+              padding: "0.75rem 1rem",
+              borderRadius: "0.5rem",
+              fontSize: "0.875rem",
+            }}
+          >
+            {pwdSuccessMessage}
+          </div>
+        )}
+
+        {pwdGeneralError && (
+          <div
+            role="alert"
+            style={{
+              background: "rgba(220, 38, 38, 0.1)",
+              border: "1px solid rgba(220, 38, 38, 0.2)",
+              color: "rgb(220, 38, 38)",
+              padding: "0.75rem 1rem",
+              borderRadius: "0.5rem",
+              fontSize: "0.875rem",
+            }}
+          >
+            {pwdGeneralError}
+          </div>
+        )}
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+          <label htmlFor="account-password" style={{ fontSize: "0.875rem", fontWeight: 500 }}>New Password</label>
+          <input
+            id="account-password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            disabled={isPwdPending}
+            style={{
+              height: "2.75rem",
+              borderRadius: "0.625rem",
+              border: pwdFieldErrors.password ? "1px solid rgb(220, 38, 38)" : "1px solid var(--border-default)",
+              padding: "0 0.875rem",
+              background: "var(--bg-subtle)",
+              color: "var(--text-primary)",
+              fontSize: "0.9375rem",
+              outline: "none",
+              width: "100%",
+            }}
+          />
+          {pwdFieldErrors.password && (
+            <span style={{ fontSize: "0.75rem", color: "rgb(220, 38, 38)" }}>{pwdFieldErrors.password[0]}</span>
+          )}
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+          <label htmlFor="account-confirm-password" style={{ fontSize: "0.875rem", fontWeight: 500 }}>Confirm New Password</label>
+          <input
+            id="account-confirm-password"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="••••••••"
+            disabled={isPwdPending}
+            style={{
+              height: "2.75rem",
+              borderRadius: "0.625rem",
+              border: pwdFieldErrors.confirmPassword ? "1px solid rgb(220, 38, 38)" : "1px solid var(--border-default)",
+              padding: "0 0.875rem",
+              background: "var(--bg-subtle)",
+              color: "var(--text-primary)",
+              fontSize: "0.9375rem",
+              outline: "none",
+              width: "100%",
+            }}
+          />
+          {pwdFieldErrors.confirmPassword && (
+            <span style={{ fontSize: "0.75rem", color: "rgb(220, 38, 38)" }}>{pwdFieldErrors.confirmPassword[0]}</span>
+          )}
+        </div>
+
+        <button
+          id="account-change-pwd-btn"
+          type="submit"
+          disabled={isPwdPending}
+          style={{
+            height: "2.75rem",
+            borderRadius: "0.625rem",
+            background: "#E07A5F",
+            color: "#fff",
+            fontWeight: 600,
+            border: "none",
+            cursor: isPwdPending ? "not-allowed" : "pointer",
+            opacity: isPwdPending ? 0.7 : 1,
+            boxShadow: "0 4px 16px -4px rgba(224, 122, 95, 0.5)",
+            transition: "background 0.2s",
+            marginTop: "0.5rem",
+          }}
+        >
+          {isPwdPending ? "Updating Password..." : "Update Password"}
+        </button>
       </form>
     </div>
   );

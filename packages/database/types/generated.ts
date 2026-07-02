@@ -256,7 +256,21 @@ export interface Database {
           cancelled_at:     string | null;
         };
         Insert: Omit<Database["public"]["Tables"]["bookings"]["Row"], "id" | "created_at" | "updated_at"> & { id?: string };
-        Update: Partial<Database["public"]["Tables"]["bookings"]["Insert"]>;
+        Update: {
+          venue_id?:         string;
+          customer_id?:      string;
+          package_id?:       string | null;
+          event_date?:       string;
+          event_type_id?:    string | null;
+          guest_count?:      number;
+          status?:           BookingStatus;
+          total_amount?:     number | null;
+          deposit_amount?:   number | null;
+          special_requests?: string | null;
+          decline_reason?:   string | null;
+          confirmed_at?:     string | null;
+          cancelled_at?:     string | null;
+        };
       };
 
       booking_status_history: {
