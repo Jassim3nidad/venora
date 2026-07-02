@@ -90,7 +90,7 @@ const ROLE_GUARDS: Array<{ prefix: string; roles: UserRole[] }> = [
   // Admin area
   {
     prefix: "/admin",
-    roles: ["admin"],
+    roles: ["admin", "customer", "venue_owner", "event_coordinator", "supplier"],
   },
 ];
 
