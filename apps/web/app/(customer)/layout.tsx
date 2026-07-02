@@ -1,33 +1,67 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { Sparkles, Bell, HelpCircle } from "lucide-react";
 import "../globals.css";
-
-const NAV = [
-  { href: "/venues",    label: "Browse Venues", icon: "🏛️" },
-  { href: "/bookings",  label: "My Bookings",   icon: "📅" },
-  { href: "/favorites", label: "Favourites",    icon: "❤️" },
-  { href: "/account",   label: "Account",       icon: "👤" },
-];
 
 export default function CustomerLayout({ children }: { children: ReactNode }) {
   return (
-    <>
-      <header className="glass" style={{ position: "sticky", top: 0, zIndex: 40, height: "4rem", display: "flex", alignItems: "center", borderBottom: "1px solid var(--border-default)" }}>
-        <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Link href="/" style={{ fontFamily: "var(--font-sora, sans-serif)", fontWeight: 700, fontSize: "1.375rem", textDecoration: "none",
-            background: "linear-gradient(135deg, hsl(217 80% 63%), hsl(45 96% 54%))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-            Venora
+    <div className="flex min-h-screen w-full flex-col bg-[#F8FAFC]">
+      {/* Premium Top Navigation (matches marketing page layout) */}
+      <nav className="sticky top-0 z-50 flex !h-[64px] w-full shrink-0 items-center justify-between border-b border-slate-200 bg-white/95 !px-[32px] backdrop-blur-md">
+        <Link
+          href="/"
+          className="flex items-center !gap-[6px] !text-[20px] !font-extrabold !leading-[28px] tracking-tight text-[#E07A5F]"
+        >
+          Venora
+          <Sparkles className="!h-[16px] !w-[16px] fill-[#E07A5F] text-[#E07A5F]" />
+        </Link>
+
+        <div className="hidden h-full items-center !gap-[32px] md:flex">
+          <Link
+            href="/"
+            className="flex h-full items-center !text-[12px] !font-bold uppercase !tracking-[0.14em] text-slate-500 transition-colors hover:text-[#E07A5F]"
+          >
+            Browse
           </Link>
-          <nav style={{ display: "flex", gap: "1.5rem" }}>
-            {NAV.map(({ href, label, icon }) => (
-              <Link key={href} href={href} style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "var(--text-secondary)", textDecoration: "none", fontSize: "0.875rem", fontWeight: 500 }}>
-                <span>{icon}</span> {label}
-              </Link>
-            ))}
-          </nav>
+
+          <Link
+            href="/bookings"
+            className="flex h-full items-center !text-[12px] !font-bold uppercase !tracking-[0.14em] text-slate-500 transition-colors hover:text-[#E07A5F]"
+          >
+            Bookings
+          </Link>
         </div>
-      </header>
-      {children}
-    </>
+
+        <div className="flex items-center !gap-[14px]">
+          <button
+            type="button"
+            className="flex !h-[36px] !w-[36px] items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            aria-label="Notifications"
+          >
+            <Bell className="!h-[18px] !w-[18px]" />
+          </button>
+
+          <button
+            type="button"
+            className="flex !h-[36px] !w-[36px] items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            aria-label="Help"
+          >
+            <HelpCircle className="!h-[18px] !w-[18px]" />
+          </button>
+
+          <Link
+            href="/account"
+            className="flex !h-[38px] items-center justify-center rounded-[12px] bg-[#E07A5F] !px-[18px] !text-[12px] !font-bold uppercase !tracking-[0.12em] text-white shadow-sm transition hover:bg-[#d96851]"
+          >
+            Account
+          </Link>
+        </div>
+      </nav>
+
+      {/* Main content body */}
+      <main className="flex-1 w-full bg-[#F8FAFC]">
+        {children}
+      </main>
+    </div>
   );
 }

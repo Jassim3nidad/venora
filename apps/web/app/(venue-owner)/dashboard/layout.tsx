@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import SignOutButton from "./sign-out-button";
 
 const SIDEBAR_LINKS = [
   { href: "/dashboard/bookings",  label: "Bookings",  icon: "📅" },
@@ -37,6 +38,14 @@ export default function OwnerDashboardLayout({ children }: { children: ReactNode
             <span>{icon}</span> {label}
           </Link>
         ))}
+
+        {/* Spacer pushes sign-out to bottom */}
+        <div style={{ flex: 1 }} />
+
+        {/* Divider */}
+        <div style={{ height: "1px", background: "var(--border-default)", margin: "0.5rem 0" }} />
+
+        <SignOutButton />
       </aside>
 
       {/* Main */}

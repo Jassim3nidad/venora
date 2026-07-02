@@ -26,7 +26,7 @@ export class SupabaseAuthRepository implements AuthRepository {
       password,
       options: {
         data: { full_name: fullName, role },
-        emailRedirectTo: `${siteUrl}/auth/callback?next=/account`,
+        emailRedirectTo: `${siteUrl}/auth/callback?next=/`,
       },
     });
 
@@ -48,7 +48,7 @@ export class SupabaseAuthRepository implements AuthRepository {
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${siteUrl}/auth/callback?next=/account`,
+        redirectTo: `${siteUrl}/auth/callback?next=/`,
       },
     });
     if (error) throw new AuthError(error.message);
