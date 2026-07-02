@@ -379,35 +379,7 @@ export default function BrowseClient({ initialVenues, userEmail, userRoles = [] 
 
       {/* Main Layout */}
       <div className="flex min-h-[calc(100vh-64px)] w-full items-start overflow-hidden">
-        <Sidebar
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          selectedProvince={selectedProvince}
-          setSelectedProvince={setSelectedProvince}
-          selectedCity={selectedCity}
-          setSelectedCity={setSelectedCity}
-          selectedLocation={selectedLocation}
-          setSelectedLocation={setSelectedLocation}
-          selectedEventType={selectedEventType}
-          setSelectedEventType={setSelectedEventType}
-          selectedBudget={selectedBudget}
-          setSelectedBudget={setSelectedBudget}
-          minBudget={minBudget}
-          setMinBudget={setMinBudget}
-          maxBudget={maxBudget}
-          setMaxBudget={setMaxBudget}
-          capacityLimit={capacityLimit}
-          setCapacityLimit={setCapacityLimit}
-          selectedVenueStyle={selectedVenueStyle}
-          setSelectedVenueStyle={setSelectedVenueStyle}
-          selectedAmenities={selectedAmenities}
-          setSelectedAmenities={setSelectedAmenities}
-          onUseCurrentLocation={handleUseCurrentLocation}
-          onClearFilters={handleClearFilters}
-          provinces={provinces}
-          cities={cities}
-          activeFilterCount={activeFilterCount}
-        />
+        <Sidebar/>
 
         <main className="flex-1 overflow-y-auto !px-[32px] !py-[30px] lg:!px-[40px] h-[calc(100vh-64px)]">
           {/* Header */}

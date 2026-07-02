@@ -72,7 +72,7 @@ export async function loginAction(rawInput: unknown): Promise<ActionResult> {
   }
 
   // Get current user to decide where to redirect
-  let targetPath = "/";
+  let targetPath = "/venues";
   try {
     const user = await getCurrentUserUseCase();
     if (user && user.roles.length > 0) {

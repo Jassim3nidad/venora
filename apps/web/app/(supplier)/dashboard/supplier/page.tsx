@@ -44,7 +44,6 @@ export default async function SupplierDashboardPage() {
     // Graceful onboarding state for new suppliers
     return (
       <DashboardShell
-        role="supplier"
         title="Supplier Dashboard"
         description="Set up your supplier profile to get discovered by venue owners and event planners."
         badge="Supplier Onboarding"
@@ -146,7 +145,6 @@ export default async function SupplierDashboardPage() {
 
   return (
     <DashboardShell
-      role="supplier"
       title={`${supplierProfile.business_name} Dashboard`}
       description="Manage supplier services, packages, client inquiries, venue partnerships, and business performance."
       badge={`Supplier Profile: ${supplierProfile.accreditation_status}`}

@@ -146,7 +146,7 @@ export async function middleware(request: NextRequest) {
 
   // 2. Redirect logged-in users away from auth pages
   if (user && AUTH_PATHS.some((path) => pathname.startsWith(path))) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(new URL("//dashboard/customer", request.url));
   }
 
   // 3. Role guard — redirect users without the required role
