@@ -64,22 +64,22 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/40 to-[#0F172A]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_35%_45%,rgba(255,255,255,0.10),transparent_35%)]" />
 
-        <div className="relative z-10 mx-auto flex w-full max-w-[560px] translate-x-[40px] flex-col justify-center px-[64px]">
+        <div className="relative z-10 mx-auto flex w-full max-w-[560px] translate-x-[-100px] flex-col justify-center px-[64px]">
           {/* Brand */}
           <div className="mb-[58px] flex items-center gap-[12px]">
-            <DraftingCompass className="h-[32px] w-[32px] text-[#F4C7B8]" />
-            <span className="text-[24px] font-extrabold leading-[32px] tracking-[-0.02em] text-white">
+            <span className="text-[24px] font-semibold leading-[32px] translate-y-[50px] tracking-[-0.02em] text-[#E07A5F]">
               Venora
             </span>
           </div>
 
           {/* Value Prop */}
           <div>
-            <h1 className="max-w-[560px] text-[50px] font-bold leading-[65px] tracking-[-0.05em] text-white">
-              Where Extraordinary Events Begin.
+            <h1 className="max-w-[500px] text-[50px] font-bold leading-[65px] tracking-[-0.05em] text-white">
+              <span className="block whitespace-nowrap">Where Extraordinary</span>
+              <span className="block whitespace-nowrap">Events Begin.</span>
             </h1>
 
-            <ul className="mt-[54px] flex translate-y-[20px] flex-col gap-[24px]">
+            <ul className="mt-[54px] flex translate-y-[-40px] flex-col gap-[24px]">
               <li className="flex items-center gap-[18px] text-white">
                 <span className="flex h-[24px] w-[24px] items-center justify-center rounded-full bg-[#FFDACE]">
                   <Check
