@@ -32,6 +32,10 @@ type RoleJoinRow = {
     | null;
 };
 
+// In local development, allow frontend developers to preview dashboard pages
+// without needing exact Supabase role rows.
+const SKIP_DASHBOARD_ROLE_GUARD_IN_DEV = process.env.NODE_ENV === "development";
+
 // Routes that require authentication
 const PROTECTED_PREFIXES = [
   "/bookings",
@@ -43,12 +47,30 @@ const PROTECTED_PREFIXES = [
 
 // Routes that require specific roles
 const ROLE_GUARDS: Array<{ prefix: string; roles: UserRole[] }> = [
-  { prefix: "/dashboard/venues", roles: ["venue_owner", "admin"] },
-  { prefix: "/dashboard/calendar", roles: ["venue_owner", "admin"] },
-  { prefix: "/dashboard/packages", roles: ["venue_owner", "admin"] },
-  { prefix: "/dashboard/staff", roles: ["venue_owner", "admin"] },
-  { prefix: "/dashboard/analytics", roles: ["venue_owner", "supplier", "admin"] },
-  { prefix: "/admin", roles: ["admin"] },
+  {
+    prefix: "/dashboard/venues",
+    roles: ["venue_owner", "admin"],
+  },
+  {
+    prefix: "/dashboard/calendar",
+    roles: ["venue_owner", "admin"],
+  },
+  {
+    prefix: "/dashboard/packages",
+    roles: ["venue_owner", "admin"],
+  },
+  {
+    prefix: "/dashboard/staff",
+    roles: ["venue_owner", "admin"],
+  },
+  {
+    prefix: "/dashboard/analytics",
+    roles: ["venue_owner", "supplier", "admin"],
+  },
+  {
+    prefix: "/admin",
+    roles: ["venue_owner", "supplier", "admin"],
+  },
 ];
 
 const AUTH_PATHS = ["/login", "/register", "/forgot-password"];
@@ -127,7 +149,10 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith(guard.prefix),
     );
 
-    if (matchedGuard) {
+    const shouldSkipDashboardRoleGuard =
+      SKIP_DASHBOARD_ROLE_GUARD_IN_DEV && pathname.startsWith("/dashboard");
+
+    if (matchedGuard && !shouldSkipDashboardRoleGuard) {
       const { data: roleRows, error } = await (
         supabase.from("user_roles") as any
       )
