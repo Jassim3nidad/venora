@@ -252,9 +252,9 @@ export default function AccountForm({
       if (response && response.success) {
         setSuccessMessage("Profile updated successfully.");
         // Immediately update state with returned data
-        if (response.data) {
-          setFullName(response.data.full_name || fullName);
-          setPhone(response.data.phone || phone);
+        if (response && (response as any).data) {
+          setFullName((response as any).data.full_name || fullName);
+          setPhone((response as any).data.phone || phone);
         }
         // Then refresh to ensure page component shows updated data too
         setTimeout(() => {

@@ -180,7 +180,7 @@ export async function resetPasswordAction(
 
 export async function updateProfileAction(
   rawInput: unknown,
-): Promise<ActionResult> {
+): Promise<ActionResult<{ full_name?: string | null; phone?: string | null }>> {
   const parsed = updateProfileSchema.safeParse(rawInput);
 
   if (!parsed.success) {
