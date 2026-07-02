@@ -80,7 +80,7 @@ export default async function VenuesMarketplacePage() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("[venues/page] Supabase fetch error:", error.message);
+    console.warn("[venues/page] Supabase fetch error:", error.message);
   }
 
   const venues: Venue[] =
