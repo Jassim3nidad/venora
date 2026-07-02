@@ -47,30 +47,11 @@ const navItems = [
   },
 ];
 
-const supplierNavItems = [
-  {
-    label: "Overview",
-    href: "/dashboard/supplier",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "Packages",
-    href: "/dashboard/supplier",
-    icon: Package,
-  },
-  {
-    label: "Analytics",
-    href: "/dashboard/supplier",
-    icon: BarChart3,
-  },
-];
-
 type DashboardShellProps = {
   title: string;
   description: string;
   badge?: string;
   children: ReactNode;
-  role?: "venue_owner" | "supplier";
 };
 
 export function DashboardShell({
@@ -78,10 +59,8 @@ export function DashboardShell({
   description,
   badge,
   children,
-  role = "venue_owner",
 }: DashboardShellProps) {
   const pathname = usePathname();
-  const items = role === "supplier" ? supplierNavItems : navItems;
 
   return (
     <main className="flex min-h-screen bg-[#FFFDFC]">
@@ -104,15 +83,13 @@ export function DashboardShell({
         </div>
 
         <nav className="flex flex-col gap-[8px]">
-          {items.map((item) => {
+          {navItems.map((item) => {
             const Icon = item.icon;
-            // For suppliers, if the href is /dashboard/supplier and they are on it, mark it active.
-            // Since all supplier tabs map to /dashboard/supplier, we highlight Overview by default.
             const isActive = pathname === item.href;
 
             return (
               <Link
-                key={item.label}
+                key={item.href}
                 href={item.href}
                 className={`flex h-[44px] items-center gap-[12px] rounded-[10px] px-[12px] text-[14px] font-bold transition ${
                   isActive

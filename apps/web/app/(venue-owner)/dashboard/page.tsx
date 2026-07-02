@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/src/lib/supabase/server";
 import {
   BarChart3,
   Building2,
@@ -15,102 +13,7 @@ import {
   DashboardShell,
 } from "@/components/dashboard/DashboardShell";
 
-export const metadata = {
-  title: "Venue Owner Dashboard",
-  description: "Manage venue listings, booking requests, calendars, packages, staff, and business performance.",
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  pending:   "hsl(45 96% 54%)",
-  approved:  "hsl(142 71% 45%)",
-  declined:  "hsl(0 72% 51%)",
-  cancelled: "hsl(0 72% 51%)",
-  completed: "hsl(217 91% 60%)",
-  expired:   "hsl(217 70% 47%)",
-};
-
-export default async function VenueOwnerDashboardPage() {
-  const supabase = (await createClient()) as any;
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-
-  // Fetch organizations user belongs to
-  const { data: members } = await supabase
-    .from("organization_members")
-    .select("organization_id")
-    .eq("user_id", user.id);
-  const orgIds = (members ?? []).map((m: any) => m.organization_id);
-
-  // Fetch venues for these organizations
-  const { data: venues } = await supabase
-    .from("venues")
-    .select("id, name")
-    .in("organization_id", orgIds.length ? orgIds : ["__none__"]);
-  const venueIds = (venues ?? []).map((v: any) => v.id);
-
-  const totalVenues = venues?.length ?? 0;
-
-  // Total bookings count
-  const { count: totalBookings } = await supabase
-    .from("bookings")
-    .select("id", { count: "exact", head: true })
-    .in("venue_id", venueIds.length ? venueIds : ["__none__"]);
-
-  // Pending bookings count
-  const { count: pendingBookings } = await supabase
-    .from("bookings")
-    .select("id", { count: "exact", head: true })
-    .in("venue_id", venueIds.length ? venueIds : ["__none__"])
-    .eq("status", "pending");
-
-  // Monthly Revenue (sum of total_amount for approved or completed bookings in the current month)
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
-
-  const { data: monthBookings } = await supabase
-    .from("bookings")
-    .select("total_amount")
-    .in("venue_id", venueIds.length ? venueIds : ["__none__"])
-    .in("status", ["approved", "completed"])
-    .gte("event_date", startOfMonth)
-    .lte("event_date", endOfMonth);
-
-  const monthlyRevenue = (monthBookings ?? []).reduce(
-    (sum: number, b: any) => sum + (b.total_amount ?? 0),
-    0
-  );
-
-  // Upcoming bookings list (latest 5 bookings)
-  const { data: recentBookings } = await supabase
-    .from("bookings")
-    .select("id, event_date, status, total_amount, guest_count, venues(name), profiles!customer_id(full_name)")
-    .in("venue_id", venueIds.length ? venueIds : ["__none__"])
-    .order("event_date", { ascending: true })
-    .limit(5);
-
-  // Chart data: Confirmations per month in the current year
-  const startOfYear = new Date(now.getFullYear(), 0, 1).toISOString();
-  const endOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59).toISOString();
-
-  const { data: yearBookings } = await supabase
-    .from("bookings")
-    .select("event_date")
-    .in("venue_id", venueIds.length ? venueIds : ["__none__"])
-    .in("status", ["approved", "completed"])
-    .gte("event_date", startOfYear)
-    .lte("event_date", endOfYear);
-
-  const monthlyCounts = Array(12).fill(0);
-  (yearBookings ?? []).forEach((b: any) => {
-    const month = new Date(b.event_date).getMonth();
-    monthlyCounts[month]++;
-  });
-
-  const maxVal = Math.max(...monthlyCounts, 1);
-  // Scale bar height to max 180px, min 4px
-  const heights = monthlyCounts.map(c => Math.max((c / maxVal) * 180, 6));
-
+export default function VenueOwnerDashboardPage() {
   return (
     <DashboardShell
       title="Venue Owner Dashboard"
@@ -121,25 +24,25 @@ export default async function VenueOwnerDashboardPage() {
       <div className="grid gap-[16px] md:grid-cols-2 xl:grid-cols-4">
         <DashboardCard
           title="Total Venues"
-          description={`${totalVenues} active venue listing${totalVenues !== 1 ? "s" : ""} registered.`}
+          description="8 active venue listings ready for customer discovery."
           icon={<Building2 className="h-[20px] w-[20px]" />}
         />
 
         <DashboardCard
           title="Total Bookings"
-          description={`${totalBookings ?? 0} total booking request${totalBookings !== 1 ? "s" : ""} received.`}
+          description="124 booking requests and confirmed reservations recorded."
           icon={<ClipboardCheck className="h-[20px] w-[20px]" />}
         />
 
         <DashboardCard
-          title="Pending Bookings"
-          description={`${pendingBookings ?? 0} request${pendingBookings !== 1 ? "s" : ""} require your review.`}
+          title="Pending Inquiries"
+          description="18 customer inquiries need review or follow-up."
           icon={<Hourglass className="h-[20px] w-[20px]" />}
         />
 
         <DashboardCard
           title="Monthly Revenue"
-          description={`₱${monthlyRevenue.toLocaleString()} from confirmed events this month.`}
+          description="₱485,000 estimated revenue from confirmed bookings."
           icon={<Banknote className="h-[20px] w-[20px]" />}
         />
       </div>
@@ -159,46 +62,42 @@ export default async function VenueOwnerDashboardPage() {
             </div>
 
             <span className="rounded-full bg-[#FFF4F0] px-[12px] py-[6px] text-[12px] font-bold text-[#E07A5F]">
-              Year {now.getFullYear()}
+              This Year
             </span>
           </div>
 
           <div className="flex h-[260px] items-end gap-[12px] rounded-[16px] bg-[#FFFDFC] px-[18px] py-[20px]">
-            {heights.map((height, index) => (
-              <div
-                key={index}
-                className="flex flex-1 flex-col items-center gap-[8px]"
-              >
-                <div className="relative group w-full flex justify-center">
+            {[36, 52, 44, 68, 58, 84, 72, 96, 88, 110, 98, 124].map(
+              (height, index) => (
+                <div
+                  key={index}
+                  className="flex flex-1 flex-col items-center gap-[8px]"
+                >
                   <div
-                    className="w-full max-w-[20px] rounded-t-[6px] bg-[#E07A5F] transition-all hover:bg-[#C4614A]"
+                    className="w-full rounded-t-[10px] bg-[#E07A5F]/80"
                     style={{ height: `${height}px` }}
                   />
-                  {/* Tooltip */}
-                  <span className="absolute bottom-[100%] mb-[4px] hidden group-hover:block rounded bg-[#191C1E] px-[6px] py-[2px] text-[10px] font-bold text-white whitespace-nowrap">
-                    {monthlyCounts[index]} booking{monthlyCounts[index] !== 1 ? "s" : ""}
+                  <span className="text-[11px] font-bold text-[#88726D]">
+                    {
+                      [
+                        "Jan",
+                        "Feb",
+                        "Mar",
+                        "Apr",
+                        "May",
+                        "Jun",
+                        "Jul",
+                        "Aug",
+                        "Sep",
+                        "Oct",
+                        "Nov",
+                        "Dec",
+                      ][index]
+                    }
                   </span>
                 </div>
-                <span className="text-[11px] font-bold text-[#88726D]">
-                  {
-                    [
-                      "Jan",
-                      "Feb",
-                      "Mar",
-                      "Apr",
-                      "May",
-                      "Jun",
-                      "Jul",
-                      "Aug",
-                      "Sep",
-                      "Oct",
-                      "Nov",
-                      "Dec",
-                    ][index]
-                  }
-                </span>
-              </div>
-            ))}
+              ),
+            )}
           </div>
         </section>
 
@@ -214,18 +113,19 @@ export default async function VenueOwnerDashboardPage() {
 
           <div className="mt-[20px] grid gap-[12px]">
             {[
-              { label: "Review Booking Requests", href: "/dashboard/bookings" },
-              { label: "Manage Calendar", href: "/dashboard/calendar" },
-              { label: "Manage Packages", href: "/dashboard/packages" },
+              "Add New Venue",
+              "Review Booking Requests",
+              "Manage Calendar",
+              "Create Package",
             ].map((action) => (
-              <a
-                key={action.label}
-                href={action.href}
-                className="flex h-[48px] items-center justify-between rounded-[12px] border border-[#E9D5D0] bg-[#FFFDFC] px-[14px] text-left text-[14px] font-bold text-[#191C1E] transition hover:border-[#E07A5F] hover:bg-[#FFF4F0] hover:text-[#E07A5F] text-decoration-none"
+              <button
+                key={action}
+                type="button"
+                className="flex h-[48px] items-center justify-between rounded-[12px] border border-[#E9D5D0] bg-[#FFFDFC] px-[14px] text-left text-[14px] font-bold text-[#191C1E] transition hover:border-[#E07A5F] hover:bg-[#FFF4F0] hover:text-[#E07A5F]"
               >
-                {action.label}
+                {action}
                 <span className="text-[#E07A5F]">→</span>
-              </a>
+              </button>
             ))}
           </div>
         </section>
@@ -233,29 +133,23 @@ export default async function VenueOwnerDashboardPage() {
 
       {/* Operations Cards */}
       <div className="mt-[24px] grid gap-[16px] md:grid-cols-3">
-        <a href="/dashboard/calendar" className="text-decoration-none block">
-          <DashboardCard
-            title="Calendar Management"
-            description="View reserved dates, tentative reservations, maintenance schedules, and blackout dates."
-            icon={<CalendarDays className="h-[20px] w-[20px]" />}
-          />
-        </a>
+        <DashboardCard
+          title="Calendar Management"
+          description="View reserved dates, tentative reservations, maintenance schedules, and blackout dates."
+          icon={<CalendarDays className="h-[20px] w-[20px]" />}
+        />
 
-        <a href="/dashboard/packages" className="text-decoration-none block">
-          <DashboardCard
-            title="Packages & Pricing"
-            description="Configure package prices, inclusions, guest capacity, and supplier participation."
-            icon={<PackageCheck className="h-[20px] w-[20px]" />}
-          />
-        </a>
+        <DashboardCard
+          title="Packages & Pricing"
+          description="Configure package prices, inclusions, guest capacity, and supplier participation."
+          icon={<PackageCheck className="h-[20px] w-[20px]" />}
+        />
 
-        <a href="/dashboard/staff" className="text-decoration-none block">
-          <DashboardCard
-            title="Staff Management"
-            description="Manage venue staff, roles, assignments, and operational permissions."
-            icon={<UsersRound className="h-[20px] w-[20px]" />}
-          />
-        </a>
+        <DashboardCard
+          title="Staff Management"
+          description="Manage venue staff, roles, assignments, and operational permissions."
+          icon={<UsersRound className="h-[20px] w-[20px]" />}
+        />
       </div>
 
       {/* Upcoming Bookings */}
@@ -283,7 +177,7 @@ export default async function VenueOwnerDashboardPage() {
             <thead className="bg-[#FFF4F0]">
               <tr>
                 <th className="px-[16px] py-[12px] text-[12px] font-extrabold uppercase tracking-[0.08em] text-[#9A442D]">
-                  Customer
+                  Event
                 </th>
                 <th className="px-[16px] py-[12px] text-[12px] font-extrabold uppercase tracking-[0.08em] text-[#9A442D]">
                   Venue
@@ -301,48 +195,76 @@ export default async function VenueOwnerDashboardPage() {
             </thead>
 
             <tbody>
-              {!recentBookings || recentBookings.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="text-center py-[24px] text-[14px] text-[#55423E]">
-                    No bookings found.
+              {[
+                {
+                  event: "Santos–Reyes Wedding",
+                  venue: "The Glass Garden",
+                  date: "Feb 18, 2026",
+                  status: "Confirmed",
+                  amount: "₱120,000",
+                },
+                {
+                  event: "Corporate Gala Night",
+                  venue: "Azure Grand Hall",
+                  date: "Feb 22, 2026",
+                  status: "Pending",
+                  amount: "₱85,000",
+                },
+                {
+                  event: "Debut Celebration",
+                  venue: "Rosewood Pavilion",
+                  date: "Mar 2, 2026",
+                  status: "Tentative",
+                  amount: "₱95,000",
+                },
+              ].map((booking) => (
+                <tr
+                  key={booking.event}
+                  className="border-t border-[#E9D5D0]"
+                >
+                  <td className="px-[16px] py-[14px] text-[14px] font-bold text-[#191C1E]">
+                    {booking.event}
+                  </td>
+                  <td className="px-[16px] py-[14px] text-[14px] text-[#55423E]">
+                    {booking.venue}
+                  </td>
+                  <td className="px-[16px] py-[14px] text-[14px] text-[#55423E]">
+                    {booking.date}
+                  </td>
+                  <td className="px-[16px] py-[14px]">
+                    <span className="rounded-full bg-[#FFF4F0] px-[10px] py-[5px] text-[12px] font-bold text-[#E07A5F]">
+                      {booking.status}
+                    </span>
+                  </td>
+                  <td className="px-[16px] py-[14px] text-[14px] font-bold text-[#191C1E]">
+                    {booking.amount}
                   </td>
                 </tr>
-              ) : (
-                recentBookings.map((booking: any) => (
-                  <tr
-                    key={booking.id}
-                    className="border-t border-[#E9D5D0]"
-                  >
-                    <td className="px-[16px] py-[14px] text-[14px] font-bold text-[#191C1E]">
-                      {(booking.profiles as any)?.full_name ?? "—"}
-                    </td>
-                    <td className="px-[16px] py-[14px] text-[14px] text-[#55423E]">
-                      {(booking.venues as any)?.name ?? "—"}
-                    </td>
-                    <td className="px-[16px] py-[14px] text-[14px] text-[#55423E]">
-                      {new Date(booking.event_date).toLocaleDateString("en-PH", { dateStyle: "medium" })}
-                    </td>
-                    <td className="px-[16px] py-[14px]">
-                      <span
-                        className="rounded-full px-[10px] py-[5px] text-[12px] font-bold capitalize"
-                        style={{
-                          background: `${STATUS_COLORS[booking.status] ?? "hsl(217 70% 47%)"}20`,
-                          color: STATUS_COLORS[booking.status] ?? "hsl(217 70% 47%)",
-                        }}
-                      >
-                        {booking.status}
-                      </span>
-                    </td>
-                    <td className="px-[16px] py-[14px] text-[14px] font-bold text-[#191C1E]">
-                      {booking.total_amount ? `₱${booking.total_amount.toLocaleString()}` : "—"}
-                    </td>
-                  </tr>
-                ))
-              )}
+              ))}
             </tbody>
           </table>
         </div>
       </section>
+
+      {/* Analytics Preview */}
+      <div className="mt-[24px] grid gap-[16px] md:grid-cols-2">
+        <DashboardCard
+          title="Business Analytics"
+          description="Track revenue, inquiry conversion, occupancy rate, popular packages, and booking trends."
+          icon={<BarChart3 className="h-[20px] w-[20px]" />}
+        />
+
+        <div className="rounded-[18px] border border-dashed border-[#E9D5D0] bg-white p-[20px] text-center shadow-sm">
+          <h3 className="text-[17px] font-extrabold leading-[24px] text-[#191C1E]">
+            Venue owner dashboard shell ready
+          </h3>
+
+          <p className="mx-auto mt-[6px] max-w-[520px] text-[14px] leading-[22px] text-[#55423E]">
+            This overview page is ready to connect to venue owner role data from
+            Supabase.
+          </p>
+        </div>
+      </div>
     </DashboardShell>
   );
 }
