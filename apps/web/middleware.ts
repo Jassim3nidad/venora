@@ -29,6 +29,7 @@ const SKIP_ROLE_GUARD_IN_DEV = process.env.NODE_ENV === "development";
 
 // Routes that require authentication
 const PROTECTED_PREFIXES = [
+  "/venues",
   "/bookings",
   "/favorites",
   "/account",
@@ -146,7 +147,7 @@ export async function middleware(request: NextRequest) {
 
   // 2. Redirect logged-in users away from auth pages
   if (user && AUTH_PATHS.some((path) => pathname.startsWith(path))) {
-    return NextResponse.redirect(new URL("//dashboard/customer", request.url));
+    return NextResponse.redirect(new URL("/venues", request.url));
   }
 
   // 3. Role guard — redirect users without the required role

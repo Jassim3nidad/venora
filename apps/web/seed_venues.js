@@ -76,7 +76,6 @@ async function seed() {
     console.log(`  Created organization: ${orgId}`);
   }
 
-
   // ── Step 3: Venue data ────────────────────────────────────────
   const venueData = [
     {
@@ -116,6 +115,9 @@ async function seed() {
         { name: 'Garden Elegance Package', description: 'Our most popular all-inclusive package', price: 185000, min_guests: 100, max_guests: 200, inclusions: ['10-hour venue use','Tables & Chairs for 200','Full garden lighting rig','Premium sound system','LED wall','Bridal & Groom suites','Event coordinator'] },
         { name: 'Grand Estate Package', description: 'The ultimate celebration experience', price: 280000, min_guests: 200, max_guests: 300, inclusions: ['12-hour venue use','Full venue exclusive use','Premium A/V setup','Stage & dance floor','Event coordinator','Bridal & Groom suites','Parking for 150 cars'] },
       ],
+      images: [
+        'https://lh3.googleusercontent.com/aida-public/AB6AXuAHn1I2QEWfbx_gmkoGeOwk9N4C7-C2T-m6T8Ip-wDfM0BsKS7DYzHoLOEUty1bvix6WA5sRtdAz7ZpWb7tcF0L3vcPRbafYejBJXKX7gvJq9BbtvzFfx6ZziFVQbqRIV9pydLLbsxeQJpiAnlltaSdfyVQy6RZcgUXNuV5HqlYn8ZXLh7BhsetSM3jabmu5UjpQZGF31WnMxSj95SqUA6boo4rJ4Ss9D4J9YfOS2X3nQGtuTfJfVVy9Q'
+      ]
     },
     {
       name: 'The Foundry Loft',
@@ -141,7 +143,7 @@ async function seed() {
       ceremony_venue: false,
       reception_venue: true,
       status: 'published',
-      is_featured: false,
+      is_featured: true,
       avg_rating: 4.8,
       review_count: 62,
       cancellation_policy: 'Non-refundable deposit of 30%. Balance refundable 14 days before.',
@@ -153,6 +155,49 @@ async function seed() {
         { name: 'Loft Basic', description: 'Essential package for corporate events', price: 85000, min_guests: 30, max_guests: 80, inclusions: ['6-hour use','Standard A/V','Tables & Chairs','Projector','Basic lighting'] },
         { name: 'Loft Premium', description: 'Full industrial-chic experience', price: 150000, min_guests: 80, max_guests: 150, inclusions: ['8-hour use','LED wall','Premium sound system','Full Edison lighting rig','Bar setup','Tables & Chairs for 150'] },
       ],
+      images: [
+        'https://lh3.googleusercontent.com/aida-public/AB6AXuAFJ3wQrOI59wJRDVjDuhVHBym1PFzFZt8qVSJ54ke-PoJFVkYVfcgghztWHyEW-5PvBNYU9Pe94qBrKyweMDyTdmwFB1VFSlZLqzLxDZ2OAViAcnGoUs4G0SfbcmZnolW-g0yYDRbpr3pgMs4VNJFzTvDqwYDlse85um56CwlVDsvJch6I4oiZjn2LNDTQ0-1BWlnAJYV4V_cwswL17qivzVQYF60Cu82Z7g3pXCTSnAh5rSBChJg_Cg'
+      ]
+    },
+    {
+      name: 'Rosewood Pavilion',
+      slug: 'rosewood-pavilion',
+      description: 'An elegant outdoor pavilion with a manicured lawn, white tent structure, and warm string lights. Perfect for garden weddings and social gatherings.',
+      province: 'Rizal',
+      city: 'Antipolo',
+      municipality: 'Antipolo',
+      address: '100 Rosewood Drive, Antipolo City, Rizal',
+      latitude: 14.5874,
+      longitude: 121.1758,
+      capacity_min: 50,
+      capacity_max: 250,
+      base_price: 150000,
+      price_unit: 'per_event',
+      indoor_outdoor: 'outdoor',
+      air_conditioned: false,
+      parking_available: true,
+      overnight_accommodation: false,
+      pet_friendly: true,
+      wheelchair_accessible: true,
+      has_pool: false,
+      ceremony_venue: true,
+      reception_venue: true,
+      status: 'published',
+      is_featured: true,
+      avg_rating: 4.9,
+      review_count: 24,
+      cancellation_policy: 'Full refund if cancelled 45 days before the event.',
+      venue_rules: 'Music must end by 10PM. Pets must be leashed in the garden.',
+      categories: ['garden', 'events-space'],
+      eventTypes: ['wedding', 'debut', 'birthday'],
+      amenities: ['Parking', 'Sound System', 'Garden Area', 'Bridal Suite'],
+      packages: [
+        { name: 'Pavilion Intimate', description: 'Ideal for small gatherings and ceremonies', price: 150000, min_guests: 50, max_guests: 100, inclusions: ['8-hour venue use','Setup of chairs','Sound system','Bridal lounge'] },
+        { name: 'Pavilion Grand', description: 'Our comprehensive outdoor celebration package', price: 220000, min_guests: 100, max_guests: 250, inclusions: ['10-hour venue use','Chairs for up to 250','Premium sound system','Garden styling & ambient lighting','Event manager','Bridal suite'] }
+      ],
+      images: [
+        'https://lh3.googleusercontent.com/aida-public/AB6AXuDByzvwqt-vjG2KfX9hYLE_7lBbX6K2up1Q0Oa9xn97AiQf9SCN6LcZckrig72KBpTWHMMHhfGFtiep2ukWGoG2dAyorFgByk0-XNqRUd08rneXGoMP9ilE3OeSgXmFy6BBCkDT7NRAW8HFUaUTrA6h_OfBflVjvUYFs492DvW8dK509vCGA41l9HS--XuX6g17IUFw4T9M8Bw7m7_beB1kHLXhb6BTp7fX8obrHQJXFnXVjzOwn9JxZw'
+      ]
     },
     {
       name: 'Villa Serena Batangas',
@@ -190,6 +235,9 @@ async function seed() {
         { name: 'Beach Ceremony Package', description: 'Exclusive ceremony by the sea', price: 250000, min_guests: 80, max_guests: 200, inclusions: ['Private beach access','10-hour venue use','Ceremony setup','Sound system','Tables & Chairs','Bridal villa'] },
         { name: 'Destination Wedding Bundle', description: 'Full 2-day beachfront takeover', price: 480000, min_guests: 150, max_guests: 400, inclusions: ['2-day exclusive villa access','Overnight accommodations (10 rooms)','Pool & beach access','Full A/V production','Event coordinator','Bridal & Groom suites'] },
       ],
+      images: [
+        'https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&w=800&h=600&q=80'
+      ]
     },
     {
       name: 'Sky Deck at One Meridian',
@@ -227,6 +275,9 @@ async function seed() {
         { name: 'Sky View Package', description: 'Daytime event with panoramic views', price: 180000, min_guests: 20, max_guests: 100, inclusions: ['6-hour use','Standard A/V','Cocktail tables','BGC city skyline backdrop'] },
         { name: 'Sunset Premium Package', description: 'Golden hour event experience', price: 280000, min_guests: 50, max_guests: 200, inclusions: ['8-hour use','Sunset timing slot','Premium sound system','LED wall','Bar setup','Full event styling'] },
       ],
+      images: [
+        'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&h=600&q=80'
+      ]
     },
     {
       name: 'Hacienda Buenas Noches',
@@ -264,12 +315,15 @@ async function seed() {
         { name: 'Hacienda Garden Package', description: 'Classic garden celebration', price: 95000, min_guests: 100, max_guests: 250, inclusions: ['8-hour venue use','Tables & Chairs','Garden lighting','Sound system','Chapel access'] },
         { name: 'Grand Hacienda Package', description: 'Full hacienda experience with overnight stay', price: 195000, min_guests: 200, max_guests: 500, inclusions: ['12-hour venue use','Overnight accommodations (5 rooms)','Full A/V production','Stage & dance floor','Chapel ceremony','Event coordinator','Catering kitchen access'] },
       ],
+      images: [
+        'https://images.unsplash.com/photo-1508672019048-805c876b67e2?auto=format&fit=crop&w=800&h=600&q=80'
+      ]
     },
   ];
 
   // ── Step 4: Insert each venue and its relations ───────────────
   for (const v of venueData) {
-    const { categories: vCats, eventTypes: vETs, amenities: vAmens, packages: vPkgs, ...venueRow } = v;
+    const { categories: vCats, eventTypes: vETs, amenities: vAmens, packages: vPkgs, images: vImages, ...venueRow } = v;
 
     // Upsert by slug — let Postgres generate the ID on insert
     const { error: venueError } = await supabase.from('venues').upsert(
@@ -286,7 +340,7 @@ async function seed() {
       .from('venues').select('id').eq('slug', v.slug).single();
     const actualVenueId = fetchedVenue?.id;
 
-    console.log(`✅ Venue: ${v.name} (${actualVenueId})`);
+    console.log(`\n✅ Venue: ${v.name} (${actualVenueId})`);
 
     // Categories
     for (const slug of vCats) {
@@ -316,6 +370,27 @@ async function seed() {
         console.warn(`  ⚠️  Package "${pkg.name}": ${pkgError.message}`);
       } else {
         console.log(`  📦 Package: ${pkg.name}`);
+      }
+    }
+
+    // Images
+    if (vImages && vImages.length > 0) {
+      // Clear existing images for this venue to prevent duplicate inserts
+      await supabase.from('venue_images').delete().eq('venue_id', actualVenueId);
+      
+      for (let i = 0; i < vImages.length; i++) {
+        const imgUrl = vImages[i];
+        const isFeatured = i === 0;
+        const { error: imgError } = await supabase.from('venue_images').insert({
+          venue_id: actualVenueId,
+          storage_path: imgUrl,
+          is_featured: isFeatured
+        });
+        if (imgError) {
+          console.warn(`  ⚠️  Image "${imgUrl}": ${imgError.message}`);
+        } else {
+          console.log(`  🖼️  Image seeded: ${imgUrl}`);
+        }
       }
     }
   }

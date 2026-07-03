@@ -11,8 +11,8 @@ export async function GET() {
   const supabase = await createClient();
   await supabase.auth.signOut();
 
-  const loginUrl = new URL("/login", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000");
-  const response = NextResponse.redirect(loginUrl);
+  const homeUrl = new URL("/", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000");
+  const response = NextResponse.redirect(homeUrl);
   
   // Explicitly clear all chunked auth cookies to ensure the session is destroyed locally
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
