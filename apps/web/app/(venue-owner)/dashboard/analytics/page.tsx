@@ -1,36 +1,44 @@
 import type { Metadata } from "next";
+import {
+  DashboardSubPage,
+  KpiCard,
+  Panel,
+  PanelHeader,
+} from "@/components/dashboard/enterprise";
 
 export const metadata: Metadata = { title: "Analytics — Dashboard" };
 
 const STAT_CARDS = [
-  { label: "Total Revenue",   value: "₱0",  icon: "💰", change: "—" },
-  { label: "Total Bookings",  value: "0",   icon: "📅", change: "—" },
-  { label: "Avg. Rating",     value: "—",   icon: "⭐", change: "—" },
-  { label: "Occupancy Rate",  value: "0%",  icon: "📊", change: "—" },
+  { label: "Total Revenue", value: "₱0", icon: "payments" },
+  { label: "Total Bookings", value: "0", icon: "event_available" },
+  { label: "Avg. Rating", value: "—", icon: "star" },
+  { label: "Occupancy Rate", value: "0%", icon: "analytics" },
 ];
 
 export default function AnalyticsPage() {
   return (
-    <main>
-      <h1 style={{ fontFamily: "var(--font-sora, sans-serif)", fontSize: "1.5rem", fontWeight: 700, marginBottom: "1.5rem" }}>
-        Analytics
-      </h1>
-
-      <div id="analytics-stats" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
+    <DashboardSubPage
+      title="Analytics"
+      description="Track revenue, inquiry conversion, occupancy rate, and booking trends."
+    >
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {STAT_CARDS.map((card) => (
-          <div key={card.label} style={{ padding: "1.5rem", borderRadius: "0.875rem", border: "1px solid var(--border-default)", background: "var(--bg-subtle)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.75rem" }}>
-              <span style={{ fontSize: "1.5rem" }}>{card.icon}</span>
-            </div>
-            <div style={{ fontSize: "1.75rem", fontWeight: 700, marginBottom: "0.25rem" }}>{card.value}</div>
-            <div style={{ fontSize: "0.8125rem", color: "var(--text-muted)" }}>{card.label}</div>
-          </div>
+          <KpiCard key={card.label} label={card.label} value={card.value} icon={card.icon} />
         ))}
       </div>
 
-      <div style={{ height: 300, borderRadius: "1rem", border: "1px solid var(--border-default)", background: "var(--bg-subtle)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)" }}>
-        Revenue chart — integrate Recharts or Chart.js
-      </div>
-    </main>
+      <Panel>
+        <PanelHeader
+          title="Revenue Overview"
+          description="Monthly revenue and booking performance."
+        />
+        <div
+          id="analytics-stats"
+          className="flex h-[280px] items-center justify-center rounded-xl border border-dashed border-[#e8deda] bg-[#fffdfc] text-sm text-[#88726d]"
+        >
+          Revenue chart — integrate Recharts or Chart.js
+        </div>
+      </Panel>
+    </DashboardSubPage>
   );
 }
