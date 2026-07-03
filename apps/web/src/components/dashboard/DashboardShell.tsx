@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { ReactNode } from "react";
 import Link from "next/link";
@@ -63,19 +63,19 @@ export function DashboardShell({
   const pathname = usePathname();
 
   return (
-    <main className="flex min-h-screen bg-[#FFFDFC]">
-      <aside className="hidden min-h-screen w-[280px] shrink-0 border-r border-[#E9D5D0] bg-white px-[20px] py-[24px] lg:block">
+    <main className="flex min-h-screen bg-[#F9FAFB]">
+      <aside className="hidden min-h-screen w-[280px] shrink-0 border-r border-[#E5E7EB] bg-white px-[20px] py-[24px] lg:block">
         <div className="mb-[32px]">
           <Link href="/" className="flex items-center gap-[10px]">
-            <div className="flex h-[38px] w-[38px] items-center justify-center rounded-[12px] bg-[#FFF4F0] text-[#E07A5F]">
+            <div className="flex h-[38px] w-[38px] items-center justify-center rounded-[12px] bg-[#EFF6FF] text-[#2563EB]">
               <Truck className="h-[20px] w-[20px]" />
             </div>
 
             <div>
-              <p className="text-[20px] font-extrabold leading-[26px] tracking-[-0.02em] text-[#191C1E]">
+              <p className="text-[20px] font-extrabold leading-[26px] tracking-[-0.02em] text-[#111827]">
                 Venora
               </p>
-              <p className="text-[12px] font-medium text-[#88726D]">
+              <p className="text-[12px] font-medium text-[#6B7280]">
                 Dashboard
               </p>
             </div>
@@ -93,8 +93,8 @@ export function DashboardShell({
                 href={item.href}
                 className={`flex h-[44px] items-center gap-[12px] rounded-[10px] px-[12px] text-[14px] font-bold transition ${
                   isActive
-                    ? "bg-[#FFF4F0] text-[#E07A5F]"
-                    : "text-[#55423E] hover:bg-[#FFF4F0] hover:text-[#E07A5F]"
+                    ? "bg-[#EFF6FF] text-[#2563EB]"
+                    : "text-[#4B5563] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
                 }`}
               >
                 <Icon className="h-[18px] w-[18px]" />
@@ -104,34 +104,34 @@ export function DashboardShell({
           })}
         </nav>
 
-        <div className="mt-[32px] rounded-[16px] border border-[#E9D5D0] bg-[#FFFDFC] p-[16px]">
-          <div className="mb-[10px] flex h-[36px] w-[36px] items-center justify-center rounded-[10px] bg-[#FFF4F0] text-[#E07A5F]">
+        <div className="mt-[32px] rounded-[16px] border border-[#E5E7EB] bg-[#F9FAFB] p-[16px]">
+          <div className="mb-[10px] flex h-[36px] w-[36px] items-center justify-center rounded-[10px] bg-[#EFF6FF] text-[#2563EB]">
             <Settings className="h-[18px] w-[18px]" />
           </div>
 
-          <p className="text-[14px] font-bold text-[#191C1E]">
+          <p className="text-[14px] font-bold text-[#111827]">
             Dashboard Shell
           </p>
 
-          <p className="mt-[4px] text-[12px] leading-[18px] text-[#55423E]">
+          <p className="mt-[4px] text-[12px] leading-[18px] text-[#4B5563]">
             Ready for role-based routing once roles go live.
           </p>
         </div>
       </aside>
 
       <section className="flex min-h-screen flex-1 flex-col">
-        <header className="border-b border-[#E9D5D0] bg-white px-[24px] py-[20px] lg:px-[40px]">
+        <header className="border-b border-[#E5E7EB] bg-white px-[24px] py-[20px] lg:px-[40px]">
           {badge ? (
-            <span className="mb-[8px] inline-flex rounded-full bg-[#FFF4F0] px-[10px] py-[4px] text-[12px] font-bold uppercase tracking-[0.08em] text-[#E07A5F]">
+            <span className="mb-[8px] inline-flex rounded-full bg-[#EFF6FF] px-[10px] py-[4px] text-[12px] font-bold uppercase tracking-[0.08em] text-[#2563EB]">
               {badge}
             </span>
           ) : null}
 
-          <h1 className="text-[28px] font-extrabold leading-[36px] tracking-[-0.03em] text-[#191C1E]">
+          <h1 className="text-[28px] font-extrabold leading-[36px] tracking-[-0.03em] text-[#111827]">
             {title}
           </h1>
 
-          <p className="mt-[4px] max-w-[680px] text-[15px] leading-[23px] text-[#55423E]">
+          <p className="mt-[4px] max-w-[680px] text-[15px] leading-[23px] text-[#4B5563]">
             {description}
           </p>
         </header>
@@ -156,18 +156,18 @@ export function DashboardCard({
   icon,
 }: DashboardCardProps) {
   return (
-    <div className="rounded-[18px] border border-[#E9D5D0] bg-white p-[20px] shadow-sm">
+    <div className="rounded-[18px] border border-[#E5E7EB] bg-white p-[20px] shadow-sm">
       {icon ? (
-        <div className="mb-[16px] flex h-[42px] w-[42px] items-center justify-center rounded-[12px] bg-[#FFF4F0] text-[#E07A5F]">
+        <div className="mb-[16px] flex h-[42px] w-[42px] items-center justify-center rounded-[12px] bg-[#EFF6FF] text-[#2563EB]">
           {icon}
         </div>
       ) : null}
 
-      <h3 className="text-[17px] font-extrabold leading-[24px] text-[#191C1E]">
+      <h3 className="text-[17px] font-extrabold leading-[24px] text-[#111827]">
         {title}
       </h3>
 
-      <p className="mt-[6px] text-[14px] leading-[22px] text-[#55423E]">
+      <p className="mt-[6px] text-[14px] leading-[22px] text-[#4B5563]">
         {description}
       </p>
     </div>

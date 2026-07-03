@@ -8,7 +8,7 @@ import {
   DashButton,
 } from "@/components/dashboard/enterprise";
 
-export const metadata: Metadata = { title: "Bookings — Dashboard" };
+export const metadata: Metadata = { title: "Bookings - Dashboard" };
 
 export default async function OwnerBookingsPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -64,15 +64,15 @@ export default async function OwnerBookingsPage() {
 
     return {
       id: b.id,
-      venue: venue?.name ?? "—",
-      customer: customer?.full_name ?? "—",
+      venue: venue?.name ?? "-",
+      customer: customer?.full_name ?? "-",
       date: new Date(b.event_date).toLocaleDateString("en-PH", {
         dateStyle: "medium",
       }),
       guests: b.guest_count,
       amount: b.total_amount
         ? `₱${Number(b.total_amount).toLocaleString()}`
-        : "—",
+        : "-",
       status: b.status,
     };
   });
@@ -92,7 +92,7 @@ export default async function OwnerBookingsPage() {
             key: "venue",
             header: "Venue",
             cell: (r) => (
-              <span className="font-semibold text-[#191c1e]">{r.venue}</span>
+              <span className="font-semibold text-[#111827]">{r.venue}</span>
             ),
           },
           { key: "customer", header: "Customer", cell: (r) => r.customer },
@@ -102,7 +102,7 @@ export default async function OwnerBookingsPage() {
             key: "amount",
             header: "Amount",
             cell: (r) => (
-              <span className="font-semibold text-[#191c1e]">{r.amount}</span>
+              <span className="font-semibold text-[#111827]">{r.amount}</span>
             ),
           },
           {

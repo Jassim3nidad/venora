@@ -137,12 +137,12 @@ export default function BookingCalendar() {
 
   return (
     <div style={{ display: "flex", gap: "1.5rem", minHeight: "70vh", fontFamily: "var(--font-sora, 'Inter', sans-serif)" }}>
-      {/* ─── Left: Calendar ─── */}
+      {/* --- Left: Calendar --- */}
       <div style={{ flex: 1, minWidth: 0 }}>
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-            <div style={{ background: "linear-gradient(135deg, #E07A5F 0%, #C4614A 100%)", borderRadius: "0.6rem", padding: "0.5rem", display: "flex" }}>
+            <div style={{ background: "linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)", borderRadius: "0.6rem", padding: "0.5rem", display: "flex" }}>
               <CalendarDays size={20} color="#fff" />
             </div>
             <div>
@@ -204,7 +204,7 @@ export default function BookingCalendar() {
         {loading ? (
           <div style={{ height: 400, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", color: "#9CA3AF" }}>
             <Loader2 size={20} style={{ animation: "spin 1s linear infinite" }} />
-            <span>Loading bookings…</span>
+            <span>Loading bookings...</span>
           </div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "2px" }}>
@@ -223,7 +223,7 @@ export default function BookingCalendar() {
                     padding: "0.4rem",
                     borderRadius: "0.5rem",
                     border: isSelected
-                      ? "2px solid #E07A5F"
+                      ? "2px solid #2563EB"
                       : "1px solid #F3F4F6",
                     background: isSelected
                       ? "#FFF5F2"
@@ -246,7 +246,7 @@ export default function BookingCalendar() {
                       borderRadius: "50%",
                       fontSize: "0.75rem",
                       fontWeight: isTodayDate ? 800 : 600,
-                      background: isTodayDate ? "#E07A5F" : "transparent",
+                      background: isTodayDate ? "#2563EB" : "transparent",
                       color: isTodayDate ? "#fff" : isCurrentMonth ? "#374151" : "#9CA3AF",
                       marginBottom: "0.25rem",
                     }}
@@ -294,7 +294,7 @@ export default function BookingCalendar() {
         )}
       </div>
 
-      {/* ─── Right: Details Sidebar ─── */}
+      {/* --- Right: Details Sidebar --- */}
       <div
         style={{
           width: selectedDay ? 340 : 0,
@@ -380,7 +380,7 @@ export default function BookingCalendar() {
                       {/* Booking info rows */}
                       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", fontSize: "0.8rem", color: "#374151" }}>
                         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                          <Building2 size={13} color="#E07A5F" />
+                          <Building2 size={13} color="#2563EB" />
                           <span style={{ fontWeight: 700 }}>{booking.venue?.name ?? "N/A"}</span>
                         </div>
                         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
@@ -390,7 +390,7 @@ export default function BookingCalendar() {
                         </div>
                         {booking.customer?.phone && (
                           <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                            <span style={{ color: "#9CA3AF", fontSize: "0.75rem" }}>📞 {booking.customer.phone}</span>
+                            <span style={{ color: "#9CA3AF", fontSize: "0.75rem" }}>ðŸ“ž {booking.customer.phone}</span>
                           </div>
                         )}
                         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
@@ -410,7 +410,7 @@ export default function BookingCalendar() {
                               ₱{booking.total_amount.toLocaleString()}
                             </span>
                             {booking.deposit_amount && (
-                              <span style={{ color: "#9CA3AF" }}>· Deposit: ₱{booking.deposit_amount.toLocaleString()}</span>
+                              <span style={{ color: "#9CA3AF" }}>- Deposit: ₱{booking.deposit_amount.toLocaleString()}</span>
                             )}
                           </div>
                         )}

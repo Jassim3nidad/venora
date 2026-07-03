@@ -383,10 +383,10 @@ export default function VenuesClient({
       )}
 
       <div className="flex flex-col gap-8">
-        <section className="max-w-full overflow-hidden rounded-[24px] border border-[#E9D5D0]/80 bg-white shadow-sm sm:rounded-[28px]">
+        <section className="max-w-full overflow-hidden rounded-[24px] border border-[#E5E7EB]/80 bg-white shadow-sm sm:rounded-[28px]">
           <div className="grid gap-6 p-5 sm:p-6">
             <div className="min-w-0">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#F0A090] bg-[#FFF4F1] px-3 py-1.5 text-[#E07A5F]">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1.5 text-[#2563EB]">
                 <Sparkles className="h-3.5 w-3.5" />
 
                 <span className="text-[11px] font-extrabold uppercase tracking-[0.14em]">
@@ -419,7 +419,7 @@ export default function VenuesClient({
                   value={filters.query}
                   onChange={(event) => updateFilter("q", event.target.value)}
                   placeholder="Search venue name, location, or category..."
-                  className="h-12 w-full rounded-2xl border border-slate-200 bg-[#FFFDFC] pl-11 pr-4 text-sm font-medium text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-[#E9D5D0] focus:border-[#E07A5F] focus:bg-white focus:ring-4 focus:ring-[#E07A5F]/10"
+                  className="h-12 w-full rounded-2xl border border-slate-200 bg-[#F9FAFB] pl-11 pr-4 text-sm font-medium text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-[#E5E7EB] focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
                 />
               </div>
 
@@ -427,12 +427,12 @@ export default function VenuesClient({
                 <button
                   type="button"
                   onClick={() => setMobileFiltersOpen(true)}
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-600 shadow-sm transition hover:border-[#E9D5D0] hover:bg-[#FFF4F1] hover:text-[#9A442D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E07A5F]/20 lg:hidden"
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-600 shadow-sm transition hover:border-[#E5E7EB] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/20 lg:hidden"
                 >
                   <SlidersHorizontal className="h-4 w-4" />
                   Filters
                   {activeFilterCount > 0 && (
-                    <span className="rounded-full bg-[#E07A5F] px-2 py-0.5 text-xs text-white">
+                    <span className="rounded-full bg-[#2563EB] px-2 py-0.5 text-xs text-white">
                       {activeFilterCount}
                     </span>
                   )}
@@ -446,7 +446,7 @@ export default function VenuesClient({
                     onChange={(event) =>
                       updateFilter("sort", event.target.value)
                     }
-                    className="h-12 w-full appearance-none rounded-2xl border border-slate-200 bg-white pl-11 pr-9 text-sm font-bold text-slate-600 shadow-sm outline-none transition hover:border-[#E9D5D0] focus:border-[#E07A5F] focus:ring-4 focus:ring-[#E07A5F]/10"
+                    className="h-12 w-full appearance-none rounded-2xl border border-slate-200 bg-white pl-11 pr-9 text-sm font-bold text-slate-600 shadow-sm outline-none transition hover:border-[#E5E7EB] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
                     aria-label="Sort venues"
                   >
                     <option value="recommended">Recommended</option>
@@ -463,7 +463,7 @@ export default function VenuesClient({
                 {filterSummary.map((item) => (
                   <span
                     key={item}
-                    className="rounded-full border border-[#E9D5D0] bg-[#FFFDFC] px-3 py-1.5 text-xs font-bold text-[#9A442D]"
+                    className="rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-3 py-1.5 text-xs font-bold text-[#1D4ED8]"
                   >
                     {item}
                   </span>
@@ -472,7 +472,7 @@ export default function VenuesClient({
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="rounded-full px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.08em] text-slate-500 transition hover:bg-[#FFF4F1] hover:text-[#9A442D]"
+                  className="rounded-full px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.08em] text-slate-500 transition hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
                 >
                   Clear all
                 </button>
@@ -482,8 +482,8 @@ export default function VenuesClient({
         </section>
 
         {filtered.length === 0 ? (
-          <div className="flex min-h-[320px] flex-col items-center justify-center rounded-[24px] border border-dashed border-[#E9D5D0] bg-white px-6 py-12 text-center shadow-sm">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#FFF4F1] text-[#E07A5F]">
+          <div className="flex min-h-[320px] flex-col items-center justify-center rounded-[24px] border border-dashed border-[#E5E7EB] bg-white px-6 py-12 text-center shadow-sm">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#EFF6FF] text-[#2563EB]">
               <Search className="h-5 w-5" />
             </div>
 
@@ -499,7 +499,7 @@ export default function VenuesClient({
             <button
               type="button"
               onClick={clearFilters}
-              className="mt-5 rounded-full bg-[#E07A5F] px-5 py-2.5 text-sm font-extrabold text-white shadow-sm shadow-[#E07A5F]/20 transition hover:bg-[#d96851]"
+              className="mt-5 rounded-full bg-[#2563EB] px-5 py-2.5 text-sm font-extrabold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1d4ed8]"
             >
               Clear all filters
             </button>
@@ -510,7 +510,7 @@ export default function VenuesClient({
               <Link
                 key={venue.id}
                 href={`/venues/${venue.slug ?? venue.id}`}
-                className="group flex h-full overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-sm shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1 hover:border-[#E07A5F]/50 hover:shadow-xl hover:shadow-slate-200/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E07A5F]/30"
+                className="group flex h-full overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-sm shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1 hover:border-[#2563EB]/50 hover:shadow-xl hover:shadow-slate-200/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
               >
                 <article className="flex h-full w-full flex-col">
                   <div className="relative aspect-[16/11] overflow-hidden bg-slate-100">
@@ -522,7 +522,7 @@ export default function VenuesClient({
 
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-slate-950/5 to-transparent" />
 
-                    <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#9A442D] shadow-sm backdrop-blur-md">
+                    <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#1D4ED8] shadow-sm backdrop-blur-md">
                       {venue.category}
                     </span>
 
@@ -548,7 +548,7 @@ export default function VenuesClient({
 
                   <div className="flex min-h-[190px] flex-1 flex-col justify-between gap-5 p-5">
                     <div className="min-w-0">
-                      <h2 className="line-clamp-1 text-lg font-extrabold leading-6 tracking-[-0.02em] text-slate-950 transition group-hover:text-[#9A442D]">
+                      <h2 className="line-clamp-1 text-lg font-extrabold leading-6 tracking-[-0.02em] text-slate-950 transition group-hover:text-[#1D4ED8]">
                         {venue.name}
                       </h2>
 

@@ -71,13 +71,13 @@ export function SupplierOverview({
     <DashboardPage>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-semibold text-[#88726d]">Supplier Portal</p>
-          <h1 className="font-display text-2xl font-bold text-[#191c1e] sm:text-3xl">
+          <p className="text-sm font-semibold text-[#6b7280]">Supplier Portal</p>
+          <h1 className="font-display text-2xl font-bold text-[#111827] sm:text-3xl">
             {businessName}
           </h1>
-          <p className="mt-1 text-sm text-[#55423e]">
+          <p className="mt-1 text-sm text-[#4b5563]">
             Accreditation:{" "}
-            <span className="font-semibold capitalize text-[#9a442d]">
+            <span className="font-semibold capitalize text-[#1d4ed8]">
               {accreditationStatus}
             </span>
           </p>
@@ -97,16 +97,16 @@ export function SupplierOverview({
             title="Inquiry Performance"
             description="Monthly supplier inquiries from customers and venue partners."
             action={
-              <span className="rounded-full bg-[#fff4f0] px-3 py-1 text-xs font-bold text-[#9a442d]">
+              <span className="rounded-full bg-[#eff6ff] px-3 py-1 text-xs font-bold text-[#1d4ed8]">
                 This Year
               </span>
             }
           />
-          <div className="flex h-40 items-end gap-2 rounded-xl bg-[#fffdfc] p-4">
+          <div className="flex h-40 items-end gap-2 rounded-xl bg-[#f9fafb] p-4">
             {[10, 15, 12, 18, 22, 25, 20, 28, 24, 30, 26, 34].map((h, i) => (
               <div
                 key={i}
-                className="flex-1 rounded-t-md bg-[#9a442d]/70"
+                className="flex-1 rounded-t-md bg-[#1d4ed8]/70"
                 style={{ height: `${h * 4}px` }}
               />
             ))}
@@ -125,7 +125,7 @@ export function SupplierOverview({
               <button
                 key={action}
                 type="button"
-                className="flex items-center justify-between rounded-xl border border-[#e8deda] px-4 py-3 text-left text-sm font-semibold text-[#191c1e] transition hover:border-[#9a442d] hover:bg-[#fff4f0] hover:text-[#9a442d]"
+                className="flex items-center justify-between rounded-xl border border-[#e5e7eb] px-4 py-3 text-left text-sm font-semibold text-[#111827] transition hover:border-[#1d4ed8] hover:bg-[#eff6ff] hover:text-[#1d4ed8]"
               >
                 {action}
                 <MaterialIcon name="chevron_right" />
@@ -153,17 +153,17 @@ export function SupplierOverview({
             {services.map((item) => (
               <div
                 key={item.id}
-                className="rounded-xl border border-[#e8deda] bg-[#fffdfc] p-4"
+                className="rounded-xl border border-[#e5e7eb] bg-[#f9fafb] p-4"
               >
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#fff4f0] text-[#9a442d]">
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#eff6ff] text-[#1d4ed8]">
                   <MaterialIcon name="verified" />
                 </div>
-                <p className="font-semibold text-[#191c1e]">{item.name}</p>
-                <p className="mt-1 text-sm capitalize text-[#55423e]">
+                <p className="font-semibold text-[#111827]">{item.name}</p>
+                <p className="mt-1 text-sm capitalize text-[#4b5563]">
                   {item.category}
                 </p>
                 <div className="mt-4 flex items-center justify-between">
-                  <span className="font-bold text-[#191c1e]">{item.price}</span>
+                  <span className="font-bold text-[#111827]">{item.price}</span>
                   <StatusBadge status="active" label={item.status} />
                 </div>
               </div>
@@ -173,7 +173,7 @@ export function SupplierOverview({
       </Panel>
 
       <Panel padding={false} className="overflow-hidden">
-        <div className="border-b border-[#e8deda] p-5 sm:p-6">
+        <div className="border-b border-[#e5e7eb] p-5 sm:p-6">
           <PanelHeader
             title="Recent Client Inquiries"
             description="Latest requests for your supplier services."
@@ -189,7 +189,7 @@ export function SupplierOverview({
                 key: "client",
                 header: "Client",
                 cell: (r) => (
-                  <span className="font-semibold text-[#191c1e]">{r.client}</span>
+                  <span className="font-semibold text-[#111827]">{r.client}</span>
                 ),
               },
               { key: "service", header: "Service", cell: (r) => r.service },

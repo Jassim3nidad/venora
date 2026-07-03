@@ -48,8 +48,8 @@ function NavLink({
         "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition",
         uppercase && "uppercase tracking-wide text-xs",
         isActive
-          ? "bg-[#fff4f0] text-[#9a442d]"
-          : "text-[#55423e] hover:bg-[#fff4f0] hover:text-[#9a442d]",
+          ? "bg-[#eff6ff] text-[#1d4ed8]"
+          : "text-[#4b5563] hover:bg-[#eff6ff] hover:text-[#1d4ed8]",
       )}
     >
       <MaterialIcon
@@ -59,7 +59,7 @@ function NavLink({
       />
       <span className="flex-1">{item.label}</span>
       {item.badge ? (
-        <span className="rounded-full bg-[#9a442d] px-2 py-0.5 text-[10px] font-bold text-white">
+        <span className="rounded-full bg-[#1d4ed8] px-2 py-0.5 text-[10px] font-bold text-white">
           {item.badge}
         </span>
       ) : null}
@@ -86,14 +86,14 @@ function Sidebar({
     <div className="flex h-full flex-col">
       <div className="mb-6 px-1">
         <Link href="/" className="flex items-center gap-3" {...(onNavigate ? { onClick: onNavigate } : {})}>
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#fff4f0] text-[#9a442d]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eff6ff] text-[#1d4ed8]">
             <MaterialIcon name="domain" className="text-xl" filled />
           </div>
           <div>
-            <p className="font-display text-lg font-bold text-[#191c1e]">
+            <p className="font-display text-lg font-bold text-[#111827]">
               Venora
             </p>
-            <p className="text-xs font-medium text-[#88726d]">
+            <p className="text-xs font-medium text-[#6b7280]">
               {ROLE_LABELS[role]}
             </p>
           </div>
@@ -112,7 +112,7 @@ function Sidebar({
         ))}
       </nav>
 
-      <div className="mt-6 border-t border-[#e8deda] pt-4">
+      <div className="mt-6 border-t border-[#e5e7eb] pt-4">
         <button
           type="button"
           onClick={() => {
@@ -149,11 +149,11 @@ function TopBar({
     userSubtitle ?? businessName ?? ROLE_LABELS[role];
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-[#e8deda] bg-white px-4 lg:hidden">
+    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-[#e5e7eb] bg-white px-4 lg:hidden">
       <button
         type="button"
         onClick={onMenuClick}
-        className="flex h-10 w-10 items-center justify-center rounded-xl text-[#55423e] hover:bg-[#fff4f0]"
+        className="flex h-10 w-10 items-center justify-center rounded-xl text-[#4b5563] hover:bg-[#eff6ff]"
         aria-label="Open menu"
       >
         <MaterialIcon name="menu" className="text-2xl" />
@@ -161,18 +161,18 @@ function TopBar({
 
       <div className="flex items-center gap-2">
         <div className="text-right">
-          <p className="text-sm font-bold text-[#191c1e]">{displayName}</p>
-          <p className="text-xs text-[#88726d]">{subtitle}</p>
+          <p className="text-sm font-bold text-[#111827]">{displayName}</p>
+          <p className="text-xs text-[#6b7280]">{subtitle}</p>
         </div>
         {userAvatar ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={userAvatar}
             alt=""
-            className="h-9 w-9 rounded-full object-cover ring-2 ring-[#e8deda]"
+            className="h-9 w-9 rounded-full object-cover ring-2 ring-[#e5e7eb]"
           />
         ) : (
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#fff4f0] text-sm font-bold text-[#9a442d]">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#eff6ff] text-sm font-bold text-[#1d4ed8]">
             {displayName.charAt(0)}
           </div>
         )}
@@ -195,25 +195,25 @@ function DesktopTopBar({
   const displayName = userName ?? "Account User";
 
   return (
-    <div className="sticky top-0 z-30 hidden items-center justify-between border-b border-[#e8deda] bg-white px-6 py-4 lg:flex">
+    <div className="sticky top-0 z-30 hidden items-center justify-between border-b border-[#e5e7eb] bg-white px-6 py-4 lg:flex">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-[#88726d]">
+        <p className="text-xs font-semibold uppercase tracking-wider text-[#6b7280]">
           {ROLE_LABELS[role]}
         </p>
         {businessName ? (
-          <p className="font-display text-lg font-bold text-[#191c1e]">
+          <p className="font-display text-lg font-bold text-[#111827]">
             {businessName}
           </p>
         ) : null}
       </div>
       <div className="flex items-center gap-3">
         <div className="text-right">
-          <p className="text-sm font-bold text-[#191c1e]">{displayName}</p>
+          <p className="text-sm font-bold text-[#111827]">{displayName}</p>
           {userSubtitle ? (
-            <p className="text-xs text-[#88726d]">{userSubtitle}</p>
+            <p className="text-xs text-[#6b7280]">{userSubtitle}</p>
           ) : null}
         </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#fff4f0] text-sm font-bold text-[#9a442d]">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#eff6ff] text-sm font-bold text-[#1d4ed8]">
           {displayName.charAt(0)}
         </div>
       </div>
@@ -233,9 +233,9 @@ export function EnterpriseShell({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="flex min-h-dvh bg-[#fffdfc]">
-      {/* Desktop sidebar — sticks in place while the page scrolls */}
-      <aside className="sticky top-0 hidden h-dvh w-[260px] shrink-0 overflow-y-auto border-r border-[#e8deda] bg-white p-5 lg:block">
+    <div className="flex min-h-dvh bg-[#f9fafb]">
+      {/* Desktop sidebar - sticks in place while the page scrolls */}
+      <aside className="sticky top-0 hidden h-dvh w-[260px] shrink-0 overflow-y-auto border-r border-[#e5e7eb] bg-white p-5 lg:block">
         <Sidebar role={role} pathname={pathname} />
       </aside>
 

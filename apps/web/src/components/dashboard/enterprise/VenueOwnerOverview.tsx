@@ -41,7 +41,7 @@ export type VenueOwnerOverviewProps = {
 function Toast({ show, message }: { show: boolean; message: string }) {
   if (!show) return null;
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-[#191c1e] px-4 py-3 text-sm font-semibold text-white shadow-lg">
+    <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-[#111827] px-4 py-3 text-sm font-semibold text-white shadow-lg">
       <MaterialIcon name="check_circle" className="text-lg text-emerald-400" />
       {message}
     </div>
@@ -107,7 +107,7 @@ export function VenueOwnerOverview({
     },
     {
       label: "Avg. Rating",
-      value: avgRating != null ? avgRating.toFixed(1) : "—",
+      value: avgRating != null ? avgRating.toFixed(1) : "-",
       icon: "star",
     },
   ];
@@ -116,10 +116,10 @@ export function VenueOwnerOverview({
     <DashboardPage>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-semibold text-[#88726d]">
+          <p className="text-sm font-semibold text-[#6b7280]">
             Welcome back, {userName.split(" ")[0]}
           </p>
-          <h1 className="font-display text-2xl font-bold text-[#191c1e] sm:text-3xl">
+          <h1 className="font-display text-2xl font-bold text-[#111827] sm:text-3xl">
             {businessName ?? "Venue Dashboard"}
           </h1>
         </div>
@@ -136,12 +136,12 @@ export function VenueOwnerOverview({
 
       <div className="grid gap-6 xl:grid-cols-[1fr_320px]">
         <Panel padding={false} className="overflow-hidden">
-          <div className="border-b border-[#e8deda] p-5 sm:p-6">
+          <div className="border-b border-[#e5e7eb] p-5 sm:p-6">
             <PanelHeader
               title="Booking Requests"
               description="Review and respond to incoming reservation requests."
               action={
-                <span className="rounded-full bg-[#fff4f0] px-3 py-1 text-xs font-bold text-[#9a442d]">
+                <span className="rounded-full bg-[#eff6ff] px-3 py-1 text-xs font-bold text-[#1d4ed8]">
                   {requests.filter((r) => r.status === "pending").length} pending
                 </span>
               }
@@ -158,8 +158,8 @@ export function VenueOwnerOverview({
                   header: "Event",
                   cell: (r) => (
                     <div>
-                      <p className="font-semibold text-[#191c1e]">{r.eventName}</p>
-                      <p className="text-xs text-[#88726d]">{r.eventType}</p>
+                      <p className="font-semibold text-[#111827]">{r.eventName}</p>
+                      <p className="text-xs text-[#6b7280]">{r.eventType}</p>
                     </div>
                   ),
                 },
@@ -168,7 +168,7 @@ export function VenueOwnerOverview({
                   header: "Client",
                   cell: (r) => (
                     <div className="flex items-center gap-2">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#fff4f0] text-xs font-bold text-[#9a442d]">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eff6ff] text-xs font-bold text-[#1d4ed8]">
                         {r.clientInitials}
                       </div>
                       <span>{r.client}</span>
@@ -181,7 +181,7 @@ export function VenueOwnerOverview({
                   cell: (r) => (
                     <div>
                       <p>{r.date}</p>
-                      <p className="text-xs text-[#88726d]">{r.time}</p>
+                      <p className="text-xs text-[#6b7280]">{r.time}</p>
                     </div>
                   ),
                 },
@@ -189,7 +189,7 @@ export function VenueOwnerOverview({
                   key: "revenue",
                   header: "Revenue",
                   cell: (r) => (
-                    <span className="font-semibold text-[#191c1e]">{r.revenue}</span>
+                    <span className="font-semibold text-[#111827]">{r.revenue}</span>
                   ),
                 },
                 {
@@ -207,7 +207,7 @@ export function VenueOwnerOverview({
                           type="button"
                           disabled={loadingId === r.id}
                           onClick={() => handleAction(r.id, "approved")}
-                          className="rounded-lg bg-[#9a442d] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#7a3624] disabled:opacity-50"
+                          className="rounded-lg bg-[#1d4ed8] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#1e40af] disabled:opacity-50"
                         >
                           Accept
                         </button>
@@ -215,13 +215,13 @@ export function VenueOwnerOverview({
                           type="button"
                           disabled={loadingId === r.id}
                           onClick={() => handleAction(r.id, "declined")}
-                          className="rounded-lg border border-[#e8deda] px-3 py-1.5 text-xs font-bold text-[#55423e] hover:border-red-300 hover:text-red-700 disabled:opacity-50"
+                          className="rounded-lg border border-[#e5e7eb] px-3 py-1.5 text-xs font-bold text-[#4b5563] hover:border-red-300 hover:text-red-700 disabled:opacity-50"
                         >
                           Decline
                         </button>
                       </div>
                     ) : (
-                      <span className="text-xs text-[#88726d]">—</span>
+                      <span className="text-xs text-[#6b7280]">-</span>
                     ),
                 },
               ]}
@@ -233,38 +233,38 @@ export function VenueOwnerOverview({
           <Panel>
             <PanelHeader title="Venue Profile" />
             <div className="mb-4 flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#fff4f0] text-[#9a442d]">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#eff6ff] text-[#1d4ed8]">
                 <MaterialIcon name="location_city" className="text-3xl" />
               </div>
               <div>
-                <p className="font-display font-bold text-[#191c1e]">
+                <p className="font-display font-bold text-[#111827]">
                   {venueCount} Active Venue{venueCount !== 1 ? "s" : ""}
                 </p>
-                <p className="text-sm text-[#55423e]">Listed on Venora</p>
+                <p className="text-sm text-[#4b5563]">Listed on Venora</p>
               </div>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-[#55423e]">Profile completion</span>
-                <span className="font-bold text-[#9a442d]">{profileCompletion}%</span>
+                <span className="text-[#4b5563]">Profile completion</span>
+                <span className="font-bold text-[#1d4ed8]">{profileCompletion}%</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-[#e8deda]">
+              <div className="h-2 overflow-hidden rounded-full bg-[#e5e7eb]">
                 <div
-                  className="h-full rounded-full bg-[#9a442d] transition-all"
+                  className="h-full rounded-full bg-[#1d4ed8] transition-all"
                   style={{ width: `${profileCompletion}%` }}
                 />
               </div>
             </div>
             <Link
               href="/dashboard/packages"
-              className="mt-4 flex items-center gap-2 text-sm font-semibold text-[#9a442d] hover:underline"
+              className="mt-4 flex items-center gap-2 text-sm font-semibold text-[#1d4ed8] hover:underline"
             >
               Complete your profile
               <MaterialIcon name="arrow_forward" className="text-base" />
             </Link>
           </Panel>
 
-          <Panel className="bg-[#fff4f0]/40">
+          <Panel className="bg-[#eff6ff]/40">
             <PanelHeader
               title="Performance Trend"
               description="Confirmed bookings this year"
@@ -274,7 +274,7 @@ export function VenueOwnerOverview({
                 (h, i) => (
                   <div
                     key={i}
-                    className="flex-1 rounded-t-md bg-[#9a442d]/70"
+                    className="flex-1 rounded-t-md bg-[#1d4ed8]/70"
                     style={{ height: `${h * 0.9}px` }}
                   />
                 ),

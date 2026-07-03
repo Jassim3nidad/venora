@@ -11,61 +11,61 @@
 @theme {
   --font-sans: "Inter", sans-serif;
   --font-display: "Sora", sans-serif;
-  
-  --color-brand-50:  hsl(217 91% 97%);
-  --color-brand-100: hsl(217 91% 93%);
-  --color-brand-200: hsl(217 91% 85%);
-  --color-brand-300: hsl(217 91% 74%);
-  --color-brand-400: hsl(217 91% 63%);
-  --color-brand-500: hsl(217 91% 55%);
-  --color-brand-600: hsl(217 91% 47%);
-  --color-brand-700: hsl(217 91% 39%);
-  --color-brand-800: hsl(217 91% 31%);
-  --color-brand-900: hsl(217 91% 23%);
-  --color-brand-950: hsl(217 91% 15%);
-  
-  --color-accent-400: hsl(45 96% 65%);
-  --color-accent-500: hsl(45 96% 54%);
+
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+  --color-brand-950: #172554;
+
+  --color-accent-400: #37bcf1;
+  --color-accent-500: #37bcf1;
 }
 
-/* ─── CSS Custom Properties (Design Tokens) ──────────────────────────────── */
+/* --- CSS Custom Properties (Design Tokens) -------------------------------- */
 :root {
   /* Brand (blue) */
-  --color-brand-50:  hsl(217 91% 97%);
-  --color-brand-100: hsl(217 91% 93%);
-  --color-brand-200: hsl(217 91% 85%);
-  --color-brand-300: hsl(217 91% 74%);
-  --color-brand-400: hsl(217 91% 63%);
-  --color-brand-500: hsl(217 91% 55%);
-  --color-brand-600: hsl(217 91% 47%);
-  --color-brand-700: hsl(217 91% 39%);
-  --color-brand-800: hsl(217 91% 31%);
-  --color-brand-900: hsl(217 91% 23%);
-  --color-brand-950: hsl(217 91% 15%);
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+  --color-brand-950: #172554;
 
-  /* Accent (amber-gold) */
-  --color-accent-400: hsl(45 96% 65%);
-  --color-accent-500: hsl(45 96% 54%);
+  /* Accent (cyan) */
+  --color-accent-400: #37bcf1;
+  --color-accent-500: #37bcf1;
 
   /* Backgrounds */
-  --bg-base:     hsl(0 0% 100%);
-  --bg-subtle:   hsl(240 5% 98%);
-  --bg-muted:    hsl(240 5% 95%);
+  --bg-base: #ffffff;
+  --bg-subtle: #f9fafb;
+  --bg-muted: #f3f4f6;
 
   /* Text */
-  --text-primary:   hsl(240 10% 12%);
-  --text-secondary: hsl(240 5% 45%);
-  --text-muted:     hsl(240 5% 65%);
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
 
   /* Border */
-  --border-default: hsl(240 6% 90%);
-  --border-strong:  hsl(240 6% 80%);
+  --border-default: #e5e7eb;
+  --border-strong: #d1d5db;
 
   /* Shadows */
   --shadow-sm:  0 1px 3px 0 rgb(0 0 0 / 0.05);
   --shadow-md:  0 4px 16px -2px rgb(0 0 0 / 0.08);
   --shadow-lg:  0 20px 40px -8px rgb(0 0 0 / 0.12);
-  --shadow-brand: 0 8px 24px -4px hsl(217 91% 47% / 0.3);
+  --shadow-brand: 0 8px 24px -4px rgb(37 99 235 / 0.3);
 
   /* Radii */
   --radius-sm:  0.375rem;
@@ -84,14 +84,14 @@
   --transition-slow:    400ms cubic-bezier(0.16, 1, 0.3, 1);
 
   /* Semantic status colors */
-  --color-success:      hsl(142 76% 36%);
-  --color-success-bg:   hsl(142 76% 95%);
-  --color-warning:      hsl(31 67% 54%);
-  --color-warning-bg:   hsl(31 67% 95%);
-  --color-danger:       hsl(12 49% 41%);
-  --color-danger-bg:    hsl(12 49% 95%);
-  --color-info:         hsl(195 33% 36%);
-  --color-info-bg:      hsl(195 33% 95%);
+  --color-success: #10b981;
+  --color-success-bg: #ecfdf5;
+  --color-warning: #f59e0b;
+  --color-warning-bg: #fffbeb;
+  --color-danger: #ef4444;
+  --color-danger-bg: #fef2f2;
+  --color-info: #37bcf1;
+  --color-info-bg: #eff6ff;
 }
 
 /* Dark mode */
@@ -105,13 +105,13 @@
   --border-default: hsl(240 6% 20%);
   --border-strong:  hsl(240 6% 28%);
 
-  --color-success-bg:   hsl(142 76% 12%);
-  --color-warning-bg:   hsl(31 67% 12%);
-  --color-danger-bg:    hsl(12 49% 12%);
-  --color-info-bg:      hsl(195 33% 12%);
+  --color-success-bg: #064e3b;
+  --color-warning-bg: #78350f;
+  --color-danger-bg: #7f1d1d;
+  --color-info-bg: #172554;
 }
 
-/* ─── Base Reset & Typography ─────────────────────────────────────────────── */
+/* --- Base Reset & Typography ----------------------------------------------- */
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -131,7 +131,7 @@ body {
   min-height: 100dvh;
 }
 
-/* ─── Scrollbar ───────────────────────────────────────────────────────────── */
+/* --- Scrollbar ------------------------------------------------------------- */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
@@ -142,19 +142,19 @@ body {
   background: var(--text-muted);
 }
 
-/* ─── Focus ───────────────────────────────────────────────────────────────── */
+/* --- Focus ----------------------------------------------------------------- */
 :focus-visible {
   outline: 2px solid var(--color-brand-500);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
 
-/* ─── Selection ───────────────────────────────────────────────────────────── */
+/* --- Selection ------------------------------------------------------------- */
 ::selection {
-  background-color: hsl(217 80% 63% / 0.25);
+  background-color: rgb(219 234 254 / 0.8);
 }
 
-/* ─── Animations ──────────────────────────────────────────────────────────── */
+/* --- Animations ------------------------------------------------------------ */
 @keyframes fade-in {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -184,7 +184,7 @@ body {
 .animate-slide-up  { animation: slide-up var(--transition-slow)    both; }
 .animate-scale-in  { animation: scale-in var(--transition-fast)    both; }
 
-/* ─── Skeleton shimmer ────────────────────────────────────────────────────── */
+/* --- Skeleton shimmer ------------------------------------------------------ */
 .skeleton {
   background: linear-gradient(
     90deg,
@@ -197,7 +197,7 @@ body {
   border-radius: var(--radius-md);
 }
 
-/* ─── Glassmorphism utility ───────────────────────────────────────────────── */
+/* --- Glassmorphism utility ------------------------------------------------- */
 .glass {
   background: rgb(255 255 255 / 0.7);
   backdrop-filter: blur(12px) saturate(180%);
@@ -210,7 +210,7 @@ body {
   border: 1px solid rgb(255 255 255 / 0.08);
 }
 
-/* ─── Gradient text ───────────────────────────────────────────────────────── */
+/* --- Gradient text --------------------------------------------------------- */
 .gradient-text {
   background: linear-gradient(
     135deg,
@@ -223,7 +223,7 @@ body {
   background-clip: text;
 }
 
-/* ─── Gradient background ─────────────────────────────────────────────────── */
+/* --- Gradient background --------------------------------------------------- */
 .gradient-brand {
   background: linear-gradient(
     135deg,
@@ -232,7 +232,7 @@ body {
   );
 }
 
-/* ─── Container ───────────────────────────────────────────────────────────── */
+/* --- Container ------------------------------------------------------------- */
 .container {
   width: 100%;
   max-width: 1280px;
@@ -258,7 +258,7 @@ body {
   width: 100%;
   height: 4px;
   border-radius: 2px;
-  background: #e2e8f0;
+  background: #e5e7eb;
   outline: none;
 }
 .range-slider::-webkit-slider-thumb {
@@ -267,7 +267,7 @@ body {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #e07a5f;
+  background: #2563eb;
   cursor: pointer;
   border: 2px solid #ffffff;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);

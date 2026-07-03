@@ -73,14 +73,14 @@ function SectionHeader({
   description: string;
 }) {
   return (
-    <div className="border-b border-[#E9D5D0]/80 pb-5">
+    <div className="border-b border-[#E5E7EB]/80 pb-5">
       <div className="mb-4 flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FFF4F1] text-[#E07A5F] shadow-sm">
+        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB] shadow-sm">
           <Icon className="h-5 w-5" />
         </div>
 
         <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#E07A5F]">
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
             {eyebrow}
           </p>
           <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">
@@ -147,10 +147,10 @@ function TextField({
           disabled={disabled}
           autoComplete={autoComplete}
           className={[
-            "h-12 w-full rounded-2xl border bg-[#FFFDFC] pl-11 pr-11 text-sm font-semibold text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-70",
+            "h-12 w-full rounded-2xl border bg-[#F9FAFB] pl-11 pr-11 text-sm font-semibold text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-70",
             error
               ? "border-red-500 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
-              : "border-slate-200 hover:border-[#E9D5D0] focus:border-[#E07A5F] focus:bg-white focus:ring-4 focus:ring-[#E07A5F]/10",
+              : "border-slate-200 hover:border-[#E5E7EB] focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10",
           ].join(" ")}
         />
 
@@ -158,7 +158,7 @@ function TextField({
           <button
             type="button"
             onClick={() => onShowPasswordChange(!showPassword)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E07A5F]/30"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? (
@@ -193,7 +193,7 @@ function SubmitButton({
       id={id}
       type="submit"
       disabled={isPending}
-      className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#E07A5F] px-5 text-sm font-extrabold text-white shadow-lg shadow-[#E07A5F]/25 transition hover:bg-[#d96851] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#E07A5F]/25 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+      className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-5 text-sm font-extrabold text-white shadow-lg shadow-[#2563EB]/25 transition hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
     >
       <Icon className="h-4 w-4" />
       {isPending ? pendingText : children}
@@ -315,11 +315,11 @@ export default function AccountForm({
 
   return (
     <div className="relative">
-      <div className="absolute left-[-120px] top-[-80px] -z-10 h-[260px] w-[260px] rounded-full bg-[#E07A5F]/10 blur-3xl" />
-      <div className="absolute bottom-[-120px] right-[-80px] -z-10 h-[280px] w-[280px] rounded-full bg-[#F0A090]/10 blur-3xl" />
+      <div className="absolute left-[-120px] top-[-80px] -z-10 h-[260px] w-[260px] rounded-full bg-[#2563EB]/10 blur-3xl" />
+      <div className="absolute bottom-[-120px] right-[-80px] -z-10 h-[280px] w-[280px] rounded-full bg-[#DBEAFE]/10 blur-3xl" />
 
       <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[#F0A090] bg-[#FFF4F1] px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#E07A5F]">
+        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#2563EB]">
           Account settings
         </div>
       </div>
@@ -327,7 +327,7 @@ export default function AccountForm({
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)]">
         <form
           onSubmit={handleProfileSubmit}
-          className="overflow-hidden rounded-[28px] border border-[#E9D5D0]/80 bg-white shadow-xl shadow-slate-200/60"
+          className="overflow-hidden rounded-[28px] border border-[#E5E7EB]/80 bg-white shadow-xl shadow-slate-200/60"
         >
           <div className="p-6 sm:p-8">
             <SectionHeader
@@ -370,9 +370,9 @@ export default function AccountForm({
                 autoComplete="tel"
               />
 
-              <div className="rounded-2xl border border-[#E9D5D0]/80 bg-[#FFFDFC] p-4">
+              <div className="rounded-2xl border border-[#E5E7EB]/80 bg-[#F9FAFB] p-4">
                 <div className="flex gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#FFF4F1] text-[#E07A5F]">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB]">
                     <ShieldCheck className="h-5 w-5" />
                   </div>
 
@@ -390,7 +390,7 @@ export default function AccountForm({
             </div>
           </div>
 
-          <div className="border-t border-[#E9D5D0]/80 bg-[#FFFDFC] px-6 py-5 sm:px-8">
+          <div className="border-t border-[#E5E7EB]/80 bg-[#F9FAFB] px-6 py-5 sm:px-8">
             <SubmitButton
               id="account-save-btn"
               isPending={isPending}
@@ -404,7 +404,7 @@ export default function AccountForm({
 
         <form
           onSubmit={handlePasswordSubmit}
-          className="overflow-hidden rounded-[28px] border border-[#E9D5D0]/80 bg-white shadow-xl shadow-slate-200/60"
+          className="overflow-hidden rounded-[28px] border border-[#E5E7EB]/80 bg-white shadow-xl shadow-slate-200/60"
         >
           <div className="p-6 sm:p-8">
             <SectionHeader
@@ -429,7 +429,7 @@ export default function AccountForm({
                 type="password"
                 value={oldPassword}
                 onChange={setOldPassword}
-                placeholder="••••••••"
+                placeholder="Enter password"
                 disabled={isPwdPending}
                 error={pwdFieldErrors.oldPassword?.[0]}
                 icon={Lock}
@@ -444,7 +444,7 @@ export default function AccountForm({
                 type="password"
                 value={password}
                 onChange={setPassword}
-                placeholder="••••••••"
+                placeholder="Enter password"
                 disabled={isPwdPending}
                 error={pwdFieldErrors.password?.[0]}
                 icon={KeyRound}
@@ -459,7 +459,7 @@ export default function AccountForm({
                 type="password"
                 value={confirmPassword}
                 onChange={setConfirmPassword}
-                placeholder="••••••••"
+                placeholder="Enter password"
                 disabled={isPwdPending}
                 error={pwdFieldErrors.confirmPassword?.[0]}
                 icon={ShieldCheck}
@@ -480,7 +480,7 @@ export default function AccountForm({
             </div>
           </div>
 
-          <div className="border-t border-[#E9D5D0]/80 bg-[#FFFDFC] px-6 py-5 sm:px-8">
+          <div className="border-t border-[#E5E7EB]/80 bg-[#F9FAFB] px-6 py-5 sm:px-8">
             <SubmitButton
               id="account-change-pwd-btn"
               isPending={isPwdPending}

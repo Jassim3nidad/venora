@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { type FormEvent, useState, useTransition } from "react";
 import Link from "next/link";
@@ -6,12 +6,13 @@ import {
   Building2,
   CalendarCheck,
   Check,
+  Chrome,
   ClipboardCheck,
-  DraftingCompass,
   Eye,
   EyeOff,
   LockKeyhole,
   Mail,
+  Sparkles,
   Truck,
   User,
 } from "lucide-react";
@@ -26,6 +27,12 @@ const ROLES = [
   { value: "venue_owner", label: "Venue Owner", icon: Building2 },
   { value: "supplier", label: "Supplier", icon: Truck },
   { value: "event_coordinator", label: "Coordinator", icon: ClipboardCheck },
+];
+
+const brandPoints = [
+  "Discover venues for weddings, parties, and corporate events.",
+  "Manage bookings, favorites, and event details in one place.",
+  "Create a workspace tailored to your Venora role.",
 ];
 
 export default function RegisterPage() {
@@ -76,382 +83,371 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="flex min-h-screen w-full overflow-hidden bg-white">
-      {/* Left Branding Panel */}
-      <section className="relative hidden min-h-screen w-1/2 overflow-hidden bg-[#0F172A] lg:flex">
-        <div className="absolute inset-0 opacity-[0.18]">
-          <div className="absolute left-[18%] top-[10%] h-[360px] w-[260px] rounded-[28px] border border-white/10 bg-white/5 shadow-2xl" />
-          <div className="absolute bottom-[10%] right-[12%] h-[340px] w-[260px] rounded-[28px] border border-white/10 bg-white/5 shadow-2xl" />
-          <div className="absolute left-[42%] top-[13%] h-[220px] w-[220px] rotate-45 bg-white/5" />
-          <div className="absolute bottom-[20%] right-[24%] h-[220px] w-[220px] rotate-45 bg-white/5" />
-        </div>
+    <main className="flex min-h-screen w-full overflow-hidden bg-[#F9FAFB] text-[#111827]">
+      <section className="relative hidden min-h-screen w-1/2 overflow-hidden bg-[#111827] lg:flex">
+        <img
+          src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1400&q=80"
+          alt="Elegant banquet venue prepared for a premium event."
+          className="absolute inset-0 h-full w-full object-cover opacity-45"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#111827]/95 via-[#1D4ED8]/88 to-[#2563EB]/78" />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/40 to-[#0F172A]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_35%_45%,rgba(255,255,255,0.10),transparent_35%)]" />
+        <div className="relative z-10 flex w-full flex-col justify-between px-12 py-12 xl:px-16">
+          <Link
+            href="/"
+            className="text-2xl font-black tracking-[-0.04em] text-white transition hover:text-[#EFF6FF]"
+          >
+            Venora
+          </Link>
 
-        <div className="relative z-10 mx-auto flex w-full max-w-[560px] translate-x-[-100px] flex-col justify-center px-[64px]">
-          <div className="mb-[58px] flex items-center gap-[12px]">
-            <span className="text-[24px] font-semibold leading-[32px] translate-y-[50px] tracking-[-0.02em] text-[#E07A5F]">
-              Venora
-            </span>
-          </div>
+          <div className="max-w-xl">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-white backdrop-blur-md">
+              Join the marketplace
+            </div>
 
-          <div>
-            <h1 className="max-w-[500px] text-[50px] font-bold leading-[65px] tracking-[-0.05em] text-white">
-              <span className="block whitespace-nowrap">Where Extraordinary</span>
-              <span className="block whitespace-nowrap">Events Begin.</span>
+            <h1 className="text-5xl font-black leading-tight tracking-[-0.05em] text-white xl:text-6xl">
+              Create your event workspace.
             </h1>
 
-            <ul className="mt-[54px] flex translate-y-[-40px] flex-col gap-[24px]">
-              {[
-                "Curated, high-quality spaces.",
-                "Transparent, upfront pricing.",
-                "Seamless booking management.",
-              ].map((item) => (
-                <li
-                  key={item}
-                  className="flex items-center gap-[18px] text-white"
-                >
-                  <span className="flex h-[24px] w-[24px] items-center justify-center rounded-full bg-[#FFDACE]">
-                    <Check
-                      className="h-[14px] w-[14px] text-[#0F172A]"
-                      strokeWidth={3}
-                    />
+            <p className="mt-5 max-w-md text-base font-medium leading-7 text-white/82">
+              Venora brings customers, venues, suppliers, and coordinators into
+              one polished planning experience.
+            </p>
+
+            <ul className="mt-9 space-y-4">
+              {brandPoints.map((item) => (
+                <li key={item} className="flex items-start gap-3 text-white">
+                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#EFF6FF] text-[#1D4ED8]">
+                    <Check className="h-4 w-4" strokeWidth={3} />
                   </span>
-                  <span className="text-[18px] leading-[28px]">{item}</span>
+                  <span className="text-base font-semibold leading-6">
+                    {item}
+                  </span>
                 </li>
               ))}
             </ul>
           </div>
+
+          <div className=" -translate-y-20 rounded-[28px] border border-white/20 bg-white/15 p-5 text-white shadow-2xl shadow-black/20 backdrop-blur-md">
+            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-white/70">
+              Designed for every role
+            </p>
+            <p className="mt-2 text-sm font-semibold leading-6 text-white/85">
+              Choose the account type that matches how you plan, host, supply,
+              or coordinate unforgettable events.
+            </p>
+          </div>
         </div>
       </section>
 
-      {/* Register Form */}
-      <section className="flex min-h-screen w-full items-center justify-center overflow-y-auto bg-white px-[24px] py-[20px] lg:w-1/2 lg:px-[64px]">
-        <div className="w-full max-w-[400px]">
-          {/* Mobile Logo */}
-          <div className="mb-[18px] flex items-center justify-center lg:hidden">
-            <span className="text-[24px] font-semibold text-[#E07A5F]">Venora</span>
-          </div>
-
-          <div className="mb-[18px] text-center">
-            <h2 className="mb-[4px] text-[28px] font-semibold leading-[36px] tracking-[-0.01em] text-[#191C1E]">
-              Create your Venora account
-            </h2>
-            <p className="text-[15px] font-normal leading-[22px] text-[#55423E]">
-              Enter your details to get started.
-            </p>
-          </div>
-
-          {generalError ? (
-            <div
-              role="alert"
-              className="mb-[12px] rounded-[8px] border border-red-200 bg-red-50 px-[14px] py-[10px] text-[14px] font-medium text-red-700"
+      <section className="flex min-h-screen w-full items-center justify-center overflow-y-auto bg-[#F9FAFB] px-4 py-8 sm:px-6 lg:w-1/2 lg:px-12 xl:px-16">
+        <div className="w-full max-w-[500px]">
+          <div className="mb-6 flex items-center justify-center lg:hidden">
+            <Link
+              href="/"
+              className="text-2xl font-black tracking-[-0.04em] text-[#2563EB]"
             >
-              {generalError}
+              Venora
+            </Link>
+          </div>
+
+          <div className="rounded-[28px] border border-[#E5E7EB]/80 bg-white p-6 shadow-xl shadow-slate-200/60 sm:p-8">
+            <div className="mb-6 text-center">
+              <p className="mb-3 inline-flex rounded-full border border-[#E5E7EB] bg-[#EFF6FF] px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#1D4ED8]">
+                Start planning
+              </p>
+              <h2 className="text-3xl font-black leading-tight tracking-[-0.04em] text-[#111827]">
+                Create your Venora account
+              </h2>
+              <p className="mt-2 text-sm font-medium leading-6 text-[#6B7280]">
+                Enter your details and choose your workspace type.
+              </p>
             </div>
-          ) : null}
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-[10px]">
-            {/* Full Name */}
-            <div className="flex flex-col gap-[4px]">
-              <label
-                htmlFor="fullName"
-                className="!pl-[2px] text-[11px] font-bold uppercase leading-[16px] tracking-[0.08em] text-[#191C1E]"
+            {generalError ? (
+              <div
+                role="alert"
+                className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold leading-6 text-red-700"
               >
-                Full Name
-              </label>
-
-              <div className="relative">
-                <User className="pointer-events-none absolute left-[10px] top-1/2 h-[16px] w-[16px] -translate-y-1/2 text-[#55423E]" />
-
-                <input
-                  id="fullName"
-                  name="fullName"
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Jane Doe"
-                  autoComplete="name"
-                  disabled={isPending}
-                  className={`h-[42px] w-full rounded-[6px] border bg-white !pl-[40px] pr-[16px] text-[15px] font-normal leading-[22px] text-[#191C1E] outline-none transition-shadow placeholder:text-[#55423E]/60 focus:border-[#E07A5F] focus:ring-2 focus:ring-[#E07A5F]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
-                    fieldErrors.fullName
-                      ? "border-red-500"
-                      : "border-[#E2E8F0]"
-                  }`}
-                />
+                {generalError}
               </div>
+            ) : null}
 
-              {fieldErrors.fullName?.[0] ? (
-                <p className="text-[13px] font-medium text-red-600">
-                  {fieldErrors.fullName[0]}
-                </p>
-              ) : null}
-            </div>
-
-            {/* Email */}
-            <div className="flex flex-col gap-[4px]">
-              <label
-                htmlFor="email"
-                className="!pl-[2px] text-[11px] font-bold uppercase leading-[16px] tracking-[0.08em] text-[#191C1E]"
-              >
-                Email Address
-              </label>
-
-              <div className="relative">
-                <Mail className="pointer-events-none absolute left-[10px] top-1/2 h-[16px] w-[16px] -translate-y-1/2 text-[#55423E]" />
-
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="jane@example.com"
-                  autoComplete="email"
-                  disabled={isPending}
-                  className={`h-[42px] w-full rounded-[6px] border bg-white !pl-[40px] pr-[16px] text-[15px] font-normal leading-[22px] text-[#191C1E] outline-none transition-shadow placeholder:text-[#55423E]/60 focus:border-[#E07A5F] focus:ring-2 focus:ring-[#E07A5F]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
-                    fieldErrors.email ? "border-red-500" : "border-[#E2E8F0]"
-                  }`}
-                />
-              </div>
-
-              {fieldErrors.email?.[0] ? (
-                <p className="text-[13px] font-medium text-red-600">
-                  {fieldErrors.email[0]}
-                </p>
-              ) : null}
-            </div>
-
-            {/* Password */}
-            <div className="flex flex-col gap-[4px]">
-              <label
-                htmlFor="password"
-                className="!pl-[2px] text-[11px] font-bold uppercase leading-[16px] tracking-[0.08em] text-[#191C1E]"
-              >
-                Password
-              </label>
-
-              <div className="relative">
-                <LockKeyhole className="pointer-events-none absolute left-[10px] top-1/2 h-[16px] w-[16px] -translate-y-1/2 text-[#55423E]" />
-
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  autoComplete="new-password"
-                  disabled={isPending}
-                  className={`h-[42px] w-full rounded-[6px] border bg-white !pl-[40px] pr-[38px] text-[15px] font-normal leading-[22px] text-[#191C1E] outline-none transition-shadow placeholder:text-[#55423E]/60 focus:border-[#E07A5F] focus:ring-2 focus:ring-[#E07A5F]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
-                    fieldErrors.password
-                      ? "border-red-500"
-                      : "border-[#E2E8F0]"
-                  }`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-[10px] top-1/2 -translate-y-1/2 text-[#55423E] transition hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E07A5F]/30"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor="fullName"
+                  className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#111827]"
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-[16px] w-[16px]" />
-                  ) : (
-                    <Eye className="h-[16px] w-[16px]" />
-                  )}
-                </button>
+                  Full name
+                </label>
+
+                <div className="relative">
+                  <User className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
+
+                  <input
+                    id="fullName"
+                    name="fullName"
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Jane Doe"
+                    autoComplete="name"
+                    disabled={isPending}
+                    className={[
+                      "h-11 w-full rounded-2xl border bg-[#F9FAFB] pl-11 pr-4 text-sm font-semibold text-[#111827] shadow-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60",
+                      fieldErrors.fullName
+                        ? "border-red-500 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
+                        : "border-[#E5E7EB] hover:border-[#2563EB]/60 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10",
+                    ].join(" ")}
+                  />
+                </div>
+
+                {fieldErrors.fullName?.[0] ? (
+                  <p className="text-xs font-semibold text-red-600">
+                    {fieldErrors.fullName[0]}
+                  </p>
+                ) : null}
               </div>
 
-              {fieldErrors.password?.[0] ? (
-                <p className="text-[13px] font-medium text-red-600">
-                  {fieldErrors.password[0]}
-                </p>
-              ) : (
-                <p className="mt-[2px] text-[13px] font-normal leading-[18px] text-[#55423E]">
-                  Must be at least 8 characters.
-                </p>
-              )}
-            </div>
-
-            {/* Confirm Password */}
-            <div className="flex flex-col gap-[4px]">
-              <label
-                htmlFor="confirmPassword"
-                className="!pl-[2px] text-[11px] font-bold uppercase leading-[16px] tracking-[0.08em] text-[#191C1E]"
-              >
-                Confirm Password
-              </label>
-
-              <div className="relative">
-                <LockKeyhole className="pointer-events-none absolute left-[10px] top-1/2 h-[16px] w-[16px] -translate-y-1/2 text-[#55423E]" />
-
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  autoComplete="new-password"
-                  disabled={isPending}
-                  className={`h-[42px] w-full rounded-[6px] border bg-white !pl-[40px] pr-[38px] text-[15px] font-normal leading-[22px] text-[#191C1E] outline-none transition-shadow placeholder:text-[#55423E]/60 focus:border-[#E07A5F] focus:ring-2 focus:ring-[#E07A5F]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
-                    fieldErrors.confirmPassword
-                      ? "border-red-500"
-                      : "border-[#E2E8F0]"
-                  }`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-[10px] top-1/2 -translate-y-1/2 text-[#55423E] transition hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E07A5F]/30"
-                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor="email"
+                  className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#111827]"
                 >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-[16px] w-[16px]" />
-                  ) : (
-                    <Eye className="h-[16px] w-[16px]" />
-                  )}
-                </button>
+                  Email address
+                </label>
+
+                <div className="relative">
+                  <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
+
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="jane@example.com"
+                    autoComplete="email"
+                    disabled={isPending}
+                    className={[
+                      "h-11 w-full rounded-2xl border bg-[#F9FAFB] pl-11 pr-4 text-sm font-semibold text-[#111827] shadow-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60",
+                      fieldErrors.email
+                        ? "border-red-500 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
+                        : "border-[#E5E7EB] hover:border-[#2563EB]/60 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10",
+                    ].join(" ")}
+                  />
+                </div>
+
+                {fieldErrors.email?.[0] ? (
+                  <p className="text-xs font-semibold text-red-600">
+                    {fieldErrors.email[0]}
+                  </p>
+                ) : null}
               </div>
 
-              {fieldErrors.confirmPassword?.[0] ? (
-                <p className="text-[13px] font-medium text-red-600">
-                  {fieldErrors.confirmPassword[0]}
-                </p>
-              ) : null}
-            </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="password"
+                    className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#111827]"
+                  >
+                    Password
+                  </label>
 
-            {/* Account Type */}
-            <fieldset className="border-0 p-0">
-              <legend className="mb-[8px] text-[11px] font-bold uppercase leading-[16px] tracking-[0.08em] text-[#191C1E]">
-                Account Type
-              </legend>
+                  <div className="relative">
+                    <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
 
-              <div className="grid grid-cols-2 gap-[10px]">
-                {ROLES.map((roleOption) => {
-                  const isSelected = role === roleOption.value;
-                  const Icon = roleOption.icon;
-
-                  return (
-                    <label
-                      key={roleOption.value}
-                      htmlFor={`role-${roleOption.value}`}
-                      className={`flex h-[60px] cursor-pointer flex-col items-center justify-center rounded-[8px] border transition-all ${
-                        isSelected
-                          ? "border-[#E07A5F] bg-[#FFF4F0]"
-                          : "border-[#E2E8F0] bg-white hover:border-[#E07A5F]/60"
-                      }`}
+                    <input
+                      id="password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Create password"
+                      autoComplete="new-password"
+                      disabled={isPending}
+                      className={[
+                        "h-11 w-full rounded-2xl border bg-[#F9FAFB] pl-11 pr-11 text-sm font-semibold text-[#111827] shadow-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60",
+                        fieldErrors.password
+                          ? "border-red-500 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
+                          : "border-[#E5E7EB] hover:border-[#2563EB]/60 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10",
+                      ].join(" ")}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[#6B7280] transition hover:bg-[#EFF6FF] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
                     >
-                      <input
-                        id={`role-${roleOption.value}`}
-                        type="radio"
-                        name="role"
-                        value={roleOption.value}
-                        checked={isSelected}
-                        onChange={(e) => setRole(e.target.value)}
-                        disabled={isPending}
-                        className="sr-only"
-                      />
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
 
-                      <Icon
-                        className={`mb-[8px] h-[22px] w-[22px] ${
-                          isSelected ? "text-[#E07A5F]" : "text-[#5B463F]"
-                        }`}
-                        strokeWidth={2.3}
-                      />
+                  {fieldErrors.password?.[0] ? (
+                    <p className="text-xs font-semibold text-red-600">
+                      {fieldErrors.password[0]}
+                    </p>
+                  ) : (
+                    <p className="text-xs font-medium text-[#6B7280]">
+                      At least 8 characters.
+                    </p>
+                  )}
+                </div>
 
-                      <span
-                        className={`text-center text-[14px] font-bold leading-[18px] ${
-                          isSelected ? "text-[#E07A5F]" : "text-[#3F2F2A]"
-                        }`}
-                      >
-                        {roleOption.label}
-                      </span>
-                    </label>
-                  );
-                })}
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="confirmPassword"
+                    className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#111827]"
+                  >
+                    Confirm password
+                  </label>
+
+                  <div className="relative">
+                    <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
+
+                    <input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Confirm password"
+                      autoComplete="new-password"
+                      disabled={isPending}
+                      className={[
+                        "h-11 w-full rounded-2xl border bg-[#F9FAFB] pl-11 pr-11 text-sm font-semibold text-[#111827] shadow-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60",
+                        fieldErrors.confirmPassword
+                          ? "border-red-500 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
+                          : "border-[#E5E7EB] hover:border-[#2563EB]/60 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10",
+                      ].join(" ")}
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      className="absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[#6B7280] transition hover:bg-[#EFF6FF] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
+                      aria-label={
+                        showConfirmPassword ? "Hide password" : "Show password"
+                      }
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+
+                  {fieldErrors.confirmPassword?.[0] ? (
+                    <p className="text-xs font-semibold text-red-600">
+                      {fieldErrors.confirmPassword[0]}
+                    </p>
+                  ) : null}
+                </div>
               </div>
 
-              {fieldErrors.role?.[0] ? (
-                <p className="mt-[6px] text-[13px] font-medium text-red-600">
-                  {fieldErrors.role[0]}
-                </p>
-              ) : null}
-            </fieldset>
+              <fieldset className="border-0 p-0">
+                <legend className="mb-2 text-xs font-extrabold uppercase tracking-[0.12em] text-[#111827]">
+                  Account type
+                </legend>
 
-            {/* Submit Button */}
-            <button
-              id="register-submit-btn"
-              type="submit"
-              disabled={isPending}
-              className="mt-[4px] h-[40px] w-full rounded-[4px] bg-[#E07A5F] text-[14px] font-semibold leading-[20px] text-white transition-colors duration-200 hover:bg-[#9A442D] disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {isPending ? "Creating Account..." : "Create Account"}
-            </button>
+                <div className="grid grid-cols-2 gap-3">
+                  {ROLES.map((roleOption) => {
+                    const isSelected = role === roleOption.value;
+                    const Icon = roleOption.icon;
 
-            {/* Divider */}
-            <div className="relative flex items-center py-[4px]">
-              <div className="flex-grow border-t border-[#E2E8F0]" />
-              <span className="mx-[16px] flex-shrink-0 text-[14px] font-normal leading-[20px] text-[#55423E]">
-                or
-              </span>
-              <div className="flex-grow border-t border-[#E2E8F0]" />
-            </div>
+                    return (
+                      <label
+                        key={roleOption.value}
+                        htmlFor={`role-${roleOption.value}`}
+                        className={[
+                          "flex min-h-[78px] cursor-pointer flex-col items-center justify-center rounded-2xl border px-3 py-3 text-center shadow-sm transition-all",
+                          isSelected
+                            ? "border-[#2563EB] bg-[#EFF6FF] text-[#1D4ED8] shadow-[#2563EB]/10"
+                            : "border-[#E5E7EB] bg-white text-[#6B7280] hover:border-[#2563EB]/60 hover:bg-[#F9FAFB] hover:text-[#1D4ED8]",
+                        ].join(" ")}
+                      >
+                        <input
+                          id={`role-${roleOption.value}`}
+                          type="radio"
+                          name="role"
+                          value={roleOption.value}
+                          checked={isSelected}
+                          onChange={(e) => setRole(e.target.value)}
+                          disabled={isPending}
+                          className="sr-only"
+                        />
 
-            {/* Google Button */}
-            <button
-              id="google-register-btn"
-              type="button"
-              disabled={isPending}
-              onClick={() => {
-                setGeneralError(null);
+                        <Icon className="mb-2 h-5 w-5" strokeWidth={2.3} />
 
-                startTransition(async () => {
-                  const res = await signInWithOAuthAction("google");
+                        <span className="text-xs font-extrabold leading-4">
+                          {roleOption.label}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
 
-                  if (res && !res.success) {
-                    setGeneralError(res.error);
-                  }
-                });
-              }}
-              className="flex h-[40px] w-full items-center justify-center gap-[8px] rounded-[4px] border border-[#E2E8F0] bg-white text-[14px] font-extrabold leading-[20px] text-[#191C1E] transition-colors duration-200 hover:border-[#88726D] disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              <svg
-                className="h-[16px] w-[16px]"
-                fill="none"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
+                {fieldErrors.role?.[0] ? (
+                  <p className="mt-2 text-xs font-semibold text-red-600">
+                    {fieldErrors.role[0]}
+                  </p>
+                ) : null}
+              </fieldset>
+
+              <button
+                id="register-submit-btn"
+                type="submit"
+                disabled={isPending}
+                className="h-12 w-full rounded-2xl bg-[#2563EB] text-sm font-extrabold text-white shadow-lg shadow-[#2563EB]/25 transition hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 disabled:cursor-not-allowed disabled:opacity-70"
               >
-                <path
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  fill="#4285F4"
-                />
-                <path
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  fill="#34A853"
-                />
-                <path
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                  fill="#FBBC05"
-                />
-                <path
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                  fill="#EA4335"
-                />
-              </svg>
+                {isPending ? "Creating account..." : "Create account"}
+              </button>
 
-              Continue with Google
-            </button>
-          </form>
+              <div className="relative flex items-center py-1">
+                <div className="h-px flex-grow bg-[#E5E7EB]" />
+                <span className="mx-4 flex-shrink-0 text-sm font-semibold text-[#6B7280]">
+                  or
+                </span>
+                <div className="h-px flex-grow bg-[#E5E7EB]" />
+              </div>
 
-          <div className="!mt-[10px] text-center">
-            <p className="text-[15px] font-bold leading-[22px] text-[#55423E]">
+              <button
+                id="google-register-btn"
+                type="button"
+                disabled={isPending}
+                onClick={() => {
+                  setGeneralError(null);
+
+                  startTransition(async () => {
+                    const res = await signInWithOAuthAction("google");
+
+                    if (res && !res.success) {
+                      setGeneralError(res.error);
+                    }
+                  });
+                }}
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white text-sm font-extrabold text-[#111827] shadow-sm transition hover:border-[#2563EB]/60 hover:bg-[#EFF6FF] disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                <Chrome className="h-4 w-4 text-[#2563EB]" />
+                Continue with Google
+              </button>
+            </form>
+          </div>
+
+          <div className="mt-6 text-center">
+            <p className="text-sm font-semibold leading-6 text-[#6B7280]">
               Already have an account?{" "}
               <Link
-                className="font-bold text-[#E07A5F] hover:underline"
+                className="font-extrabold text-[#2563EB] transition hover:text-[#1D4ED8]"
                 href="/login"
               >
                 Log in.

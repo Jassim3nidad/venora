@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
@@ -40,16 +40,13 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#FFFDFC] px-4 py-10 text-slate-950 sm:px-6">
-      <div className="absolute left-[-120px] top-[-120px] h-[320px] w-[320px] rounded-full bg-[#E07A5F]/20 blur-3xl" />
-      <div className="absolute bottom-[-140px] right-[-120px] h-[360px] w-[360px] rounded-full bg-[#F0A090]/20 blur-3xl" />
-
-      <section className="relative grid w-full max-w-5xl overflow-hidden rounded-[32px] border border-[#E9D5D0]/80 bg-white shadow-2xl shadow-slate-200/70 lg:grid-cols-[0.95fr_1.05fr]">
-        <div className="hidden bg-gradient-to-br from-[#9A442D] via-[#C85F49] to-[#E07A5F] p-10 text-white lg:flex lg:flex-col lg:justify-between">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[linear-gradient(180deg,#F9FAFB_0%,#F8FAFC_100%)] px-4 py-10 text-[#111827] sm:px-6">
+      <section className="relative grid w-full max-w-5xl overflow-hidden rounded-[32px] border border-[#E5E7EB]/80 bg-white shadow-xl shadow-slate-200/70 lg:grid-cols-[0.95fr_1.05fr]">
+        <div className="hidden bg-gradient-to-br from-[#1D4ED8] via-[#2563EB] to-[#2563EB] p-10 text-white lg:flex lg:flex-col lg:justify-between">
           <div>
             <Link
               href="/"
-              className="inline-flex items-center text-2xl font-extrabold tracking-tight text-white"
+              className="inline-flex items-center text-2xl font-black tracking-[-0.04em] text-white"
             >
               Venora
             </Link>
@@ -81,7 +78,7 @@ export default function ForgotPasswordPage() {
           <div className="mb-8">
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 text-sm font-bold text-[#6B7280] transition hover:text-[#E07A5F]"
+              className="inline-flex items-center gap-2 text-sm font-extrabold text-[#6B7280] transition hover:text-[#2563EB]"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to sign in
@@ -90,15 +87,15 @@ export default function ForgotPasswordPage() {
 
           <div className="mx-auto max-w-md">
             <div className="mb-8">
-              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FFF4F1] text-[#E07A5F] shadow-sm">
+              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB] shadow-sm">
                 <Mail className="h-6 w-6" />
               </div>
 
-              <p className="mb-3 inline-flex rounded-full border border-[#F0A090] bg-[#FFF4F1] px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#E07A5F]">
+              <p className="mb-3 inline-flex rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#2563EB]">
                 Password reset
               </p>
 
-              <h1 className="text-3xl font-black tracking-[-0.04em] text-slate-950 sm:text-4xl">
+              <h1 className="text-3xl font-black tracking-[-0.04em] text-[#111827] sm:text-4xl">
                 Forgot your password?
               </h1>
 
@@ -111,9 +108,11 @@ export default function ForgotPasswordPage() {
             {success ? (
               <div
                 role="status"
-                className="rounded-2xl border border-[#E9D5D0] bg-[#FFF4F1] p-5 text-sm font-semibold leading-6 text-[#9A442D]"
+                className="rounded-2xl border border-[#E5E7EB] bg-[#EFF6FF] p-5 text-sm font-semibold leading-6 text-[#1D4ED8]"
               >
-                If your email is registered, you will receive a password reset link shortly. Please check your spam/junk folder if you do not see it in your inbox.
+                If your email is registered, you will receive a password reset
+                link shortly. Please check your spam/junk folder if you do not
+                see it in your inbox.
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
@@ -137,10 +136,10 @@ export default function ForgotPasswordPage() {
                       autoComplete="email"
                       disabled={isPending}
                       className={[
-                        "h-12 w-full rounded-2xl border bg-[#FFFDFC] pl-11 pr-4 text-sm font-semibold text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-70",
+                        "h-12 w-full rounded-2xl border bg-[#F9FAFB] pl-11 pr-4 text-sm font-semibold text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-70",
                         fieldErrors.email
                           ? "border-red-500 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
-                          : "border-slate-200 hover:border-[#E9D5D0] focus:border-[#E07A5F] focus:bg-white focus:ring-4 focus:ring-[#E07A5F]/10",
+                          : "border-slate-200 hover:border-[#E5E7EB] focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10",
                       ].join(" ")}
                     />
                   </div>
@@ -156,7 +155,7 @@ export default function ForgotPasswordPage() {
                   id="forgot-submit-btn"
                   type="submit"
                   disabled={isPending}
-                  className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-[#E07A5F] px-5 text-sm font-extrabold text-white shadow-lg shadow-[#E07A5F]/25 transition hover:bg-[#d96851] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#E07A5F]/25 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-[#2563EB] px-5 text-sm font-extrabold text-white shadow-lg shadow-[#2563EB]/25 transition hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {isPending ? "Sending reset link..." : "Send Reset Link"}
                 </button>
@@ -167,7 +166,7 @@ export default function ForgotPasswordPage() {
               Remembered your password?{" "}
               <Link
                 href="/login"
-                className="font-extrabold text-[#E07A5F] transition hover:text-[#9A442D]"
+                className="font-extrabold text-[#2563EB] transition hover:text-[#1D4ED8]"
               >
                 Sign in
               </Link>

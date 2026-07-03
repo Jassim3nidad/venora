@@ -56,7 +56,7 @@ interface VenuesMarketplaceClientProps {
   initialVenues: Venue[];
 }
 
-const budgetPresets = ["Under ₱100k", "₱100k–300k", "Luxury"];
+const budgetPresets = ["Under ₱100k", "₱100k-300k", "Luxury"];
 
 const venueStyles = [
   { label: "Hotel", icon: Building2 },
@@ -84,10 +84,10 @@ const citiesByProvince: Record<string, string[]> = {
 };
 
 export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketplaceClientProps) {
-  // Unified live search — both inputs update this immediately
+  // Unified live search - both inputs update this immediately
   const [liveSearch, setLiveSearch] = useState("");
 
-  // ─── Draft states (non-search) — applied via the Apply button ───
+  // --- Draft states (non-search) - applied via the Apply button ---
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
@@ -101,7 +101,7 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
   const [provinceOpen, setProvinceOpen] = useState(false);
   const [cityOpen, setCityOpen] = useState(false);
 
-  // ─── Applied filter states (synced on Apply button click) ───
+  // --- Applied filter states (synced on Apply button click) ---
   const [appliedProvince, setAppliedProvince] = useState("");
   const [appliedCity, setAppliedCity] = useState("");
   const [appliedLocation, setAppliedLocation] = useState("");
@@ -172,7 +172,7 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
       if (preset === "Under ₱100k") {
         setMinBudget(10000);
         setMaxBudget(100000);
-      } else if (preset === "₱100k–300k") {
+      } else if (preset === "₱100k-300k") {
         setMinBudget(100000);
         setMaxBudget(300000);
       } else if (preset === "Luxury") {
@@ -245,7 +245,7 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
     Number(Boolean(selectedVenueStyle)) +
     selectedAmenities.length;
 
-  // Location pill → province/city mapping for fuzzy matching
+  // Location pill to province/city mapping for fuzzy matching
   const locationPillMap: Record<string, { city?: string; province?: string }> = {
     tagaytay: { city: "Tagaytay City", province: "Cavite" },
     bgc: { city: "Taguig City", province: "Metro Manila" },
@@ -253,9 +253,9 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
     batangas: { province: "Batangas" },
   };
 
-  // ─── Filter Logic ───
+  // --- Filter Logic ---
   const filteredVenues = initialVenues.filter((v) => {
-    // Live search — both sidebar and top-bar inputs update this in real-time
+    // Live search - both sidebar and top-bar inputs update this in real-time
     if (liveSearch) {
       const q = liveSearch.toLowerCase();
       const match =
@@ -273,7 +273,7 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
     // City dropdown
     if (appliedCity && v.city !== appliedCity) return false;
 
-    // Location pills — use the mapped city/province for accurate matching
+    // Location pills - use the mapped city/province for accurate matching
     if (appliedLocation) {
       const mapped = locationPillMap[appliedLocation.toLowerCase()];
       if (mapped) {
@@ -337,7 +337,7 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
     return true;
   });
 
-  // ─── Sort Logic ───
+  // --- Sort Logic ---
   const sortedVenues = [...filteredVenues].sort((a, b) => {
     if (sortBy === "price-asc") {
       return a.base_price - b.base_price;
@@ -356,12 +356,12 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[#F8FAFC] text-slate-950">
-      {/* ─── Header ─── */}
-      <header className="z-50 shrink-0 border-b border-[#E9D5D0]/70 bg-white/90 backdrop-blur-xl">
+      {/* --- Header --- */}
+      <header className="z-50 shrink-0 border-b border-[#E5E7EB]/70 bg-white/90 backdrop-blur-xl">
         <div className="relative mx-auto flex min-h-16 w-full max-w-[1600px] items-center gap-2 px-3 sm:gap-3 sm:px-6 lg:px-8">
           <Link
             href="/"
-            className="text-lg font-semibold tracking-tight text-[#E07A5F] transition hover:text-[#d96851] sm:text-xl"
+            className="text-lg font-semibold tracking-tight text-[#2563EB] transition hover:text-[#1d4ed8] sm:text-xl"
           >
             Venora
           </Link>
@@ -370,14 +370,14 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
             <div className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/80 p-1 shadow-sm">
               <Link
                 href="/venues"
-                className="rounded-full bg-[#FFF4F1] px-4 py-2 text-sm font-semibold text-[#E07A5F] transition hover:text-[#d96851]"
+                className="rounded-full bg-[#EFF6FF] px-4 py-2 text-sm font-semibold text-[#2563EB] transition hover:text-[#1d4ed8]"
               >
                 Browse
               </Link>
 
               <Link
                 href="/bookings"
-                className="rounded-full px-4 py-2 text-sm font-semibold text-[#6B7280] transition hover:bg-[#FFF4F1] hover:text-[#E07A5F]"
+                className="rounded-full px-4 py-2 text-sm font-semibold text-[#6B7280] transition hover:bg-[#EFF6FF] hover:text-[#2563EB]"
               >
                 Bookings
               </Link>
@@ -403,7 +403,7 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
 
             <Link
               href="/account"
-              className="inline-flex h-9 items-center justify-center rounded-full bg-[#E07A5F] px-3 text-[11px] font-bold uppercase tracking-[0.08em] text-white shadow-sm shadow-[#E07A5F]/20 transition hover:bg-[#d96851] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E07A5F]/30 sm:h-10 sm:px-4 sm:text-xs sm:tracking-[0.12em]"
+              className="inline-flex h-9 items-center justify-center rounded-full bg-[#2563EB] px-3 text-[11px] font-bold uppercase tracking-[0.08em] text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 sm:h-10 sm:px-4 sm:text-xs sm:tracking-[0.12em]"
             >
               Account
             </Link>
@@ -411,7 +411,7 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
             <button
               onClick={handleLogout}
               aria-label="Logout"
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 text-[11px] font-bold uppercase tracking-[0.08em] text-[#6B7280] shadow-sm transition hover:border-[#E9D5D0] hover:bg-[#FFFDFC] hover:text-[#9A442D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E07A5F]/20 sm:h-10 sm:gap-2 sm:px-4 sm:text-xs sm:tracking-[0.12em]"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 text-[11px] font-bold uppercase tracking-[0.08em] text-[#6B7280] shadow-sm transition hover:border-[#E5E7EB] hover:bg-[#F9FAFB] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/20 sm:h-10 sm:gap-2 sm:px-4 sm:text-xs sm:tracking-[0.12em]"
             >
               <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Logout</span>
@@ -420,13 +420,13 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
         </div>
       </header>
 
-      {/* ─── Main Content Layout ─── */}
+      {/* --- Main Content Layout --- */}
       <div className="flex min-h-0 w-full flex-1 overflow-hidden">
         
-        {/* ─── Sidebar filter panel ─── */}
-        <aside className="hidden h-full w-[360px] max-w-[360px] flex-shrink-0 flex-col border-r border-[#E9D5D0] bg-[#FFFDFC] shadow-sm lg:flex">
+        {/* --- Sidebar filter panel --- */}
+        <aside className="hidden h-full w-[360px] max-w-[360px] flex-shrink-0 flex-col border-r border-[#E5E7EB] bg-[#F9FAFB] shadow-sm lg:flex">
           {/* Header */}
-          <div className="shrink-0 border-b border-[#E9D5D0] px-6 pb-4 pt-5 flex items-center justify-between">
+          <div className="shrink-0 border-b border-[#E5E7EB] px-6 pb-4 pt-5 flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight text-[#C7897A]">
                 Filters
@@ -454,7 +454,7 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
                   placeholder="Search venues..."
                   value={liveSearch}
                   onChange={(e) => setLiveSearch(e.target.value)}
-                  className="h-11 w-full rounded-xl border border-[#E9D5D0] bg-white pl-12 pr-4 text-sm font-medium text-neutral-700 shadow-sm outline-none transition placeholder:text-neutral-400 focus:border-[#E2765F] focus:ring-4 focus:ring-[#E2765F]/10"
+                  className="h-11 w-full rounded-xl border border-[#E5E7EB] bg-white pl-12 pr-4 text-sm font-medium text-neutral-700 shadow-sm outline-none transition placeholder:text-neutral-400 focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
                 />
               </div>
             </section>
@@ -477,13 +477,13 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
                       setProvinceOpen(!provinceOpen);
                       setCityOpen(false);
                     }}
-                    className="flex h-11 w-full items-center justify-between rounded-xl border border-[#E9D5D0] bg-white px-4 text-left text-sm font-medium text-neutral-700 shadow-sm transition hover:border-[#E2765F]"
+                    className="flex h-11 w-full items-center justify-between rounded-xl border border-[#E5E7EB] bg-white px-4 text-left text-sm font-medium text-neutral-700 shadow-sm transition hover:border-[#2563EB]"
                   >
                     <span>{selectedProvince || "Select Province"}</span>
                     <ChevronDown className="h-4 w-4 text-slate-500" />
                   </button>
                   {provinceOpen && (
-                    <div className="absolute left-0 right-0 z-[60] mt-1.5 max-h-48 overflow-y-auto rounded-xl border border-[#E9D5D0] bg-white py-1 shadow-lg">
+                    <div className="absolute left-0 right-0 z-[60] mt-1.5 max-h-48 overflow-y-auto rounded-xl border border-[#E5E7EB] bg-white py-1 shadow-lg">
                       <button
                         type="button"
                         onClick={() => {
@@ -491,7 +491,7 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
                           setSelectedCity("");
                           setProvinceOpen(false);
                         }}
-                        className="flex w-full px-4 py-2 text-left text-sm hover:bg-[#FFF4F1] hover:text-[#E2765F] text-neutral-500 font-semibold"
+                        className="flex w-full px-4 py-2 text-left text-sm hover:bg-[#EFF6FF] hover:text-[#2563EB] text-neutral-500 font-semibold"
                       >
                         Clear selection
                       </button>
@@ -504,7 +504,7 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
                             setSelectedCity("");
                             setProvinceOpen(false);
                           }}
-                          className="flex w-full px-4 py-2 text-left text-sm hover:bg-[#FFF4F1] hover:text-[#E2765F] text-neutral-700 font-semibold"
+                          className="flex w-full px-4 py-2 text-left text-sm hover:bg-[#EFF6FF] hover:text-[#2563EB] text-neutral-700 font-semibold"
                         >
                           {p}
                         </button>
@@ -521,20 +521,20 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
                       setCityOpen(!cityOpen);
                       setProvinceOpen(false);
                     }}
-                    className="flex h-11 w-full items-center justify-between rounded-xl border border-[#E9D5D0] bg-white px-4 text-left text-sm font-medium text-neutral-700 shadow-sm transition hover:border-[#E2765F]"
+                    className="flex h-11 w-full items-center justify-between rounded-xl border border-[#E5E7EB] bg-white px-4 text-left text-sm font-medium text-neutral-700 shadow-sm transition hover:border-[#2563EB]"
                   >
                     <span>{selectedCity || "Select City"}</span>
                     <ChevronDown className="h-4 w-4 text-slate-500" />
                   </button>
                   {cityOpen && (
-                    <div className="absolute left-0 right-0 z-[60] mt-1.5 max-h-48 overflow-y-auto rounded-xl border border-[#E9D5D0] bg-white py-1 shadow-lg">
+                    <div className="absolute left-0 right-0 z-[60] mt-1.5 max-h-48 overflow-y-auto rounded-xl border border-[#E5E7EB] bg-white py-1 shadow-lg">
                       <button
                         type="button"
                         onClick={() => {
                           setSelectedCity("");
                           setCityOpen(false);
                         }}
-                        className="flex w-full px-4 py-2 text-left text-sm hover:bg-[#FFF4F1] hover:text-[#E2765F] text-neutral-500 font-semibold"
+                        className="flex w-full px-4 py-2 text-left text-sm hover:bg-[#EFF6FF] hover:text-[#2563EB] text-neutral-500 font-semibold"
                       >
                         Clear selection
                       </button>
@@ -546,7 +546,7 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
                             setSelectedCity(c);
                             setCityOpen(false);
                           }}
-                          className="flex w-full px-4 py-2 text-left text-sm hover:bg-[#FFF4F1] hover:text-[#E2765F] text-neutral-700 font-semibold"
+                          className="flex w-full px-4 py-2 text-left text-sm hover:bg-[#EFF6FF] hover:text-[#2563EB] text-neutral-700 font-semibold"
                         >
                           {c}
                         </button>
@@ -562,7 +562,7 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
                     setSelectedCity("Taguig City");
                     setSelectedLocation("");
                   }}
-                  className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#E9D5D0] bg-neutral-100 text-sm font-bold text-neutral-700 shadow-sm transition hover:border-[#E2765F] hover:bg-[#FFF4F1] hover:text-[#E2765F]"
+                  className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-neutral-100 text-sm font-bold text-neutral-700 shadow-sm transition hover:border-[#2563EB] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
                 >
                   <Crosshair className="h-5 w-5" />
                   Use my current location
@@ -577,8 +577,8 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
                       className={[
                         "rounded-full border px-3.5 py-2 text-sm font-semibold transition",
                         selectedLocation === loc
-                          ? "border-[#F0A090] bg-[#FFF4F1] text-[#E2765F]"
-                          : "border-[#E9D5D0] bg-white text-neutral-600 hover:border-[#E2765F] hover:text-[#E2765F]",
+                          ? "border-[#DBEAFE] bg-[#EFF6FF] text-[#2563EB]"
+                          : "border-[#E5E7EB] bg-white text-neutral-600 hover:border-[#2563EB] hover:text-[#2563EB]",
                       ].join(" ")}
                     >
                       {loc}
@@ -606,8 +606,8 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
                     className={[
                       "h-10 rounded-xl border text-sm font-semibold transition",
                       selectedEventType === type
-                        ? "border-[#E2765F] bg-[#FFF7F4] text-[#E2765F] shadow-[0_0_0_1px_#E2765F]"
-                        : "border-[#E9D5D0] bg-white text-neutral-700 hover:border-[#E2765F] hover:text-[#E2765F]",
+                        ? "border-[#2563EB] bg-[#FFF7F4] text-[#2563EB] shadow-[0_0_0_1px_#2563EB]"
+                        : "border-[#E5E7EB] bg-white text-neutral-700 hover:border-[#2563EB] hover:text-[#2563EB]",
                     ].join(" ")}
                   >
                     {type}
@@ -625,7 +625,7 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
                 </h3>
               </div>
 
-              <div className="overflow-hidden rounded-xl border border-[#E9D5D0] bg-white">
+              <div className="overflow-hidden rounded-xl border border-[#E5E7EB] bg-white">
                 <div className="grid grid-cols-3">
                   {budgetPresets.map((budget, index) => (
                     <button
@@ -635,10 +635,10 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
                       className={[
                         "h-10 text-xs font-bold transition",
                         index !== budgetPresets.length - 1
-                          ? "border-r border-[#E9D5D0]"
+                          ? "border-r border-[#E5E7EB]"
                           : "",
                         selectedBudgetPreset === budget
-                          ? "bg-[#FFF4F1] text-[#E2765F]"
+                          ? "bg-[#EFF6FF] text-[#2563EB]"
                           : "bg-white text-neutral-600 hover:bg-[#FFF9F7]",
                       ].join(" ")}
                     >
@@ -673,7 +673,7 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
                       setMinBudget(e.target.value ? Number(e.target.value) : "");
                       setSelectedBudgetPreset("");
                     }}
-                    className="h-10 w-full rounded-xl border border-[#E9D5D0] bg-white px-3 text-sm font-semibold text-neutral-700 outline-none transition focus:border-[#E2765F]"
+                    className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm font-semibold text-neutral-700 outline-none transition focus:border-[#2563EB]"
                   />
                 </div>
                 <div>
@@ -688,7 +688,7 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
                       setMaxBudget(e.target.value ? Number(e.target.value) : "");
                       setSelectedBudgetPreset("");
                     }}
-                    className="h-10 w-full rounded-xl border border-[#E9D5D0] bg-white px-3 text-sm font-semibold text-neutral-700 outline-none transition focus:border-[#E2765F]"
+                    className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm font-semibold text-neutral-700 outline-none transition focus:border-[#2563EB]"
                   />
                 </div>
               </div>
@@ -714,7 +714,7 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
                 max="1000"
                 value={capacityLimit || 150}
                 onChange={(e) => setCapacityLimit(Number(e.target.value))}
-                className="w-full accent-[#E2765F] h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer mt-3"
+                className="w-full accent-[#2563EB] h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer mt-3"
               />
 
               <p className="mt-2 text-sm font-medium text-neutral-500">
@@ -733,7 +733,7 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
                   placeholder="e.g. 150"
                   value={capacityLimit}
                   onChange={(e) => setCapacityLimit(e.target.value ? Number(e.target.value) : "")}
-                  className="h-10 w-full rounded-xl border border-[#E9D5D0] bg-white px-3 text-sm font-semibold text-neutral-700 outline-none transition focus:border-[#E2765F]"
+                  className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm font-semibold text-neutral-700 outline-none transition focus:border-[#2563EB]"
                 />
               </div>
             </section>
@@ -756,8 +756,8 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
                     className={[
                       "flex aspect-[1.35] flex-col items-center justify-center gap-2 rounded-2xl border bg-white transition",
                       selectedVenueStyle === label
-                        ? "border-[#E2765F] bg-[#FFF7F4] text-[#E2765F] shadow-[0_0_0_2px_#E2765F]"
-                        : "border-[#E9D5D0] text-neutral-700 hover:border-[#E2765F] hover:text-[#E2765F]",
+                        ? "border-[#2563EB] bg-[#FFF7F4] text-[#2563EB] shadow-[0_0_0_2px_#2563EB]"
+                        : "border-[#E5E7EB] text-neutral-700 hover:border-[#2563EB] hover:text-[#2563EB]",
                     ].join(" ")}
                   >
                     <Icon className="h-7 w-7" strokeWidth={2.3} />
@@ -785,8 +785,8 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
                     className={[
                       "flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-bold transition",
                       selectedAmenities.includes(label)
-                        ? "border-[#F0A090] bg-[#FFF4F1] text-[#E2765F]"
-                        : "border-[#E9D5D0] bg-white text-neutral-700 hover:border-[#E2765F] hover:text-[#E2765F]",
+                        ? "border-[#DBEAFE] bg-[#EFF6FF] text-[#2563EB]"
+                        : "border-[#E5E7EB] bg-white text-neutral-700 hover:border-[#2563EB] hover:text-[#2563EB]",
                     ].join(" ")}
                   >
                     <Icon className="h-4 w-4" strokeWidth={2.5} />
@@ -798,26 +798,26 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
           </div>
 
           {/* Apply Button */}
-          <div className="shrink-0 border-t border-[#E9D5D0] bg-[#FFFDFC] px-6 py-4 shadow-[0_-12px_30px_rgba(15,23,42,0.06)]">
+          <div className="shrink-0 border-t border-[#E5E7EB] bg-[#F9FAFB] px-6 py-4 shadow-[0_-12px_30px_rgba(15,23,42,0.06)]">
             <button
               type="button"
               onClick={handleApplyFilters}
-              className="h-13 w-full rounded-xl bg-[#E2765F] py-3.5 text-base font-extrabold text-white shadow-lg shadow-[#E2765F]/20 transition hover:bg-[#d96851] active:scale-[0.98]"
+              className="h-13 w-full rounded-xl bg-[#2563EB] py-3.5 text-base font-extrabold text-white shadow-lg shadow-[#2563EB]/20 transition hover:bg-[#1d4ed8] active:scale-[0.98]"
             >
               Apply Filters ({activeDraftFilterCount})
             </button>
           </div>
         </aside>
 
-        {/* ─── Main Marketplace Feed ─── */}
+        {/* --- Main Marketplace Feed --- */}
         <main className="h-full min-w-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-7 lg:px-8 xl:px-10">
           <div className="flex flex-col gap-8">
             
             {/* Sparkles AI banner */}
-            <section className="max-w-full overflow-hidden rounded-[24px] border border-[#E9D5D0]/80 bg-white shadow-sm sm:rounded-[28px]">
+            <section className="max-w-full overflow-hidden rounded-[24px] border border-[#E5E7EB]/80 bg-white shadow-sm sm:rounded-[28px]">
               <div className="grid gap-6 p-5 sm:p-6">
                 <div className="min-w-0">
-                  <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#F0A090] bg-[#FFF4F1] px-3 py-1.5 text-[#E07A5F]">
+                  <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1.5 text-[#2563EB]">
                     <Sparkles className="h-3.5 w-3.5" />
                     <span className="text-[11px] font-extrabold uppercase tracking-[0.14em]">
                       AI-powered venue discovery
@@ -848,7 +848,7 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
                       placeholder="Search venue name..."
                       value={liveSearch}
                       onChange={(e) => setLiveSearch(e.target.value)}
-                      className="h-12 w-full rounded-2xl border border-slate-200 bg-[#FFFDFC] pl-11 pr-4 text-sm font-medium text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-[#E9D5D0] focus:border-[#E07A5F] focus:bg-white focus:ring-4 focus:ring-[#E07A5F]/10"
+                      className="h-12 w-full rounded-2xl border border-slate-200 bg-[#F9FAFB] pl-11 pr-4 text-sm font-medium text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-[#E5E7EB] focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
                     />
                   </div>
 
@@ -856,7 +856,7 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="inline-flex h-12 items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-600 shadow-sm transition hover:border-[#E9D5D0] focus:border-[#E07A5F] outline-none cursor-pointer pr-10 appearance-none"
+                      className="inline-flex h-12 items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-600 shadow-sm transition hover:border-[#E5E7EB] focus:border-[#2563EB] outline-none cursor-pointer pr-10 appearance-none"
                     >
                       <option value="recommended">Sort: Recommended</option>
                       <option value="price-asc">Price: Low to High</option>
@@ -871,12 +871,12 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
 
             {/* Grid of venue cards */}
             {sortedVenues.length === 0 ? (
-              <div className="text-center p-12 bg-white rounded-3xl border border-[#E9D5D0] shadow-sm">
+              <div className="text-center p-12 bg-white rounded-3xl border border-[#E5E7EB] shadow-sm">
                 <p className="text-lg font-extrabold text-slate-800">No venues found matching your criteria</p>
                 <p className="mt-2 text-sm text-slate-500">Try adjusting your filters or search queries.</p>
                 <button
                   onClick={handleClearFilters}
-                  className="mt-6 inline-flex h-10 items-center justify-center rounded-full bg-[#E07A5F] px-6 text-xs font-bold uppercase tracking-[0.12em] text-white shadow-sm transition hover:bg-[#d96851]"
+                  className="mt-6 inline-flex h-10 items-center justify-center rounded-full bg-[#2563EB] px-6 text-xs font-bold uppercase tracking-[0.12em] text-white shadow-sm transition hover:bg-[#1d4ed8]"
                 >
                   Clear Filters
                 </button>
@@ -889,7 +889,7 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
                     <Link
                       key={venue.id}
                       href={`/venues/${venue.slug ?? venue.id}`}
-                      className="group flex h-full overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-sm shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1 hover:border-[#E07A5F]/50 hover:shadow-xl hover:shadow-slate-200/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E07A5F]/30"
+                      className="group flex h-full overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-sm shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1 hover:border-[#2563EB]/50 hover:shadow-xl hover:shadow-slate-200/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
                     >
                       <article className="flex h-full w-full flex-col">
                         <div className="relative aspect-[16/11] overflow-hidden bg-slate-100">
@@ -901,7 +901,7 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
 
                           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-slate-950/5 to-transparent" />
 
-                          <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#9A442D] shadow-sm backdrop-blur-md">
+                          <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#1D4ED8] shadow-sm backdrop-blur-md">
                             {venue.category}
                           </span>
 
@@ -924,7 +924,7 @@ export default function VenuesMarketplaceClient({ initialVenues }: VenuesMarketp
 
                         <div className="flex min-h-[190px] flex-1 flex-col justify-between gap-5 p-5">
                           <div className="min-w-0">
-                            <h2 className="line-clamp-1 text-lg font-extrabold leading-6 tracking-[-0.02em] text-slate-950 transition group-hover:text-[#9A442D]">
+                            <h2 className="line-clamp-1 text-lg font-extrabold leading-6 tracking-[-0.02em] text-slate-950 transition group-hover:text-[#1D4ED8]">
                               {venue.name}
                             </h2>
 

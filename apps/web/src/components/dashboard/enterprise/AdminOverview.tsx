@@ -101,13 +101,13 @@ export function AdminOverview({
     <DashboardPage>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <span className="mb-2 inline-flex rounded-full bg-[#fff4f0] px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-[#9a442d]">
+          <span className="mb-2 inline-flex rounded-full bg-[#eff6ff] px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-[#1d4ed8]">
             Administrator
           </span>
-          <h1 className="font-display text-2xl font-bold text-[#191c1e] sm:text-3xl">
+          <h1 className="font-display text-2xl font-bold text-[#111827] sm:text-3xl">
             Platform Admin
           </h1>
-          <p className="mt-1 max-w-2xl text-sm text-[#55423e]">
+          <p className="mt-1 max-w-2xl text-sm text-[#4b5563]">
             Manage users, venue approvals, supplier accreditation, commissions,
             and platform operations.
           </p>
@@ -139,19 +139,19 @@ export function AdminOverview({
               <Link
                 key={mod.title}
                 href={mod.href}
-                className="group rounded-xl border border-[#e8deda] bg-[#fffdfc] p-4 transition hover:border-[#9a442d] hover:bg-[#fff4f0]"
+                className="group rounded-xl border border-[#e5e7eb] bg-[#f9fafb] p-4 transition hover:border-[#1d4ed8] hover:bg-[#eff6ff]"
               >
                 <div className="mb-3 flex items-center justify-between">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#9a442d] shadow-sm">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#1d4ed8] shadow-sm">
                     <MaterialIcon name={mod.icon} />
                   </div>
                   <MaterialIcon
                     name="arrow_forward"
-                    className="text-[#88726d] transition group-hover:text-[#9a442d]"
+                    className="text-[#6b7280] transition group-hover:text-[#1d4ed8]"
                   />
                 </div>
-                <p className="font-semibold text-[#191c1e]">{mod.title}</p>
-                <p className="mt-1 text-sm text-[#55423e]">{mod.description}</p>
+                <p className="font-semibold text-[#111827]">{mod.title}</p>
+                <p className="mt-1 text-sm text-[#4b5563]">{mod.description}</p>
               </Link>
             ))}
           </div>
@@ -163,13 +163,13 @@ export function AdminOverview({
             {PLATFORM_HEALTH.map((item) => (
               <div
                 key={item.label}
-                className="flex items-center justify-between rounded-xl border border-[#e8deda] bg-[#fffdfc] p-3"
+                className="flex items-center justify-between rounded-xl border border-[#e5e7eb] bg-[#f9fafb] p-3"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#fff4f0] text-[#9a442d]">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8]">
                     <MaterialIcon name={item.icon} className="text-lg" />
                   </div>
-                  <p className="text-sm font-semibold text-[#191c1e]">
+                  <p className="text-sm font-semibold text-[#111827]">
                     {item.label}
                   </p>
                 </div>
@@ -181,7 +181,7 @@ export function AdminOverview({
       </div>
 
       <Panel padding={false} className="overflow-hidden">
-        <div className="border-b border-[#e8deda] p-5 sm:p-6">
+        <div className="border-b border-[#e5e7eb] p-5 sm:p-6">
           <PanelHeader
             title="Pending Reviews"
             description="Latest venue and supplier submissions awaiting review."
@@ -202,7 +202,7 @@ export function AdminOverview({
                 key: "item",
                 header: "Item",
                 cell: (r) => (
-                  <span className="font-semibold text-[#191c1e]">{r.item}</span>
+                  <span className="font-semibold text-[#111827]">{r.item}</span>
                 ),
               },
               { key: "type", header: "Type", cell: (r) => r.type },

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
@@ -79,15 +79,15 @@ export default async function AccountPage() {
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#F8FAFC] text-slate-950">
-      <section className="relative border-b border-[#E9D5D0]/70 bg-[#FFFDFC]">
-        <div className="absolute left-[-120px] top-[-120px] h-[320px] w-[320px] rounded-full bg-[#E07A5F]/20 blur-3xl" />
-        <div className="absolute right-[-140px] top-[40px] h-[300px] w-[300px] rounded-full bg-[#F0A090]/20 blur-3xl" />
+      <section className="relative border-b border-[#E5E7EB]/70 bg-[#F9FAFB]">
+        <div className="absolute left-[-120px] top-[-120px] h-[320px] w-[320px] rounded-full bg-[#2563EB]/20 blur-3xl" />
+        <div className="absolute right-[-140px] top-[40px] h-[300px] w-[300px] rounded-full bg-[#DBEAFE]/20 blur-3xl" />
 
         <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <Link
               href="/venues"
-              className="inline-flex w-fit items-center gap-2 rounded-full border border-[#E9D5D0] bg-white px-4 py-2 text-sm font-bold text-[#6B7280] shadow-sm transition hover:border-[#E07A5F]/50 hover:bg-[#FFF4F1] hover:text-[#E07A5F]"
+              className="inline-flex w-fit items-center gap-2 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-bold text-[#6B7280] shadow-sm transition hover:border-[#2563EB]/50 hover:bg-[#EFF6FF] hover:text-[#2563EB]"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Venues
@@ -104,7 +104,7 @@ export default async function AccountPage() {
 
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
             <div>
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#F0A090] bg-[#FFF4F1] px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#E07A5F]">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#2563EB]">
                 Venora account center
               </div>
 
@@ -118,8 +118,8 @@ export default async function AccountPage() {
               </p>
             </div>
 
-            <div className="overflow-hidden rounded-[28px] border border-[#E9D5D0]/80 bg-white shadow-xl shadow-slate-200/60">
-              <div className="bg-gradient-to-br from-[#9A442D] via-[#C85F49] to-[#E07A5F] px-6 py-7 text-white">
+            <div className="overflow-hidden rounded-[28px] border border-[#E5E7EB]/80 bg-white shadow-xl shadow-slate-200/60">
+              <div className="bg-gradient-to-br from-[#1D4ED8] via-[#2563EB] to-[#2563EB] px-6 py-7 text-white">
                 <div className="flex items-center gap-4">
                   <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-white/20 bg-white/20 text-2xl font-black shadow-lg backdrop-blur-md">
                     {profile?.avatar_url ? (
@@ -146,8 +146,8 @@ export default async function AccountPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3 bg-white p-5">
-                <div className="rounded-2xl border border-[#E9D5D0]/80 bg-[#FFFDFC] p-4">
-                  <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-[#FFF4F1] text-[#E07A5F]">
+                <div className="rounded-2xl border border-[#E5E7EB]/80 bg-[#F9FAFB] p-4">
+                  <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-[#EFF6FF] text-[#2563EB]">
                     <UserRound className="h-4 w-4" />
                   </div>
                   <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
@@ -158,8 +158,8 @@ export default async function AccountPage() {
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-[#E9D5D0]/80 bg-[#FFFDFC] p-4">
-                  <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-[#FFF4F1] text-[#E07A5F]">
+                <div className="rounded-2xl border border-[#E5E7EB]/80 bg-[#F9FAFB] p-4">
+                  <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-[#EFF6FF] text-[#2563EB]">
                     <ShieldCheck className="h-4 w-4" />
                   </div>
                   <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
@@ -182,13 +182,13 @@ export default async function AccountPage() {
         />
 
         {visibleDashboards.length > 0 && (
-          <div className="mt-8 overflow-hidden rounded-[28px] border border-[#E9D5D0]/80 bg-white shadow-xl shadow-slate-200/60">
-            <div className="border-b border-[#E9D5D0]/80 p-6 sm:p-8">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FFF4F1] text-[#E07A5F] shadow-sm">
+          <div className="mt-8 overflow-hidden rounded-[28px] border border-[#E5E7EB]/80 bg-white shadow-xl shadow-slate-200/60">
+            <div className="border-b border-[#E5E7EB]/80 p-6 sm:p-8">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB] shadow-sm">
                 <LayoutDashboard className="h-5 w-5" />
               </div>
 
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#E07A5F]">
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
                 Authorized access
               </p>
 
@@ -210,9 +210,9 @@ export default async function AccountPage() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="group rounded-3xl border border-slate-200 bg-[#FFFDFC] p-5 transition hover:-translate-y-1 hover:border-[#E07A5F]/50 hover:bg-[#FFF4F1] hover:shadow-xl hover:shadow-slate-200/70"
+                    className="group rounded-3xl border border-slate-200 bg-[#F9FAFB] p-5 transition hover:-translate-y-1 hover:border-[#2563EB]/50 hover:bg-[#EFF6FF] hover:shadow-xl hover:shadow-slate-200/70"
                   >
-                    <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#E07A5F] shadow-sm transition group-hover:bg-[#E07A5F] group-hover:text-white">
+                    <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#2563EB] shadow-sm transition group-hover:bg-[#2563EB] group-hover:text-white">
                       <Icon className="h-5 w-5" />
                     </div>
 

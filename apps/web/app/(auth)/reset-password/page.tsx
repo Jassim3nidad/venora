@@ -7,7 +7,7 @@ import { resetPasswordAction } from "@/features/auth/actions/auth.actions";
 import { resetPasswordSchema } from "@/features/auth/schemas/auth.schema";
 import { createClient } from "@/lib/supabase/client";
 
-// ─── Invalid / Expired Link view ──────────────────────────────────────────────
+// --- Invalid / Expired Link view ----------------------------------------------
 
 function ExpiredLinkView() {
   return (
@@ -16,10 +16,10 @@ function ExpiredLinkView() {
         {/* Logo */}
         <Link
           href="/"
-          className="mb-[16px] flex items-center justify-center gap-[6px] text-[20px] font-extrabold tracking-tight text-[#E07A5F]"
+          className="mb-[16px] flex items-center justify-center gap-[6px] text-[20px] font-extrabold tracking-tight text-[#2563EB]"
         >
           Venora
-          <Sparkles className="h-[16px] w-[16px] fill-[#E07A5F] text-[#E07A5F]" />
+          <Sparkles className="h-[16px] w-[16px] fill-[#2563EB] text-[#2563EB]" />
         </Link>
 
         <div className="mb-[14px] mx-auto flex h-[48px] w-[48px] items-center justify-center rounded-full bg-red-50 text-red-500">
@@ -38,17 +38,17 @@ function ExpiredLinkView() {
         <Link
           href="/forgot-password"
           id="request-new-link-btn"
-          className="flex h-[46px] w-full items-center justify-center rounded-[6px] bg-[#E07A5F] text-[15px] font-extrabold text-white transition hover:bg-[#9A442D] shadow-sm"
+          className="flex h-[46px] w-full items-center justify-center rounded-[6px] bg-[#2563EB] text-[15px] font-extrabold text-white transition hover:bg-[#1D4ED8] shadow-sm"
         >
           Request a new link
         </Link>
 
-        <p className="mt-[20px] text-center text-[14px] font-medium text-[#55423E]">
+        <p className="mt-[20px] text-center text-[14px] font-medium text-[#4B5563]">
           <Link
             href="/login"
-            className="font-bold text-[#E07A5F] transition hover:text-[#9A442D] hover:underline"
+            className="font-bold text-[#2563EB] transition hover:text-[#1D4ED8] hover:underline"
           >
-            ← Back to sign in
+            <- Back to sign in
           </Link>
         </p>
       </div>
@@ -56,7 +56,7 @@ function ExpiredLinkView() {
   );
 }
 
-// ─── Reset Password form ───────────────────────────────────────────────────────
+// --- Reset Password form -------------------------------------------------------
 
 export default function ResetPasswordPage() {
   const [sessionChecked, setSessionChecked] = useState(false);
@@ -104,7 +104,7 @@ export default function ResetPasswordPage() {
   if (!sessionChecked) {
     return (
       <div className="flex min-h-screen w-full items-center justify-center bg-[#F8FAFC]">
-        <div className="h-[32px] w-[32px] animate-spin rounded-full border-[3px] border-slate-200 border-t-[#E07A5F]" />
+        <div className="h-[32px] w-[32px] animate-spin rounded-full border-[3px] border-slate-200 border-t-[#2563EB]" />
       </div>
     );
   }
@@ -120,13 +120,13 @@ export default function ResetPasswordPage() {
         <div className="mb-[28px] flex flex-col items-center text-center">
           <Link
             href="/"
-            className="mb-[16px] flex items-center gap-[6px] text-[20px] font-extrabold tracking-tight text-[#E07A5F]"
+            className="mb-[16px] flex items-center gap-[6px] text-[20px] font-extrabold tracking-tight text-[#2563EB]"
           >
             Venora
-            <Sparkles className="h-[16px] w-[16px] fill-[#E07A5F] text-[#E07A5F]" />
+            <Sparkles className="h-[16px] w-[16px] fill-[#2563EB] text-[#2563EB]" />
           </Link>
 
-          <div className="mb-[14px] flex h-[48px] w-[48px] items-center justify-center rounded-full bg-[#FFF4F1] text-[#E07A5F]">
+          <div className="mb-[14px] flex h-[48px] w-[48px] items-center justify-center rounded-full bg-[#EFF6FF] text-[#2563EB]">
             <LockKeyhole className="h-[22px] w-[22px]" />
           </div>
 
@@ -158,16 +158,16 @@ export default function ResetPasswordPage() {
             </label>
 
             <div className="relative">
-              <LockKeyhole className="pointer-events-none absolute left-[14px] top-1/2 h-[17px] w-[17px] -translate-y-1/2 text-[#55423E]" />
+              <LockKeyhole className="pointer-events-none absolute left-[14px] top-1/2 h-[17px] w-[17px] -translate-y-1/2 text-[#4B5563]" />
               <input
                 id="new-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Enter password"
                 autoComplete="new-password"
                 disabled={isPending}
-                className={`h-[46px] w-full rounded-[6px] border bg-white !pl-[42px] pr-[16px] text-[16px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#E07A5F] focus:ring-4 focus:ring-[#E07A5F]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
+                className={`h-[46px] w-full rounded-[6px] border bg-white !pl-[42px] pr-[16px] text-[16px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
                   fieldErrors.password ? "border-red-500" : "border-[#E2E8F0]"
                 }`}
               />
@@ -178,7 +178,7 @@ export default function ResetPasswordPage() {
                 {fieldErrors.password[0]}
               </p>
             ) : (
-              <p className="mt-[2px] text-[14px] font-medium leading-[20px] text-[#55423E]">
+              <p className="mt-[2px] text-[14px] font-medium leading-[20px] text-[#4B5563]">
                 Must be at least 8 characters.
               </p>
             )}
@@ -194,16 +194,16 @@ export default function ResetPasswordPage() {
             </label>
 
             <div className="relative">
-              <LockKeyhole className="pointer-events-none absolute left-[14px] top-1/2 h-[17px] w-[17px] -translate-y-1/2 text-[#55423E]" />
+              <LockKeyhole className="pointer-events-none absolute left-[14px] top-1/2 h-[17px] w-[17px] -translate-y-1/2 text-[#4B5563]" />
               <input
                 id="confirm-new-password"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Enter password"
                 autoComplete="new-password"
                 disabled={isPending}
-                className={`h-[46px] w-full rounded-[6px] border bg-white !pl-[42px] pr-[16px] text-[16px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#E07A5F] focus:ring-4 focus:ring-[#E07A5F]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
+                className={`h-[46px] w-full rounded-[6px] border bg-white !pl-[42px] pr-[16px] text-[16px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
                   fieldErrors.confirmPassword ? "border-red-500" : "border-[#E2E8F0]"
                 }`}
               />
@@ -221,16 +221,16 @@ export default function ResetPasswordPage() {
             id="reset-submit-btn"
             type="submit"
             disabled={isPending}
-            className="mt-[8px] h-[46px] w-full rounded-[6px] bg-[#E07A5F] text-[15px] font-extrabold text-white transition hover:bg-[#9A442D] disabled:cursor-not-allowed disabled:opacity-70"
+            className="mt-[8px] h-[46px] w-full rounded-[6px] bg-[#2563EB] text-[15px] font-extrabold text-white transition hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isPending ? "Setting Password..." : "Update Password"}
           </button>
         </form>
 
-        <p className="mt-[24px] text-center text-[14px] font-medium text-[#55423E]">
+        <p className="mt-[24px] text-center text-[14px] font-medium text-[#4B5563]">
           <Link
             href="/login"
-            className="font-bold text-[#E07A5F] transition hover:text-[#9A442D] hover:underline"
+            className="font-bold text-[#2563EB] transition hover:text-[#1D4ED8] hover:underline"
           >
             Cancel and return to sign in
           </Link>

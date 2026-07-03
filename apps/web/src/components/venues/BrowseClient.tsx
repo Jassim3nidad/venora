@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
@@ -293,23 +293,23 @@ export default function BrowseClient({ initialVenues, userEmail, userRoles = [] 
       <nav className="sticky top-0 z-50 flex !h-[64px] w-full shrink-0 items-center justify-between border-b border-slate-200 bg-white/95 !px-[32px] backdrop-blur-md">
         <Link
           href="/"
-          className="flex items-center !gap-[6px] !text-[20px] !font-extrabold !leading-[28px] tracking-tight text-[#E07A5F]"
+          className="flex items-center !gap-[6px] !text-[20px] !font-extrabold !leading-[28px] tracking-tight text-[#2563EB]"
         >
           Venora
-          <Sparkles className="!h-[16px] !w-[16px] fill-[#E07A5F] text-[#E07A5F]" />
+          <Sparkles className="!h-[16px] !w-[16px] fill-[#2563EB] text-[#2563EB]" />
         </Link>
 
         <div className="hidden h-full items-center !gap-[32px] md:flex">
           <Link
             href="/"
-            className="flex h-full items-center border-b-2 border-[#E07A5F] !text-[12px] !font-bold uppercase !tracking-[0.14em] text-[#E07A5F]"
+            className="flex h-full items-center border-b-2 border-[#2563EB] !text-[12px] !font-bold uppercase !tracking-[0.14em] text-[#2563EB]"
           >
             Browse
           </Link>
 
           <Link
             href="/bookings"
-            className="flex h-full items-center !text-[12px] !font-bold uppercase !tracking-[0.14em] text-slate-500 transition-colors hover:text-[#E07A5F]"
+            className="flex h-full items-center !text-[12px] !font-bold uppercase !tracking-[0.14em] text-slate-500 transition-colors hover:text-[#2563EB]"
           >
             Bookings
           </Link>
@@ -317,7 +317,7 @@ export default function BrowseClient({ initialVenues, userEmail, userRoles = [] 
           {userRoles.includes("venue_owner") && (
             <Link
               href="/dashboard"
-              className="flex h-full items-center !text-[12px] !font-bold uppercase !tracking-[0.14em] text-slate-500 transition-colors hover:text-[#E07A5F]"
+              className="flex h-full items-center !text-[12px] !font-bold uppercase !tracking-[0.14em] text-slate-500 transition-colors hover:text-[#2563EB]"
             >
               Venue Dashboard
             </Link>
@@ -326,7 +326,7 @@ export default function BrowseClient({ initialVenues, userEmail, userRoles = [] 
           {userRoles.includes("event_coordinator") && (
             <Link
               href="/dashboard"
-              className="flex h-full items-center !text-[12px] !font-bold uppercase !tracking-[0.14em] text-slate-500 transition-colors hover:text-[#E07A5F]"
+              className="flex h-full items-center !text-[12px] !font-bold uppercase !tracking-[0.14em] text-slate-500 transition-colors hover:text-[#2563EB]"
             >
               Coordinator Dashboard
             </Link>
@@ -335,7 +335,7 @@ export default function BrowseClient({ initialVenues, userEmail, userRoles = [] 
           {userRoles.includes("supplier") && (
             <Link
               href="/dashboard/supplier"
-              className="flex h-full items-center !text-[12px] !font-bold uppercase !tracking-[0.14em] text-slate-500 transition-colors hover:text-[#E07A5F]"
+              className="flex h-full items-center !text-[12px] !font-bold uppercase !tracking-[0.14em] text-slate-500 transition-colors hover:text-[#2563EB]"
             >
               Supplier Dashboard
             </Link>
@@ -344,7 +344,7 @@ export default function BrowseClient({ initialVenues, userEmail, userRoles = [] 
           {userRoles.includes("admin") && (
             <Link
               href="/admin"
-              className="flex h-full items-center !text-[12px] !font-bold uppercase !tracking-[0.14em] text-slate-500 transition-colors hover:text-[#E07A5F]"
+              className="flex h-full items-center !text-[12px] !font-bold uppercase !tracking-[0.14em] text-slate-500 transition-colors hover:text-[#2563EB]"
             >
               Admin Panel
             </Link>
@@ -370,7 +370,7 @@ export default function BrowseClient({ initialVenues, userEmail, userRoles = [] 
 
           <Link
             href="/account"
-            className="flex !h-[38px] items-center justify-center rounded-[12px] bg-[#E07A5F] !px-[18px] !text-[12px] !font-bold uppercase !tracking-[0.12em] text-white shadow-sm transition hover:bg-[#d96851]"
+            className="flex !h-[38px] items-center justify-center rounded-[12px] bg-[#2563EB] !px-[18px] !text-[12px] !font-bold uppercase !tracking-[0.12em] text-white shadow-sm transition hover:bg-[#1d4ed8]"
           >
             Account
           </Link>
@@ -385,7 +385,7 @@ export default function BrowseClient({ initialVenues, userEmail, userRoles = [] 
           {/* Header */}
           <div className="mb-[28px] flex flex-col !gap-[18px] xl:flex-row xl:items-end xl:justify-between">
             <div>
-              <div className="mb-[10px] inline-flex items-center !gap-[8px] rounded-full border border-[#F0A090] bg-[#FFF4F1] !px-[12px] !py-[6px] text-[#E07A5F]">
+              <div className="mb-[10px] inline-flex items-center !gap-[8px] rounded-full border border-[#DBEAFE] bg-[#EFF6FF] !px-[12px] !py-[6px] text-[#2563EB]">
                 <Sparkles className="!h-[14px] !w-[14px]" />
                 <span className="!text-[12px] !font-extrabold uppercase !tracking-[0.12em]">
                   AI-powered venue discovery
@@ -409,7 +409,7 @@ export default function BrowseClient({ initialVenues, userEmail, userRoles = [] 
                   placeholder="Search venue name..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="!h-[44px] w-full rounded-[14px] border border-slate-200 bg-white !pl-[42px] !pr-[16px] !text-[14px] !font-medium text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#E07A5F] focus:ring-4 focus:ring-[#E07A5F]/10 sm:!w-[260px]"
+                  className="!h-[44px] w-full rounded-[14px] border border-slate-200 bg-white !pl-[42px] !pr-[16px] !text-[14px] !font-medium text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10 sm:!w-[260px]"
                 />
               </div>
 
@@ -418,7 +418,7 @@ export default function BrowseClient({ initialVenues, userEmail, userRoles = [] 
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="flex !h-[44px] items-center justify-center rounded-[14px] border border-slate-200 bg-white !pl-[38px] !pr-[16px] !text-[13px] !font-bold text-slate-600 shadow-sm outline-none transition hover:border-[#E07A5F] focus:border-[#E07A5F] cursor-pointer"
+                  className="flex !h-[44px] items-center justify-center rounded-[14px] border border-slate-200 bg-white !pl-[38px] !pr-[16px] !text-[13px] !font-bold text-slate-600 shadow-sm outline-none transition hover:border-[#2563EB] focus:border-[#2563EB] cursor-pointer"
                 >
                   <option value="recommended">Sort: Recommended</option>
                   <option value="price-asc">Price: Low to High</option>
@@ -437,7 +437,7 @@ export default function BrowseClient({ initialVenues, userEmail, userRoles = [] 
               <button
                 type="button"
                 onClick={handleClearFilters}
-                className="mt-[16px] rounded-[10px] bg-[#E07A5F] px-[16px] py-[8px] text-[13px] font-bold text-white transition hover:bg-[#9A442D]"
+                className="mt-[16px] rounded-[10px] bg-[#2563EB] px-[16px] py-[8px] text-[13px] font-bold text-white transition hover:bg-[#1D4ED8]"
               >
                 Clear All Filters
               </button>
@@ -450,7 +450,7 @@ export default function BrowseClient({ initialVenues, userEmail, userRoles = [] 
                   <Link
                     key={venue.id}
                     href={`/venues/${venue.slug ?? venue.id}`}
-                    className="group overflow-hidden rounded-[22px] border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#E07A5F]/40 hover:shadow-xl hover:shadow-slate-200/70"
+                    className="group overflow-hidden rounded-[22px] border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#2563EB]/40 hover:shadow-xl hover:shadow-slate-200/70"
                   >
                     <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
                       <img
@@ -485,7 +485,7 @@ export default function BrowseClient({ initialVenues, userEmail, userRoles = [] 
                     <div className="flex min-h-[172px] flex-col justify-between !gap-[18px] !p-[18px]">
                       <div>
                         <div className="mb-[10px] flex items-center justify-between !gap-[12px]">
-                          <span className="rounded-full bg-[#FFF4F1] !px-[10px] !py-[5px] !text-[11px] !font-extrabold uppercase !tracking-[0.1em] text-[#E07A5F]">
+                          <span className="rounded-full bg-[#EFF6FF] !px-[10px] !py-[5px] !text-[11px] !font-extrabold uppercase !tracking-[0.1em] text-[#2563EB]">
                             {venue.category}
                           </span>
                         </div>

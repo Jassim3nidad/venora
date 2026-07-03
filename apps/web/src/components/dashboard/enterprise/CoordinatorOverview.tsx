@@ -12,7 +12,7 @@ import { MaterialIcon } from "./MaterialIcon";
 const UPCOMING_EVENTS = [
   {
     id: "1",
-    event: "Santos–Reyes Wedding",
+    event: "Santos-Reyes Wedding",
     venue: "The Glasshouse Estate",
     date: "Feb 18, 2026",
     status: "Final Coordination",
@@ -58,8 +58,8 @@ export function CoordinatorOverview() {
     <DashboardPage>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-semibold text-[#88726d]">Event Coordinator</p>
-          <h1 className="font-display text-2xl font-bold text-[#191c1e] sm:text-3xl">
+          <p className="text-sm font-semibold text-[#6b7280]">Event Coordinator</p>
+          <h1 className="font-display text-2xl font-bold text-[#111827] sm:text-3xl">
             Coordination Hub
           </h1>
         </div>
@@ -74,7 +74,7 @@ export function CoordinatorOverview() {
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <Panel padding={false} className="overflow-hidden">
-          <div className="border-b border-[#e8deda] p-5 sm:p-6">
+          <div className="border-b border-[#e5e7eb] p-5 sm:p-6">
             <PanelHeader
               title="Upcoming Coordinated Events"
               description="Track event progress, venue coordination, and client status."
@@ -89,7 +89,7 @@ export function CoordinatorOverview() {
                   key: "event",
                   header: "Event",
                   cell: (r) => (
-                    <span className="font-semibold text-[#191c1e]">{r.event}</span>
+                    <span className="font-semibold text-[#111827]">{r.event}</span>
                   ),
                 },
                 { key: "venue", header: "Venue", cell: (r) => r.venue },
@@ -113,12 +113,12 @@ export function CoordinatorOverview() {
             {CHECKLIST.map((task) => (
               <div
                 key={task}
-                className="flex items-center gap-3 rounded-xl border border-[#e8deda] bg-[#fffdfc] p-3"
+                className="flex items-center gap-3 rounded-xl border border-[#e5e7eb] bg-[#f9fafb] p-3"
               >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#fff4f0] text-[#9a442d]">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8]">
                   <MaterialIcon name="check_circle" className="text-lg" />
                 </div>
-                <p className="text-sm font-semibold text-[#191c1e]">{task}</p>
+                <p className="text-sm font-semibold text-[#111827]">{task}</p>
               </div>
             ))}
           </div>
@@ -134,13 +134,13 @@ export function CoordinatorOverview() {
           {MANAGED_VENUES.map((venue) => (
             <div
               key={venue.name}
-              className="rounded-xl border border-[#e8deda] bg-[#fffdfc] p-4"
+              className="rounded-xl border border-[#e5e7eb] bg-[#f9fafb] p-4"
             >
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#fff4f0] text-[#9a442d]">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#eff6ff] text-[#1d4ed8]">
                 <MaterialIcon name="location_city" />
               </div>
-              <p className="font-semibold text-[#191c1e]">{venue.name}</p>
-              <p className="mt-1 text-sm text-[#55423e]">
+              <p className="font-semibold text-[#111827]">{venue.name}</p>
+              <p className="mt-1 text-sm text-[#4b5563]">
                 {venue.events} active event{venue.events !== 1 ? "s" : ""}
               </p>
               <div className="mt-3">

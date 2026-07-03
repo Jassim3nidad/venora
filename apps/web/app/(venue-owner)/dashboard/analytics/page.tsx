@@ -6,12 +6,12 @@ import {
   PanelHeader,
 } from "@/components/dashboard/enterprise";
 
-export const metadata: Metadata = { title: "Analytics — Dashboard" };
+export const metadata: Metadata = { title: "Analytics - Dashboard" };
 
 const STAT_CARDS = [
   { label: "Total Revenue", value: "₱0", icon: "payments" },
   { label: "Total Bookings", value: "0", icon: "event_available" },
-  { label: "Avg. Rating", value: "—", icon: "star" },
+  { label: "Avg. Rating", value: "-", icon: "star" },
   { label: "Occupancy Rate", value: "0%", icon: "analytics" },
 ];
 
@@ -34,9 +34,9 @@ export default function AnalyticsPage() {
         />
         <div
           id="analytics-stats"
-          className="flex h-[280px] items-center justify-center rounded-xl border border-dashed border-[#e8deda] bg-[#fffdfc] text-sm text-[#88726d]"
+          className="flex h-[280px] items-center justify-center rounded-xl border border-dashed border-[#e5e7eb] bg-[#f9fafb] text-sm text-[#6b7280]"
         >
-          Revenue chart — integrate Recharts or Chart.js
+          Revenue chart - integrate Recharts or Chart.js
         </div>
       </Panel>
     </DashboardSubPage>

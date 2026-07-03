@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -120,7 +120,7 @@ function SelectBox({
         aria-label={label}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="h-11 w-full appearance-none rounded-xl border border-[#E9D5D0] bg-white px-4 pr-10 text-left text-sm font-medium text-neutral-700 shadow-sm outline-none transition hover:border-[#E2765F] focus:border-[#E2765F] focus:ring-4 focus:ring-[#E2765F]/10"
+        className="h-11 w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-4 pr-10 text-left text-sm font-medium text-neutral-700 shadow-sm outline-none transition hover:border-[#2563EB] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
       >
         <option value="">{placeholder}</option>
         {options.map((option) => (
@@ -150,8 +150,8 @@ function Pill({
       className={[
         "rounded-full border px-3.5 py-2 text-sm font-semibold transition",
         active
-          ? "border-[#F0A090] bg-[#FFF4F1] text-[#E2765F]"
-          : "border-[#E9D5D0] bg-white text-neutral-600 hover:border-[#E2765F] hover:text-[#E2765F]",
+          ? "border-[#DBEAFE] bg-[#EFF6FF] text-[#2563EB]"
+          : "border-[#E5E7EB] bg-white text-neutral-600 hover:border-[#2563EB] hover:text-[#2563EB]",
       ].join(" ")}
     >
       {children}
@@ -175,8 +175,8 @@ function OptionButton({
       className={[
         "h-10 rounded-xl border text-sm font-semibold transition",
         active
-          ? "border-[#E2765F] bg-[#FFF7F4] text-[#E2765F] shadow-[0_0_0_1px_#E2765F]"
-          : "border-[#E9D5D0] bg-white text-neutral-700 hover:border-[#E2765F] hover:text-[#E2765F]",
+          ? "border-[#2563EB] bg-[#FFF7F4] text-[#2563EB] shadow-[0_0_0_1px_#2563EB]"
+          : "border-[#E5E7EB] bg-white text-neutral-700 hover:border-[#2563EB] hover:text-[#2563EB]",
       ].join(" ")}
     >
       {children}
@@ -364,16 +364,16 @@ export default function Sidebar({
   return (
     <aside
       className={[
-        "flex flex-shrink-0 flex-col bg-[#FFFDFC] shadow-sm",
+        "flex flex-shrink-0 flex-col bg-[#F9FAFB] shadow-sm",
         presentation === "mobile"
-          ? "h-full w-full rounded-t-[28px] border border-[#E9D5D0]"
-          : "h-full w-[360px] max-w-[360px] border-r border-[#E9D5D0]",
+          ? "h-full w-full rounded-t-[28px] border border-[#E5E7EB]"
+          : "h-full w-[360px] max-w-[360px] border-r border-[#E5E7EB]",
       ].join(" ")}
     >
-      <div className="shrink-0 border-b border-[#E9D5D0] px-6 pb-4 pt-5">
+      <div className="shrink-0 border-b border-[#E5E7EB] px-6 pb-4 pt-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-[#C7897A]">
+            <h1 className="text-2xl font-extrabold tracking-tight text-[#2563EB]">
               Filters
             </h1>
 
@@ -386,7 +386,7 @@ export default function Sidebar({
             <button
               type="button"
               onClick={clearFilters}
-              className="rounded-full border border-[#E9D5D0] bg-white px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.08em] text-[#9A442D] transition hover:border-[#E2765F] hover:bg-[#FFF4F1]"
+              className="rounded-full border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.08em] text-[#1D4ED8] transition hover:border-[#2563EB] hover:bg-[#EFF6FF]"
             >
               Clear
             </button>
@@ -401,7 +401,7 @@ export default function Sidebar({
             value={searchQuery}
             onChange={(event) => updateFilters({ q: event.target.value })}
             placeholder="Search venues..."
-            className="h-11 w-full rounded-xl border border-[#E9D5D0] bg-white pl-12 pr-4 text-sm font-medium text-neutral-700 shadow-sm outline-none transition placeholder:text-neutral-400 focus:border-[#E2765F] focus:ring-4 focus:ring-[#E2765F]/10"
+            className="h-11 w-full rounded-xl border border-[#E5E7EB] bg-white pl-12 pr-4 text-sm font-medium text-neutral-700 shadow-sm outline-none transition placeholder:text-neutral-400 focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
           />
         </div>
       </div>
@@ -431,7 +431,7 @@ export default function Sidebar({
             <button
               type="button"
               onClick={handleUseCurrentLocation}
-              className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#E9D5D0] bg-neutral-100 text-sm font-bold text-neutral-700 shadow-sm transition hover:border-[#E2765F] hover:bg-[#FFF4F1] hover:text-[#E2765F]"
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-neutral-100 text-sm font-bold text-neutral-700 shadow-sm transition hover:border-[#2563EB] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
             >
               <Crosshair className="h-5 w-5" />
               Use my current location
@@ -486,7 +486,7 @@ export default function Sidebar({
         <section>
           <SectionTitle icon={WalletCards} title="Budget" />
 
-          <div className="overflow-hidden rounded-xl border border-[#E9D5D0] bg-white">
+          <div className="overflow-hidden rounded-xl border border-[#E5E7EB] bg-white">
             <div className="grid grid-cols-3">
               {budgetTabs.map((budget, index) => (
                 <button
@@ -501,10 +501,10 @@ export default function Sidebar({
                   className={[
                     "h-10 text-xs font-bold transition",
                     index !== budgetTabs.length - 1
-                      ? "border-r border-[#E9D5D0]"
+                      ? "border-r border-[#E5E7EB]"
                       : "",
                     selectedBudget === budget.value
-                      ? "bg-[#FFF4F1] text-[#E2765F]"
+                      ? "bg-[#EFF6FF] text-[#2563EB]"
                       : "bg-white text-neutral-600 hover:bg-[#FFF9F7]",
                   ].join(" ")}
                 >
@@ -536,7 +536,7 @@ export default function Sidebar({
             onChange={(event) =>
               updateFilters({ capacity: event.target.value })
             }
-            className="mt-3 h-2 w-full accent-[#E2765F]"
+            className="mt-3 h-2 w-full accent-[#2563EB]"
             aria-label="Minimum guest capacity"
           />
 
@@ -554,7 +554,7 @@ export default function Sidebar({
               onChange={(event) =>
                 updateFilters({ capacity: event.target.value })
               }
-              className="h-11 w-full rounded-xl border border-[#E9D5D0] bg-white px-3 text-sm font-semibold text-neutral-800 shadow-sm outline-none transition focus:border-[#E2765F] focus:ring-4 focus:ring-[#E2765F]/10"
+              className="h-11 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm font-semibold text-neutral-800 shadow-sm outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
               placeholder="Any"
             />
           </div>
@@ -578,7 +578,7 @@ export default function Sidebar({
               <button
                 type="button"
                 onClick={() => updateFilters({ capacity: "" })}
-                className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#9A442D] hover:text-[#E2765F]"
+                className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#1D4ED8] hover:text-[#2563EB]"
               >
                 Reset
               </button>
@@ -601,8 +601,8 @@ export default function Sidebar({
                   className={[
                     "flex aspect-[1.35] flex-col items-center justify-center gap-2 rounded-2xl border bg-white transition",
                     active
-                      ? "border-[#E2765F] bg-[#FFF7F4] text-[#E2765F] shadow-[0_0_0_2px_#E2765F]"
-                      : "border-[#E9D5D0] text-neutral-700 hover:border-[#E2765F] hover:text-[#E2765F]",
+                      ? "border-[#2563EB] bg-[#FFF7F4] text-[#2563EB] shadow-[0_0_0_2px_#2563EB]"
+                      : "border-[#E5E7EB] text-neutral-700 hover:border-[#2563EB] hover:text-[#2563EB]",
                   ].join(" ")}
                 >
                   <Icon className="h-7 w-7" strokeWidth={2.3} />
@@ -628,8 +628,8 @@ export default function Sidebar({
                   className={[
                     "flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-bold transition",
                     active
-                      ? "border-[#F0A090] bg-[#FFF4F1] text-[#E2765F]"
-                      : "border-[#E9D5D0] bg-white text-neutral-700 hover:border-[#E2765F] hover:text-[#E2765F]",
+                      ? "border-[#DBEAFE] bg-[#EFF6FF] text-[#2563EB]"
+                      : "border-[#E5E7EB] bg-white text-neutral-700 hover:border-[#2563EB] hover:text-[#2563EB]",
                   ].join(" ")}
                 >
                   <Icon className="h-4 w-4" strokeWidth={2.5} />
@@ -641,11 +641,11 @@ export default function Sidebar({
         </section>
       </div>
 
-      <div className="shrink-0 border-t border-[#E9D5D0] bg-[#FFFDFC] px-6 py-4 shadow-[0_-12px_30px_rgba(15,23,42,0.06)]">
+      <div className="shrink-0 border-t border-[#E5E7EB] bg-[#F9FAFB] px-6 py-4 shadow-[0_-12px_30px_rgba(15,23,42,0.06)]">
         <button
           type="button"
           onClick={onApply}
-          className="h-12 w-full rounded-xl bg-[#E2765F] py-3 text-base font-extrabold text-white shadow-lg shadow-[#E2765F]/20 transition hover:bg-[#d96851] active:scale-[0.98]"
+          className="h-12 w-full rounded-xl bg-[#2563EB] py-3 text-base font-extrabold text-white shadow-lg shadow-[#2563EB]/20 transition hover:bg-[#1d4ed8] active:scale-[0.98]"
         >
           View Results ({activeFilterCount})
         </button>
