@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 
 const featuredVenues = [
@@ -44,6 +47,8 @@ const stats = [
 ];
 
 export default function MarketingHomePage() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen w-full max-w-full flex flex-col overflow-x-hidden bg-surface text-on-background antialiased">
       <style>{`
@@ -139,7 +144,40 @@ export default function MarketingHomePage() {
           .md\\:font-headline-lg { font-family: 'Plus Jakarta Sans', sans-serif; }
           .md\\:text-headline-lg { font-size: 30px; line-height: 38px; letter-spacing: -0.01em; font-weight: 600; }
         }
-      `}</style>
+        .mobile-menu-backdrop {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.35);
+          z-index: 40;
+        }
+
+        .mobile-menu-panel {
+          position: fixed;
+          inset: auto 0 0 0;
+          z-index: 50;
+          background: #ffffff;
+          border-top: 1px solid #e0e3e5;
+          box-shadow: 0 -16px 40px rgba(15, 23, 42, 0.12);
+          padding: 20px 16px 24px;
+        }
+
+        .mobile-menu-panel nav,
+        .mobile-menu-panel .auth-links {
+          display: grid;
+          gap: 16px;
+        }
+
+        .mobile-menu-close {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+          border: none;
+          background: transparent;
+          color: #191c1e;
+          font-size: 22px;
+          line-height: 1;
+          cursor: pointer;
+        }      `}</style>
 
       {/* Top Navigation */}
       <header className="sticky top-0 z-50 w-full bg-surface/90 darkbg-surface-dim/ backdrop-blur-md border-b border-outline-variant/30">
@@ -196,11 +234,78 @@ export default function MarketingHomePage() {
             className="md:hidden text-primary justify-self-end col-start-3"
             type="button"
             aria-label="Open menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen(true)}
           >
             <span className="material-symbols-outlined">menu</span>
           </button>
         </div>
       </header>
+
+      {menuOpen ? (
+        <>
+          <div
+            className="mobile-menu-backdrop md:hidden"
+            onClick={() => setMenuOpen(false)}
+          />
+          <div className="mobile-menu-panel md:hidden" role="dialog" aria-modal="true" aria-label="Mobile navigation">
+            <button
+              className="mobile-menu-close"
+              type="button"
+              aria-label="Close menu"
+              onClick={() => setMenuOpen(false)}
+            >
+              ×
+            </button>
+            <nav className="space-y-3">
+              <Link
+                href="/venues"
+                className="block font-body-md text-body-md text-on-surface hover:text-primary"
+                onClick={() => setMenuOpen(false)}
+              >
+                Venues
+              </Link>
+              <Link
+                href="/venues"
+                className="block font-body-md text-body-md text-on-surface hover:text-primary"
+                onClick={() => setMenuOpen(false)}
+              >
+                Experiences
+              </Link>
+              <Link
+                href="/bookings"
+                className="block font-body-md text-body-md text-on-surface hover:text-primary"
+                onClick={() => setMenuOpen(false)}
+              >
+                Planning Tools
+              </Link>
+              <Link
+                href="/register"
+                className="block font-body-md text-body-md text-on-surface hover:text-primary"
+                onClick={() => setMenuOpen(false)}
+              >
+                Host a Venue
+              </Link>
+            </nav>
+            <div className="auth-links mt-6 space-y-3">
+              <Link
+                href="/login"
+                className="block font-button text-button text-on-surface hover:text-primary"
+                onClick={() => setMenuOpen(false)}
+              >
+                Log In
+              </Link>
+              <Link
+                href="/register"
+                className="inline-flex h-12 w-full items-center justify-center rounded-[32px] bg-primary-container px-6 text-[15px] font-semibold text-on-primary hover:opacity-90 transition-opacity"
+                onClick={() => setMenuOpen(false)}
+              >
+                Sign Up
+              </Link>
+            </div>
+          </div>
+        </>
+      ) : null}
 
       <main className="flex-grow w-full">
         {/* Hero Section */}
