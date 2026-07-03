@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import Link from "next/link";
+import { Bell, HelpCircle, LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import VenueDetails from "@/src/features/venues/ui/VenueDetails";
 
@@ -26,6 +28,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function VenueDetailPage({ params }: Props) {
   const { slug } = await params;
   const supabase = await createClient() as any;
+
+  async function logoutAction() {
+    "use server";
+
+    const supabase = await createClient();
+    await supabase.auth.signOut();
+
+    redirect("/login");
+  }
 
   // 1. Fetch current user session
   const { data: { user } } = await supabase.auth.getUser();
@@ -90,12 +101,82 @@ export default async function VenueDetailPage({ params }: Props) {
   }
 
   return (
-    <VenueDetails
-      venue={venue}
-      reviews={reviews || []}
-      nearbyVenues={nearbyVenues || []}
-      initialIsFavorited={initialIsFavorited}
-      currentUser={user}
-    />
+    <>
+      <header className="z-50 shrink-0 border-b border-[#E9D5D0]/70 bg-white/90 backdrop-blur-xl">
+        <div className="relative mx-auto flex min-h-16 w-full max-w-[1600px] items-center gap-2 px-3 sm:gap-3 sm:px-6 lg:px-8">
+          <Link
+            href="/"
+            className="text-lg font-semibold tracking-tight text-[#E07A5F] transition hover:text-[#d96851] sm:text-xl"
+          >
+            Venora
+          </Link>
+
+          <nav
+            aria-label="Primary navigation"
+            className="absolute left-1/2 hidden -translate-x-1/2 justify-center md:flex"
+          >
+            <div className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white/80 p-1 shadow-sm">
+              <Link
+                href="/venues"
+                className="rounded-full bg-[#FFF4F1] px-4 py-2 text-sm font-semibold text-[#E07A5F] transition hover:text-[#d96851]"
+              >
+                Browse
+              </Link>
+
+              <Link
+                href="/bookings"
+                className="rounded-full px-4 py-2 text-sm font-semibold text-[#6B7280] transition hover:bg-[#FFF4F1] hover:text-[#E07A5F]"
+              >
+                Bookings
+              </Link>
+            </div>
+          </nav>
+
+          <div className="ml-auto flex min-w-0 items-center justify-end gap-1.5 sm:gap-3">
+            <button
+              type="button"
+              className="hidden h-10 w-10 items-center justify-center rounded-full border border-transparent text-slate-400 transition hover:border-slate-200 hover:bg-slate-50 hover:text-slate-600 lg:inline-flex"
+              aria-label="Notifications"
+            >
+              <Bell className="h-4 w-4" />
+            </button>
+
+            <button
+              type="button"
+              className="hidden h-10 w-10 items-center justify-center rounded-full border border-transparent text-slate-400 transition hover:border-slate-200 hover:bg-slate-50 hover:text-slate-600 sm:inline-flex"
+              aria-label="Help"
+            >
+              <HelpCircle className="h-4 w-4" />
+            </button>
+
+            <Link
+              href="/account"
+              className="inline-flex h-9 items-center justify-center rounded-full bg-[#E07A5F] px-3 text-[11px] font-bold uppercase tracking-[0.08em] text-white shadow-sm shadow-[#E07A5F]/20 transition hover:bg-[#d96851] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E07A5F]/30 sm:h-10 sm:px-4 sm:text-xs sm:tracking-[0.12em]"
+            >
+              Account
+            </Link>
+
+            <form action={logoutAction} className="shrink-0">
+              <button
+                type="submit"
+                aria-label="Logout"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 text-[11px] font-bold uppercase tracking-[0.08em] text-[#6B7280] shadow-sm transition hover:border-[#E9D5D0] hover:bg-[#FFFDFC] hover:text-[#9A442D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E07A5F]/20 sm:h-10 sm:gap-2 sm:px-4 sm:text-xs sm:tracking-[0.12em]"
+              >
+                <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </header>
+
+      <VenueDetails
+        venue={venue}
+        reviews={reviews || []}
+        nearbyVenues={nearbyVenues || []}
+        initialIsFavorited={initialIsFavorited}
+        currentUser={user}
+      />
+    </>
   );
 }

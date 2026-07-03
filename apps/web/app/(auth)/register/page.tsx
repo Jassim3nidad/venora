@@ -129,6 +129,11 @@ export default function RegisterPage() {
       {/* Register Form */}
       <section className="flex min-h-screen w-full items-center justify-center overflow-y-auto bg-white px-[24px] py-[20px] lg:w-1/2 lg:px-[64px]">
         <div className="w-full max-w-[400px]">
+          {/* Mobile Logo */}
+          <div className="mb-[18px] flex items-center justify-center lg:hidden">
+            <span className="text-[24px] font-semibold text-[#E07A5F]">Venora</span>
+          </div>
+
           <div className="mb-[18px] text-center">
             <h2 className="mb-[4px] text-[28px] font-semibold leading-[36px] tracking-[-0.01em] text-[#191C1E]">
               Create your Venora account
