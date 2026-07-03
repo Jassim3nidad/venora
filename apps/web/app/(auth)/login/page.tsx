@@ -133,9 +133,8 @@ function LoginForm() {
       <section className="flex min-h-screen w-full items-center justify-center bg-white px-[24px] py-[40px] lg:w-1/2 lg:px-[64px]">
         <div className="w-full max-w-[430px]">
           {/* Mobile Logo */}
-          <div className="mb-[48px] flex items-center justify-center gap-[10px] lg:hidden">
-            <DraftingCompass className="h-[32px] w-[32px] text-[#E07A5F]" />
-            <span className="text-[24px] font-extrabold text-slate-950">
+          <div className="mb-[48px] flex items-center justify-center lg:hidden">
+            <span className="text-[24px] font-semibold text-[#E07A5F]">
               Venora
             </span>
           </div>
