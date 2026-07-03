@@ -132,13 +132,15 @@ export default async function VenuesMarketplacePage() {
   }
 
   const { data: dbVenues, error } = await (supabase.from("venues") as any)
-    .select(`
+    .select(
+      `
       *,
       venue_images(storage_path, is_featured, display_order),
       venue_category_assignments(venue_categories(name, slug)),
       venue_event_types(event_types(name, slug)),
       venue_amenities(amenities(name))
-    `)
+    `,
+    )
     .eq("status", "published")
     .order("created_at", { ascending: false });
 
@@ -153,13 +155,17 @@ export default async function VenuesMarketplacePage() {
   let favoriteVenueIds = new Set<string>();
 
   if (user) {
-    const { data: favoriteRows, error: favoritesError } = await (supabase
-      .from("favorites") as any)
+    const { data: favoriteRows, error: favoritesError } = await (
+      supabase.from("favorites") as any
+    )
       .select("venue_id")
       .eq("customer_id", user.id);
 
     if (favoritesError) {
-      console.error("[venues/page] Favorites fetch error:", favoritesError.message);
+      console.error(
+        "[venues/page] Favorites fetch error:",
+        favoritesError.message,
+      );
     } else {
       favoriteVenueIds = new Set(
         (favoriteRows ?? []).map((row: any) => String(row.venue_id)),
@@ -239,7 +245,7 @@ export default async function VenuesMarketplacePage() {
       <header className="sticky top-0 z-50 shrink-0 border-b border-[#E5E7EB]/70 bg-white/90 backdrop-blur-xl">
         <div className="relative mx-auto flex min-h-16 w-full max-w-[1600px] items-center gap-2 px-3 sm:gap-3 sm:px-6 lg:px-8">
           <Link
-            href="/"
+            href="/venues"
             className="text-lg font-black tracking-[-0.04em] text-[#2563EB] transition hover:text-[#1d4ed8] sm:text-xl"
           >
             Venora
