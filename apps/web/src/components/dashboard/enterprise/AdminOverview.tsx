@@ -1,0 +1,221 @@
+"use client";
+
+import Link from "next/link";
+import {
+  DashboardPage,
+  DashButton,
+  DataTable,
+  KpiCard,
+  Panel,
+  PanelHeader,
+  StatusBadge,
+} from "./ui";
+import { MaterialIcon } from "./MaterialIcon";
+
+export type AdminOverviewProps = {
+  totalUsers: number;
+  pendingVenues: number;
+  supplierReviews: number;
+  monthlyCommission: number;
+  pendingReviews: Array<{
+    id: string;
+    item: string;
+    type: string;
+    submittedBy: string;
+    status: string;
+  }>;
+};
+
+const ADMIN_MODULES = [
+  {
+    title: "User Management",
+    description: "Review users, manage roles, and monitor platform access.",
+    href: "/admin/users",
+    icon: "group",
+  },
+  {
+    title: "Venue Approval",
+    description: "Approve, reject, and review venue listings.",
+    href: "/admin/venues",
+    icon: "location_city",
+  },
+  {
+    title: "Supplier Accreditation",
+    description: "Review supplier profiles and accreditation status.",
+    href: "/admin/suppliers",
+    icon: "storefront",
+  },
+  {
+    title: "Commission Tracking",
+    description: "Monitor platform fees and payout summaries.",
+    href: "/admin/commissions",
+    icon: "payments",
+  },
+  {
+    title: "Reports",
+    description: "Platform analytics, booking trends, and activity.",
+    href: "/admin/reports",
+    icon: "assessment",
+  },
+];
+
+const PLATFORM_HEALTH = [
+  { label: "Role-based access control", status: "Active", icon: "shield" },
+  { label: "Venue approval workflow", status: "Online", icon: "verified" },
+  { label: "Supplier verification", status: "Needs Review", icon: "badge" },
+  { label: "Reports and analytics", status: "Ready", icon: "analytics" },
+];
+
+export function AdminOverview({
+  totalUsers,
+  pendingVenues,
+  supplierReviews,
+  monthlyCommission,
+  pendingReviews,
+}: AdminOverviewProps) {
+  const kpis = [
+    {
+      label: "Total Users",
+      value: totalUsers.toLocaleString(),
+      icon: "group",
+      highlight: true,
+    },
+    {
+      label: "Pending Venues",
+      value: String(pendingVenues),
+      icon: "location_city",
+    },
+    {
+      label: "Supplier Reviews",
+      value: String(supplierReviews),
+      icon: "storefront",
+    },
+    {
+      label: "Monthly Commission",
+      value: `₱${monthlyCommission.toLocaleString()}`,
+      icon: "payments",
+    },
+  ];
+
+  return (
+    <DashboardPage>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <span className="mb-2 inline-flex rounded-full bg-[#fff4f0] px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-[#9a442d]">
+            Administrator
+          </span>
+          <h1 className="font-display text-2xl font-bold text-[#191c1e] sm:text-3xl">
+            Platform Admin
+          </h1>
+          <p className="mt-1 max-w-2xl text-sm text-[#55423e]">
+            Manage users, venue approvals, supplier accreditation, commissions,
+            and platform operations.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <DashButton href="/admin/reports" variant="secondary" icon="assessment">
+            View Reports
+          </DashButton>
+          <DashButton href="/admin/venues" icon="arrow_forward">
+            Review Venues
+          </DashButton>
+        </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {kpis.map((kpi) => (
+          <KpiCard key={kpi.label} {...kpi} />
+        ))}
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+        <Panel>
+          <PanelHeader
+            title="Admin Modules"
+            description="Quick access to major administrator tools."
+          />
+          <div className="grid gap-3 md:grid-cols-2">
+            {ADMIN_MODULES.map((mod) => (
+              <Link
+                key={mod.title}
+                href={mod.href}
+                className="group rounded-xl border border-[#e8deda] bg-[#fffdfc] p-4 transition hover:border-[#9a442d] hover:bg-[#fff4f0]"
+              >
+                <div className="mb-3 flex items-center justify-between">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#9a442d] shadow-sm">
+                    <MaterialIcon name={mod.icon} />
+                  </div>
+                  <MaterialIcon
+                    name="arrow_forward"
+                    className="text-[#88726d] transition group-hover:text-[#9a442d]"
+                  />
+                </div>
+                <p className="font-semibold text-[#191c1e]">{mod.title}</p>
+                <p className="mt-1 text-sm text-[#55423e]">{mod.description}</p>
+              </Link>
+            ))}
+          </div>
+        </Panel>
+
+        <Panel>
+          <PanelHeader title="Platform Health" />
+          <div className="space-y-2">
+            {PLATFORM_HEALTH.map((item) => (
+              <div
+                key={item.label}
+                className="flex items-center justify-between rounded-xl border border-[#e8deda] bg-[#fffdfc] p-3"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#fff4f0] text-[#9a442d]">
+                    <MaterialIcon name={item.icon} className="text-lg" />
+                  </div>
+                  <p className="text-sm font-semibold text-[#191c1e]">
+                    {item.label}
+                  </p>
+                </div>
+                <StatusBadge status="active" label={item.status} />
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </div>
+
+      <Panel padding={false} className="overflow-hidden">
+        <div className="border-b border-[#e8deda] p-5 sm:p-6">
+          <PanelHeader
+            title="Pending Reviews"
+            description="Latest venue and supplier submissions awaiting review."
+            action={
+              <DashButton href="/admin/venues" variant="secondary">
+                Manage Reviews
+              </DashButton>
+            }
+          />
+        </div>
+        <div className="p-5 sm:p-6">
+          <DataTable
+            rows={pendingReviews}
+            keyFn={(r) => r.id}
+            emptyMessage="No pending reviews."
+            columns={[
+              {
+                key: "item",
+                header: "Item",
+                cell: (r) => (
+                  <span className="font-semibold text-[#191c1e]">{r.item}</span>
+                ),
+              },
+              { key: "type", header: "Type", cell: (r) => r.type },
+              { key: "by", header: "Submitted By", cell: (r) => r.submittedBy },
+              {
+                key: "status",
+                header: "Status",
+                cell: (r) => <StatusBadge status="pending" label={r.status} />,
+              },
+            ]}
+          />
+        </div>
+      </Panel>
+    </DashboardPage>
+  );
+}
