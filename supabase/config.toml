@@ -24,8 +24,8 @@ enabled = true
 
 [auth]
 enabled = true
-site_url = "http://localhost:3000"
-additional_redirect_urls = ["http://localhost:3000/auth/callback"]
+site_url = "http://localhost:3001"
+additional_redirect_urls = ["http://localhost:3000/auth/callback", "http://localhost:3001/auth/callback"]
 jwt_expiry = 3600
 enable_signup = true
 

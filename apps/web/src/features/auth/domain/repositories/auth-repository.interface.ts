@@ -17,6 +17,8 @@ export interface AuthRepository {
 
   signIn(params: { email: string; password: string }): Promise<void>;
 
+  resendVerificationEmail(email: string): Promise<void>;
+
   signInWithOAuth(provider: "google"): Promise<void>;
 
   signOut(): Promise<void>;

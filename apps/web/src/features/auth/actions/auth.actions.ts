@@ -14,6 +14,7 @@ import {
 import {
   registerUserUseCase,
   authenticateUserUseCase,
+  resendVerificationEmailUseCase,
   signInWithOAuthUseCase,
   signOutUseCase,
   requestPasswordResetUseCase,
@@ -22,8 +23,28 @@ import {
   getCurrentUserUseCase,
 } from "../application/auth.usecases";
 import type { ActionResult } from "../types/auth.types";
-import { defaultRouteForRoles, type RoleName } from "@/lib/rbac/roles";
+import { type RoleName } from "@/lib/rbac/roles";
 import { toErrorMessage } from "@/lib/errors";
+
+function isUnverifiedEmailError(message: string) {
+  const normalized = message.toLowerCase();
+
+  return (
+    normalized.includes("email not confirmed") ||
+    normalized.includes("confirm your email") ||
+    normalized.includes("not verified")
+  );
+}
+
+function isAlreadyRegisteredError(message: string) {
+  const normalized = message.toLowerCase();
+
+  return (
+    normalized.includes("already registered") ||
+    normalized.includes("already exists") ||
+    normalized.includes("user already")
+  );
+}
 
 export async function registerAction(rawInput: unknown): Promise<ActionResult> {
   const parsed = registerSchema.safeParse(rawInput);
@@ -43,14 +64,32 @@ export async function registerAction(rawInput: unknown): Promise<ActionResult> {
       fullName: parsed.data.fullName,
       role: parsed.data.role as RoleName,
     });
+
+    try {
+      await resendVerificationEmailUseCase(parsed.data.email);
+    } catch (resendError) {
+      console.error("[registerAction] Verification email resend failed:", resendError);
+    }
   } catch (error) {
+    const message = toErrorMessage(error);
+
+    if (isAlreadyRegisteredError(message)) {
+      try {
+        await resendVerificationEmailUseCase(parsed.data.email);
+      } catch (resendError) {
+        console.error("[registerAction] Existing user verification resend failed:", resendError);
+      }
+
+      redirect(`/verify-email?email=${encodeURIComponent(parsed.data.email)}&resend=available`);
+    }
+
     return {
       success: false,
-      error: toErrorMessage(error),
+      error: message,
     };
   }
 
-  redirect("/verify-email");
+  redirect(`/verify-email?email=${encodeURIComponent(parsed.data.email)}`);
 }
 
 export async function loginAction(rawInput: unknown): Promise<ActionResult> {
@@ -67,25 +106,46 @@ export async function loginAction(rawInput: unknown): Promise<ActionResult> {
   try {
     await authenticateUserUseCase(parsed.data);
   } catch (error) {
+    const message = toErrorMessage(error);
+
+    return {
+      success: false,
+      error: message,
+      data: isUnverifiedEmailError(message)
+        ? { reason: "email_unverified", email: parsed.data.email }
+        : undefined,
+    };
+  }
+
+  redirect("/venues");
+}
+
+export async function resendVerificationEmailAction(
+  rawInput: unknown,
+): Promise<ActionResult> {
+  const parsed = forgotPasswordSchema.safeParse(rawInput);
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: "Enter a valid email address.",
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
+  }
+
+  try {
+    await resendVerificationEmailUseCase(parsed.data.email);
+  } catch (error) {
     return {
       success: false,
       error: toErrorMessage(error),
     };
   }
 
-  let targetPath = "/venues";
-
-  try {
-    const user = await getCurrentUserUseCase();
-
-    if (user && user.roles.length > 0) {
-      targetPath = defaultRouteForRoles(user.roles);
-    }
-  } catch (error) {
-    console.error("[loginAction] Could not resolve roles post-login:", error);
-  }
-
-  redirect(targetPath);
+  return {
+    success: true,
+    data: undefined,
+  };
 }
 
 export async function signInWithOAuthAction(

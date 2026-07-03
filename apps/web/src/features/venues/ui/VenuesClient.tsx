@@ -42,6 +42,7 @@ export interface Venue {
   receptionVenue?: boolean;
   eventTypes?: string[];
   amenities?: string[];
+  isFavorited?: boolean;
 }
 
 const filterKeys = [
@@ -181,14 +182,20 @@ function matchesAmenity(venue: Venue, amenity: string) {
 
 export default function VenuesClient({
   initialVenues,
+  favoriteVenueIds = [],
 }: {
   initialVenues: Venue[];
+  favoriteVenueIds?: string[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const queryString = searchParams.toString();
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const favoriteSet = useMemo(
+    () => new Set(favoriteVenueIds.map(String)),
+    [favoriteVenueIds],
+  );
 
   const filters = useMemo(() => {
     const params = new URLSearchParams(queryString);
@@ -309,6 +316,13 @@ export default function VenuesClient({
     });
 
     return [...list].sort((a, b) => {
+      const aFavorited = favoriteSet.has(String(a.id)) || Boolean(a.isFavorited);
+      const bFavorited = favoriteSet.has(String(b.id)) || Boolean(b.isFavorited);
+
+      if (aFavorited !== bFavorited) {
+        return aFavorited ? -1 : 1;
+      }
+
       if (filters.sort === "price") {
         const aPrice = getVenuePrice(a) || Number.MAX_SAFE_INTEGER;
         const bPrice = getVenuePrice(b) || Number.MAX_SAFE_INTEGER;
@@ -328,7 +342,7 @@ export default function VenuesClient({
 
       return a.name.localeCompare(b.name);
     });
-  }, [filters, initialVenues]);
+  }, [favoriteSet, filters, initialVenues]);
 
   const filterSummary = [
     filters.query && `Search: ${filters.query}`,

@@ -17,6 +17,7 @@ import {
   User,
 } from "lucide-react";
 import {
+  resendVerificationEmailAction,
   registerAction,
   signInWithOAuthAction,
 } from "@/features/auth/actions/auth.actions";
@@ -46,12 +47,16 @@ export default function RegisterPage() {
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
+  const [showResendVerification, setShowResendVerification] = useState(false);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFieldErrors({});
     setGeneralError(null);
+    setShowResendVerification(false);
+    setResendMessage(null);
 
     const result = registerSchema.safeParse({
       fullName,
@@ -77,6 +82,11 @@ export default function RegisterPage() {
 
       if (response && !response.success) {
         setGeneralError(response.error || "Unable to create account.");
+        setShowResendVerification(
+          response.error.toLowerCase().includes("already registered") ||
+            response.error.toLowerCase().includes("already exists") ||
+            response.error.toLowerCase().includes("user already"),
+        );
         if (response.fieldErrors) setFieldErrors(response.fieldErrors);
       }
     });
@@ -170,6 +180,43 @@ export default function RegisterPage() {
                 className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold leading-6 text-red-700"
               >
                 {generalError}
+                {showResendVerification ? (
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => {
+                      setResendMessage(null);
+
+                      startTransition(async () => {
+                        const response = await resendVerificationEmailAction({
+                          email,
+                        });
+
+                        if (response.success) {
+                          setResendMessage(
+                            "We sent a fresh verification link. Please check your inbox.",
+                          );
+                          return;
+                        }
+
+                        setGeneralError(response.error);
+                      });
+                    }}
+                    className="mt-3 block rounded-xl bg-red-700 px-4 py-2 text-sm font-extrabold text-white transition hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    {isPending ? "Sending..." : "Resend verification email"}
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+
+            {resendMessage ? (
+              <div
+                role="status"
+                className="mb-4 flex gap-3 rounded-2xl border border-[#E5E7EB] bg-[#EFF6FF] px-4 py-3 text-sm font-semibold leading-6 text-[#1D4ED8]"
+              >
+                <Mail className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>{resendMessage}</span>
               </div>
             ) : null}
 
