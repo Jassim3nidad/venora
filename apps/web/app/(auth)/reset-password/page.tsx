@@ -48,7 +48,7 @@ function ExpiredLinkView() {
             href="/login"
             className="font-bold text-[#2563EB] transition hover:text-[#1D4ED8] hover:underline"
           >
-            <- Back to sign in
+            ← Back to sign in
           </Link>
         </p>
       </div>

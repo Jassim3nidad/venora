@@ -81,7 +81,7 @@ export default function ForgotPasswordPage() {
               className="inline-flex items-center gap-2 text-sm font-extrabold text-[#6B7280] transition hover:text-[#2563EB]"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to sign in
+              ← Back to sign in
             </Link>
           </div>
 
