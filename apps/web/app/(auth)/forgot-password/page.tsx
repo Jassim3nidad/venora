@@ -51,8 +51,7 @@ export default function ForgotPasswordPage() {
               Venora
             </Link>
 
-            <div className="mt-16 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-10 py-2 text-xs font-bold uppercase tracking-[0.14em] backdrop-blur-md">
-              <Sparkles className="h-4 w-4" />
+            <div className="mt-16 inline-flex items-center gap-2 !translate-x-5 rounded-full border border-white/25 bg-white/15 px-10 py-2 text-xs font-bold uppercase tracking-[0.14em] backdrop-blur-md">
               Secure account recovery
             </div>
 
@@ -81,7 +80,7 @@ export default function ForgotPasswordPage() {
               className="inline-flex items-center gap-2 text-sm font-extrabold text-[#6B7280] transition hover:text-[#2563EB]"
             >
               <ArrowLeft className="h-4 w-4" />
-              ← Back to sign in
+              Back to sign in
             </Link>
           </div>
 
