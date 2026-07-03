@@ -21,27 +21,25 @@ type EnterpriseShellProps = {
   businessName?: string;
 };
 
+function matchesRoute(href: string, pathname: string) {
+  if (href === "/dashboard") return pathname === "/dashboard";
+  if (href === "/admin") return pathname === "/admin";
+  if (href === "/dashboard/coordinator") return pathname === "/dashboard/coordinator";
+  if (href === "/dashboard/supplier") return pathname === "/dashboard/supplier";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 function NavLink({
   item,
-  pathname,
+  isActive,
   uppercase,
   onNavigate,
 }: {
   item: NavItem;
-  pathname: string;
+  isActive: boolean;
   uppercase?: boolean;
   onNavigate?: () => void;
 }) {
-  const isActive = (() => {
-    if (item.href === "/dashboard") return pathname === "/dashboard";
-    if (item.href === "/admin") return pathname === "/admin";
-    if (item.href === "/dashboard/coordinator")
-      return pathname === "/dashboard/coordinator";
-    if (item.href === "/dashboard/supplier")
-      return pathname === "/dashboard/supplier";
-    return pathname === item.href || pathname.startsWith(`${item.href}/`);
-  })();
-
   return (
     <Link
       href={item.href}
@@ -79,18 +77,16 @@ function Sidebar({
   onNavigate?: () => void;
 }) {
   const items = NAV_BY_ROLE[role];
-  const isAdmin = role === "admin";
+  // Some roles currently share a single destination page across multiple nav
+  // entries; only the first matching item should render as "active" so the
+  // sidebar always highlights exactly one button, like every other role.
+  const activeIndex = items.findIndex((item) => matchesRoute(item.href, pathname));
 
   return (
     <div className="flex h-full flex-col">
       <div className="mb-6 px-1">
         <Link href="/" className="flex items-center gap-3" {...(onNavigate ? { onClick: onNavigate } : {})}>
-          <div
-            className={cn(
-              "flex h-10 w-10 items-center justify-center rounded-xl",
-              isAdmin ? "bg-[#191c1e] text-white" : "bg-[#fff4f0] text-[#9a442d]",
-            )}
-          >
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#fff4f0] text-[#9a442d]">
             <MaterialIcon name="domain" className="text-xl" filled />
           </div>
           <div>
@@ -105,11 +101,11 @@ function Sidebar({
       </div>
 
       <nav className="flex flex-1 flex-col gap-1">
-        {items.map((item) => (
+        {items.map((item, index) => (
           <NavLink
             key={item.label}
             item={item}
-            pathname={pathname}
+            isActive={index === activeIndex}
             uppercase
             {...(onNavigate ? { onNavigate } : {})}
           />
@@ -153,7 +149,7 @@ function TopBar({
     userSubtitle ?? businessName ?? ROLE_LABELS[role];
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-[#e8deda] bg-white px-4 lg:hidden">
+    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-[#e8deda] bg-white px-4 lg:hidden">
       <button
         type="button"
         onClick={onMenuClick}
@@ -199,7 +195,7 @@ function DesktopTopBar({
   const displayName = userName ?? "Account User";
 
   return (
-    <div className="hidden items-center justify-between border-b border-[#e8deda] bg-white px-6 py-4 lg:flex">
+    <div className="sticky top-0 z-30 hidden items-center justify-between border-b border-[#e8deda] bg-white px-6 py-4 lg:flex">
       <div>
         <p className="text-xs font-semibold uppercase tracking-wider text-[#88726d]">
           {ROLE_LABELS[role]}
@@ -235,20 +231,12 @@ export function EnterpriseShell({
 }: EnterpriseShellProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const isAdmin = role === "admin";
 
   return (
     <div className="flex min-h-dvh bg-[#fffdfc]">
-      {/* Desktop sidebar */}
-      <aside
-        className={cn(
-          "hidden w-[260px] shrink-0 border-r border-[#e8deda] p-5 lg:block",
-          isAdmin ? "bg-[#191c1e]" : "bg-white",
-        )}
-      >
-        <div className={isAdmin ? "[&_*]:text-white [&_.text-\\[\\#88726d\\]]:text-gray-400 [&_.text-\\[\\#55423e\\]]:text-gray-300 [&_.text-\\[\\#191c1e\\]]:text-white [&_.hover\\:bg-\\[\\#fff4f0\\]:hover]:bg-white/10 [&_.bg-\\[\\#fff4f0\\]]:bg-white/15 [&_.text-\\[\\#9a442d\\]]:text-[#e07a5f]" : ""}>
-          <Sidebar role={role} pathname={pathname} />
-        </div>
+      {/* Desktop sidebar — sticks in place while the page scrolls */}
+      <aside className="sticky top-0 hidden h-dvh w-[260px] shrink-0 overflow-y-auto border-r border-[#e8deda] bg-white p-5 lg:block">
+        <Sidebar role={role} pathname={pathname} />
       </aside>
 
       {/* Mobile drawer */}
@@ -260,7 +248,7 @@ export function EnterpriseShell({
             aria-label="Close menu"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="relative h-full w-[280px] bg-white p-5 shadow-xl">
+          <aside className="relative h-full w-[280px] overflow-y-auto bg-white p-5 shadow-xl">
             <Sidebar
               role={role}
               pathname={pathname}
@@ -286,7 +274,7 @@ export function EnterpriseShell({
           {...(userSubtitle ? { userSubtitle } : {})}
           {...(businessName ? { businessName } : {})}
         />
-        <main className="min-w-0 flex-1 overflow-auto">{children}</main>
+        <main className="min-w-0 flex-1">{children}</main>
       </div>
     </div>
   );

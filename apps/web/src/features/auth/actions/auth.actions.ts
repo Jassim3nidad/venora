@@ -116,7 +116,7 @@ export async function signOutAction(): Promise<ActionResult> {
     };
   }
 
-  redirect("/login");
+  redirect("/");
 }
 
 export async function forgotPasswordAction(
