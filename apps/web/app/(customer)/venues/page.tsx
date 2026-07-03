@@ -1,18 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import Sidebar from "@/components/layout/Sidebar";
-import {
-  Bell,
-  HelpCircle,
-  Heart,
-  LogOut,
-  MapPin,
-  Search,
-  SlidersHorizontal,
-  Sparkles,
-  Star,
-  Users,
-} from "lucide-react";
+import { Bell, HelpCircle, LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import VenuesClient from "@/src/features/venues/ui/VenuesClient";
 
@@ -26,6 +15,23 @@ export interface Venue {
   image: string;
   rating?: number;
   category?: string;
+  city?: string;
+  province?: string;
+  basePrice?: number;
+  capacityMax?: number;
+  latitude?: number | null;
+  longitude?: number | null;
+  indoorOutdoor?: string | null;
+  airConditioned?: boolean;
+  parkingAvailable?: boolean;
+  overnightAccommodation?: boolean;
+  petFriendly?: boolean;
+  wheelchairAccessible?: boolean;
+  hasPool?: boolean;
+  ceremonyVenue?: boolean;
+  receptionVenue?: boolean;
+  eventTypes?: string[];
+  amenities?: string[];
 }
 
 const FALLBACK_IMAGE =
@@ -43,6 +49,18 @@ const fallbackVenues: Venue[] = [
       "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
     rating: 4.9,
     category: "Garden Venue",
+    city: "Tagaytay City",
+    province: "Cavite",
+    basePrice: 120000,
+    capacityMax: 300,
+    indoorOutdoor: "outdoor",
+    airConditioned: false,
+    parkingAvailable: true,
+    overnightAccommodation: true,
+    petFriendly: false,
+    hasPool: false,
+    eventTypes: ["Wedding", "Debut", "Party"],
+    amenities: ["Parking", "Overnight"],
   },
   {
     id: 2,
@@ -55,8 +73,41 @@ const fallbackVenues: Venue[] = [
       "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1200&q=80",
     rating: 4.8,
     category: "Event Hall",
+    city: "Makati City",
+    province: "Metro Manila",
+    basePrice: 85000,
+    capacityMax: 150,
+    indoorOutdoor: "indoor",
+    airConditioned: true,
+    parkingAvailable: true,
+    overnightAccommodation: false,
+    petFriendly: false,
+    hasPool: false,
+    eventTypes: ["Corporate", "Conference", "Birthday"],
+    amenities: ["Parking", "Aircon", "WiFi"],
   },
 ];
+
+function asNumber(value: unknown) {
+  const amount = Number(value);
+
+  return Number.isFinite(amount) ? amount : undefined;
+}
+
+function asStringArray(value: unknown) {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item).trim()).filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    return value
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+}
 
 function formatCurrency(value: unknown) {
   const amount = Number(value);
@@ -80,14 +131,6 @@ function buildVenueImageUrl(storagePath?: string | null) {
   if (!supabaseUrl) return FALLBACK_IMAGE;
 
   return `${supabaseUrl}/storage/v1/object/public/venue-images/${storagePath}`;
-}
-
-function formatRating(rating?: number) {
-  if (typeof rating === "number" && Number.isFinite(rating)) {
-    return rating.toFixed(1);
-  }
-
-  return "4.8";
 }
 
 export default async function VenuesMarketplacePage() {
@@ -115,22 +158,43 @@ export default async function VenuesMarketplacePage() {
     dbVenues && dbVenues.length > 0
       ? dbVenues.map((venue: any) => {
           const firstImage = venue.venue_images?.[0]?.storage_path;
+          const basePrice = asNumber(venue.base_price ?? venue.starting_price);
+          const capacityMax = asNumber(venue.capacity_max);
+          const city = venue.city ?? "";
+          const province = venue.province ?? "";
 
           return {
             id: venue.id,
             slug: venue.slug ?? String(venue.id),
             name: venue.name ?? "Untitled Venue",
             location:
-              venue.city && venue.province
-                ? `${venue.city}, ${venue.province}`
-                : venue.city || venue.province || "Location unavailable",
-            price: formatCurrency(venue.base_price ?? venue.starting_price),
-            capacity: venue.capacity_max
-              ? `Up to ${venue.capacity_max} pax`
+              city && province
+                ? `${city}, ${province}`
+                : city || province || "Location unavailable",
+            price: formatCurrency(basePrice),
+            capacity: capacityMax
+              ? `Up to ${capacityMax} pax`
               : "Capacity unavailable",
             image: buildVenueImageUrl(firstImage),
             rating: Number(venue.rating ?? 4.8),
             category: venue.category ?? venue.venue_type ?? "Event Venue",
+            city,
+            province,
+            basePrice,
+            capacityMax,
+            latitude: asNumber(venue.latitude) ?? null,
+            longitude: asNumber(venue.longitude) ?? null,
+            indoorOutdoor: venue.indoor_outdoor ?? null,
+            airConditioned: Boolean(venue.air_conditioned),
+            parkingAvailable: Boolean(venue.parking_available),
+            overnightAccommodation: Boolean(venue.overnight_accommodation),
+            petFriendly: Boolean(venue.pet_friendly),
+            wheelchairAccessible: Boolean(venue.wheelchair_accessible),
+            hasPool: Boolean(venue.has_pool),
+            ceremonyVenue: Boolean(venue.ceremony_venue),
+            receptionVenue: Boolean(venue.reception_venue),
+            eventTypes: asStringArray(venue.event_types ?? venue.eventTypes),
+            amenities: asStringArray(venue.amenities),
           };
         })
       : fallbackVenues;
@@ -207,7 +271,7 @@ export default async function VenuesMarketplacePage() {
 
       <div className="flex min-h-0 w-full flex-1 overflow-hidden">
         <div className="hidden shrink-0 lg:block">
-          <Sidebar />
+          <Sidebar venues={venues} />
         </div>
 
         <main className="h-full min-w-0 flex-1 overflow-y-auto">

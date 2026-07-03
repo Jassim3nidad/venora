@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Bed,
   Building2,
@@ -20,12 +21,51 @@ import {
   Wifi,
 } from "lucide-react";
 
-const provinces = ["Select Province", "Metro Manila", "Cavite", "Batangas", "Laguna"];
-const cities = ["Select City", "Tagaytay", "BGC", "Makati", "Batangas"];
+type FilterUpdate = Record<string, string | number | null | undefined>;
 
-const eventTypes = ["Wedding", "Birthday", "Corporate", "Conference", "Debut", "Party"];
+interface VenueFilterSource {
+  id: string | number;
+  name: string;
+  location: string;
+  city?: string;
+  province?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
+interface SidebarProps {
+  venues?: VenueFilterSource[];
+  presentation?: "desktop" | "mobile";
+  onApply?: () => void;
+}
+
+const filterKeys = [
+  "q",
+  "province",
+  "city",
+  "location",
+  "event",
+  "budget",
+  "capacity",
+  "style",
+  "amenities",
+];
+
+const eventTypes = [
+  "Wedding",
+  "Birthday",
+  "Corporate",
+  "Conference",
+  "Debut",
+  "Party",
+];
 const quickLocations = ["Tagaytay", "BGC", "Makati", "Batangas"];
-const budgetTabs = ["Under ₱100k", "₱100k–300k", "Luxury"];
+
+const budgetTabs = [
+  { label: "Under ₱100k", value: "under-100k", range: "Below ₱100,000" },
+  { label: "₱100k-300k", value: "100k-300k", range: "₱100,000 - ₱300,000" },
+  { label: "Luxury", value: "luxury", range: "Above ₱300,000" },
+];
 
 const venueStyles = [
   { label: "Hotel", icon: Building2 },
@@ -60,15 +100,37 @@ function SectionTitle({
   );
 }
 
-function SelectBox({ value }: { value: string }) {
+function SelectBox({
+  label,
+  value,
+  options,
+  placeholder,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: string[];
+  placeholder: string;
+  onChange: (value: string) => void;
+}) {
   return (
-    <button
-      type="button"
-      className="flex h-11 w-full items-center justify-between rounded-xl border border-[#E9D5D0] bg-white px-4 text-left text-sm font-medium text-neutral-700 shadow-sm transition hover:border-[#E2765F] focus:outline-none focus:ring-2 focus:ring-[#E2765F]/20"
-    >
-      <span>{value}</span>
-      <ChevronDown className="h-4 w-4 text-slate-500" />
-    </button>
+    <div className="relative">
+      <label className="sr-only">{label}</label>
+      <select
+        aria-label={label}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="h-11 w-full appearance-none rounded-xl border border-[#E9D5D0] bg-white px-4 pr-10 text-left text-sm font-medium text-neutral-700 shadow-sm outline-none transition hover:border-[#E2765F] focus:border-[#E2765F] focus:ring-4 focus:ring-[#E2765F]/10"
+      >
+        <option value="">{placeholder}</option>
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+      <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+    </div>
   );
 }
 
@@ -122,75 +184,277 @@ function OptionButton({
   );
 }
 
-export default function Sidebar() {
-  const [selectedLocation, setSelectedLocation] = useState("BGC");
-  const [selectedEventType, setSelectedEventType] = useState("Corporate");
-  const [selectedBudget, setSelectedBudget] = useState("₱100k–300k");
-  const [selectedVenueStyle, setSelectedVenueStyle] = useState("Garden");
-  const [selectedAmenities, setSelectedAmenities] = useState(["Aircon", "WiFi"]);
+function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const radius = 6371;
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) *
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+
+  return radius * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+}
+
+export default function Sidebar({
+  venues = [],
+  presentation = "desktop",
+  onApply,
+}: SidebarProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const queryString = searchParams.toString();
+  const params = useMemo(() => new URLSearchParams(queryString), [queryString]);
+  const [locationStatus, setLocationStatus] = useState("");
+
+  const searchQuery = params.get("q") ?? "";
+  const selectedProvince = params.get("province") ?? "";
+  const selectedCity = params.get("city") ?? "";
+  const selectedLocation = params.get("location") ?? "";
+  const selectedEventType = params.get("event") ?? "";
+  const selectedBudget = params.get("budget") ?? "";
+  const selectedCapacity = params.get("capacity") ?? "";
+  const selectedVenueStyle = params.get("style") ?? "";
+  const selectedAmenities = useMemo(
+    () =>
+      (params.get("amenities") ?? "")
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
+    [params],
+  );
+
+  const provinceOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          venues.map((venue) => venue.province).filter(Boolean) as string[],
+        ),
+      ).sort(),
+    [venues],
+  );
+
+  const cityOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          venues
+            .filter(
+              (venue) =>
+                !selectedProvince || venue.province === selectedProvince,
+            )
+            .map((venue) => venue.city)
+            .filter(Boolean) as string[],
+        ),
+      ).sort(),
+    [selectedProvince, venues],
+  );
+
+  const capacityValue = Number(selectedCapacity) || 0;
+  const activeBudgetLabel =
+    budgetTabs.find((budget) => budget.value === selectedBudget)?.range ??
+    "Any budget";
+
+  const updateFilters = (updates: FilterUpdate) => {
+    const nextParams = new URLSearchParams(queryString);
+
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === null || value === undefined || value === "") {
+        nextParams.delete(key);
+      } else {
+        nextParams.set(key, String(value));
+      }
+    });
+
+    const nextQuery = nextParams.toString();
+    router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, {
+      scroll: false,
+    });
+  };
+
+  const clearFilters = () => {
+    const nextParams = new URLSearchParams(queryString);
+    filterKeys.forEach((key) => nextParams.delete(key));
+
+    const nextQuery = nextParams.toString();
+    router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, {
+      scroll: false,
+    });
+  };
 
   const toggleAmenity = (amenity: string) => {
-    setSelectedAmenities((current) =>
-      current.includes(amenity)
-        ? current.filter((item) => item !== amenity)
-        : [...current, amenity],
+    const nextAmenities = selectedAmenities.includes(amenity)
+      ? selectedAmenities.filter((item) => item !== amenity)
+      : [...selectedAmenities, amenity];
+
+    updateFilters({ amenities: nextAmenities.join(",") });
+  };
+
+  const handleUseCurrentLocation = () => {
+    const venuesWithCoordinates = venues.filter(
+      (venue) =>
+        typeof venue.latitude === "number" &&
+        typeof venue.longitude === "number",
+    );
+
+    if (!navigator.geolocation) {
+      setLocationStatus("Location is not available in this browser.");
+      return;
+    }
+
+    if (venuesWithCoordinates.length === 0) {
+      setLocationStatus("No venues include map coordinates yet.");
+      return;
+    }
+
+    setLocationStatus("Finding nearby venues...");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const closest = venuesWithCoordinates.reduce(
+          (nearest, venue) => {
+            const venueDistance = getDistance(
+              position.coords.latitude,
+              position.coords.longitude,
+              venue.latitude as number,
+              venue.longitude as number,
+            );
+
+            if (!nearest || venueDistance < nearest.distance) {
+              return { venue, distance: venueDistance };
+            }
+
+            return nearest;
+          },
+          null as { venue: VenueFilterSource; distance: number } | null,
+        );
+
+        if (!closest) {
+          setLocationStatus("No nearby venues found.");
+          return;
+        }
+
+        updateFilters({
+          province: closest.venue.province,
+          city: closest.venue.city,
+          location: "",
+        });
+        setLocationStatus(`Nearest match: ${closest.venue.location}`);
+      },
+      () => {
+        setLocationStatus("Location access was not allowed.");
+      },
     );
   };
 
   const activeFilterCount =
-    Number(Boolean(selectedLocation)) +
-    Number(Boolean(selectedEventType)) +
-    Number(Boolean(selectedBudget)) +
-    Number(Boolean(selectedVenueStyle)) +
-    selectedAmenities.length;
+    [
+      searchQuery,
+      selectedProvince,
+      selectedCity,
+      selectedLocation,
+      selectedEventType,
+      selectedBudget,
+      selectedCapacity,
+      selectedVenueStyle,
+    ].filter(Boolean).length + selectedAmenities.length;
 
   return (
-    <aside className="flex h-full w-[360px] max-w-[360px] flex-shrink-0 flex-col border-r border-[#E9D5D0] bg-[#FFFDFC] shadow-sm">
-      {/* Header */}
+    <aside
+      className={[
+        "flex flex-shrink-0 flex-col bg-[#FFFDFC] shadow-sm",
+        presentation === "mobile"
+          ? "h-full w-full rounded-t-[28px] border border-[#E9D5D0]"
+          : "h-full w-[360px] max-w-[360px] border-r border-[#E9D5D0]",
+      ].join(" ")}
+    >
       <div className="shrink-0 border-b border-[#E9D5D0] px-6 pb-4 pt-5">
-        <h1 className="text-2xl font-extrabold tracking-tight text-[#C7897A]">
-          Filters
-        </h1>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-extrabold tracking-tight text-[#C7897A]">
+              Filters
+            </h1>
 
-        <p className="mt-1 text-sm font-medium text-neutral-500">
-          Refine your venue search
-        </p>
+            <p className="mt-1 text-sm font-medium text-neutral-500">
+              Refine your venue search
+            </p>
+          </div>
+
+          {activeFilterCount > 0 && (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="rounded-full border border-[#E9D5D0] bg-white px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.08em] text-[#9A442D] transition hover:border-[#E2765F] hover:bg-[#FFF4F1]"
+            >
+              Clear
+            </button>
+          )}
+        </div>
 
         <div className="relative mt-4">
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-500" />
 
           <input
-            type="text"
+            type="search"
+            value={searchQuery}
+            onChange={(event) => updateFilters({ q: event.target.value })}
             placeholder="Search venues..."
             className="h-11 w-full rounded-xl border border-[#E9D5D0] bg-white pl-12 pr-4 text-sm font-medium text-neutral-700 shadow-sm outline-none transition placeholder:text-neutral-400 focus:border-[#E2765F] focus:ring-4 focus:ring-[#E2765F]/10"
           />
         </div>
       </div>
 
-      {/* Scrollable Filter Body */}
       <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [&>section:not(:last-child)]:mb-5">
-        {/* Location */}
         <section>
           <SectionTitle icon={MapPin} title="Location" />
 
           <div className="flex flex-col gap-2.5">
-            <SelectBox value={provinces[0] ?? "Select Province"} />
-            <SelectBox value={cities[0] ?? "Select City"} />
+            <SelectBox
+              label="Province"
+              value={selectedProvince}
+              options={provinceOptions}
+              placeholder="Select Province"
+              onChange={(value) =>
+                updateFilters({ province: value, city: "", location: "" })
+              }
+            />
+            <SelectBox
+              label="City"
+              value={selectedCity}
+              options={cityOptions}
+              placeholder="Select City"
+              onChange={(value) => updateFilters({ city: value, location: "" })}
+            />
 
             <button
               type="button"
+              onClick={handleUseCurrentLocation}
               className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#E9D5D0] bg-neutral-100 text-sm font-bold text-neutral-700 shadow-sm transition hover:border-[#E2765F] hover:bg-[#FFF4F1] hover:text-[#E2765F]"
             >
               <Crosshair className="h-5 w-5" />
               Use my current location
             </button>
 
+            {locationStatus && (
+              <p className="text-xs font-medium leading-5 text-neutral-500">
+                {locationStatus}
+              </p>
+            )}
+
             <div className="flex flex-wrap gap-2 pt-1">
               {quickLocations.map((location) => (
                 <Pill
                   key={location}
                   active={selectedLocation === location}
-                  onClick={() => setSelectedLocation(location)}
+                  onClick={() =>
+                    updateFilters({
+                      location: selectedLocation === location ? "" : location,
+                      province: "",
+                      city: "",
+                    })
+                  }
                 >
                   {location}
                 </Pill>
@@ -199,7 +463,6 @@ export default function Sidebar() {
           </div>
         </section>
 
-        {/* Event Type */}
         <section>
           <SectionTitle icon={CalendarDays} title="Event Type" />
 
@@ -208,7 +471,11 @@ export default function Sidebar() {
               <OptionButton
                 key={type}
                 active={selectedEventType === type}
-                onClick={() => setSelectedEventType(type)}
+                onClick={() =>
+                  updateFilters({
+                    event: selectedEventType === type ? "" : type,
+                  })
+                }
               >
                 {type}
               </OptionButton>
@@ -216,7 +483,6 @@ export default function Sidebar() {
           </div>
         </section>
 
-        {/* Budget */}
         <section>
           <SectionTitle icon={WalletCards} title="Budget" />
 
@@ -224,65 +490,102 @@ export default function Sidebar() {
             <div className="grid grid-cols-3">
               {budgetTabs.map((budget, index) => (
                 <button
-                  key={budget}
+                  key={budget.value}
                   type="button"
-                  onClick={() => setSelectedBudget(budget)}
+                  onClick={() =>
+                    updateFilters({
+                      budget:
+                        selectedBudget === budget.value ? "" : budget.value,
+                    })
+                  }
                   className={[
                     "h-10 text-xs font-bold transition",
                     index !== budgetTabs.length - 1
                       ? "border-r border-[#E9D5D0]"
                       : "",
-                    selectedBudget === budget
+                    selectedBudget === budget.value
                       ? "bg-[#FFF4F1] text-[#E2765F]"
                       : "bg-white text-neutral-600 hover:bg-[#FFF9F7]",
                   ].join(" ")}
                 >
-                  {budget}
+                  {budget.label}
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="mt-4">
-            <div className="mb-3 flex justify-between text-sm font-semibold text-neutral-500">
-              <span>₱50k</span>
-              <span>₱500k+</span>
-            </div>
-
-            <div className="relative mx-1 h-6">
-              <div className="absolute left-0 right-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-neutral-200" />
-              <div className="absolute left-[20%] right-[38%] top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-[#E2765F]" />
-              <div className="absolute left-[20%] top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-white bg-[#E2765F] shadow-md" />
-              <div className="absolute left-[62%] top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-white bg-[#E2765F] shadow-md" />
-            </div>
-
-            <p className="mt-2 text-center text-base font-extrabold text-neutral-700">
-              ₱100,000 - ₱300,000
-            </p>
-          </div>
-        </section>
-
-        {/* Capacity */}
-        <section>
-          <SectionTitle icon={Users} title="Capacity" />
-
-          <div className="flex justify-between text-sm font-semibold text-neutral-500">
-            <span>10</span>
-            <span>1000+</span>
-          </div>
-
-          <div className="mt-3 h-2 rounded-full bg-neutral-200">
-            <div className="h-2 w-[45%] rounded-full bg-[#E2765F]" />
-          </div>
-
-          <p className="mt-2 text-sm font-medium text-neutral-500">
-            Up to{" "}
-            <span className="font-extrabold text-neutral-800">150</span>{" "}
-            guests
+          <p className="mt-3 text-center text-sm font-extrabold text-neutral-700">
+            {activeBudgetLabel}
           </p>
         </section>
 
-        {/* Venue Style */}
+        <section>
+          <SectionTitle icon={Users} title="Capacity" />
+
+          <div className="flex items-center justify-between text-sm font-semibold text-neutral-500">
+            <span>50</span>
+            <span>1000+</span>
+          </div>
+
+          <input
+            type="range"
+            min={50}
+            max={1000}
+            step={50}
+            value={capacityValue || 150}
+            onChange={(event) =>
+              updateFilters({ capacity: event.target.value })
+            }
+            className="mt-3 h-2 w-full accent-[#E2765F]"
+            aria-label="Minimum guest capacity"
+          />
+
+          <div className="mt-3 flex items-center gap-3">
+            <label className="min-w-[90px] text-sm font-medium text-neutral-500" htmlFor="capacity-input">
+              Capacity
+            </label>
+            <input
+              id="capacity-input"
+              type="number"
+              min={0}
+              max={1000}
+              step={10}
+              value={capacityValue || ""}
+              onChange={(event) =>
+                updateFilters({ capacity: event.target.value })
+              }
+              className="h-11 w-full rounded-xl border border-[#E9D5D0] bg-white px-3 text-sm font-semibold text-neutral-800 shadow-sm outline-none transition focus:border-[#E2765F] focus:ring-4 focus:ring-[#E2765F]/10"
+              placeholder="Any"
+            />
+          </div>
+
+          <div className="mt-2 flex items-center justify-between gap-3">
+            <p className="text-sm font-medium text-neutral-500">
+              {capacityValue ? (
+                <>
+                  At least{" "}
+                  <span className="font-extrabold text-neutral-800">
+                    {capacityValue}
+                  </span>{" "}
+                  guests
+                </>
+              ) : (
+                "Any capacity"
+              )}
+            </p>
+
+            {capacityValue > 0 && (
+              <button
+                type="button"
+                onClick={() => updateFilters({ capacity: "" })}
+                className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#9A442D] hover:text-[#E2765F]"
+              >
+                Reset
+              </button>
+            )}
+          </div>
+        </section>
+
         <section>
           <SectionTitle icon={Building2} title="Venue Style" />
 
@@ -294,7 +597,7 @@ export default function Sidebar() {
                 <button
                   key={label}
                   type="button"
-                  onClick={() => setSelectedVenueStyle(label)}
+                  onClick={() => updateFilters({ style: active ? "" : label })}
                   className={[
                     "flex aspect-[1.35] flex-col items-center justify-center gap-2 rounded-2xl border bg-white transition",
                     active
@@ -310,7 +613,6 @@ export default function Sidebar() {
           </div>
         </section>
 
-        {/* Amenities */}
         <section>
           <SectionTitle icon={Users} title="Amenities" />
 
@@ -339,13 +641,13 @@ export default function Sidebar() {
         </section>
       </div>
 
-      {/* Fixed Apply Button */}
       <div className="shrink-0 border-t border-[#E9D5D0] bg-[#FFFDFC] px-6 py-4 shadow-[0_-12px_30px_rgba(15,23,42,0.06)]">
         <button
           type="button"
-          className="h-13 w-full rounded-xl bg-[#E2765F] py-3.5 text-base font-extrabold text-white shadow-lg shadow-[#E2765F]/20 transition hover:bg-[#d96851] active:scale-[0.98]"
+          onClick={onApply}
+          className="h-12 w-full rounded-xl bg-[#E2765F] py-3 text-base font-extrabold text-white shadow-lg shadow-[#E2765F]/20 transition hover:bg-[#d96851] active:scale-[0.98]"
         >
-          Apply Filters ({activeFilterCount})
+          View Results ({activeFilterCount})
         </button>
       </div>
     </aside>
