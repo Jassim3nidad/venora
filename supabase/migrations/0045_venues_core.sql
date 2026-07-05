@@ -1,6 +1,6 @@
 -- ============================================================
 -- Migration 005 — Venue Domain
--- (venues, junction tables, images, packages)
+-- (core venues, junction tables, images, packages)
 -- ============================================================
 
 -- ── venues ───────────────────────────────────────────────────

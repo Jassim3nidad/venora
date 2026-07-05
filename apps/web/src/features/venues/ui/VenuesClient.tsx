@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { type FormEvent, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Heart,
+  Loader2,
   MapPin,
   Search,
   SlidersHorizontal,
@@ -14,6 +15,12 @@ import {
   X,
 } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
+import { useSmartVenueSearch } from "@/features/search/hooks/use-smart-venue-search";
+import type {
+  SmartSearchFilters,
+  SmartVenueSearchIntent,
+  SmartVenueSearchResponse,
+} from "@/features/search/schemas/search.schema";
 import { toggleFavoriteAction } from "../application/actions";
 
 export interface Venue {
@@ -27,6 +34,7 @@ export interface Venue {
   rating?: number;
   category?: string;
   city?: string;
+  municipality?: string;
   province?: string;
   basePrice?: number;
   capacityMax?: number;
@@ -42,6 +50,7 @@ export interface Venue {
   ceremonyVenue?: boolean;
   receptionVenue?: boolean;
   eventTypes?: string[];
+  categories?: string[];
   amenities?: string[];
   isFavorited?: boolean;
 }
@@ -50,22 +59,54 @@ const filterKeys = [
   "q",
   "province",
   "city",
+  "municipality",
   "location",
   "event",
   "budget",
+  "minBudget",
+  "maxBudget",
   "capacity",
   "style",
+  "venueTypes",
+  "indoorOutdoor",
   "amenities",
   "sort",
 ];
 
 const eventHints: Record<string, string[]> = {
-  wedding: ["wedding", "ceremony", "reception", "garden", "estate"],
-  birthday: ["birthday", "party", "event", "hall"],
+  wedding: ["wedding", "ceremony", "reception", "garden", "estate", "church"],
+  birthday: ["birthday", "party", "event", "hall", "restaurant"],
   corporate: ["corporate", "conference", "meeting", "loft", "hall", "hotel"],
   conference: ["conference", "corporate", "meeting", "hall", "hotel"],
   debut: ["debut", "party", "ballroom", "garden", "hall"],
-  party: ["party", "event", "hall", "resort", "loft"],
+  party: ["party", "event", "hall", "resort", "loft", "restaurant"],
+};
+
+const venueTypeValues = [
+  "garden",
+  "beach",
+  "resort",
+  "hotel",
+  "restaurant",
+  "church",
+] as const;
+
+type VenueTypeValue = (typeof venueTypeValues)[number];
+type IndoorOutdoorValue = "indoor" | "outdoor" | "both";
+
+type LocalSmartSearchIntent = {
+  province?: string;
+  city?: string;
+  municipality?: string;
+  eventType?: string;
+  minBudget?: number;
+  maxBudget?: number;
+  capacity?: number;
+  venueTypes: string[];
+  indoorOutdoor?: IndoorOutdoorValue;
+  amenities: string[];
+  keyword?: string;
+  summary: string[];
 };
 
 function normalize(value: unknown) {
@@ -98,6 +139,41 @@ function textIncludes(value: unknown, query: string) {
   return normalize(value).includes(query);
 }
 
+function toVenueTypeValue(value: string): VenueTypeValue | null {
+  const normalized = normalize(value).replace(/\s+/g, "-");
+  const match = venueTypeValues.find(
+    (venueType) =>
+      venueType === normalized ||
+      normalized.includes(venueType) ||
+      venueType.includes(normalized),
+  );
+
+  return match ?? null;
+}
+
+function isVenueTypeValue(
+  value: VenueTypeValue | null,
+): value is VenueTypeValue {
+  return value !== null;
+}
+
+function getVenueSearchText(venue: Venue) {
+  return normalize(
+    [
+      venue.name,
+      venue.location,
+      venue.category,
+      venue.city,
+      venue.municipality,
+      venue.province,
+      venue.indoorOutdoor,
+      ...(venue.categories ?? []),
+      ...(venue.eventTypes ?? []),
+      ...(venue.amenities ?? []),
+    ].join(" "),
+  );
+}
+
 function matchesEventType(venue: Venue, eventType: string) {
   if (!eventType) return true;
 
@@ -112,15 +188,13 @@ function matchesEventType(venue: Venue, eventType: string) {
     return true;
   }
 
-  const venueText = normalize(
-    [venue.name, venue.location, venue.category, venue.indoorOutdoor].join(" "),
-  );
+  const venueText = getVenueSearchText(venue);
   const hints = eventHints[event] ?? [event];
 
   return hints.some((hint) => venueText.includes(hint));
 }
 
-function matchesBudget(venue: Venue, budget: string) {
+function matchesBudgetPreset(venue: Venue, budget: string) {
   if (!budget) return true;
 
   const price = getVenuePrice(venue);
@@ -131,6 +205,41 @@ function matchesBudget(venue: Venue, budget: string) {
   if (budget === "luxury") return price > 300000;
 
   return true;
+}
+
+function matchesBudgetRange(
+  venue: Venue,
+  minBudget: string,
+  maxBudget: string,
+) {
+  const price = getVenuePrice(venue);
+  const min = Number(minBudget) || 0;
+  const max = Number(maxBudget) || 0;
+
+  if (price <= 0 && (min > 0 || max > 0)) return false;
+  if (min > 0 && price < min) return false;
+  if (max > 0 && price > max) return false;
+
+  return true;
+}
+
+function matchesVenueTypes(venue: Venue, venueTypes: string[]) {
+  if (venueTypes.length === 0) return true;
+
+  const venueText = getVenueSearchText(venue);
+  const requested = venueTypes.map(toVenueTypeValue).filter(isVenueTypeValue);
+
+  return requested.some((venueType) => venueText.includes(venueType));
+}
+
+function matchesIndoorOutdoor(venue: Venue, indoorOutdoor: string) {
+  if (!indoorOutdoor) return true;
+
+  const venueMode = normalize(venue.indoorOutdoor);
+  const requested = normalize(indoorOutdoor);
+
+  if (requested === "both") return venueMode === "both";
+  return venueMode === requested || venueMode === "both";
 }
 
 function matchesAmenity(venue: Venue, amenity: string) {
@@ -160,6 +269,15 @@ function matchesAmenity(venue: Venue, amenity: string) {
     );
   }
 
+  if (normalizedAmenity === "wheelchair accessible") {
+    return (
+      venue.wheelchairAccessible ||
+      amenityText.some(
+        (item) => item.includes("wheelchair") || item.includes("accessible"),
+      )
+    );
+  }
+
   if (normalizedAmenity === "wifi") {
     return amenityText.some(
       (item) =>
@@ -181,6 +299,374 @@ function matchesAmenity(venue: Venue, amenity: string) {
   return amenityText.some((item) => item.includes(normalizedAmenity));
 }
 
+function formatCurrency(amount: number) {
+  return `₱${amount.toLocaleString("en-PH")}`;
+}
+
+function getBudgetSummary(filters: {
+  budget: string;
+  minBudget: string;
+  maxBudget: string;
+}) {
+  const min = Number(filters.minBudget) || 0;
+  const max = Number(filters.maxBudget) || 0;
+
+  if (min || max) {
+    return `${min ? formatCurrency(min) : "Any"} - ${
+      max ? formatCurrency(max) : "No limit"
+    }`;
+  }
+
+  if (filters.budget === "under-100k") return "Under ₱100k";
+  if (filters.budget === "100k-300k") return "₱100k-300k";
+  if (filters.budget === "luxury") return "Luxury";
+
+  return "";
+}
+
+function getIntentSummary(intent: SmartVenueSearchIntent) {
+  return [
+    intent.keyword && `Keyword: ${intent.keyword}`,
+    intent.province,
+    intent.city,
+    intent.municipality,
+    intent.minBudget && `From ${formatCurrency(intent.minBudget)}`,
+    intent.maxBudget && `Up to ${formatCurrency(intent.maxBudget)}`,
+    intent.guests && `${intent.guests}+ guests`,
+    ...intent.venueTypes.map(
+      (venueType) => venueType.charAt(0).toUpperCase() + venueType.slice(1),
+    ),
+    intent.indoorOutdoor &&
+      intent.indoorOutdoor.charAt(0).toUpperCase() +
+        intent.indoorOutdoor.slice(1),
+    intent.parking && "Parking",
+    intent.petFriendly && "Pet friendly",
+    intent.wheelchairAccessible && "Wheelchair accessible",
+  ].filter(Boolean) as string[];
+}
+
+function parseLocalCurrencyToken(rawValue: string, suffix = "") {
+  const value = Number(rawValue.replace(/,/g, ""));
+
+  if (!Number.isFinite(value) || value <= 0) return undefined;
+
+  const normalizedSuffix = normalize(suffix);
+  if (normalizedSuffix === "m" || normalizedSuffix === "million") {
+    return Math.round(value * 1_000_000);
+  }
+
+  if (normalizedSuffix === "k" || normalizedSuffix === "thousand") {
+    return Math.round(value * 1_000);
+  }
+
+  return Math.round(value);
+}
+
+function detectLocalLocation(text: string, venues: Venue[]) {
+  const hints: Pick<
+    LocalSmartSearchIntent,
+    "province" | "city" | "municipality"
+  > = {};
+
+  const aliases: Array<{
+    terms: string[];
+    province: string;
+    city?: string;
+    municipality?: string;
+  }> = [
+    {
+      terms: ["tagaytay"],
+      province: "Cavite",
+      city: "Tagaytay City",
+      municipality: "Tagaytay",
+    },
+    {
+      terms: ["makati"],
+      province: "Metro Manila",
+      city: "Makati City",
+      municipality: "Makati",
+    },
+    {
+      terms: ["bgc", "bonifacio global city", "taguig"],
+      province: "Metro Manila",
+      city: "Taguig City",
+      municipality: "Taguig",
+    },
+    {
+      terms: ["nasugbu"],
+      province: "Batangas",
+      city: "Nasugbu",
+      municipality: "Nasugbu",
+    },
+    { terms: ["batangas"], province: "Batangas" },
+    {
+      terms: ["antipolo"],
+      province: "Rizal",
+      city: "Antipolo",
+      municipality: "Antipolo",
+    },
+    { terms: ["rizal"], province: "Rizal" },
+    {
+      terms: ["malolos"],
+      province: "Bulacan",
+      city: "Malolos City",
+      municipality: "Malolos",
+    },
+    { terms: ["bulacan"], province: "Bulacan" },
+  ];
+
+  const aliasMatch = aliases.find((alias) =>
+    alias.terms.some((term) => text.includes(term)),
+  );
+
+  if (aliasMatch) {
+    hints.province = aliasMatch.province;
+    if (aliasMatch.city) hints.city = aliasMatch.city;
+    if (aliasMatch.municipality) hints.municipality = aliasMatch.municipality;
+  }
+
+  const locationFields = [
+    ["province", "province"],
+    ["city", "city"],
+    ["municipality", "municipality"],
+  ] as const;
+
+  locationFields.forEach(([intentKey, venueKey]) => {
+    if (hints[intentKey]) return;
+
+    const match = [
+      ...new Set(
+        venues
+          .map((venue) => venue[venueKey])
+          .filter((value): value is string => Boolean(value?.trim())),
+      ),
+    ]
+      .sort((a, b) => b.length - a.length)
+      .find((value) => {
+        const normalized = normalize(value);
+        return normalized.length > 2 && text.includes(normalized);
+      });
+
+    if (match) hints[intentKey] = match;
+  });
+
+  return hints;
+}
+
+function parseLocalSmartSearch(
+  query: string,
+  venues: Venue[],
+): LocalSmartSearchIntent {
+  const text = normalize(query);
+  const summary: string[] = [];
+  const pushSummary = (value?: string | false) => {
+    if (value && !summary.includes(value)) summary.push(value);
+  };
+
+  const locationHints = detectLocalLocation(text, venues);
+  const rangeBudgetMatch = text.match(
+    /(?:budget|price|cost)?\s*(?:php|p|peso|pesos|\u20b1)?\s*([0-9][0-9,.]*)(k|m|thousand|million)?\s*(?:-|to)\s*(?:php|p|peso|pesos|\u20b1)?\s*([0-9][0-9,.]*)(k|m|thousand|million)?/,
+  );
+  const maxBudgetMatch = text.match(
+    /(?:under|below|less than|up to|max(?:imum)?|budget(?: is| of| around| about)?|price(?: is| of| around| about)?)\s*(?:php|p|peso|pesos|\u20b1)?\s*([0-9][0-9,.]*)(k|m|thousand|million)?/,
+  );
+  const minBudgetMatch = text.match(
+    /(?:from|above|over|at least|min(?:imum)?)\s*(?:php|p|peso|pesos|\u20b1)?\s*([0-9][0-9,.]*)(k|m|thousand|million)?/,
+  );
+  const guestMatch = text.match(
+    /([0-9][0-9,.]*)\s*(?:guests|guest|pax|people|persons)/,
+  );
+  const venueTypes = venueTypeValues
+    .filter((venueType) => text.includes(venueType))
+    .map((venueType) => venueType.charAt(0).toUpperCase() + venueType.slice(1));
+  const amenities = [
+    text.includes("parking") && "Parking",
+    (text.includes("aircon") ||
+      text.includes("air conditioned") ||
+      text.includes("air-conditioned")) &&
+      "Aircon",
+    text.includes("pool") && "Pool",
+    (text.includes("pet friendly") ||
+      text.includes("pet-friendly") ||
+      text.includes("pets")) &&
+      "Pet Friendly",
+    (text.includes("wheelchair") || text.includes("accessible")) &&
+      "Wheelchair Accessible",
+    (text.includes("wifi") || text.includes("wi-fi")) && "WiFi",
+    (text.includes("overnight") ||
+      text.includes("rooms") ||
+      text.includes("accommodation")) &&
+      "Overnight",
+  ].filter(Boolean) as string[];
+  const eventType = [
+    "wedding",
+    "birthday",
+    "corporate",
+    "conference",
+    "debut",
+    "party",
+  ].find((event) => text.includes(event));
+  const indoorOutdoor: IndoorOutdoorValue | undefined =
+    text.includes("indoor and outdoor") ||
+    text.includes("indoor/outdoor") ||
+    text.includes("both indoor") ||
+    text.includes("both outdoor")
+      ? "both"
+      : text.includes("outdoor")
+        ? "outdoor"
+        : text.includes("indoor")
+          ? "indoor"
+          : undefined;
+  const budgetSuffixForRange = rangeBudgetMatch?.[2] || rangeBudgetMatch?.[4];
+  const minBudget = rangeBudgetMatch
+    ? parseLocalCurrencyToken(rangeBudgetMatch[1] ?? "", budgetSuffixForRange)
+    : minBudgetMatch
+      ? parseLocalCurrencyToken(minBudgetMatch[1] ?? "", minBudgetMatch[2])
+      : undefined;
+  const maxBudget = rangeBudgetMatch
+    ? parseLocalCurrencyToken(rangeBudgetMatch[3] ?? "", rangeBudgetMatch[4])
+    : maxBudgetMatch
+      ? parseLocalCurrencyToken(maxBudgetMatch[1] ?? "", maxBudgetMatch[2])
+      : undefined;
+  const capacity = guestMatch
+    ? parseLocalCurrencyToken(guestMatch[1] ?? "")
+    : undefined;
+  const keywordHints = [
+    "rooftop",
+    "ballroom",
+    "loft",
+    "pavilion",
+    "chapel",
+    "farm",
+    "estate",
+    "villa",
+    "hall",
+    "cafe",
+    "sea view",
+    "mountain view",
+  ];
+  const keyword =
+    keywordHints.find((hint) => text.includes(hint)) ||
+    (!locationHints.province &&
+    !locationHints.city &&
+    !locationHints.municipality &&
+    !eventType &&
+    !minBudget &&
+    !maxBudget &&
+    !capacity &&
+    venueTypes.length === 0 &&
+    !indoorOutdoor &&
+    amenities.length === 0
+      ? query.trim().slice(0, 120)
+      : undefined);
+
+  pushSummary(locationHints.province);
+  pushSummary(locationHints.city);
+  pushSummary(locationHints.municipality);
+  pushSummary(
+    eventType
+      ? eventType.charAt(0).toUpperCase() + eventType.slice(1)
+      : undefined,
+  );
+  pushSummary(minBudget ? `From ${formatCurrency(minBudget)}` : undefined);
+  pushSummary(maxBudget ? `Up to ${formatCurrency(maxBudget)}` : undefined);
+  pushSummary(capacity ? `${capacity}+ guests` : undefined);
+  venueTypes.forEach(pushSummary);
+  pushSummary(
+    indoorOutdoor &&
+      indoorOutdoor.charAt(0).toUpperCase() + indoorOutdoor.slice(1),
+  );
+  amenities.forEach(pushSummary);
+  pushSummary(keyword && `Keyword: ${keyword}`);
+
+  const intent: LocalSmartSearchIntent = {
+    venueTypes,
+    amenities,
+    summary,
+  };
+
+  if (locationHints.province) intent.province = locationHints.province;
+  if (locationHints.city) intent.city = locationHints.city;
+  if (locationHints.municipality) {
+    intent.municipality = locationHints.municipality;
+  }
+  if (eventType) {
+    intent.eventType = eventType.charAt(0).toUpperCase() + eventType.slice(1);
+  }
+  if (minBudget) intent.minBudget = minBudget;
+  if (maxBudget) intent.maxBudget = maxBudget;
+  if (capacity) intent.capacity = capacity;
+  if (indoorOutdoor) intent.indoorOutdoor = indoorOutdoor;
+  if (keyword) intent.keyword = keyword;
+
+  return intent;
+}
+
+function toSmartSearchFilters(filters: {
+  query: string;
+  province: string;
+  city: string;
+  municipality: string;
+  budget: string;
+  minBudget: string;
+  maxBudget: string;
+  capacity: string;
+  venueTypes: string[];
+  indoorOutdoor: string;
+  amenities: string[];
+  sort: string;
+}): Partial<SmartSearchFilters> {
+  const minBudget =
+    Number(filters.minBudget) ||
+    (filters.budget === "100k-300k"
+      ? 100000
+      : filters.budget === "luxury"
+        ? 300000
+        : undefined);
+  const maxBudget = Number(filters.maxBudget) || undefined;
+  const guests = Number(filters.capacity) || undefined;
+  const venueTypes = filters.venueTypes
+    .map(toVenueTypeValue)
+    .filter(Boolean) as VenueTypeValue[];
+
+  return {
+    q: filters.query || undefined,
+    keyword: filters.query || undefined,
+    province: filters.province || undefined,
+    city: filters.city || undefined,
+    municipality: filters.municipality || undefined,
+    min_budget: minBudget,
+    max_budget:
+      maxBudget ||
+      (filters.budget === "under-100k"
+        ? 100000
+        : filters.budget === "100k-300k"
+          ? 300000
+          : undefined),
+    guests,
+    venue_types: venueTypes,
+    indoor_outdoor:
+      filters.indoorOutdoor === "indoor" ||
+      filters.indoorOutdoor === "outdoor" ||
+      filters.indoorOutdoor === "both"
+        ? filters.indoorOutdoor
+        : undefined,
+    parking: filters.amenities.includes("Parking") || undefined,
+    pet_friendly: filters.amenities.includes("Pet Friendly") || undefined,
+    wheelchair_accessible:
+      filters.amenities.includes("Wheelchair Accessible") || undefined,
+    sort_by:
+      filters.sort === "price"
+        ? "price_asc"
+        : filters.sort === "rating"
+          ? "rating"
+          : filters.sort === "capacity"
+            ? "capacity"
+            : "relevance",
+    per_page: 50,
+  };
+}
+
 export default function VenuesClient({
   initialVenues,
   favoriteVenueIds = [],
@@ -192,7 +678,12 @@ export default function VenuesClient({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const queryString = searchParams.toString();
+  const smartSearch = useSmartVenueSearch();
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiSearchResult, setAiSearchResult] =
+    useState<SmartVenueSearchResponse | null>(null);
+  const [localAiSummary, setLocalAiSummary] = useState<string[]>([]);
   const [favoriteIds, setFavoriteIds] = useState(
     () =>
       new Set([
@@ -213,11 +704,18 @@ export default function VenuesClient({
       query: params.get("q") ?? "",
       province: params.get("province") ?? "",
       city: params.get("city") ?? "",
+      municipality: params.get("municipality") ?? "",
       location: params.get("location") ?? "",
       eventType: params.get("event") ?? "",
       budget: params.get("budget") ?? "",
+      minBudget: params.get("minBudget") ?? "",
+      maxBudget: params.get("maxBudget") ?? "",
       capacity: params.get("capacity") ?? "",
-      style: params.get("style") ?? "",
+      venueTypes: (params.get("venueTypes") || params.get("style") || "")
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
+      indoorOutdoor: params.get("indoorOutdoor") ?? "",
       amenities: (params.get("amenities") ?? "")
         .split(",")
         .map((item) => item.trim())
@@ -231,12 +729,15 @@ export default function VenuesClient({
       filters.query,
       filters.province,
       filters.city,
+      filters.municipality,
       filters.location,
       filters.eventType,
-      filters.budget,
+      filters.budget || filters.minBudget || filters.maxBudget,
       filters.capacity,
-      filters.style,
-    ].filter(Boolean).length + filters.amenities.length;
+      filters.indoorOutdoor,
+    ].filter(Boolean).length +
+    filters.venueTypes.length +
+    filters.amenities.length;
 
   const updateFilter = (key: string, value: string) => {
     const params = new URLSearchParams(queryString);
@@ -261,42 +762,60 @@ export default function VenuesClient({
     router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, {
       scroll: false,
     });
+    setAiSearchResult(null);
+    setLocalAiSummary([]);
+    setAiPrompt("");
+    smartSearch.reset();
   };
+
+  const aiResultRank = useMemo(() => {
+    if (!aiSearchResult) return new Map<string, number>();
+
+    return new Map(
+      aiSearchResult.venues.map((venue, index) => [String(venue.id), index]),
+    );
+  }, [aiSearchResult]);
 
   const filtered = useMemo(() => {
     const query = normalize(filters.query);
     const location = normalize(filters.location);
     const city = normalize(filters.city);
+    const municipality = normalize(filters.municipality);
     const province = normalize(filters.province);
-    const style = normalize(filters.style);
     const requestedCapacity = Number(filters.capacity) || 0;
+    const source =
+      aiResultRank.size > 0
+        ? initialVenues.filter((venue) => aiResultRank.has(String(venue.id)))
+        : initialVenues;
 
-    const list = initialVenues.filter((venue) => {
+    const list = source.filter((venue) => {
       if (query) {
-        const matchesQuery =
-          textIncludes(venue.name, query) ||
-          textIncludes(venue.location, query) ||
-          textIncludes(venue.category, query) ||
-          textIncludes(venue.city, query) ||
-          textIncludes(venue.province, query);
+        const matchesQuery = getVenueSearchText(venue).includes(query);
 
         if (!matchesQuery) return false;
       }
 
       if (province && normalize(venue.province) !== province) return false;
       if (city && normalize(venue.city) !== city) return false;
+      if (municipality && normalize(venue.municipality) !== municipality) {
+        return false;
+      }
 
       if (location) {
         const matchesLocation =
           textIncludes(venue.location, location) ||
           textIncludes(venue.city, location) ||
+          textIncludes(venue.municipality, location) ||
           textIncludes(venue.province, location);
 
         if (!matchesLocation) return false;
       }
 
       if (!matchesEventType(venue, filters.eventType)) return false;
-      if (!matchesBudget(venue, filters.budget)) return false;
+      if (!matchesBudgetPreset(venue, filters.budget)) return false;
+      if (!matchesBudgetRange(venue, filters.minBudget, filters.maxBudget)) {
+        return false;
+      }
 
       if (
         requestedCapacity > 0 &&
@@ -305,14 +824,8 @@ export default function VenuesClient({
         return false;
       }
 
-      if (style) {
-        const matchesStyle =
-          textIncludes(venue.category, style) ||
-          textIncludes(venue.name, style) ||
-          textIncludes(venue.indoorOutdoor, style);
-
-        if (!matchesStyle) return false;
-      }
+      if (!matchesVenueTypes(venue, filters.venueTypes)) return false;
+      if (!matchesIndoorOutdoor(venue, filters.indoorOutdoor)) return false;
 
       if (
         filters.amenities.length > 0 &&
@@ -325,6 +838,14 @@ export default function VenuesClient({
     });
 
     return [...list].sort((a, b) => {
+      if (aiResultRank.size > 0 && filters.sort === "recommended") {
+        const rankDiff =
+          (aiResultRank.get(String(a.id)) ?? Number.MAX_SAFE_INTEGER) -
+          (aiResultRank.get(String(b.id)) ?? Number.MAX_SAFE_INTEGER);
+
+        if (rankDiff !== 0) return rankDiff;
+      }
+
       const aFavorited = favoriteIds.has(String(a.id));
       const bFavorited = favoriteIds.has(String(b.id));
 
@@ -351,7 +872,88 @@ export default function VenuesClient({
 
       return a.name.localeCompare(b.name);
     });
-  }, [favoriteIds, filters, initialVenues]);
+  }, [aiResultRank, favoriteIds, filters, initialVenues]);
+
+  const applyLocalSmartSearch = (query: string) => {
+    const intent = parseLocalSmartSearch(query, initialVenues);
+
+    if (intent.summary.length === 0) return false;
+
+    const params = new URLSearchParams(queryString);
+
+    if (intent.keyword) params.set("q", intent.keyword);
+    if (intent.province) params.set("province", intent.province);
+    if (intent.city) params.set("city", intent.city);
+    if (intent.municipality) params.set("municipality", intent.municipality);
+    if (intent.eventType) params.set("event", intent.eventType);
+
+    if (intent.minBudget) {
+      params.set("minBudget", String(intent.minBudget));
+      params.delete("budget");
+    }
+
+    if (intent.maxBudget) {
+      params.set("maxBudget", String(intent.maxBudget));
+      params.delete("budget");
+    }
+
+    if (intent.capacity) params.set("capacity", String(intent.capacity));
+
+    if (intent.venueTypes.length > 0) {
+      params.set("venueTypes", intent.venueTypes.join(","));
+      params.delete("style");
+    }
+
+    if (intent.indoorOutdoor) {
+      params.set("indoorOutdoor", intent.indoorOutdoor);
+    }
+
+    if (intent.amenities.length > 0) {
+      const mergedAmenities = [
+        ...new Set([...filters.amenities, ...intent.amenities]),
+      ];
+      params.set("amenities", mergedAmenities.join(","));
+    }
+
+    const nextQuery = params.toString();
+    router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, {
+      scroll: false,
+    });
+    setLocalAiSummary(intent.summary);
+    setAiSearchResult(null);
+    smartSearch.reset();
+
+    return true;
+  };
+
+  const handleSmartSearch = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const query = aiPrompt.trim();
+
+    if (!query && activeFilterCount === 0) return;
+
+    try {
+      const result = await smartSearch.mutateAsync({
+        query: query || undefined,
+        filters: toSmartSearchFilters(filters),
+      });
+
+      setAiSearchResult(result);
+      setLocalAiSummary([]);
+    } catch {
+      if (query && applyLocalSmartSearch(query)) return;
+
+      setAiSearchResult(null);
+    }
+  };
+
+  const clearAiSearch = () => {
+    setAiSearchResult(null);
+    setLocalAiSummary([]);
+    setAiPrompt("");
+    smartSearch.reset();
+  };
 
   const handleFavoriteToggle = async (
     event: React.MouseEvent<HTMLButtonElement>,
@@ -395,18 +997,23 @@ export default function VenuesClient({
     });
   };
 
+  const budgetSummary = getBudgetSummary(filters);
+  const aiIntentSummary = aiSearchResult
+    ? getIntentSummary(aiSearchResult.parsedFilters)
+    : localAiSummary;
   const filterSummary = [
     filters.query && `Search: ${filters.query}`,
-    filters.location || filters.city || filters.province,
+    filters.location ||
+      filters.municipality ||
+      filters.city ||
+      filters.province,
     filters.eventType,
-    filters.budget &&
-      (filters.budget === "under-100k"
-        ? "Under ₱100k"
-        : filters.budget === "100k-300k"
-          ? "₱100k-300k"
-          : "Luxury"),
+    budgetSummary,
     filters.capacity && `${filters.capacity}+ guests`,
-    filters.style,
+    ...filters.venueTypes,
+    filters.indoorOutdoor &&
+      filters.indoorOutdoor.charAt(0).toUpperCase() +
+        filters.indoorOutdoor.slice(1),
     ...filters.amenities,
   ].filter(Boolean);
 
@@ -470,10 +1077,90 @@ export default function VenuesClient({
               </p>
             </div>
 
+            <form
+              onSubmit={handleSmartSearch}
+              className="grid gap-3 rounded-2xl border border-[#DBEAFE] bg-[#F8FAFC] p-3 sm:p-4"
+            >
+              <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+                <div className="relative min-w-0">
+                  <label htmlFor="venue-ai-search" className="sr-only">
+                    Natural language venue search
+                  </label>
+
+                  <Sparkles className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#2563EB]" />
+
+                  <input
+                    id="venue-ai-search"
+                    type="search"
+                    value={aiPrompt}
+                    onChange={(event) => setAiPrompt(event.target.value)}
+                    placeholder="Try: outdoor garden in Tagaytay for 150 guests under ₱250k with parking"
+                    className="h-12 w-full rounded-2xl border border-[#BFDBFE] bg-white pl-11 pr-4 text-sm font-semibold text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-[#93C5FD] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={
+                    smartSearch.isPending ||
+                    (!aiPrompt.trim() && activeFilterCount === 0)
+                  }
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-5 text-sm font-extrabold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {smartSearch.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-4 w-4" />
+                  )}
+                  Search AI
+                </button>
+              </div>
+
+              {smartSearch.error && localAiSummary.length === 0 && (
+                <p
+                  className="rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700"
+                  role="alert"
+                >
+                  {smartSearch.error.message}
+                </p>
+              )}
+
+              {localAiSummary.length > 0 && !aiSearchResult && (
+                <p
+                  className="rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800"
+                  role="status"
+                >
+                  AI search service is not deployed yet, so local smart filters
+                  were applied.
+                </p>
+              )}
+
+              {(aiSearchResult || localAiSummary.length > 0) && (
+                <div className="flex flex-wrap items-center gap-2 border-t border-[#DBEAFE] pt-3">
+                  {aiIntentSummary.slice(0, 10).map((item) => (
+                    <span
+                      key={item}
+                      className="rounded-full border border-[#DBEAFE] bg-white px-3 py-1.5 text-xs font-bold text-[#1D4ED8]"
+                    >
+                      {item}
+                    </span>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={clearAiSearch}
+                    className="rounded-full px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.08em] text-slate-500 transition hover:bg-white hover:text-[#1D4ED8]"
+                  >
+                    Clear AI
+                  </button>
+                </div>
+              )}
+            </form>
+
             <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
               <div className="relative min-w-0">
                 <label htmlFor="venue-search" className="sr-only">
-                  Search venue name
+                  Keyword venue search
                 </label>
 
                 <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -483,7 +1170,7 @@ export default function VenuesClient({
                   type="search"
                   value={filters.query}
                   onChange={(event) => updateFilter("q", event.target.value)}
-                  placeholder="Search venue name, location, or category..."
+                  placeholder="Search venue name, location, category, or amenity..."
                   className="h-12 w-full rounded-2xl border border-slate-200 bg-[#F9FAFB] pl-11 pr-4 text-sm font-medium text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-[#E5E7EB] focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
                 />
               </div>

@@ -9,8 +9,11 @@ import {
   Car,
   ChevronDown,
   Crosshair,
+  Accessibility,
+  Landmark,
   MapPin,
   PawPrint,
+  House,
   Search,
   Snowflake,
   Trees,
@@ -28,6 +31,7 @@ interface VenueFilterSource {
   name: string;
   location: string;
   city?: string;
+  municipality?: string;
   province?: string;
   latitude?: number | null;
   longitude?: number | null;
@@ -43,11 +47,16 @@ const filterKeys = [
   "q",
   "province",
   "city",
+  "municipality",
   "location",
   "event",
   "budget",
+  "minBudget",
+  "maxBudget",
   "capacity",
   "style",
+  "venueTypes",
+  "indoorOutdoor",
   "amenities",
 ];
 
@@ -67,11 +76,19 @@ const budgetTabs = [
   { label: "Luxury", value: "luxury", range: "Above ₱300,000" },
 ];
 
-const venueStyles = [
-  { label: "Hotel", icon: Building2 },
-  { label: "Beach", icon: Umbrella },
+const venueTypes = [
   { label: "Garden", icon: Trees },
+  { label: "Beach", icon: Umbrella },
   { label: "Resort", icon: Waves },
+  { label: "Hotel", icon: Building2 },
+  { label: "Restaurant", icon: House },
+  { label: "Church", icon: Landmark },
+];
+
+const indoorOutdoorModes = [
+  { label: "Indoor", value: "indoor" },
+  { label: "Outdoor", value: "outdoor" },
+  { label: "Both", value: "both" },
 ];
 
 const amenities = [
@@ -79,6 +96,7 @@ const amenities = [
   { label: "Aircon", icon: Snowflake },
   { label: "Pool", icon: Waves },
   { label: "Pet Friendly", icon: PawPrint },
+  { label: "Wheelchair Accessible", icon: Accessibility },
   { label: "WiFi", icon: Wifi },
   { label: "Overnight", icon: Bed },
 ];
@@ -213,11 +231,23 @@ export default function Sidebar({
   const searchQuery = params.get("q") ?? "";
   const selectedProvince = params.get("province") ?? "";
   const selectedCity = params.get("city") ?? "";
+  const selectedMunicipality = params.get("municipality") ?? "";
   const selectedLocation = params.get("location") ?? "";
   const selectedEventType = params.get("event") ?? "";
   const selectedBudget = params.get("budget") ?? "";
+  const selectedMinBudget = params.get("minBudget") ?? "";
+  const selectedMaxBudget = params.get("maxBudget") ?? "";
   const selectedCapacity = params.get("capacity") ?? "";
   const selectedVenueStyle = params.get("style") ?? "";
+  const selectedIndoorOutdoor = params.get("indoorOutdoor") ?? "";
+  const selectedVenueTypes = useMemo(
+    () =>
+      (params.get("venueTypes") || selectedVenueStyle)
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
+    [params, selectedVenueStyle],
+  );
   const selectedAmenities = useMemo(
     () =>
       (params.get("amenities") ?? "")
@@ -253,10 +283,35 @@ export default function Sidebar({
     [selectedProvince, venues],
   );
 
+  const municipalityOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          venues
+            .filter(
+              (venue) =>
+                (!selectedProvince || venue.province === selectedProvince) &&
+                (!selectedCity || venue.city === selectedCity),
+            )
+            .map((venue) => venue.municipality)
+            .filter(Boolean) as string[],
+        ),
+      ).sort(),
+    [selectedCity, selectedProvince, venues],
+  );
+
   const capacityValue = Number(selectedCapacity) || 0;
+  const minBudgetValue = Number(selectedMinBudget) || 0;
+  const maxBudgetValue = Number(selectedMaxBudget) || 0;
   const activeBudgetLabel =
-    budgetTabs.find((budget) => budget.value === selectedBudget)?.range ??
-    "Any budget";
+    minBudgetValue || maxBudgetValue
+      ? `${minBudgetValue ? `₱${minBudgetValue.toLocaleString("en-PH")}` : "Any"} - ${
+          maxBudgetValue
+            ? `₱${maxBudgetValue.toLocaleString("en-PH")}`
+            : "No limit"
+        }`
+      : (budgetTabs.find((budget) => budget.value === selectedBudget)?.range ??
+        "Any budget");
 
   const updateFilters = (updates: FilterUpdate) => {
     const nextParams = new URLSearchParams(queryString);
@@ -291,6 +346,17 @@ export default function Sidebar({
       : [...selectedAmenities, amenity];
 
     updateFilters({ amenities: nextAmenities.join(",") });
+  };
+
+  const toggleVenueType = (venueType: string) => {
+    const nextVenueTypes = selectedVenueTypes.includes(venueType)
+      ? selectedVenueTypes.filter((item) => item !== venueType)
+      : [...selectedVenueTypes, venueType];
+
+    updateFilters({
+      venueTypes: nextVenueTypes.join(","),
+      style: "",
+    });
   };
 
   const handleUseCurrentLocation = () => {
@@ -354,12 +420,15 @@ export default function Sidebar({
       searchQuery,
       selectedProvince,
       selectedCity,
+      selectedMunicipality,
       selectedLocation,
       selectedEventType,
-      selectedBudget,
+      selectedBudget || selectedMinBudget || selectedMaxBudget,
       selectedCapacity,
-      selectedVenueStyle,
-    ].filter(Boolean).length + selectedAmenities.length;
+      selectedIndoorOutdoor,
+    ].filter(Boolean).length +
+    selectedVenueTypes.length +
+    selectedAmenities.length;
 
   return (
     <aside
@@ -417,7 +486,12 @@ export default function Sidebar({
               options={provinceOptions}
               placeholder="Select Province"
               onChange={(value) =>
-                updateFilters({ province: value, city: "", location: "" })
+                updateFilters({
+                  province: value,
+                  city: "",
+                  municipality: "",
+                  location: "",
+                })
               }
             />
             <SelectBox
@@ -425,7 +499,18 @@ export default function Sidebar({
               value={selectedCity}
               options={cityOptions}
               placeholder="Select City"
-              onChange={(value) => updateFilters({ city: value, location: "" })}
+              onChange={(value) =>
+                updateFilters({ city: value, municipality: "", location: "" })
+              }
+            />
+            <SelectBox
+              label="Municipality"
+              value={selectedMunicipality}
+              options={municipalityOptions}
+              placeholder="Select Municipality"
+              onChange={(value) =>
+                updateFilters({ municipality: value, location: "" })
+              }
             />
 
             <button
@@ -496,6 +581,8 @@ export default function Sidebar({
                     updateFilters({
                       budget:
                         selectedBudget === budget.value ? "" : budget.value,
+                      minBudget: "",
+                      maxBudget: "",
                     })
                   }
                   className={[
@@ -517,6 +604,56 @@ export default function Sidebar({
           <p className="mt-3 text-center text-sm font-extrabold text-neutral-700">
             {activeBudgetLabel}
           </p>
+
+          <div className="mt-3 grid grid-cols-2 gap-2.5">
+            <div>
+              <label
+                className="mb-1 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400"
+                htmlFor="min-budget-input"
+              >
+                Min
+              </label>
+              <input
+                id="min-budget-input"
+                type="number"
+                min={0}
+                step={5000}
+                value={selectedMinBudget}
+                onChange={(event) =>
+                  updateFilters({
+                    minBudget: event.target.value,
+                    budget: "",
+                  })
+                }
+                className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm font-semibold text-neutral-800 shadow-sm outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                placeholder="₱ min"
+              />
+            </div>
+
+            <div>
+              <label
+                className="mb-1 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400"
+                htmlFor="max-budget-input"
+              >
+                Max
+              </label>
+              <input
+                id="max-budget-input"
+                type="number"
+                min={0}
+                step={5000}
+                value={selectedMaxBudget}
+                onChange={(event) =>
+                  updateFilters({
+                    maxBudget: event.target.value,
+                    budget: "",
+                  })
+                }
+                className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm font-semibold text-neutral-800 shadow-sm outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                placeholder="₱ max"
+              />
+            </div>
+          </div>
         </section>
 
         <section>
@@ -541,7 +678,10 @@ export default function Sidebar({
           />
 
           <div className="mt-3 flex items-center gap-3">
-            <label className="min-w-[90px] text-sm font-medium text-neutral-500" htmlFor="capacity-input">
+            <label
+              className="min-w-[90px] text-sm font-medium text-neutral-500"
+              htmlFor="capacity-input"
+            >
               Capacity
             </label>
             <input
@@ -587,17 +727,17 @@ export default function Sidebar({
         </section>
 
         <section>
-          <SectionTitle icon={Building2} title="Venue Style" />
+          <SectionTitle icon={Building2} title="Venue Type" />
 
           <div className="grid grid-cols-2 gap-3">
-            {venueStyles.map(({ label, icon: Icon }) => {
-              const active = selectedVenueStyle === label;
+            {venueTypes.map(({ label, icon: Icon }) => {
+              const active = selectedVenueTypes.includes(label);
 
               return (
                 <button
                   key={label}
                   type="button"
-                  onClick={() => updateFilters({ style: active ? "" : label })}
+                  onClick={() => toggleVenueType(label)}
                   className={[
                     "flex aspect-[1.35] flex-col items-center justify-center gap-2 rounded-2xl border bg-white transition",
                     active
@@ -610,6 +750,27 @@ export default function Sidebar({
                 </button>
               );
             })}
+          </div>
+        </section>
+
+        <section>
+          <SectionTitle icon={Umbrella} title="Indoor / Outdoor" />
+
+          <div className="grid grid-cols-3 gap-2.5">
+            {indoorOutdoorModes.map((mode) => (
+              <OptionButton
+                key={mode.value}
+                active={selectedIndoorOutdoor === mode.value}
+                onClick={() =>
+                  updateFilters({
+                    indoorOutdoor:
+                      selectedIndoorOutdoor === mode.value ? "" : mode.value,
+                  })
+                }
+              >
+                {mode.label}
+              </OptionButton>
+            ))}
           </div>
         </section>
 

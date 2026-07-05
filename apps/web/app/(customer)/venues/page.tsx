@@ -16,6 +16,7 @@ export interface Venue {
   rating?: number;
   category?: string;
   city?: string;
+  municipality?: string;
   province?: string;
   basePrice?: number;
   capacityMax?: number;
@@ -31,6 +32,7 @@ export interface Venue {
   ceremonyVenue?: boolean;
   receptionVenue?: boolean;
   eventTypes?: string[];
+  categories?: string[];
   amenities?: string[];
   isFavorited?: boolean;
 }
@@ -51,6 +53,7 @@ const fallbackVenues: Venue[] = [
     rating: 4.9,
     category: "Garden Venue",
     city: "Tagaytay City",
+    municipality: "Tagaytay",
     province: "Cavite",
     basePrice: 120000,
     capacityMax: 300,
@@ -61,6 +64,7 @@ const fallbackVenues: Venue[] = [
     petFriendly: false,
     hasPool: false,
     eventTypes: ["Wedding", "Debut", "Party"],
+    categories: ["Garden"],
     amenities: ["Parking", "Overnight"],
   },
   {
@@ -75,6 +79,7 @@ const fallbackVenues: Venue[] = [
     rating: 4.8,
     category: "Event Hall",
     city: "Makati City",
+    municipality: "Makati",
     province: "Metro Manila",
     basePrice: 85000,
     capacityMax: 150,
@@ -85,6 +90,7 @@ const fallbackVenues: Venue[] = [
     petFriendly: false,
     hasPool: false,
     eventTypes: ["Corporate", "Conference", "Birthday"],
+    categories: ["Event Hall", "Hotel"],
     amenities: ["Parking", "Aircon", "WiFi"],
   },
 ];
@@ -186,7 +192,12 @@ export default async function VenuesMarketplacePage() {
           const basePrice = asNumber(venue.base_price ?? venue.starting_price);
           const capacityMax = asNumber(venue.capacity_max);
           const city = venue.city ?? "";
+          const municipality = venue.municipality ?? "";
           const province = venue.province ?? "";
+          const categories =
+            venue.venue_category_assignments
+              ?.map((entry: any) => entry.venue_categories?.name)
+              .filter(Boolean) ?? [];
           const eventTypes =
             venue.venue_event_types
               ?.map((entry: any) => entry.event_types?.name)
@@ -212,11 +223,12 @@ export default async function VenuesMarketplacePage() {
             image: buildVenueImageUrl(firstImage),
             rating: Number(venue.avg_rating ?? venue.rating ?? 4.8),
             category:
-              venue.venue_category_assignments?.[0]?.venue_categories?.name ??
+              categories[0] ??
               venue.category ??
               venue.venue_type ??
               "Event Venue",
             city,
+            municipality,
             province,
             basePrice,
             capacityMax,
@@ -232,6 +244,7 @@ export default async function VenuesMarketplacePage() {
             ceremonyVenue: Boolean(venue.ceremony_venue),
             receptionVenue: Boolean(venue.reception_venue),
             eventTypes,
+            categories,
             amenities,
           };
         })
