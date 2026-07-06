@@ -21,15 +21,19 @@ type UserRole =
   | "supplier"
   | "admin";
 
-
-
 // Allows frontend preview of dashboard/admin pages during local development.
 // Production will still enforce role guards.
 const SKIP_ROLE_GUARD_IN_DEV = process.env.NODE_ENV === "development";
 
-// Routes that require authentication
+// Routes that require authentication.
+// Important: /venues is intentionally NOT protected.
+// Public:
+// - /venues
+// - /venues/[slug]
+//
+// Protected separately:
+// - /venues/[slug]/book
 const PROTECTED_PREFIXES = [
-  "/venues",
   "/bookings",
   "/favorites",
   "/account",
@@ -92,8 +96,6 @@ const ROLE_GUARDS: Array<{ prefix: string; roles: UserRole[] }> = [
 
 const AUTH_PATHS = ["/login", "/register", "/forgot-password"];
 
-
-
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -132,9 +134,11 @@ export async function middleware(request: NextRequest) {
 
   const { pathname, search } = request.nextUrl;
 
-  const isProtected = PROTECTED_PREFIXES.some((prefix) =>
-    pathname.startsWith(prefix),
-  );
+  const isVenueBookingPath = /^\/venues\/[^/]+\/book(?:\/)?$/.test(pathname);
+
+  const isProtected =
+    PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix)) ||
+    isVenueBookingPath;
 
   // 1. Auth guard — redirect unauthenticated users
   if (isProtected && !user) {
