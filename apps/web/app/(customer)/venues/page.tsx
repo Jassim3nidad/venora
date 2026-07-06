@@ -122,7 +122,7 @@ export default async function VenuesMarketplacePage() {
         <div className="relative mx-auto flex min-h-16 w-full max-w-[1600px] items-center gap-2 px-3 sm:gap-3 sm:px-6 lg:px-8">
           <Link
             href="/venues"
-            className="text-lg font-black tracking-[-0.04em] text-[#2563EB] transition hover:text-[#1d4ed8] sm:text-xl"
+            className="text-lg font-black tracking-tight text-[#2563EB] transition hover:text-[#1d4ed8] sm:text-xl"
           >
             Venora
           </Link>

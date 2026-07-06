@@ -1,3 +1,5 @@
+@charset "UTF-8";
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Sora:wght@400..700&display=swap");
 @import "tailwindcss";
 @config "../tailwind.config.ts";
 
@@ -5,8 +7,6 @@
 @source "../src";
 @source "../../../packages/ui/src";
 @source "../../../packages/lib/src";
-
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Sora:wght@400..700&display=swap");
 
 @theme {
   --font-sans: "Inter", sans-serif;
