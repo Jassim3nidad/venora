@@ -11,13 +11,15 @@ interface CalendarCellProps {
   bookings: Booking[];
   availability: VenueAvailability | undefined;
   onClick: () => void;
+  isDisabled?: boolean;
 }
 
-export function CalendarCell({ day, currentMonth, bookings, availability, onClick }: CalendarCellProps) {
+export function CalendarCell({ day, currentMonth, bookings, availability, onClick, isDisabled = false }: CalendarCellProps) {
   const dateStr = format(day, "yyyy-MM-dd");
   const { isOver, setNodeRef } = useDroppable({
     id: dateStr,
-    data: { date: dateStr },
+    disabled: isDisabled,
+    data: { date: dateStr, disabled: isDisabled },
   });
 
   const isCurrentMonth = isSameMonth(day, currentMonth);
@@ -36,16 +38,23 @@ export function CalendarCell({ day, currentMonth, bookings, availability, onClic
     borderClass = isOver ? "border-2 border-blue-500" : "border-gray-300 border-dashed border-2";
   }
 
+  if (isDisabled) {
+    bgClass = "bg-gray-50";
+    opacityClass = "opacity-50";
+    borderClass = "border border-gray-200";
+  }
+
   return (
     <div
       ref={setNodeRef}
-      onClick={onClick}
-      className={`min-h-[120px] p-2 rounded-lg cursor-pointer transition-colors flex flex-col overflow-hidden relative ${bgClass} ${opacityClass} ${borderClass} hover:border-blue-300`}
+      onClick={isDisabled ? undefined : onClick}
+      aria-disabled={isDisabled}
+      className={`min-h-[120px] p-2 rounded-lg transition-colors flex flex-col overflow-hidden relative ${bgClass} ${opacityClass} ${borderClass} ${isDisabled ? "cursor-not-allowed text-gray-400" : "cursor-pointer hover:border-blue-300"}`}
     >
       <div className="flex justify-between items-start mb-2">
         <span
           className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
-            isTodayDate ? "bg-blue-600 text-white" : isCurrentMonth ? "text-gray-700" : "text-gray-400"
+            isDisabled ? "text-gray-400" : isTodayDate ? "bg-blue-600 text-white" : isCurrentMonth ? "text-gray-700" : "text-gray-400"
           }`}
         >
           {format(day, "d")}
@@ -67,7 +76,7 @@ export function CalendarCell({ day, currentMonth, bookings, availability, onClic
       </div>
       
       {/* Seasonal Price Override Indicator */}
-      {availability?.seasonal_price_override && (
+      {!isDisabled && availability?.seasonal_price_override && (
         <div className="absolute bottom-1 right-2 text-[10px] font-semibold text-green-600">
           ₱{availability.seasonal_price_override.toLocaleString()}
         </div>

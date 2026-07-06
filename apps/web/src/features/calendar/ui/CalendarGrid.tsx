@@ -8,6 +8,7 @@ import { moveBookingDate } from "../application/calendar-actions";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner"; // Assuming sonner is used for toasts, standard in shadcn
+import { isPastDate } from "@/src/lib/date-only";
 
 const DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -15,9 +16,10 @@ interface CalendarGridProps {
   venueId: string;
   currentMonth: Date;
   onDayClick: (day: Date) => void;
+  disablePastDates?: boolean;
 }
 
-export function CalendarGrid({ venueId, currentMonth, onDayClick }: CalendarGridProps) {
+export function CalendarGrid({ venueId, currentMonth, onDayClick, disablePastDates = false }: CalendarGridProps) {
   const { bookings, availability, isLoading, getBookingsForDay, getAvailabilityForDay } = useCalendar(venueId, currentMonth);
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -93,6 +95,7 @@ export function CalendarGrid({ venueId, currentMonth, onDayClick }: CalendarGrid
           {calendarDays.map((day) => {
             const dayBookings = getBookingsForDay(day);
             const dayAvailability = getAvailabilityForDay(day);
+            const isDisabled = disablePastDates && isPastDate(day);
 
             return (
               <CalendarCell
@@ -101,7 +104,11 @@ export function CalendarGrid({ venueId, currentMonth, onDayClick }: CalendarGrid
                 currentMonth={currentMonth}
                 bookings={dayBookings}
                 availability={dayAvailability}
-                onClick={() => onDayClick(day)}
+                isDisabled={isDisabled}
+                onClick={() => {
+                  if (isDisabled) return;
+                  onDayClick(day);
+                }}
               />
             );
           })}

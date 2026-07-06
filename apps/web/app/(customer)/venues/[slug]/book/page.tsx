@@ -19,6 +19,7 @@ import {
   CustomerStatusBadge,
 } from "@/src/components/customer/CustomerUI";
 import { createClient } from "@/lib/supabase/server";
+import { getLocalDateInputValue } from "@/src/lib/date-only";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -126,6 +127,7 @@ export default async function BookVenuePage({ params }: Props) {
                       id="booking-event-date"
                       type="date"
                       name="event_date"
+                      min={getLocalDateInputValue()}
                       className="h-12 w-full rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] pl-11 pr-4 text-sm font-semibold text-slate-700 outline-none transition hover:border-[#BFDBFE] focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
                     />
                   </div>

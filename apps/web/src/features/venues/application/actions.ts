@@ -4,6 +4,11 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createServerAction } from "@/src/lib/server-action";
 import { UnauthorizedError } from "@/src/lib/errors";
+import {
+  isTodayOrFutureDateString,
+  isValidDateOnlyString,
+  PAST_DATE_MESSAGE,
+} from "@/src/lib/date-only";
 
 // ─── Input Schemas ───
 
@@ -18,7 +23,11 @@ const createInquirySchema = z.object({
 
 const checkAvailabilitySchema = z.object({
   venueId: z.string().uuid(),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format")
+    .refine(isValidDateOnlyString, { message: "Invalid date" })
+    .refine(isTodayOrFutureDateString, { message: PAST_DATE_MESSAGE }),
 });
 
 // ─── Actions ───

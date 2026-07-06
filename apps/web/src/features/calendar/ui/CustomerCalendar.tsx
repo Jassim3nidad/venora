@@ -4,6 +4,7 @@ import { useState } from "react";
 import { format, addMonths, subMonths, eachDayOfInterval, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isSameMonth, isToday } from "date-fns";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useCalendar } from "../hooks/use-calendar";
+import { isPastDate } from "@/src/lib/date-only";
 
 const DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -70,10 +71,12 @@ export function CustomerCalendar({ venueId, basePrice }: CustomerCalendarProps) 
             const dayAvailability = getAvailabilityForDay(day);
             const isCurrentMonth = isSameMonth(day, currentMonth);
             const isTodayDate = isToday(day);
+            const isPast = isPastDate(day);
 
             // Determine if unavailable
             // Unavailable if blackout, maintenance, or if there's an approved booking
             const isUnavailable = 
+              isPast ||
               dayAvailability?.status === "blackout" || 
               dayAvailability?.status === "maintenance" ||
               dayAvailability?.status === "reserved" ||
@@ -87,7 +90,7 @@ export function CustomerCalendar({ venueId, basePrice }: CustomerCalendarProps) 
                 className={`
                   aspect-square p-1 rounded-lg flex flex-col justify-between items-center transition-colors
                   ${!isCurrentMonth ? "opacity-30 pointer-events-none" : ""}
-                  ${isUnavailable ? "bg-gray-50 opacity-50 line-through text-gray-400" : "bg-white border border-gray-100 hover:border-blue-500 cursor-pointer"}
+                  ${isPast ? "bg-gray-50 text-gray-400 opacity-50 cursor-not-allowed" : isUnavailable ? "bg-gray-50 opacity-50 line-through text-gray-400 cursor-not-allowed" : "bg-white border border-gray-100 hover:border-blue-500 cursor-pointer"}
                 `}
               >
                 <span

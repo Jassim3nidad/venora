@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createBookingSchema, type CreateBookingInput } from "../schemas/booking.schema";
 import { useCreateBooking } from "../hooks/use-create-booking";
+import { getLocalDateInputValue } from "@/src/lib/date-only";
 
 interface BookingFormProps {
   venueId: string;
@@ -54,7 +55,7 @@ export function BookingForm({
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
           <label htmlFor="bf-event-date" style={{ fontSize: "0.875rem", fontWeight: 500 }}>Event date</label>
-          <input id="bf-event-date" type="date" {...register("eventDate")}
+          <input id="bf-event-date" type="date" min={getLocalDateInputValue()} {...register("eventDate")}
             style={{ height: "2.75rem", borderRadius: "0.625rem", border: `1px solid ${errors.eventDate ? "hsl(0 72% 51%)" : "var(--border-default)"}`, padding: "0 0.875rem", background: "var(--bg-subtle)", fontSize: "0.9375rem", outline: "none" }} />
           {errors.eventDate && <p role="alert" style={{ fontSize: "0.75rem", color: "hsl(0 72% 51%)" }}>{errors.eventDate.message}</p>}
         </div>

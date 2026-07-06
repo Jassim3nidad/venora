@@ -16,6 +16,15 @@ interface CalendarProps {
   selectedDate?: Date;
   onDateSelect?: (date: Date) => void;
   availability?: Record<string, CalendarAvailabilityStatus>;
+  disablePastDates?: boolean;
+}
+
+function startOfLocalDay(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function isPastDate(date: Date) {
+  return startOfLocalDay(date).getTime() < startOfLocalDay(new Date()).getTime();
 }
 
 export function Calendar({
@@ -23,6 +32,7 @@ export function Calendar({
   selectedDate,
   onDateSelect,
   availability = {},
+  disablePastDates = false,
 }: CalendarProps) {
   const [currentDate, setCurrentDate] = React.useState(new Date());
 
@@ -106,6 +116,8 @@ export function Calendar({
         {daysArray.map((day) => {
           const key = formatDateKey(day);
           const status = availability[key] ?? "available";
+          const date = new Date(year, month, day);
+          const isPast = disablePastDates && isPastDate(date);
 
           const isSelected =
             selectedDate &&
@@ -117,21 +129,29 @@ export function Calendar({
             <button
               key={`day-${day}`}
               type="button"
-              onClick={() => onDateSelect?.(new Date(year, month, day))}
+              disabled={isPast}
+              aria-disabled={isPast}
+              title={isPast ? "Please choose today or a future date." : undefined}
+              onClick={() => {
+                if (isPast) return;
+                onDateSelect?.(date);
+              }}
               className={cn(
                 "aspect-square rounded-lg text-xs font-semibold flex items-center justify-center transition-all cursor-pointer relative",
+                isPast &&
+                  "cursor-not-allowed border border-[var(--border-default)] bg-[var(--bg-muted)] text-[var(--text-muted)] opacity-50 hover:bg-[var(--bg-muted)]",
                 // Available
-                status === "available" && "border border-[var(--border-default)] hover:bg-[var(--bg-subtle)] text-[var(--text-primary)]",
+                !isPast && status === "available" && "border border-[var(--border-default)] hover:bg-[var(--bg-subtle)] text-[var(--text-primary)]",
                 // Reserved
-                status === "reserved" && "bg-[var(--color-success)] text-white",
+                !isPast && status === "reserved" && "bg-[var(--color-success)] text-white",
                 // Tentative
-                status === "tentative" && "border-2 border-dashed border-[var(--color-warning)] text-[var(--color-warning)]",
+                !isPast && status === "tentative" && "border-2 border-dashed border-[var(--color-warning)] text-[var(--color-warning)]",
                 // Maintenance
-                status === "maintenance" && "bg-[var(--bg-muted)] text-[var(--text-muted)] line-through",
+                !isPast && status === "maintenance" && "bg-[var(--bg-muted)] text-[var(--text-muted)] line-through",
                 // Blackout
-                status === "blackout" && "bg-[var(--color-danger-bg)] text-[var(--color-danger)] border border-[var(--color-danger)]/30",
+                !isPast && status === "blackout" && "bg-[var(--color-danger-bg)] text-[var(--color-danger)] border border-[var(--color-danger)]/30",
                 // Selected override
-                isSelected && "ring-2 ring-[var(--color-brand-500)] ring-offset-1"
+                isSelected && !isPast && "ring-2 ring-[var(--color-brand-500)] ring-offset-1"
               )}
             >
               {day}

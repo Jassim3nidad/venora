@@ -27,6 +27,7 @@ import {
 import { format } from "date-fns";
 import InquiryDialog from "./InquiryDialog";
 import { checkAvailabilityAction } from "../application/actions";
+import { isPastDate, PAST_DATE_MESSAGE } from "@/src/lib/date-only";
 
 interface Package {
   id: string;
@@ -82,6 +83,7 @@ export default function BookingSidebar({
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
 
   const selectedPackage = packages.find((p) => p.id === selectedPackageId);
+  const selectedDateIsPast = selectedDate ? isPastDate(selectedDate) : false;
 
   // Dynamic values
   const currentPrice = selectedPackage
@@ -103,6 +105,12 @@ export default function BookingSidebar({
   useEffect(() => {
     if (!selectedDate) {
       setAvailabilityStatus("idle");
+      setOverridePrice(null);
+      return;
+    }
+
+    if (isPastDate(selectedDate)) {
+      setAvailabilityStatus("unavailable");
       setOverridePrice(null);
       return;
     }
@@ -144,7 +152,7 @@ export default function BookingSidebar({
   }, [guests]);
 
   const handleBook = () => {
-    if (!selectedDate || availabilityStatus !== "available") return;
+    if (!selectedDate || selectedDateIsPast || availabilityStatus !== "available") return;
     setMobileSheetOpen(false);
     const dateStr = format(selectedDate, "yyyy-MM-dd");
     router.push(
@@ -220,7 +228,9 @@ export default function BookingSidebar({
             <div className="absolute top-16 left-0 right-0 z-50 bg-[var(--bg-base)] border border-[var(--border-default)] shadow-2xl rounded-2xl p-2">
               <Calendar
                 selectedDate={selectedDate as any}
+                disablePastDates
                 onDateSelect={(d) => {
+                  if (isPastDate(d)) return;
                   setSelectedDate(d);
                   setShowCalendar(false);
                 }}
@@ -319,7 +329,11 @@ export default function BookingSidebar({
       {availabilityStatus === "unavailable" && selectedDate && (
         <div className="mt-4 flex gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-600">
           <AlertCircle className="h-4 w-4 shrink-0" />
-          <span>This date is unavailable. Please select another date.</span>
+          <span>
+            {selectedDateIsPast
+              ? PAST_DATE_MESSAGE
+              : "This date is unavailable. Please select another date."}
+          </span>
         </div>
       )}
 
@@ -358,6 +372,7 @@ export default function BookingSidebar({
         <Button
           disabled={
             !selectedDate ||
+            selectedDateIsPast ||
             availabilityStatus !== "available" ||
             isCheckingAvailability ||
             guests < activeMinGuests ||

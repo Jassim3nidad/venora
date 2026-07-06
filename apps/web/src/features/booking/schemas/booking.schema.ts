@@ -1,4 +1,9 @@
 import { z } from "zod";
+import {
+  coerceDateOnlyValue,
+  isTodayOrFutureDate,
+  PAST_DATE_MESSAGE,
+} from "@/src/lib/date-only";
 
 /**
  * Booking schemas — Zod as single source of truth.
@@ -10,9 +15,11 @@ import { z } from "zod";
 export const createBookingSchema = z.object({
   venueId: z.string().uuid("Invalid venue ID"),
   packageId: z.string().uuid("Invalid package ID").optional(),
-  eventDate: z.coerce.date().refine((d) => d >= new Date(new Date().toDateString()), {
-    message: "Event date must be in the future",
-  }),
+  eventDate: z
+    .preprocess(coerceDateOnlyValue, z.coerce.date())
+    .refine(isTodayOrFutureDate, {
+      message: PAST_DATE_MESSAGE,
+    }),
   guestCount: z.number().int().min(1, "Guest count must be at least 1"),
   specialRequests: z.string().max(1000).optional(),
 });
