@@ -30,11 +30,11 @@ export default function BookingCalendar() {
         .single();
       
       if (!error && data) {
-        setVenueId(data.id);
+        setVenueId((data as { id: string }).id);
       } else {
         // Fallback for demo if organization_id isn't directly user.id
         const { data: altData } = await (supabase as any).from("venues").select("id").limit(1).single();
-        if (altData) setVenueId(altData.id);
+        if (altData) setVenueId((altData as { id: string }).id);
       }
       setLoadingVenues(false);
     }
