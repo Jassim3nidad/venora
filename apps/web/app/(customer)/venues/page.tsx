@@ -1,7 +1,7 @@
 ﻿import Link from "next/link";
 import { redirect } from "next/navigation";
 import Sidebar from "@/components/layout/Sidebar";
-import { Bell, HelpCircle, LogOut } from "lucide-react";
+import { Bell, HelpCircle, LogOut, Menu } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import VenuesClient from "@/src/features/venues/ui/VenuesClient";
 
@@ -210,9 +210,40 @@ export default async function VenuesMarketplacePage() {
             Venora
           </Link>
 
+          {/* Mobile: compact menu */}
+          <details className="ml-auto md:hidden relative">
+            <summary
+              role="button"
+              aria-label="Open menu"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#1D4ED8] transition hover:bg-[#EFF6FF]"
+            >
+              <Menu className="h-5 w-5" />
+            </summary>
+
+            <div className="absolute right-0 mt-2 w-56 rounded-md border bg-white p-2 shadow-lg z-50">
+              <Link href="/venues" className="block w-full rounded px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                Browse
+              </Link>
+
+              <Link href="/bookings" className="mt-1 block w-full rounded px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                Bookings
+              </Link>
+
+              <Link href="/account" className="mt-1 block w-full rounded px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                Account
+              </Link>
+
+              <form action={logoutAction} className="mt-2">
+                <button type="submit" className="w-full rounded px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                  Logout
+                </button>
+              </form>
+            </div>
+          </details>
+
           <nav
             aria-label="Primary navigation"
-            className="absolute left-1/2 hidden -translate-x-1/2 justify-center md:flex"
+            className="hidden md:absolute md:left-1/2 md:-translate-x-1/2 md:flex md:justify-center"
           >
             <div className="inline-flex items-center gap-1 rounded-full border border-[#E5E7EB]/80 bg-[#F9FAFB]/90 p-1 shadow-sm">
               <Link
@@ -231,7 +262,7 @@ export default async function VenuesMarketplacePage() {
             </div>
           </nav>
 
-          <div className="ml-auto flex min-w-0 items-center justify-end gap-1.5 sm:gap-3">
+          <div className="ml-auto hidden md:flex min-w-0 items-center justify-end gap-1.5 sm:gap-3">
             <button
               type="button"
               className="hidden h-10 w-10 items-center justify-center rounded-full border border-transparent text-slate-400 transition hover:border-[#E5E7EB] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] lg:inline-flex"
