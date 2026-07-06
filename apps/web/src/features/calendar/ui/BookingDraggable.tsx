@@ -29,9 +29,9 @@ export function BookingDraggable({ booking }: BookingDraggableProps) {
   const style = {
     transform: CSS.Translate.toString(transform),
     opacity: isDragging ? 0.5 : 1,
-    background: cfg.bg,
-    color: cfg.color,
-    border: `1px solid ${cfg.dot}33`,
+    background: cfg?.bg || "#ffffff",
+    color: cfg?.color || "#000000",
+    border: `1px solid ${cfg?.dot || "#000000"}33`,
     cursor: "grab",
     zIndex: isDragging ? 50 : 1,
   };
@@ -46,7 +46,7 @@ export function BookingDraggable({ booking }: BookingDraggableProps) {
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1 overflow-hidden">
-          <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: cfg.dot }} />
+          <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: cfg?.dot || "#000000" }} />
           <span className="truncate">{booking.customer.full_name}</span>
         </div>
       </div>

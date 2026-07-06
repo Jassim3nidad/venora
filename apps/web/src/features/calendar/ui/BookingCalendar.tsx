@@ -22,7 +22,7 @@ export default function BookingCalendar() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("venues")
         .select("id")
         .eq("organization_id", user.id) // Assuming simple mapping for now
@@ -33,7 +33,7 @@ export default function BookingCalendar() {
         setVenueId(data.id);
       } else {
         // Fallback for demo if organization_id isn't directly user.id
-        const { data: altData } = await supabase.from("venues").select("id").limit(1).single();
+        const { data: altData } = await (supabase as any).from("venues").select("id").limit(1).single();
         if (altData) setVenueId(altData.id);
       }
       setLoadingVenues(false);
