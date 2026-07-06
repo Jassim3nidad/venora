@@ -79,7 +79,7 @@ export default async function AccountLayout({
                 </p>
               </div>
 
-              <div className="flex w-fit items-center gap-3 rounded-2xl border border-[#E5E7EB]/80 bg-white p-3 pr-5 shadow-sm">
+              <div className="flex w-full min-w-0 items-center gap-3 rounded-2xl border border-[#E5E7EB]/80 bg-white p-3 pr-5 shadow-sm sm:w-fit">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#EFF6FF] text-base font-black text-[#2563EB]">
                   {profile?.avatar_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -107,6 +107,10 @@ export default async function AccountLayout({
         </section>
 
         <section className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="mb-6 lg:hidden">
+            <AccountMobileMenu />
+          </div>
+
           <div className="grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-start">
             <AccountNav />
             <div className="min-w-0">{children}</div>

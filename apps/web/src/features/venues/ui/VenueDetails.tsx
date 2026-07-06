@@ -21,7 +21,14 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import Image from "next/image";
-import { Button, Separator, Badge, Toast, ToastTitle, ToastDescription } from "@venora/ui";
+import {
+  Badge,
+  Button,
+  Separator,
+  Toast,
+  ToastDescription,
+  ToastTitle,
+} from "@venora/ui";
 import VenueGallery from "./VenueGallery";
 import BookingSidebar from "./BookingSidebar";
 import ReviewsSection from "./ReviewsSection";
@@ -37,6 +44,18 @@ interface VenueDetailsProps {
   currentUser: any;
 }
 
+function formatCurrency(value?: number | null) {
+  if (!value || !Number.isFinite(value)) {
+    return "Price pending";
+  }
+
+  return new Intl.NumberFormat("en-PH", {
+    style: "currency",
+    currency: "PHP",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
 export default function VenueDetails({
   venue,
   reviews = [],
@@ -46,9 +65,14 @@ export default function VenueDetails({
 }: VenueDetailsProps) {
   const [isFavorited, setIsFavorited] = useState(initialIsFavorited);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://szmjjkywcsnzkgqevinz.supabase.co";
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    "https://szmjjkywcsnzkgqevinz.supabase.co";
   const [toastOpen, setToastOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState({ title: "", description: "" });
+  const [toastMessage, setToastMessage] = useState({
+    title: "",
+    description: "",
+  });
 
   const triggerToast = (title: string, description: string) => {
     setToastMessage({ title, description });
@@ -74,10 +98,12 @@ export default function VenueDetails({
       triggerToast("Error", result.error.message);
     } else {
       triggerToast(
-        result.data.isFavorited ? "Saved to Favorites" : "Removed from Favorites",
+        result.data.isFavorited
+          ? "Saved to Favorites"
+          : "Removed from Favorites",
         result.data.isFavorited
           ? "You can view this venue anytime in your account dashboard."
-          : "This venue has been removed from your saved list."
+          : "This venue has been removed from your saved list.",
       );
     }
   };
@@ -85,63 +111,78 @@ export default function VenueDetails({
   const handleShare = () => {
     const url = window.location.href;
     navigator.clipboard.writeText(url);
-    triggerToast("Link Copied", "The venue page link has been copied to your clipboard.");
+    triggerToast(
+      "Link Copied",
+      "The venue page link has been copied to your clipboard.",
+    );
   };
 
-  const amenitiesList = venue.venue_amenities?.map((va: any) => va.amenities?.name).filter(Boolean) ?? [];
+  const amenitiesList =
+    venue.venue_amenities
+      ?.map((va: any) => va.amenities?.name)
+      .filter(Boolean) ?? [];
 
   return (
-    <main className="container max-w-7xl mx-auto px-4 pt-8 pb-28 lg:pb-8 space-y-8 font-sans">
+    <main className="mx-auto max-w-7xl space-y-8 px-4 pb-28 pt-6 font-sans sm:px-6 sm:pt-8 lg:px-8 lg:pb-8">
       {/* Top Header info */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" className="bg-[var(--bg-subtle)] font-medium text-[var(--color-brand-600)] border-[var(--color-brand-500)]/20 uppercase tracking-wider text-[10px]">
-              {venue.indoor_outdoor}
-            </Badge>
-            {venue.is_featured && (
-              <Badge className="bg-amber-500 text-white font-semibold flex items-center gap-1 text-[10px]">
-                <Flame className="h-3 w-3 fill-current" />
-                Featured
+      <div className="rounded-[24px] border border-[#E5E7EB] bg-white p-5 shadow-sm shadow-slate-200/60 sm:p-6">
+        <div className="flex flex-col justify-between gap-5 md:flex-row md:items-start">
+          <div className="min-w-0 space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge
+                variant="outline"
+                className="border-[#DBEAFE] bg-[#EFF6FF] text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#2563EB]"
+              >
+                {venue.indoor_outdoor}
               </Badge>
-            )}
+              {venue.is_featured && (
+                <Badge className="bg-amber-500 text-white font-semibold flex items-center gap-1 text-[10px]">
+                  <Flame className="h-3 w-3 fill-current" />
+                  Featured
+                </Badge>
+              )}
+            </div>
+            <h1 className="max-w-3xl text-3xl font-black leading-tight tracking-[-0.04em] text-slate-950 md:text-4xl">
+              {venue.name}
+            </h1>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium text-[#6B7280]">
+              <span className="flex items-center gap-1.5">
+                <MapPin className="h-4 w-4 text-[#2563EB]" />
+                {venue.address}, {venue.city}, {venue.province}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Users className="h-4 w-4 text-[#2563EB]" />
+                Up to {venue.capacity_max} guests
+              </span>
+            </div>
           </div>
-          <h1 className="font-sora text-3xl md:text-4xl font-extrabold tracking-tight text-[var(--text-primary)]">
-            {venue.name}
-          </h1>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[var(--text-secondary)] font-medium">
-            <span className="flex items-center gap-1.5">
-              <MapPin className="h-4 w-4 text-[var(--text-muted)]" />
-              {venue.address}, {venue.city}, {venue.province}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Users className="h-4 w-4 text-[var(--text-muted)]" />
-              Up to {venue.capacity_max} guests
-            </span>
-          </div>
-        </div>
 
-        {/* Action Controls */}
-        <div className="flex items-center gap-3">
-          <Button
-            onClick={handleShare}
-            variant="outline"
-            className="rounded-xl border-[var(--border-default)] hover:bg-[var(--bg-subtle)] text-[var(--text-primary)] font-semibold h-11 px-4 flex items-center gap-2 text-sm"
-          >
-            <Share2 className="h-4 w-4" />
-            Share
-          </Button>
-          <Button
-            onClick={handleFavoriteToggle}
-            variant="outline"
-            disabled={isTogglingFavorite}
-            className={`rounded-xl border-[var(--border-default)] hover:bg-[var(--bg-subtle)] font-semibold h-11 px-4 flex items-center gap-2 text-sm transition-all ${
-              isFavorited ? "text-red-500 border-red-200 bg-red-50/50" : "text-[var(--text-primary)]"
-            }`}
-          >
-            <Heart className={`h-4 w-4 ${isFavorited ? "fill-current" : ""}`} />
-            {isFavorited ? "Favorited" : "Favorite"}
-          </Button>
+          {/* Action Controls */}
+          <div className="flex flex-col gap-3 sm:flex-row md:justify-end">
+            <Button
+              onClick={handleShare}
+              variant="outline"
+              className="flex h-11 items-center gap-2 rounded-2xl border-[#E5E7EB] px-4 text-sm font-bold text-[#111827] hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
+            >
+              <Share2 className="h-4 w-4" />
+              Share
+            </Button>
+            <Button
+              onClick={handleFavoriteToggle}
+              variant="outline"
+              disabled={isTogglingFavorite}
+              className={`flex h-11 items-center gap-2 rounded-2xl border-[#E5E7EB] px-4 text-sm font-bold transition-all hover:border-[#BFDBFE] hover:bg-[#EFF6FF] ${
+                isFavorited
+                  ? "text-red-500 border-red-200 bg-red-50/50"
+                  : "text-[var(--text-primary)]"
+              }`}
+            >
+              <Heart
+                className={`h-4 w-4 ${isFavorited ? "fill-current" : ""}`}
+              />
+              {isFavorited ? "Favorited" : "Favorite"}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -161,12 +202,12 @@ export default function VenueDetails({
               {venue.description || "No description provided for this venue."}
             </p>
             {venue.ai_generated_description && (
-              <div className="bg-gradient-to-br from-indigo-50/50 to-purple-50/50 dark:from-indigo-950/20 dark:to-purple-950/20 border border-indigo-100/50 p-5 rounded-3xl space-y-2">
-                <span className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 tracking-wider uppercase">
-                  <Sparkles className="h-4 w-4 text-indigo-500" />
+              <div className="space-y-2 rounded-[24px] border border-[#DBEAFE] bg-[#EFF6FF] p-5">
+                <span className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-[0.12em] text-[#2563EB]">
+                  <Sparkles className="h-4 w-4" />
                   AI Generated Overview
                 </span>
-                <p className="text-xs text-[var(--text-secondary)] italic leading-relaxed">
+                <p className="text-sm font-medium leading-6 text-[#4B5563]">
                   "{venue.ai_generated_description}"
                 </p>
               </div>
@@ -204,12 +245,29 @@ export default function VenueDetails({
                 <ParkingCircle className="h-4.5 w-4.5 text-[var(--color-brand-600)]" />
                 Parking & Accessibility
               </span>
-              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                {venue.parking_available
-                  ? "✅ Secure on-site private parking is available for all guests and coordinators."
-                  : "❌ Private on-site parking is not available. Street parking or public pay lots are nearby."}
-                {venue.wheelchair_accessible && " Accessible routes and ramps are fully prepared on-site."}
-              </p>
+              <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-medium leading-6 text-[#6B7280]">
+                <div className="flex gap-3">
+                  {venue.parking_available ? (
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                  ) : (
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                  )}
+                  <p>
+                    {venue.parking_available
+                      ? "Secure on-site private parking is available for all guests and coordinators."
+                      : "Private on-site parking is not available. Street parking or public pay lots are nearby."}
+                  </p>
+                </div>
+
+                {venue.wheelchair_accessible && (
+                  <div className="mt-3 flex gap-3 border-t border-[#E5E7EB] pt-3">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                    <p>
+                      Accessible routes and ramps are fully prepared on-site.
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="space-y-3">
@@ -218,7 +276,8 @@ export default function VenueDetails({
                 Venue Rules
               </span>
               <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                {venue.venue_rules || "Standard booking policies apply. Respect operating hours, maximum guest capacity constraints, and municipal noise ordinances."}
+                {venue.venue_rules ||
+                  "Standard booking policies apply. Respect operating hours, maximum guest capacity constraints, and municipal noise ordinances."}
               </p>
             </div>
 
@@ -228,7 +287,8 @@ export default function VenueDetails({
                 Cancellation Policy
               </span>
               <p className="text-xs text-[var(--text-secondary)] leading-relaxed bg-[var(--bg-subtle)] p-4 rounded-2xl border border-[var(--border-default)]">
-                {venue.cancellation_policy || "Full refund is supported for cancellations requested at least 14 days before the event schedule date. Cancellations inside 14 days forfeit the initial deposit amount."}
+                {venue.cancellation_policy ||
+                  "Full refund is supported for cancellations requested at least 14 days before the event schedule date. Cancellations inside 14 days forfeit the initial deposit amount."}
               </p>
             </div>
           </section>
@@ -241,8 +301,9 @@ export default function VenueDetails({
               <h3 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
                 Location & Accessibility
               </h3>
-              <span className="text-xs font-medium text-[var(--text-muted)]">
-                📍 {venue.address}, {venue.city}
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--text-muted)]">
+                <MapPin className="h-3.5 w-3.5 text-[#2563EB]" />
+                {venue.address}, {venue.city}
               </span>
             </div>
             {venue.latitude && venue.longitude ? (
@@ -254,7 +315,9 @@ export default function VenueDetails({
             ) : (
               <div className="h-[300px] bg-[var(--bg-subtle)] border border-[var(--border-default)] rounded-3xl flex flex-col items-center justify-center text-center p-4">
                 <Compass className="h-8 w-8 text-[var(--text-muted)] mb-2" />
-                <p className="text-sm font-semibold text-[var(--text-primary)]">Map details unavailable</p>
+                <p className="text-sm font-semibold text-[var(--text-primary)]">
+                  Map details unavailable
+                </p>
               </div>
             )}
           </section>
@@ -262,7 +325,7 @@ export default function VenueDetails({
           <Separator />
 
           {/* Host/Organization Info */}
-          <section className="bg-[var(--bg-subtle)] border border-[var(--border-default)] p-6 rounded-3xl flex flex-col sm:flex-row gap-5 items-start sm:items-center justify-between">
+          <section className="flex flex-col items-start justify-between gap-5 rounded-[24px] border border-[#E5E7EB] bg-white p-6 shadow-sm shadow-slate-200/60 sm:flex-row sm:items-center">
             <div className="flex items-center gap-4">
               <div className="h-14 w-14 rounded-2xl bg-[var(--color-brand-600)] text-white font-sora font-extrabold flex items-center justify-center text-2xl shadow-md">
                 {venue.organizations?.name?.slice(0, 2).toUpperCase() || "VE"}
@@ -283,8 +346,12 @@ export default function VenueDetails({
 
             <div className="flex gap-4 items-center">
               <div className="text-left sm:text-right text-xs">
-                <p className="text-[var(--text-muted)] font-medium">Response Rate</p>
-                <p className="font-bold text-[var(--text-primary)] text-sm">98% / Fast Response</p>
+                <p className="text-[var(--text-muted)] font-medium">
+                  Response Rate
+                </p>
+                <p className="font-bold text-[var(--text-primary)] text-sm">
+                  98% / Fast Response
+                </p>
               </div>
             </div>
           </section>
@@ -327,7 +394,9 @@ export default function VenueDetails({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {nearbyVenues.map((item) => {
-              const coverImg = item.venue_images?.find((i: any) => i.is_featured) ?? item.venue_images?.[0];
+              const coverImg =
+                item.venue_images?.find((i: any) => i.is_featured) ??
+                item.venue_images?.[0];
               const imgUrl = coverImg
                 ? String(coverImg.storage_path).startsWith("http")
                   ? coverImg.storage_path
@@ -338,9 +407,9 @@ export default function VenueDetails({
                 <Link
                   key={item.id}
                   href={`/venues/${item.slug}`}
-                  className="group rounded-3xl border border-[var(--border-default)] bg-[var(--bg-base)] overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col h-full"
+                  className="group flex h-full flex-col overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/50 transition-all hover:-translate-y-1 hover:border-[#BFDBFE] hover:shadow-xl hover:shadow-slate-200/70"
                 >
-                  <div className="h-48 w-full relative overflow-hidden bg-slate-100 flex-shrink-0">
+                  <div className="relative aspect-[16/10] w-full flex-shrink-0 overflow-hidden bg-slate-100">
                     {imgUrl ? (
                       <Image
                         src={imgUrl}
@@ -357,24 +426,33 @@ export default function VenueDetails({
                     )}
                   </div>
 
-                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                  <div className="flex flex-1 flex-col justify-between space-y-4 p-5">
                     <div className="space-y-1">
-                      <h4 className="font-sora font-bold text-base text-[var(--text-primary)] leading-snug line-clamp-1 group-hover:text-[var(--color-brand-600)] transition-colors">
+                      <h4 className="line-clamp-2 text-base font-extrabold leading-snug tracking-[-0.02em] text-slate-950 transition-colors group-hover:text-[#1D4ED8]">
                         {item.name}
                       </h4>
-                      <p className="text-xs text-[var(--text-muted)] font-medium">
-                        📍 {item.city}, {item.province}
+                      <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+                        <MapPin className="h-3.5 w-3.5 shrink-0 text-[#2563EB]" />
+                        <span className="line-clamp-1">
+                          {item.city}, {item.province}
+                        </span>
                       </p>
                     </div>
 
                     <div className="flex items-center justify-between text-sm font-semibold">
                       <div className="flex items-center gap-1">
                         <Star className="h-4 w-4 fill-amber-400 stroke-amber-400" />
-                        <span className="text-[var(--text-primary)]">{item.avg_rating.toFixed(1)}</span>
+                        <span className="text-[var(--text-primary)]">
+                          {item.avg_rating.toFixed(1)}
+                        </span>
                       </div>
                       <div className="text-right">
-                        <span className="text-[var(--text-primary)]">₱{item.base_price?.toLocaleString()}</span>
-                        <span className="text-xs font-normal text-[var(--text-muted)]">/day</span>
+                        <span className="text-[var(--text-primary)]">
+                          {formatCurrency(item.base_price)}
+                        </span>
+                        <span className="text-xs font-normal text-[var(--text-muted)]">
+                          /day
+                        </span>
                       </div>
                     </div>
                   </div>

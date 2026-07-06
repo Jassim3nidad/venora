@@ -2,7 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Users, Calendar as CalendarIcon, Info, HelpCircle, Check, Loader2 } from "lucide-react";
+import {
+  AlertCircle,
+  Calendar as CalendarIcon,
+  Check,
+  HelpCircle,
+  Info,
+  Loader2,
+} from "lucide-react";
 import {
   Calendar,
   Button,
@@ -42,6 +49,14 @@ interface BookingSidebarProps {
   packages: Package[];
 }
 
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat("en-PH", {
+    style: "currency",
+    currency: "PHP",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
 export default function BookingSidebar({
   venueId,
   venueName,
@@ -60,14 +75,18 @@ export default function BookingSidebar({
   const [inputValue, setInputValue] = useState<string>(capacityMin.toString());
   const [selectedPackageId, setSelectedPackageId] = useState<string>("none");
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
-  const [availabilityStatus, setAvailabilityStatus] = useState<"idle" | "available" | "unavailable">("idle");
+  const [availabilityStatus, setAvailabilityStatus] = useState<
+    "idle" | "available" | "unavailable"
+  >("idle");
   const [overridePrice, setOverridePrice] = useState<number | null>(null);
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
 
   const selectedPackage = packages.find((p) => p.id === selectedPackageId);
 
   // Dynamic values
-  const currentPrice = selectedPackage ? selectedPackage.price : (overridePrice ?? basePrice);
+  const currentPrice = selectedPackage
+    ? selectedPackage.price
+    : (overridePrice ?? basePrice);
   const currentUnit = selectedPackage ? selectedPackage.price_unit : priceUnit;
 
   // Calculate totals
@@ -100,7 +119,9 @@ export default function BookingSidebar({
       if (result.error) {
         setAvailabilityStatus("unavailable");
       } else {
-        setAvailabilityStatus(result.data.isAvailable ? "available" : "unavailable");
+        setAvailabilityStatus(
+          result.data.isAvailable ? "available" : "unavailable",
+        );
         setOverridePrice(result.data.priceOverride);
       }
     }
@@ -127,7 +148,7 @@ export default function BookingSidebar({
     setMobileSheetOpen(false);
     const dateStr = format(selectedDate, "yyyy-MM-dd");
     router.push(
-      `/venues/${venueId}/book?date=${dateStr}&guests=${guests}&packageId=${selectedPackageId}`
+      `/venues/${venueId}/book?date=${dateStr}&guests=${guests}&packageId=${selectedPackageId}`,
     );
   };
 
@@ -151,7 +172,7 @@ export default function BookingSidebar({
       <div className="space-y-1">
         <div className="flex items-baseline gap-1">
           <span className="font-sora text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-            ₱{currentPrice.toLocaleString()}
+            {formatCurrency(currentPrice)}
           </span>
           <span className="text-sm font-medium text-[var(--text-muted)]">
             / {getUnitText(currentUnit)}
@@ -180,7 +201,9 @@ export default function BookingSidebar({
           >
             <span className="flex items-center gap-2">
               <CalendarIcon className="h-4 w-4 text-[var(--text-muted)]" />
-              {selectedDate ? format(selectedDate, "MMMM d, yyyy") : "Select date"}
+              {selectedDate
+                ? format(selectedDate, "MMMM d, yyyy")
+                : "Select date"}
             </span>
             {isCheckingAvailability ? (
               <Loader2 className="h-4 w-4 animate-spin text-[var(--color-brand-500)]" />
@@ -212,15 +235,24 @@ export default function BookingSidebar({
             <label className="text-[10px] font-bold text-[var(--text-primary)] tracking-wide uppercase">
               Select Package
             </label>
-            <Select value={selectedPackageId} onValueChange={setSelectedPackageId}>
+            <Select
+              value={selectedPackageId}
+              onValueChange={setSelectedPackageId}
+            >
               <SelectTrigger className="w-full h-11 px-4 border border-[var(--border-default)] bg-[var(--bg-subtle)] rounded-xl text-sm font-medium">
                 <SelectValue placeholder="Custom (Base Price)" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-[var(--border-default)]">
-                <SelectItem value="none" className="text-sm font-medium">Custom (Base Price)</SelectItem>
+                <SelectItem value="none" className="text-sm font-medium">
+                  Custom (Base Price)
+                </SelectItem>
                 {packages.map((pkg) => (
-                  <SelectItem key={pkg.id} value={pkg.id} className="text-sm font-medium">
-                    {pkg.name} (₱{pkg.price.toLocaleString()})
+                  <SelectItem
+                    key={pkg.id}
+                    value={pkg.id}
+                    className="text-sm font-medium"
+                  >
+                    {pkg.name} ({formatCurrency(pkg.price)})
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -243,7 +275,13 @@ export default function BookingSidebar({
               type="range"
               min={activeMinGuests}
               max={activeMaxGuests}
-              value={guests < activeMinGuests ? activeMinGuests : guests > activeMaxGuests ? activeMaxGuests : guests}
+              value={
+                guests < activeMinGuests
+                  ? activeMinGuests
+                  : guests > activeMaxGuests
+                    ? activeMaxGuests
+                    : guests
+              }
               onChange={(e) => setGuests(Number(e.target.value))}
               className="w-full h-1.5 bg-[var(--border-default)] rounded-lg appearance-none cursor-pointer accent-[var(--color-brand-600)]"
             />
@@ -264,21 +302,24 @@ export default function BookingSidebar({
             />
           </div>
           {guests > activeMaxGuests && (
-            <p className="text-red-500 text-[11px] font-semibold mt-1">
-              ⚠️ This venue can only accommodate up to {activeMaxGuests} guests.
+            <p className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-red-500">
+              <AlertCircle className="h-3.5 w-3.5" />
+              This venue can only accommodate up to {activeMaxGuests} guests.
             </p>
           )}
           {guests < activeMinGuests && (
-            <p className="text-red-500 text-[11px] font-semibold mt-1">
-              ⚠️ This venue requires a minimum of {activeMinGuests} guests.
+            <p className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-red-500">
+              <AlertCircle className="h-3.5 w-3.5" />
+              This venue requires a minimum of {activeMinGuests} guests.
             </p>
           )}
         </div>
       </div>
 
       {availabilityStatus === "unavailable" && selectedDate && (
-        <div className="mt-4 p-3 rounded-xl border border-red-200/20 bg-red-500/10 text-red-600 text-xs font-medium">
-          ⚠️ This date is unavailable. Please select another date.
+        <div className="mt-4 flex gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-600">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          <span>This date is unavailable. Please select another date.</span>
         </div>
       )}
 
@@ -286,11 +327,12 @@ export default function BookingSidebar({
       <div className="mt-6 space-y-3 text-sm">
         <div className="flex justify-between text-[var(--text-secondary)]">
           <span>
-            ₱{currentPrice.toLocaleString()} × {guestsToCharge} {getUnitText(currentUnit)}
+            {formatCurrency(currentPrice)} x {guestsToCharge}{" "}
+            {getUnitText(currentUnit)}
             {guestsToCharge > 1 ? "s" : ""}
           </span>
           <span className="font-semibold text-[var(--text-primary)]">
-            ₱{subtotal.toLocaleString()}
+            {formatCurrency(subtotal)}
           </span>
         </div>
         <div className="flex justify-between text-[var(--text-secondary)]">
@@ -299,14 +341,14 @@ export default function BookingSidebar({
             <HelpCircle className="h-3.5 w-3.5 text-[var(--text-muted)]" />
           </span>
           <span className="font-semibold text-[var(--text-primary)]">
-            ₱{platformFee.toLocaleString()}
+            {formatCurrency(platformFee)}
           </span>
         </div>
         <Separator className="my-2" />
         <div className="flex justify-between text-base font-bold text-[var(--text-primary)]">
           <span>Total Est.</span>
           <span className="text-[var(--color-brand-600)]">
-            ₱{total.toLocaleString()}
+            {formatCurrency(total)}
           </span>
         </div>
       </div>
@@ -340,7 +382,7 @@ export default function BookingSidebar({
   return (
     <>
       {/* Desktop: sticky sidebar card */}
-      <div className="glass sticky top-24 hidden w-full rounded-3xl border border-[var(--border-default)] p-6 shadow-2xl lg:block">
+      <div className="sticky top-24 hidden w-full rounded-[24px] border border-[#E5E7EB] bg-white p-6 shadow-sm shadow-slate-200/60 lg:block">
         {bookingForm}
       </div>
 
@@ -350,7 +392,7 @@ export default function BookingSidebar({
           <div className="min-w-0 space-y-0.5">
             <div className="flex items-baseline gap-1">
               <span className="font-sora text-lg font-extrabold tracking-tight text-[var(--text-primary)]">
-                ₱{currentPrice.toLocaleString()}
+                {formatCurrency(currentPrice)}
               </span>
               <span className="text-xs font-medium text-[var(--text-muted)]">
                 / {getUnitText(currentUnit)}
@@ -358,10 +400,13 @@ export default function BookingSidebar({
             </div>
             {selectedDate ? (
               <p className="truncate text-[11px] font-medium text-[var(--text-secondary)]">
-                {format(selectedDate, "MMM d, yyyy")} · {guests} guest{guests !== 1 ? "s" : ""}
+                {format(selectedDate, "MMM d, yyyy")} - {guests} guest
+                {guests !== 1 ? "s" : ""}
               </p>
             ) : (
-              <p className="text-[11px] font-medium text-[var(--text-muted)]">Add a date to see availability</p>
+              <p className="text-[11px] font-medium text-[var(--text-muted)]">
+                Add a date to see availability
+              </p>
             )}
           </div>
 

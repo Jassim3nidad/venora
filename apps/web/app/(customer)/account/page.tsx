@@ -75,7 +75,7 @@ export default async function AccountPage() {
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="rounded-2xl border border-[#E5E7EB]/80 bg-white p-4 shadow-sm">
           <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-[#EFF6FF] text-[#2563EB]">
             <UserRound className="h-4 w-4" />
@@ -188,8 +188,8 @@ export default async function AccountPage() {
                 You haven&apos;t saved any venues yet
               </p>
               <p className="mt-1.5 max-w-sm text-sm font-medium text-slate-500">
-                Tap the heart icon on any venue while browsing to save it
-                here for later.
+                Tap the heart icon on any venue while browsing to save it here
+                for later.
               </p>
               <Link
                 href="/venues"
@@ -218,8 +218,8 @@ export default async function AccountPage() {
             </h2>
 
             <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-500">
-              These dashboard shortcuts are based on the roles assigned to
-              your Venora account.
+              These dashboard shortcuts are based on the roles assigned to your
+              Venora account.
             </p>
           </div>
 

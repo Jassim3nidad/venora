@@ -1,4 +1,3 @@
-import Sidebar from "@/components/layout/Sidebar";
 import { CustomerNavbar } from "@/components/layout/CustomerNavbar";
 import { createClient } from "@/lib/supabase/server";
 import VenuesClient from "@/src/features/venues/ui/VenuesClient";
@@ -93,6 +92,7 @@ export default async function VenuesMarketplacePage() {
   const researchVenueById = new Map(
     researchVenues.map((venue) => [venue.id, venue]),
   );
+
   const orderedResearchVenues =
     dbVenues && dbVenues.length === researchVenues.length
       ? (dbVenues as Array<{ id: string }>)
@@ -101,6 +101,7 @@ export default async function VenuesMarketplacePage() {
             Boolean(venue),
           )
       : researchVenues;
+
   const venues: Venue[] = orderedResearchVenues.map((venue) =>
     toMarketplaceVenue(venue, favoriteVenueIds),
   );
@@ -110,16 +111,10 @@ export default async function VenuesMarketplacePage() {
       <CustomerNavbar />
 
       <div className="flex min-h-0 w-full flex-1 overflow-hidden">
-        <div className="hidden shrink-0 lg:block">
-          <Sidebar venues={venues} />
-        </div>
-
-        <main className="h-full min-w-0 flex-1 overflow-y-auto bg-[linear-gradient(180deg,#F9FAFB_0%,#F8FAFC_100%)]">
-          <VenuesClient
-            initialVenues={venues}
-            favoriteVenueIds={[...favoriteVenueIds]}
-          />
-        </main>
+        <VenuesClient
+          initialVenues={venues}
+          favoriteVenueIds={[...favoriteVenueIds]}
+        />
       </div>
     </div>
   );

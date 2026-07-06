@@ -7,6 +7,8 @@ import {
   Heart,
   Loader2,
   MapPin,
+  PanelLeftClose,
+  PanelLeftOpen,
   Search,
   SlidersHorizontal,
   Sparkles,
@@ -663,6 +665,7 @@ export default function VenuesClient({
   const queryString = searchParams.toString();
   const smartSearch = useSmartVenueSearch();
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [desktopFiltersOpen, setDesktopFiltersOpen] = useState(true);
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiSearchResult, setAiSearchResult] =
     useState<SmartVenueSearchResponse | null>(null);
@@ -1004,7 +1007,7 @@ export default function VenuesClient({
   ].filter(Boolean);
 
   return (
-    <div className="h-full min-w-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8 xl:px-12">
+    <div className="flex h-full min-w-0 flex-1 overflow-hidden bg-[linear-gradient(180deg,#F9FAFB_0%,#F8FAFC_100%)]">
       {mobileFiltersOpen && (
         <div
           className="fixed inset-0 z-[60] lg:hidden"
@@ -1042,33 +1045,76 @@ export default function VenuesClient({
         </div>
       )}
 
-      <div className="flex flex-col gap-9">
-        <section className="max-w-full overflow-hidden rounded-[28px] border border-[#E5E7EB]/90 bg-white shadow-sm shadow-slate-200/60">
-          <div className="grid gap-6 p-5 sm:p-7">
-            <div className="min-w-0">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1.5 text-[#2563EB]">
-                <Sparkles className="h-3.5 w-3.5" />
+      <aside
+        className={[
+          "hidden h-full shrink-0 overflow-hidden transition-[width,opacity] duration-300 ease-out lg:block",
+          desktopFiltersOpen ? "w-[360px] opacity-100" : "w-0 opacity-0",
+        ].join(" ")}
+        aria-label="Venue filters"
+      >
+        <Sidebar venues={initialVenues} />
+      </aside>
 
-                <span className="text-[11px] font-extrabold uppercase tracking-[0.14em]">
-                  AI-powered venue discovery
-                </span>
+      <main className="h-full min-w-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8 xl:px-12">
+        <div className="flex flex-col gap-9">
+        <section className="max-w-full overflow-hidden rounded-[24px] border border-[#E5E7EB]/90 bg-white shadow-sm shadow-slate-200/60">
+          <div className="grid gap-5 p-5 sm:p-7">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="min-w-0">
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1.5 text-[#2563EB]">
+                  <Sparkles className="h-3.5 w-3.5" />
+
+                  <span className="text-[11px] font-extrabold uppercase tracking-[0.14em]">
+                    Venue marketplace
+                  </span>
+                </div>
+
+                <h1 className="max-w-3xl break-words text-3xl font-black leading-9 tracking-[-0.04em] text-slate-950 sm:text-4xl sm:leading-tight">
+                  Wedding & Event Venues
+                </h1>
+
+                <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-[#6B7280] sm:text-base">
+                  {filtered.length} venue{filtered.length === 1 ? "" : "s"} found
+                  matching your criteria. Search, filter, and compare spaces by
+                  location, pricing, capacity, and amenities.
+                </p>
               </div>
 
-              <h1 className="max-w-3xl break-words text-3xl font-black leading-9 tracking-[-0.04em] text-slate-950 sm:text-4xl sm:leading-tight">
-                Wedding & Event Venues
-              </h1>
+              <button
+                type="button"
+                onClick={() => setDesktopFiltersOpen((open) => !open)}
+                aria-pressed={desktopFiltersOpen}
+                className="hidden h-11 shrink-0 items-center justify-center gap-2 rounded-2xl border border-[#DBEAFE] bg-white px-4 text-sm font-extrabold text-[#1D4ED8] shadow-sm transition hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/20 lg:inline-flex"
+              >
+                {desktopFiltersOpen ? (
+                  <PanelLeftClose className="h-4 w-4" />
+                ) : (
+                  <PanelLeftOpen className="h-4 w-4" />
+                )}
 
-              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-[#6B7280] sm:text-base">
-                {filtered.length} venue{filtered.length === 1 ? "" : "s"} found
-                matching your criteria. Compare spaces, pricing, and capacity in
-                one polished marketplace.
-              </p>
+                {desktopFiltersOpen ? "Hide filters" : "Show filters"}
+
+                {activeFilterCount > 0 && (
+                  <span className="rounded-full bg-[#2563EB] px-2 py-0.5 text-xs text-white">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
             </div>
 
             <form
               onSubmit={handleSmartSearch}
-              className="grid gap-3 rounded-[24px] border border-[#DBEAFE] bg-[#F8FAFC] p-3 sm:p-4"
+              className="grid gap-3 rounded-[20px] border border-slate-200 bg-[#F9FAFB] p-3 sm:p-4"
             >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">
+                  Optional smart search
+                </p>
+                <p className="text-xs font-medium text-slate-500">
+                  Describe the event when filters are not enough.
+                </p>
+              </div>
+
               <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
                 <div className="relative min-w-0">
                   <label htmlFor="venue-ai-search" className="sr-only">
@@ -1084,8 +1130,8 @@ export default function VenuesClient({
                     value={aiPrompt}
                     onInput={(event) => setAiPrompt(event.currentTarget.value)}
                     onChange={(event) => setAiPrompt(event.target.value)}
-                    placeholder="Try: outdoor garden in Tagaytay for 150 guests under ₱250k with parking"
-                    className="h-12 w-full rounded-2xl border border-[#BFDBFE] bg-white pl-11 pr-4 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-[#93C5FD] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                    placeholder="Try: outdoor garden in Tagaytay for 150 guests under PHP 250k with parking"
+                    className="h-12 w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-[#93C5FD] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
                   />
                 </div>
 
@@ -1095,7 +1141,7 @@ export default function VenuesClient({
                     smartSearch.isPending ||
                     (!aiPrompt.trim() && activeFilterCount === 0)
                   }
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-5 text-sm font-extrabold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-[#BFDBFE] bg-white px-5 text-sm font-extrabold text-[#1D4ED8] shadow-sm transition hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {smartSearch.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -1356,7 +1402,8 @@ export default function VenuesClient({
             })}
           </div>
         )}
-      </div>
+        </div>
+      </main>
     </div>
   );
 }
