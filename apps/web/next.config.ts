@@ -23,6 +23,12 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      // Squarespace-hosted venue images
+      {
+        protocol: "https",
+        hostname: "images.squarespace-cdn.com",
+        pathname: "/**",
+      },
       // Google user images (profile photos)
       {
         protocol: "https",
