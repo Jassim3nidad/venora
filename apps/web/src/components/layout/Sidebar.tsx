@@ -507,10 +507,10 @@ export default function Sidebar({
   return (
     <aside
       className={[
-        "flex flex-shrink-0 flex-col bg-[#F9FAFB] shadow-sm",
+        "flex h-full flex-shrink-0 flex-col overflow-hidden bg-[#F9FAFB] shadow-sm",
         presentation === "mobile"
-          ? "h-full w-full rounded-t-[28px] border border-[#E5E7EB]"
-          : "h-full w-[360px] max-w-[360px] border-r border-[#E5E7EB]",
+          ? "w-full rounded-[24px] border border-[#E5E7EB]"
+          : "w-[360px] max-w-[360px] border-r border-[#E5E7EB]",
       ].join(" ")}
     >
       <div className="shrink-0 border-b border-[#E5E7EB] px-6 pb-4 pt-5">

@@ -1010,7 +1010,7 @@ export default function VenuesClient({
             className="absolute inset-0 bg-slate-950/35 backdrop-blur-[2px]"
           />
 
-          <div className="absolute inset-x-0 bottom-0 max-h-[88vh] px-3 pb-3">
+          <div className="absolute inset-x-0 bottom-0 flex max-h-[92dvh] flex-col px-3 pb-3">
             <div className="mb-2 flex justify-end">
               <button
                 type="button"
@@ -1022,11 +1022,13 @@ export default function VenuesClient({
               </button>
             </div>
 
-            <Sidebar
-              venues={initialVenues}
-              presentation="mobile"
-              onApply={() => setMobileFiltersOpen(false)}
-            />
+            <div className="min-h-0 flex-1 overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-2xl">
+              <Sidebar
+                venues={initialVenues}
+                presentation="mobile"
+                onApply={() => setMobileFiltersOpen(false)}
+              />
+            </div>
           </div>
         </div>
       )}
