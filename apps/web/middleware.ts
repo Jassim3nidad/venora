@@ -137,7 +137,17 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { pathname, search } = request.nextUrl;
+  const { pathname, searchParams, search } = request.nextUrl;
+
+  // Intercept Supabase Auth errors on the root (e.g., expired OTPs)
+  if (pathname === "/" && searchParams.get("error") === "access_denied") {
+    const errorDesc = searchParams.get("error_description") || "Your link is invalid or has expired.";
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/forgot-password";
+    redirectUrl.search = ""; // clear all existing search params
+    redirectUrl.searchParams.set("error", errorDesc);
+    return NextResponse.redirect(redirectUrl);
+  }
 
   const isVenueBookingPath = /^\/venues\/[^/]+\/book(?:\/)?$/.test(pathname);
 
