@@ -27,6 +27,7 @@ import BookingSidebar from "./BookingSidebar";
 import ReviewsSection from "./ReviewsSection";
 import VenueMap from "@/src/components/VenueMap";
 import { toggleFavoriteAction } from "../application/actions";
+import { isOptimizableImageSrc } from "@/src/lib/image-host";
 
 interface VenueDetailsProps {
   venue: any;
@@ -90,7 +91,7 @@ export default function VenueDetails({
   const amenitiesList = venue.venue_amenities?.map((va: any) => va.amenities?.name).filter(Boolean) ?? [];
 
   return (
-    <main className="container max-w-7xl mx-auto px-4 py-8 space-y-8 font-sans">
+    <main className="container max-w-7xl mx-auto px-4 pt-8 pb-28 lg:pb-8 space-y-8 font-sans">
       {/* Top Header info */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-2">
@@ -345,6 +346,7 @@ export default function VenueDetails({
                         src={imgUrl}
                         alt={item.name}
                         fill
+                        unoptimized={!isOptimizableImageSrc(imgUrl)}
                         sizes="(max-width: 768px) 100vw, 33vw"
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />

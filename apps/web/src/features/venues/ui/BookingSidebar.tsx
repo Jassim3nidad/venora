@@ -3,7 +3,20 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Users, Calendar as CalendarIcon, Info, HelpCircle, Check, Loader2 } from "lucide-react";
-import { Calendar, Button, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Separator } from "@venora/ui";
+import {
+  Calendar,
+  Button,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  Separator,
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogTitle,
+} from "@venora/ui";
 import { format } from "date-fns";
 import InquiryDialog from "./InquiryDialog";
 import { checkAvailabilityAction } from "../application/actions";
@@ -49,6 +62,7 @@ export default function BookingSidebar({
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
   const [availabilityStatus, setAvailabilityStatus] = useState<"idle" | "available" | "unavailable">("idle");
   const [overridePrice, setOverridePrice] = useState<number | null>(null);
+  const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
 
   const selectedPackage = packages.find((p) => p.id === selectedPackageId);
 
@@ -110,6 +124,7 @@ export default function BookingSidebar({
 
   const handleBook = () => {
     if (!selectedDate || availabilityStatus !== "available") return;
+    setMobileSheetOpen(false);
     const dateStr = format(selectedDate, "yyyy-MM-dd");
     router.push(
       `/venues/${venueId}/book?date=${dateStr}&guests=${guests}&packageId=${selectedPackageId}`
@@ -130,8 +145,8 @@ export default function BookingSidebar({
     }
   };
 
-  return (
-    <div className="glass border border-[var(--border-default)] rounded-3xl p-6 shadow-2xl sticky top-24 w-full">
+  const bookingForm = (
+    <>
       {/* Price section */}
       <div className="space-y-1">
         <div className="flex items-baseline gap-1">
@@ -319,6 +334,58 @@ export default function BookingSidebar({
         <Info className="h-3.5 w-3.5" />
         <span>You won't be charged yet</span>
       </div>
-    </div>
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop: sticky sidebar card */}
+      <div className="glass sticky top-24 hidden w-full rounded-3xl border border-[var(--border-default)] p-6 shadow-2xl lg:block">
+        {bookingForm}
+      </div>
+
+      {/* Mobile: Airbnb-style floating bar that reveals the full booking sheet */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border-default)] bg-[var(--bg-base)]/95 px-4 pb-[max(0.875rem,env(safe-area-inset-bottom))] pt-3.5 shadow-[0_-8px_24px_-8px_rgba(0,0,0,0.15)] backdrop-blur-lg lg:hidden">
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0 space-y-0.5">
+            <div className="flex items-baseline gap-1">
+              <span className="font-sora text-lg font-extrabold tracking-tight text-[var(--text-primary)]">
+                ₱{currentPrice.toLocaleString()}
+              </span>
+              <span className="text-xs font-medium text-[var(--text-muted)]">
+                / {getUnitText(currentUnit)}
+              </span>
+            </div>
+            {selectedDate ? (
+              <p className="truncate text-[11px] font-medium text-[var(--text-secondary)]">
+                {format(selectedDate, "MMM d, yyyy")} · {guests} guest{guests !== 1 ? "s" : ""}
+              </p>
+            ) : (
+              <p className="text-[11px] font-medium text-[var(--text-muted)]">Add a date to see availability</p>
+            )}
+          </div>
+
+          <Dialog open={mobileSheetOpen} onOpenChange={setMobileSheetOpen}>
+            <DialogTrigger asChild>
+              <Button className="h-12 shrink-0 rounded-2xl bg-[var(--color-brand-600)] px-7 font-bold text-white shadow-lg shadow-[var(--color-brand-500)]/20 hover:bg-[var(--color-brand-700)]">
+                Reserve
+              </Button>
+            </DialogTrigger>
+            <DialogContent
+              className={
+                "fixed inset-x-0 bottom-0 left-0 right-0 top-auto z-50 grid max-h-[88vh] w-full max-w-full " +
+                "translate-x-0 translate-y-0 gap-0 overflow-y-auto rounded-t-3xl rounded-b-none border-x-0 border-b-0 p-0 " +
+                "pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-2xl " +
+                "data-[state=open]:animate-sheet-in data-[state=closed]:animate-sheet-out"
+              }
+            >
+              <DialogTitle className="sr-only">Reserve {venueName}</DialogTitle>
+              <div className="mx-auto mt-2.5 h-1.5 w-12 shrink-0 rounded-full bg-[var(--border-default)]" />
+              <div className="px-6 pb-2 pt-4">{bookingForm}</div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+    </>
   );
 }

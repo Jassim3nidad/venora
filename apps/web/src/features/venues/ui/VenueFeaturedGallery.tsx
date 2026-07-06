@@ -11,6 +11,7 @@ import {
   sortVenueMedia,
 } from "../utils/venue-media";
 import VenueGalleryPlaceholder from "./VenueGalleryPlaceholder";
+import { isOptimizableImageSrc } from "@/src/lib/image-host";
 
 interface VenueFeaturedGalleryProps {
   media: VenueMedia[];
@@ -63,6 +64,7 @@ export default function VenueFeaturedGallery({
             alt={featured.alt_text || venueName}
             fill
             priority
+            unoptimized={!isOptimizableImageSrc(getVenueMediaUrl(featured.storage_path))}
             sizes="100vw"
             className="object-cover"
           />
@@ -88,6 +90,7 @@ export default function VenueFeaturedGallery({
                   src={getVenueMediaUrl(item.storage_path)}
                   alt={item.alt_text || `${venueName} photo ${index + 1}`}
                   fill
+                  unoptimized={!isOptimizableImageSrc(getVenueMediaUrl(item.storage_path))}
                   sizes="80px"
                   className="object-cover"
                 />
@@ -120,6 +123,7 @@ export default function VenueFeaturedGallery({
             alt={featured.alt_text || venueName}
             fill
             priority
+            unoptimized={!isOptimizableImageSrc(getVenueMediaUrl(featured.storage_path))}
             sizes="50vw"
             className="object-cover transition-transform duration-500 hover:scale-[1.03]"
           />
@@ -150,6 +154,7 @@ export default function VenueFeaturedGallery({
                   src={getVenueMediaUrl(item.storage_path)}
                   alt={item.alt_text || `${venueName} photo`}
                   fill
+                  unoptimized={!isOptimizableImageSrc(getVenueMediaUrl(item.storage_path))}
                   sizes="25vw"
                   className="object-cover transition-transform duration-500 hover:scale-[1.05]"
                 />
