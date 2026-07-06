@@ -507,7 +507,7 @@ export default function Sidebar({
   return (
     <aside
       className={[
-        "flex h-full flex-shrink-0 flex-col overflow-hidden bg-[#F9FAFB] shadow-sm",
+        "flex h-full max-h-full flex-shrink-0 flex-col overflow-hidden bg-[#F9FAFB] shadow-sm",
         presentation === "mobile"
           ? "w-full rounded-[24px] border border-[#E5E7EB]"
           : "w-[360px] max-w-[360px] border-r border-[#E5E7EB]",
@@ -549,7 +549,7 @@ export default function Sidebar({
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [&>section:not(:last-child)]:mb-5">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [&>section:not(:last-child)]:mb-5">
         <section>
           <SectionTitle icon={MapPin} title="Location" />
 
@@ -876,7 +876,7 @@ export default function Sidebar({
         </section>
       </div>
 
-      <div className="shrink-0 border-t border-[#E5E7EB] bg-[#F9FAFB] px-6 py-4 shadow-[0_-12px_30px_rgba(15,23,42,0.06)]">
+      <div className="sticky bottom-0 z-10 shrink-0 border-t border-[#E5E7EB] bg-[#F9FAFB] px-6 py-4 shadow-[0_-12px_30px_rgba(15,23,42,0.06)]">
         <button
           type="button"
           onClick={onApply}
