@@ -1,9 +1,10 @@
 ﻿import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { Bell, HelpCircle, LogOut, Menu } from "lucide-react";
+import { Bell, HelpCircle, LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import VenueDetails from "@/src/features/venues/ui/VenueDetails";
+import VenuesMobileMenu from "@/components/layout/VenuesMobileMenu";
 import {
   getNearbyResearchVenueDetails,
   getPublicResearchReviews,
@@ -130,39 +131,7 @@ export default async function VenueDetailPage({ params }: Props) {
             Venora
           </Link>
 
-          <details className="ml-auto md:hidden relative">
-            <summary
-              role="button"
-              aria-label="Open menu"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#1D4ED8] transition hover:bg-[#EFF6FF]"
-            >
-              <Menu className="h-5 w-5" />
-            </summary>
-
-            <div className="absolute right-0 mt-2 w-56 rounded-md border bg-white p-2 shadow-lg z-50">
-              <Link href="/venues" className="block w-full rounded px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                Browse
-              </Link>
-
-              <Link href="/bookings" className="mt-1 block w-full rounded px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                Bookings
-              </Link>
-
-              <Link href="/favorites" className="mt-1 block w-full rounded px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                Favorites
-              </Link>
-
-              <Link href="/account" className="mt-1 block w-full rounded px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                Account
-              </Link>
-
-              <form action={logoutAction} className="mt-2">
-                <button type="submit" className="w-full rounded px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                  Logout
-                </button>
-              </form>
-            </div>
-          </details>
+          <VenuesMobileMenu logoutAction={logoutAction} />
 
           <nav
             aria-label="Primary navigation"

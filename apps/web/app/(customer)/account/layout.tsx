@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { ArrowLeft, LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import AccountNav from "./_components/AccountNav";
+import AccountMobileMenu from "./_components/AccountMobileMenu";
 
 export const metadata: Metadata = {
   title: {
@@ -47,8 +48,14 @@ export default async function AccountLayout({
         <div className="absolute left-[-120px] top-[-120px] -z-10 h-[320px] w-[320px] rounded-full bg-[#2563EB]/20 blur-3xl" />
         <div className="absolute right-[-140px] top-[40px] -z-10 h-[300px] w-[300px] rounded-full bg-[#DBEAFE]/20 blur-3xl" />
 
-        <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          {/* Mobile: compact bar with burger menu (categories + back/sign out live in the drawer) */}
+          <div className="mb-6 lg:hidden">
+            <AccountMobileMenu />
+          </div>
+
+          {/* Desktop: full back/sign out row */}
+          <div className="mb-8 hidden lg:flex lg:items-center lg:justify-between lg:gap-4">
             <Link
               href="/venues"
               className="inline-flex w-fit items-center gap-2 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-bold text-[#6B7280] shadow-sm transition hover:border-[#2563EB]/50 hover:bg-[#EFF6FF] hover:text-[#2563EB]"
@@ -72,11 +79,11 @@ export default async function AccountLayout({
                 Venora account center
               </div>
 
-              <h1 className="max-w-3xl text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl">
+              <h1 className="max-w-3xl text-2xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-4xl lg:text-5xl">
                 Account Center
               </h1>
 
-              <p className="mt-4 max-w-2xl text-sm font-medium leading-6 text-slate-500 sm:text-base">
+              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-slate-500 sm:mt-4 sm:text-base">
                 Manage your personal information, payments, transaction
                 history, and privacy preferences in one place.
               </p>
