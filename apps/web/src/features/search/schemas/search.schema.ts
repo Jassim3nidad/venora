@@ -102,6 +102,14 @@ export const smartVenueSearchVenueSchema = z.object({
 export const smartVenueSearchResponseSchema = z.object({
   venues: z.array(smartVenueSearchVenueSchema),
   parsedFilters: smartVenueSearchIntentSchema,
+  searchParameters: z
+    .object({
+      max_price: z.number().nullable(),
+      location: z.string().nullable(),
+      venue_type: z.string().nullable(),
+      keywords: z.array(z.string()),
+    })
+    .optional(),
   fallbackReason: z.string().nullable().optional(),
   embeddedVenueCount: z.number().int().nonnegative().optional(),
 });

@@ -11,6 +11,9 @@ import {
   Star,
   UserRound,
 } from "lucide-react";
+import { getMarketplaceResearchVenues } from "@/src/features/venues/data/research-venues";
+
+const dashboardVenues = getMarketplaceResearchVenues().slice(0, 3);
 
 const quickStats = [
   {
@@ -42,44 +45,31 @@ const quickStats = [
 const bookingRows = [
   {
     event: "Santos-Reyes Wedding",
-    venue: "The Glass Garden",
+    venue: dashboardVenues[0]?.name ?? "Venue",
     date: "Feb 18, 2026",
     status: "Confirmed",
   },
   {
     event: "Birthday Celebration",
-    venue: "Rosewood Pavilion",
+    venue: dashboardVenues[1]?.name ?? "Venue",
     date: "Mar 8, 2026",
     status: "Pending",
   },
   {
     event: "Corporate Seminar",
-    venue: "Azure Grand Hall",
+    venue: dashboardVenues[2]?.name ?? "Venue",
     date: "Mar 12, 2026",
     status: "Inquiry Sent",
   },
 ];
 
-const savedVenues = [
-  {
-    name: "The Glass Garden",
-    location: "Tagaytay, Cavite",
-    price: "Starts at ₱120,000",
-    rating: "4.9",
-  },
-  {
-    name: "Azure Grand Hall",
-    location: "Makati City",
-    price: "Starts at ₱85,000",
-    rating: "4.8",
-  },
-  {
-    name: "Rosewood Pavilion",
-    location: "Batangas",
-    price: "Starts at ₱95,000",
-    rating: "4.7",
-  },
-];
+const savedVenues = dashboardVenues.map((venue) => ({
+  name: venue.name,
+  location: venue.location,
+  price: `Starts at ${venue.price}`,
+  rating: venue.rating ? venue.rating.toFixed(1) : "New",
+  image: venue.image,
+}));
 
 const navItems = [
   {
@@ -430,7 +420,11 @@ export default function CustomerDashboardPage() {
                   key={venue.name}
                   className="rounded-[16px] border border-[#E5E7EB] bg-[#F9FAFB] p-[18px]"
                 >
-                  <div className="mb-[14px] h-[110px] rounded-[14px] bg-[#EFF6FF]" />
+                  <img
+                    src={venue.image}
+                    alt={venue.name}
+                    className="mb-[14px] h-[110px] w-full rounded-[14px] object-cover"
+                  />
 
                   <h3 className="text-[16px] font-extrabold leading-[22px] text-[#111827]">
                     {venue.name}

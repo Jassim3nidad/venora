@@ -39,7 +39,6 @@ import {
   TabsTrigger,
   TabsContent,
   Avatar,
-  AvatarImage,
   AvatarFallback,
   Separator,
   ToastProvider,
@@ -322,7 +321,6 @@ export default function DesignSystemPage() {
                   </CardHeader>
                   <CardContent className="flex items-center gap-4">
                     <Avatar>
-                      <AvatarImage src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&h=80" />
                       <AvatarFallback>JT</AvatarFallback>
                     </Avatar>
                     <Avatar>

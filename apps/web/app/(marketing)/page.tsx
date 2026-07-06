@@ -13,48 +13,37 @@ import {
   Users,
   X,
 } from "lucide-react";
+import {
+  getMarketplaceResearchVenues,
+  researchVenueImageCount,
+  researchVenues,
+} from "@/src/features/venues/data/research-venues";
 
-const featuredVenues = [
-  {
-    name: "The Foundry Loft",
-    location: "Makati City",
-    price: "₱85,000",
-    rating: "4.8",
-    category: "Industrial",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAFJ3wQrOI59wJRDVjDuhVHBym1PFzFZt8qVSJ54ke-PoJFVkYVfcgghztWHyEW-5PvBNYU9Pe94qBrKyweMDyTdmwFB1VFSlZLqzLxDZ2OAViAcnGoUs4G0SfbcmZnolW-g0yYDRbpr3pgMs4VNJFzTvDqwYDlse85um56CwlVDsvJch6I4oiZjn2LNDTQ0-1BWlnAJYV4V_cwswL17qivzVQYF60Cu82Z7g3pXCTSnAh5rSBChJg_Cg",
-    alt: "A bright, airy industrial loft event space with exposed brick, large windows, and polished concrete floors.",
-    filledHeart: true,
-  },
-  {
-    name: "Rosewood Pavilion",
-    location: "Antipolo",
-    price: "₱150,000",
-    rating: "4.9",
-    category: "Outdoor",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDByzvwqt-vjG2KfX9hYLE_7lBbX6K2up1Q0Oa9xn97AiQf9SCN6LcZckrig72KBpTWHMMHhfGFtiep2ukWGoG2dAyorFgByk0-XNqRUd08rneXGoMP9ilE3OeSgXmFy6BBCkDT7NRAW8HFUaUTrA6h_OfBflVjvUYFs492DvW8dK509vCGA41l9HS--XuX6g17IUFw4T9M8Bw7m7_beB1kHLXhb6BTp7fX8obrHQJXFnXVjzOwn9JxZw",
-    alt: "An elegant outdoor pavilion with a manicured lawn, white tent structure, and warm string lights.",
-    filledHeart: false,
-  },
-  {
-    name: "The Glasshouse Estate",
-    location: "Tagaytay",
-    price: "₱120,000",
-    rating: "4.9",
-    category: "Estate",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAHn1I2QEWfbx_gmkoGeOwk9N4C7-C2T-m6T8Ip-wDfM0BsKS7DYzHoLOEUty1bvix6WA5sRtdAz7ZpWb7tcF0L3vcPRbafYejBJXKX7gvJq9BbtvzFfx6ZziFVQbqRIV9pydLLbsxeQJpiAnlltaSdfyVQy6RZcgUXNuV5HqlYn8ZXLh7BhsetSM3jabmu5UjpQZGF31WnMxSj95SqUA6boo4rJ4Ss9D4J9YfOS2X3nQGtuTfJfVVy9Q",
-    alt: "A luxurious modern glasshouse estate venue surrounded by greenery in Tagaytay.",
-    filledHeart: false,
-  },
-];
+const featuredVenues = getMarketplaceResearchVenues()
+  .slice(0, 3)
+  .map((venue, index) => ({
+    name: venue.name,
+    slug: venue.slug,
+    location: venue.location,
+    price: venue.price,
+    rating: venue.rating ? venue.rating.toFixed(1) : "New",
+    category: venue.category,
+    image: venue.image,
+    alt: `${venue.name} in ${venue.location}`,
+    capacity: venue.capacity,
+    filledHeart: index === 0,
+  }));
+
+const heroVenue = featuredVenues[0]!;
+const provinceCount = new Set(
+  researchVenues.map((venue) => venue.location.province),
+).size;
 
 const stats = [
-  { value: "500+", label: "Curated Venues" },
-  { value: "4.8", label: "Average Rating" },
-  { value: "24/7", label: "Planning Support" },
-  { value: "100%", label: "Verified Partners" },
+  { value: String(researchVenues.length), label: "Research Venues" },
+  { value: String(provinceCount), label: "Regions Covered" },
+  { value: String(researchVenueImageCount), label: "Linked Images" },
+  { value: "100%", label: "Source Checked" },
 ];
 
 const desktopNavLinks = [
@@ -287,22 +276,22 @@ export default function MarketingHomePage() {
                 <div className="relative mb-4 h-64 w-full overflow-hidden rounded-[22px]">
                   <img
                     className="h-full w-full object-cover"
-                    alt="A stunning modern glasshouse estate venue set among lush greenery in Tagaytay."
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7HE3d2-uKCIMbAq9bQFg1CLg2QepJelmFZ2eWrGjz5cnOO6K72UKsfIcD18IVbvomw79WofVwHkZWUxX9s6IUSUJbtrv4hAJrk02qGMsjiFpZldDlUz9kw_1dg8LDGb4Ud82QI9ovXS1UQZL4d7g9lxJLROg6hRG-QeWk8C6xLwQqf6d-9wB9qKwX2lZZuSob8vy_KQY1zLZY2kCpakrmp0B8_M-LcM50UrA41QdfkmAOo8Lv8wwv1g"
+                    alt={heroVenue.alt}
+                    src={heroVenue.image}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent" />
                   <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full bg-white/90 px-3 py-1.5 text-xs font-extrabold text-[#111827] shadow-sm backdrop-blur">
                     <Star className="h-3.5 w-3.5 fill-[#F59E0B] text-[#F59E0B]" />
-                    4.9
+                    {heroVenue.rating}
                   </div>
                 </div>
 
                 <h3 className="mb-1 text-xl font-black tracking-[-0.03em] text-[#111827]">
-                  The Glasshouse Estate
+                  {heroVenue.name}
                 </h3>
                 <p className="mb-4 flex items-center gap-1.5 text-sm font-semibold text-[#6B7280]">
                   <MapPin className="h-4 w-4" />
-                  Tagaytay
+                  {heroVenue.location}
                 </p>
 
                 <div className="flex items-end justify-between border-t border-slate-100 pt-4">
@@ -311,12 +300,12 @@ export default function MarketingHomePage() {
                       Starting at
                     </p>
                     <p className="text-lg font-black text-[#111827]">
-                      ₱120,000
+                      {heroVenue.price}
                     </p>
                   </div>
                   <div className="flex items-center gap-1.5 rounded-2xl bg-slate-100 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.08em] text-[#6B7280]">
                     <Users className="h-3.5 w-3.5" />
-                    300 pax
+                    {heroVenue.capacity}
                   </div>
                 </div>
               </div>
