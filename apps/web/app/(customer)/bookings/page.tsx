@@ -1,84 +1,461 @@
 import type { Metadata } from "next";
-import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import {
+  ArrowLeft,
+  CalendarDays,
+  CheckCircle2,
+  Clock3,
+  MapPin,
+  Search,
+  Sparkles,
+  TicketCheck,
+  XCircle,
+} from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = { title: "My Bookings" };
-
-const STATUS_COLORS: Record<string, string> = {
-  pending:   "hsl(45 96% 54%)",
-  approved:  "hsl(142 71% 45%)",
-  declined:  "hsl(0 72% 51%)",
-  cancelled: "hsl(0 72% 51%)",
-  completed: "hsl(217 91% 60%)",
-  expired:   "hsl(217 70% 47%)",
+export const metadata: Metadata = {
+  title: "My Bookings | Venora",
 };
 
-export default async function BookingsPage() {
-  const supabase = (await createClient()) as any;
+export const dynamic = "force-dynamic";
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+type BookingStatus =
+  | "pending"
+  | "confirmed"
+  | "approved"
+  | "declined"
+  | "cancelled"
+  | "completed"
+  | string;
 
-  const { data: bookings } = await supabase
-    .from("bookings")
-    .select("id, event_date, status, total_amount, venues(name, slug)")
-    .eq("customer_id", user.id)
-    .order("event_date", { ascending: false });
+type VenueRecord = {
+  id?: string;
+  name?: string | null;
+  slug?: string | null;
+  city?: string | null;
+  province?: string | null;
+  venue_images?: { storage_path?: string | null }[] | null;
+};
+
+type BookingRecord = {
+  id: string;
+  status?: BookingStatus | null;
+  event_date?: string | null;
+  booking_date?: string | null;
+  start_date?: string | null;
+  created_at?: string | null;
+  event_type?: string | null;
+  guest_count?: number | null;
+  total_amount?: number | null;
+  estimated_total?: number | null;
+  notes?: string | null;
+  venues?: VenueRecord | VenueRecord[] | null;
+};
+
+const statusStyles: Record<
+  string,
+  {
+    label: string;
+    icon: typeof Clock3;
+    className: string;
+  }
+> = {
+  pending: {
+    label: "Pending",
+    icon: Clock3,
+    className: "border-amber-200 bg-amber-50 text-amber-700",
+  },
+  confirmed: {
+    label: "Confirmed",
+    icon: CheckCircle2,
+    className: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  },
+  approved: {
+    label: "Approved",
+    icon: CheckCircle2,
+    className: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  },
+  completed: {
+    label: "Completed",
+    icon: CheckCircle2,
+    className: "border-blue-200 bg-blue-50 text-blue-700",
+  },
+  declined: {
+    label: "Declined",
+    icon: XCircle,
+    className: "border-red-200 bg-red-50 text-red-700",
+  },
+  cancelled: {
+    label: "Cancelled",
+    icon: XCircle,
+    className: "border-red-200 bg-red-50 text-red-700",
+  },
+};
+
+function formatDate(value?: string | null) {
+  if (!value) return "Date not set";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Date not set";
+  }
+
+  return new Intl.DateTimeFormat("en-PH", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
+
+function formatCurrency(value?: number | null) {
+  if (!value || !Number.isFinite(value)) {
+    return "Price pending";
+  }
+
+  return `₱${value.toLocaleString("en-PH")}`;
+}
+
+function getVenue(booking: BookingRecord) {
+  if (Array.isArray(booking.venues)) {
+    return booking.venues[0];
+  }
+
+  return booking.venues;
+}
+
+function getVenueLocation(venue?: VenueRecord | null) {
+  if (!venue) return "Location unavailable";
+
+  if (venue.city && venue.province) {
+    return `${venue.city}, ${venue.province}`;
+  }
+
+  return venue.city || venue.province || "Location unavailable";
+}
+
+function buildVenueImageUrl(storagePath?: string | null) {
+  if (!storagePath) {
+    return "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=80";
+  }
+
+  if (storagePath.startsWith("http")) {
+    return storagePath;
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+  if (!supabaseUrl) {
+    return "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=80";
+  }
+
+  return `${supabaseUrl}/storage/v1/object/public/venue-images/${storagePath}`;
+}
+
+async function getCustomerBookings(userId: string) {
+  const supabase = await createClient();
+
+  const selectQuery = `
+    *,
+    venues (
+      id,
+      name,
+      slug,
+      city,
+      province,
+      venue_images (
+        storage_path
+      )
+    )
+  `;
+
+  let { data, error } = await (supabase.from("bookings") as any)
+    .select(selectQuery)
+    .eq("customer_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    const fallback = await (supabase.from("bookings") as any)
+      .select(selectQuery)
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    data = fallback.data;
+    error = fallback.error;
+  }
+
+  if (error) {
+    console.error("[bookings/page] Supabase fetch error:", error.message);
+    return [];
+  }
+
+  return (data ?? []) as BookingRecord[];
+}
+
+export default async function CustomerBookingsPage() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login?redirectTo=/bookings");
+  }
+
+  const bookings = await getCustomerBookings(user.id);
+
+  const pendingCount = bookings.filter(
+    (booking) => booking.status === "pending",
+  ).length;
+
+  const confirmedCount = bookings.filter((booking) =>
+    ["confirmed", "approved"].includes(String(booking.status)),
+  ).length;
+
+  const completedCount = bookings.filter(
+    (booking) => booking.status === "completed",
+  ).length;
 
   return (
-    <main className="container" style={{ paddingBlock: "2rem" }}>
-      <h1 style={{ fontFamily: "var(--font-sora, sans-serif)", fontSize: "1.75rem", fontWeight: 700, marginBottom: "1.5rem" }}>
-        My Bookings
-      </h1>
+    <main className="min-h-screen bg-[#F8FAFC] text-[#111827]">
+      <section className="relative overflow-hidden border-b border-[#E5E7EB] bg-[#F9FAFB]">
+        <div className="absolute left-[-120px] top-[-120px] h-[320px] w-[320px] rounded-full bg-[#2563EB]/15 blur-3xl" />
+        <div className="absolute right-[-140px] top-[60px] h-[320px] w-[320px] rounded-full bg-[#37BCF1]/15 blur-3xl" />
 
-      {!bookings || bookings.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "4rem", color: "var(--text-muted)" }}>
-          <div style={{ fontSize: "3rem" }}>📅</div>
-          <p style={{ marginTop: "1rem" }}>No bookings yet.</p>
-          <a href="/venues" style={{ color: "hsl(217 70% 47%)", marginTop: "0.5rem", display: "block" }}>Browse venues →</a>
-        </div>
-      ) : (
-        <div id="bookings-list" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          {bookings.map((b: any) => (
-            <div
-              key={b.id}
-              id={`booking-row-${b.id}`}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "1.25rem 1.5rem",
-                borderRadius: "0.875rem",
-                border: "1px solid var(--border-default)",
-                background: "var(--bg-subtle)",
-              }}
+        <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <Link
+              href="/venues"
+              className="inline-flex w-fit items-center gap-2 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-bold text-[#6B7280] shadow-sm transition hover:border-[#2563EB]/50 hover:bg-[#EFF6FF] hover:text-[#2563EB]"
             >
-              <div>
-                <div style={{ fontWeight: 600, marginBottom: "0.25rem" }}>
-                  {(b.venues as { name: string } | null)?.name}
+              <ArrowLeft className="h-4 w-4" />
+              Back to Venues
+            </Link>
+
+            <Link
+              href="/account"
+              className="inline-flex w-fit items-center gap-2 rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-4 py-2 text-sm font-bold text-[#2563EB] shadow-sm transition hover:border-[#2563EB]/50 hover:bg-white"
+            >
+              Account Settings
+            </Link>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-end">
+            <div>
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#2563EB]">
+                <Sparkles className="h-3.5 w-3.5" />
+                Venora booking center
+              </div>
+
+              <h1 className="max-w-3xl text-4xl font-black leading-tight tracking-[-0.05em] text-[#111827] sm:text-5xl">
+                Track every venue booking request in one place.
+              </h1>
+
+              <p className="mt-4 max-w-2xl text-sm font-medium leading-6 text-[#6B7280] sm:text-base">
+                Review pending requests, confirmed reservations, and completed
+                venue bookings connected to your Venora account.
+              </p>
+            </div>
+
+            <div className="rounded-[28px] border border-[#E5E7EB] bg-white p-5 shadow-xl shadow-slate-200/60">
+              <div className="grid grid-cols-3 gap-3">
+                <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
+                  <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">
+                    Total
+                  </p>
+                  <p className="mt-2 text-2xl font-black text-[#111827]">
+                    {bookings.length}
+                  </p>
                 </div>
-                <div style={{ fontSize: "0.875rem", color: "var(--text-secondary)" }}>
-                  {new Date(b.event_date).toLocaleDateString("en-PH", { dateStyle: "long" })}
+
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                  <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-amber-700">
+                    Pending
+                  </p>
+                  <p className="mt-2 text-2xl font-black text-amber-800">
+                    {pendingCount}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                  <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-emerald-700">
+                    Active
+                  </p>
+                  <p className="mt-2 text-2xl font-black text-emerald-800">
+                    {confirmedCount}
+                  </p>
                 </div>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
-                <span style={{ fontWeight: 700 }}>₱{b.total_amount?.toLocaleString()}</span>
-                <span style={{
-                  padding: "0.2rem 0.875rem",
-                  borderRadius: "999px",
-                  background: `${STATUS_COLORS[b.status] ?? "hsl(217 70% 47%)"}20`,
-                  color: STATUS_COLORS[b.status] ?? "hsl(217 70% 47%)",
-                  fontSize: "0.75rem",
-                  fontWeight: 600,
-                  textTransform: "capitalize",
-                }}>
-                  {b.status}
-                </span>
+
+              <div className="mt-3 rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
+                <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">
+                  Completed bookings
+                </p>
+                <p className="mt-1 text-xl font-black text-[#111827]">
+                  {completedCount}
+                </p>
               </div>
             </div>
-          ))}
+          </div>
         </div>
-      )}
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        {bookings.length > 0 ? (
+          <div className="grid gap-5">
+            {bookings.map((booking) => {
+              const venue = getVenue(booking);
+              const statusKey = String(booking.status ?? "pending");
+              const status = statusStyles[statusKey] ?? statusStyles.pending;
+              const StatusIcon = status.icon;
+
+              const eventDate =
+                booking.event_date ||
+                booking.booking_date ||
+                booking.start_date ||
+                booking.created_at;
+
+              const venueImage =
+                venue?.venue_images?.[0]?.storage_path ?? undefined;
+
+              return (
+                <article
+                  key={booking.id}
+                  className="overflow-hidden rounded-[28px] border border-[#E5E7EB] bg-white shadow-xl shadow-slate-200/50"
+                >
+                  <div className="grid gap-0 lg:grid-cols-[260px_minmax(0,1fr)]">
+                    <div className="relative h-56 overflow-hidden bg-[#EFF6FF] lg:h-full">
+                      <img
+                        src={buildVenueImageUrl(venueImage)}
+                        alt={venue?.name ?? "Venue booking"}
+                        className="h-full w-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/35 to-transparent lg:bg-gradient-to-r" />
+                    </div>
+
+                    <div className="p-5 sm:p-6">
+                      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                        <div>
+                          <div
+                            className={[
+                              "mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-extrabold uppercase tracking-[0.12em]",
+                              status.className,
+                            ].join(" ")}
+                          >
+                            <StatusIcon className="h-3.5 w-3.5" />
+                            {status.label}
+                          </div>
+
+                          <h2 className="text-2xl font-black tracking-[-0.04em] text-[#111827]">
+                            {venue?.name ?? "Untitled Venue"}
+                          </h2>
+
+                          <div className="mt-3 flex flex-wrap gap-3 text-sm font-semibold text-[#6B7280]">
+                            <span className="inline-flex items-center gap-2">
+                              <MapPin className="h-4 w-4 text-[#2563EB]" />
+                              {getVenueLocation(venue)}
+                            </span>
+
+                            <span className="inline-flex items-center gap-2">
+                              <CalendarDays className="h-4 w-4 text-[#2563EB]" />
+                              {formatDate(eventDate)}
+                            </span>
+
+                            {booking.guest_count ? (
+                              <span className="inline-flex items-center gap-2">
+                                <TicketCheck className="h-4 w-4 text-[#2563EB]" />
+                                {booking.guest_count} guests
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
+
+                        <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 lg:text-right">
+                          <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">
+                            Estimated total
+                          </p>
+                          <p className="mt-1 text-lg font-black text-[#111827]">
+                            {formatCurrency(
+                              booking.total_amount ?? booking.estimated_total,
+                            )}
+                          </p>
+                        </div>
+                      </div>
+
+                      {booking.event_type || booking.notes ? (
+                        <div className="mt-5 rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
+                          {booking.event_type ? (
+                            <p className="text-sm font-bold text-[#111827]">
+                              Event type:{" "}
+                              <span className="font-semibold text-[#6B7280]">
+                                {booking.event_type}
+                              </span>
+                            </p>
+                          ) : null}
+
+                          {booking.notes ? (
+                            <p className="mt-2 text-sm font-medium leading-6 text-[#6B7280]">
+                              {booking.notes}
+                            </p>
+                          ) : null}
+                        </div>
+                      ) : null}
+
+                      <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                        {venue?.slug ? (
+                          <Link
+                            href={`/venues/${venue.slug}`}
+                            className="inline-flex h-11 items-center justify-center rounded-2xl bg-[#2563EB] px-5 text-sm font-extrabold text-white shadow-lg shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8]"
+                          >
+                            View Venue
+                          </Link>
+                        ) : null}
+
+                        <Link
+                          href="/venues"
+                          className="inline-flex h-11 items-center justify-center rounded-2xl border border-[#E5E7EB] bg-white px-5 text-sm font-extrabold text-[#111827] shadow-sm transition hover:border-[#2563EB]/50 hover:bg-[#EFF6FF] hover:text-[#2563EB]"
+                        >
+                          Browse More Venues
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="overflow-hidden rounded-[32px] border border-[#E5E7EB] bg-white p-8 text-center shadow-xl shadow-slate-200/60">
+            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-[#EFF6FF] text-[#2563EB]">
+              <Search className="h-7 w-7" />
+            </div>
+
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
+              No bookings yet
+            </p>
+
+            <h2 className="mt-2 text-3xl font-black tracking-[-0.05em] text-[#111827]">
+              Start with your first venue request.
+            </h2>
+
+            <p className="mx-auto mt-3 max-w-md text-sm font-medium leading-6 text-[#6B7280]">
+              Browse Venora&apos;s curated venues, choose the right space, and
+              submit a booking request when you are ready.
+            </p>
+
+            <div className="mt-6 flex justify-center">
+              <Link
+                href="/venues"
+                className="inline-flex h-12 items-center justify-center rounded-2xl bg-[#2563EB] px-6 text-sm font-extrabold text-white shadow-lg shadow-[#2563EB]/25 transition hover:bg-[#1D4ED8]"
+              >
+                Browse Venues
+              </Link>
+            </div>
+          </div>
+        )}
+      </section>
     </main>
   );
 }

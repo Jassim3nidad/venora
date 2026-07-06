@@ -44,6 +44,11 @@ const PROTECTED_PREFIXES = [
 // Routes that require specific roles
 const ROLE_GUARDS: Array<{ prefix: string; roles: UserRole[] }> = [
   {
+  prefix: "/favorites",
+  roles: ["customer"],
+  }, 
+
+  {
   prefix: "/bookings",
   roles: ["customer", "admin"],
   }, 
