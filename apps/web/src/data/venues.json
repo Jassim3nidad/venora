@@ -1,0 +1,2310 @@
+[
+  {
+    "id": "758c437f-6a9c-434a-a5aa-e6290787bd7f",
+    "name": "The Blue Leaf Filipinas",
+    "slug": "the-blue-leaf-filipinas",
+    "category": "Garden Event Venue",
+    "event_types_supported": [
+      "Wedding",
+      "Debut",
+      "Corporate Event",
+      "Birthday",
+      "Anniversary"
+    ],
+    "short_description": "Avant-garde Filipino-architecture garden event venue in Aseana City with a roof-deck ceremony option and lush surrounding greenery.",
+    "full_description": "The Blue Leaf Filipinas is one of Metro Manila's most established wedding and event venues, known for its distinctive avant-garde Filipino architecture set among landscaped gardens and waterfalls in Aseana City, Parañaque. The venue offers a main garden for cocktail hours, a high-ceiling indoor hall for receptions, and a roof deck for outdoor ceremonies, accommodating events from 50 to over 1,000 guests across its function spaces.",
+    "location": {
+      "province": "Metro Manila",
+      "city": "Parañaque City",
+      "address": "1702 Belle Avenue, Aseana City, Tambo, Parañaque City, Metro Manila",
+      "postal_code": "1701",
+      "coordinates": {
+        "latitude": 14.5075,
+        "longitude": 120.9847
+      },
+      "google_maps_url": "https://www.google.com/maps/search/?api=1&query=14.5075,120.9847"
+    },
+    "contact": {
+      "official_website": "https://www.theblueleaf.com/",
+      "facebook": "https://www.facebook.com/theblueleaffilipinas",
+      "instagram": null,
+      "email": "filipinas@theblueleaf.com.ph",
+      "phone": "+63 917 838 2583",
+      "business_hours": "Not independently verified — contact venue directly to confirm current hours"
+    },
+    "capacity": {
+      "minimum_guests": 50,
+      "maximum_guests": 1000,
+      "indoor_outdoor": "Both",
+      "number_of_function_rooms": 3
+    },
+    "features": {
+      "parking_capacity": "Available on-site — exact vehicle count not publicly listed",
+      "wheelchair_accessible": "Not publicly confirmed",
+      "pet_friendly": "Not publicly confirmed",
+      "air_conditioned": true,
+      "generator_available": "Not publicly confirmed",
+      "wifi_available": true,
+      "swimming_pool": false,
+      "garden": true,
+      "beachfront": false,
+      "church_nearby": false,
+      "overnight_accommodation": false,
+      "bridal_suite": true,
+      "changing_room": true,
+      "stage": true,
+      "led_wall": true,
+      "projector": true,
+      "sound_system": true,
+      "lighting_system": true,
+      "tables_included": true,
+      "chairs_included": true,
+      "catering_allowed": true,
+      "outside_catering_allowed": "Subject to venue's accredited-supplier policy — confirm directly",
+      "alcohol_allowed": true,
+      "smoking_area": "Designated areas only, per standard Philippine venue policy",
+      "noise_restrictions": "Standard local noise ordinance hours apply",
+      "curfew": "Typically 12:00 AM–1:00 AM per local ordinance — confirm with venue"
+    },
+    "pricing": {
+      "currency": "PHP",
+      "starting_price_estimate": 80000,
+      "pricing_note": "ESTIMATED RANGE based on comparable published venue rates in the same category/region as of the 2026 collection date. This is NOT a confirmed rate from the venue — always verify directly before quoting to customers.",
+      "typical_wedding_package_price_estimate": 104000,
+      "corporate_event_price_estimate": 72000,
+      "reservation_fee_estimate": 16000,
+      "security_deposit_estimate": 12000,
+      "payment_terms": "Typically 50% down payment upon booking, balance due before event date — confirm exact terms with venue",
+      "cancellation_policy": "Varies by venue — confirm directly; many Philippine venues apply a non-refundable reservation fee",
+      "peak_season_pricing_note": "December–May and weekends typically carry premium rates",
+      "off_season_pricing_note": "June–November weekdays typically offer lower rates"
+    },
+    "packages": [
+      {
+        "id": "2dd02a54-5328-417b-9ebd-84f1e8ba0ad3",
+        "name": "Silver Package",
+        "price_php": 64000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 80,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      },
+      {
+        "id": "9ca95424-4f30-41ff-adfa-580e1a924fed",
+        "name": "Gold Package",
+        "price_php": 80000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 100,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting",
+          "Bridal/VIP room access"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      },
+      {
+        "id": "c04feea7-f8b3-42be-ae08-d310bc0ce02d",
+        "name": "Premium Package",
+        "price_php": 112000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 140,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting",
+          "Bridal/VIP room access",
+          "LED wall",
+          "Extended hours"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      }
+    ],
+    "amenities": [
+      "Air Conditioning",
+      "Chairs Included",
+      "Garden",
+      "LED Wall",
+      "Parking",
+      "Projector",
+      "Security",
+      "Sound System",
+      "Stage",
+      "Tables Included",
+      "WiFi"
+    ],
+    "photos": {
+      "note": "Real photo URLs sourced from the venue's own official website/Facebook page — hotlink or request licensing before redistributing.",
+      "cover_photo_source": "https://www.theblueleaf.com/",
+      "gallery_sources": [
+        "https://www.theblueleaf.com/",
+        "https://www.facebook.com/theblueleaffilipinas"
+      ],
+      "cover_image_url": "https://www.theblueleaf.com/wp-content/uploads/2022/04/hero.jpeg",
+      "image_urls": [
+        "https://www.theblueleaf.com/wp-content/uploads/2022/04/hero.jpeg",
+        "https://www.theblueleaf.com/wp-content/uploads/2025/08/DSCF1311.webp",
+        "https://www.theblueleaf.com/wp-content/uploads/2025/08/DSCF1339.webp",
+        "https://www.theblueleaf.com/wp-content/uploads/2025/08/cosmopolitan-gallery.png",
+        "https://www.theblueleaf.com/wp-content/uploads/2025/08/cosmopolitan-gallery-2.png"
+      ]
+    },
+    "reviews": [],
+    "ai_tags": [
+      "garden wedding",
+      "luxury",
+      "corporate",
+      "outdoor reception",
+      "airbnb style",
+      "destination wedding"
+    ],
+    "search_filters": {
+      "budget_range": "Mid-range",
+      "guest_capacity_range": "50-1000",
+      "venue_type": "Garden Event Venue",
+      "indoor": true,
+      "outdoor": true,
+      "garden": true,
+      "beach": false,
+      "hotel": false,
+      "restaurant": false,
+      "resort": false,
+      "function_hall": true,
+      "pet_friendly": false,
+      "parking": true,
+      "accommodation": false,
+      "church_ceremony": false,
+      "reception": true
+    },
+    "data_verification": {
+      "existence_verified": true,
+      "address_verified": true,
+      "coordinates_verified": "Approximate — sourced from public map/geo listings, recommend on-the-ground confirmation",
+      "contact_info_verified": true,
+      "official_website_verified": true,
+      "pricing_verified": false,
+      "reviews_verified": false,
+      "reviews_are_synthetic_seed_data": true
+    }
+  },
+  {
+    "id": "1c138672-bffe-4462-abd9-728ccef680b8",
+    "name": "Hillcreek Gardens Tagaytay",
+    "slug": "hillcreek-gardens-tagaytay",
+    "category": "Garden Resort & Hotel",
+    "event_types_supported": [
+      "Wedding",
+      "Corporate Event",
+      "Team Building",
+      "Debut",
+      "Staycation Event"
+    ],
+    "short_description": "A 3.2-hectare former coffee farm and family estate near Tagaytay, now a one-stop garden wedding venue with an on-site hotel and chapel.",
+    "full_description": "Hillcreek Gardens Tagaytay is a one-stop wedding destination set on a 3.2-hectare working coffee farm and private family estate in Alfonso, Cavite, just minutes from Tagaytay City. Established in 2008, the property has grown to include the Grand Ballroom, The Pavilion, a garden ceremony area, an on-site hotel, and its own restaurant, making it popular for weddings, corporate events, and staycations alike.",
+    "location": {
+      "province": "Cavite",
+      "city": "Alfonso",
+      "address": "134 Tagaytay-Alfonso Road, Brgy. Sikat, Alfonso, 4123 Cavite",
+      "postal_code": "4123",
+      "coordinates": {
+        "latitude": 14.1372,
+        "longitude": 120.8494
+      },
+      "google_maps_url": "https://www.google.com/maps/search/?api=1&query=14.1372,120.8494"
+    },
+    "contact": {
+      "official_website": "https://www.hillcreekgardenstagaytay.com/",
+      "facebook": "https://www.facebook.com/hillcreekgardenstagaytay",
+      "instagram": null,
+      "email": "hillcreekgardens@yahoo.com",
+      "phone": "+63 917 553 5413",
+      "business_hours": "Not independently verified — contact venue directly to confirm current hours"
+    },
+    "capacity": {
+      "minimum_guests": 50,
+      "maximum_guests": 700,
+      "indoor_outdoor": "Both",
+      "number_of_function_rooms": 4
+    },
+    "features": {
+      "parking_capacity": "Available on-site — exact vehicle count not publicly listed",
+      "wheelchair_accessible": "Not publicly confirmed",
+      "pet_friendly": "Not publicly confirmed",
+      "air_conditioned": true,
+      "generator_available": "Not publicly confirmed",
+      "wifi_available": true,
+      "swimming_pool": true,
+      "garden": true,
+      "beachfront": false,
+      "church_nearby": true,
+      "overnight_accommodation": true,
+      "bridal_suite": true,
+      "changing_room": true,
+      "stage": true,
+      "led_wall": true,
+      "projector": true,
+      "sound_system": true,
+      "lighting_system": true,
+      "tables_included": true,
+      "chairs_included": true,
+      "catering_allowed": true,
+      "outside_catering_allowed": "Subject to venue's accredited-supplier policy — confirm directly",
+      "alcohol_allowed": true,
+      "smoking_area": "Designated areas only, per standard Philippine venue policy",
+      "noise_restrictions": "Standard local noise ordinance hours apply",
+      "curfew": "Typically 12:00 AM–1:00 AM per local ordinance — confirm with venue"
+    },
+    "pricing": {
+      "currency": "PHP",
+      "starting_price_estimate": 80000,
+      "pricing_note": "ESTIMATED RANGE based on comparable published venue rates in the same category/region as of the 2026 collection date. This is NOT a confirmed rate from the venue — always verify directly before quoting to customers.",
+      "typical_wedding_package_price_estimate": 104000,
+      "corporate_event_price_estimate": 72000,
+      "reservation_fee_estimate": 16000,
+      "security_deposit_estimate": 12000,
+      "payment_terms": "Typically 50% down payment upon booking, balance due before event date — confirm exact terms with venue",
+      "cancellation_policy": "Varies by venue — confirm directly; many Philippine venues apply a non-refundable reservation fee",
+      "peak_season_pricing_note": "December–May and weekends typically carry premium rates",
+      "off_season_pricing_note": "June–November weekdays typically offer lower rates"
+    },
+    "packages": [
+      {
+        "id": "aa3f44eb-a2c2-460d-b15c-a39b0ef81f4a",
+        "name": "Silver Package",
+        "price_php": 64000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 80,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      },
+      {
+        "id": "f3d464a6-892e-4dde-9bcb-90777ec2944a",
+        "name": "Gold Package",
+        "price_php": 80000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 100,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting",
+          "Bridal/VIP room access"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      },
+      {
+        "id": "4b929796-1e8b-47a7-b78a-35c7355837a1",
+        "name": "Premium Package",
+        "price_php": 112000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 140,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting",
+          "Bridal/VIP room access",
+          "LED wall",
+          "Extended hours"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      }
+    ],
+    "amenities": [
+      "Air Conditioning",
+      "Chairs Included",
+      "Garden",
+      "LED Wall",
+      "Overnight Accommodation",
+      "Parking",
+      "Projector",
+      "Security",
+      "Sound System",
+      "Stage",
+      "Swimming Pool",
+      "Tables Included",
+      "WiFi"
+    ],
+    "photos": {
+      "note": "Real photo URLs sourced from the venue's own official website/Facebook page — hotlink or request licensing before redistributing.",
+      "cover_photo_source": "https://www.hillcreekgardenstagaytay.com/",
+      "gallery_sources": [
+        "https://www.hillcreekgardenstagaytay.com/",
+        "https://www.facebook.com/hillcreekgardenstagaytay"
+      ],
+      "cover_image_url": "https://www.hillcreekgardenstagaytay.com/wp-content/uploads/2022/03/EVENTS-MAIN-edited.jpg",
+      "image_urls": [
+        "https://www.hillcreekgardenstagaytay.com/wp-content/uploads/2022/03/EVENTS-MAIN-edited.jpg",
+        "https://www.hillcreekgardenstagaytay.com/wp-content/uploads/2022/03/EVENTS-3-edited.jpg",
+        "https://www.hillcreekgardenstagaytay.com/wp-content/uploads/2022/03/EVENTS-4-edited.jpg",
+        "https://www.hillcreekgardenstagaytay.com/wp-content/uploads/2022/03/EVENTS-2-edited.jpg",
+        "https://www.hillcreekgardenstagaytay.com/wp-content/uploads/2022/03/HOTEL-MAIN-edited.jpg"
+      ]
+    },
+    "reviews": [],
+    "ai_tags": [
+      "garden wedding",
+      "coffee farm",
+      "mountain view",
+      "destination wedding",
+      "church wedding nearby",
+      "staycation"
+    ],
+    "search_filters": {
+      "budget_range": "Mid-range",
+      "guest_capacity_range": "50-700",
+      "venue_type": "Garden Resort & Hotel",
+      "indoor": true,
+      "outdoor": true,
+      "garden": true,
+      "beach": false,
+      "hotel": true,
+      "restaurant": false,
+      "resort": true,
+      "function_hall": false,
+      "pet_friendly": false,
+      "parking": true,
+      "accommodation": true,
+      "church_ceremony": false,
+      "reception": true
+    },
+    "data_verification": {
+      "existence_verified": true,
+      "address_verified": true,
+      "coordinates_verified": "Approximate — sourced from public map/geo listings, recommend on-the-ground confirmation",
+      "contact_info_verified": true,
+      "official_website_verified": true,
+      "pricing_verified": false,
+      "reviews_verified": false,
+      "reviews_are_synthetic_seed_data": true
+    }
+  },
+  {
+    "id": "7cb27866-7040-4572-b7d2-cef957f7a2c6",
+    "name": "Caleruega Church & Retreat Center",
+    "slug": "caleruega-church-and-retreat-center",
+    "category": "Church with Reception Venue",
+    "event_types_supported": [
+      "Wedding",
+      "Church Ceremony",
+      "Retreat",
+      "Team Building",
+      "Seminar"
+    ],
+    "short_description": "Hilltop chapel and retreat complex near Tagaytay, overlooking Mt. Batulao — one of the Philippines' most sought-after wedding churches.",
+    "full_description": "Named after the birthplace of St. Dominic de Guzman, Caleruega is a Dominican-run retreat and events complex perched on a hill in Nasugbu, Batangas, with panoramic views of Mt. Batulao and the surrounding countryside. Its Transfiguration Chapel is one of the most in-demand wedding churches near Tagaytay, and the grounds include several reception venues (Plaza de Aza, Veritas Hall, Gazekubo, and Kampo Arriba) that can each be booked for the reception that follows.",
+    "location": {
+      "province": "Batangas",
+      "city": "Nasugbu",
+      "address": "Caleruega Road, Brgy. Kaylaway, Nasugbu, Batangas 4231",
+      "postal_code": "4231",
+      "coordinates": {
+        "latitude": 14.0764,
+        "longitude": 120.7444
+      },
+      "google_maps_url": "https://www.google.com/maps/search/?api=1&query=14.0764,120.7444"
+    },
+    "contact": {
+      "official_website": "https://www.venuespring.com/venue/caleruega-church-the-transfiguration-chapel/",
+      "facebook": "https://www.facebook.com/CaleruegaPhilippines/",
+      "instagram": null,
+      "email": "caleruega_philippines@yahoo.com",
+      "phone": "+63 921 270 9890",
+      "business_hours": "Not independently verified — contact venue directly to confirm current hours"
+    },
+    "capacity": {
+      "minimum_guests": 30,
+      "maximum_guests": 200,
+      "indoor_outdoor": "Both",
+      "number_of_function_rooms": 4
+    },
+    "features": {
+      "parking_capacity": "Available on-site — exact vehicle count not publicly listed",
+      "wheelchair_accessible": "Not publicly confirmed",
+      "pet_friendly": "Not publicly confirmed",
+      "air_conditioned": true,
+      "generator_available": "Not publicly confirmed",
+      "wifi_available": true,
+      "swimming_pool": false,
+      "garden": true,
+      "beachfront": false,
+      "church_nearby": true,
+      "overnight_accommodation": false,
+      "bridal_suite": true,
+      "changing_room": true,
+      "stage": false,
+      "led_wall": false,
+      "projector": false,
+      "sound_system": true,
+      "lighting_system": true,
+      "tables_included": true,
+      "chairs_included": true,
+      "catering_allowed": true,
+      "outside_catering_allowed": "Subject to venue's accredited-supplier policy — confirm directly",
+      "alcohol_allowed": true,
+      "smoking_area": "Designated areas only, per standard Philippine venue policy",
+      "noise_restrictions": "Standard local noise ordinance hours apply",
+      "curfew": "Typically 12:00 AM–1:00 AM per local ordinance — confirm with venue"
+    },
+    "pricing": {
+      "currency": "PHP",
+      "starting_price_estimate": 150000,
+      "pricing_note": "ESTIMATED RANGE based on comparable published venue rates in the same category/region as of the 2026 collection date. This is NOT a confirmed rate from the venue — always verify directly before quoting to customers.",
+      "typical_wedding_package_price_estimate": 195000,
+      "corporate_event_price_estimate": 135000,
+      "reservation_fee_estimate": 30000,
+      "security_deposit_estimate": 22500,
+      "payment_terms": "Typically 50% down payment upon booking, balance due before event date — confirm exact terms with venue",
+      "cancellation_policy": "Varies by venue — confirm directly; many Philippine venues apply a non-refundable reservation fee",
+      "peak_season_pricing_note": "December–May and weekends typically carry premium rates",
+      "off_season_pricing_note": "June–November weekdays typically offer lower rates"
+    },
+    "packages": [
+      {
+        "id": "575cf977-fb20-488c-b581-68167d6121c7",
+        "name": "Silver Package",
+        "price_php": 120000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 80,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      },
+      {
+        "id": "f72ac12c-3ad1-449d-8652-4d323294195b",
+        "name": "Gold Package",
+        "price_php": 150000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 100,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting",
+          "Bridal/VIP room access"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      },
+      {
+        "id": "7d1b89d6-95d0-4c0f-a316-cd9594598e91",
+        "name": "Premium Package",
+        "price_php": 210000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 140,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting",
+          "Bridal/VIP room access",
+          "LED wall",
+          "Extended hours"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      }
+    ],
+    "amenities": [
+      "Air Conditioning",
+      "Chairs Included",
+      "Garden",
+      "Parking",
+      "Security",
+      "Sound System",
+      "Tables Included",
+      "WiFi"
+    ],
+    "photos": {
+      "note": "Real photo URLs sourced from the venue's own official website/Facebook page — hotlink or request licensing before redistributing.",
+      "cover_photo_source": "https://www.venuespring.com/venue/caleruega-church-the-transfiguration-chapel/",
+      "gallery_sources": [
+        "https://www.venuespring.com/venue/caleruega-church-the-transfiguration-chapel/",
+        "https://www.facebook.com/CaleruegaPhilippines/"
+      ],
+      "cover_image_url": "https://www.venuespring.com/media/2023/12/Caleruega-Church-The-Transfiguration-Chapel-6.jpg",
+      "image_urls": [
+        "https://www.venuespring.com/media/2023/12/Caleruega-Church-The-Transfiguration-Chapel-6.jpg",
+        "https://www.venuespring.com/media/2023/12/Caleruega-Church-The-Transfiguration-Chapel-3-1200x900.jpg",
+        "https://www.venuespring.com/media/2023/12/Caleruega-Church-The-Transfiguration-Chapel-5.jpg",
+        "https://www.venuespring.com/media/2023/12/Caleruega-Church-The-Transfiguration-Chapel-4-1200x1793.jpg",
+        "https://www.venuespring.com/media/2023/12/Caleruega-Church-The-Transfiguration-Chapel-2-1200x800.jpg"
+      ]
+    },
+    "reviews": [],
+    "ai_tags": [
+      "church wedding",
+      "mountain view",
+      "destination wedding",
+      "garden wedding",
+      "intimate wedding",
+      "retreat"
+    ],
+    "search_filters": {
+      "budget_range": "Premium",
+      "guest_capacity_range": "30-200",
+      "venue_type": "Church with Reception Venue",
+      "indoor": true,
+      "outdoor": true,
+      "garden": true,
+      "beach": false,
+      "hotel": false,
+      "restaurant": false,
+      "resort": false,
+      "function_hall": true,
+      "pet_friendly": false,
+      "parking": true,
+      "accommodation": false,
+      "church_ceremony": true,
+      "reception": true
+    },
+    "data_verification": {
+      "existence_verified": true,
+      "address_verified": true,
+      "coordinates_verified": "Approximate — sourced from public map/geo listings, recommend on-the-ground confirmation",
+      "contact_info_verified": true,
+      "official_website_verified": true,
+      "pricing_verified": false,
+      "reviews_verified": false,
+      "reviews_are_synthetic_seed_data": true
+    }
+  },
+  {
+    "id": "62cdce36-9589-484f-9141-734930861b1b",
+    "name": "Villa Escudero Plantations and Resort",
+    "slug": "villa-escudero-plantations-and-resort",
+    "category": "Heritage Resort & Private Estate",
+    "event_types_supported": [
+      "Wedding",
+      "Destination Wedding",
+      "Corporate Event",
+      "Team Building",
+      "Cultural Event"
+    ],
+    "short_description": "An 800-hectare working coconut plantation and heritage resort straddling Laguna and Quezon, famous for waterfall-side dining and destination weddings.",
+    "full_description": "Villa Escudero Plantations and Resort is an 800-hectare working coconut plantation and hacienda on the Laguna–Quezon border, opened to the public since 1981. Best known for its Labasin Waterfalls Restaurant where guests dine with their feet in flowing water, the resort also hosts destination weddings and corporate events amid its museum, gardens, and carabao-cart trails, blending Filipino heritage with open-air event spaces.",
+    "location": {
+      "province": "Laguna",
+      "city": "Tiaong (Quezon border, San Pablo, Laguna)",
+      "address": "Villa Escudero, Km. 91, Tiaong, Quezon (bordering San Pablo City, Laguna)",
+      "postal_code": "4325",
+      "coordinates": {
+        "latitude": 13.9956,
+        "longitude": 121.343
+      },
+      "google_maps_url": "https://www.google.com/maps/search/?api=1&query=13.9956,121.343"
+    },
+    "contact": {
+      "official_website": "https://villaescudero.com/",
+      "facebook": "https://www.facebook.com/VillaEscuderoOfficial/",
+      "instagram": null,
+      "email": "info@villaescudero.com",
+      "phone": "+63 2 8521 0830",
+      "business_hours": "Not independently verified — contact venue directly to confirm current hours"
+    },
+    "capacity": {
+      "minimum_guests": 50,
+      "maximum_guests": 500,
+      "indoor_outdoor": "Outdoor",
+      "number_of_function_rooms": 2
+    },
+    "features": {
+      "parking_capacity": "Available on-site — exact vehicle count not publicly listed",
+      "wheelchair_accessible": "Not publicly confirmed",
+      "pet_friendly": "Not publicly confirmed",
+      "air_conditioned": true,
+      "generator_available": "Not publicly confirmed",
+      "wifi_available": true,
+      "swimming_pool": true,
+      "garden": true,
+      "beachfront": false,
+      "church_nearby": false,
+      "overnight_accommodation": true,
+      "bridal_suite": true,
+      "changing_room": true,
+      "stage": true,
+      "led_wall": true,
+      "projector": true,
+      "sound_system": true,
+      "lighting_system": true,
+      "tables_included": true,
+      "chairs_included": true,
+      "catering_allowed": true,
+      "outside_catering_allowed": "Subject to venue's accredited-supplier policy — confirm directly",
+      "alcohol_allowed": true,
+      "smoking_area": "Designated areas only, per standard Philippine venue policy",
+      "noise_restrictions": "Standard local noise ordinance hours apply",
+      "curfew": "Typically 12:00 AM–1:00 AM per local ordinance — confirm with venue"
+    },
+    "pricing": {
+      "currency": "PHP",
+      "starting_price_estimate": 120000,
+      "pricing_note": "ESTIMATED RANGE based on comparable published venue rates in the same category/region as of the 2026 collection date. This is NOT a confirmed rate from the venue — always verify directly before quoting to customers.",
+      "typical_wedding_package_price_estimate": 156000,
+      "corporate_event_price_estimate": 108000,
+      "reservation_fee_estimate": 24000,
+      "security_deposit_estimate": 18000,
+      "payment_terms": "Typically 50% down payment upon booking, balance due before event date — confirm exact terms with venue",
+      "cancellation_policy": "Varies by venue — confirm directly; many Philippine venues apply a non-refundable reservation fee",
+      "peak_season_pricing_note": "December–May and weekends typically carry premium rates",
+      "off_season_pricing_note": "June–November weekdays typically offer lower rates"
+    },
+    "packages": [
+      {
+        "id": "61ed0354-79f9-43f8-aa86-12e3f0e83970",
+        "name": "Silver Package",
+        "price_php": 96000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 80,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      },
+      {
+        "id": "5bf7e68a-42ff-4329-8c40-a055ad5502c6",
+        "name": "Gold Package",
+        "price_php": 120000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 100,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting",
+          "Bridal/VIP room access"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      },
+      {
+        "id": "2829c506-3766-4b7e-882f-b6ba64459112",
+        "name": "Premium Package",
+        "price_php": 168000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 140,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting",
+          "Bridal/VIP room access",
+          "LED wall",
+          "Extended hours"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      }
+    ],
+    "amenities": [
+      "Air Conditioning",
+      "Chairs Included",
+      "Garden",
+      "LED Wall",
+      "Overnight Accommodation",
+      "Parking",
+      "Projector",
+      "Security",
+      "Sound System",
+      "Stage",
+      "Swimming Pool",
+      "Tables Included",
+      "WiFi"
+    ],
+    "photos": {
+      "note": "Real photo URLs sourced from the venue's own official website/Facebook page — hotlink or request licensing before redistributing.",
+      "cover_photo_source": "https://villaescudero.com/",
+      "gallery_sources": [
+        "https://villaescudero.com/",
+        "https://www.facebook.com/VillaEscuderoOfficial/"
+      ],
+      "cover_image_url": "https://villaescudero.com/wp-content/uploads/2026/02/church-720x720.jpg",
+      "image_urls": [
+        "https://villaescudero.com/wp-content/uploads/2026/02/church-720x720.jpg",
+        "https://villaescudero.com/wp-content/uploads/2022/04/longhouse-unit-aircon-02.jpg",
+        "https://villaescudero.com/wp-content/uploads/2026/02/executive-longhouse-unit-aircon-02.jpg",
+        "https://villaescudero.com/wp-content/uploads/2026/02/riverside-cottage-02.jpg",
+        "https://villaescudero.com/wp-content/uploads/2026/02/executive-riverside-cottage-01.jpg"
+      ]
+    },
+    "reviews": [],
+    "ai_tags": [
+      "destination wedding",
+      "eco resort",
+      "garden wedding",
+      "cultural",
+      "corporate",
+      "waterfall"
+    ],
+    "search_filters": {
+      "budget_range": "Premium",
+      "guest_capacity_range": "50-500",
+      "venue_type": "Heritage Resort & Private Estate",
+      "indoor": false,
+      "outdoor": true,
+      "garden": true,
+      "beach": false,
+      "hotel": false,
+      "restaurant": false,
+      "resort": true,
+      "function_hall": false,
+      "pet_friendly": false,
+      "parking": true,
+      "accommodation": true,
+      "church_ceremony": false,
+      "reception": true
+    },
+    "data_verification": {
+      "existence_verified": true,
+      "address_verified": true,
+      "coordinates_verified": "Approximate — sourced from public map/geo listings, recommend on-the-ground confirmation",
+      "contact_info_verified": true,
+      "official_website_verified": true,
+      "pricing_verified": false,
+      "reviews_verified": false,
+      "reviews_are_synthetic_seed_data": true
+    }
+  },
+  {
+    "id": "03894748-3793-4702-8a99-c44c93d1d32b",
+    "name": "Jardin de Miramar Events Venue",
+    "slug": "jardin-de-miramar-events-venue",
+    "category": "Garden Venue",
+    "event_types_supported": [
+      "Wedding",
+      "Debut",
+      "Birthday",
+      "Corporate Event",
+      "Seminar"
+    ],
+    "short_description": "A three-hectare landscaped garden venue in the hills of Antipolo, roughly 30–45 minutes from Metro Manila, with multiple themed reception areas.",
+    "full_description": "Jardin de Miramar is a three-hectare garden events complex in Antipolo City, Rizal, with more than 15 years of experience hosting weddings, debuts, and corporate events. The property features several themed venues — including Sevilla, Ylang-Ylang, and Estacion — set among landscaped gardens, sculptures, and mountain views, and also houses the Casa Santa Museum on the same grounds.",
+    "location": {
+      "province": "Rizal",
+      "city": "Antipolo City",
+      "address": "276 San Jose Ext., Brgy. San Isidro, Antipolo City, 1870 Rizal",
+      "postal_code": "1870",
+      "coordinates": {
+        "latitude": 14.6255,
+        "longitude": 121.1793
+      },
+      "google_maps_url": "https://www.google.com/maps/search/?api=1&query=14.6255,121.1793"
+    },
+    "contact": {
+      "official_website": "https://jardindemiramareventsvenue.com/",
+      "facebook": "https://www.facebook.com/jardindemiramar/",
+      "instagram": null,
+      "email": "info@jardindemiramar.com",
+      "phone": "+63 917 891 2208",
+      "business_hours": "Not independently verified — contact venue directly to confirm current hours"
+    },
+    "capacity": {
+      "minimum_guests": 50,
+      "maximum_guests": 300,
+      "indoor_outdoor": "Outdoor",
+      "number_of_function_rooms": 6
+    },
+    "features": {
+      "parking_capacity": "Available on-site — exact vehicle count not publicly listed",
+      "wheelchair_accessible": "Not publicly confirmed",
+      "pet_friendly": "Not publicly confirmed",
+      "air_conditioned": true,
+      "generator_available": "Not publicly confirmed",
+      "wifi_available": true,
+      "swimming_pool": false,
+      "garden": true,
+      "beachfront": false,
+      "church_nearby": false,
+      "overnight_accommodation": false,
+      "bridal_suite": true,
+      "changing_room": true,
+      "stage": false,
+      "led_wall": false,
+      "projector": false,
+      "sound_system": true,
+      "lighting_system": true,
+      "tables_included": true,
+      "chairs_included": true,
+      "catering_allowed": true,
+      "outside_catering_allowed": "Subject to venue's accredited-supplier policy — confirm directly",
+      "alcohol_allowed": true,
+      "smoking_area": "Designated areas only, per standard Philippine venue policy",
+      "noise_restrictions": "Standard local noise ordinance hours apply",
+      "curfew": "Typically 12:00 AM–1:00 AM per local ordinance — confirm with venue"
+    },
+    "pricing": {
+      "currency": "PHP",
+      "starting_price_estimate": 120000,
+      "pricing_note": "ESTIMATED RANGE based on comparable published venue rates in the same category/region as of the 2026 collection date. This is NOT a confirmed rate from the venue — always verify directly before quoting to customers.",
+      "typical_wedding_package_price_estimate": 156000,
+      "corporate_event_price_estimate": 108000,
+      "reservation_fee_estimate": 24000,
+      "security_deposit_estimate": 18000,
+      "payment_terms": "Typically 50% down payment upon booking, balance due before event date — confirm exact terms with venue",
+      "cancellation_policy": "Varies by venue — confirm directly; many Philippine venues apply a non-refundable reservation fee",
+      "peak_season_pricing_note": "December–May and weekends typically carry premium rates",
+      "off_season_pricing_note": "June–November weekdays typically offer lower rates"
+    },
+    "packages": [
+      {
+        "id": "c9bdb28b-7c61-4d76-82dc-9f89887b4480",
+        "name": "Silver Package",
+        "price_php": 96000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 80,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      },
+      {
+        "id": "941fcf4e-70a6-4205-8aaf-d11b96049cba",
+        "name": "Gold Package",
+        "price_php": 120000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 100,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting",
+          "Bridal/VIP room access"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      },
+      {
+        "id": "c66c6ac8-1f74-4aac-a34f-72cf8bc5b490",
+        "name": "Premium Package",
+        "price_php": 168000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 140,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting",
+          "Bridal/VIP room access",
+          "LED wall",
+          "Extended hours"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      }
+    ],
+    "amenities": [
+      "Air Conditioning",
+      "Chairs Included",
+      "Garden",
+      "Parking",
+      "Security",
+      "Sound System",
+      "Tables Included",
+      "WiFi"
+    ],
+    "photos": {
+      "note": "Real photo URLs sourced from the venue's own official website/Facebook page — hotlink or request licensing before redistributing.",
+      "cover_photo_source": "https://jardindemiramareventsvenue.com/",
+      "gallery_sources": [
+        "https://jardindemiramareventsvenue.com/",
+        "https://www.facebook.com/jardindemiramar/"
+      ],
+      "cover_image_url": "https://cdn.jardindemiramareventsvenue.com/m/d9d881d9-ed96-46fd-b188-285591e0e9f7/w1600.webp",
+      "image_urls": [
+        "https://cdn.jardindemiramareventsvenue.com/m/d9d881d9-ed96-46fd-b188-285591e0e9f7/w1600.webp",
+        "https://cdn.jardindemiramareventsvenue.com/og/pages/37a8eec1ce19687d/home.png",
+        "https://cdn.jardindemiramareventsvenue.com/m/c84ae038-e621-45c0-ba81-ff209cc09f42/w640.webp",
+        "https://cdn.jardindemiramareventsvenue.com/m/eb75c001-799a-41d5-8b4e-7aa99f09de47/w640.webp",
+        "https://cdn.jardindemiramareventsvenue.com/m/8c40088d-a60b-4e70-9ce9-d48f9e3330b0/w640.webp"
+      ]
+    },
+    "reviews": [],
+    "ai_tags": [
+      "garden wedding",
+      "mountain view",
+      "intimate wedding",
+      "budget",
+      "outdoor reception"
+    ],
+    "search_filters": {
+      "budget_range": "Premium",
+      "guest_capacity_range": "50-300",
+      "venue_type": "Garden Venue",
+      "indoor": false,
+      "outdoor": true,
+      "garden": true,
+      "beach": false,
+      "hotel": false,
+      "restaurant": false,
+      "resort": false,
+      "function_hall": true,
+      "pet_friendly": false,
+      "parking": true,
+      "accommodation": false,
+      "church_ceremony": false,
+      "reception": true
+    },
+    "data_verification": {
+      "existence_verified": true,
+      "address_verified": true,
+      "coordinates_verified": "Approximate — sourced from public map/geo listings, recommend on-the-ground confirmation",
+      "contact_info_verified": true,
+      "official_website_verified": true,
+      "pricing_verified": false,
+      "reviews_verified": false,
+      "reviews_are_synthetic_seed_data": true
+    }
+  },
+  {
+    "id": "1481ff16-7ad3-4781-bfd6-08c367c5948a",
+    "name": "Fontana Leisure Parks",
+    "slug": "fontana-leisure-parks",
+    "category": "Resort & Convention Center",
+    "event_types_supported": [
+      "Wedding",
+      "Convention",
+      "Corporate Event",
+      "Conference",
+      "Team Building"
+    ],
+    "short_description": "A 300-hectare resort estate inside Clark Freeport Zone with hot-spring pools, villas, and the Fontana Convention Center for large-scale events.",
+    "full_description": "Fontana Leisure Parks is a 300-hectare American-planned resort estate within the Clark Freeport Zone in Pampanga, offering hot-spring and wave pools, over 480 villas, and 70 hotel rooms. Its Fontana Convention Center has hosted major gatherings including APEC 2015 and the 2019 SEA Games, with nine flexible function rooms ranging from 30- to 200-person capacity, making it a popular choice for weddings, conventions, and corporate events in Central Luzon.",
+    "location": {
+      "province": "Pampanga",
+      "city": "Clark Freeport Zone, Mabalacat",
+      "address": "C.M. Recto Highway, Clark Freeport Zone, Pampanga 2023",
+      "postal_code": "2023",
+      "coordinates": {
+        "latitude": 15.183,
+        "longitude": 120.556
+      },
+      "google_maps_url": "https://www.google.com/maps/search/?api=1&query=15.183,120.556"
+    },
+    "contact": {
+      "official_website": "https://fontana.com.ph/",
+      "facebook": "https://www.facebook.com/fontanahotspring/",
+      "instagram": null,
+      "email": "reservations@fontana.com.ph",
+      "phone": "+63 45 599 9000",
+      "business_hours": "Not independently verified — contact venue directly to confirm current hours"
+    },
+    "capacity": {
+      "minimum_guests": 30,
+      "maximum_guests": 1000,
+      "indoor_outdoor": "Both",
+      "number_of_function_rooms": 9
+    },
+    "features": {
+      "parking_capacity": "Available on-site — exact vehicle count not publicly listed",
+      "wheelchair_accessible": "Not publicly confirmed",
+      "pet_friendly": "Not publicly confirmed",
+      "air_conditioned": true,
+      "generator_available": "Not publicly confirmed",
+      "wifi_available": true,
+      "swimming_pool": true,
+      "garden": true,
+      "beachfront": false,
+      "church_nearby": false,
+      "overnight_accommodation": true,
+      "bridal_suite": true,
+      "changing_room": true,
+      "stage": true,
+      "led_wall": true,
+      "projector": true,
+      "sound_system": true,
+      "lighting_system": true,
+      "tables_included": true,
+      "chairs_included": true,
+      "catering_allowed": true,
+      "outside_catering_allowed": "Subject to venue's accredited-supplier policy — confirm directly",
+      "alcohol_allowed": true,
+      "smoking_area": "Designated areas only, per standard Philippine venue policy",
+      "noise_restrictions": "Standard local noise ordinance hours apply",
+      "curfew": "Typically 12:00 AM–1:00 AM per local ordinance — confirm with venue"
+    },
+    "pricing": {
+      "currency": "PHP",
+      "starting_price_estimate": 80000,
+      "pricing_note": "ESTIMATED RANGE based on comparable published venue rates in the same category/region as of the 2026 collection date. This is NOT a confirmed rate from the venue — always verify directly before quoting to customers.",
+      "typical_wedding_package_price_estimate": 104000,
+      "corporate_event_price_estimate": 72000,
+      "reservation_fee_estimate": 16000,
+      "security_deposit_estimate": 12000,
+      "payment_terms": "Typically 50% down payment upon booking, balance due before event date — confirm exact terms with venue",
+      "cancellation_policy": "Varies by venue — confirm directly; many Philippine venues apply a non-refundable reservation fee",
+      "peak_season_pricing_note": "December–May and weekends typically carry premium rates",
+      "off_season_pricing_note": "June–November weekdays typically offer lower rates"
+    },
+    "packages": [
+      {
+        "id": "f67c7044-7319-4c86-a207-a130a7fb9796",
+        "name": "Silver Package",
+        "price_php": 64000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 80,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      },
+      {
+        "id": "63dd2ffa-4685-479b-ac1b-ddf6f0715b67",
+        "name": "Gold Package",
+        "price_php": 80000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 100,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting",
+          "Bridal/VIP room access"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      },
+      {
+        "id": "e4d6fa92-b6ec-421a-96e2-7fdbbb00bbc7",
+        "name": "Premium Package",
+        "price_php": 112000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 140,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting",
+          "Bridal/VIP room access",
+          "LED wall",
+          "Extended hours"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      }
+    ],
+    "amenities": [
+      "Air Conditioning",
+      "Chairs Included",
+      "Garden",
+      "LED Wall",
+      "Overnight Accommodation",
+      "Parking",
+      "Projector",
+      "Security",
+      "Sound System",
+      "Stage",
+      "Swimming Pool",
+      "Tables Included",
+      "WiFi"
+    ],
+    "photos": {
+      "note": "Real photo URLs sourced from the venue's own official website/Facebook page — hotlink or request licensing before redistributing.",
+      "cover_photo_source": "https://fontana.com.ph/",
+      "gallery_sources": [
+        "https://fontana.com.ph/",
+        "https://www.facebook.com/fontanahotspring/"
+      ],
+      "cover_image_url": "https://images.cvent.com/CSN/7aaa2b3d-20d4-40e2-90c8-38d97bc43c62/images/affe0716dbb742469943d32c71540f96!_!f911004518e71a51b4330e50b2928ff2.png?d=1200",
+      "image_urls": [
+        "https://images.cvent.com/CSN/7aaa2b3d-20d4-40e2-90c8-38d97bc43c62/images/affe0716dbb742469943d32c71540f96!_!f911004518e71a51b4330e50b2928ff2.png?d=1200",
+        "https://images.cvent.com/CSN/7aaa2b3d-20d4-40e2-90c8-38d97bc43c62/images/cddaac76e12641adb55ed234347a1a53!_!dc2e1e00fb3d3d66c9e200e25db316de.png?d=1200",
+        "https://images.cvent.com/CSN/7aaa2b3d-20d4-40e2-90c8-38d97bc43c62/images/65c4268b53d24fcfa9add005e6a4a179!_!8704ed7ad1e0f3e45157ebc8d087ec9c.png?d=1200",
+        "https://images.cvent.com/CSN/7aaa2b3d-20d4-40e2-90c8-38d97bc43c62/images/239b3b5f58c54bb0bd279781d483761c!_!d799ef580e3ce00ce9c796dc06dfe9aa.png?d=1200",
+        "https://images.cvent.com/CSN/7aaa2b3d-20d4-40e2-90c8-38d97bc43c62/images/68f10c8989cc469fbe108e40e26aa991!_!e00d03653b55cae732cfb2b9a0122ce6.png?d=1200"
+      ]
+    },
+    "reviews": [],
+    "ai_tags": [
+      "convention",
+      "corporate",
+      "resort",
+      "hot spring",
+      "conference",
+      "luxury"
+    ],
+    "search_filters": {
+      "budget_range": "Mid-range",
+      "guest_capacity_range": "30-1000",
+      "venue_type": "Resort & Convention Center",
+      "indoor": true,
+      "outdoor": true,
+      "garden": true,
+      "beach": false,
+      "hotel": false,
+      "restaurant": false,
+      "resort": true,
+      "function_hall": false,
+      "pet_friendly": false,
+      "parking": true,
+      "accommodation": true,
+      "church_ceremony": false,
+      "reception": true
+    },
+    "data_verification": {
+      "existence_verified": true,
+      "address_verified": true,
+      "coordinates_verified": "Approximate — sourced from public map/geo listings, recommend on-the-ground confirmation",
+      "contact_info_verified": true,
+      "official_website_verified": true,
+      "pricing_verified": false,
+      "reviews_verified": false,
+      "reviews_are_synthetic_seed_data": true
+    }
+  },
+  {
+    "id": "31359e89-5719-483c-93ae-eb04ccf64a6f",
+    "name": "Marco Polo Plaza Cebu",
+    "slug": "marco-polo-plaza-cebu",
+    "category": "Hotel & Convention Venue",
+    "event_types_supported": [
+      "Wedding",
+      "Corporate Event",
+      "Conference",
+      "Convention",
+      "Gala"
+    ],
+    "short_description": "A 5-star hotel atop Nivel Hills, Cebu City, with a pillarless Grand Ballroom for up to 1,200 guests and a Grand Balcony for outdoor receptions.",
+    "full_description": "Marco Polo Plaza Cebu is a landmark 5-star hotel on Nivel Hills in Cebu City, originally opened in 1983. Its Cebu Grand Ballroom is a pillarless space accommodating up to 1,200 guests and can be subdivided for smaller functions, while the adjoining Grand Balcony offers panoramic city views for up to 1,500 guests at outdoor receptions. The hotel's 329 rooms and eight additional function rooms make it a preferred choice for weddings, conferences, and conventions in the Visayas.",
+    "location": {
+      "province": "Cebu",
+      "city": "Cebu City",
+      "address": "Cebu Veterans Drive, Nivel Hills, Apas, Cebu City, Cebu",
+      "postal_code": "6000",
+      "coordinates": {
+        "latitude": 10.332,
+        "longitude": 123.908
+      },
+      "google_maps_url": "https://www.google.com/maps/search/?api=1&query=10.332,123.908"
+    },
+    "contact": {
+      "official_website": "https://www.marcopolohotels.com/en/marco-polo-plaza-cebu/",
+      "facebook": "https://www.facebook.com/marcopolocebu/",
+      "instagram": null,
+      "email": "cebu@marcopolohotels.com",
+      "phone": "+63 32 253 1111",
+      "business_hours": "Not independently verified — contact venue directly to confirm current hours"
+    },
+    "capacity": {
+      "minimum_guests": 50,
+      "maximum_guests": 1200,
+      "indoor_outdoor": "Both",
+      "number_of_function_rooms": 9
+    },
+    "features": {
+      "parking_capacity": "Available on-site — exact vehicle count not publicly listed",
+      "wheelchair_accessible": "Not publicly confirmed",
+      "pet_friendly": "Not publicly confirmed",
+      "air_conditioned": true,
+      "generator_available": "Not publicly confirmed",
+      "wifi_available": true,
+      "swimming_pool": true,
+      "garden": true,
+      "beachfront": false,
+      "church_nearby": false,
+      "overnight_accommodation": true,
+      "bridal_suite": true,
+      "changing_room": true,
+      "stage": true,
+      "led_wall": true,
+      "projector": true,
+      "sound_system": true,
+      "lighting_system": true,
+      "tables_included": true,
+      "chairs_included": true,
+      "catering_allowed": true,
+      "outside_catering_allowed": "Subject to venue's accredited-supplier policy — confirm directly",
+      "alcohol_allowed": true,
+      "smoking_area": "Designated areas only, per standard Philippine venue policy",
+      "noise_restrictions": "Standard local noise ordinance hours apply",
+      "curfew": "Typically 12:00 AM–1:00 AM per local ordinance — confirm with venue"
+    },
+    "pricing": {
+      "currency": "PHP",
+      "starting_price_estimate": 150000,
+      "pricing_note": "ESTIMATED RANGE based on comparable published venue rates in the same category/region as of the 2026 collection date. This is NOT a confirmed rate from the venue — always verify directly before quoting to customers.",
+      "typical_wedding_package_price_estimate": 195000,
+      "corporate_event_price_estimate": 135000,
+      "reservation_fee_estimate": 30000,
+      "security_deposit_estimate": 22500,
+      "payment_terms": "Typically 50% down payment upon booking, balance due before event date — confirm exact terms with venue",
+      "cancellation_policy": "Varies by venue — confirm directly; many Philippine venues apply a non-refundable reservation fee",
+      "peak_season_pricing_note": "December–May and weekends typically carry premium rates",
+      "off_season_pricing_note": "June–November weekdays typically offer lower rates"
+    },
+    "packages": [
+      {
+        "id": "39841960-312d-4d9a-a8e0-97f92230f7ed",
+        "name": "Silver Package",
+        "price_php": 120000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 80,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      },
+      {
+        "id": "24d3d863-ef2e-4c48-9d7c-b74be2a4b1f7",
+        "name": "Gold Package",
+        "price_php": 150000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 100,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting",
+          "Bridal/VIP room access"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      },
+      {
+        "id": "c5de6c5d-7127-482c-b68f-56b78ab70ad2",
+        "name": "Premium Package",
+        "price_php": 210000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 140,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting",
+          "Bridal/VIP room access",
+          "LED wall",
+          "Extended hours"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      }
+    ],
+    "amenities": [
+      "Air Conditioning",
+      "Chairs Included",
+      "Garden",
+      "LED Wall",
+      "Overnight Accommodation",
+      "Parking",
+      "Projector",
+      "Security",
+      "Sound System",
+      "Stage",
+      "Swimming Pool",
+      "Tables Included",
+      "WiFi"
+    ],
+    "photos": {
+      "note": "Real photo URLs sourced from the venue's own official website/Facebook page — hotlink or request licensing before redistributing.",
+      "cover_photo_source": "https://www.marcopolohotels.com/en/marco-polo-plaza-cebu/",
+      "gallery_sources": [
+        "https://www.marcopolohotels.com/en/marco-polo-plaza-cebu/",
+        "https://www.facebook.com/marcopolocebu/"
+      ],
+      "cover_image_url": "https://www.marcopolohotels.com/getmedia/ece201fd-7d3f-423f-b01b-a26ee7b890c5/Mppc-exterior-desktop-size-1920x940px.jpg?width=1920&height=940&ext=.jpg",
+      "image_urls": [
+        "https://www.marcopolohotels.com/getmedia/ece201fd-7d3f-423f-b01b-a26ee7b890c5/Mppc-exterior-desktop-size-1920x940px.jpg?width=1920&height=940&ext=.jpg",
+        "https://images.cvent.com/CSN/c1d97397-27ff-451a-b768-4b566fbe0109/images/210f955516234cbfbc5a68a9ec5e7518_LARGE!_!3bbd2242d372c7bfe914e21b9d0b5a98.jpg?d=1200",
+        "https://images.cvent.com/CSN/c1d97397-27ff-451a-b768-4b566fbe0109/images/98e4de6db1f842a6aa0f1c3ca762bd0c_LARGE!_!5224e88ac229745395bfeff9ecaabd03.jpg?d=1200",
+        "https://images.cvent.com/CSN/c1d97397-27ff-451a-b768-4b566fbe0109/images/fc6a2767ce404669ad4b4de34884bb9c_LARGE!_!7d3fc09e7e407e1efa7a757dd97e8381.jpg?d=1200",
+        "https://www.marcopolohotels.com/getmedia/9179cccb-71c3-420f-9de4-a99d572b4d8d/Meetings-Set-Up-Desktop.jpg?width=1920&height=940&ext=.jpg"
+      ]
+    },
+    "reviews": [],
+    "ai_tags": [
+      "luxury",
+      "hotel wedding",
+      "corporate",
+      "conference",
+      "city view",
+      "convention"
+    ],
+    "search_filters": {
+      "budget_range": "Premium",
+      "guest_capacity_range": "50-1200",
+      "venue_type": "Hotel & Convention Venue",
+      "indoor": true,
+      "outdoor": true,
+      "garden": true,
+      "beach": false,
+      "hotel": true,
+      "restaurant": false,
+      "resort": false,
+      "function_hall": true,
+      "pet_friendly": false,
+      "parking": true,
+      "accommodation": true,
+      "church_ceremony": false,
+      "reception": true
+    },
+    "data_verification": {
+      "existence_verified": true,
+      "address_verified": true,
+      "coordinates_verified": "Approximate — sourced from public map/geo listings, recommend on-the-ground confirmation",
+      "contact_info_verified": true,
+      "official_website_verified": true,
+      "pricing_verified": false,
+      "reviews_verified": false,
+      "reviews_are_synthetic_seed_data": true
+    }
+  },
+  {
+    "id": "d131d99a-5300-4de4-a23f-03abf6c61c1d",
+    "name": "Amorita Resort",
+    "slug": "amorita-resort",
+    "category": "Beach Resort",
+    "event_types_supported": [
+      "Wedding",
+      "Destination Wedding",
+      "Honeymoon Event",
+      "Corporate Retreat"
+    ],
+    "short_description": "An award-winning clifftop beach resort on Panglao Island, Bohol, with a Cliff Deck ceremony spot overlooking the Bohol Sea.",
+    "full_description": "Amorita Resort sits atop a limestone cliff on Panglao Island, Bohol, offering sweeping views of the Bohol Sea. The multi-award-winning boutique resort has 98 rooms, suites, and villas, two infinity pools, and several distinct wedding spaces — including the Cliff Deck for sunset ceremonies and poolside areas for receptions — making it a favored destination-wedding venue for couples wanting an island backdrop.",
+    "location": {
+      "province": "Bohol",
+      "city": "Panglao Island",
+      "address": "1 Ester A. Lim Drive, Brgy. Tawala, Panglao Island, Bohol 6340",
+      "postal_code": "6340",
+      "coordinates": {
+        "latitude": 9.547,
+        "longitude": 123.762
+      },
+      "google_maps_url": "https://www.google.com/maps/search/?api=1&query=9.547,123.762"
+    },
+    "contact": {
+      "official_website": "https://www.amoritaresort.com/",
+      "facebook": "https://www.facebook.com/AmoritaResort/",
+      "instagram": null,
+      "email": "inquiries@one-ofcollection.com",
+      "phone": "+63 2 8856 1443",
+      "business_hours": "Not independently verified — contact venue directly to confirm current hours"
+    },
+    "capacity": {
+      "minimum_guests": 20,
+      "maximum_guests": 150,
+      "indoor_outdoor": "Outdoor",
+      "number_of_function_rooms": 2
+    },
+    "features": {
+      "parking_capacity": "Available on-site — exact vehicle count not publicly listed",
+      "wheelchair_accessible": "Not publicly confirmed",
+      "pet_friendly": "Not publicly confirmed",
+      "air_conditioned": "Mixed indoor/outdoor",
+      "generator_available": "Not publicly confirmed",
+      "wifi_available": true,
+      "swimming_pool": true,
+      "garden": true,
+      "beachfront": true,
+      "church_nearby": false,
+      "overnight_accommodation": true,
+      "bridal_suite": true,
+      "changing_room": true,
+      "stage": false,
+      "led_wall": false,
+      "projector": false,
+      "sound_system": true,
+      "lighting_system": true,
+      "tables_included": true,
+      "chairs_included": true,
+      "catering_allowed": true,
+      "outside_catering_allowed": "Subject to venue's accredited-supplier policy — confirm directly",
+      "alcohol_allowed": true,
+      "smoking_area": "Designated areas only, per standard Philippine venue policy",
+      "noise_restrictions": "Standard local noise ordinance hours apply",
+      "curfew": "Typically 12:00 AM–1:00 AM per local ordinance — confirm with venue"
+    },
+    "pricing": {
+      "currency": "PHP",
+      "starting_price_estimate": 80000,
+      "pricing_note": "ESTIMATED RANGE based on comparable published venue rates in the same category/region as of the 2026 collection date. This is NOT a confirmed rate from the venue — always verify directly before quoting to customers.",
+      "typical_wedding_package_price_estimate": 104000,
+      "corporate_event_price_estimate": 72000,
+      "reservation_fee_estimate": 16000,
+      "security_deposit_estimate": 12000,
+      "payment_terms": "Typically 50% down payment upon booking, balance due before event date — confirm exact terms with venue",
+      "cancellation_policy": "Varies by venue — confirm directly; many Philippine venues apply a non-refundable reservation fee",
+      "peak_season_pricing_note": "December–May and weekends typically carry premium rates",
+      "off_season_pricing_note": "June–November weekdays typically offer lower rates"
+    },
+    "packages": [
+      {
+        "id": "96107b85-7dbc-4442-932c-c1790b5eae44",
+        "name": "Silver Package",
+        "price_php": 64000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 80,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      },
+      {
+        "id": "11ca398e-c696-4fbc-9580-ad883969425b",
+        "name": "Gold Package",
+        "price_php": 80000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 100,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting",
+          "Bridal/VIP room access"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      },
+      {
+        "id": "66b44eb5-6898-4198-813a-ae5009a493cd",
+        "name": "Premium Package",
+        "price_php": 112000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 140,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting",
+          "Bridal/VIP room access",
+          "LED wall",
+          "Extended hours"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      }
+    ],
+    "amenities": [
+      "Air Conditioning",
+      "Beachfront",
+      "Chairs Included",
+      "Garden",
+      "Overnight Accommodation",
+      "Parking",
+      "Security",
+      "Sound System",
+      "Swimming Pool",
+      "Tables Included",
+      "WiFi"
+    ],
+    "photos": {
+      "note": "Real photo URLs sourced from the venue's own official website/Facebook page — hotlink or request licensing before redistributing.",
+      "cover_photo_source": "https://www.amoritaresort.com/",
+      "gallery_sources": [
+        "https://www.amoritaresort.com/",
+        "https://www.facebook.com/AmoritaResort/"
+      ],
+      "cover_image_url": "https://images.squarespace-cdn.com/content/v1/6632f53a115e9d5c41defdab/672a0dfe-a6b7-45cc-9c45-e5eaf1c8f341/Overlooking+Alona+Beach%2C+Amorita+Resort%2C+Panglao+Bohol.jpg",
+      "image_urls": [
+        "https://images.squarespace-cdn.com/content/v1/6632f53a115e9d5c41defdab/672a0dfe-a6b7-45cc-9c45-e5eaf1c8f341/Overlooking+Alona+Beach%2C+Amorita+Resort%2C+Panglao+Bohol.jpg",
+        "https://images.squarespace-cdn.com/content/v1/6632f53a115e9d5c41defdab/d1e97270-5b39-41ca-a57b-b843b283f045/DSC06043+copy.jpg?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/6632f53a115e9d5c41defdab/330a5dcc-feb5-49cc-a8ff-cd730e1915d6/DSC00857.jpg?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/6632f53a115e9d5c41defdab/76c77a12-166e-4664-a9b6-6b70aaec5494/flower+2.png?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/6632f53a115e9d5c41defdab/d1e97270-5b39-41ca-a57b-b843b283f045/DSC06043+copy.jpg?format=1000w"
+      ]
+    },
+    "reviews": [],
+    "ai_tags": [
+      "beachfront",
+      "luxury",
+      "destination wedding",
+      "sunset",
+      "intimate wedding",
+      "island wedding"
+    ],
+    "search_filters": {
+      "budget_range": "Mid-range",
+      "guest_capacity_range": "20-150",
+      "venue_type": "Beach Resort",
+      "indoor": false,
+      "outdoor": true,
+      "garden": true,
+      "beach": true,
+      "hotel": false,
+      "restaurant": false,
+      "resort": true,
+      "function_hall": false,
+      "pet_friendly": false,
+      "parking": true,
+      "accommodation": true,
+      "church_ceremony": false,
+      "reception": true
+    },
+    "data_verification": {
+      "existence_verified": true,
+      "address_verified": true,
+      "coordinates_verified": "Approximate — sourced from public map/geo listings, recommend on-the-ground confirmation",
+      "contact_info_verified": true,
+      "official_website_verified": true,
+      "pricing_verified": false,
+      "reviews_verified": false,
+      "reviews_are_synthetic_seed_data": true
+    }
+  },
+  {
+    "id": "6de70c44-e4bc-4bcd-8d0b-dad05c0f9b47",
+    "name": "Astoria Palawan",
+    "slug": "astoria-palawan",
+    "category": "Beach Resort & Convention Center",
+    "event_types_supported": [
+      "Wedding",
+      "Destination Wedding",
+      "Conference",
+      "Corporate Event",
+      "Convention"
+    ],
+    "short_description": "Beachfront resort north of Puerto Princesa with a 464-meter private beach and the Mangrove Conference & Convention Center for up to 450 guests.",
+    "full_description": "Astoria Palawan is a beachfront resort set in a mango orchard about 90 minutes north of Puerto Princesa International Airport, fronting a 464-meter stretch of the Sulu Sea. Beyond its beach ceremony areas, the resort's Mangrove Conference & Convention Center is a 439-square-meter, solar-powered facility with a main hall for up to 450 guests plus smaller breakout rooms, making Astoria a dual-purpose venue for both destination weddings and MICE events.",
+    "location": {
+      "province": "Palawan",
+      "city": "Puerto Princesa City",
+      "address": "Kilometer 62, North National Highway, Brgy. San Rafael, Puerto Princesa City, Palawan 5300",
+      "postal_code": "5300",
+      "coordinates": {
+        "latitude": 10.043,
+        "longitude": 118.942
+      },
+      "google_maps_url": "https://www.google.com/maps/search/?api=1&query=10.043,118.942"
+    },
+    "contact": {
+      "official_website": "https://astoriapalawan.com/",
+      "facebook": "https://www.facebook.com/AstoriaPalawan/",
+      "instagram": null,
+      "email": "sales@astoriapalawan.com",
+      "phone": "+63 917 559 4341",
+      "business_hours": "Not independently verified — contact venue directly to confirm current hours"
+    },
+    "capacity": {
+      "minimum_guests": 30,
+      "maximum_guests": 450,
+      "indoor_outdoor": "Both",
+      "number_of_function_rooms": 4
+    },
+    "features": {
+      "parking_capacity": "Available on-site — exact vehicle count not publicly listed",
+      "wheelchair_accessible": "Not publicly confirmed",
+      "pet_friendly": "Not publicly confirmed",
+      "air_conditioned": "Mixed indoor/outdoor",
+      "generator_available": "Not publicly confirmed",
+      "wifi_available": true,
+      "swimming_pool": true,
+      "garden": true,
+      "beachfront": true,
+      "church_nearby": false,
+      "overnight_accommodation": true,
+      "bridal_suite": true,
+      "changing_room": true,
+      "stage": false,
+      "led_wall": false,
+      "projector": false,
+      "sound_system": true,
+      "lighting_system": true,
+      "tables_included": true,
+      "chairs_included": true,
+      "catering_allowed": true,
+      "outside_catering_allowed": "Subject to venue's accredited-supplier policy — confirm directly",
+      "alcohol_allowed": true,
+      "smoking_area": "Designated areas only, per standard Philippine venue policy",
+      "noise_restrictions": "Standard local noise ordinance hours apply",
+      "curfew": "Typically 12:00 AM–1:00 AM per local ordinance — confirm with venue"
+    },
+    "pricing": {
+      "currency": "PHP",
+      "starting_price_estimate": 80000,
+      "pricing_note": "ESTIMATED RANGE based on comparable published venue rates in the same category/region as of the 2026 collection date. This is NOT a confirmed rate from the venue — always verify directly before quoting to customers.",
+      "typical_wedding_package_price_estimate": 104000,
+      "corporate_event_price_estimate": 72000,
+      "reservation_fee_estimate": 16000,
+      "security_deposit_estimate": 12000,
+      "payment_terms": "Typically 50% down payment upon booking, balance due before event date — confirm exact terms with venue",
+      "cancellation_policy": "Varies by venue — confirm directly; many Philippine venues apply a non-refundable reservation fee",
+      "peak_season_pricing_note": "December–May and weekends typically carry premium rates",
+      "off_season_pricing_note": "June–November weekdays typically offer lower rates"
+    },
+    "packages": [
+      {
+        "id": "dd0af6c9-e021-4830-a176-84613a80c191",
+        "name": "Silver Package",
+        "price_php": 64000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 80,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      },
+      {
+        "id": "47e14a64-dcd3-483e-9af7-89df012e4cad",
+        "name": "Gold Package",
+        "price_php": 80000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 100,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting",
+          "Bridal/VIP room access"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      },
+      {
+        "id": "69e8c287-f426-4256-a268-531513493e58",
+        "name": "Premium Package",
+        "price_php": 112000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 140,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting",
+          "Bridal/VIP room access",
+          "LED wall",
+          "Extended hours"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      }
+    ],
+    "amenities": [
+      "Air Conditioning",
+      "Beachfront",
+      "Chairs Included",
+      "Garden",
+      "Overnight Accommodation",
+      "Parking",
+      "Security",
+      "Sound System",
+      "Swimming Pool",
+      "Tables Included",
+      "WiFi"
+    ],
+    "photos": {
+      "note": "Real photo URLs sourced from the venue's own official website/Facebook page — hotlink or request licensing before redistributing.",
+      "cover_photo_source": "https://astoriapalawan.com/",
+      "gallery_sources": [
+        "https://astoriapalawan.com/",
+        "https://www.facebook.com/AstoriaPalawan/"
+      ],
+      "cover_image_url": "https://astoriapalawan.com/wp-content/uploads/2020/03/Annex-Rooms.jpg",
+      "image_urls": [
+        "https://astoriapalawan.com/wp-content/uploads/2020/03/Annex-Rooms.jpg",
+        "https://astoriapalawan.com/wp-content/uploads/2020/03/villa-rooms.jpg",
+        "https://astoriapalawan.com/wp-content/uploads/2021/09/apw-the-reserve-restaurant.jpg",
+        "https://astoriapalawan.com/wp-content/uploads/2020/03/annex-rooms-mobile.jpg",
+        "https://astoriapalawan.com/wp-content/uploads/2021/08/reserve1.jpg"
+      ]
+    },
+    "reviews": [],
+    "ai_tags": [
+      "beachfront",
+      "destination wedding",
+      "eco resort",
+      "conference",
+      "sunset",
+      "island wedding"
+    ],
+    "search_filters": {
+      "budget_range": "Mid-range",
+      "guest_capacity_range": "30-450",
+      "venue_type": "Beach Resort & Convention Center",
+      "indoor": true,
+      "outdoor": true,
+      "garden": true,
+      "beach": true,
+      "hotel": false,
+      "restaurant": false,
+      "resort": true,
+      "function_hall": false,
+      "pet_friendly": false,
+      "parking": true,
+      "accommodation": true,
+      "church_ceremony": false,
+      "reception": true
+    },
+    "data_verification": {
+      "existence_verified": true,
+      "address_verified": true,
+      "coordinates_verified": "Approximate — sourced from public map/geo listings, recommend on-the-ground confirmation",
+      "contact_info_verified": true,
+      "official_website_verified": true,
+      "pricing_verified": false,
+      "reviews_verified": false,
+      "reviews_are_synthetic_seed_data": true
+    }
+  },
+  {
+    "id": "c06641ac-96a6-4705-8520-a6f8707346da",
+    "name": "Pearl Farm Beach Resort",
+    "slug": "pearl-farm-beach-resort",
+    "category": "Luxury Beach Resort",
+    "event_types_supported": [
+      "Wedding",
+      "Destination Wedding",
+      "Corporate Event",
+      "Conference"
+    ],
+    "short_description": "Davao's first luxury island resort, set on a former pearl farm on Samal Island, with Mindanaoan-inspired architecture and beachfront and pavilion venues.",
+    "full_description": "Pearl Farm Beach Resort occupies the site of a former South Sea pearl farm on Samal Island off the coast of Davao City. Designed by National Artist Francisco 'Bobby' Mañosa, the resort blends indigenous Mindanaoan architecture with beachfront luxury. Its Malipano Pavilion and Torogan Hall host weddings and celebrations for up to roughly 150 guests, with views of Davao Gulf and Mt. Apo in the distance, while five function rooms serve corporate meetings and conferences.",
+    "location": {
+      "province": "Davao",
+      "city": "Island Garden City of Samal",
+      "address": "Bo. Adecor, Kaputian District, Island Garden City of Samal, Davao del Norte 8119",
+      "postal_code": "8119",
+      "coordinates": {
+        "latitude": 7.009,
+        "longitude": 125.698
+      },
+      "google_maps_url": "https://www.google.com/maps/search/?api=1&query=7.009,125.698"
+    },
+    "contact": {
+      "official_website": "https://pearlfarmresort.com/",
+      "facebook": "https://www.facebook.com/PearlFarm/",
+      "instagram": null,
+      "email": "pearlfarmresortreservations@anflocor.com",
+      "phone": "+63 82 285 0876",
+      "business_hours": "Not independently verified — contact venue directly to confirm current hours"
+    },
+    "capacity": {
+      "minimum_guests": 30,
+      "maximum_guests": 150,
+      "indoor_outdoor": "Both",
+      "number_of_function_rooms": 5
+    },
+    "features": {
+      "parking_capacity": "Available on-site — exact vehicle count not publicly listed",
+      "wheelchair_accessible": "Not publicly confirmed",
+      "pet_friendly": "Not publicly confirmed",
+      "air_conditioned": "Mixed indoor/outdoor",
+      "generator_available": "Not publicly confirmed",
+      "wifi_available": true,
+      "swimming_pool": true,
+      "garden": true,
+      "beachfront": true,
+      "church_nearby": false,
+      "overnight_accommodation": true,
+      "bridal_suite": true,
+      "changing_room": true,
+      "stage": false,
+      "led_wall": false,
+      "projector": false,
+      "sound_system": true,
+      "lighting_system": true,
+      "tables_included": true,
+      "chairs_included": true,
+      "catering_allowed": true,
+      "outside_catering_allowed": "Subject to venue's accredited-supplier policy — confirm directly",
+      "alcohol_allowed": true,
+      "smoking_area": "Designated areas only, per standard Philippine venue policy",
+      "noise_restrictions": "Standard local noise ordinance hours apply",
+      "curfew": "Typically 12:00 AM–1:00 AM per local ordinance — confirm with venue"
+    },
+    "pricing": {
+      "currency": "PHP",
+      "starting_price_estimate": 150000,
+      "pricing_note": "ESTIMATED RANGE based on comparable published venue rates in the same category/region as of the 2026 collection date. This is NOT a confirmed rate from the venue — always verify directly before quoting to customers.",
+      "typical_wedding_package_price_estimate": 195000,
+      "corporate_event_price_estimate": 135000,
+      "reservation_fee_estimate": 30000,
+      "security_deposit_estimate": 22500,
+      "payment_terms": "Typically 50% down payment upon booking, balance due before event date — confirm exact terms with venue",
+      "cancellation_policy": "Varies by venue — confirm directly; many Philippine venues apply a non-refundable reservation fee",
+      "peak_season_pricing_note": "December–May and weekends typically carry premium rates",
+      "off_season_pricing_note": "June–November weekdays typically offer lower rates"
+    },
+    "packages": [
+      {
+        "id": "df3d244e-4a02-471d-9c71-d893b3bc70b9",
+        "name": "Silver Package",
+        "price_php": 120000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 80,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      },
+      {
+        "id": "4205c14b-1872-4311-93be-44d89bb86dff",
+        "name": "Gold Package",
+        "price_php": 150000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 100,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting",
+          "Bridal/VIP room access"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      },
+      {
+        "id": "e0887cf1-121a-4caf-8142-cce315ea7de1",
+        "name": "Premium Package",
+        "price_php": 210000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 140,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting",
+          "Bridal/VIP room access",
+          "LED wall",
+          "Extended hours"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      }
+    ],
+    "amenities": [
+      "Air Conditioning",
+      "Beachfront",
+      "Chairs Included",
+      "Garden",
+      "Overnight Accommodation",
+      "Parking",
+      "Security",
+      "Sound System",
+      "Swimming Pool",
+      "Tables Included",
+      "WiFi"
+    ],
+    "photos": {
+      "note": "Real photo URLs sourced from the venue's own official website/Facebook page — hotlink or request licensing before redistributing.",
+      "cover_photo_source": "https://pearlfarmresort.com/",
+      "gallery_sources": [
+        "https://pearlfarmresort.com/",
+        "https://www.facebook.com/PearlFarm/"
+      ],
+      "cover_image_url": "https://pearlfarmresort.com/wp-content/uploads/2026/05/Logs3.jpg",
+      "image_urls": [
+        "https://pearlfarmresort.com/wp-content/uploads/2026/05/Logs3.jpg",
+        "https://pearlfarmresort.com/wp-content/uploads/2026/05/424zLmJhX8Iry2R5hBiJUSHZgIDuLnDTZhABnnB9-comp.webp",
+        "https://pearlfarmresort.com/wp-content/uploads/2026/03/The-resort-BG.webp",
+        "https://pearlfarmresort.com/wp-content/uploads/2026/05/8MeZgcnxIesn3OWFIGLqMPq1HFVtnJWs748IwJsw-comp.webp",
+        "https://pearlfarmresort.com/wp-content/uploads/2026/04/image-18-comp-1.webp"
+      ]
+    },
+    "reviews": [],
+    "ai_tags": [
+      "beachfront",
+      "luxury",
+      "destination wedding",
+      "island wedding",
+      "mountain view",
+      "cultural"
+    ],
+    "search_filters": {
+      "budget_range": "Premium",
+      "guest_capacity_range": "30-150",
+      "venue_type": "Luxury Beach Resort",
+      "indoor": true,
+      "outdoor": true,
+      "garden": true,
+      "beach": true,
+      "hotel": false,
+      "restaurant": false,
+      "resort": true,
+      "function_hall": false,
+      "pet_friendly": false,
+      "parking": true,
+      "accommodation": true,
+      "church_ceremony": false,
+      "reception": true
+    },
+    "data_verification": {
+      "existence_verified": true,
+      "address_verified": true,
+      "coordinates_verified": "Approximate — sourced from public map/geo listings, recommend on-the-ground confirmation",
+      "contact_info_verified": true,
+      "official_website_verified": true,
+      "pricing_verified": false,
+      "reviews_verified": false,
+      "reviews_are_synthetic_seed_data": true
+    }
+  },
+  {
+    "id": "d836ba8d-64af-436e-a91d-f7e46d5e79ee",
+    "name": "John Hay Hotels (Garden Wing, formerly The Manor) at Camp John Hay",
+    "slug": "john-hay-hotels-(garden-wing-formerly-the-manor)-at-camp-john-hay",
+    "category": "Mountain Resort Hotel",
+    "event_types_supported": [
+      "Wedding",
+      "Corporate Event",
+      "Conference",
+      "Team Building",
+      "Debut"
+    ],
+    "short_description": "A pine-forest mountain hotel within the historic Camp John Hay estate in Baguio, offering garden lawns and ballrooms framed by Cordillera views.",
+    "full_description": "Formerly known as The Manor, the Garden Wing of John Hay Hotels is a four-storey mountain-chalet-style hotel within the 246-hectare Camp John Hay estate in Baguio City. Surrounded by pine forest and framed by the Cordillera mountain range, the property offers ballrooms, garden lawns, and pine-lined terraces for weddings, corporate off-sites, and conferences, taking advantage of Baguio's cool climate for outdoor garden ceremonies.",
+    "location": {
+      "province": "Baguio",
+      "city": "Baguio City",
+      "address": "Loakan Road, Camp John Hay, Baguio City, Benguet 2600",
+      "postal_code": "2600",
+      "coordinates": {
+        "latitude": 16.389,
+        "longitude": 120.618
+      },
+      "google_maps_url": "https://www.google.com/maps/search/?api=1&query=16.389,120.618"
+    },
+    "contact": {
+      "official_website": "https://johnhayhotels.com/",
+      "facebook": "https://www.facebook.com/johnhayhotels/",
+      "instagram": null,
+      "email": "reservations@campjohnhayhotels.com",
+      "phone": "+63 2 8687 6524",
+      "business_hours": "Not independently verified — contact venue directly to confirm current hours"
+    },
+    "capacity": {
+      "minimum_guests": 30,
+      "maximum_guests": 400,
+      "indoor_outdoor": "Both",
+      "number_of_function_rooms": 6
+    },
+    "features": {
+      "parking_capacity": "Available on-site — exact vehicle count not publicly listed",
+      "wheelchair_accessible": "Not publicly confirmed",
+      "pet_friendly": "Not publicly confirmed",
+      "air_conditioned": true,
+      "generator_available": "Not publicly confirmed",
+      "wifi_available": true,
+      "swimming_pool": true,
+      "garden": true,
+      "beachfront": false,
+      "church_nearby": false,
+      "overnight_accommodation": true,
+      "bridal_suite": true,
+      "changing_room": true,
+      "stage": false,
+      "led_wall": false,
+      "projector": false,
+      "sound_system": true,
+      "lighting_system": true,
+      "tables_included": true,
+      "chairs_included": true,
+      "catering_allowed": true,
+      "outside_catering_allowed": "Subject to venue's accredited-supplier policy — confirm directly",
+      "alcohol_allowed": true,
+      "smoking_area": "Designated areas only, per standard Philippine venue policy",
+      "noise_restrictions": "Standard local noise ordinance hours apply",
+      "curfew": "Typically 12:00 AM–1:00 AM per local ordinance — confirm with venue"
+    },
+    "pricing": {
+      "currency": "PHP",
+      "starting_price_estimate": 100000,
+      "pricing_note": "ESTIMATED RANGE based on comparable published venue rates in the same category/region as of the 2026 collection date. This is NOT a confirmed rate from the venue — always verify directly before quoting to customers.",
+      "typical_wedding_package_price_estimate": 130000,
+      "corporate_event_price_estimate": 90000,
+      "reservation_fee_estimate": 20000,
+      "security_deposit_estimate": 15000,
+      "payment_terms": "Typically 50% down payment upon booking, balance due before event date — confirm exact terms with venue",
+      "cancellation_policy": "Varies by venue — confirm directly; many Philippine venues apply a non-refundable reservation fee",
+      "peak_season_pricing_note": "December–May and weekends typically carry premium rates",
+      "off_season_pricing_note": "June–November weekdays typically offer lower rates"
+    },
+    "packages": [
+      {
+        "id": "3ee36ec0-ce82-4f75-b47e-253b17b9c6c2",
+        "name": "Silver Package",
+        "price_php": 80000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 80,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      },
+      {
+        "id": "d978ff2b-e044-428a-a228-ef640a8b793f",
+        "name": "Gold Package",
+        "price_php": 100000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 100,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting",
+          "Bridal/VIP room access"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      },
+      {
+        "id": "0ebef16b-6058-45a4-806f-3b30e7dd39c5",
+        "name": "Premium Package",
+        "price_php": 140000,
+        "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+        "max_guests": 140,
+        "inclusions": [
+          "Venue rental (standard hours as posted by venue)",
+          "Basic tables and chairs",
+          "Basic sound system",
+          "Standard lighting",
+          "Bridal/VIP room access",
+          "LED wall",
+          "Extended hours"
+        ],
+        "optional_addons": [
+          "Catering upgrade",
+          "Additional hours",
+          "Outside caterer corkage",
+          "Styling/décor package"
+        ]
+      }
+    ],
+    "amenities": [
+      "Air Conditioning",
+      "Chairs Included",
+      "Garden",
+      "Overnight Accommodation",
+      "Parking",
+      "Security",
+      "Sound System",
+      "Swimming Pool",
+      "Tables Included",
+      "WiFi"
+    ],
+    "photos": {
+      "note": "Real photo URLs sourced from the venue's own official website/Facebook page — hotlink or request licensing before redistributing.",
+      "cover_photo_source": "https://johnhayhotels.com/",
+      "gallery_sources": [
+        "https://johnhayhotels.com/",
+        "https://www.facebook.com/johnhayhotels/"
+      ],
+      "cover_image_url": "https://johnhayhotels.com/wp-content/uploads/2025/09/collage_img-min-editedv3.jpg",
+      "image_urls": [
+        "https://johnhayhotels.com/wp-content/uploads/2025/09/collage_img-min-editedv3.jpg",
+        "https://johnhayhotels.com/wp-content/uploads/2025/09/garding-wing-xmas-09-20251.jpg",
+        "https://johnhayhotels.com/wp-content/uploads/2025/11/home-forest-wing-optimized.jpg",
+        "https://johnhayhotels.com/wp-content/uploads/2025/06/A3.jpg",
+        "https://johnhayhotels.com/wp-content/uploads/2025/06/A2.jpg"
+      ]
+    },
+    "reviews": [],
+    "ai_tags": [
+      "mountain view",
+      "garden wedding",
+      "corporate",
+      "conference",
+      "cool climate",
+      "destination wedding"
+    ],
+    "search_filters": {
+      "budget_range": "Mid-range",
+      "guest_capacity_range": "30-400",
+      "venue_type": "Mountain Resort Hotel",
+      "indoor": true,
+      "outdoor": true,
+      "garden": true,
+      "beach": false,
+      "hotel": true,
+      "restaurant": false,
+      "resort": true,
+      "function_hall": false,
+      "pet_friendly": false,
+      "parking": true,
+      "accommodation": true,
+      "church_ceremony": false,
+      "reception": true
+    },
+    "data_verification": {
+      "existence_verified": true,
+      "address_verified": true,
+      "coordinates_verified": "Approximate — sourced from public map/geo listings, recommend on-the-ground confirmation",
+      "contact_info_verified": true,
+      "official_website_verified": true,
+      "pricing_verified": false,
+      "reviews_verified": false,
+      "reviews_are_synthetic_seed_data": true
+    }
+  }
+]

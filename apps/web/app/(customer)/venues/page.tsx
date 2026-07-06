@@ -4,6 +4,10 @@ import Sidebar from "@/components/layout/Sidebar";
 import { Bell, HelpCircle, LogOut, Menu } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import VenuesClient from "@/src/features/venues/ui/VenuesClient";
+import {
+  researchVenues,
+  toMarketplaceVenue,
+} from "@/src/features/venues/data/research-venues";
 
 export interface Venue {
   id: string | number;
@@ -19,6 +23,8 @@ export interface Venue {
   municipality?: string;
   province?: string;
   basePrice?: number;
+  budgetRange?: string;
+  capacityMin?: number | null;
   capacityMax?: number;
   latitude?: number | null;
   longitude?: number | null;
@@ -35,94 +41,6 @@ export interface Venue {
   categories?: string[];
   amenities?: string[];
   isFavorited?: boolean;
-}
-
-const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=80";
-
-const fallbackVenues: Venue[] = [
-  {
-    id: 1,
-    slug: "the-glasshouse-estate",
-    name: "The Glasshouse Estate",
-    location: "Tagaytay City",
-    price: "₱120,000",
-    capacity: "Up to 300 pax",
-    image:
-      "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
-    rating: 4.9,
-    category: "Garden Venue",
-    city: "Tagaytay City",
-    municipality: "Tagaytay",
-    province: "Cavite",
-    basePrice: 120000,
-    capacityMax: 300,
-    indoorOutdoor: "outdoor",
-    airConditioned: false,
-    parkingAvailable: true,
-    overnightAccommodation: true,
-    petFriendly: false,
-    hasPool: false,
-    eventTypes: ["Wedding", "Debut", "Party"],
-    categories: ["Garden"],
-    amenities: ["Parking", "Overnight"],
-  },
-  {
-    id: 2,
-    slug: "the-foundry-loft",
-    name: "The Foundry Loft",
-    location: "Makati City",
-    price: "₱85,000",
-    capacity: "Up to 150 pax",
-    image:
-      "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1200&q=80",
-    rating: 4.8,
-    category: "Event Hall",
-    city: "Makati City",
-    municipality: "Makati",
-    province: "Metro Manila",
-    basePrice: 85000,
-    capacityMax: 150,
-    indoorOutdoor: "indoor",
-    airConditioned: true,
-    parkingAvailable: true,
-    overnightAccommodation: false,
-    petFriendly: false,
-    hasPool: false,
-    eventTypes: ["Corporate", "Conference", "Birthday"],
-    categories: ["Event Hall", "Hotel"],
-    amenities: ["Parking", "Aircon", "WiFi"],
-  },
-];
-
-function asNumber(value: unknown) {
-  const amount = Number(value);
-
-  return Number.isFinite(amount) ? amount : undefined;
-}
-
-function formatCurrency(value: unknown) {
-  const amount = Number(value);
-
-  if (!Number.isFinite(amount) || amount <= 0) {
-    return "Price on request";
-  }
-
-  return `₱${amount.toLocaleString("en-PH")}`;
-}
-
-function buildVenueImageUrl(storagePath?: string | null) {
-  if (!storagePath) return FALLBACK_IMAGE;
-
-  if (storagePath.startsWith("http")) {
-    return storagePath;
-  }
-
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-
-  if (!supabaseUrl) return FALLBACK_IMAGE;
-
-  return `${supabaseUrl}/storage/v1/object/public/venue-images/${storagePath}`;
 }
 
 export default async function VenuesMarketplacePage() {
@@ -146,6 +64,10 @@ export default async function VenuesMarketplacePage() {
       venue_event_types(event_types(name, slug)),
       venue_amenities(amenities(name))
     `,
+    )
+    .in(
+      "id",
+      researchVenues.map((venue) => venue.id),
     )
     .eq("status", "published")
     .order("created_at", { ascending: false });
@@ -179,79 +101,20 @@ export default async function VenuesMarketplacePage() {
     }
   }
 
-  const venues: Venue[] =
-    dbVenues && dbVenues.length > 0
-      ? dbVenues.map((venue: any) => {
-          const venueImages = [...(venue.venue_images ?? [])].sort(
-            (a: any, b: any) =>
-              Number(a.display_order ?? 0) - Number(b.display_order ?? 0),
-          );
-          const featuredImage =
-            venueImages.find((img: any) => img.is_featured) ?? venueImages[0];
-          const firstImage = featuredImage?.storage_path;
-          const basePrice = asNumber(venue.base_price ?? venue.starting_price);
-          const capacityMax = asNumber(venue.capacity_max);
-          const city = venue.city ?? "";
-          const municipality = venue.municipality ?? "";
-          const province = venue.province ?? "";
-          const categories =
-            venue.venue_category_assignments
-              ?.map((entry: any) => entry.venue_categories?.name)
-              .filter(Boolean) ?? [];
-          const eventTypes =
-            venue.venue_event_types
-              ?.map((entry: any) => entry.event_types?.name)
-              .filter(Boolean) ?? [];
-          const amenities =
-            venue.venue_amenities
-              ?.map((entry: any) => entry.amenities?.name)
-              .filter(Boolean) ?? [];
-
-          return {
-            id: venue.id,
-            slug: venue.slug ?? String(venue.id),
-            isFavorited: favoriteVenueIds.has(String(venue.id)),
-            name: venue.name ?? "Untitled Venue",
-            location:
-              city && province
-                ? `${city}, ${province}`
-                : city || province || "Location unavailable",
-            price: formatCurrency(basePrice),
-            capacity: capacityMax
-              ? `Up to ${capacityMax} pax`
-              : "Capacity unavailable",
-            image: buildVenueImageUrl(firstImage),
-            rating: Number(venue.avg_rating ?? venue.rating ?? 4.8),
-            category:
-              categories[0] ??
-              venue.category ??
-              venue.venue_type ??
-              "Event Venue",
-            city,
-            municipality,
-            province,
-            basePrice,
-            capacityMax,
-            latitude: asNumber(venue.latitude) ?? null,
-            longitude: asNumber(venue.longitude) ?? null,
-            indoorOutdoor: venue.indoor_outdoor ?? null,
-            airConditioned: Boolean(venue.air_conditioned),
-            parkingAvailable: Boolean(venue.parking_available),
-            overnightAccommodation: Boolean(venue.overnight_accommodation),
-            petFriendly: Boolean(venue.pet_friendly),
-            wheelchairAccessible: Boolean(venue.wheelchair_accessible),
-            hasPool: Boolean(venue.has_pool),
-            ceremonyVenue: Boolean(venue.ceremony_venue),
-            receptionVenue: Boolean(venue.reception_venue),
-            eventTypes,
-            categories,
-            amenities,
-          };
-        })
-      : fallbackVenues.map((venue) => ({
-          ...venue,
-          isFavorited: favoriteVenueIds.has(String(venue.id)),
-        }));
+  const researchVenueById = new Map(
+    researchVenues.map((venue) => [venue.id, venue]),
+  );
+  const orderedResearchVenues =
+    dbVenues && dbVenues.length === researchVenues.length
+      ? (dbVenues as Array<{ id: string }>)
+          .map((venue) => researchVenueById.get(String(venue.id)))
+          .filter((venue): venue is (typeof researchVenues)[number] =>
+            Boolean(venue),
+          )
+      : researchVenues;
+  const venues: Venue[] = orderedResearchVenues.map((venue) =>
+    toMarketplaceVenue(venue, favoriteVenueIds),
+  );
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[#F9FAFB] text-[#111827]">

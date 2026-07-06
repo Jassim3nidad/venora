@@ -327,7 +327,11 @@ export default function VenueDetails({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {nearbyVenues.map((item) => {
               const coverImg = item.venue_images?.find((i: any) => i.is_featured) ?? item.venue_images?.[0];
-              const imgUrl = coverImg ? `${supabaseUrl}/storage/v1/object/public/venue-images/${coverImg.storage_path}` : null;
+              const imgUrl = coverImg
+                ? String(coverImg.storage_path).startsWith("http")
+                  ? coverImg.storage_path
+                  : `${supabaseUrl}/storage/v1/object/public/venue-images/${coverImg.storage_path}`
+                : null;
 
               return (
                 <Link

@@ -18,10 +18,25 @@ const nextConfig: NextConfig = {
         hostname: "*.supabase.co",
         pathname: "/storage/v1/object/public/**",
       },
-      // Placeholder images for development
+      // Research venue image sources
+      { protocol: "https", hostname: "www.theblueleaf.com", pathname: "/**" },
       {
         protocol: "https",
-        hostname: "images.unsplash.com",
+        hostname: "www.hillcreekgardenstagaytay.com",
+        pathname: "/**",
+      },
+      { protocol: "https", hostname: "www.venuespring.com", pathname: "/**" },
+      { protocol: "https", hostname: "villaescudero.com", pathname: "/**" },
+      {
+        protocol: "https",
+        hostname: "cdn.jardindemiramareventsvenue.com",
+        pathname: "/**",
+      },
+      { protocol: "https", hostname: "images.cvent.com", pathname: "/**" },
+      {
+        protocol: "https",
+        hostname: "www.marcopolohotels.com",
+        pathname: "/**",
       },
       // Squarespace-hosted venue images
       {
@@ -29,6 +44,9 @@ const nextConfig: NextConfig = {
         hostname: "images.squarespace-cdn.com",
         pathname: "/**",
       },
+      { protocol: "https", hostname: "astoriapalawan.com", pathname: "/**" },
+      { protocol: "https", hostname: "pearlfarmresort.com", pathname: "/**" },
+      { protocol: "https", hostname: "johnhayhotels.com", pathname: "/**" },
       // Google user images (profile photos)
       {
         protocol: "https",

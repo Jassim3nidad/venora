@@ -4,6 +4,13 @@ import Link from "next/link";
 import { Bell, HelpCircle, LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import VenueDetails from "@/src/features/venues/ui/VenueDetails";
+import {
+  getNearbyResearchVenueDetails,
+  getPublicResearchReviews,
+  getResearchVenueBySlug,
+  getResearchVenueDetailBySlug,
+  researchVenues,
+} from "@/src/features/venues/data/research-venues";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -16,12 +23,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .from("venues")
     .select("name, description")
     .eq("slug", slug)
-    .single();
+    .in(
+      "id",
+      researchVenues.map((item) => item.id),
+    )
+    .maybeSingle();
 
-  if (!venue) return { title: "Venue Not Found" };
+  const datasetVenue = getResearchVenueBySlug(slug);
+  const metadataVenue = datasetVenue ?? venue;
+
+  if (!metadataVenue) return { title: "Venue Not Found" };
   return {
-    title: venue.name,
-    description: venue.description ?? undefined,
+    title: metadataVenue.name,
+    description:
+      "description" in metadataVenue
+        ? (metadataVenue.description ?? undefined)
+        : metadataVenue.short_description,
   };
 }
 
@@ -44,7 +61,7 @@ export default async function VenueDetailPage({ params }: Props) {
   } = await supabase.auth.getUser();
 
   // 2. Fetch primary venue details
-  const { data: venue } = await supabase
+  const { data: dbVenue } = await supabase
     .from("venues")
     .select(
       `
@@ -56,44 +73,38 @@ export default async function VenueDetailPage({ params }: Props) {
     `,
     )
     .eq("slug", slug)
+    .in(
+      "id",
+      researchVenues.map((item) => item.id),
+    )
     .eq("status", "published")
     .maybeSingle();
 
-  if (!venue) notFound();
+  const datasetVenue = getResearchVenueBySlug(slug);
+  const venue = getResearchVenueDetailBySlug(slug);
+
+  if (!venue || !datasetVenue) notFound();
 
   // 3. Fetch reviews associated with this venue
-  const { data: reviews } = await supabase
-    .from("reviews")
-    .select(
-      `
-      *,
-      profiles(
-        full_name,
-        avatar_url
-      )
-    `,
-    )
-    .eq("venue_id", venue.id)
-    .eq("status", "published")
-    .order("created_at", { ascending: false });
+  const { data: reviews } = dbVenue
+    ? await supabase
+        .from("reviews")
+        .select(
+          `
+          *,
+          profiles(
+            full_name,
+            avatar_url
+          )
+        `,
+        )
+        .eq("venue_id", venue.id)
+        .eq("status", "published")
+        .order("created_at", { ascending: false })
+    : { data: getPublicResearchReviews() };
 
   // 4. Fetch nearby venues in the same province
-  const { data: nearbyVenues } = await supabase
-    .from("venues")
-    .select(
-      `
-      *,
-      venue_images(
-        storage_path,
-        is_featured
-      )
-    `,
-    )
-    .eq("province", venue.province)
-    .eq("status", "published")
-    .neq("id", venue.id)
-    .order("avg_rating", { ascending: false })
-    .limit(3);
+  const nearbyVenues = getNearbyResearchVenueDetails(datasetVenue);
 
   // 5. Fetch user favorite status
   let initialIsFavorited = false;
@@ -181,7 +192,7 @@ export default async function VenueDetailPage({ params }: Props) {
       <VenueDetails
         venue={venue}
         reviews={reviews || []}
-        nearbyVenues={nearbyVenues || []}
+        nearbyVenues={nearbyVenues}
         initialIsFavorited={initialIsFavorited}
         currentUser={user}
       />

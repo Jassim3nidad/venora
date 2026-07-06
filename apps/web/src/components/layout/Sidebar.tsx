@@ -7,6 +7,7 @@ import {
   Building2,
   CalendarDays,
   Car,
+  Check as CheckIcon,
   ChevronDown,
   Crosshair,
   Accessibility,
@@ -33,8 +34,15 @@ interface VenueFilterSource {
   city?: string;
   municipality?: string;
   province?: string;
+  basePrice?: number;
+  budgetRange?: string;
+  capacityMin?: number | null;
+  capacityMax?: number;
   latitude?: number | null;
   longitude?: number | null;
+  eventTypes?: string[];
+  categories?: string[];
+  amenities?: string[];
 }
 
 interface SidebarProps {
@@ -60,46 +68,52 @@ const filterKeys = [
   "amenities",
 ];
 
-const eventTypes = [
-  "Wedding",
-  "Birthday",
-  "Corporate",
-  "Conference",
-  "Debut",
-  "Party",
-];
-const quickLocations = ["Tagaytay", "BGC", "Makati", "Batangas"];
-
-const budgetTabs = [
-  { label: "Under ₱100k", value: "under-100k", range: "Below ₱100,000" },
-  { label: "₱100k-300k", value: "100k-300k", range: "₱100,000 - ₱300,000" },
-  { label: "Luxury", value: "luxury", range: "Above ₱300,000" },
-];
-
-const venueTypes = [
-  { label: "Garden", icon: Trees },
-  { label: "Beach", icon: Umbrella },
-  { label: "Resort", icon: Waves },
-  { label: "Hotel", icon: Building2 },
-  { label: "Restaurant", icon: House },
-  { label: "Church", icon: Landmark },
-];
-
 const indoorOutdoorModes = [
   { label: "Indoor", value: "indoor" },
   { label: "Outdoor", value: "outdoor" },
   { label: "Both", value: "both" },
 ];
 
-const amenities = [
-  { label: "Parking", icon: Car },
-  { label: "Aircon", icon: Snowflake },
-  { label: "Pool", icon: Waves },
-  { label: "Pet Friendly", icon: PawPrint },
-  { label: "Wheelchair Accessible", icon: Accessibility },
-  { label: "WiFi", icon: Wifi },
-  { label: "Overnight", icon: Bed },
-];
+function normalize(value: unknown) {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase();
+}
+
+function uniqueStrings(values: Array<string | null | undefined>) {
+  return [...new Set(values.filter((value): value is string => Boolean(value)))];
+}
+
+function getVenueTypeIcon(label: string) {
+  const value = normalize(label);
+
+  if (value.includes("garden")) return Trees;
+  if (value.includes("beach")) return Umbrella;
+  if (value.includes("resort")) return Waves;
+  if (value.includes("hotel")) return Building2;
+  if (value.includes("restaurant")) return House;
+  if (value.includes("church")) return Landmark;
+
+  return Building2;
+}
+
+function getAmenityIcon(label: string) {
+  const value = normalize(label);
+
+  if (value.includes("park")) return Car;
+  if (value.includes("air")) return Snowflake;
+  if (value.includes("pool") || value.includes("beach")) return Waves;
+  if (value.includes("pet")) return PawPrint;
+  if (value.includes("wheelchair") || value.includes("accessible")) {
+    return Accessibility;
+  }
+  if (value.includes("wifi") || value.includes("wi-fi")) return Wifi;
+  if (value.includes("overnight") || value.includes("accommodation")) {
+    return Bed;
+  }
+
+  return CheckIcon;
+}
 
 function SectionTitle({
   icon: Icon,
@@ -256,6 +270,66 @@ export default function Sidebar({
         .filter(Boolean),
     [params],
   );
+
+  const eventTypes = useMemo(
+    () =>
+      uniqueStrings(venues.flatMap((venue) => venue.eventTypes ?? [])).sort(),
+    [venues],
+  );
+
+  const quickLocations = useMemo(
+    () =>
+      uniqueStrings(
+        venues.flatMap((venue) => [venue.city, venue.province]),
+      ).slice(0, 4),
+    [venues],
+  );
+
+  const budgetTabs = useMemo(
+    () =>
+      uniqueStrings(venues.map((venue) => venue.budgetRange)).map((range) => ({
+        label: range,
+        value: range,
+        range,
+      })),
+    [venues],
+  );
+
+  const venueTypes = useMemo(
+    () =>
+      uniqueStrings(
+        venues.flatMap((venue) => venue.categories ?? []),
+      ).map((label) => ({
+        label,
+        icon: getVenueTypeIcon(label),
+      })),
+    [venues],
+  );
+
+  const amenities = useMemo(
+    () =>
+      uniqueStrings(
+        venues.flatMap((venue) => venue.amenities ?? []),
+      ).map((label) => ({
+        label,
+        icon: getAmenityIcon(label),
+      })),
+    [venues],
+  );
+
+  const capacityBounds = useMemo(() => {
+    const capacities = venues
+      .map((venue) => venue.capacityMax)
+      .filter((value): value is number => typeof value === "number");
+
+    const min = Math.min(...capacities);
+    const max = Math.max(...capacities);
+
+    return {
+      min: Number.isFinite(min) ? Math.max(1, Math.floor(min / 10) * 10) : 1,
+      max: Number.isFinite(max) ? Math.ceil(max / 50) * 50 : 1000,
+    };
+  }, [venues]);
 
   const provinceOptions = useMemo(
     () =>
@@ -660,16 +734,16 @@ export default function Sidebar({
           <SectionTitle icon={Users} title="Capacity" />
 
           <div className="flex items-center justify-between text-sm font-semibold text-neutral-500">
-            <span>50</span>
-            <span>1000+</span>
+            <span>{capacityBounds.min}</span>
+            <span>{capacityBounds.max}+</span>
           </div>
 
           <input
             type="range"
-            min={50}
-            max={1000}
-            step={50}
-            value={capacityValue || 150}
+            min={capacityBounds.min}
+            max={capacityBounds.max}
+            step={10}
+            value={capacityValue || Math.min(150, capacityBounds.max)}
             onChange={(event) =>
               updateFilters({ capacity: event.target.value })
             }
@@ -688,7 +762,7 @@ export default function Sidebar({
               id="capacity-input"
               type="number"
               min={0}
-              max={1000}
+              max={capacityBounds.max}
               step={10}
               value={capacityValue || ""}
               onChange={(event) =>

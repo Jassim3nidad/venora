@@ -85,11 +85,11 @@ export default function ReviewsSection({
                   <div className="h-1.5 w-full bg-[var(--border-default)] rounded-full overflow-hidden">
                     <div
                       className="h-full bg-[var(--color-brand-500)] rounded-full"
-                      style={{ width: ratingPercentage(dim.value || 4.5) }}
+                      style={{ width: ratingPercentage(dim.value) }}
                     />
                   </div>
                   <span className="text-xs font-bold text-[var(--text-primary)] min-w-[20px] text-right">
-                    {(dim.value || 4.5).toFixed(1)}
+                    {dim.value.toFixed(1)}
                   </span>
                 </div>
               </div>
@@ -145,9 +145,11 @@ export default function ReviewsSection({
                     </div>
                   </div>
 
-                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-                    {review.comment || "Great venue and host!"}
-                  </p>
+                  {review.comment && (
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                      {review.comment}
+                    </p>
+                  )}
 
                   {/* Owner's reply */}
                   {review.owner_reply && (

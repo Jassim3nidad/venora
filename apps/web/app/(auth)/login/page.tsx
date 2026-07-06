@@ -19,12 +19,14 @@ import {
   signInWithOAuthAction,
 } from "@/features/auth/actions/auth.actions";
 import { loginSchema } from "@/features/auth/schemas/auth.schema";
+import { researchVenues } from "@/src/features/venues/data/research-venues";
 
 const brandPoints = [
   "Curated, high-quality spaces.",
   "Transparent, upfront pricing.",
   "Seamless booking management.",
 ];
+const heroVenue = researchVenues[0]!;
 
 function LoginForm() {
   const searchParams = useSearchParams();
@@ -84,8 +86,8 @@ function LoginForm() {
     <main className="flex min-h-screen w-full overflow-hidden bg-[#F9FAFB] text-[#111827]">
       <section className="relative hidden min-h-screen w-1/2 overflow-hidden bg-[#111827] lg:flex">
         <img
-          src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1400&q=80"
-          alt="Warmly lit wedding reception venue with elegant table settings."
+          src={heroVenue.photos.cover_image_url ?? heroVenue.photos.image_urls?.[0]}
+          alt={`${heroVenue.name} venue`}
           className="absolute inset-0 h-full w-full object-cover opacity-45"
         />
         <div className="absolute inset-0 bg-gradient-to-br from-[#111827]/95 via-[#1D4ED8]/88 to-[#2563EB]/78" />

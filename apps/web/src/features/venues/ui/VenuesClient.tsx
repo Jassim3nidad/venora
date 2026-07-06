@@ -37,6 +37,8 @@ export interface Venue {
   municipality?: string;
   province?: string;
   basePrice?: number;
+  budgetRange?: string;
+  capacityMin?: number | null;
   capacityMax?: number;
   latitude?: number | null;
   longitude?: number | null;
@@ -198,7 +200,27 @@ function matchesBudgetPreset(venue: Venue, budget: string) {
   if (!budget) return true;
 
   const price = getVenuePrice(venue);
+  const normalizedBudget = normalize(budget);
+
+  if (
+    venue.budgetRange &&
+    normalize(venue.budgetRange) === normalizedBudget
+  ) {
+    return true;
+  }
+
   if (price <= 0) return false;
+
+  const underMatch = normalizedBudget.match(/^under-(\d+)$/);
+  if (underMatch) return price < Number(underMatch[1]);
+
+  const overMatch = normalizedBudget.match(/^over-(\d+)$/);
+  if (overMatch) return price >= Number(overMatch[1]);
+
+  const rangeMatch = normalizedBudget.match(/^range-(\d+)-(\d+)$/);
+  if (rangeMatch) {
+    return price >= Number(rangeMatch[1]) && price <= Number(rangeMatch[2]);
+  }
 
   if (budget === "under-100k") return price < 100000;
   if (budget === "100k-300k") return price >= 100000 && price <= 300000;
@@ -227,9 +249,16 @@ function matchesVenueTypes(venue: Venue, venueTypes: string[]) {
   if (venueTypes.length === 0) return true;
 
   const venueText = getVenueSearchText(venue);
-  const requested = venueTypes.map(toVenueTypeValue).filter(isVenueTypeValue);
+  const requested = venueTypes.map(normalize).filter(Boolean);
 
-  return requested.some((venueType) => venueText.includes(venueType));
+  return requested.some((venueType) => {
+    const compatibleVenueType = toVenueTypeValue(venueType);
+
+    return (
+      venueText.includes(venueType) ||
+      (compatibleVenueType ? venueText.includes(compatibleVenueType) : false)
+    );
+  });
 }
 
 function matchesIndoorOutdoor(venue: Venue, indoorOutdoor: string) {
@@ -320,6 +349,7 @@ function getBudgetSummary(filters: {
   if (filters.budget === "under-100k") return "Under ₱100k";
   if (filters.budget === "100k-300k") return "₱100k-300k";
   if (filters.budget === "luxury") return "Luxury";
+  if (filters.budget) return filters.budget;
 
   return "";
 }
@@ -368,63 +398,6 @@ function detectLocalLocation(text: string, venues: Venue[]) {
     "province" | "city" | "municipality"
   > = {};
 
-  const aliases: Array<{
-    terms: string[];
-    province: string;
-    city?: string;
-    municipality?: string;
-  }> = [
-    {
-      terms: ["tagaytay"],
-      province: "Cavite",
-      city: "Tagaytay City",
-      municipality: "Tagaytay",
-    },
-    {
-      terms: ["makati"],
-      province: "Metro Manila",
-      city: "Makati City",
-      municipality: "Makati",
-    },
-    {
-      terms: ["bgc", "bonifacio global city", "taguig"],
-      province: "Metro Manila",
-      city: "Taguig City",
-      municipality: "Taguig",
-    },
-    {
-      terms: ["nasugbu"],
-      province: "Batangas",
-      city: "Nasugbu",
-      municipality: "Nasugbu",
-    },
-    { terms: ["batangas"], province: "Batangas" },
-    {
-      terms: ["antipolo"],
-      province: "Rizal",
-      city: "Antipolo",
-      municipality: "Antipolo",
-    },
-    { terms: ["rizal"], province: "Rizal" },
-    {
-      terms: ["malolos"],
-      province: "Bulacan",
-      city: "Malolos City",
-      municipality: "Malolos",
-    },
-    { terms: ["bulacan"], province: "Bulacan" },
-  ];
-
-  const aliasMatch = aliases.find((alias) =>
-    alias.terms.some((term) => text.includes(term)),
-  );
-
-  if (aliasMatch) {
-    hints.province = aliasMatch.province;
-    if (aliasMatch.city) hints.city = aliasMatch.city;
-    if (aliasMatch.municipality) hints.municipality = aliasMatch.municipality;
-  }
-
   const locationFields = [
     ["province", "province"],
     ["city", "city"],
@@ -468,7 +441,7 @@ function parseLocalSmartSearch(
     /(?:budget|price|cost)?\s*(?:php|p|peso|pesos|\u20b1)?\s*([0-9][0-9,.]*)(k|m|thousand|million)?\s*(?:-|to)\s*(?:php|p|peso|pesos|\u20b1)?\s*([0-9][0-9,.]*)(k|m|thousand|million)?/,
   );
   const maxBudgetMatch = text.match(
-    /(?:under|below|less than|up to|max(?:imum)?|budget(?: is| of| around| about)?|price(?: is| of| around| about)?)\s*(?:php|p|peso|pesos|\u20b1)?\s*([0-9][0-9,.]*)(k|m|thousand|million)?/,
+    /(?:under|below|less than|up to|max(?:imum)?|budget(?: is| is only| of| around| about| only)?|price(?: is| is only| of| around| about| only)?|only)\s*(?:php|p|peso|pesos|\u20b1)?\s*([0-9][0-9,.]*)(k|m|thousand|million)?/,
   );
   const minBudgetMatch = text.match(
     /(?:from|above|over|at least|min(?:imum)?)\s*(?:php|p|peso|pesos|\u20b1)?\s*([0-9][0-9,.]*)(k|m|thousand|million)?/,
@@ -929,7 +902,11 @@ export default function VenuesClient({
   const handleSmartSearch = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const query = aiPrompt.trim();
+    const formData = new FormData(event.currentTarget);
+    const query =
+      String(formData.get("aiPrompt") ?? aiPrompt)
+        .trim()
+        .slice(0, 500);
 
     if (!query && activeFilterCount === 0) return;
 
@@ -1091,8 +1068,12 @@ export default function VenuesClient({
 
                   <input
                     id="venue-ai-search"
+                    name="aiPrompt"
                     type="search"
                     value={aiPrompt}
+                    onInput={(event) =>
+                      setAiPrompt(event.currentTarget.value)
+                    }
                     onChange={(event) => setAiPrompt(event.target.value)}
                     placeholder="Try: outdoor garden in Tagaytay for 150 guests under ₱250k with parking"
                     className="h-12 w-full rounded-2xl border border-[#BFDBFE] bg-white pl-11 pr-4 text-sm font-semibold text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-[#93C5FD] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
@@ -1130,7 +1111,7 @@ export default function VenuesClient({
                   className="rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800"
                   role="status"
                 >
-                  AI search service is not deployed yet, so local smart filters
+                  AI search is temporarily unavailable, so local smart filters
                   were applied.
                 </p>
               )}
@@ -1291,7 +1272,7 @@ export default function VenuesClient({
                           {String(
                             typeof venue.rating === "number"
                               ? venue.rating.toFixed(1)
-                              : "4.8",
+                              : "New",
                           )}
                         </span>
                       </div>

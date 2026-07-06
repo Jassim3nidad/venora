@@ -1,17 +1,19 @@
 /**
  * Supabase Edge Function: ai-search
  *
- * Smart venue search for Venora:
- * - Parses natural language search intent with OpenAI Structured Outputs.
- * - Generates query embeddings with OpenAI embeddings.
- * - Warms missing venue embeddings in small batches.
- * - Executes hybrid PostgreSQL search with typed filters and logs usage.
+ * Parses natural-language venue searches with OpenAI, then maps the parsed
+ * parameters into the existing public.search_venues RPC.
  */
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 type VenueType =
-  "garden" | "beach" | "resort" | "hotel" | "restaurant" | "church";
+  | "garden"
+  | "beach"
+  | "resort"
+  | "hotel"
+  | "restaurant"
+  | "church";
 
 type IndoorOutdoor = "indoor" | "outdoor" | "both";
 
@@ -36,6 +38,18 @@ type RawSearchFilters = {
   sort_by?: string;
 };
 
+type SearchRequest = {
+  query?: string;
+  filters?: RawSearchFilters;
+};
+
+type ExtractedSearchParameters = {
+  max_price: number | null;
+  location: string | null;
+  venue_type: string | null;
+  keywords: string[];
+};
+
 type SearchIntent = {
   province: string | null;
   city: string | null;
@@ -52,10 +66,7 @@ type SearchIntent = {
   confidence: number;
 };
 
-type SearchRequest = {
-  query?: string;
-  filters?: RawSearchFilters;
-};
+type LocationMatch = Pick<SearchIntent, "province" | "city" | "municipality">;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -64,6 +75,8 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+const openAiBaseUrl = "https://api.openai.com/v1";
+const defaultSearchModel = "gpt-4o-mini";
 const venueTypes: VenueType[] = [
   "garden",
   "beach",
@@ -72,10 +85,20 @@ const venueTypes: VenueType[] = [
   "restaurant",
   "church",
 ];
-
-const openAiBaseUrl = "https://api.openai.com/v1";
-const defaultSearchModel = "gpt-5.4-mini";
-const defaultEmbeddingModel = "text-embedding-3-small";
+const indoorOutdoorValues: IndoorOutdoor[] = ["indoor", "outdoor", "both"];
+const featureKeywords = new Map<string, keyof Pick<
+  SearchIntent,
+  "parking" | "petFriendly" | "wheelchairAccessible"
+>>([
+  ["parking", "parking"],
+  ["car park", "parking"],
+  ["pet friendly", "petFriendly"],
+  ["pet-friendly", "petFriendly"],
+  ["pets", "petFriendly"],
+  ["wheelchair", "wheelchairAccessible"],
+  ["accessible", "wheelchairAccessible"],
+  ["wheelchair accessible", "wheelchairAccessible"],
+]);
 
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -97,13 +120,14 @@ function cleanString(value: unknown, maxLength = 120) {
 
 function normalizeText(value: unknown) {
   return String(value ?? "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
     .trim()
     .toLowerCase();
 }
 
 function toPositiveNumber(value: unknown) {
   const amount = Number(value);
-
   if (!Number.isFinite(amount) || amount <= 0) return null;
   return Math.round(amount);
 }
@@ -112,7 +136,7 @@ function parseCurrencyToken(rawValue: string, suffix = "") {
   const value = Number(rawValue.replace(/,/g, ""));
   if (!Number.isFinite(value) || value <= 0) return null;
 
-  const normalizedSuffix = suffix.toLowerCase();
+  const normalizedSuffix = normalizeText(suffix);
   if (normalizedSuffix === "m" || normalizedSuffix === "million") {
     return Math.round(value * 1_000_000);
   }
@@ -124,9 +148,139 @@ function parseCurrencyToken(rawValue: string, suffix = "") {
   return Math.round(value);
 }
 
-function normalizeVenueType(value: string): VenueType | null {
-  const normalized = normalizeText(value).replace(/\s+/g, "-");
+function uniqueStrings(values: Array<string | null | undefined>) {
+  return [...new Set(values.map((value) => cleanString(value)).filter(Boolean))]
+    .map((value) => value as string);
+}
 
+function deterministicExtraction(query: string): Partial<ExtractedSearchParameters> {
+  const text = normalizeText(query);
+  const budgetMatch = text.match(
+    /(?:budget|under|below|less than|up to|max(?:imum)?|not more than|only)\D*([0-9][0-9,.]*)(k|m|thousand|million)?/,
+  );
+  const maxPrice = budgetMatch
+    ? parseCurrencyToken(budgetMatch[1], budgetMatch[2])
+    : null;
+  const venueType =
+    indoorOutdoorValues.find((value) => text.includes(value)) ??
+    venueTypes.find((value) => text.includes(value)) ??
+    null;
+  const keywords = uniqueStrings(
+    [...featureKeywords.keys()].filter((keyword) => text.includes(keyword)),
+  );
+
+  return {
+    max_price: maxPrice,
+    venue_type: venueType,
+    keywords,
+  };
+}
+
+function normalizeExtractedParameters(
+  parsed: Partial<ExtractedSearchParameters>,
+  deterministic: Partial<ExtractedSearchParameters>,
+): ExtractedSearchParameters {
+  const maxPrice =
+    toPositiveNumber(parsed.max_price) ?? toPositiveNumber(deterministic.max_price);
+  const location = cleanString(parsed.location)?.toLowerCase() ?? null;
+  const venueType = cleanString(parsed.venue_type)?.toLowerCase() ?? null;
+  const keywords = uniqueStrings([
+    ...(Array.isArray(parsed.keywords) ? parsed.keywords : []),
+    ...(Array.isArray(deterministic.keywords) ? deterministic.keywords : []),
+  ])
+    .map((keyword) => keyword.toLowerCase())
+    .filter(
+      (keyword) =>
+        ![
+          "budget",
+          "price",
+          "cost",
+          "cheap",
+          "affordable",
+          "only",
+          "venue",
+          "venues",
+        ].includes(keyword),
+    )
+    .slice(0, 12);
+
+  return {
+    max_price: maxPrice,
+    location,
+    venue_type: venueType,
+    keywords,
+  };
+}
+
+function extractChatContent(payload: any) {
+  const content = payload?.choices?.[0]?.message?.content;
+  if (typeof content === "string") return content;
+  return null;
+}
+
+async function parseQueryWithOpenAI(
+  query: string,
+  openAiApiKey: string,
+): Promise<ExtractedSearchParameters> {
+  const deterministic = deterministicExtraction(query);
+  const response = await fetch(`${openAiBaseUrl}/chat/completions`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${openAiApiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: Deno.env.get("OPENAI_SEARCH_MODEL") ?? defaultSearchModel,
+      temperature: 0,
+      messages: [
+        {
+          role: "system",
+          content:
+            "Extract venue search parameters from natural language. Convert shorthand budgets like 100k to 100000. Return only fields in the schema. Use lowercase strings. Put amenities or features such as parking, pool, wifi, beachfront, pet friendly, or wheelchair accessible in keywords. Do not put budget phrases in keywords.",
+        },
+        {
+          role: "user",
+          content: query,
+        },
+      ],
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "venue_search_parameters",
+          strict: true,
+          schema: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              max_price: { type: ["number", "null"] },
+              location: { type: ["string", "null"] },
+              venue_type: { type: ["string", "null"] },
+              keywords: {
+                type: "array",
+                items: { type: "string" },
+              },
+            },
+            required: ["max_price", "location", "venue_type", "keywords"],
+          },
+        },
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`OpenAI parsing failed: ${errorText}`);
+  }
+
+  const payload = await response.json();
+  const content = extractChatContent(payload);
+  if (!content) throw new Error("OpenAI parsing returned no JSON content.");
+
+  return normalizeExtractedParameters(JSON.parse(content), deterministic);
+}
+
+function normalizeVenueType(value: string | null): VenueType | null {
+  const normalized = normalizeText(value).replace(/\s+/g, "-");
   return (
     venueTypes.find(
       (venueType) =>
@@ -137,389 +291,162 @@ function normalizeVenueType(value: string): VenueType | null {
   );
 }
 
-function normalizeIndoorOutdoor(value: unknown): IndoorOutdoor | null {
+function normalizeIndoorOutdoor(value: string | null): IndoorOutdoor | null {
   const normalized = normalizeText(value);
-
   if (normalized === "indoor") return "indoor";
   if (normalized === "outdoor") return "outdoor";
   if (normalized === "both" || normalized === "indoor/outdoor") return "both";
-
   return null;
 }
 
-function uniqueVenueTypes(values: unknown): VenueType[] {
-  if (!Array.isArray(values)) return [];
+function explicitVenueTypes(filters?: RawSearchFilters): VenueType[] {
+  if (!Array.isArray(filters?.venue_types)) return [];
 
   return [
     ...new Set(
-      values
-        .map((value) => normalizeVenueType(String(value)))
+      filters.venue_types
+        .map((value) => normalizeVenueType(value))
         .filter(Boolean) as VenueType[],
     ),
   ];
 }
 
-function mergeExplicitFilters(
-  intent: SearchIntent,
-  filters?: RawSearchFilters,
-) {
-  if (!filters) return intent;
+async function resolveLocation(
+  supabase: ReturnType<typeof createClient>,
+  location: string | null,
+): Promise<LocationMatch> {
+  if (!location) return { province: null, city: null, municipality: null };
 
-  const explicitVenueTypes = uniqueVenueTypes(filters.venue_types);
-  const indoorOutdoor = normalizeIndoorOutdoor(filters.indoor_outdoor);
+  const normalizedLocation = normalizeText(location);
+  const { data, error } = await supabase
+    .from("venues")
+    .select("province, city, municipality")
+    .eq("status", "published")
+    .limit(500);
 
-  return compactIntent({
-    ...intent,
-    province: cleanString(filters.province) ?? intent.province,
-    city: cleanString(filters.city) ?? intent.city,
-    municipality: cleanString(filters.municipality) ?? intent.municipality,
-    minBudget: toPositiveNumber(filters.min_budget) ?? intent.minBudget,
-    maxBudget:
-      toPositiveNumber(filters.max_budget) ??
-      toPositiveNumber(filters.maxPrice) ??
-      intent.maxBudget,
-    guests:
-      toPositiveNumber(filters.guests) ??
-      toPositiveNumber(filters.capacity) ??
-      intent.guests,
-    venueTypes:
-      explicitVenueTypes.length > 0 ? explicitVenueTypes : intent.venueTypes,
-    indoorOutdoor: indoorOutdoor ?? intent.indoorOutdoor,
-    parking: filters.parking === true || intent.parking,
-    petFriendly: filters.pet_friendly === true || intent.petFriendly,
-    wheelchairAccessible:
-      filters.wheelchair_accessible === true || intent.wheelchairAccessible,
-    keyword: cleanString(filters.keyword ?? filters.q) ?? intent.keyword,
-  });
-}
-
-function inferDeterministicKeyword(
-  query: string,
-  text: string,
-  hasStructuredIntent: boolean,
-) {
-  const keywordHints = [
-    "rooftop",
-    "ballroom",
-    "loft",
-    "pavilion",
-    "chapel",
-    "farm",
-    "estate",
-    "villa",
-    "hall",
-    "cafe",
-    "sea view",
-    "mountain view",
-  ];
-  const keywordHint = keywordHints.find((hint) => text.includes(hint));
-
-  if (keywordHint) return keywordHint;
-  if (hasStructuredIntent) return null;
-
-  return cleanString(query, 160);
-}
-
-function compactIntent(input: Partial<SearchIntent>): SearchIntent {
-  return {
-    province: cleanString(input.province),
-    city: cleanString(input.city),
-    municipality: cleanString(input.municipality),
-    minBudget: toPositiveNumber(input.minBudget),
-    maxBudget: toPositiveNumber(input.maxBudget),
-    guests: toPositiveNumber(input.guests),
-    venueTypes: uniqueVenueTypes(input.venueTypes),
-    indoorOutdoor: normalizeIndoorOutdoor(input.indoorOutdoor),
-    parking: input.parking === true,
-    petFriendly: input.petFriendly === true,
-    wheelchairAccessible: input.wheelchairAccessible === true,
-    keyword: cleanString(input.keyword),
-    confidence: Math.min(
-      1,
-      Math.max(
-        0,
-        Number.isFinite(input.confidence) ? (input.confidence ?? 0) : 0,
-      ),
-    ),
-  };
-}
-
-function deterministicIntent(query = "", filters?: RawSearchFilters) {
-  const text = normalizeText(query);
-  const detectedTypes = venueTypes.filter((type) => text.includes(type));
-  const budgetMatch = text.match(
-    /(?:under|below|less than|up to|max(?:imum)?)\s*(?:php|₱|p)?\s*([0-9][0-9,.]*)(k|m|thousand|million)?/,
-  );
-  const minBudgetMatch = text.match(
-    /(?:from|above|over|at least|min(?:imum)?)\s*(?:php|₱|p)?\s*([0-9][0-9,.]*)(k|m|thousand|million)?/,
-  );
-  const guestMatch = text.match(
-    /([0-9][0-9,.]*)\s*(?:guests|guest|pax|people|persons)/,
-  );
-
-  const locationHints: Partial<
-    Pick<SearchIntent, "province" | "city" | "municipality">
-  > = {};
-
-  if (text.includes("tagaytay")) {
-    locationHints.city = "Tagaytay City";
-    locationHints.municipality = "Tagaytay";
-    locationHints.province = "Cavite";
-  } else if (text.includes("makati")) {
-    locationHints.city = "Makati City";
-    locationHints.municipality = "Makati";
-    locationHints.province = "Metro Manila";
-  } else if (text.includes("bgc") || text.includes("taguig")) {
-    locationHints.city = "Taguig City";
-    locationHints.municipality = "Taguig";
-    locationHints.province = "Metro Manila";
-  } else if (text.includes("nasugbu") || text.includes("batangas")) {
-    locationHints.city = text.includes("nasugbu") ? "Nasugbu" : null;
-    locationHints.municipality = text.includes("nasugbu") ? "Nasugbu" : null;
-    locationHints.province = "Batangas";
-  } else if (text.includes("antipolo") || text.includes("rizal")) {
-    locationHints.city = text.includes("antipolo") ? "Antipolo" : null;
-    locationHints.municipality = text.includes("antipolo") ? "Antipolo" : null;
-    locationHints.province = "Rizal";
-  } else if (text.includes("malolos") || text.includes("bulacan")) {
-    locationHints.city = text.includes("malolos") ? "Malolos City" : null;
-    locationHints.municipality = text.includes("malolos") ? "Malolos" : null;
-    locationHints.province = "Bulacan";
+  if (error || !data) {
+    return { province: location, city: null, municipality: null };
   }
 
-  const indoorOutdoor =
-    text.includes("indoor and outdoor") || text.includes("indoor/outdoor")
-      ? "both"
-      : text.includes("outdoor")
-        ? "outdoor"
-        : text.includes("indoor")
-          ? "indoor"
-          : null;
-  const hasStructuredIntent = Boolean(
-    locationHints.province ||
-      locationHints.city ||
-      locationHints.municipality ||
-      budgetMatch ||
-      minBudgetMatch ||
-      guestMatch ||
-      detectedTypes.length > 0 ||
-      indoorOutdoor ||
-      text.includes("parking") ||
-      text.includes("pet friendly") ||
-      text.includes("pets") ||
-      text.includes("wheelchair") ||
-      text.includes("accessible"),
-  );
-
-  const intent = compactIntent({
-    ...locationHints,
-    minBudget: minBudgetMatch
-      ? parseCurrencyToken(minBudgetMatch[1], minBudgetMatch[2])
-      : null,
-    maxBudget: budgetMatch
-      ? parseCurrencyToken(budgetMatch[1], budgetMatch[2])
-      : null,
-    guests: guestMatch ? parseCurrencyToken(guestMatch[1]) : null,
-    venueTypes: detectedTypes,
-    indoorOutdoor,
-    parking: text.includes("parking"),
-    petFriendly: text.includes("pet friendly") || text.includes("pets"),
-    wheelchairAccessible:
-      text.includes("wheelchair") || text.includes("accessible"),
-    keyword: inferDeterministicKeyword(query, text, hasStructuredIntent),
-    confidence: text ? 0.45 : 0,
-  });
-
-  return mergeExplicitFilters(intent, filters);
-}
-
-function structuredOutputSchema() {
-  return {
-    type: "object",
-    additionalProperties: false,
-    properties: {
-      province: { type: ["string", "null"] },
-      city: { type: ["string", "null"] },
-      municipality: { type: ["string", "null"] },
-      minBudget: { type: ["number", "null"] },
-      maxBudget: { type: ["number", "null"] },
-      guests: { type: ["number", "null"] },
-      venueTypes: {
-        type: "array",
-        items: { type: "string", enum: venueTypes },
-      },
-      indoorOutdoor: {
-        type: ["string", "null"],
-        enum: ["indoor", "outdoor", "both", null],
-      },
-      parking: { type: "boolean" },
-      petFriendly: { type: "boolean" },
-      wheelchairAccessible: { type: "boolean" },
-      keyword: { type: ["string", "null"] },
-      confidence: { type: "number" },
-    },
-    required: [
-      "province",
-      "city",
-      "municipality",
-      "minBudget",
-      "maxBudget",
-      "guests",
-      "venueTypes",
-      "indoorOutdoor",
-      "parking",
-      "petFriendly",
-      "wheelchairAccessible",
-      "keyword",
-      "confidence",
-    ],
-  };
-}
-
-function extractResponseText(payload: any) {
-  if (typeof payload.output_text === "string") return payload.output_text;
-
-  for (const item of payload.output ?? []) {
-    for (const content of item.content ?? []) {
-      if (typeof content.text === "string") return content.text;
-      if (typeof content.output_text === "string") return content.output_text;
+  for (const row of data) {
+    if (normalizeText(row.province) === normalizedLocation) {
+      return { province: row.province, city: null, municipality: null };
     }
   }
 
-  return null;
+  for (const row of data) {
+    if (normalizeText(row.city) === normalizedLocation) {
+      return { province: null, city: row.city, municipality: null };
+    }
+  }
+
+  for (const row of data) {
+    if (normalizeText(row.municipality) === normalizedLocation) {
+      return { province: null, city: null, municipality: row.municipality };
+    }
+  }
+
+  return { province: location, city: null, municipality: null };
 }
 
-async function parseIntentWithOpenAI(
-  query: string,
-  filters: RawSearchFilters | undefined,
-  openAiApiKey: string,
-) {
-  const response = await fetch(`${openAiBaseUrl}/responses`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${openAiApiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: Deno.env.get("OPENAI_SEARCH_MODEL") ?? defaultSearchModel,
-      input: [
-        {
-          role: "system",
-          content:
-            "Extract structured venue search filters for Venora. Use Philippine location names when clear. Return null for unknown optional fields. Do not invent unavailable constraints.",
-        },
-        {
-          role: "user",
-          content: JSON.stringify({
-            query,
-            explicitFilters: filters ?? {},
-            supportedVenueTypes: venueTypes,
-            supportedIndoorOutdoor: ["indoor", "outdoor", "both"],
-          }),
-        },
-      ],
-      text: {
-        format: {
-          type: "json_schema",
-          name: "venue_search_intent",
-          strict: true,
-          schema: structuredOutputSchema(),
-        },
-      },
-    }),
+function keywordHas(keywords: string[], values: string[]) {
+  return keywords.some((keyword) => {
+    const normalized = normalizeText(keyword);
+    return values.some((value) => normalized.includes(value));
+  });
+}
+
+function buildKeyword(parameters: ExtractedSearchParameters) {
+  const filterOnlyKeywords = [
+    "parking",
+    "car park",
+    "pet friendly",
+    "pet-friendly",
+    "pets",
+    "wheelchair",
+    "accessible",
+    "wheelchair accessible",
+  ];
+
+  const searchKeywords = parameters.keywords.filter((keyword) => {
+    const normalized = normalizeText(keyword);
+    return !filterOnlyKeywords.some((filterKeyword) =>
+      normalized.includes(filterKeyword),
+    );
   });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`OpenAI intent parsing failed: ${errorText}`);
-  }
-
-  const payload = await response.json();
-  const outputText = extractResponseText(payload);
-
-  if (!outputText) {
-    throw new Error("OpenAI intent parsing returned no text output.");
-  }
-
-  return mergeExplicitFilters(compactIntent(JSON.parse(outputText)), filters);
+  return searchKeywords.length > 0 ? searchKeywords.join(" ") : null;
 }
 
-async function createEmbeddings(inputs: string[], openAiApiKey: string) {
-  if (inputs.length === 0) return [];
-
-  const response = await fetch(`${openAiBaseUrl}/embeddings`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${openAiApiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: Deno.env.get("OPENAI_EMBEDDING_MODEL") ?? defaultEmbeddingModel,
-      input: inputs,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`OpenAI embedding failed: ${errorText}`);
-  }
-
-  const payload = await response.json();
-
-  return (payload.data ?? [])
-    .sort((a: { index: number }, b: { index: number }) => a.index - b.index)
-    .map((item: { embedding: number[] }) => item.embedding);
-}
-
-async function refreshMissingVenueEmbeddings(
+async function buildIntent(
   supabase: ReturnType<typeof createClient>,
-  openAiApiKey: string | null,
-) {
-  if (!openAiApiKey) return 0;
-
-  const refreshLimit = Math.min(
-    25,
-    Math.max(0, Number(Deno.env.get("AI_SEARCH_EMBED_REFRESH_LIMIT") ?? 8)),
+  parameters: ExtractedSearchParameters,
+  filters?: RawSearchFilters,
+): Promise<SearchIntent> {
+  const locationMatch = await resolveLocation(supabase, parameters.location);
+  const parsedVenueType = normalizeVenueType(parameters.venue_type);
+  const parsedIndoorOutdoor = normalizeIndoorOutdoor(parameters.venue_type);
+  const filterIndoorOutdoor = normalizeIndoorOutdoor(
+    filters?.indoor_outdoor ?? null,
   );
+  const venueTypes = [
+    ...new Set([
+      ...explicitVenueTypes(filters),
+      ...(parsedVenueType ? [parsedVenueType] : []),
+    ]),
+  ];
+  const keywords = parameters.keywords;
 
-  if (refreshLimit === 0) return 0;
+  return {
+    province: cleanString(filters?.province) ?? locationMatch.province,
+    city: cleanString(filters?.city) ?? locationMatch.city,
+    municipality:
+      cleanString(filters?.municipality) ?? locationMatch.municipality,
+    minBudget: toPositiveNumber(filters?.min_budget),
+    maxBudget:
+      parameters.max_price ??
+      toPositiveNumber(filters?.max_budget) ??
+      toPositiveNumber(filters?.maxPrice),
+    guests:
+      toPositiveNumber(filters?.guests) ?? toPositiveNumber(filters?.capacity),
+    venueTypes,
+    indoorOutdoor: filterIndoorOutdoor ?? parsedIndoorOutdoor,
+    parking: filters?.parking === true || keywordHas(keywords, ["parking"]),
+    petFriendly:
+      filters?.pet_friendly === true ||
+      keywordHas(keywords, ["pet friendly", "pet-friendly", "pets"]),
+    wheelchairAccessible:
+      filters?.wheelchair_accessible === true ||
+      keywordHas(keywords, ["wheelchair", "accessible"]),
+    keyword:
+      cleanString(filters?.keyword ?? filters?.q) ?? buildKeyword(parameters),
+    confidence: 1,
+  };
+}
 
-  const { data, error } = await supabase.rpc("venues_for_embedding", {
-    refresh_limit: refreshLimit,
-  });
-
-  if (error || !data || data.length === 0) return 0;
-
-  const embeddings = await createEmbeddings(
-    data.map((venue: { embedding_text: string }) => venue.embedding_text),
-    openAiApiKey,
-  );
-
-  const records = data
-    .map((venue: { id: string }, index: number) => ({
-      venue_id: venue.id,
-      embedding: embeddings[index],
-      updated_at: new Date().toISOString(),
-    }))
-    .filter((record: { embedding?: number[] }) =>
-      Array.isArray(record.embedding),
-    );
-
-  if (records.length === 0) return 0;
-
-  const { error: upsertError } = await supabase
-    .from("venue_embeddings")
-    .upsert(records, { onConflict: "venue_id" });
-
-  if (upsertError) {
-    console.error(
-      "[ai-search] Failed to upsert venue embeddings:",
-      upsertError,
-    );
-    return 0;
-  }
-
-  return records.length;
+function toVenuePayload(venue: any) {
+  return {
+    id: venue.id,
+    name: venue.name,
+    slug: venue.slug,
+    city: venue.city,
+    province: venue.province,
+    municipality: venue.municipality,
+    basePrice: venue.base_price === null ? null : Number(venue.base_price),
+    capacityMin: venue.capacity_min === null ? null : Number(venue.capacity_min),
+    capacityMax: venue.capacity_max === null ? null : Number(venue.capacity_max),
+    indoorOutdoor: venue.indoor_outdoor,
+    parkingAvailable: venue.parking_available,
+    petFriendly: venue.pet_friendly,
+    wheelchairAccessible: venue.wheelchair_accessible,
+    avgRating: venue.avg_rating === null ? null : Number(venue.avg_rating),
+    similarity: venue.similarity === null ? null : Number(venue.similarity ?? 0),
+    relevanceScore:
+      venue.relevance_score === null ? null : Number(venue.relevance_score ?? 0),
+    categories: venue.categories ?? [],
+    amenities: venue.amenities ?? [],
+    eventTypes: venue.event_types ?? [],
+  };
 }
 
 async function getAuthenticatedUserId(req: Request, supabaseUrl: string) {
@@ -536,25 +463,6 @@ async function getAuthenticatedUserId(req: Request, supabaseUrl: string) {
   return data.user?.id ?? null;
 }
 
-function buildEmbeddingQuery(query: string, intent: SearchIntent) {
-  return [
-    query,
-    intent.keyword,
-    intent.province,
-    intent.city,
-    intent.municipality,
-    intent.guests ? `${intent.guests} guests` : "",
-    intent.maxBudget ? `budget ${intent.maxBudget}` : "",
-    ...intent.venueTypes,
-    intent.indoorOutdoor,
-    intent.parking ? "parking" : "",
-    intent.petFriendly ? "pet friendly" : "",
-    intent.wheelchairAccessible ? "wheelchair accessible" : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
-}
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -567,19 +475,30 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const openAiApiKey = Deno.env.get("OPENAI_API_KEY");
 
     if (!supabaseUrl || !serviceRoleKey) {
       return errorResponse(
         "CONFIGURATION_ERROR",
-        "AI search is not configured correctly.",
+        "AI search is missing Supabase configuration.",
         500,
       );
     }
 
-    const openAiApiKey = Deno.env.get("OPENAI_API_KEY") ?? null;
+    if (!openAiApiKey) {
+      return errorResponse(
+        "OPENAI_NOT_CONFIGURED",
+        "OPENAI_API_KEY is not configured for ai-search.",
+        500,
+      );
+    }
+
     const body = (await req.json().catch(() => null)) as SearchRequest | null;
-    const query = cleanString(body?.query, 500) ?? "";
     const filters = body?.filters ?? {};
+    const query =
+      cleanString(body?.query, 500) ??
+      cleanString(filters.q ?? filters.keyword, 500) ??
+      "";
 
     if (!query && Object.keys(filters).length === 0) {
       return errorResponse(
@@ -590,71 +509,20 @@ serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
-    let fallbackReason: string | null = null;
-    let intent = deterministicIntent(query, filters);
-
-    if (openAiApiKey && query) {
-      try {
-        intent = await parseIntentWithOpenAI(query, filters, openAiApiKey);
-      } catch (error) {
-        fallbackReason =
-          "AI intent parsing fell back to deterministic parsing.";
-        console.error("[ai-search] Intent parser fallback:", error);
-      }
-    } else if (!openAiApiKey) {
-      fallbackReason = "OPENAI_API_KEY is not configured.";
-    }
-
-    let embeddedVenueCount = 0;
-    try {
-      embeddedVenueCount = await refreshMissingVenueEmbeddings(
-        supabase,
-        openAiApiKey,
-      );
-    } catch (error) {
-      console.error("[ai-search] Venue embedding refresh failed:", error);
-    }
-
-    let queryEmbedding: number[] | null = null;
-    const embeddingQuery = buildEmbeddingQuery(query, intent);
-
-    if (openAiApiKey && embeddingQuery) {
-      try {
-        queryEmbedding =
-          (await createEmbeddings([embeddingQuery], openAiApiKey))[0] ?? null;
-      } catch (error) {
-        fallbackReason =
-          fallbackReason ?? "Semantic search fell back to keyword search.";
-        console.error("[ai-search] Query embedding fallback:", error);
-      }
-    }
-
+    const parameters = query
+      ? await parseQueryWithOpenAI(query, openAiApiKey)
+      : normalizeExtractedParameters({}, {});
+    const intent = await buildIntent(supabase, parameters, filters);
     const matchCount = Math.min(
       50,
       Math.max(1, Number(filters.per_page ?? 24)),
     );
-    const sortBy = filters.sort_by ?? "relevance";
-    const hasStructuredSearchFilters = Boolean(
-      intent.province ||
-        intent.city ||
-        intent.municipality ||
-        intent.minBudget ||
-        intent.maxBudget ||
-        intent.guests ||
-        intent.venueTypes.length > 0 ||
-        intent.indoorOutdoor ||
-        intent.parking ||
-        intent.petFriendly ||
-        intent.wheelchairAccessible,
-    );
-    const searchKeyword =
-      intent.keyword ?? (hasStructuredSearchFilters ? null : query || null);
 
     const { data: venueRows, error: searchError } = await supabase.rpc(
       "search_venues",
       {
-        query_embedding: queryEmbedding,
-        keyword: searchKeyword,
+        query_embedding: null,
+        keyword: intent.keyword,
         filter_province: intent.province,
         filter_city: intent.city,
         filter_municipality: intent.municipality,
@@ -667,7 +535,7 @@ serve(async (req) => {
         filter_pet_friendly: intent.petFriendly ? true : null,
         filter_wheelchair_accessible: intent.wheelchairAccessible ? true : null,
         match_count: matchCount,
-        sort_by: sortBy,
+        sort_by: filters.sort_by ?? "relevance",
       },
     );
 
@@ -680,39 +548,12 @@ serve(async (req) => {
       );
     }
 
-    const venues = (venueRows ?? []).map((venue: any) => ({
-      id: venue.id,
-      name: venue.name,
-      slug: venue.slug,
-      city: venue.city,
-      province: venue.province,
-      municipality: venue.municipality,
-      basePrice: venue.base_price === null ? null : Number(venue.base_price),
-      capacityMin:
-        venue.capacity_min === null ? null : Number(venue.capacity_min),
-      capacityMax:
-        venue.capacity_max === null ? null : Number(venue.capacity_max),
-      indoorOutdoor: venue.indoor_outdoor,
-      parkingAvailable: venue.parking_available,
-      petFriendly: venue.pet_friendly,
-      wheelchairAccessible: venue.wheelchair_accessible,
-      avgRating: venue.avg_rating === null ? null : Number(venue.avg_rating),
-      similarity:
-        venue.similarity === null ? null : Number(venue.similarity ?? 0),
-      relevanceScore:
-        venue.relevance_score === null
-          ? null
-          : Number(venue.relevance_score ?? 0),
-      categories: venue.categories ?? [],
-      amenities: venue.amenities ?? [],
-      eventTypes: venue.event_types ?? [],
-    }));
-
+    const venues = (venueRows ?? []).map(toVenuePayload);
     const userId = await getAuthenticatedUserId(req, supabaseUrl);
     const { error: logError } = await supabase.from("ai_search_logs").insert({
       user_id: userId,
       query_text: query || intent.keyword || "filter search",
-      parsed_filters: intent,
+      parsed_filters: { ...intent, searchParameters: parameters },
       results_count: venues.length,
     });
 
@@ -724,8 +565,9 @@ serve(async (req) => {
       data: {
         venues,
         parsedFilters: intent,
-        fallbackReason,
-        embeddedVenueCount,
+        searchParameters: parameters,
+        fallbackReason: null,
+        embeddedVenueCount: 0,
       },
       error: null,
     });
@@ -733,7 +575,9 @@ serve(async (req) => {
     console.error("[ai-search] Unexpected error:", error);
     return errorResponse(
       "INTERNAL_ERROR",
-      "AI search is temporarily unavailable.",
+      error instanceof Error
+        ? error.message
+        : "AI search is temporarily unavailable.",
       500,
     );
   }

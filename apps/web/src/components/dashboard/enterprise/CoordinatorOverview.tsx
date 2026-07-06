@@ -8,26 +8,29 @@ import {
   StatusBadge,
 } from "./ui";
 import { MaterialIcon } from "./MaterialIcon";
+import { getMarketplaceResearchVenues } from "@/src/features/venues/data/research-venues";
+
+const coordinatorVenues = getMarketplaceResearchVenues().slice(0, 3);
 
 const UPCOMING_EVENTS = [
   {
     id: "1",
     event: "Santos-Reyes Wedding",
-    venue: "The Glasshouse Estate",
+    venue: coordinatorVenues[0]?.name ?? "Venue",
     date: "Feb 18, 2026",
     status: "Final Coordination",
   },
   {
     id: "2",
     event: "Corporate Leadership Summit",
-    venue: "Azure Grand Hall",
+    venue: coordinatorVenues[1]?.name ?? "Venue",
     date: "Feb 24, 2026",
     status: "Supplier Review",
   },
   {
     id: "3",
     event: "Debut Celebration",
-    venue: "Rosewood Pavilion",
+    venue: coordinatorVenues[2]?.name ?? "Venue",
     date: "Mar 6, 2026",
     status: "Pending Confirmation",
   },
@@ -40,11 +43,11 @@ const CHECKLIST = [
   "Send updated event timeline",
 ];
 
-const MANAGED_VENUES = [
-  { name: "The Glasshouse Estate", events: 4, status: "active" },
-  { name: "Azure Grand Hall", events: 2, status: "active" },
-  { name: "Rosewood Pavilion", events: 1, status: "pending" },
-];
+const MANAGED_VENUES = coordinatorVenues.map((venue, index) => ({
+  name: venue.name,
+  events: [4, 2, 1][index] ?? 1,
+  status: index === 2 ? "pending" : "active",
+}));
 
 export function CoordinatorOverview() {
   const kpis = [
