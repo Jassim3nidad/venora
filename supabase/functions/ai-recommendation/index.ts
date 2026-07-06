@@ -92,7 +92,9 @@ serve(async (req) => {
       body: JSON.stringify({ query: preferenceQuery }),
     });
 
-    const { venues } = await searchRes.json();
+    const searchPayload = await searchRes.json();
+    const venues = searchPayload.data?.venues ?? searchPayload.venues ?? [];
+
     return new Response(JSON.stringify({ venues, preferenceQuery }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

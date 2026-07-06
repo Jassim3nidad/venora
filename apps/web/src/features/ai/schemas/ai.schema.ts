@@ -1,14 +1,8 @@
 import { z } from "zod";
+import { smartVenueSearchRequestSchema } from "@/features/search/schemas/search.schema";
 
 /** AI search request schema */
-export const aiSearchSchema = z.object({
-  query:    z.string().min(3, "Query must be at least 3 characters"),
-  filters:  z.object({
-    city:      z.string().optional(),
-    capacity:  z.number().optional(),
-    maxPrice:  z.number().optional(),
-  }).optional(),
-});
+export const aiSearchSchema = smartVenueSearchRequestSchema;
 export type AISearchInput = z.infer<typeof aiSearchSchema>;
 
 /** AI cost estimate request schema */

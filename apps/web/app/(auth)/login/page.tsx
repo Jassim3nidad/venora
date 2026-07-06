@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Suspense, type FormEvent, useState, useTransition } from "react";
 import Link from "next/link";
@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import {
   loginAction,
+  resendVerificationEmailAction,
   signInWithOAuthAction,
 } from "@/features/auth/actions/auth.actions";
 import { loginSchema } from "@/features/auth/schemas/auth.schema";
@@ -29,6 +30,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const didReset = searchParams.get("reset") === "true";
   const didRegister = searchParams.get("registered") === "true";
+  const didVerify = searchParams.get("verified") === "true";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,6 +38,8 @@ function LoginForm() {
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
+  const [showResendVerification, setShowResendVerification] = useState(false);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -43,6 +47,8 @@ function LoginForm() {
 
     setFieldErrors({});
     setGeneralError(null);
+    setShowResendVerification(false);
+    setResendMessage(null);
 
     const result = loginSchema.safeParse({
       email,
@@ -62,6 +68,10 @@ function LoginForm() {
 
       if (response && !response.success) {
         setGeneralError(response.error);
+        const data = response.data as
+          | { reason?: string; email?: string }
+          | undefined;
+        setShowResendVerification(data?.reason === "email_unverified");
 
         if (response.fieldErrors) {
           setFieldErrors(response.fieldErrors);
@@ -165,6 +175,18 @@ function LoginForm() {
               </div>
             ) : null}
 
+            {didVerify ? (
+              <div
+                role="status"
+                className="mb-4 flex gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold leading-6 text-emerald-800"
+              >
+                <Check className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>
+                  Your email has been verified! Please sign in to continue.
+                </span>
+              </div>
+            ) : null}
+
             {didRegister ? (
               <div
                 role="status"
@@ -184,6 +206,43 @@ function LoginForm() {
                 className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold leading-6 text-red-700"
               >
                 {generalError}
+                {showResendVerification ? (
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => {
+                      setResendMessage(null);
+
+                      startTransition(async () => {
+                        const response = await resendVerificationEmailAction({
+                          email,
+                        });
+
+                        if (response.success) {
+                          setResendMessage(
+                            "We sent a fresh verification link. Please check your inbox.",
+                          );
+                          return;
+                        }
+
+                        setGeneralError(response.error);
+                      });
+                    }}
+                    className="mt-3 block rounded-xl bg-red-700 px-4 py-2 text-sm font-extrabold text-white transition hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    {isPending ? "Sending..." : "Resend verification email"}
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+
+            {resendMessage ? (
+              <div
+                role="status"
+                className="mb-4 flex gap-3 rounded-2xl border border-[#E5E7EB] bg-[#EFF6FF] px-4 py-3 text-sm font-semibold leading-6 text-[#1D4ED8]"
+              >
+                <Mail className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>{resendMessage}</span>
               </div>
             ) : null}
 

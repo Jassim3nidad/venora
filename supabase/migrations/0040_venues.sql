@@ -1,6 +1,6 @@
 -- ============================================================
 -- Migration 004 — Venue Lookup Tables
--- (venue_categories, event_types, amenities)
+-- (venue categories, event types, amenities)
 -- ============================================================
 
 -- ── venue_categories ──────────────────────────────────────────

@@ -16,6 +16,7 @@ export interface Venue {
   rating?: number;
   category?: string;
   city?: string;
+  municipality?: string;
   province?: string;
   basePrice?: number;
   capacityMax?: number;
@@ -31,7 +32,9 @@ export interface Venue {
   ceremonyVenue?: boolean;
   receptionVenue?: boolean;
   eventTypes?: string[];
+  categories?: string[];
   amenities?: string[];
+  isFavorited?: boolean;
 }
 
 const FALLBACK_IMAGE =
@@ -50,6 +53,7 @@ const fallbackVenues: Venue[] = [
     rating: 4.9,
     category: "Garden Venue",
     city: "Tagaytay City",
+    municipality: "Tagaytay",
     province: "Cavite",
     basePrice: 120000,
     capacityMax: 300,
@@ -60,6 +64,7 @@ const fallbackVenues: Venue[] = [
     petFriendly: false,
     hasPool: false,
     eventTypes: ["Wedding", "Debut", "Party"],
+    categories: ["Garden"],
     amenities: ["Parking", "Overnight"],
   },
   {
@@ -74,6 +79,7 @@ const fallbackVenues: Venue[] = [
     rating: 4.8,
     category: "Event Hall",
     city: "Makati City",
+    municipality: "Makati",
     province: "Metro Manila",
     basePrice: 85000,
     capacityMax: 150,
@@ -84,6 +90,7 @@ const fallbackVenues: Venue[] = [
     petFriendly: false,
     hasPool: false,
     eventTypes: ["Corporate", "Conference", "Birthday"],
+    categories: ["Event Hall", "Hotel"],
     amenities: ["Parking", "Aircon", "WiFi"],
   },
 ];
@@ -92,21 +99,6 @@ function asNumber(value: unknown) {
   const amount = Number(value);
 
   return Number.isFinite(amount) ? amount : undefined;
-}
-
-function asStringArray(value: unknown) {
-  if (Array.isArray(value)) {
-    return value.map((item) => String(item).trim()).filter(Boolean);
-  }
-
-  if (typeof value === "string") {
-    return value
-      .split(",")
-      .map((item) => item.trim())
-      .filter(Boolean);
-  }
-
-  return [];
 }
 
 function formatCurrency(value: unknown) {
@@ -146,7 +138,15 @@ export default async function VenuesMarketplacePage() {
   }
 
   const { data: dbVenues, error } = await (supabase.from("venues") as any)
-    .select("*, venue_images(storage_path)")
+    .select(
+      `
+      *,
+      venue_images(storage_path, is_featured, display_order),
+      venue_category_assignments(venue_categories(name, slug)),
+      venue_event_types(event_types(name, slug)),
+      venue_amenities(amenities(name))
+    `,
+    )
     .eq("status", "published")
     .order("created_at", { ascending: false });
 
@@ -154,18 +154,63 @@ export default async function VenuesMarketplacePage() {
     console.error("[venues/page] Supabase fetch error:", error.message);
   }
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let favoriteVenueIds = new Set<string>();
+
+  if (user) {
+    const { data: favoriteRows, error: favoritesError } = await (
+      supabase.from("favorites") as any
+    )
+      .select("venue_id")
+      .eq("customer_id", user.id);
+
+    if (favoritesError) {
+      console.error(
+        "[venues/page] Favorites fetch error:",
+        favoritesError.message,
+      );
+    } else {
+      favoriteVenueIds = new Set(
+        (favoriteRows ?? []).map((row: any) => String(row.venue_id)),
+      );
+    }
+  }
+
   const venues: Venue[] =
     dbVenues && dbVenues.length > 0
       ? dbVenues.map((venue: any) => {
-          const firstImage = venue.venue_images?.[0]?.storage_path;
+          const venueImages = [...(venue.venue_images ?? [])].sort(
+            (a: any, b: any) =>
+              Number(a.display_order ?? 0) - Number(b.display_order ?? 0),
+          );
+          const featuredImage =
+            venueImages.find((img: any) => img.is_featured) ?? venueImages[0];
+          const firstImage = featuredImage?.storage_path;
           const basePrice = asNumber(venue.base_price ?? venue.starting_price);
           const capacityMax = asNumber(venue.capacity_max);
           const city = venue.city ?? "";
+          const municipality = venue.municipality ?? "";
           const province = venue.province ?? "";
+          const categories =
+            venue.venue_category_assignments
+              ?.map((entry: any) => entry.venue_categories?.name)
+              .filter(Boolean) ?? [];
+          const eventTypes =
+            venue.venue_event_types
+              ?.map((entry: any) => entry.event_types?.name)
+              .filter(Boolean) ?? [];
+          const amenities =
+            venue.venue_amenities
+              ?.map((entry: any) => entry.amenities?.name)
+              .filter(Boolean) ?? [];
 
           return {
             id: venue.id,
             slug: venue.slug ?? String(venue.id),
+            isFavorited: favoriteVenueIds.has(String(venue.id)),
             name: venue.name ?? "Untitled Venue",
             location:
               city && province
@@ -176,9 +221,14 @@ export default async function VenuesMarketplacePage() {
               ? `Up to ${capacityMax} pax`
               : "Capacity unavailable",
             image: buildVenueImageUrl(firstImage),
-            rating: Number(venue.rating ?? 4.8),
-            category: venue.category ?? venue.venue_type ?? "Event Venue",
+            rating: Number(venue.avg_rating ?? venue.rating ?? 4.8),
+            category:
+              categories[0] ??
+              venue.category ??
+              venue.venue_type ??
+              "Event Venue",
             city,
+            municipality,
             province,
             basePrice,
             capacityMax,
@@ -193,18 +243,22 @@ export default async function VenuesMarketplacePage() {
             hasPool: Boolean(venue.has_pool),
             ceremonyVenue: Boolean(venue.ceremony_venue),
             receptionVenue: Boolean(venue.reception_venue),
-            eventTypes: asStringArray(venue.event_types ?? venue.eventTypes),
-            amenities: asStringArray(venue.amenities),
+            eventTypes,
+            categories,
+            amenities,
           };
         })
-      : fallbackVenues;
+      : fallbackVenues.map((venue) => ({
+          ...venue,
+          isFavorited: favoriteVenueIds.has(String(venue.id)),
+        }));
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[#F9FAFB] text-[#111827]">
       <header className="sticky top-0 z-50 shrink-0 border-b border-[#E5E7EB]/70 bg-white/90 backdrop-blur-xl">
         <div className="relative mx-auto flex min-h-16 w-full max-w-[1600px] items-center gap-2 px-3 sm:gap-3 sm:px-6 lg:px-8">
           <Link
-            href="/"
+            href="/venues"
             className="text-lg font-black tracking-[-0.04em] text-[#2563EB] transition hover:text-[#1d4ed8] sm:text-xl"
           >
             Venora
@@ -306,7 +360,10 @@ export default async function VenuesMarketplacePage() {
         </div>
 
         <main className="h-full min-w-0 flex-1 overflow-y-auto bg-[linear-gradient(180deg,#F9FAFB_0%,#F8FAFC_100%)]">
-          <VenuesClient initialVenues={venues} />
+          <VenuesClient
+            initialVenues={venues}
+            favoriteVenueIds={[...favoriteVenueIds]}
+          />
         </main>
       </div>
     </div>

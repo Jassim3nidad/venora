@@ -5,8 +5,35 @@ export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
 
   const code = requestUrl.searchParams.get("code");
-  const next = requestUrl.searchParams.get("next") ?? "/account";
+  const tokenHash = requestUrl.searchParams.get("token_hash");
+  const type = requestUrl.searchParams.get("type");
+  const next = requestUrl.searchParams.get("next") ?? "/venues";
 
+  // ── Token-based verification (email confirmation links) ────────────
+  // Supabase email verification sends ?token_hash=...&type=signup
+  // rather than a PKCE ?code=... parameter.
+  if (tokenHash && type) {
+    const supabase = await createClient();
+
+    const { error } = await supabase.auth.verifyOtp({
+      token_hash: tokenHash,
+      type: type as "signup" | "email",
+    });
+
+    if (error) {
+      console.error("[auth/callback] verifyOtp failed:", error.message);
+      const redirectUrl = new URL("/login", request.url);
+      redirectUrl.searchParams.set("error", "verification_failed");
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    // Email confirmed — send to login with success indicator
+    const redirectUrl = new URL("/login", request.url);
+    redirectUrl.searchParams.set("verified", "true");
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  // ── PKCE / OAuth code exchange ─────────────────────────────────────
   if (!code) {
     const redirectUrl = new URL("/login", request.url);
     redirectUrl.searchParams.set("error", "missing_auth_code");

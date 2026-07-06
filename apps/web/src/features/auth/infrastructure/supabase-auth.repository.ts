@@ -5,6 +5,10 @@ import type { AuthRepository } from "../domain/repositories/auth-repository.inte
 import type { AuthUser } from "../types/auth.types";
 
 export class SupabaseAuthRepository implements AuthRepository {
+  private getSiteUrl() {
+    return process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  }
+
   async signUp({
     email,
     password,
@@ -17,7 +21,7 @@ export class SupabaseAuthRepository implements AuthRepository {
     role: RoleName;
   }) {
     const supabase = await createClient();
-    const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+    const siteUrl = this.getSiteUrl();
 
     // The profiles row and user_roles mapping are created automatically by the on_auth_user_created
     // trigger (see migration 003_auth_profiles.sql) — we do not need to insert them here.
@@ -26,12 +30,19 @@ export class SupabaseAuthRepository implements AuthRepository {
       password,
       options: {
         data: { full_name: fullName, role },
-        emailRedirectTo: `${siteUrl}/auth/callback?next=/`,
+        emailRedirectTo: `${siteUrl}/auth/callback?next=/venues`,
       },
     });
 
     if (error) throw new AuthError(error.message);
     if (!data.user) throw new AuthError("Registration did not return a user.");
+
+    // Supabase returns a user with empty identities[] for already-registered
+    // but unverified emails (to prevent account enumeration). Detect this so
+    // the UI can offer the "Resend verification" button.
+    if (data.user.identities && data.user.identities.length === 0) {
+      throw new AuthError("User already registered");
+    }
 
     return { userId: data.user.id };
   }
@@ -42,13 +53,28 @@ export class SupabaseAuthRepository implements AuthRepository {
     if (error) throw new AuthError(error.message);
   }
 
+  async resendVerificationEmail(email: string) {
+    const supabase = await createClient();
+    const siteUrl = this.getSiteUrl();
+
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: {
+        emailRedirectTo: `${siteUrl}/auth/callback?next=/venues`,
+      },
+    });
+
+    if (error) throw new AuthError(error.message);
+  }
+
   async signInWithOAuth(provider: "google") {
     const supabase = await createClient();
-    const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+    const siteUrl = this.getSiteUrl();
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${siteUrl}/auth/callback?next=/`,
+        redirectTo: `${siteUrl}/auth/callback?next=/venues`,
       },
     });
     if (error) throw new AuthError(error.message);
@@ -62,7 +88,7 @@ export class SupabaseAuthRepository implements AuthRepository {
 
   async requestPasswordReset(email: string) {
     const supabase = await createClient();
-    const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+    const siteUrl = this.getSiteUrl();
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${siteUrl}/auth/callback?next=/reset-password`,
@@ -96,6 +122,21 @@ export class SupabaseAuthRepository implements AuthRepository {
       .eq("id", user.id)
       .single() as any;
 
+    let profileStatus = (profile?.status as any) ?? "pending_verification";
+
+    if (profileStatus === "pending_verification" && user.email_confirmed_at) {
+      const { error: profileStatusError } = await (supabase
+        .from("profiles") as any)
+        .update({ status: "active" })
+        .eq("id", user.id);
+
+      if (profileStatusError) {
+        console.error("[auth] Failed to sync confirmed profile status:", profileStatusError);
+      } else {
+        profileStatus = "active";
+      }
+    }
+
     const { data: roleRows } = await supabase
       .from("user_roles")
       .select("role")
@@ -111,7 +152,7 @@ export class SupabaseAuthRepository implements AuthRepository {
       fullName: profile?.full_name ?? "",
       avatarUrl: profile?.avatar_url ?? null,
       phone: profile?.phone ?? null,
-      status: (profile?.status as any) ?? "pending_verification",
+      status: profileStatus,
       roles,
     };
   }

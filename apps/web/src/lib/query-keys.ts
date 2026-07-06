@@ -64,7 +64,7 @@ export const queryKeys = {
   // ── Search ─────────────────────────────────────────────────
   search: {
     results: (query: Record<string, unknown>) => ["search", "results", query] as const,
-    ai:      (query: string)                  => ["search", "ai",      query] as const,
+    ai:      (query: Record<string, unknown>) => ["search", "ai",      query] as const,
   },
 } as const;
 

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { ArrowLeft, CheckCircle2, Mail, Sparkles } from "lucide-react";
+import { ResendVerificationForm } from "./resend-verification-form";
 
 export const metadata: Metadata = {
   title: "Verify Email | Venora",
@@ -78,6 +80,10 @@ export default function VerifyEmailPage() {
               </div>
             </div>
           </div>
+
+          <Suspense fallback={null}>
+            <ResendVerificationForm />
+          </Suspense>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link

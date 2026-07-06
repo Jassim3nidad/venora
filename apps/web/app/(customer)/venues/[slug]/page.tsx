@@ -11,7 +11,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = await createClient() as any;
+  const supabase = (await createClient()) as any;
   const { data: venue } = await supabase
     .from("venues")
     .select("name, description")
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function VenueDetailPage({ params }: Props) {
   const { slug } = await params;
-  const supabase = await createClient() as any;
+  const supabase = (await createClient()) as any;
 
   async function logoutAction() {
     "use server";
@@ -39,18 +39,22 @@ export default async function VenueDetailPage({ params }: Props) {
   }
 
   // 1. Fetch current user session
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   // 2. Fetch primary venue details
   const { data: venue } = await supabase
     .from("venues")
-    .select(`
+    .select(
+      `
       *,
       venue_packages(*),
       venue_images(*),
       venue_amenities(amenities(name)),
       organizations(*)
-    `)
+    `,
+    )
     .eq("slug", slug)
     .eq("status", "published")
     .maybeSingle();
@@ -60,13 +64,15 @@ export default async function VenueDetailPage({ params }: Props) {
   // 3. Fetch reviews associated with this venue
   const { data: reviews } = await supabase
     .from("reviews")
-    .select(`
+    .select(
+      `
       *,
       profiles(
         full_name,
         avatar_url
       )
-    `)
+    `,
+    )
     .eq("venue_id", venue.id)
     .eq("status", "published")
     .order("created_at", { ascending: false });
@@ -74,13 +80,15 @@ export default async function VenueDetailPage({ params }: Props) {
   // 4. Fetch nearby venues in the same province
   const { data: nearbyVenues } = await supabase
     .from("venues")
-    .select(`
+    .select(
+      `
       *,
       venue_images(
         storage_path,
         is_featured
       )
-    `)
+    `,
+    )
     .eq("province", venue.province)
     .eq("status", "published")
     .neq("id", venue.id)
@@ -105,7 +113,7 @@ export default async function VenueDetailPage({ params }: Props) {
       <header className="z-50 shrink-0 border-b border-[#E5E7EB]/70 bg-white/90 backdrop-blur-xl">
         <div className="relative mx-auto flex min-h-16 w-full max-w-[1600px] items-center gap-2 px-3 sm:gap-3 sm:px-6 lg:px-8">
           <Link
-            href="/"
+            href="/venues"
             className="text-lg font-semibold tracking-tight text-[#2563EB] transition hover:text-[#1d4ed8] sm:text-xl"
           >
             Venora
