@@ -308,7 +308,7 @@ export default async function CustomerBookingsPage() {
             {bookings.map((booking) => {
               const venue = getVenue(booking);
               const statusKey = String(booking.status ?? "pending");
-              const status = statusStyles[statusKey] ?? statusStyles.pending;
+              const status = statusStyles[statusKey] ?? statusStyles.pending!;
               const StatusIcon = status.icon;
 
               const eventDate =
