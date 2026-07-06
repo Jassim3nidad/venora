@@ -11,7 +11,11 @@ export async function GET() {
   const supabase = await createClient();
   await supabase.auth.signOut();
 
-  const homeUrl = new URL("/", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000");
+  let appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL;
+  if (!appUrl && process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL) appUrl = `https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`;
+  else if (!appUrl && process.env.VERCEL_URL) appUrl = `https://${process.env.VERCEL_URL}`;
+  
+  const homeUrl = new URL("/", appUrl || "http://localhost:3000");
   const response = NextResponse.redirect(homeUrl);
   
   // Explicitly clear all chunked auth cookies to ensure the session is destroyed locally

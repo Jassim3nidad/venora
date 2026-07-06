@@ -26,7 +26,13 @@ export const metadata: Metadata = {
   keywords: ["venue booking", "event venues", "Philippines", "wedding venue", "corporate events"],
   authors: [{ name: "Venora" }],
   creator: "Venora",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || 
+    process.env.NEXT_PUBLIC_SITE_URL || 
+    (process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}` : null) || 
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) || 
+    "http://localhost:3000"
+  ),
   openGraph: {
     type: "website",
     locale: "en_PH",

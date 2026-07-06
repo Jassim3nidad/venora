@@ -1,12 +1,16 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
-import { ArrowLeft, Mail, Sparkles } from "lucide-react";
+import { useState, useTransition, Suspense } from "react";
+import { ArrowLeft, Mail, AlertCircle } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { forgotPasswordAction } from "@/features/auth/actions/auth.actions";
 import { forgotPasswordSchema } from "@/features/auth/schemas/auth.schema";
 
-export default function ForgotPasswordPage() {
+function ForgotPasswordContent() {
+  const searchParams = useSearchParams();
+  const urlError = searchParams?.get("error");
+  
   const [email, setEmail] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [success, setSuccess] = useState(false);
@@ -104,6 +108,17 @@ export default function ForgotPasswordPage() {
               </p>
             </div>
 
+            {urlError && (
+              <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-800 flex gap-3 items-start">
+                <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-red-900">Reset link expired or invalid</p>
+                  <p className="mt-1 opacity-90">{urlError}</p>
+                  <p className="mt-2 text-xs opacity-75">This usually happens if you double-clicked the link, requested a newer link, or your email provider pre-scanned the link. Please request a new one below.</p>
+                </div>
+              </div>
+            )}
+
             {success ? (
               <div
                 role="status"
@@ -174,5 +189,13 @@ export default function ForgotPasswordPage() {
         </div>
       </section>
     </main>
+  );
+}
+
+export default function ForgotPasswordPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#F9FAFB]" />}>
+      <ForgotPasswordContent />
+    </Suspense>
   );
 }
