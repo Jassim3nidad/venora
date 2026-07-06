@@ -106,6 +106,14 @@ const ROLE_GUARDS: Array<{ prefix: string; roles: UserRole[] }> = [
 
 const AUTH_PATHS = ["/login", "/register", "/forgot-password"];
 
+function redirectWithCookies(url: URL | string, sourceResponse: NextResponse) {
+  const redirectResponse = NextResponse.redirect(url);
+  sourceResponse.cookies.getAll().forEach((cookie) => {
+    redirectResponse.cookies.set(cookie);
+  });
+  return redirectResponse;
+}
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -145,12 +153,10 @@ export async function middleware(request: NextRequest) {
   const { pathname, searchParams, search } = request.nextUrl;
 
   // Intercept Supabase Auth PKCE code on the root
-  // (happens if Supabase emailRedirectTo falls back to Site URL instead of /auth/callback)
   if (pathname === "/" && searchParams.has("code")) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/auth/callback";
-    // Keep all existing search params (like code, next, etc.)
-    return NextResponse.redirect(redirectUrl);
+    return redirectWithCookies(redirectUrl, supabaseResponse);
   }
 
   // Intercept Supabase Auth errors on the root (e.g., expired OTPs)
@@ -158,11 +164,10 @@ export async function middleware(request: NextRequest) {
     const errorDesc = searchParams.get("error_description") || "Your link is invalid or has expired.";
     const redirectUrl = request.nextUrl.clone();
     
-    // If we're not sure it's a password reset, it's safer to send to login
     redirectUrl.pathname = "/login";
-    redirectUrl.search = ""; // clear all existing search params
+    redirectUrl.search = ""; 
     redirectUrl.searchParams.set("error", errorDesc);
-    return NextResponse.redirect(redirectUrl);
+    return redirectWithCookies(redirectUrl, supabaseResponse);
   }
 
   const isVenueBookingPath = /^\/venues\/[^/]+\/book(?:\/)?$/.test(pathname);
@@ -177,12 +182,12 @@ export async function middleware(request: NextRequest) {
     redirectUrl.pathname = "/login";
     redirectUrl.searchParams.set("redirectTo", `${pathname}${search}`);
 
-    return NextResponse.redirect(redirectUrl);
+    return redirectWithCookies(redirectUrl, supabaseResponse);
   }
 
   // 2. Redirect logged-in users away from auth pages
   if (user && AUTH_PATHS.some((path) => pathname.startsWith(path))) {
-    return NextResponse.redirect(new URL("/venues", request.url));
+    return redirectWithCookies(new URL("/venues", request.url), supabaseResponse);
   }
 
   // 3. Role guard — redirect users without the required role
@@ -204,8 +209,7 @@ export async function middleware(request: NextRequest) {
       if (error) {
         const redirectUrl = request.nextUrl.clone();
         redirectUrl.pathname = "/unauthorized";
-
-        return NextResponse.redirect(redirectUrl);
+        return redirectWithCookies(redirectUrl, supabaseResponse);
       }
 
       const userRoles = ((roleRows ?? []) as { role: UserRole }[])
@@ -219,8 +223,7 @@ export async function middleware(request: NextRequest) {
       if (!hasAccess) {
         const redirectUrl = request.nextUrl.clone();
         redirectUrl.pathname = "/unauthorized";
-
-        return NextResponse.redirect(redirectUrl);
+        return redirectWithCookies(redirectUrl, supabaseResponse);
       }
     }
   }
