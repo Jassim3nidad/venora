@@ -19,7 +19,6 @@ export const registerSchema = z
     email: z.string().trim().toLowerCase().email("Enter a valid email address"),
     password: passwordSchema,
     confirmPassword: z.string(),
-    role: z.enum(ROLE_OPTIONS, { errorMap: () => ({ message: "Select an account type" }) }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",

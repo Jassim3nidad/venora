@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CreditCard, Lock, Receipt, UserRound } from "lucide-react";
+import { CreditCard, Lock, Receipt, UserRound, Building2 } from "lucide-react";
 
 const NAV_ITEMS = [
   {
@@ -28,6 +28,12 @@ const NAV_ITEMS = [
     label: "Privacy and Sharing",
     description: "Data and communication preferences",
     icon: Lock,
+  },
+  {
+    href: "/account/become-partner",
+    label: "Become a Partner",
+    description: "Apply for a Vendor workspace",
+    icon: Building2,
   },
 ] as const;
 

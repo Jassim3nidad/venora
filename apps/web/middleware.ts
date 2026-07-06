@@ -144,11 +144,22 @@ export async function middleware(request: NextRequest) {
 
   const { pathname, searchParams, search } = request.nextUrl;
 
+  // Intercept Supabase Auth PKCE code on the root
+  // (happens if Supabase emailRedirectTo falls back to Site URL instead of /auth/callback)
+  if (pathname === "/" && searchParams.has("code")) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/auth/callback";
+    // Keep all existing search params (like code, next, etc.)
+    return NextResponse.redirect(redirectUrl);
+  }
+
   // Intercept Supabase Auth errors on the root (e.g., expired OTPs)
   if (pathname === "/" && searchParams.get("error") === "access_denied") {
     const errorDesc = searchParams.get("error_description") || "Your link is invalid or has expired.";
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/forgot-password";
+    
+    // If we're not sure it's a password reset, it's safer to send to login
+    redirectUrl.pathname = "/login";
     redirectUrl.search = ""; // clear all existing search params
     redirectUrl.searchParams.set("error", errorDesc);
     return NextResponse.redirect(redirectUrl);

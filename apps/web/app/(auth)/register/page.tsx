@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { type FormEvent, useState, useTransition } from "react";
 import Link from "next/link";
@@ -24,12 +24,7 @@ import {
 import { registerSchema } from "@/features/auth/schemas/auth.schema";
 import { researchVenues } from "@/src/features/venues/data/research-venues";
 
-const ROLES = [
-  { value: "customer", label: "Book a Venue", icon: CalendarCheck },
-  { value: "venue_owner", label: "Venue Owner", icon: Building2 },
-  { value: "supplier", label: "Supplier", icon: Truck },
-  { value: "event_coordinator", label: "Coordinator", icon: ClipboardCheck },
-];
+
 
 const brandPoints = [
   "Discover venues for weddings, parties, and corporate events.",
@@ -43,7 +38,6 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState<string>("customer");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -65,7 +59,6 @@ export default function RegisterPage() {
       email,
       password,
       confirmPassword,
-      role,
     });
 
     if (!result.success) {
@@ -79,7 +72,6 @@ export default function RegisterPage() {
         email,
         password,
         confirmPassword,
-        role,
       });
 
       if (response && !response.success) {
@@ -172,7 +164,7 @@ export default function RegisterPage() {
                 Create your Venora account
               </h2>
               <p className="mt-2 text-sm font-medium leading-6 text-[#6B7280]">
-                Enter your details and choose your workspace type.
+                Enter your details to get started.
               </p>
             </div>
 
@@ -403,54 +395,7 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              <fieldset className="border-0 p-0">
-                <legend className="mb-2 text-xs font-extrabold uppercase tracking-[0.12em] text-[#111827]">
-                  Account type
-                </legend>
 
-                <div className="grid grid-cols-2 gap-3">
-                  {ROLES.map((roleOption) => {
-                    const isSelected = role === roleOption.value;
-                    const Icon = roleOption.icon;
-
-                    return (
-                      <label
-                        key={roleOption.value}
-                        htmlFor={`role-${roleOption.value}`}
-                        className={[
-                          "flex min-h-[78px] cursor-pointer flex-col items-center justify-center rounded-2xl border px-3 py-3 text-center shadow-sm transition-all",
-                          isSelected
-                            ? "border-[#2563EB] bg-[#EFF6FF] text-[#1D4ED8] shadow-[#2563EB]/10"
-                            : "border-[#E5E7EB] bg-white text-[#6B7280] hover:border-[#2563EB]/60 hover:bg-[#F9FAFB] hover:text-[#1D4ED8]",
-                        ].join(" ")}
-                      >
-                        <input
-                          id={`role-${roleOption.value}`}
-                          type="radio"
-                          name="role"
-                          value={roleOption.value}
-                          checked={isSelected}
-                          onChange={(e) => setRole(e.target.value)}
-                          disabled={isPending}
-                          className="sr-only"
-                        />
-
-                        <Icon className="mb-2 h-5 w-5" strokeWidth={2.3} />
-
-                        <span className="text-xs font-extrabold leading-4">
-                          {roleOption.label}
-                        </span>
-                      </label>
-                    );
-                  })}
-                </div>
-
-                {fieldErrors.role?.[0] ? (
-                  <p className="mt-2 text-xs font-semibold text-red-600">
-                    {fieldErrors.role[0]}
-                  </p>
-                ) : null}
-              </fieldset>
 
               <button
                 id="register-submit-btn"

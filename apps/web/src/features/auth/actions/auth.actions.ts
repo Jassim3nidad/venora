@@ -62,7 +62,7 @@ export async function registerAction(rawInput: unknown): Promise<ActionResult> {
       email: parsed.data.email,
       password: parsed.data.password,
       fullName: parsed.data.fullName,
-      role: parsed.data.role as RoleName,
+      role: "customer",
     });
 
     try {
