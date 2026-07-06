@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Heart, MapPin, Star, Users } from "lucide-react";
+import { ArrowRight, Heart, MapPin, Star, Users } from "lucide-react";
 import { toggleFavoriteAction } from "../application/actions";
 import type { MarketplaceVenue } from "../data/research-venues";
 
@@ -22,7 +22,9 @@ export default function FavoritesGrid({ initialVenues }: FavoritesGridProps) {
     event.stopPropagation();
 
     const previousVenues = venues;
-    setVenues((current) => current.filter((venue) => String(venue.id) !== venueId));
+    setVenues((current) =>
+      current.filter((venue) => String(venue.id) !== venueId),
+    );
     setPendingId(venueId);
 
     const result = await toggleFavoriteAction({ venueId });
@@ -37,29 +39,37 @@ export default function FavoritesGrid({ initialVenues }: FavoritesGridProps) {
 
   if (venues.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-[28px] border border-dashed border-[#E5E7EB] bg-white px-6 py-20 text-center shadow-sm">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#EFF6FF] text-[#2563EB]">
+      <div className="overflow-hidden rounded-[32px] border border-[#E5E7EB] bg-white px-6 py-16 text-center shadow-xl shadow-slate-200/60 sm:px-10 sm:py-20">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-[#EFF6FF] text-[#2563EB]">
           <Heart className="h-7 w-7" />
         </div>
-        <h2 className="mt-5 text-xl font-black tracking-[-0.02em] text-slate-950">
-          You haven&apos;t saved any venues yet
-        </h2>
-        <p className="mt-2 max-w-sm text-sm font-medium leading-6 text-slate-500">
-          Tap the heart icon on any venue while browsing to save it here for
-          later.
+
+        <p className="mt-6 text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
+          No favorites yet
         </p>
+
+        <h2 className="mx-auto mt-2 max-w-xl text-3xl font-black tracking-[-0.05em] text-[#111827]">
+          Build a venue shortlist you can return to.
+        </h2>
+
+        <p className="mx-auto mt-3 max-w-md text-sm font-medium leading-6 text-[#6B7280]">
+          Save promising spaces while browsing Venora, then come back here to
+          compare details, pricing, capacity, and location.
+        </p>
+
         <Link
           href="/venues"
-          className="mt-6 inline-flex items-center justify-center rounded-full bg-[#2563EB] px-6 py-3 text-sm font-extrabold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1d4ed8]"
+          className="mt-7 inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-6 text-sm font-extrabold text-white shadow-lg shadow-[#2563EB]/25 transition hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
         >
-          Browse venues
+          Browse Venues
+          <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
       {venues.map((venue) => {
         const id = String(venue.id);
         const isPending = pendingId === id;
@@ -83,13 +93,15 @@ export default function FavoritesGrid({ initialVenues }: FavoritesGridProps) {
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-slate-950/5 to-transparent" />
 
                 <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#1D4ED8] shadow-sm backdrop-blur-md">
-                  {venue.category}
+                  {venue.category ?? "Venue"}
                 </span>
 
                 <div className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-slate-800 shadow-sm backdrop-blur-md">
                   <Star className="h-3.5 w-3.5 fill-[#F59E0B] text-[#F59E0B]" />
                   <span className="text-xs font-extrabold">
-                    {typeof venue.rating === "number" ? venue.rating.toFixed(1) : "New"}
+                    {typeof venue.rating === "number"
+                      ? venue.rating.toFixed(1)
+                      : "New"}
                   </span>
                 </div>
               </div>
@@ -116,7 +128,7 @@ export default function FavoritesGrid({ initialVenues }: FavoritesGridProps) {
                     </p>
                   </div>
 
-                  <div className="inline-flex max-w-[60%] items-center gap-1.5 rounded-2xl bg-slate-100 px-3 py-2 text-slate-600">
+                  <div className="inline-flex max-w-[60%] items-center gap-1.5 rounded-2xl bg-[#EFF6FF] px-3 py-2 text-[#1D4ED8]">
                     <Users className="h-3.5 w-3.5 shrink-0" />
                     <span className="truncate text-[11px] font-extrabold uppercase tracking-[0.08em]">
                       {venue.capacity}

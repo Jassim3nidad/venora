@@ -1,7 +1,5 @@
-﻿import Link from "next/link";
-import { redirect } from "next/navigation";
 import Sidebar from "@/components/layout/Sidebar";
-import { Bell, HelpCircle, LogOut, Menu } from "lucide-react";
+import { CustomerNavbar } from "@/components/layout/CustomerNavbar";
 import { createClient } from "@/lib/supabase/server";
 import VenuesClient from "@/src/features/venues/ui/VenuesClient";
 import {
@@ -45,15 +43,6 @@ export interface Venue {
 
 export default async function VenuesMarketplacePage() {
   const supabase = await createClient();
-
-  async function logoutAction() {
-    "use server";
-
-    const supabase = await createClient();
-    await supabase.auth.signOut();
-
-    redirect("/login");
-  }
 
   const { data: dbVenues, error } = await (supabase.from("venues") as any)
     .select(
@@ -118,115 +107,7 @@ export default async function VenuesMarketplacePage() {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[#F9FAFB] text-[#111827]">
-      <header className="sticky top-0 z-50 shrink-0 border-b border-[#E5E7EB]/70 bg-white/90 backdrop-blur-xl">
-        <div className="relative mx-auto flex min-h-16 w-full max-w-[1600px] items-center gap-2 px-3 sm:gap-3 sm:px-6 lg:px-8">
-          <Link
-            href="/venues"
-            className="text-lg font-black tracking-tight text-[#2563EB] transition hover:text-[#1d4ed8] sm:text-xl"
-          >
-            Venora
-          </Link>
-
-          {/* Mobile: compact menu */}
-          <details className="ml-auto md:hidden relative">
-            <summary
-              role="button"
-              aria-label="Open menu"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#1D4ED8] transition hover:bg-[#EFF6FF]"
-            >
-              <Menu className="h-5 w-5" />
-            </summary>
-
-            <div className="absolute right-0 mt-2 w-56 rounded-md border bg-white p-2 shadow-lg z-50">
-              <Link href="/venues" className="block w-full rounded px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                Browse
-              </Link>
-
-              <Link href="/bookings" className="mt-1 block w-full rounded px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                Bookings
-              </Link>
-
-              <Link href="/favorites" className="mt-1 block w-full rounded px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                Favorites
-              </Link>
-
-              <Link href="/account" className="mt-1 block w-full rounded px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                Account
-              </Link>
-
-              <form action={logoutAction} className="mt-2">
-                <button type="submit" className="w-full rounded px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                  Logout
-                </button>
-              </form>
-            </div>
-          </details>
-
-          <nav
-            aria-label="Primary navigation"
-            className="hidden md:absolute md:left-1/2 md:-translate-x-1/2 md:flex md:justify-center"
-          >
-            <div className="inline-flex items-center gap-1 rounded-full border border-[#E5E7EB]/80 bg-[#F9FAFB]/90 p-1 shadow-sm">
-              <Link
-                href="/venues"
-                className="rounded-full bg-[#EFF6FF] px-4 py-2 text-sm font-bold text-[#2563EB] transition hover:text-[#1d4ed8]"
-              >
-                Browse
-              </Link>
-
-              <Link
-                href="/bookings"
-                className="rounded-full px-4 py-2 text-sm font-bold text-[#6B7280] transition hover:bg-[#EFF6FF] hover:text-[#2563EB]"
-              >
-                Bookings
-              </Link>
-
-              <Link
-                href="/favorites"
-                className="rounded-full px-4 py-2 text-sm font-bold text-[#6B7280] transition hover:bg-[#EFF6FF] hover:text-[#2563EB]"
-              >
-                Favorites
-              </Link>
-            </div>
-          </nav>
-
-          <div className="ml-auto hidden md:flex min-w-0 items-center justify-end gap-1.5 sm:gap-3">
-            <button
-              type="button"
-              className="hidden h-10 w-10 items-center justify-center rounded-full border border-transparent text-slate-400 transition hover:border-[#E5E7EB] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] lg:inline-flex"
-              aria-label="Notifications"
-            >
-              <Bell className="h-4 w-4" />
-            </button>
-
-            <button
-              type="button"
-              className="hidden h-10 w-10 items-center justify-center rounded-full border border-transparent text-slate-400 transition hover:border-[#E5E7EB] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] sm:inline-flex"
-              aria-label="Help"
-            >
-              <HelpCircle className="h-4 w-4" />
-            </button>
-
-            <Link
-              href="/account"
-              className="inline-flex h-9 items-center justify-center rounded-full bg-[#2563EB] px-3 text-[11px] font-bold uppercase tracking-[0.08em] text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 sm:h-10 sm:px-4 sm:text-xs sm:tracking-[0.12em]"
-            >
-              Account
-            </Link>
-
-            <form action={logoutAction} className="shrink-0">
-              <button
-                type="submit"
-                aria-label="Logout"
-                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-[#E5E7EB] bg-white px-2.5 text-[11px] font-bold uppercase tracking-[0.08em] text-[#6B7280] shadow-sm transition hover:bg-[#EFF6FF] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/20 sm:h-10 sm:gap-2 sm:px-4 sm:text-xs sm:tracking-[0.12em]"
-              >
-                <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Logout</span>
-              </button>
-            </form>
-          </div>
-        </div>
-      </header>
+      <CustomerNavbar />
 
       <div className="flex min-h-0 w-full flex-1 overflow-hidden">
         <div className="hidden shrink-0 lg:block">
