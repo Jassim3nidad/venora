@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { Grid, Play, X, ChevronLeft, ChevronRight, Image as ImageIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogClose, Button } from "@venora/ui";
+import { isOptimizableImageSrc } from "@/src/lib/image-host";
 
 interface VenueMedia {
   id: string;
@@ -77,6 +78,7 @@ export default function VenueGallery({ media = [], venueName }: VenueGalleryProp
             alt={featured.alt_text || venueName}
             fill
             priority
+            unoptimized={!isOptimizableImageSrc(getMediaUrl(featured.storage_path))}
             sizes="(max-width: 768px) 100vw, 50vw"
             className="object-cover hover:scale-[1.03] transition-transform duration-500"
           />
@@ -114,6 +116,7 @@ export default function VenueGallery({ media = [], venueName }: VenueGalleryProp
                   src={getMediaUrl(item.storage_path)}
                   alt={item.alt_text || `${venueName} photo`}
                   fill
+                  unoptimized={!isOptimizableImageSrc(getMediaUrl(item.storage_path))}
                   sizes="25vw"
                   className="object-cover hover:scale-[1.05] transition-transform duration-500"
                 />

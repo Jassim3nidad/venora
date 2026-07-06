@@ -2,20 +2,20 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
-  ArrowLeft,
+  Heart,
   LayoutDashboard,
-  LogOut,
+  MapPin,
   ShieldCheck,
-  Sparkles,
   Store,
   UserRound,
   UsersRound,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { getFavoriteVenuesForUser } from "@/src/features/venues/application/get-favorite-venues";
 import AccountForm from "./account-form";
 
 export const metadata: Metadata = {
-  title: "My Account",
+  title: "Personal Information",
 };
 
 export const dynamic = "force-dynamic";
@@ -42,12 +42,8 @@ export default async function AccountPage() {
 
   const userRoles = (roleRows ?? []).map((row: any) => row.role as string);
 
-  const displayName = profile?.full_name || "Venora User";
-  const email = user.email ?? "No email available";
-  const avatarInitial =
-    displayName?.charAt(0)?.toUpperCase() ||
-    email?.charAt(0)?.toUpperCase() ||
-    "?";
+  const favoriteVenues = await getFavoriteVenuesForUser(user.id);
+  const favoritesPreview = favoriteVenues.slice(0, 3);
 
   const dashboardLinks = [
     {
@@ -78,158 +74,182 @@ export default async function AccountPage() {
   const visibleDashboards = dashboardLinks.filter((item) => item.show);
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#F8FAFC] text-slate-950">
-      <section className="relative border-b border-[#E5E7EB]/70 bg-[#F9FAFB]">
-        <div className="absolute left-[-120px] top-[-120px] h-[320px] w-[320px] rounded-full bg-[#2563EB]/20 blur-3xl" />
-        <div className="absolute right-[-140px] top-[40px] h-[300px] w-[300px] rounded-full bg-[#DBEAFE]/20 blur-3xl" />
+    <div className="space-y-8">
+      <div className="grid grid-cols-3 gap-3">
+        <div className="rounded-2xl border border-[#E5E7EB]/80 bg-white p-4 shadow-sm">
+          <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+            <UserRound className="h-4 w-4" />
+          </div>
+          <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
+            Role Count
+          </p>
+          <p className="mt-1 text-xl font-black text-slate-950">
+            {userRoles.length}
+          </p>
+        </div>
 
-        <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <Link
-              href="/venues"
-              className="inline-flex w-fit items-center gap-2 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-bold text-[#6B7280] shadow-sm transition hover:border-[#2563EB]/50 hover:bg-[#EFF6FF] hover:text-[#2563EB]"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Venues
-            </Link>
+        <div className="rounded-2xl border border-[#E5E7EB]/80 bg-white p-4 shadow-sm">
+          <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+            <ShieldCheck className="h-4 w-4" />
+          </div>
+          <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
+            Status
+          </p>
+          <p className="mt-1 text-xl font-black text-slate-950">Active</p>
+        </div>
 
-            <Link
-              href="/logout"
-              className="inline-flex w-fit items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-bold text-red-600 shadow-sm transition hover:border-red-300 hover:bg-red-100"
-            >
-              <LogOut className="h-4 w-4" />
-              Sign Out
-            </Link>
+        <Link
+          href="/favorites"
+          className="rounded-2xl border border-[#E5E7EB]/80 bg-white p-4 shadow-sm transition hover:border-[#2563EB]/50 hover:bg-[#EFF6FF]"
+        >
+          <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+            <Heart className="h-4 w-4" />
+          </div>
+          <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
+            Saved
+          </p>
+          <p className="mt-1 text-xl font-black text-slate-950">
+            {favoriteVenues.length}
+          </p>
+        </Link>
+      </div>
+
+      <AccountForm
+        initialFullName={profile?.full_name ?? ""}
+        initialPhone={profile?.phone ?? ""}
+      />
+
+      <div className="overflow-hidden rounded-[28px] border border-[#E5E7EB]/80 bg-white shadow-xl shadow-slate-200/60">
+        <div className="flex flex-col gap-4 border-b border-[#E5E7EB]/80 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+          <div>
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB] shadow-sm">
+              <Heart className="h-5 w-5" />
+            </div>
+
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
+              Saved for later
+            </p>
+
+            <h2 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-950">
+              Favorite Venues
+            </h2>
+
+            <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-500">
+              Venues you&apos;ve saved while browsing the marketplace.
+            </p>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
-            <div>
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#2563EB]">
-                Venora account center
-              </div>
+          {favoriteVenues.length > 0 && (
+            <Link
+              href="/favorites"
+              className="inline-flex w-fit items-center gap-2 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-bold text-[#2563EB] shadow-sm transition hover:border-[#2563EB]/50 hover:bg-[#EFF6FF]"
+            >
+              View all ({favoriteVenues.length})
+            </Link>
+          )}
+        </div>
 
-              <h1 className="max-w-3xl text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl">
-                Manage your account and security settings.
-              </h1>
+        <div className="p-6 sm:p-8">
+          {favoritesPreview.length > 0 ? (
+            <div className="grid gap-4 md:grid-cols-3">
+              {favoritesPreview.map((venue) => (
+                <Link
+                  key={venue.id}
+                  href={`/venues/${venue.slug ?? venue.id}`}
+                  className="group rounded-3xl border border-slate-200 bg-[#F9FAFB] p-4 transition hover:-translate-y-1 hover:border-[#2563EB]/50 hover:shadow-xl hover:shadow-slate-200/70"
+                >
+                  <div className="relative mb-4 aspect-[16/10] overflow-hidden rounded-2xl bg-slate-100">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={venue.image}
+                      alt={venue.name}
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                    />
+                  </div>
 
-              <p className="mt-4 max-w-2xl text-sm font-medium leading-6 text-slate-500 sm:text-base">
-                Keep your profile details updated, protect your password, and
-                access the dashboards connected to your Venora role.
+                  <h3 className="line-clamp-1 text-base font-black tracking-[-0.02em] text-slate-950 transition group-hover:text-[#1D4ED8]">
+                    {venue.name}
+                  </h3>
+
+                  <p className="mt-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+                    <MapPin className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                    <span className="line-clamp-1">{venue.location}</span>
+                  </p>
+
+                  <p className="mt-3 text-sm font-black text-slate-950">
+                    {venue.price}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-6 py-12 text-center">
+              <p className="text-sm font-bold text-slate-950">
+                You haven&apos;t saved any venues yet
               </p>
+              <p className="mt-1.5 max-w-sm text-sm font-medium text-slate-500">
+                Tap the heart icon on any venue while browsing to save it
+                here for later.
+              </p>
+              <Link
+                href="/venues"
+                className="mt-5 inline-flex items-center justify-center rounded-full bg-[#2563EB] px-5 py-2.5 text-sm font-extrabold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1d4ed8]"
+              >
+                Browse venues
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {visibleDashboards.length > 0 && (
+        <div className="overflow-hidden rounded-[28px] border border-[#E5E7EB]/80 bg-white shadow-xl shadow-slate-200/60">
+          <div className="border-b border-[#E5E7EB]/80 p-6 sm:p-8">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB] shadow-sm">
+              <LayoutDashboard className="h-5 w-5" />
             </div>
 
-            <div className="overflow-hidden rounded-[28px] border border-[#E5E7EB]/80 bg-white shadow-xl shadow-slate-200/60">
-              <div className="bg-gradient-to-br from-[#1D4ED8] via-[#2563EB] to-[#2563EB] px-6 py-7 text-white">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-white/20 bg-white/20 text-2xl font-black shadow-lg backdrop-blur-md">
-                    {profile?.avatar_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={profile.avatar_url}
-                        alt={displayName}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      avatarInitial
-                    )}
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
+              Authorized access
+            </p>
+
+            <h2 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-950">
+              Your dashboards
+            </h2>
+
+            <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-500">
+              These dashboard shortcuts are based on the roles assigned to
+              your Venora account.
+            </p>
+          </div>
+
+          <div className="grid gap-4 p-6 sm:p-8 md:grid-cols-2 xl:grid-cols-3">
+            {visibleDashboards.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="group rounded-3xl border border-slate-200 bg-[#F9FAFB] p-5 transition hover:-translate-y-1 hover:border-[#2563EB]/50 hover:bg-[#EFF6FF] hover:shadow-xl hover:shadow-slate-200/70"
+                >
+                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#2563EB] shadow-sm transition group-hover:bg-[#2563EB] group-hover:text-white">
+                    <Icon className="h-5 w-5" />
                   </div>
 
-                  <div className="min-w-0">
-                    <p className="truncate text-lg font-black tracking-[-0.02em]">
-                      {displayName}
-                    </p>
-                    <p className="mt-1 truncate text-sm font-medium text-white/80">
-                      {email}
-                    </p>
-                  </div>
-                </div>
-              </div>
+                  <h3 className="text-base font-black tracking-[-0.02em] text-slate-950">
+                    {item.label}
+                  </h3>
 
-              <div className="grid grid-cols-2 gap-3 bg-white p-5">
-                <div className="rounded-2xl border border-[#E5E7EB]/80 bg-[#F9FAFB] p-4">
-                  <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-[#EFF6FF] text-[#2563EB]">
-                    <UserRound className="h-4 w-4" />
-                  </div>
-                  <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
-                    Role Count
+                  <p className="mt-2 text-sm font-medium leading-6 text-slate-500">
+                    {item.description}
                   </p>
-                  <p className="mt-1 text-xl font-black text-slate-950">
-                    {userRoles.length}
-                  </p>
-                </div>
-
-                <div className="rounded-2xl border border-[#E5E7EB]/80 bg-[#F9FAFB] p-4">
-                  <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-[#EFF6FF] text-[#2563EB]">
-                    <ShieldCheck className="h-4 w-4" />
-                  </div>
-                  <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
-                    Status
-                  </p>
-                  <p className="mt-1 text-xl font-black text-slate-950">
-                    Active
-                  </p>
-                </div>
-              </div>
-            </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
-      </section>
-
-      <section className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <AccountForm
-          initialFullName={profile?.full_name ?? ""}
-          initialPhone={profile?.phone ?? ""}
-        />
-
-        {visibleDashboards.length > 0 && (
-          <div className="mt-8 overflow-hidden rounded-[28px] border border-[#E5E7EB]/80 bg-white shadow-xl shadow-slate-200/60">
-            <div className="border-b border-[#E5E7EB]/80 p-6 sm:p-8">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB] shadow-sm">
-                <LayoutDashboard className="h-5 w-5" />
-              </div>
-
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
-                Authorized access
-              </p>
-
-              <h2 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-950">
-                Your dashboards
-              </h2>
-
-              <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-500">
-                These dashboard shortcuts are based on the roles assigned to
-                your Venora account.
-              </p>
-            </div>
-
-            <div className="grid gap-4 p-6 sm:p-8 md:grid-cols-2 xl:grid-cols-3">
-              {visibleDashboards.map((item) => {
-                const Icon = item.icon;
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="group rounded-3xl border border-slate-200 bg-[#F9FAFB] p-5 transition hover:-translate-y-1 hover:border-[#2563EB]/50 hover:bg-[#EFF6FF] hover:shadow-xl hover:shadow-slate-200/70"
-                  >
-                    <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#2563EB] shadow-sm transition group-hover:bg-[#2563EB] group-hover:text-white">
-                      <Icon className="h-5 w-5" />
-                    </div>
-
-                    <h3 className="text-base font-black tracking-[-0.02em] text-slate-950">
-                      {item.label}
-                    </h3>
-
-                    <p className="mt-2 text-sm font-medium leading-6 text-slate-500">
-                      {item.description}
-                    </p>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </section>
-    </main>
+      )}
+    </div>
   );
 }

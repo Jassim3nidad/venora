@@ -148,6 +148,10 @@ export default async function VenueDetailPage({ params }: Props) {
                 Bookings
               </Link>
 
+              <Link href="/favorites" className="mt-1 block w-full rounded px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                Favorites
+              </Link>
+
               <Link href="/account" className="mt-1 block w-full rounded px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
                 Account
               </Link>
@@ -177,6 +181,13 @@ export default async function VenueDetailPage({ params }: Props) {
                 className="rounded-full px-4 py-2 text-sm font-semibold text-[#6B7280] transition hover:bg-[#EFF6FF] hover:text-[#2563EB]"
               >
                 Bookings
+              </Link>
+
+              <Link
+                href="/favorites"
+                className="rounded-full px-4 py-2 text-sm font-semibold text-[#6B7280] transition hover:bg-[#EFF6FF] hover:text-[#2563EB]"
+              >
+                Favorites
               </Link>
             </div>
           </nav>

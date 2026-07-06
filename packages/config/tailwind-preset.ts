@@ -39,6 +39,8 @@ const preset: Partial<Config> = {
       animation: {
         "fade-in": "fade-in 0.3s ease-out",
         "slide-up": "slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+        "sheet-in": "sheet-in 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
+        "sheet-out": "sheet-out 0.25s ease-in",
         shimmer: "shimmer 1.5s infinite",
       },
       keyframes: {
@@ -49,6 +51,14 @@ const preset: Partial<Config> = {
         "slide-up": {
           from: { opacity: "0", transform: "translateY(12px)" },
           to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "sheet-in": {
+          from: { transform: "translateY(100%)" },
+          to: { transform: "translateY(0)" },
+        },
+        "sheet-out": {
+          from: { transform: "translateY(0)" },
+          to: { transform: "translateY(100%)" },
         },
         shimmer: {
           "0%": { backgroundPosition: "-200% 0" },
