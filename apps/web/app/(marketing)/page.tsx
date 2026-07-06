@@ -19,6 +19,8 @@ import {
   researchVenues,
 } from "@/src/features/venues/data/research-venues";
 
+export const dynamic = "force-dynamic";
+
 const featuredVenues = getMarketplaceResearchVenues()
   .slice(0, 3)
   .map((venue, index) => ({

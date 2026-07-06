@@ -81,7 +81,9 @@ function normalize(value: unknown) {
 }
 
 function uniqueStrings(values: Array<string | null | undefined>) {
-  return [...new Set(values.filter((value): value is string => Boolean(value)))];
+  return [
+    ...new Set(values.filter((value): value is string => Boolean(value))),
+  ];
 }
 
 function getVenueTypeIcon(label: string) {
@@ -123,9 +125,9 @@ function SectionTitle({
   title: string;
 }) {
   return (
-    <div className="mb-3 flex items-center gap-2">
-      <Icon className="h-4 w-4 text-slate-500" strokeWidth={2.5} />
-      <h3 className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">
+    <div className="mb-3.5 flex items-center gap-2">
+      <Icon className="h-4 w-4 text-[#2563EB]" strokeWidth={2.4} />
+      <h3 className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#6B7280]">
         {title}
       </h3>
     </div>
@@ -152,7 +154,7 @@ function SelectBox({
         aria-label={label}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="h-11 w-full appearance-none rounded-xl border border-[#E5E7EB] bg-white px-4 pr-10 text-left text-sm font-medium text-neutral-700 shadow-sm outline-none transition hover:border-[#2563EB] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+        className="h-11 w-full appearance-none rounded-2xl border border-[#E5E7EB] bg-white px-4 pr-10 text-left text-sm font-medium text-[#111827] outline-none transition hover:border-[#BFDBFE] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
       >
         <option value="">{placeholder}</option>
         {options.map((option) => (
@@ -161,7 +163,7 @@ function SelectBox({
           </option>
         ))}
       </select>
-      <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+      <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
     </div>
   );
 }
@@ -182,8 +184,8 @@ function Pill({
       className={[
         "rounded-full border px-3.5 py-2 text-sm font-semibold transition",
         active
-          ? "border-[#DBEAFE] bg-[#EFF6FF] text-[#2563EB]"
-          : "border-[#E5E7EB] bg-white text-neutral-600 hover:border-[#2563EB] hover:text-[#2563EB]",
+          ? "border-[#BFDBFE] bg-[#EFF6FF] text-[#2563EB]"
+          : "border-[#E5E7EB] bg-white text-[#6B7280] hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
       ].join(" ")}
     >
       {children}
@@ -205,10 +207,10 @@ function OptionButton({
       type="button"
       onClick={onClick}
       className={[
-        "h-10 rounded-xl border text-sm font-semibold transition",
+        "h-10 rounded-2xl border text-sm font-semibold transition",
         active
-          ? "border-[#2563EB] bg-[#FFF7F4] text-[#2563EB] shadow-[0_0_0_1px_#2563EB]"
-          : "border-[#E5E7EB] bg-white text-neutral-700 hover:border-[#2563EB] hover:text-[#2563EB]",
+          ? "border-[#BFDBFE] bg-[#EFF6FF] text-[#2563EB] shadow-[inset_0_0_0_1px_rgba(37,99,235,0.12)]"
+          : "border-[#E5E7EB] bg-white text-[#111827] hover:border-[#BFDBFE] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
       ].join(" ")}
     >
       {children}
@@ -297,23 +299,23 @@ export default function Sidebar({
 
   const venueTypes = useMemo(
     () =>
-      uniqueStrings(
-        venues.flatMap((venue) => venue.categories ?? []),
-      ).map((label) => ({
-        label,
-        icon: getVenueTypeIcon(label),
-      })),
+      uniqueStrings(venues.flatMap((venue) => venue.categories ?? [])).map(
+        (label) => ({
+          label,
+          icon: getVenueTypeIcon(label),
+        }),
+      ),
     [venues],
   );
 
   const amenities = useMemo(
     () =>
-      uniqueStrings(
-        venues.flatMap((venue) => venue.amenities ?? []),
-      ).map((label) => ({
-        label,
-        icon: getAmenityIcon(label),
-      })),
+      uniqueStrings(venues.flatMap((venue) => venue.amenities ?? [])).map(
+        (label) => ({
+          label,
+          icon: getAmenityIcon(label),
+        }),
+      ),
     [venues],
   );
 
@@ -507,20 +509,20 @@ export default function Sidebar({
   return (
     <aside
       className={[
-        "flex h-full max-h-full flex-shrink-0 flex-col overflow-hidden bg-[#F9FAFB] shadow-sm",
+        "flex h-full max-h-full flex-shrink-0 flex-col overflow-hidden bg-white",
         presentation === "mobile"
-          ? "w-full rounded-[24px] border border-[#E5E7EB]"
+          ? "w-full rounded-[28px] border border-[#E5E7EB]"
           : "w-[360px] max-w-[360px] border-r border-[#E5E7EB]",
       ].join(" ")}
     >
-      <div className="shrink-0 border-b border-[#E5E7EB] px-6 pb-4 pt-5">
+      <div className="shrink-0 border-b border-[#E5E7EB] bg-[#F9FAFB] px-6 pb-5 pt-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-[#2563EB]">
+            <h1 className="text-xl font-black tracking-[-0.03em] text-[#111827]">
               Filters
             </h1>
 
-            <p className="mt-1 text-sm font-medium text-neutral-500">
+            <p className="mt-1 text-sm font-medium text-[#6B7280]">
               Refine your venue search
             </p>
           </div>
@@ -529,7 +531,7 @@ export default function Sidebar({
             <button
               type="button"
               onClick={clearFilters}
-              className="rounded-full border border-[#E5E7EB] bg-white px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.08em] text-[#1D4ED8] transition hover:border-[#2563EB] hover:bg-[#EFF6FF]"
+              className="rounded-full border border-[#DBEAFE] bg-white px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.08em] text-[#1D4ED8] transition hover:border-[#2563EB] hover:bg-[#EFF6FF]"
             >
               Clear
             </button>
@@ -537,19 +539,19 @@ export default function Sidebar({
         </div>
 
         <div className="relative mt-4">
-          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-500" />
+          <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
 
           <input
             type="search"
             value={searchQuery}
             onChange={(event) => updateFilters({ q: event.target.value })}
             placeholder="Search venues..."
-            className="h-11 w-full rounded-xl border border-[#E5E7EB] bg-white pl-12 pr-4 text-sm font-medium text-neutral-700 shadow-sm outline-none transition placeholder:text-neutral-400 focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+            className="h-11 w-full rounded-2xl border border-[#E5E7EB] bg-white pl-11 pr-4 text-sm font-medium text-[#111827] outline-none transition placeholder:text-slate-400 hover:border-[#BFDBFE] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
           />
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [&>section:not(:last-child)]:mb-5">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [&>section:not(:last-child)]:mb-7">
         <section>
           <SectionTitle icon={MapPin} title="Location" />
 
@@ -590,14 +592,14 @@ export default function Sidebar({
             <button
               type="button"
               onClick={handleUseCurrentLocation}
-              className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-neutral-100 text-sm font-bold text-neutral-700 shadow-sm transition hover:border-[#2563EB] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-[#F8FAFC] text-sm font-bold text-[#6B7280] transition hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
             >
               <Crosshair className="h-5 w-5" />
               Use my current location
             </button>
 
             {locationStatus && (
-              <p className="text-xs font-medium leading-5 text-neutral-500">
+              <p className="text-xs font-medium leading-5 text-[#6B7280]">
                 {locationStatus}
               </p>
             )}
@@ -645,7 +647,7 @@ export default function Sidebar({
         <section>
           <SectionTitle icon={WalletCards} title="Budget" />
 
-          <div className="overflow-hidden rounded-xl border border-[#E5E7EB] bg-white">
+          <div className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white">
             <div className="grid grid-cols-3">
               {budgetTabs.map((budget, index) => (
                 <button
@@ -666,7 +668,7 @@ export default function Sidebar({
                       : "",
                     selectedBudget === budget.value
                       ? "bg-[#EFF6FF] text-[#2563EB]"
-                      : "bg-white text-neutral-600 hover:bg-[#FFF9F7]",
+                      : "bg-white text-[#6B7280] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
                   ].join(" ")}
                 >
                   {budget.label}
@@ -675,7 +677,7 @@ export default function Sidebar({
             </div>
           </div>
 
-          <p className="mt-3 text-center text-sm font-extrabold text-neutral-700">
+          <p className="mt-3 rounded-2xl bg-[#F8FAFC] px-3 py-2 text-center text-sm font-extrabold text-[#111827]">
             {activeBudgetLabel}
           </p>
 
@@ -699,7 +701,7 @@ export default function Sidebar({
                     budget: "",
                   })
                 }
-                className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm font-semibold text-neutral-800 shadow-sm outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                className="h-10 w-full rounded-2xl border border-[#E5E7EB] bg-white px-3 text-sm font-semibold text-[#111827] outline-none transition hover:border-[#BFDBFE] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
                 placeholder="₱ min"
               />
             </div>
@@ -723,7 +725,7 @@ export default function Sidebar({
                     budget: "",
                   })
                 }
-                className="h-10 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm font-semibold text-neutral-800 shadow-sm outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                className="h-10 w-full rounded-2xl border border-[#E5E7EB] bg-white px-3 text-sm font-semibold text-[#111827] outline-none transition hover:border-[#BFDBFE] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
                 placeholder="₱ max"
               />
             </div>
@@ -733,7 +735,7 @@ export default function Sidebar({
         <section>
           <SectionTitle icon={Users} title="Capacity" />
 
-          <div className="flex items-center justify-between text-sm font-semibold text-neutral-500">
+          <div className="flex items-center justify-between text-sm font-semibold text-[#6B7280]">
             <span>{capacityBounds.min}</span>
             <span>{capacityBounds.max}+</span>
           </div>
@@ -753,7 +755,7 @@ export default function Sidebar({
 
           <div className="mt-3 flex items-center gap-3">
             <label
-              className="min-w-[90px] text-sm font-medium text-neutral-500"
+              className="min-w-[90px] text-sm font-medium text-[#6B7280]"
               htmlFor="capacity-input"
             >
               Capacity
@@ -768,17 +770,17 @@ export default function Sidebar({
               onChange={(event) =>
                 updateFilters({ capacity: event.target.value })
               }
-              className="h-11 w-full rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm font-semibold text-neutral-800 shadow-sm outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+              className="h-11 w-full rounded-2xl border border-[#E5E7EB] bg-white px-3 text-sm font-semibold text-[#111827] outline-none transition hover:border-[#BFDBFE] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
               placeholder="Any"
             />
           </div>
 
           <div className="mt-2 flex items-center justify-between gap-3">
-            <p className="text-sm font-medium text-neutral-500">
+            <p className="text-sm font-medium text-[#6B7280]">
               {capacityValue ? (
                 <>
                   At least{" "}
-                  <span className="font-extrabold text-neutral-800">
+                  <span className="font-extrabold text-[#111827]">
                     {capacityValue}
                   </span>{" "}
                   guests
@@ -813,14 +815,16 @@ export default function Sidebar({
                   type="button"
                   onClick={() => toggleVenueType(label)}
                   className={[
-                    "flex aspect-[1.35] flex-col items-center justify-center gap-2 rounded-2xl border bg-white transition",
+                    "flex aspect-[1.35] flex-col items-center justify-center gap-2 rounded-2xl border bg-white px-2 text-center transition",
                     active
-                      ? "border-[#2563EB] bg-[#FFF7F4] text-[#2563EB] shadow-[0_0_0_2px_#2563EB]"
-                      : "border-[#E5E7EB] text-neutral-700 hover:border-[#2563EB] hover:text-[#2563EB]",
+                      ? "border-[#BFDBFE] bg-[#EFF6FF] text-[#2563EB] shadow-[inset_0_0_0_1px_rgba(37,99,235,0.12)]"
+                      : "border-[#E5E7EB] text-[#111827] hover:border-[#BFDBFE] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
                   ].join(" ")}
                 >
                   <Icon className="h-7 w-7" strokeWidth={2.3} />
-                  <span className="text-sm font-semibold">{label}</span>
+                  <span className="line-clamp-2 text-sm font-semibold leading-4">
+                    {label}
+                  </span>
                 </button>
               );
             })}
@@ -863,8 +867,8 @@ export default function Sidebar({
                   className={[
                     "flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-bold transition",
                     active
-                      ? "border-[#DBEAFE] bg-[#EFF6FF] text-[#2563EB]"
-                      : "border-[#E5E7EB] bg-white text-neutral-700 hover:border-[#2563EB] hover:text-[#2563EB]",
+                      ? "border-[#BFDBFE] bg-[#EFF6FF] text-[#2563EB]"
+                      : "border-[#E5E7EB] bg-white text-[#6B7280] hover:border-[#BFDBFE] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
                   ].join(" ")}
                 >
                   <Icon className="h-4 w-4" strokeWidth={2.5} />
@@ -876,13 +880,20 @@ export default function Sidebar({
         </section>
       </div>
 
-      <div className="sticky bottom-0 z-10 shrink-0 border-t border-[#E5E7EB] bg-[#F9FAFB] px-6 py-4 shadow-[0_-12px_30px_rgba(15,23,42,0.06)]">
+      <div className="sticky bottom-0 z-10 shrink-0 border-t border-[#E5E7EB] bg-white/95 px-6 py-4 backdrop-blur">
         <button
           type="button"
           onClick={onApply}
-          className="h-12 w-full rounded-xl bg-[#2563EB] py-3 text-base font-extrabold text-white shadow-lg shadow-[#2563EB]/20 transition hover:bg-[#1d4ed8] active:scale-[0.98]"
+          className={[
+            "h-12 w-full rounded-2xl py-3 text-base font-extrabold transition active:scale-[0.98]",
+            activeFilterCount > 0
+              ? "bg-[#2563EB] text-white shadow-sm shadow-[#2563EB]/20 hover:bg-[#1D4ED8]"
+              : "border border-[#DBEAFE] bg-[#EFF6FF] text-[#1D4ED8] hover:bg-[#DBEAFE]",
+          ].join(" ")}
         >
-          View Results ({activeFilterCount})
+          {activeFilterCount > 0
+            ? `View Results (${activeFilterCount})`
+            : "View Results"}
         </button>
       </div>
     </aside>

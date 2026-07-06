@@ -49,7 +49,7 @@ export function CustomerNavbar() {
   const closeMenu = () => setMenuOpen(false);
 
   return (
-    <header className="sticky top-0 z-50 shrink-0 border-b border-[#E5E7EB]/70 bg-white/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 shrink-0 border-b border-[#E5E7EB]/80 bg-white/85 backdrop-blur-xl">
       {menuOpen ? (
         <button
           type="button"
@@ -59,10 +59,10 @@ export function CustomerNavbar() {
         />
       ) : null}
 
-      <div className="relative mx-auto flex min-h-16 w-full max-w-[1600px] items-center gap-2 px-3 sm:gap-3 sm:px-6 lg:px-8">
+      <div className="relative mx-auto flex min-h-16 w-full max-w-[1600px] items-center gap-2 px-4 sm:gap-3 sm:px-6 lg:px-8">
         <Link
           href="/venues"
-          className="text-lg font-black tracking-tight text-[#2563EB] transition hover:text-[#1D4ED8] sm:text-xl"
+          className="text-lg font-black tracking-[-0.03em] text-[#2563EB] transition hover:text-[#1D4ED8] sm:text-xl"
           onClick={closeMenu}
         >
           Venora
@@ -72,7 +72,7 @@ export function CustomerNavbar() {
           aria-label="Primary navigation"
           className="absolute left-1/2 hidden -translate-x-1/2 justify-center md:flex"
         >
-          <div className="inline-flex items-center gap-1 rounded-full border border-[#E5E7EB]/80 bg-[#F9FAFB]/90 p-1 shadow-sm">
+          <div className="inline-flex items-center gap-1 rounded-full border border-[#E5E7EB]/90 bg-white/90 p-1">
             {navLinks.map((item) => {
               const active = isActive(pathname, item.href);
 
@@ -83,8 +83,8 @@ export function CustomerNavbar() {
                   className={[
                     "rounded-full px-4 py-2 text-sm font-bold transition",
                     active
-                      ? "bg-[#EFF6FF] text-[#2563EB] hover:text-[#1D4ED8]"
-                      : "text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
+                      ? "bg-[#EFF6FF] text-[#1D4ED8] shadow-[inset_0_0_0_1px_rgba(37,99,235,0.08)] hover:text-[#1D4ED8]"
+                      : "text-[#6B7280] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
                   ].join(" ")}
                 >
                   {item.label}
@@ -97,7 +97,7 @@ export function CustomerNavbar() {
         <div className="ml-auto flex min-w-0 items-center justify-end gap-1.5 sm:gap-3">
           <button
             type="button"
-            className="hidden h-10 w-10 items-center justify-center rounded-full border border-transparent text-slate-400 transition hover:border-[#E5E7EB] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] lg:inline-flex"
+            className="hidden h-10 w-10 items-center justify-center rounded-full border border-transparent text-slate-400 transition hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] lg:inline-flex"
             aria-label="Notifications"
           >
             <Bell className="h-4 w-4" />
@@ -105,7 +105,7 @@ export function CustomerNavbar() {
 
           <button
             type="button"
-            className="hidden h-10 w-10 items-center justify-center rounded-full border border-transparent text-slate-400 transition hover:border-[#E5E7EB] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] sm:inline-flex"
+            className="hidden h-10 w-10 items-center justify-center rounded-full border border-transparent text-slate-400 transition hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] sm:inline-flex"
             aria-label="Help"
           >
             <HelpCircle className="h-4 w-4" />
@@ -118,7 +118,7 @@ export function CustomerNavbar() {
               aria-expanded={menuOpen}
               aria-haspopup="menu"
               onClick={() => setMenuOpen((open) => !open)}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#1D4ED8] shadow-sm transition hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#1D4ED8] transition hover:border-[#BFDBFE] hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
             >
               {menuOpen ? (
                 <X className="h-5 w-5" />
@@ -130,7 +130,7 @@ export function CustomerNavbar() {
             {menuOpen ? (
               <div
                 role="menu"
-                className="absolute right-0 mt-2 w-64 overflow-hidden rounded-[28px] border border-[#E5E7EB] bg-white p-3 shadow-xl shadow-slate-200/70"
+                className="absolute right-0 mt-2 w-64 overflow-hidden rounded-[26px] border border-[#E5E7EB] bg-white p-3 shadow-lg shadow-slate-200/70"
               >
                 <div className="grid gap-1">
                   {menuLinks.map((item) => {

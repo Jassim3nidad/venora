@@ -137,6 +137,19 @@ function getVenueCapacity(venue: Venue) {
   return Number.isFinite(capacity) ? capacity : 0;
 }
 
+function getVenueCapacityLabel(venue: Venue) {
+  const capacity =
+    typeof venue.capacityMax === "number"
+      ? venue.capacityMax
+      : Number(String(venue.capacity).match(/\d+/)?.[0]);
+
+  if (Number.isFinite(capacity) && capacity > 0) {
+    return `Up to ${capacity.toLocaleString("en-PH")} pax`;
+  }
+
+  return venue.capacity;
+}
+
 function textIncludes(value: unknown, query: string) {
   return normalize(value).includes(query);
 }
@@ -202,10 +215,7 @@ function matchesBudgetPreset(venue: Venue, budget: string) {
   const price = getVenuePrice(venue);
   const normalizedBudget = normalize(budget);
 
-  if (
-    venue.budgetRange &&
-    normalize(venue.budgetRange) === normalizedBudget
-  ) {
+  if (venue.budgetRange && normalize(venue.budgetRange) === normalizedBudget) {
     return true;
   }
 
@@ -903,10 +913,9 @@ export default function VenuesClient({
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
-    const query =
-      String(formData.get("aiPrompt") ?? aiPrompt)
-        .trim()
-        .slice(0, 500);
+    const query = String(formData.get("aiPrompt") ?? aiPrompt)
+      .trim()
+      .slice(0, 500);
 
     if (!query && activeFilterCount === 0) return;
 
@@ -995,7 +1004,7 @@ export default function VenuesClient({
   ].filter(Boolean);
 
   return (
-    <div className="h-full min-w-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-7 lg:px-8 xl:px-10">
+    <div className="h-full min-w-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8 xl:px-12">
       {mobileFiltersOpen && (
         <div
           className="fixed inset-0 z-[60] lg:hidden"
@@ -1022,7 +1031,7 @@ export default function VenuesClient({
               </button>
             </div>
 
-            <div className="h-full min-h-0 flex-1 overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-2xl">
+            <div className="h-full min-h-0 flex-1 overflow-hidden rounded-[28px] border border-[#E5E7EB] bg-white shadow-lg shadow-slate-900/10">
               <Sidebar
                 venues={initialVenues}
                 presentation="mobile"
@@ -1033,9 +1042,9 @@ export default function VenuesClient({
         </div>
       )}
 
-      <div className="flex flex-col gap-8">
-        <section className="max-w-full overflow-hidden rounded-[24px] border border-[#E5E7EB]/80 bg-white shadow-sm sm:rounded-[28px]">
-          <div className="grid gap-6 p-5 sm:p-6">
+      <div className="flex flex-col gap-9">
+        <section className="max-w-full overflow-hidden rounded-[28px] border border-[#E5E7EB]/90 bg-white shadow-sm shadow-slate-200/60">
+          <div className="grid gap-6 p-5 sm:p-7">
             <div className="min-w-0">
               <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1.5 text-[#2563EB]">
                 <Sparkles className="h-3.5 w-3.5" />
@@ -1045,11 +1054,11 @@ export default function VenuesClient({
                 </span>
               </div>
 
-              <h1 className="max-w-3xl break-words text-2xl font-black leading-8 tracking-[-0.035em] text-slate-950 sm:text-4xl sm:leading-tight">
+              <h1 className="max-w-3xl break-words text-3xl font-black leading-9 tracking-[-0.04em] text-slate-950 sm:text-4xl sm:leading-tight">
                 Wedding & Event Venues
               </h1>
 
-              <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-500 sm:text-base">
+              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-[#6B7280] sm:text-base">
                 {filtered.length} venue{filtered.length === 1 ? "" : "s"} found
                 matching your criteria. Compare spaces, pricing, and capacity in
                 one polished marketplace.
@@ -1058,7 +1067,7 @@ export default function VenuesClient({
 
             <form
               onSubmit={handleSmartSearch}
-              className="grid gap-3 rounded-2xl border border-[#DBEAFE] bg-[#F8FAFC] p-3 sm:p-4"
+              className="grid gap-3 rounded-[24px] border border-[#DBEAFE] bg-[#F8FAFC] p-3 sm:p-4"
             >
               <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
                 <div className="relative min-w-0">
@@ -1073,12 +1082,10 @@ export default function VenuesClient({
                     name="aiPrompt"
                     type="search"
                     value={aiPrompt}
-                    onInput={(event) =>
-                      setAiPrompt(event.currentTarget.value)
-                    }
+                    onInput={(event) => setAiPrompt(event.currentTarget.value)}
                     onChange={(event) => setAiPrompt(event.target.value)}
                     placeholder="Try: outdoor garden in Tagaytay for 150 guests under ₱250k with parking"
-                    className="h-12 w-full rounded-2xl border border-[#BFDBFE] bg-white pl-11 pr-4 text-sm font-semibold text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-[#93C5FD] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                    className="h-12 w-full rounded-2xl border border-[#BFDBFE] bg-white pl-11 pr-4 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-[#93C5FD] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
                   />
                 </div>
 
@@ -1088,7 +1095,7 @@ export default function VenuesClient({
                     smartSearch.isPending ||
                     (!aiPrompt.trim() && activeFilterCount === 0)
                   }
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-5 text-sm font-extrabold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-5 text-sm font-extrabold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {smartSearch.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -1154,7 +1161,7 @@ export default function VenuesClient({
                   value={filters.query}
                   onChange={(event) => updateFilter("q", event.target.value)}
                   placeholder="Search venue name, location, category, or amenity..."
-                  className="h-12 w-full rounded-2xl border border-slate-200 bg-[#F9FAFB] pl-11 pr-4 text-sm font-medium text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-[#E5E7EB] focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
+                  className="h-12 w-full rounded-2xl border border-slate-200 bg-[#F9FAFB] pl-11 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-[#93C5FD] focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
                 />
               </div>
 
@@ -1162,7 +1169,7 @@ export default function VenuesClient({
                 <button
                   type="button"
                   onClick={() => setMobileFiltersOpen(true)}
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-600 shadow-sm transition hover:border-[#E5E7EB] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/20 lg:hidden"
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-600 transition hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/20 lg:hidden"
                 >
                   <SlidersHorizontal className="h-4 w-4" />
                   Filters
@@ -1181,7 +1188,7 @@ export default function VenuesClient({
                     onChange={(event) =>
                       updateFilter("sort", event.target.value)
                     }
-                    className="h-12 w-full appearance-none rounded-2xl border border-slate-200 bg-white pl-11 pr-9 text-sm font-bold text-slate-600 shadow-sm outline-none transition hover:border-[#E5E7EB] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                    className="h-12 w-full appearance-none rounded-2xl border border-slate-200 bg-white pl-11 pr-9 text-sm font-bold text-slate-600 outline-none transition hover:border-[#BFDBFE] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
                     aria-label="Sort venues"
                   >
                     <option value="recommended">Recommended</option>
@@ -1240,21 +1247,24 @@ export default function VenuesClient({
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {filtered.map((venue) => {
               const isFavorited = favoriteIds.has(String(venue.id));
               const isPending = favoritePendingId === String(venue.id);
+              const hasRating = typeof venue.rating === "number";
+              const ratingLabel = hasRating ? venue.rating!.toFixed(1) : "New";
+              const capacityLabel = getVenueCapacityLabel(venue);
 
               return (
                 <article
                   key={venue.id}
-                  className="group relative flex h-full overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-sm shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1 hover:border-[#2563EB]/50 hover:shadow-xl hover:shadow-slate-200/80"
+                  className="group relative flex h-full overflow-hidden rounded-[28px] border border-[#E5E7EB] bg-white shadow-[0_10px_28px_rgba(15,23,42,0.05)] transition-all duration-300 hover:-translate-y-1 hover:border-[#BFDBFE] hover:shadow-[0_18px_45px_rgba(15,23,42,0.1)]"
                 >
                   <Link
                     href={`/venues/${venue.slug ?? venue.id}`}
                     className="flex h-full w-full flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
                   >
-                    <div className="relative aspect-[16/11] overflow-hidden bg-slate-100">
+                    <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
                       <img
                         src={venue.image}
                         alt={venue.name}
@@ -1263,37 +1273,40 @@ export default function VenuesClient({
 
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-slate-950/5 to-transparent" />
 
-                      <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#1D4ED8] shadow-sm backdrop-blur-md">
-                        {venue.category}
+                      <span className="absolute left-4 top-4 max-w-[calc(100%-5rem)] truncate rounded-full border border-white/70 bg-white/85 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.08em] text-[#1D4ED8] shadow-sm backdrop-blur-md">
+                        {venue.category ?? "Venue"}
                       </span>
 
-                      <div className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-slate-800 shadow-sm backdrop-blur-md">
-                        <Star className="h-3.5 w-3.5 fill-[#F59E0B] text-[#F59E0B]" />
+                      <div className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/85 px-2.5 py-1.5 text-slate-700 shadow-sm backdrop-blur-md">
+                        <Star
+                          className={[
+                            "h-3.5 w-3.5",
+                            hasRating
+                              ? "fill-[#F59E0B] text-[#F59E0B]"
+                              : "text-slate-400",
+                          ].join(" ")}
+                        />
 
                         <span className="text-xs font-extrabold">
-                          {String(
-                            typeof venue.rating === "number"
-                              ? venue.rating.toFixed(1)
-                              : "New",
-                          )}
+                          {ratingLabel}
                         </span>
                       </div>
                     </div>
 
-                    <div className="flex min-h-[190px] flex-1 flex-col justify-between gap-5 p-5">
+                    <div className="flex min-h-[220px] flex-1 flex-col justify-between gap-5 p-5 sm:p-6">
                       <div className="min-w-0">
-                        <h2 className="line-clamp-1 text-lg font-extrabold leading-6 tracking-[-0.02em] text-slate-950 transition group-hover:text-[#1D4ED8]">
+                        <h2 className="line-clamp-2 min-h-[3rem] text-lg font-extrabold leading-6 tracking-[-0.02em] text-slate-950 transition group-hover:text-[#1D4ED8]">
                           {venue.name}
                         </h2>
 
-                        <p className="mt-2 flex min-w-0 items-center gap-2 text-sm font-medium leading-5 text-slate-500">
-                          <MapPin className="h-4 w-4 shrink-0 text-slate-400" />
+                        <p className="mt-3 flex min-w-0 items-start gap-2 text-sm font-medium leading-6 text-[#6B7280]">
+                          <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB]" />
 
-                          <span className="line-clamp-1">{venue.location}</span>
+                          <span className="line-clamp-2">{venue.location}</span>
                         </p>
                       </div>
 
-                      <div className="flex items-end justify-between gap-4 border-t border-slate-100 pt-4">
+                      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 border-t border-slate-100 pt-4">
                         <div className="min-w-0">
                           <p className="text-lg font-black leading-6 text-slate-950">
                             {venue.price}
@@ -1304,11 +1317,11 @@ export default function VenuesClient({
                           </p>
                         </div>
 
-                        <div className="inline-flex max-w-[60%] items-center gap-1.5 rounded-2xl bg-slate-100 px-3 py-2 text-slate-600">
+                        <div className="inline-flex max-w-[150px] items-center gap-1.5 rounded-2xl bg-[#EFF6FF] px-3 py-2 text-[#1D4ED8]">
                           <Users className="h-3.5 w-3.5 shrink-0" />
 
-                          <span className="truncate text-[11px] font-extrabold uppercase tracking-[0.08em]">
-                            {venue.capacity}
+                          <span className="truncate text-xs font-extrabold">
+                            {capacityLabel}
                           </span>
                         </div>
                       </div>
@@ -1319,7 +1332,12 @@ export default function VenuesClient({
                     type="button"
                     onClick={(event) => handleFavoriteToggle(event, venue.id)}
                     disabled={isPending}
-                    className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-500 shadow-sm backdrop-blur-md transition hover:scale-105 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 disabled:cursor-wait disabled:opacity-70"
+                    className={[
+                      "absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/90 shadow-sm backdrop-blur-md transition hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 disabled:cursor-wait disabled:opacity-70",
+                      isFavorited
+                        ? "text-red-500 hover:bg-red-50"
+                        : "text-slate-500 hover:bg-[#EFF6FF] hover:text-red-500",
+                    ].join(" ")}
                     aria-label={
                       isFavorited
                         ? `Remove ${venue.name} from favorites`
