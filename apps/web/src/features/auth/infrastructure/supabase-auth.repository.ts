@@ -6,7 +6,22 @@ import type { AuthUser } from "../types/auth.types";
 
 export class SupabaseAuthRepository implements AuthRepository {
   private getSiteUrl() {
-    return process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+    let url = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL;
+    
+    // Fallback to Vercel system environment variables if explicit ones aren't set
+    if (!url && process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL) {
+      url = `https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`;
+    } else if (!url && process.env.NEXT_PUBLIC_VERCEL_URL) {
+      url = `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
+    } else if (!url && process.env.VERCEL_URL) {
+      url = `https://${process.env.VERCEL_URL}`;
+    }
+
+    url = url ?? "http://localhost:3000";
+    
+    // Ensure it starts with http/https and has no trailing slash
+    url = url.startsWith("http") ? url : `https://${url}`;
+    return url.replace(/\/$/, "");
   }
 
   async signUp({

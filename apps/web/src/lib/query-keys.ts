@@ -66,6 +66,12 @@ export const queryKeys = {
     results: (query: Record<string, unknown>) => ["search", "results", query] as const,
     ai:      (query: Record<string, unknown>) => ["search", "ai",      query] as const,
   },
+
+  // ── Calendar ───────────────────────────────────────────────
+  calendar: {
+    availability: (venueId: string, month: string) => ["calendar", "availability", venueId, month] as const,
+    bookings: (venueId: string, month: string) => ["calendar", "bookings", venueId, month] as const,
+  },
 } as const;
 
 export type QueryKeys = typeof queryKeys;
