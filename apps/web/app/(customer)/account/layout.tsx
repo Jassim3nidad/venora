@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { CustomerNavbar } from "@/components/layout/CustomerNavbar";
 import { createClient } from "@/lib/supabase/server";
 import AccountNav from "./_components/AccountNav";
+import AccountMobileMenu from "./_components/AccountMobileMenu";
 
 export const metadata: Metadata = {
   title: {

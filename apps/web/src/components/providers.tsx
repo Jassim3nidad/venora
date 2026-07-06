@@ -9,6 +9,22 @@ import { useState, type ReactNode } from "react";
  * Global providers wrapper.
  * Add theme providers, toast providers, etc. here as the app grows.
  */
+function HashAuthCatcher() {
+  if (typeof window !== "undefined") {
+    const hash = window.location.hash;
+    if (hash && hash.includes("error=access_denied")) {
+      const params = new URLSearchParams(hash.substring(1));
+      const errorDesc = params.get("error_description") || "Your link is invalid or has expired.";
+      // Redirect to login with the error
+      window.location.href = `/login?error=${encodeURIComponent(errorDesc)}`;
+    } else if (hash && hash.includes("access_token=")) {
+      // In case they somehow get an implicit flow token on the root
+      window.location.href = `/auth/callback${hash}`;
+    }
+  }
+  return null;
+}
+
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
     () =>
@@ -25,6 +41,7 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <HashAuthCatcher />
       <ToastProvider>
         {children}
         <ToastViewport />

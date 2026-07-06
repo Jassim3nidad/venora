@@ -41,6 +41,8 @@ const preset: Partial<Config> = {
         "slide-up": "slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
         "sheet-in": "sheet-in 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
         "sheet-out": "sheet-out 0.25s ease-in",
+        "drawer-in": "drawer-in 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+        "drawer-out": "drawer-out 0.22s ease-in",
         shimmer: "shimmer 1.5s infinite",
       },
       keyframes: {
@@ -59,6 +61,14 @@ const preset: Partial<Config> = {
         "sheet-out": {
           from: { transform: "translateY(0)" },
           to: { transform: "translateY(100%)" },
+        },
+        "drawer-in": {
+          from: { transform: "translateX(-100%)" },
+          to: { transform: "translateX(0)" },
+        },
+        "drawer-out": {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(-100%)" },
         },
         shimmer: {
           "0%": { backgroundPosition: "-200% 0" },
