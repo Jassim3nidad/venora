@@ -45,7 +45,7 @@ export default async function AccountLayout({
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-950">
-      <CustomerNavbar />
+      <CustomerNavbar user={user} />
 
       <main>
         <section className="relative border-b border-[#E5E7EB]/70 bg-[#F9FAFB]">

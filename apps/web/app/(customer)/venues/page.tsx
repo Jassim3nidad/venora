@@ -108,7 +108,7 @@ export default async function VenuesMarketplacePage() {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[#F9FAFB] text-[#111827]">
-      <CustomerNavbar />
+      <CustomerNavbar user={user} />
 
       <div className="flex min-h-0 w-full flex-1 overflow-hidden">
         <VenuesClient

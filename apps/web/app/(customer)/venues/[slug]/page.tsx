@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CustomerNavbar } from "@/components/layout/CustomerNavbar";
 import { createClient } from "@/lib/supabase/server";
@@ -111,7 +111,7 @@ export default async function VenueDetailPage({ params }: Props) {
 
   return (
     <>
-      <CustomerNavbar />
+      <CustomerNavbar user={user} />
 
       <VenueDetails
         venue={venue}

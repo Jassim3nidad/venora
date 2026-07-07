@@ -46,6 +46,10 @@ export default async function BookVenuePage({ params }: Props) {
   const { slug } = await params;
   const supabase = (await createClient()) as any;
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const { data: venue } = await supabase
     .from("venues")
     .select(
@@ -64,7 +68,7 @@ export default async function BookVenuePage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#111827]">
-      <CustomerNavbar />
+      <CustomerNavbar user={user} />
 
       <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <Link

@@ -15,25 +15,6 @@ import {
   X,
 } from "lucide-react";
 
-const navLinks = [
-  { label: "Browse", href: "/venues" },
-  { label: "Bookings", href: "/bookings" },
-  { label: "Favorites", href: "/favorites" },
-];
-
-const menuLinks = [
-  { label: "Browse", href: "/venues", icon: Search, mobileOnly: true },
-  {
-    label: "Bookings",
-    href: "/bookings",
-    icon: CalendarDays,
-    mobileOnly: true,
-  },
-  { label: "Favorites", href: "/favorites", icon: Heart, mobileOnly: true },
-  { label: "Account", href: "/account", icon: UserRound },
-  { label: "Logout", href: "/logout", icon: LogOut },
-];
-
 function isActive(pathname: string, href: string) {
   if (href === "/venues") {
     return pathname === "/venues" || pathname.startsWith("/venues/");
@@ -42,11 +23,37 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function CustomerNavbar() {
+export function CustomerNavbar({ user }: { user?: any }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const closeMenu = () => setMenuOpen(false);
+
+  const navLinks = user
+    ? [
+        { label: "Browse", href: "/venues" },
+        { label: "Bookings", href: "/bookings" },
+        { label: "Favorites", href: "/favorites" },
+      ]
+    : [{ label: "Browse", href: "/venues" }];
+
+  const menuLinks = user
+    ? [
+        { label: "Browse", href: "/venues", icon: Search, mobileOnly: true },
+        {
+          label: "Bookings",
+          href: "/bookings",
+          icon: CalendarDays,
+          mobileOnly: true,
+        },
+        { label: "Favorites", href: "/favorites", icon: Heart, mobileOnly: true },
+        { label: "Account", href: "/account", icon: UserRound },
+        { label: "Logout", href: "/logout", icon: LogOut },
+      ]
+    : [
+        { label: "Browse", href: "/venues", icon: Search, mobileOnly: true },
+        { label: "Sign In", href: "/login", icon: UserRound },
+      ];
 
   return (
     <header className="sticky top-0 z-50 shrink-0 border-b border-[#E5E7EB]/80 bg-white/85 backdrop-blur-xl">

@@ -25,7 +25,7 @@ export default async function FavoritesPage() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#111827]">
-      <CustomerNavbar />
+      <CustomerNavbar user={user} />
 
       <main>
         <section className="relative overflow-hidden border-b border-[#E5E7EB] bg-[#F9FAFB]">
