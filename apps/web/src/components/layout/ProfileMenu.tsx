@@ -3,6 +3,7 @@
 import Link from "next/link";
 import {
   Clock,
+  DoorOpen,
   HelpCircle,
   LogOut,
   Settings,
@@ -21,6 +22,14 @@ interface ProfileMenuProps {
   email: string;
   avatarUrl?: string | null | undefined;
   logoutAction?: () => Promise<void>;
+  /**
+   * Shows an "Exit Dashboard" item that sends enterprise-role users
+   * (venue owner, coordinator, supplier, admin) back to the customer-facing
+   * marketplace. Only relevant when this menu renders inside a dashboard
+   * shell — the regular customer nav never passes this.
+   */
+  showExitDashboard?: boolean;
+  exitDashboardHref?: string;
 }
 
 function SoonBadge() {
@@ -42,6 +51,8 @@ export default function ProfileMenu({
   email,
   avatarUrl,
   logoutAction,
+  showExitDashboard = false,
+  exitDashboardHref = "/venues",
 }: ProfileMenuProps) {
   const avatarInitial =
     displayName?.charAt(0)?.toUpperCase() ||
@@ -127,6 +138,17 @@ export default function ProfileMenu({
             <SoonBadge />
           </Link>
         </DropdownMenuItem>
+
+        {showExitDashboard ? (
+          <DropdownMenuItem asChild>
+            <Link href={exitDashboardHref} className="cursor-pointer">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#F9FAFB] text-[#2563EB]">
+                <DoorOpen className="h-4 w-4" />
+              </div>
+              <span className="font-bold text-slate-700">Exit Dashboard</span>
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
 
         <DropdownMenuSeparator />
 

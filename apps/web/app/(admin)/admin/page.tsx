@@ -28,6 +28,11 @@ export default async function AdminDashboardPage() {
     .select("id", { count: "exact", head: true })
     .eq("accreditation_status", "pending");
 
+  const { count: pendingApplications } = await supabase
+    .from("partner_applications")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "pending");
+
   const { data: recentVenues } = await supabase
     .from("venues")
     .select("id, name, status, organizations(name)")
@@ -74,7 +79,7 @@ export default async function AdminDashboardPage() {
       totalUsers={totalUsers ?? 0}
       pendingVenues={pendingVenues ?? 0}
       supplierReviews={supplierReviews ?? 0}
-      monthlyCommission={0}
+      pendingApplications={pendingApplications ?? 0}
       pendingReviews={pendingReviews}
     />
   );

@@ -1,8 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Eye, Check, X, FileText, Loader2, MapPin } from "lucide-react";
-import { approveApplicationAction, denyApplicationAction } from "../actions/admin.actions";
+import {
+  approveApplicationAction,
+  denyApplicationAction,
+  getVerificationDocumentUrlAction,
+} from "../actions/admin.actions";
+
+type DocLink = { path: string; url: string | null; error: string | null };
 
 export function ApplicationReviewModal({ application }: { application: any }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,8 +17,41 @@ export function ApplicationReviewModal({ application }: { application: any }) {
   const [denialReason, setDenialReason] = useState("");
   const [showDenyInput, setShowDenyInput] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [docLinks, setDocLinks] = useState<DocLink[] | null>(null);
 
-  const docs = application.documents_json ? JSON.parse(application.documents_json) : [];
+  const docs: string[] = application.documents_json
+    ? JSON.parse(application.documents_json)
+    : [];
+
+  useEffect(() => {
+    if (!isOpen || docLinks !== null) return;
+
+    let cancelled = false;
+
+    (async () => {
+      const resolved = await Promise.all(
+        docs.map(async (doc): Promise<DocLink> => {
+          // Backwards-compatible: older applications may have stored a full
+          // (now-403ing) public URL rather than a storage path.
+          if (doc.startsWith("http")) {
+            return { path: doc, url: doc, error: null };
+          }
+
+          const res = await getVerificationDocumentUrlAction(doc);
+          return res.success
+            ? { path: doc, url: res.url ?? null, error: null }
+            : { path: doc, url: null, error: res.error ?? "Could not load document" };
+        }),
+      );
+
+      if (!cancelled) setDocLinks(resolved);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const handleApprove = async () => {
     setIsApproving(true);
@@ -100,25 +139,49 @@ export function ApplicationReviewModal({ application }: { application: any }) {
 
               <div className="mb-8">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Verification Documents</h3>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {docs.map((docUrl: string, idx: number) => (
-                    <a
-                      key={idx}
-                      href={docUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-3 rounded-xl border border-slate-200 p-3 transition hover:border-[#2563EB] hover:bg-[#EFF6FF]"
-                    >
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
-                        <FileText className="h-5 w-5" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-bold text-slate-900">Document {idx + 1}</p>
-                        <p className="text-xs text-slate-500">Click to view</p>
-                      </div>
-                    </a>
-                  ))}
-                </div>
+                {docs.length === 0 ? (
+                  <p className="text-sm text-slate-500">No documents were submitted.</p>
+                ) : docLinks === null ? (
+                  <div className="flex items-center gap-2 text-sm text-slate-500">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading documents...
+                  </div>
+                ) : (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {docLinks.map((doc, idx) =>
+                      doc.url ? (
+                        <a
+                          key={doc.path}
+                          href={doc.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center gap-3 rounded-xl border border-slate-200 p-3 transition hover:border-[#2563EB] hover:bg-[#EFF6FF]"
+                        >
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+                            <FileText className="h-5 w-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-bold text-slate-900">Document {idx + 1}</p>
+                            <p className="text-xs text-slate-500">Click to view</p>
+                          </div>
+                        </a>
+                      ) : (
+                        <div
+                          key={doc.path}
+                          className="flex items-center gap-3 rounded-xl border border-dashed border-red-200 bg-red-50 p-3"
+                        >
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-500">
+                            <FileText className="h-5 w-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-bold text-slate-900">Document {idx + 1}</p>
+                            <p className="truncate text-xs text-red-600">{doc.error}</p>
+                          </div>
+                        </div>
+                      ),
+                    )}
+                  </div>
+                )}
               </div>
 
               {showDenyInput ? (
