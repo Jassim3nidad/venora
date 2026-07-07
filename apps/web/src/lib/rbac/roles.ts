@@ -72,9 +72,9 @@ export const PROTECTED_ROUTES: { prefix: string; allow: RoleName[] }[] = [
 // Higher-priority roles are checked first.
 
 export function defaultRouteForRoles(roles: RoleName[]): string {
-  if (roles.includes(ROLES.ADMIN))             return "/admin";
-  if (roles.includes(ROLES.VENUE_OWNER) ||
-      roles.includes(ROLES.EVENT_COORDINATOR)) return "/dashboard";
-  if (roles.includes(ROLES.SUPPLIER))          return "/dashboard";
-  return "/"; // customer (default)
+  if (roles.includes(ROLES.ADMIN))             return "/dashboard/admin";
+  if (roles.includes(ROLES.VENUE_OWNER))       return "/dashboard/venue-owner";
+  if (roles.includes(ROLES.EVENT_COORDINATOR)) return "/dashboard/event-coordinator";
+  if (roles.includes(ROLES.SUPPLIER))          return "/dashboard/supplier";
+  return "/venues";
 }

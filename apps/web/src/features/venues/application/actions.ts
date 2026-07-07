@@ -122,7 +122,11 @@ export async function checkAvailabilityAction(rawInput: unknown) {
       .select("id")
       .eq("venue_id", venueId)
       .eq("event_date", date)
-      .in("status", ["approved", "pending"]);
+      .in("status", [
+        "pending",
+        "approved",
+        "completed",
+      ]);
 
     const isAvailable = !bookings || bookings.length === 0;
 

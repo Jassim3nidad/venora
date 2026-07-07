@@ -17,10 +17,12 @@ export async function POST(request: NextRequest) {
   }
 
   const event = JSON.parse(rawBody) as {
+    id?: string;
     data: {
       attributes: {
         type: string;
         data: {
+          id?: string;
           attributes: {
             reference_number?: string;
             status: string;
@@ -41,10 +43,17 @@ export async function POST(request: NextRequest) {
   // Handle specific event types
   switch (type) {
     case "payment.paid":
-      await updateBookingStatus(bookingId, "confirmed");
+      await confirmBookingPayment(
+        bookingId,
+        data.id ?? data.attributes.reference_number ?? event.id ?? bookingId,
+      );
       break;
     case "payment.failed":
-      await updateBookingStatus(bookingId, "cancelled");
+      await failBookingPayment(
+        bookingId,
+        data.id ?? data.attributes.reference_number ?? event.id ?? bookingId,
+        data.attributes.status,
+      );
       break;
     default:
       // Log and ignore unknown events
@@ -64,18 +73,43 @@ function verifyPaymongoSignature(body: string, signature: string | null): boolea
     .createHmac("sha256", process.env.PAYMONGO_WEBHOOK_SECRET)
     .update(toSign)
     .digest("hex");
+  if (expected.length !== receivedSignature.length) return false;
   return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(receivedSignature));
 }
 
-async function updateBookingStatus(
+async function confirmBookingPayment(
   bookingId: string,
-  status: "confirmed" | "cancelled"
+  providerReference: string,
 ): Promise<void> {
-  // Dynamic import to keep the webhook handler lean
   const { createClient } = await import("@supabase/supabase-js");
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
-  await supabase.from("bookings").update({ status }).eq("id", bookingId);
+  const { error } = await supabase.rpc("confirm_booking_payment", {
+    p_booking_id: bookingId,
+    p_payment_provider: "paymongo",
+    p_provider_reference: providerReference,
+    p_amount: null,
+  });
+  if (error) throw error;
+}
+
+async function failBookingPayment(
+  bookingId: string,
+  providerReference: string,
+  reason: string,
+): Promise<void> {
+  const { createClient } = await import("@supabase/supabase-js");
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+  const { error } = await supabase.rpc("fail_booking_payment", {
+    p_booking_id: bookingId,
+    p_payment_provider: "paymongo",
+    p_provider_reference: providerReference,
+    p_failure_reason: reason,
+  });
+  if (error) throw error;
 }

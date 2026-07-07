@@ -44,7 +44,7 @@ async function createSuperUser() {
   let userId;
   
   if (existingUser) {
-    console.log(`User already exists (ID: ${existingUser.id}). Re-assigning all roles...`);
+    console.log(`User already exists (ID: ${existingUser.id}). Ensuring admin role...`);
     userId = existingUser.id;
   } else {
     console.log(`Creating user with email: ${SUPER_EMAIL}...`);
@@ -76,32 +76,31 @@ async function createSuperUser() {
     console.error("Warning updating profile status:", profileError.message);
   }
 
-  // Insert all 5 roles into user_roles
-  const roles = ['customer', 'venue_owner', 'event_coordinator', 'supplier', 'admin'];
-  console.log(`Assigning roles: ${roles.join(', ')}...`);
-  
-  for (const role of roles) {
-    const { error: roleError } = await adminClient
-      .from('user_roles')
-      .insert({ user_id: userId, role })
-      .select();
-      
-    if (roleError) {
-      if (roleError.code === '23505') {
-        console.log(`Role "${role}" already assigned.`);
-      } else {
-        console.error(`Error assigning role "${role}":`, roleError.message);
-      }
-    } else {
-      console.log(`Assigned role: ${role}`);
-    }
+  console.log(`Assigning single role: admin...`);
+  const { error: deleteRoleError } = await adminClient
+    .from('user_roles')
+    .delete()
+    .eq('user_id', userId);
+
+  if (deleteRoleError) {
+    console.error("Error clearing existing roles:", deleteRoleError.message);
+    process.exit(1);
+  }
+
+  const { error: roleError } = await adminClient
+    .from('user_roles')
+    .insert({ user_id: userId, role: 'admin' });
+
+  if (roleError) {
+    console.error(`Error assigning admin role:`, roleError.message);
+    process.exit(1);
   }
 
   console.log(`\n🎉 Super User account setup complete!`);
   console.log(`----------------------------------------`);
   console.log(`Email:    ${SUPER_EMAIL}`);
   console.log(`Password: ${SUPER_PASSWORD}`);
-  console.log(`Roles:    ${roles.join(', ')}`);
+  console.log(`Role:     admin`);
   console.log(`----------------------------------------\n`);
 }
 

@@ -23,7 +23,7 @@ import {
   getCurrentUserUseCase,
 } from "../application/auth.usecases";
 import type { ActionResult } from "../types/auth.types";
-import { type RoleName } from "@/lib/rbac/roles";
+import { defaultRouteForRoles, type RoleName } from "@/lib/rbac/roles";
 import { toErrorMessage } from "@/lib/errors";
 
 function isUnverifiedEmailError(message: string) {
@@ -117,7 +117,26 @@ export async function loginAction(rawInput: unknown): Promise<ActionResult> {
     };
   }
 
-  redirect("/venues");
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: roleRows } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", user.id)
+    .limit(1);
+
+  const roles = ((roleRows ?? []) as { role: RoleName }[])
+    .map((row) => row.role)
+    .filter(Boolean);
+
+  redirect(defaultRouteForRoles(roles));
 }
 
 export async function resendVerificationEmailAction(

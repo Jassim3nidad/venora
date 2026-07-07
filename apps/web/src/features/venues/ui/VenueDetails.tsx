@@ -370,6 +370,7 @@ export default function VenueDetails({
         <div className="lg:col-span-1">
           <BookingSidebar
             venueId={venue.id}
+            venueSlug={venue.slug}
             venueName={venue.name}
             basePrice={venue.base_price}
             priceUnit={venue.price_unit}

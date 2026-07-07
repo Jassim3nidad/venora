@@ -89,7 +89,7 @@ export class SupabaseAuthRepository implements AuthRepository {
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${siteUrl}/auth/callback?next=/venues`,
+        redirectTo: `${siteUrl}/auth/callback`,
       },
     });
     if (error) throw new AuthError(error.message);

@@ -17,6 +17,8 @@ interface CalendarProps {
   onDateSelect?: (date: Date) => void;
   availability?: Record<string, CalendarAvailabilityStatus>;
   disablePastDates?: boolean;
+  currentMonth?: Date;
+  onMonthChange?: (month: Date) => void;
 }
 
 function startOfLocalDay(date: Date) {
@@ -33,11 +35,19 @@ export function Calendar({
   onDateSelect,
   availability = {},
   disablePastDates = false,
+  currentMonth,
+  onMonthChange,
 }: CalendarProps) {
-  const [currentDate, setCurrentDate] = React.useState(new Date());
+  const [currentDate, setCurrentDate] = React.useState(currentMonth ?? new Date());
+
+  React.useEffect(() => {
+    if (currentMonth) {
+      setCurrentDate(currentMonth);
+    }
+  }, [currentMonth]);
 
   const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
+  const monthIndex = currentDate.getMonth();
 
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
@@ -46,22 +56,32 @@ export function Calendar({
 
   // Helper to format date key YYYY-MM-DD
   const formatDateKey = (day: number) => {
-    const d = new Date(year, month, day);
+    const d = new Date(year, monthIndex, day);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   };
 
   // Get total days in month
-  const totalDays = new Date(year, month + 1, 0).getDate();
+  const totalDays = new Date(year, monthIndex + 1, 0).getDate();
 
   // Get first day of the week (0 = Sunday)
-  const firstDayIndex = new Date(year, month, 1).getDay();
+  const firstDayIndex = new Date(year, monthIndex, 1).getDay();
 
   const handlePrevMonth = () => {
-    setCurrentDate(new Date(year, month - 1, 1));
+    const nextMonth = new Date(year, monthIndex - 1, 1);
+    if (onMonthChange) {
+      onMonthChange(nextMonth);
+      return;
+    }
+    setCurrentDate(nextMonth);
   };
 
   const handleNextMonth = () => {
-    setCurrentDate(new Date(year, month + 1, 1));
+    const nextMonth = new Date(year, monthIndex + 1, 1);
+    if (onMonthChange) {
+      onMonthChange(nextMonth);
+      return;
+    }
+    setCurrentDate(nextMonth);
   };
 
   const daysArray = Array.from({ length: totalDays }, (_, i) => i + 1);
@@ -77,7 +97,7 @@ export function Calendar({
       {/* Header */}
       <div className="flex items-center justify-between pb-4">
         <h4 className="font-semibold text-sm text-[var(--text-primary)]">
-          {monthNames[month]} {year}
+          {monthNames[monthIndex]} {year}
         </h4>
         <div className="flex gap-1">
           <button
@@ -116,13 +136,13 @@ export function Calendar({
         {daysArray.map((day) => {
           const key = formatDateKey(day);
           const status = availability[key] ?? "available";
-          const date = new Date(year, month, day);
+          const date = new Date(year, monthIndex, day);
           const isPast = disablePastDates && isPastDate(date);
 
           const isSelected =
             selectedDate &&
             selectedDate.getDate() === day &&
-            selectedDate.getMonth() === month &&
+            selectedDate.getMonth() === monthIndex &&
             selectedDate.getFullYear() === year;
 
           return (

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { defaultRouteForRoles, type RoleName } from "@/lib/rbac/roles";
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
@@ -7,7 +8,7 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get("code");
   const tokenHash = requestUrl.searchParams.get("token_hash");
   const type = requestUrl.searchParams.get("type");
-  const next = requestUrl.searchParams.get("next") ?? "/venues";
+  const next = requestUrl.searchParams.get("next");
 
   // ── Token-based verification (email confirmation links) ────────────
   // Supabase email verification sends ?token_hash=...&type=signup
@@ -52,5 +53,27 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  return NextResponse.redirect(new URL(next, request.url));
+  if (next) {
+    return NextResponse.redirect(new URL(next, request.url));
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  const { data: roleRows } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", user.id)
+    .limit(1);
+
+  const roles = ((roleRows ?? []) as { role: RoleName }[])
+    .map((row) => row.role)
+    .filter(Boolean);
+
+  return NextResponse.redirect(new URL(defaultRouteForRoles(roles), request.url));
 }

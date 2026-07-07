@@ -26,7 +26,7 @@ export type PriceUnit           = "per_event" | "per_hour" | "per_pax" | "per_da
 export type IndoorOutdoor       = "indoor" | "outdoor" | "both";
 export type MediaType           = "image" | "video";
 export type AvailabilityStatus  = "available" | "reserved" | "tentative" | "maintenance" | "blackout";
-export type BookingStatus       = "pending" | "approved" | "declined" | "cancelled" | "completed" | "expired";
+export type BookingStatus       = "pending" | "approved" | "payment_pending" | "confirmed" | "declined" | "cancelled" | "completed" | "reviewed" | "expired";
 export type InquiryStatus       = "new" | "responded" | "closed";
 export type AccreditationStatus = "pending" | "accredited" | "rejected" | "suspended";
 export type ReviewStatus        = "published" | "flagged" | "removed";
@@ -243,17 +243,26 @@ export interface Database {
           customer_id:      string;
           package_id:       string | null;
           event_date:       string;
+          event_start_time: string | null;
+          event_end_time:   string | null;
           event_type_id:    string | null;
           guest_count:      number;
           status:           BookingStatus;
           total_amount:     number | null;
           deposit_amount:   number | null;
           special_requests: string | null;
+          approval_note:    string | null;
           decline_reason:   string | null;
           created_at:       string;
           updated_at:       string;
+          approved_at:      string | null;
+          payment_due_at:   string | null;
+          payment_started_at: string | null;
+          paid_at:          string | null;
           confirmed_at:     string | null;
           cancelled_at:     string | null;
+          completed_at:     string | null;
+          reviewed_at:      string | null;
         };
         Insert: Omit<Database["public"]["Tables"]["bookings"]["Row"], "id" | "created_at" | "updated_at"> & { id?: string };
         Update: {
@@ -261,15 +270,24 @@ export interface Database {
           customer_id?:      string;
           package_id?:       string | null;
           event_date?:       string;
+          event_start_time?: string | null;
+          event_end_time?:   string | null;
           event_type_id?:    string | null;
           guest_count?:      number;
           status?:           BookingStatus;
           total_amount?:     number | null;
           deposit_amount?:   number | null;
           special_requests?: string | null;
+          approval_note?:    string | null;
           decline_reason?:   string | null;
+          approved_at?:      string | null;
+          payment_due_at?:   string | null;
+          payment_started_at?: string | null;
+          paid_at?:          string | null;
           confirmed_at?:     string | null;
           cancelled_at?:     string | null;
+          completed_at?:     string | null;
+          reviewed_at?:      string | null;
         };
       };
 
@@ -479,10 +497,40 @@ export interface Database {
           payment_provider:   PaymentProvider;
           provider_reference: string | null;
           status:             TransactionStatus;
+          currency:           string;
+          payment_kind:       string;
+          checkout_url:       string | null;
+          paid_at:            string | null;
+          failed_at:          string | null;
+          failure_reason:     string | null;
+          metadata:           Json;
           created_at:         string;
         };
-        Insert: Omit<Database["public"]["Tables"]["transactions"]["Row"], "id" | "created_at"> & { id?: string };
-        Update: { status?: TransactionStatus; provider_reference?: string };
+        Insert: {
+          id?: string;
+          booking_id: string;
+          amount: number;
+          commission_amount?: number;
+          payment_provider: PaymentProvider;
+          provider_reference?: string | null;
+          status?: TransactionStatus;
+          currency?: string;
+          payment_kind?: string;
+          checkout_url?: string | null;
+          paid_at?: string | null;
+          failed_at?: string | null;
+          failure_reason?: string | null;
+          metadata?: Json;
+        };
+        Update: {
+          status?: TransactionStatus;
+          provider_reference?: string | null;
+          checkout_url?: string | null;
+          paid_at?: string | null;
+          failed_at?: string | null;
+          failure_reason?: string | null;
+          metadata?: Json;
+        };
       };
 
       payouts: {

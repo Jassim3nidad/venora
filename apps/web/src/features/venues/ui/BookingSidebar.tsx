@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertCircle,
@@ -24,10 +24,11 @@ import {
   DialogContent,
   DialogTitle,
 } from "@venora/ui";
-import { format } from "date-fns";
+import { format, startOfMonth } from "date-fns";
 import InquiryDialog from "./InquiryDialog";
 import { checkAvailabilityAction } from "../application/actions";
 import { isPastDate, PAST_DATE_MESSAGE } from "@/src/lib/date-only";
+import { useCalendar } from "@/src/features/calendar/hooks/use-calendar";
 
 interface Package {
   id: string;
@@ -42,6 +43,7 @@ interface Package {
 
 interface BookingSidebarProps {
   venueId: string;
+  venueSlug: string;
   venueName: string;
   basePrice: number;
   priceUnit: "per_event" | "per_hour" | "per_pax" | "per_day";
@@ -60,6 +62,7 @@ function formatCurrency(value: number) {
 
 export default function BookingSidebar({
   venueId,
+  venueSlug,
   venueName,
   basePrice,
   priceUnit,
@@ -81,6 +84,18 @@ export default function BookingSidebar({
   >("idle");
   const [overridePrice, setOverridePrice] = useState<number | null>(null);
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(() => startOfMonth(new Date()));
+
+  const { availability } = useCalendar(venueId, calendarMonth);
+  const calendarAvailability = useMemo(() => {
+    return availability.reduce<Record<string, "available" | "reserved" | "tentative" | "maintenance" | "blackout">>(
+      (acc, item) => {
+        acc[item.date] = item.status;
+        return acc;
+      },
+      {},
+    );
+  }, [availability]);
 
   const selectedPackage = packages.find((p) => p.id === selectedPackageId);
   const selectedDateIsPast = selectedDate ? isPastDate(selectedDate) : false;
@@ -156,7 +171,7 @@ export default function BookingSidebar({
     setMobileSheetOpen(false);
     const dateStr = format(selectedDate, "yyyy-MM-dd");
     router.push(
-      `/venues/${venueId}/book?date=${dateStr}&guests=${guests}&packageId=${selectedPackageId}`,
+      `/venues/${venueSlug}/book?date=${dateStr}&guests=${guests}&packageId=${selectedPackageId}`,
     );
   };
 
@@ -229,6 +244,9 @@ export default function BookingSidebar({
               <Calendar
                 selectedDate={selectedDate as any}
                 disablePastDates
+                currentMonth={calendarMonth}
+                onMonthChange={setCalendarMonth}
+                availability={calendarAvailability}
                 onDateSelect={(d) => {
                   if (isPastDate(d)) return;
                   setSelectedDate(d);
