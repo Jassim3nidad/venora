@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
@@ -7,15 +7,11 @@ import { createClient } from "@/lib/supabase/server";
  * Log out the user by signing out of Supabase and clearing local auth cookies,
  * then redirecting back to the homepage.
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   const supabase = await createClient();
   await supabase.auth.signOut();
 
-  let appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL;
-  if (!appUrl && process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL) appUrl = `https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`;
-  else if (!appUrl && process.env.VERCEL_URL) appUrl = `https://${process.env.VERCEL_URL}`;
-  
-  const homeUrl = new URL("/", appUrl || "http://localhost:3000");
+  const homeUrl = new URL("/", request.url);
   const response = NextResponse.redirect(homeUrl);
   
   // Explicitly clear all chunked auth cookies to ensure the session is destroyed locally
