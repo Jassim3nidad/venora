@@ -48,7 +48,6 @@ type BookingRecord = {
   guest_count: number | null;
   total_amount: number | null;
   deposit_amount: number | null;
-  payment_due_at: string | null;
   created_at: string | null;
   venues?: VenueRecord | VenueRecord[] | null;
   reviews?: { id: string }[] | null;
@@ -163,7 +162,6 @@ async function getCustomerBookings(userId: string) {
         guest_count,
         total_amount,
         deposit_amount,
-        payment_due_at,
         created_at,
         venues (
           id,
@@ -237,7 +235,7 @@ export default async function CustomerBookingsPage({
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#111827]">
-      <CustomerNavbar />
+      <CustomerNavbar user={user} />
 
       <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         {query.created ? (

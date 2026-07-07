@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/src/lib/supabase/server";
 import { createBookingSchema } from "@/src/features/booking/schemas/booking.schema";
 import { VenoraError } from "@/src/lib/errors";
@@ -188,6 +189,8 @@ export async function POST(request: NextRequest) {
 
       if (insertError) throw insertError;
 
+      revalidatePath("/bookings");
+
       return NextResponse.json(
         {
           data: {
@@ -202,6 +205,8 @@ export async function POST(request: NextRequest) {
     }
 
     if (error) throw error;
+
+    revalidatePath("/bookings");
 
     return NextResponse.json(
       {
