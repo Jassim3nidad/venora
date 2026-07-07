@@ -72,13 +72,12 @@ export function VerificationUpload({
         const fileName = `${user.id}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
         
         const { data, error: uploadError } = await supabase.storage
-          .from("verification-documents")
+          .from("verification-docs")
           .upload(fileName, file);
 
         if (uploadError) throw uploadError;
 
-        const { data: urlData } = supabase.storage.from("verification-documents").getPublicUrl(data.path);
-        uploadedUrls.push(urlData.publicUrl);
+        uploadedUrls.push(data.path);
       }
 
       onSubmit(uploadedUrls);
