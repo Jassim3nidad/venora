@@ -392,7 +392,7 @@ export async function changePasswordAction(
 export async function verifyOtpAction(tokenHash: string, type: "signup" | "email"): Promise<ActionResult> {
   try {
     await verifyOtpUseCase(tokenHash, type);
-    return { success: true };
+    return { success: true, data: undefined };
   } catch (error) {
     return { success: false, error: toErrorMessage(error) };
   }
