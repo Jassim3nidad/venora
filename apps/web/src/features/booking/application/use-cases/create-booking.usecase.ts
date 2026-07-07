@@ -1,7 +1,7 @@
 import type { BookingRepository } from "../../domain/repositories/booking-repository.interface";
 import { BookingEntity } from "../../domain/entities/booking.entity";
 import type { CreateBookingInput } from "../../schemas/booking.schema";
-import { isTodayOrFutureDate, PAST_DATE_MESSAGE } from "@/src/lib/date-only";
+import { isTodayOrFutureDateString, PAST_DATE_MESSAGE } from "@/src/lib/date-only";
 
 /**
  * CreateBookingUseCase
@@ -16,7 +16,7 @@ export class CreateBookingUseCase {
     input: CreateBookingInput,
     customerId: string
   ): Promise<BookingEntity> {
-    if (!isTodayOrFutureDate(input.eventDate)) {
+    if (!isTodayOrFutureDateString(input.eventDate)) {
       throw new Error(PAST_DATE_MESSAGE);
     }
 
@@ -25,18 +25,27 @@ export class CreateBookingUseCase {
       venueId: input.venueId,
       customerId,
       packageId: input.packageId ?? null,
-      eventDate: input.eventDate,
+      eventDate: new Date(`${input.eventDate}T00:00:00`),
+      eventStartTime: input.eventStartTime || null,
+      eventEndTime: input.eventEndTime || null,
       eventTypeId: null,
       guestCount: input.guestCount,
       status: "pending",
       totalAmount: null,
       depositAmount: null,
       specialRequests: input.specialRequests ?? null,
+      approvalNote: null,
       declineReason: null,
       createdAt: new Date(),
       updatedAt: new Date(),
+      approvedAt: null,
+      paymentDueAt: null,
+      paymentStartedAt: null,
+      paidAt: null,
       confirmedAt: null,
       cancelledAt: null,
+      completedAt: null,
+      reviewedAt: null,
     });
 
     await this.bookingRepository.save(booking);

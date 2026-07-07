@@ -3,23 +3,17 @@
 import { type FormEvent, useState, useTransition } from "react";
 import Link from "next/link";
 import {
-  Building2,
-  CalendarCheck,
   Check,
-  Chrome,
-  ClipboardCheck,
   Eye,
   EyeOff,
   LockKeyhole,
   Mail,
   Sparkles,
-  Truck,
   User,
 } from "lucide-react";
 import {
   resendVerificationEmailAction,
   registerAction,
-  signInWithOAuthAction,
 } from "@/features/auth/actions/auth.actions";
 import { registerSchema } from "@/features/auth/schemas/auth.schema";
 import { researchVenues } from "@/src/features/venues/data/research-venues";
@@ -29,7 +23,7 @@ import { researchVenues } from "@/src/features/venues/data/research-venues";
 const brandPoints = [
   "Discover venues for weddings, parties, and corporate events.",
   "Manage bookings, favorites, and event details in one place.",
-  "Create a workspace tailored to your Venora role.",
+  "Apply for partner access after creating your customer account.",
 ];
 const heroVenue = researchVenues[1] ?? researchVenues[0]!;
 
@@ -114,8 +108,8 @@ export default function RegisterPage() {
             </h1>
 
             <p className="mt-5 max-w-md text-base font-medium leading-7 text-white/82">
-              Venora brings customers, venues, suppliers, and coordinators into
-              one polished planning experience.
+              Venora gives every new member a customer workspace first, with
+              partner applications available after signup.
             </p>
 
             <ul className="mt-9 space-y-4">
@@ -134,11 +128,11 @@ export default function RegisterPage() {
 
           <div className=" -translate-y-20 rounded-[28px] border border-white/20 bg-white/15 p-5 text-white shadow-2xl shadow-black/20 backdrop-blur-md">
             <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-white/70">
-              Designed for every role
+              Customer account first
             </p>
             <p className="mt-2 text-sm font-semibold leading-6 text-white/85">
-              Choose the account type that matches how you plan, host, supply,
-              or coordinate unforgettable events.
+              Create your account to plan events, then apply for venue,
+              coordinator, or supplier access when you are ready.
             </p>
           </div>
         </div>
@@ -406,34 +400,6 @@ export default function RegisterPage() {
                 {isPending ? "Creating account..." : "Create account"}
               </button>
 
-              <div className="relative flex items-center py-1">
-                <div className="h-px flex-grow bg-[#E5E7EB]" />
-                <span className="mx-4 flex-shrink-0 text-sm font-semibold text-[#6B7280]">
-                  or
-                </span>
-                <div className="h-px flex-grow bg-[#E5E7EB]" />
-              </div>
-
-              <button
-                id="google-register-btn"
-                type="button"
-                disabled={isPending}
-                onClick={() => {
-                  setGeneralError(null);
-
-                  startTransition(async () => {
-                    const res = await signInWithOAuthAction("google");
-
-                    if (res && !res.success) {
-                      setGeneralError(res.error);
-                    }
-                  });
-                }}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white text-sm font-extrabold text-[#111827] shadow-sm transition hover:border-[#2563EB]/60 hover:bg-[#EFF6FF] disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                <Chrome className="h-4 w-4 text-[#2563EB]" />
-                Continue with Google
-              </button>
             </form>
           </div>
 

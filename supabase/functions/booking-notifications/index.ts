@@ -12,15 +12,27 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-type BookingStatus = "pending" | "approved" | "declined" | "cancelled" | "completed" | "expired";
+type BookingStatus =
+  | "pending"
+  | "approved"
+  | "payment_pending"
+  | "confirmed"
+  | "declined"
+  | "cancelled"
+  | "completed"
+  | "reviewed"
+  | "expired";
 
 const SUBJECT_MAP: Record<BookingStatus, string> = {
-  pending:   "Booking Request Received — Venora",
-  approved:  "Your Booking is Approved! 🎉 — Venora",
-  declined:  "Booking Request Declined — Venora",
-  cancelled: "Booking Cancelled — Venora",
-  completed: "Thank you for choosing Venora! 🌟",
-  expired:   "Booking Request Expired — Venora",
+  pending:         "Booking Request Received - Venora",
+  approved:        "Your Booking Quote is Approved - Venora",
+  payment_pending: "Booking Payment Pending - Venora",
+  confirmed:       "Booking Confirmed - Venora",
+  declined:        "Booking Request Declined - Venora",
+  cancelled:       "Booking Cancelled - Venora",
+  completed:       "How was your Venora event?",
+  reviewed:        "Thank you for your review - Venora",
+  expired:         "Booking Request Expired - Venora",
 };
 
 serve(async (req) => {
@@ -36,15 +48,15 @@ serve(async (req) => {
       venue_id: string;
       status: BookingStatus;
       event_date: string;
-      total_amount: number;
+      total_amount: number | null;
+      deposit_amount: number | null;
     };
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    // Fetch customer email + venue name
     const [profileRes, venueRes] = await Promise.all([
       supabase.auth.admin.getUserById(record.customer_id),
       supabase.from("venues").select("name").eq("id", record.venue_id).single(),
@@ -55,11 +67,10 @@ serve(async (req) => {
 
     if (!email) throw new Error("Customer email not found");
 
-    // Send via Resend (or swap for your email provider)
     await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
+        Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -71,7 +82,12 @@ serve(async (req) => {
           <p>Booking ID: <strong>${record.id}</strong></p>
           <p>Venue: <strong>${venueName}</strong></p>
           <p>Event Date: <strong>${record.event_date}</strong></p>
-          <p>Status: <strong>${record.status.toUpperCase()}</strong></p>
+          <p>Status: <strong>${record.status.replaceAll("_", " ").toUpperCase()}</strong></p>
+          ${
+            record.deposit_amount
+              ? `<p>Required deposit: <strong>PHP ${Number(record.deposit_amount).toLocaleString("en-PH")}</strong></p>`
+              : ""
+          }
         `,
       }),
     });

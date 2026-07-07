@@ -3,7 +3,7 @@ import { z } from "zod";
 export const paymentIntentSchema = z.object({
   booking_id: z.string().uuid(),
   amount:     z.number().positive(),
-  gateway:    z.enum(["paymongo", "maya"]),
+  gateway:    z.enum(["paymongo", "maya", "stripe"]),
   currency:   z.literal("PHP").default("PHP"),
 });
 export type PaymentIntentInput = z.infer<typeof paymentIntentSchema>;

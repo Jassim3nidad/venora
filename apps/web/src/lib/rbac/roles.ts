@@ -46,6 +46,11 @@ export const PROTECTED_ROUTES: { prefix: string; allow: RoleName[] }[] = [
 
   // ── Dashboard sub-routes (venue-owner / event-coordinator specific) ───────
   // These must appear BEFORE the generic /dashboard catch-all.
+  { prefix: "/dashboard/admin",      allow: [ROLES.ADMIN] },
+  { prefix: "/dashboard/venue-owner", allow: [ROLES.VENUE_OWNER, ROLES.ADMIN] },
+  { prefix: "/dashboard/event-coordinator", allow: [ROLES.EVENT_COORDINATOR, ROLES.ADMIN] },
+  { prefix: "/dashboard/coordinator", allow: [ROLES.EVENT_COORDINATOR, ROLES.ADMIN] },
+  { prefix: "/dashboard/supplier",   allow: [ROLES.SUPPLIER, ROLES.ADMIN] },
   { prefix: "/dashboard/venues/new", allow: [ROLES.VENUE_OWNER, ROLES.ADMIN] },
   { prefix: "/dashboard/venues",    allow: [ROLES.VENUE_OWNER, ROLES.EVENT_COORDINATOR, ROLES.ADMIN] },
   { prefix: "/dashboard/calendar",  allow: [ROLES.VENUE_OWNER, ROLES.EVENT_COORDINATOR, ROLES.ADMIN] },
@@ -73,9 +78,9 @@ export const PROTECTED_ROUTES: { prefix: string; allow: RoleName[] }[] = [
 // Higher-priority roles are checked first.
 
 export function defaultRouteForRoles(roles: RoleName[]): string {
-  if (roles.includes(ROLES.ADMIN))             return "/admin";
-  if (roles.includes(ROLES.VENUE_OWNER))       return "/dashboard";
-  if (roles.includes(ROLES.EVENT_COORDINATOR)) return "/dashboard/coordinator";
+  if (roles.includes(ROLES.ADMIN))             return "/dashboard/admin";
+  if (roles.includes(ROLES.VENUE_OWNER))       return "/dashboard/venue-owner";
+  if (roles.includes(ROLES.EVENT_COORDINATOR)) return "/dashboard/event-coordinator";
   if (roles.includes(ROLES.SUPPLIER))          return "/dashboard/supplier";
-  return "/"; // customer (default)
+  return "/venues";
 }

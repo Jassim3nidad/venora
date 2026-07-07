@@ -1,39 +1,114 @@
 import { z } from "zod";
 import {
-  coerceDateOnlyValue,
-  isTodayOrFutureDate,
+  isTodayOrFutureDateString,
+  isValidDateOnlyString,
   PAST_DATE_MESSAGE,
 } from "@/src/lib/date-only";
 
 /**
- * Booking schemas — Zod as single source of truth.
- * Consumed by both the client form (react-hook-form) and server boundary validation.
- *
- * @see Section 7 of Architecture Foundation
+ * Booking schemas - Zod is the single source of truth at UI and server action
+ * boundaries. Dates are date-only strings so event days do not shift by
+ * timezone when they cross client/server boundaries.
  */
+
+const dateOnlySchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD format")
+  .refine(isValidDateOnlyString, { message: "Choose a valid date" })
+  .refine(isTodayOrFutureDateString, { message: PAST_DATE_MESSAGE });
+
+const timeSchema = z
+  .string()
+  .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Use HH:mm format")
+  .optional()
+  .or(z.literal(""));
 
 export const createBookingSchema = z.object({
   venueId: z.string().uuid("Invalid venue ID"),
-  packageId: z.string().uuid("Invalid package ID").optional(),
-  eventDate: z
-    .preprocess(coerceDateOnlyValue, z.coerce.date())
-    .refine(isTodayOrFutureDate, {
-      message: PAST_DATE_MESSAGE,
-    }),
-  guestCount: z.number().int().min(1, "Guest count must be at least 1"),
-  specialRequests: z.string().max(1000).optional(),
+  packageId: z.string().uuid("Invalid package ID").optional().nullable(),
+  eventDate: dateOnlySchema,
+  eventStartTime: timeSchema,
+  eventEndTime: timeSchema,
+  guestCount: z.coerce.number().int().min(1, "Guest count must be at least 1"),
+  specialRequests: z.string().max(1000, "Keep requests under 1,000 characters").optional(),
 });
 
 export type CreateBookingInput = z.infer<typeof createBookingSchema>;
 
-// ── Filters for listing ───────────────────────────────────────────────────────
+export const approveBookingSchema = z.object({
+  bookingId: z.string().uuid(),
+  totalAmount: z.coerce.number().positive("Enter a valid total amount"),
+  depositAmount: z.coerce.number().positive("Enter a valid deposit amount"),
+  note: z.string().max(1000).optional(),
+}).refine((input) => input.depositAmount <= input.totalAmount, {
+  message: "Deposit cannot exceed the total amount",
+  path: ["depositAmount"],
+});
+
+export type ApproveBookingInput = z.infer<typeof approveBookingSchema>;
+
+export const declineBookingSchema = z.object({
+  bookingId: z.string().uuid(),
+  reason: z.string().min(5, "Add a short reason").max(500),
+});
+
+export type DeclineBookingInput = z.infer<typeof declineBookingSchema>;
+
+export const cancelBookingSchema = z.object({
+  bookingId: z.string().uuid(),
+  reason: z.string().max(500).optional(),
+});
+
+export type CancelBookingInput = z.infer<typeof cancelBookingSchema>;
+
+export const startBookingPaymentSchema = z.object({
+  bookingId: z.string().uuid(),
+  provider: z.enum(["paymongo", "maya", "stripe"]).default("paymongo"),
+});
+
+export type StartBookingPaymentInput = z.infer<typeof startBookingPaymentSchema>;
+
+export const completeBookingSchema = z.object({
+  bookingId: z.string().uuid(),
+});
+
+export type CompleteBookingInput = z.infer<typeof completeBookingSchema>;
+
+export const bookingReviewSchema = z.object({
+  bookingId: z.string().uuid(),
+  venueId: z.string().uuid(),
+  overallRating: z.coerce.number().int().min(1).max(5),
+  venueQuality: z.coerce.number().int().min(1).max(5).optional(),
+  cleanliness: z.coerce.number().int().min(1).max(5).optional(),
+  staffService: z.coerce.number().int().min(1).max(5).optional(),
+  facilities: z.coerce.number().int().min(1).max(5).optional(),
+  accessibility: z.coerce.number().int().min(1).max(5).optional(),
+  valueForMoney: z.coerce.number().int().min(1).max(5).optional(),
+  foodQuality: z.coerce.number().int().min(1).max(5).optional(),
+  ambience: z.coerce.number().int().min(1).max(5).optional(),
+  comment: z.string().max(1000).optional(),
+});
+
+export type BookingReviewInput = z.infer<typeof bookingReviewSchema>;
 
 export const bookingFiltersSchema = z.object({
-  status:   z.enum(["pending", "approved", "declined", "cancelled", "completed", "expired"]).optional(),
-  venueId:  z.string().uuid().optional(),
-  from:     z.string().optional(),
-  to:       z.string().optional(),
-  page:     z.coerce.number().int().min(1).default(1),
+  status: z
+    .enum([
+      "pending",
+      "approved",
+      "payment_pending",
+      "confirmed",
+      "declined",
+      "cancelled",
+      "completed",
+      "reviewed",
+      "expired",
+    ])
+    .optional(),
+  venueId: z.string().uuid().optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+  page: z.coerce.number().int().min(1).default(1),
   per_page: z.coerce.number().int().min(1).max(100).default(20),
 });
 

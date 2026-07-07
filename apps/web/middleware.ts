@@ -49,10 +49,16 @@ const ROLE_GUARDS: Array<{ prefix: string; roles: UserRole[] }> = [
   roles: ["customer", "admin"],
   }, 
   
-  // Customer dashboard
+  // Administrator dashboard
   {
-    prefix: "/dashboard/customer",
-    roles: ["customer", "admin"],
+    prefix: "/dashboard/admin",
+    roles: ["admin"],
+  },
+
+  // Venue owner dashboard
+  {
+    prefix: "/dashboard/venue-owner",
+    roles: ["venue_owner", "admin"],
   },
 
   // Supplier dashboard
@@ -62,6 +68,10 @@ const ROLE_GUARDS: Array<{ prefix: string; roles: UserRole[] }> = [
   },
 
   // Event coordinator dashboard
+  {
+    prefix: "/dashboard/event-coordinator",
+    roles: ["event_coordinator", "admin"],
+  },
   {
     prefix: "/dashboard/coordinator",
     roles: ["event_coordinator", "admin"],
@@ -109,6 +119,14 @@ const ROLE_GUARDS: Array<{ prefix: string; roles: UserRole[] }> = [
 ];
 
 const AUTH_PATHS = ["/login", "/register", "/forgot-password"];
+
+function defaultRouteForRoles(roles: UserRole[]) {
+  if (roles.includes("admin")) return "/dashboard/admin";
+  if (roles.includes("venue_owner")) return "/dashboard/venue-owner";
+  if (roles.includes("event_coordinator")) return "/dashboard/event-coordinator";
+  if (roles.includes("supplier")) return "/dashboard/supplier";
+  return "/venues";
+}
 
 function redirectWithCookies(url: URL | string, sourceResponse: NextResponse) {
   const redirectResponse = NextResponse.redirect(url);
@@ -180,6 +198,10 @@ export async function middleware(request: NextRequest) {
     PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix)) ||
     isVenueBookingPath;
 
+  if (pathname === "/dashboard/customer") {
+    return redirectWithCookies(new URL("/venues", request.url), supabaseResponse);
+  }
+
   // 1. Auth guard — redirect unauthenticated users
   if (isProtected && !user) {
     const redirectUrl = request.nextUrl.clone();
@@ -191,7 +213,20 @@ export async function middleware(request: NextRequest) {
 
   // 2. Redirect logged-in users away from auth pages
   if (user && AUTH_PATHS.some((path) => pathname.startsWith(path))) {
-    return redirectWithCookies(new URL("/venues", request.url), supabaseResponse);
+    const { data: roleRows } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .limit(1);
+
+    const userRoles = ((roleRows ?? []) as { role: UserRole }[])
+      .map((r) => r.role)
+      .filter(Boolean);
+
+    return redirectWithCookies(
+      new URL(defaultRouteForRoles(userRoles), request.url),
+      supabaseResponse,
+    );
   }
 
   // 3. Role guard — redirect users without the required role

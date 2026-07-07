@@ -240,10 +240,12 @@ export function DataTable<T>({
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-amber-50 text-amber-800 ring-1 ring-amber-200/60",
   approved: "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200/60",
+  payment_pending: "bg-orange-50 text-orange-800 ring-1 ring-orange-200/60",
   confirmed: "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200/60",
   declined: "bg-red-50 text-red-800 ring-1 ring-red-200/60",
   cancelled: "bg-gray-50 text-gray-700 ring-1 ring-gray-200/60",
   completed: "bg-blue-50 text-blue-800 ring-1 ring-blue-200/60",
+  reviewed: "bg-teal-50 text-teal-800 ring-1 ring-teal-200/60",
   expired: "bg-gray-50 text-gray-600 ring-1 ring-gray-200/60",
   active: "bg-[#eff6ff] text-[#1d4ed8] ring-1 ring-[#e5e7eb]",
 };

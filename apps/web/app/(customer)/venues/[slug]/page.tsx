@@ -144,7 +144,7 @@ export default async function VenueDetailPage({ params }: Props) {
 
   return (
     <>
-      <CustomerNavbar />
+      <CustomerNavbar user={user} />
 
       <VenueDetails
         venue={venue}

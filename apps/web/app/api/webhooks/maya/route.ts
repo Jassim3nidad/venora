@@ -27,12 +27,19 @@ export async function POST(request: NextRequest) {
 
   switch (payload.status) {
     case "PAYMENT_SUCCESS":
-      await updateBookingStatus(bookingId, "confirmed");
+      await confirmBookingPayment(
+        bookingId,
+        payload.requestReferenceNumber ?? payload.id,
+      );
       break;
     case "PAYMENT_FAILED":
     case "PAYMENT_EXPIRED":
     case "PAYMENT_CANCELLED":
-      await updateBookingStatus(bookingId, "cancelled");
+      await failBookingPayment(
+        bookingId,
+        payload.requestReferenceNumber ?? payload.id,
+        payload.status,
+      );
       break;
     default:
       console.log(`[Maya] Unhandled status: ${payload.status}`);
@@ -47,17 +54,43 @@ function verifyMayaSignature(body: string, signature: string | null): boolean {
     .createHmac("sha512", process.env.MAYA_WEBHOOK_SECRET)
     .update(body)
     .digest("hex");
+  if (expected.length !== signature.length) return false;
   return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
 }
 
-async function updateBookingStatus(
+async function confirmBookingPayment(
   bookingId: string,
-  status: "confirmed" | "cancelled"
+  providerReference: string,
 ): Promise<void> {
   const { createClient } = await import("@supabase/supabase-js");
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
-  await supabase.from("bookings").update({ status }).eq("id", bookingId);
+  const { error } = await supabase.rpc("confirm_booking_payment", {
+    p_booking_id: bookingId,
+    p_payment_provider: "maya",
+    p_provider_reference: providerReference,
+    p_amount: null,
+  });
+  if (error) throw error;
+}
+
+async function failBookingPayment(
+  bookingId: string,
+  providerReference: string,
+  reason: string,
+): Promise<void> {
+  const { createClient } = await import("@supabase/supabase-js");
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+  const { error } = await supabase.rpc("fail_booking_payment", {
+    p_booking_id: bookingId,
+    p_payment_provider: "maya",
+    p_provider_reference: providerReference,
+    p_failure_reason: reason,
+  });
+  if (error) throw error;
 }
