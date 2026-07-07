@@ -21,6 +21,7 @@ export const ROLE_LABELS: Record<EnterpriseRole, string> = {
 export const NAV_BY_ROLE: Record<EnterpriseRole, NavItem[]> = {
   venue_owner: [
     { label: "Overview", href: "/dashboard", icon: "dashboard" },
+    { label: "Venues", href: "/dashboard/venues", icon: "location_city" },
     { label: "Bookings", href: "/dashboard/bookings", icon: "calendar_month" },
     { label: "Calendar", href: "/dashboard/calendar", icon: "event" },
     { label: "Packages", href: "/dashboard/packages", icon: "inventory_2" },

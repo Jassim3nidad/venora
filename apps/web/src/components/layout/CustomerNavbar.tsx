@@ -135,8 +135,32 @@ export function CustomerNavbar() {
                 <div className="grid gap-1">
                   {menuLinks.map((item) => {
                     const Icon = item.icon;
-                    const active =
-                      item.href !== "/logout" && isActive(pathname, item.href);
+                    const isLogout = item.href === "/logout";
+                    const active = !isLogout && isActive(pathname, item.href);
+                    const itemClassName = [
+                      "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold transition",
+                      item.mobileOnly ? "md:hidden" : "",
+                      active
+                        ? "bg-[#EFF6FF] text-[#2563EB]"
+                        : item.href === "/account"
+                          ? "text-[#111827] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
+                          : "text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]",
+                    ].join(" ");
+
+                    if (isLogout) {
+                      return (
+                        <a
+                          key={item.href}
+                          href={item.href}
+                          role="menuitem"
+                          onClick={closeMenu}
+                          className={itemClassName}
+                        >
+                          <Icon className="h-5 w-5" />
+                          {item.label}
+                        </a>
+                      );
+                    }
 
                     return (
                       <Link
@@ -144,15 +168,7 @@ export function CustomerNavbar() {
                         href={item.href}
                         role="menuitem"
                         onClick={closeMenu}
-                        className={[
-                          "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold transition",
-                          item.mobileOnly ? "md:hidden" : "",
-                          active
-                            ? "bg-[#EFF6FF] text-[#2563EB]"
-                            : item.href === "/account"
-                              ? "text-[#111827] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
-                              : "text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]",
-                        ].join(" ")}
+                        className={itemClassName}
                       >
                         <Icon className="h-5 w-5" />
                         {item.label}

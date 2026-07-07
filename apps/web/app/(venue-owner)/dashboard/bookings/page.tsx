@@ -1,117 +1,119 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { createClient } from "@/src/lib/supabase/server";
 import {
   DashboardSubPage,
   DataTable,
   StatusBadge,
   DashButton,
+  Panel,
+  PanelHeader,
+  type DataTableColumn,
 } from "@/components/dashboard/enterprise";
+import {
+  formatDate,
+  formatPeso,
+  getOwnerDashboardContext,
+  getOwnerVenueIds,
+} from "../_lib/owner-dashboard-data";
 
 export const metadata: Metadata = { title: "Bookings - Dashboard" };
 
+type BookingRow = {
+  id: string;
+  event_date: string;
+  status: string;
+  total_amount: number | null;
+  guest_count: number;
+  created_at: string;
+  venues: { name: string } | null;
+  profiles: { full_name: string } | null;
+};
+
+type BookingDisplayRow = {
+  id: string;
+  venue: string;
+  customer: string;
+  date: string;
+  guests: number;
+  amount: string;
+  status: string;
+  requested: string;
+};
+
 export default async function OwnerBookingsPage() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = (await createClient()) as any;
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const context = await getOwnerDashboardContext();
+  const { supabase } = context;
+  const venueIds = await getOwnerVenueIds(context);
 
-  const { data: members } = await supabase
-    .from("organization_members")
-    .select("organization_id")
-    .eq("user_id", user.id);
-  const orgIds = (members ?? []).map((m: { organization_id: string }) => m.organization_id);
+  const { data: bookings } =
+    venueIds.length > 0
+      ? await supabase
+          .from("bookings")
+          .select(
+            "id, event_date, status, total_amount, guest_count, created_at, venues(name), profiles!customer_id(full_name)",
+          )
+          .in("venue_id", venueIds)
+          .order("event_date", { ascending: false })
+      : { data: [] };
 
-  const { data: venues } = await supabase
-    .from("venues")
-    .select("id")
-    .in("organization_id", orgIds.length ? orgIds : ["__none__"]);
-  const venueIds = (venues ?? []).map((v: { id: string }) => v.id);
+  const rows: BookingDisplayRow[] = (bookings ?? []).map((booking: BookingRow) => ({
+    id: booking.id,
+    venue: booking.venues?.name ?? "-",
+    customer: booking.profiles?.full_name ?? "-",
+    date: formatDate(booking.event_date),
+    guests: booking.guest_count,
+    amount: formatPeso(booking.total_amount),
+    status: booking.status,
+    requested: formatDate(booking.created_at),
+  }));
 
-  const { data: bookings } = await supabase
-    .from("bookings")
-    .select(
-      "id, event_date, status, total_amount, guest_count, venues(name), profiles!customer_id(full_name)",
-    )
-    .in("venue_id", venueIds.length ? venueIds : ["__none__"])
-    .order("event_date", { ascending: false });
-
-  type BookingRow = {
-    id: string;
-    event_date: string;
-    status: string;
-    total_amount: number | null;
-    guest_count: number;
-    venues: { name: string } | null;
-    profiles: { full_name: string } | null;
-  };
-
-  type BookingDisplayRow = {
-    id: string;
-    venue: string;
-    customer: string;
-    date: string;
-    guests: number;
-    amount: string;
-    status: string;
-  };
-
-  const rows: BookingDisplayRow[] = (bookings ?? []).map((b: BookingRow) => {
-    const venue = b.venues as { name: string } | null;
-    const customer = b.profiles as { full_name: string } | null;
-
-    return {
-      id: b.id,
-      venue: venue?.name ?? "-",
-      customer: customer?.full_name ?? "-",
-      date: new Date(b.event_date).toLocaleDateString("en-PH", {
-        dateStyle: "medium",
-      }),
-      guests: b.guest_count,
-      amount: b.total_amount
-        ? `₱${Number(b.total_amount).toLocaleString()}`
-        : "-",
-      status: b.status,
-    };
-  });
+  const columns: DataTableColumn<BookingDisplayRow>[] = [
+    {
+      key: "venue",
+      header: "Venue",
+      cell: (row) => (
+        <span className="font-semibold text-[#111827]">{row.venue}</span>
+      ),
+    },
+    { key: "customer", header: "Customer", cell: (row) => row.customer },
+    { key: "date", header: "Event Date", cell: (row) => row.date },
+    { key: "guests", header: "Guests", cell: (row) => row.guests },
+    {
+      key: "amount",
+      header: "Amount",
+      cell: (row) => (
+        <span className="font-semibold text-[#111827]">{row.amount}</span>
+      ),
+    },
+    {
+      key: "status",
+      header: "Status",
+      cell: (row) => <StatusBadge status={row.status} />,
+    },
+    { key: "requested", header: "Requested", cell: (row) => row.requested },
+  ];
 
   return (
     <DashboardSubPage
       title="Bookings"
       description="Manage reservation requests and confirmed events across your venues."
-      action={<DashButton href="/dashboard/calendar" variant="secondary" icon="event">Calendar</DashButton>}
+      action={
+        <DashButton href="/dashboard/calendar" variant="secondary" icon="event">
+          Calendar
+        </DashButton>
+      }
     >
-      <DataTable
-        rows={rows}
-        keyFn={(r) => r.id}
-        emptyMessage="No bookings found for your venues."
-        columns={[
-          {
-            key: "venue",
-            header: "Venue",
-            cell: (r) => (
-              <span className="font-semibold text-[#111827]">{r.venue}</span>
-            ),
-          },
-          { key: "customer", header: "Customer", cell: (r) => r.customer },
-          { key: "date", header: "Event Date", cell: (r) => r.date },
-          { key: "guests", header: "Guests", cell: (r) => r.guests },
-          {
-            key: "amount",
-            header: "Amount",
-            cell: (r) => (
-              <span className="font-semibold text-[#111827]">{r.amount}</span>
-            ),
-          },
-          {
-            key: "status",
-            header: "Status",
-            cell: (r) => <StatusBadge status={r.status} />,
-          },
-        ]}
-      />
+      <Panel>
+        <PanelHeader
+          title="Reservation Pipeline"
+          description="Only bookings for venues owned by your organization appear here."
+        />
+        <DataTable
+          rows={rows}
+          keyFn={(row) => row.id}
+          emptyMessage="No bookings found for your venues yet."
+          columns={columns}
+        />
+      </Panel>
     </DashboardSubPage>
   );
 }

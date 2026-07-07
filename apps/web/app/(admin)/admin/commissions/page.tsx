@@ -1,14 +1,22 @@
 import type { Metadata } from "next";
+import {
+  DashboardSubPage,
+  EmptyState,
+} from "@/components/dashboard/enterprise";
 
-export const metadata: Metadata = { title: "Commissions — Admin" };
+export const metadata: Metadata = { title: "Commissions - Admin" };
 
 export default function AdminCommissionsPage() {
   return (
-    <main>
-      <h1 style={{ fontFamily: "var(--font-sora, sans-serif)", fontSize: "1.5rem", fontWeight: 700, marginBottom: "1.5rem" }}>
-        Commission Management
-      </h1>
-      <p style={{ color: "var(--text-muted)" }}>Set commission rates and view platform earnings.</p>
-    </main>
+    <DashboardSubPage
+      title="Commission Management"
+      description="Monitor platform earnings and payout summaries when payment reporting is connected."
+    >
+      <EmptyState
+        icon="payments"
+        title="No commission data yet"
+        description="Commission totals will appear here after payment capture and platform fee records are connected."
+      />
+    </DashboardSubPage>
   );
 }

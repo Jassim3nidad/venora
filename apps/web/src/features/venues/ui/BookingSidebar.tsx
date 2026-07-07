@@ -42,6 +42,7 @@ interface Package {
 
 interface BookingSidebarProps {
   venueId: string;
+  venueSlug?: string | null;
   venueName: string;
   basePrice: number;
   priceUnit: "per_event" | "per_hour" | "per_pax" | "per_day";
@@ -60,6 +61,7 @@ function formatCurrency(value: number) {
 
 export default function BookingSidebar({
   venueId,
+  venueSlug,
   venueName,
   basePrice,
   priceUnit,
@@ -155,8 +157,9 @@ export default function BookingSidebar({
     if (!selectedDate || selectedDateIsPast || availabilityStatus !== "available") return;
     setMobileSheetOpen(false);
     const dateStr = format(selectedDate, "yyyy-MM-dd");
+    const bookingIdentifier = venueSlug || venueId;
     router.push(
-      `/venues/${venueId}/book?date=${dateStr}&guests=${guests}&packageId=${selectedPackageId}`,
+      `/venues/${bookingIdentifier}/book?date=${dateStr}&guests=${guests}&packageId=${selectedPackageId}`,
     );
   };
 

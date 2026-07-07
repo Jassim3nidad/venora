@@ -1,57 +1,297 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { notFound, redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+import {
+  DashButton,
+  DashboardSubPage,
+  Panel,
+  PanelHeader,
+} from "@/components/dashboard/enterprise";
 import VenuePhotoUpload from "@/components/venues/VenuePhotoUpload";
+import {
+  getOwnerDashboardContext,
+  getOwnerVenueById,
+} from "../../../_lib/owner-dashboard-data";
 
 export const metadata: Metadata = { title: "Edit Venue" };
 
-export default async function EditVenuePage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const supabase = (await createClient()) as any;
-  const { data: { user } } = await supabase.auth.getUser();
+function fieldValue(formData: FormData, name: string) {
+  return String(formData.get(name) ?? "").trim();
+}
 
-  const { data: venue } = await supabase
-    .from("venues")
-    .select("*")
-    .eq("id", id)
-    .single();
+function optionalNumber(formData: FormData, name: string) {
+  const value = fieldValue(formData, name);
+  return value === "" ? null : Number(value);
+}
+
+function numberValue(formData: FormData, name: string) {
+  return Number(fieldValue(formData, name));
+}
+
+function editVenuePath(id: string, params?: string) {
+  return `/dashboard/venues/${id}/edit${params ? `?${params}` : ""}`;
+}
+
+export default async function EditVenuePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ saved?: string; created?: string; error?: string }>;
+}) {
+  const { id } = await params;
+  const query = (await searchParams) ?? {};
+  const context = await getOwnerDashboardContext();
+  const venue = await getOwnerVenueById(context, id);
 
   if (!venue) notFound();
 
-  return (
-    <main className="container" style={{ paddingBlock: "2rem", maxWidth: 700, display: "flex", flexDirection: "column", gap: "2rem" }}>
-      <div>
-        <h1 style={{ fontFamily: "var(--font-sora, sans-serif)", fontSize: "1.75rem", fontWeight: 700, marginBottom: "2rem" }}>
-          Edit Venue
-        </h1>
-        <form id="edit-venue-form" style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-          {[
-            { id: "edit-venue-name", label: "Venue name", type: "text", name: "name", defaultValue: venue.name },
-            { id: "edit-venue-address", label: "Address", type: "text", name: "address", defaultValue: venue.address },
-            { id: "edit-venue-city", label: "City", type: "text", name: "city", defaultValue: venue.city },
-            { id: "edit-venue-price", label: "Base price (₱)", type: "number", name: "base_price", defaultValue: venue.base_price },
-            { id: "edit-venue-capacity-min", label: "Min capacity", type: "number", name: "capacity_min", defaultValue: venue.capacity_min },
-            { id: "edit-venue-capacity-max", label: "Max capacity", type: "number", name: "capacity_max", defaultValue: venue.capacity_max },
-          ].map((field) => (
-            <div key={field.id} style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-              <label htmlFor={field.id} style={{ fontSize: "0.875rem", fontWeight: 500 }}>{field.label}</label>
-              <input id={field.id} type={field.type} name={field.name} defaultValue={String(field.defaultValue ?? "")}
-                style={{ height: "2.75rem", borderRadius: "0.625rem", border: "1px solid var(--border-default)", padding: "0 0.875rem", background: "var(--bg-subtle)", fontSize: "0.9375rem", outline: "none" }} />
-            </div>
-          ))}
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-            <label htmlFor="edit-venue-description" style={{ fontSize: "0.875rem", fontWeight: 500 }}>Description</label>
-            <textarea id="edit-venue-description" name="description" rows={5} defaultValue={venue.description ?? ""}
-              style={{ borderRadius: "0.625rem", border: "1px solid var(--border-default)", padding: "0.75rem 0.875rem", background: "var(--bg-subtle)", fontSize: "0.9375rem", outline: "none", resize: "vertical", fontFamily: "inherit" }} />
-          </div>
-          <button id="edit-venue-save-btn" type="submit"
-            style={{ height: "3rem", borderRadius: "0.75rem", background: "hsl(217 70% 47%)", color: "#fff", fontWeight: 700, border: "none", cursor: "pointer" }}>
-            Save Changes
-          </button>
-        </form>
-      </div>
+  async function updateVenueAction(formData: FormData) {
+    "use server";
 
-      <VenuePhotoUpload venueId={venue.id} organizationId={venue.organization_id} />
-    </main>
+    const actionContext = await getOwnerDashboardContext();
+    const existingVenue = await getOwnerVenueById(actionContext, id, "id, slug");
+    if (!existingVenue) notFound();
+
+    const name = fieldValue(formData, "name");
+    const province = fieldValue(formData, "province");
+    const city = fieldValue(formData, "city");
+    const address = fieldValue(formData, "address");
+    const basePrice = numberValue(formData, "base_price");
+    const capacityMax = numberValue(formData, "capacity_max");
+    const capacityMin = optionalNumber(formData, "capacity_min");
+
+    if (!name || !province || !city || !address) {
+      redirect(editVenuePath(id, "error=Please%20complete%20all%20required%20fields."));
+    }
+
+    if (
+      Number.isNaN(basePrice) ||
+      Number.isNaN(capacityMax) ||
+      (capacityMin != null && Number.isNaN(capacityMin))
+    ) {
+      redirect(editVenuePath(id, "error=Please%20enter%20valid%20numbers."));
+    }
+
+    if (capacityMin != null && capacityMin > capacityMax) {
+      redirect(editVenuePath(id, "error=Minimum%20capacity%20must%20not%20exceed%20maximum%20capacity."));
+    }
+
+    const { error } = await actionContext.supabase
+      .from("venues")
+      .update({
+        name,
+        province,
+        city,
+        municipality: fieldValue(formData, "municipality") || null,
+        address,
+        description: fieldValue(formData, "description") || null,
+        base_price: basePrice,
+        capacity_min: capacityMin,
+        capacity_max: capacityMax,
+      })
+      .eq("id", id);
+
+    if (error) {
+      redirect(
+        editVenuePath(
+          id,
+          `error=${encodeURIComponent(error.message || "Unable to save venue changes.")}`,
+        ),
+      );
+    }
+
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/venues");
+    revalidatePath(editVenuePath(id));
+    revalidatePath("/venues");
+    if (existingVenue.slug) {
+      revalidatePath(`/venues/${existingVenue.slug}`);
+      revalidatePath(`/venues/${existingVenue.slug}/book`);
+    }
+    redirect(editVenuePath(id, "saved=1"));
+  }
+
+  const inputClass =
+    "h-11 rounded-xl border border-[#e5e7eb] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9ca3af] focus:border-[#2563eb] focus:ring-4 focus:ring-[#eff6ff]";
+  const labelClass = "text-sm font-semibold text-[#374151]";
+
+  return (
+    <DashboardSubPage
+      title="Edit Venue"
+      description="Update core venue details, pricing, guest capacity, and media for this listing."
+      action={
+        <DashButton href="/dashboard/venues" variant="secondary" icon="arrow_back">
+          Back to Venues
+        </DashButton>
+      }
+    >
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+        <Panel>
+          <PanelHeader
+            title={venue.name}
+            description="Changes here update the venue profile used throughout the marketplace and owner dashboard."
+          />
+
+          {query.created ? (
+            <div className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+              Venue created. It is pending admin approval before appearing publicly.
+            </div>
+          ) : query.saved ? (
+            <div className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+              Venue changes saved.
+            </div>
+          ) : null}
+          {query.error ? (
+            <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+              {query.error}
+            </div>
+          ) : null}
+
+          <form action={updateVenueAction} className="space-y-5">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-2 sm:col-span-2">
+                <label htmlFor="edit-venue-name" className={labelClass}>
+                  Venue name
+                </label>
+                <input
+                  id="edit-venue-name"
+                  name="name"
+                  required
+                  defaultValue={venue.name}
+                  className={inputClass}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label htmlFor="edit-venue-province" className={labelClass}>
+                  Province
+                </label>
+                <input
+                  id="edit-venue-province"
+                  name="province"
+                  required
+                  defaultValue={venue.province}
+                  className={inputClass}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label htmlFor="edit-venue-city" className={labelClass}>
+                  City
+                </label>
+                <input
+                  id="edit-venue-city"
+                  name="city"
+                  required
+                  defaultValue={venue.city}
+                  className={inputClass}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label htmlFor="edit-venue-municipality" className={labelClass}>
+                  Municipality
+                </label>
+                <input
+                  id="edit-venue-municipality"
+                  name="municipality"
+                  defaultValue={venue.municipality ?? ""}
+                  className={inputClass}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label htmlFor="edit-venue-price" className={labelClass}>
+                  Base price
+                </label>
+                <input
+                  id="edit-venue-price"
+                  type="number"
+                  min="0"
+                  step="1"
+                  name="base_price"
+                  required
+                  defaultValue={venue.base_price}
+                  className={inputClass}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label htmlFor="edit-venue-capacity-min" className={labelClass}>
+                  Min capacity
+                </label>
+                <input
+                  id="edit-venue-capacity-min"
+                  type="number"
+                  min="0"
+                  step="1"
+                  name="capacity_min"
+                  defaultValue={venue.capacity_min ?? ""}
+                  className={inputClass}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label htmlFor="edit-venue-capacity-max" className={labelClass}>
+                  Max capacity
+                </label>
+                <input
+                  id="edit-venue-capacity-max"
+                  type="number"
+                  min="1"
+                  step="1"
+                  name="capacity_max"
+                  required
+                  defaultValue={venue.capacity_max}
+                  className={inputClass}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2 sm:col-span-2">
+                <label htmlFor="edit-venue-address" className={labelClass}>
+                  Address
+                </label>
+                <input
+                  id="edit-venue-address"
+                  name="address"
+                  required
+                  defaultValue={venue.address}
+                  className={inputClass}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2 sm:col-span-2">
+                <label htmlFor="edit-venue-description" className={labelClass}>
+                  Description
+                </label>
+                <textarea
+                  id="edit-venue-description"
+                  name="description"
+                  rows={6}
+                  defaultValue={venue.description ?? ""}
+                  className="rounded-xl border border-[#e5e7eb] bg-white px-3 py-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9ca3af] focus:border-[#2563eb] focus:ring-4 focus:ring-[#eff6ff]"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3 border-t border-[#e5e7eb] pt-5 sm:flex-row sm:justify-end">
+              <DashButton href="/dashboard/venues" variant="secondary">
+                Cancel
+              </DashButton>
+              <button
+                id="edit-venue-save-btn"
+                type="submit"
+                className="inline-flex items-center justify-center rounded-xl bg-[#1d4ed8] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#1e40af]"
+              >
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </Panel>
+
+        <VenuePhotoUpload venueId={venue.id} organizationId={venue.organization_id} />
+      </div>
+    </DashboardSubPage>
   );
 }

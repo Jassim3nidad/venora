@@ -200,7 +200,12 @@ async function getCustomerBookings(userId: string) {
   return (data ?? []) as BookingRecord[];
 }
 
-export default async function CustomerBookingsPage() {
+export default async function CustomerBookingsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ created?: string }>;
+}) {
+  const query = (await searchParams) ?? {};
   const supabase = await createClient();
 
   const {
@@ -235,6 +240,15 @@ export default async function CustomerBookingsPage() {
           <div className="absolute right-[-140px] top-[60px] h-[320px] w-[320px] rounded-full bg-[#37BCF1]/15 blur-3xl" />
 
           <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+            {query.created ? (
+              <div
+                role="status"
+                className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700 shadow-sm"
+              >
+                Booking request submitted. The venue team can now review it.
+              </div>
+            ) : null}
+
             <div className="mb-8">
               <Link
                 href="/venues"

@@ -1,7 +1,34 @@
 import type { Metadata } from "next";
+import {
+  DashboardSubPage,
+  DataTable,
+  EmptyState,
+  Panel,
+  PanelHeader,
+  StatusBadge,
+  type DataTableColumn,
+} from "@/components/dashboard/enterprise";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = { title: "Users — Admin" };
+export const metadata: Metadata = { title: "Users - Admin" };
+
+type UserRow = {
+  id: string;
+  full_name: string | null;
+  created_at: string;
+  user_roles?: { role: string }[] | null;
+};
+
+type UserDisplayRow = {
+  id: string;
+  name: string;
+  roles: string[];
+  joined: string;
+};
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString("en-PH", { dateStyle: "medium" });
+}
 
 export default async function AdminUsersPage() {
   const supabase = (await createClient()) as any;
@@ -11,26 +38,59 @@ export default async function AdminUsersPage() {
     .order("created_at", { ascending: false })
     .limit(50);
 
+  const rows: UserDisplayRow[] = ((profiles ?? []) as UserRow[]).map((profile) => ({
+    id: profile.id,
+    name: profile.full_name ?? "Unnamed user",
+    roles: (profile.user_roles ?? []).map((role) => role.role),
+    joined: formatDate(profile.created_at),
+  }));
+
+  const columns: DataTableColumn<UserDisplayRow>[] = [
+    {
+      key: "name",
+      header: "User",
+      cell: (row) => (
+        <span className="font-semibold text-[#111827]">{row.name}</span>
+      ),
+    },
+    {
+      key: "roles",
+      header: "Roles",
+      cell: (row) => (
+        <div className="flex flex-wrap gap-1.5">
+          {row.roles.length > 0 ? (
+            row.roles.map((role) => (
+              <StatusBadge key={role} status="active" label={role.replace(/_/g, " ")} />
+            ))
+          ) : (
+            <span className="text-[#6b7280]">No role</span>
+          )}
+        </div>
+      ),
+    },
+    { key: "joined", header: "Joined", cell: (row) => row.joined },
+  ];
+
   return (
-    <main>
-      <h1 style={{ fontFamily: "var(--font-sora, sans-serif)", fontSize: "1.5rem", fontWeight: 700, marginBottom: "1.5rem" }}>
-        Users
-      </h1>
-      <div id="admin-users-list" style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        {(profiles ?? []).map((p: any) => (
-          <div key={p.id} id={`admin-user-${p.id}`}
-            style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem 1.5rem", borderRadius: "0.75rem", border: "1px solid var(--border-default)", background: "var(--bg-subtle)" }}>
-            <span style={{ fontWeight: 500 }}>{p.full_name ?? "—"}</span>
-            <div style={{ display: "flex", gap: "0.375rem" }}>
-              {((p.user_roles as any[]) ?? []).map((r: any) => (
-                <span key={r.role} style={{ padding: "0.2rem 0.75rem", borderRadius: "999px", background: "hsl(217 70% 47% / 0.1)", color: "hsl(217 70% 47%)", fontSize: "0.75rem", fontWeight: 600, textTransform: "capitalize" }}>
-                  {r.role}
-                </span>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </main>
+    <DashboardSubPage
+      title="Users"
+      description="Review recent platform users and assigned roles."
+    >
+      {rows.length > 0 ? (
+        <Panel>
+          <PanelHeader
+            title="Recent Users"
+            description="Showing the latest 50 user profiles."
+          />
+          <DataTable rows={rows} columns={columns} keyFn={(row) => row.id} />
+        </Panel>
+      ) : (
+        <EmptyState
+          icon="group"
+          title="No users yet"
+          description="User profiles will appear here after accounts are created."
+        />
+      )}
+    </DashboardSubPage>
   );
 }

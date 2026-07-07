@@ -135,7 +135,7 @@ export function CustomerTopNav() {
                   Account
                 </Link>
 
-                <Link
+                <a
                   href="/logout"
                   role="menuitem"
                   onClick={closeMenu}
@@ -143,7 +143,7 @@ export function CustomerTopNav() {
                 >
                   <LogOut className="h-4 w-4" />
                   Logout
-                </Link>
+                </a>
               </div>
             ) : null}
           </div>

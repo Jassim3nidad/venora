@@ -47,12 +47,19 @@ export default async function AccountPage() {
 
   const dashboardLinks = [
     {
-      show:
-        userRoles.includes("venue_owner") ||
-        userRoles.includes("event_coordinator"),
+      show: userRoles.includes("venue_owner"),
       href: "/dashboard",
       label: "Venue Dashboard",
       description: "Manage venue operations and bookings.",
+      icon: Store,
+    },
+    {
+      show:
+        !userRoles.includes("venue_owner") &&
+        userRoles.includes("event_coordinator"),
+      href: "/dashboard/coordinator",
+      label: "Coordinator Dashboard",
+      description: "Plan events, compare venues, and coordinate vendors.",
       icon: Store,
     },
     {

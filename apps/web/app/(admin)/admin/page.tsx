@@ -31,7 +31,7 @@ export default async function AdminDashboardPage() {
   const { data: recentVenues } = await supabase
     .from("venues")
     .select("id, name, status, organizations(name)")
-    .eq("status", "pending_review")
+    .in("status", ["pending_approval", "pending_review"])
     .order("created_at", { ascending: false })
     .limit(5);
 
@@ -74,7 +74,7 @@ export default async function AdminDashboardPage() {
       totalUsers={totalUsers ?? 0}
       pendingVenues={pendingVenues ?? 0}
       supplierReviews={supplierReviews ?? 0}
-      monthlyCommission={84500}
+      monthlyCommission={0}
       pendingReviews={pendingReviews}
     />
   );

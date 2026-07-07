@@ -130,7 +130,7 @@ export default function AccountMobileMenu() {
           </div>
 
           <div className="mt-2 border-t border-[#E5E7EB]/80 pt-2">
-            <Link
+            <a
               href="/logout"
               onClick={() => setIsOpen(false)}
               className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-bold text-red-600 transition hover:bg-red-50"
@@ -139,7 +139,7 @@ export default function AccountMobileMenu() {
                 <LogOut className="h-4 w-4" />
               </div>
               Sign Out
-            </Link>
+            </a>
           </div>
         </div>
       </DialogContent>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { revalidatePath } from "next/cache";
+import { notFound, redirect } from "next/navigation";
 import {
   ArrowLeft,
   CalendarDays,
@@ -19,10 +20,21 @@ import {
   CustomerStatusBadge,
 } from "@/src/components/customer/CustomerUI";
 import { createClient } from "@/lib/supabase/server";
-import { getLocalDateInputValue } from "@/src/lib/date-only";
+import {
+  getLocalDateInputValue,
+  isTodayOrFutureDateString,
+  isValidDateOnlyString,
+  PAST_DATE_MESSAGE,
+} from "@/src/lib/date-only";
 
 interface Props {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{
+    date?: string;
+    guests?: string;
+    packageId?: string;
+    error?: string;
+  }>;
 }
 
 function formatCurrency(value?: number | null) {
@@ -42,19 +54,159 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: `Book - ${slug.replace(/-/g, " ")}` };
 }
 
-export default async function BookVenuePage({ params }: Props) {
+function formString(formData: FormData, name: string) {
+  return String(formData.get(name) ?? "").trim();
+}
+
+function bookingErrorPath(slug: string, message: string) {
+  return `/venues/${slug}/book?error=${encodeURIComponent(message)}`;
+}
+
+function isUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  );
+}
+
+export default async function BookVenuePage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const query = (await searchParams) ?? {};
   const supabase = (await createClient()) as any;
 
-  const { data: venue } = await supabase
+  let venueQuery = supabase
     .from("venues")
     .select(
       "id, name, slug, base_price, capacity_min, capacity_max, venue_packages(*)",
     )
-    .eq("slug", slug)
-    .single();
+    .eq("status", "published");
+
+  venueQuery = isUuid(slug) ? venueQuery.eq("id", slug) : venueQuery.eq("slug", slug);
+
+  const { data: venue } = await venueQuery.maybeSingle();
 
   if (!venue) notFound();
+
+  const bookingIdentifier = venue.slug ?? slug;
+  const requestedDate =
+    query.date && isValidDateOnlyString(query.date) ? query.date : "";
+  const requestedGuests =
+    query.guests && Number.isFinite(Number(query.guests)) ? query.guests : "";
+  const requestedPackageId = query.packageId ?? "none";
+
+  async function createBookingAction(formData: FormData) {
+    "use server";
+
+    const actionSupabase = (await createClient()) as any;
+    const {
+      data: { user },
+    } = await actionSupabase.auth.getUser();
+
+    if (!user) {
+      redirect(
+        `/login?redirectTo=${encodeURIComponent(`/venues/${bookingIdentifier}/book`)}`,
+      );
+    }
+
+    const eventDate = formString(formData, "event_date");
+    const guestCount = Number(formString(formData, "guest_count"));
+    const startTime = formString(formData, "start_time");
+    const endTime = formString(formData, "end_time");
+    const notes = formString(formData, "notes");
+    const packageId = formString(formData, "package_id");
+    const selectedPackage =
+      packageId && packageId !== "none"
+        ? venue.venue_packages?.find((pkg: { id: string }) => pkg.id === packageId)
+        : null;
+
+    if (!eventDate || !isValidDateOnlyString(eventDate)) {
+      redirect(bookingErrorPath(bookingIdentifier, "Please choose a valid event date."));
+    }
+
+    if (!isTodayOrFutureDateString(eventDate)) {
+      redirect(bookingErrorPath(bookingIdentifier, PAST_DATE_MESSAGE));
+    }
+
+    if (!Number.isFinite(guestCount) || guestCount < 1) {
+      redirect(bookingErrorPath(bookingIdentifier, "Please enter a valid guest count."));
+    }
+
+    if (venue.capacity_min && guestCount < venue.capacity_min) {
+      redirect(
+        bookingErrorPath(
+          bookingIdentifier,
+          `This venue requires at least ${venue.capacity_min.toLocaleString("en-PH")} guests.`,
+        ),
+      );
+    }
+
+    if (venue.capacity_max && guestCount > venue.capacity_max) {
+      redirect(
+        bookingErrorPath(
+          bookingIdentifier,
+          `This venue can host up to ${venue.capacity_max.toLocaleString("en-PH")} guests.`,
+        ),
+      );
+    }
+
+    if (packageId && packageId !== "none" && !selectedPackage) {
+      redirect(bookingErrorPath(bookingIdentifier, "Please choose a valid package."));
+    }
+
+    const { data: activeBooking } = await actionSupabase
+      .from("bookings")
+      .select("id")
+      .eq("venue_id", venue.id)
+      .eq("event_date", eventDate)
+      .in("status", ["pending", "approved", "confirmed"])
+      .maybeSingle();
+
+    if (activeBooking) {
+      redirect(
+        bookingErrorPath(
+          bookingIdentifier,
+          "This venue already has an active request for that date. Please choose another date.",
+        ),
+      );
+    }
+
+    const specialRequests = [
+      startTime ? `Start time: ${startTime}` : "",
+      endTime ? `End time: ${endTime}` : "",
+      notes ? `Notes: ${notes}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    const { error } = await actionSupabase.from("bookings").insert({
+      venue_id: venue.id,
+      customer_id: user.id,
+      package_id: selectedPackage?.id ?? null,
+      event_date: eventDate,
+      event_type_id: null,
+      guest_count: guestCount,
+      status: "pending",
+      total_amount: selectedPackage?.price ?? venue.base_price ?? null,
+      deposit_amount: null,
+      special_requests: specialRequests || null,
+      decline_reason: null,
+      confirmed_at: null,
+      cancelled_at: null,
+    });
+
+    if (error) {
+      redirect(
+        bookingErrorPath(
+          bookingIdentifier,
+          error.message || "We could not submit your booking request.",
+        ),
+      );
+    }
+
+    revalidatePath("/bookings");
+    revalidatePath("/dashboard/bookings");
+    revalidatePath("/dashboard/calendar");
+    redirect("/bookings?created=1");
+  }
 
   const priceLabel = formatCurrency(venue.base_price);
   const capacityLabel =
@@ -68,7 +220,7 @@ export default async function BookVenuePage({ params }: Props) {
 
       <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <Link
-          href={`/venues/${venue.slug ?? slug}`}
+          href={`/venues/${bookingIdentifier}`}
           className="inline-flex w-fit items-center gap-2 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-bold text-[#6B7280] shadow-sm transition hover:border-[#2563EB]/50 hover:bg-[#EFF6FF] hover:text-[#2563EB]"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -99,7 +251,11 @@ export default async function BookVenuePage({ params }: Props) {
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
           <CustomerCard>
-            <form id="booking-form" className="grid gap-6 p-5 sm:p-7">
+            <form
+              id="booking-form"
+              action={createBookingAction}
+              className="grid gap-6 p-5 sm:p-7"
+            >
               <div>
                 <CustomerStatusBadge icon={CalendarDays}>
                   Event details
@@ -112,6 +268,15 @@ export default async function BookVenuePage({ params }: Props) {
                   accurate availability and pricing.
                 </p>
               </div>
+
+              {query.error ? (
+                <div
+                  role="alert"
+                  className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700"
+                >
+                  {query.error}
+                </div>
+              ) : null}
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="grid gap-2">
@@ -128,6 +293,7 @@ export default async function BookVenuePage({ params }: Props) {
                       type="date"
                       name="event_date"
                       min={getLocalDateInputValue()}
+                      defaultValue={requestedDate}
                       className="h-12 w-full rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] pl-11 pr-4 text-sm font-semibold text-slate-700 outline-none transition hover:border-[#BFDBFE] focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
                     />
                   </div>
@@ -149,6 +315,7 @@ export default async function BookVenuePage({ params }: Props) {
                       min={venue.capacity_min ?? undefined}
                       max={venue.capacity_max ?? undefined}
                       placeholder={capacityLabel}
+                      defaultValue={requestedGuests}
                       className="h-12 w-full rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] pl-11 pr-4 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-[#BFDBFE] focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
                     />
                   </div>
@@ -194,6 +361,7 @@ export default async function BookVenuePage({ params }: Props) {
               </div>
 
               <div className="grid gap-2">
+                <input type="hidden" name="package_id" value={requestedPackageId} />
                 <label
                   htmlFor="booking-notes"
                   className="text-sm font-bold text-slate-700"

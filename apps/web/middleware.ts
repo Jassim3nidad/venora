@@ -21,10 +21,6 @@ type UserRole =
   | "supplier"
   | "admin";
 
-// Allows frontend preview of dashboard/admin pages during local development.
-// Production will still enforce role guards.
-const SKIP_ROLE_GUARD_IN_DEV = process.env.NODE_ENV === "development";
-
 // Routes that require authentication.
 // Important: /venues is intentionally NOT protected.
 // Public:
@@ -73,6 +69,10 @@ const ROLE_GUARDS: Array<{ prefix: string; roles: UserRole[] }> = [
 
   // Venue owner / coordinator dashboard pages
   {
+    prefix: "/dashboard/venues/new",
+    roles: ["venue_owner", "admin"],
+  },
+  {
     prefix: "/dashboard/venues",
     roles: ["venue_owner", "event_coordinator", "admin"],
   },
@@ -95,6 +95,10 @@ const ROLE_GUARDS: Array<{ prefix: string; roles: UserRole[] }> = [
   {
     prefix: "/dashboard/analytics",
     roles: ["venue_owner", "event_coordinator", "supplier", "admin"],
+  },
+  {
+    prefix: "/dashboard",
+    roles: ["venue_owner", "admin"],
   },
 
   // Admin area
@@ -196,11 +200,7 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith(guard.prefix),
     );
 
-    const shouldSkipRoleGuardInDev =
-      SKIP_ROLE_GUARD_IN_DEV &&
-      (pathname.startsWith("/dashboard") || pathname.startsWith("/admin"));
-
-    if (matchedGuard && !shouldSkipRoleGuardInDev) {
+    if (matchedGuard) {
       const { data: roleRows, error } = await supabase
         .from("user_roles")
         .select("role")

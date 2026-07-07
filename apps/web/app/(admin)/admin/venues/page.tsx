@@ -1,61 +1,111 @@
 import type { Metadata } from "next";
+import {
+  DashboardSubPage,
+  DataTable,
+  EmptyState,
+  Panel,
+  PanelHeader,
+  StatusBadge,
+  type DataTableColumn,
+} from "@/components/dashboard/enterprise";
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Venue Approval — Admin" };
+export const metadata: Metadata = { title: "Venue Approval - Admin" };
+
+type PendingVenueRow = {
+  id: string;
+  name: string;
+  city: string | null;
+  province: string | null;
+  status: string;
+  created_at: string;
+  organizations: { name: string | null } | null;
+};
+
+type VenueDisplayRow = {
+  id: string;
+  name: string;
+  organization: string;
+  location: string;
+  submitted: string;
+  status: string;
+};
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString("en-PH", { dateStyle: "medium" });
+}
 
 export default async function AdminVenuesPage() {
   const supabase = (await createClient()) as any;
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-
   const { data: pending } = await supabase
     .from("venues")
-    .select(`
+    .select(
+      `
       id,
       name,
       city,
+      province,
+      status,
       created_at,
       organizations (
-        name,
-        profiles!owner_id (
-          full_name
-        )
+        name
       )
-    `)
-    .eq("status", "pending_approval")
-    .order("created_at");
+    `,
+    )
+    .in("status", ["pending_approval", "pending_review"])
+    .order("created_at", { ascending: false });
+
+  const rows: VenueDisplayRow[] = ((pending ?? []) as PendingVenueRow[]).map(
+    (venue) => ({
+      id: venue.id,
+      name: venue.name,
+      organization: venue.organizations?.name ?? "Venue owner",
+      location: [venue.city, venue.province].filter(Boolean).join(", ") || "-",
+      submitted: formatDate(venue.created_at),
+      status: venue.status,
+    }),
+  );
+
+  const columns: DataTableColumn<VenueDisplayRow>[] = [
+    {
+      key: "venue",
+      header: "Venue",
+      cell: (row) => (
+        <div>
+          <p className="font-semibold text-[#111827]">{row.name}</p>
+          <p className="text-xs text-[#6b7280]">{row.location}</p>
+        </div>
+      ),
+    },
+    { key: "organization", header: "Organization", cell: (row) => row.organization },
+    { key: "submitted", header: "Submitted", cell: (row) => row.submitted },
+    {
+      key: "status",
+      header: "Status",
+      cell: (row) => <StatusBadge status="pending" label={row.status.replace(/_/g, " ")} />,
+    },
+  ];
 
   return (
-    <main>
-      <h1 style={{ fontFamily: "var(--font-sora, sans-serif)", fontSize: "1.5rem", fontWeight: 700, marginBottom: "1.5rem" }}>
-        Venue Approval Queue
-      </h1>
-      {!pending || pending.length === 0 ? (
-        <p style={{ color: "var(--text-muted)" }}>✅ No pending venues.</p>
+    <DashboardSubPage
+      title="Venue Approval Queue"
+      description="Review venue listings that are waiting for admin approval."
+    >
+      {rows.length > 0 ? (
+        <Panel>
+          <PanelHeader
+            title="Pending Venues"
+            description="Approval actions are intentionally hidden until the venue review action is fully wired."
+          />
+          <DataTable rows={rows} columns={columns} keyFn={(row) => row.id} />
+        </Panel>
       ) : (
-        <div id="admin-venues-list" style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-          {pending.map((v: any) => (
-            <div key={v.id} id={`admin-venue-${v.id}`}
-              style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1.25rem 1.5rem", borderRadius: "0.875rem", border: "1px solid var(--border-default)", background: "var(--bg-subtle)" }}>
-              <div>
-                <div style={{ fontWeight: 600 }}>{v.name}</div>
-                <div style={{ fontSize: "0.8125rem", color: "var(--text-secondary)" }}>
-                  {v.city} · {(v.organizations as any)?.profiles?.full_name ?? "—"}
-                </div>
-              </div>
-              <div style={{ display: "flex", gap: "0.75rem" }}>
-                <button id={`approve-venue-${v.id}`} style={{ padding: "0.5rem 1.25rem", borderRadius: "0.5rem", background: "hsl(142 71% 45%)", color: "#fff", fontWeight: 600, border: "none", cursor: "pointer", fontSize: "0.875rem" }}>
-                  Approve
-                </button>
-                <button id={`reject-venue-${v.id}`} style={{ padding: "0.5rem 1.25rem", borderRadius: "0.5rem", background: "hsl(0 72% 51%)", color: "#fff", fontWeight: 600, border: "none", cursor: "pointer", fontSize: "0.875rem" }}>
-                  Reject
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <EmptyState
+          icon="verified"
+          title="No pending venues"
+          description="Venue submissions that need admin review will appear here."
+        />
       )}
-    </main>
+    </DashboardSubPage>
   );
 }
