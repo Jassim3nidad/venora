@@ -8,9 +8,12 @@
 export type BookingStatus =
   | "pending"
   | "approved"
+  | "payment_pending"
+  | "confirmed"
   | "declined"
   | "cancelled"
   | "completed"
+  | "reviewed"
   | "expired";
 
 export interface BookingProps {
@@ -19,17 +22,26 @@ export interface BookingProps {
   customerId: string;
   packageId: string | null;
   eventDate: Date;
+  eventStartTime: string | null;
+  eventEndTime: string | null;
   eventTypeId: string | null;
   guestCount: number;
   status: BookingStatus;
   totalAmount: number | null;
   depositAmount: number | null;
   specialRequests: string | null;
+  approvalNote: string | null;
   declineReason: string | null;
   createdAt: Date;
   updatedAt: Date;
+  approvedAt: Date | null;
+  paymentDueAt: Date | null;
+  paymentStartedAt: Date | null;
+  paidAt: Date | null;
   confirmedAt: Date | null;
   cancelledAt: Date | null;
+  completedAt: Date | null;
+  reviewedAt: Date | null;
 }
 
 export class BookingEntity {
@@ -56,17 +68,26 @@ export class BookingEntity {
   get customerId(): string                { return this.props.customerId; }
   get packageId(): string | null          { return this.props.packageId; }
   get eventDate(): Date                   { return this.props.eventDate; }
+  get eventStartTime(): string | null     { return this.props.eventStartTime; }
+  get eventEndTime(): string | null       { return this.props.eventEndTime; }
   get eventTypeId(): string | null        { return this.props.eventTypeId; }
   get guestCount(): number                { return this.props.guestCount; }
   get status(): BookingStatus             { return this.props.status; }
   get totalAmount(): number | null        { return this.props.totalAmount; }
   get depositAmount(): number | null      { return this.props.depositAmount; }
   get specialRequests(): string | null    { return this.props.specialRequests; }
+  get approvalNote(): string | null       { return this.props.approvalNote; }
   get declineReason(): string | null      { return this.props.declineReason; }
   get createdAt(): Date                   { return this.props.createdAt; }
   get updatedAt(): Date                   { return this.props.updatedAt; }
+  get approvedAt(): Date | null           { return this.props.approvedAt; }
+  get paymentDueAt(): Date | null         { return this.props.paymentDueAt; }
+  get paymentStartedAt(): Date | null     { return this.props.paymentStartedAt; }
+  get paidAt(): Date | null               { return this.props.paidAt; }
   get confirmedAt(): Date | null          { return this.props.confirmedAt; }
   get cancelledAt(): Date | null          { return this.props.cancelledAt; }
+  get completedAt(): Date | null          { return this.props.completedAt; }
+  get reviewedAt(): Date | null           { return this.props.reviewedAt; }
 
   // ── Domain logic ─────────────────────────────────────────────────────────
 
@@ -75,11 +96,16 @@ export class BookingEntity {
   }
 
   canBeCancelled(): boolean {
-    return this.props.status === "pending" || this.props.status === "approved";
+    return (
+      this.props.status === "pending" ||
+      this.props.status === "approved" ||
+      this.props.status === "payment_pending" ||
+      this.props.status === "confirmed"
+    );
   }
 
   isUpcoming(): boolean {
-    return this.props.eventDate > new Date() && this.props.status === "approved";
+    return this.props.eventDate > new Date() && this.props.status === "confirmed";
   }
 
   approve(totalAmount: number, depositAmount: number): BookingEntity {
@@ -91,7 +117,46 @@ export class BookingEntity {
       status: "approved",
       totalAmount,
       depositAmount,
-      confirmedAt: new Date(),
+      approvedAt: new Date(),
+      paymentDueAt: new Date(Date.now() + 48 * 60 * 60 * 1000),
+      updatedAt: new Date(),
+    });
+  }
+
+  markPaymentPending(): BookingEntity {
+    if (this.props.status !== "approved") {
+      throw new Error(`Cannot start payment for a booking with status: ${this.props.status}`);
+    }
+    return new BookingEntity({
+      ...this.props,
+      status: "payment_pending",
+      paymentStartedAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
+
+  confirmPayment(): BookingEntity {
+    if (this.props.status !== "approved" && this.props.status !== "payment_pending") {
+      throw new Error(`Cannot confirm payment for a booking with status: ${this.props.status}`);
+    }
+    const now = new Date();
+    return new BookingEntity({
+      ...this.props,
+      status: "confirmed",
+      paidAt: now,
+      confirmedAt: now,
+      updatedAt: now,
+    });
+  }
+
+  complete(): BookingEntity {
+    if (this.props.status !== "confirmed") {
+      throw new Error(`Cannot complete a booking with status: ${this.props.status}`);
+    }
+    return new BookingEntity({
+      ...this.props,
+      status: "completed",
+      completedAt: new Date(),
       updatedAt: new Date(),
     });
   }
