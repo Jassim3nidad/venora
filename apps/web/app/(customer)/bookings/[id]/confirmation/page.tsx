@@ -10,6 +10,7 @@ import {
   CustomerStatusBadge,
 } from "@/src/components/customer/CustomerUI";
 import { createClient } from "@/lib/supabase/server";
+import { getNavbarProfile } from "@/lib/get-navbar-profile";
 import { BookingStatusBadge } from "@/src/features/booking/ui/booking-status-badge";
 import type { BookingStatusValue } from "@/src/features/booking/domain/value-objects/booking-status.vo";
 
@@ -54,6 +55,8 @@ export default async function BookingConfirmationPage({ params }: Props) {
 
   if (!user) redirect(`/login?redirectTo=/bookings/${id}/confirmation`);
 
+  const profile = await getNavbarProfile(supabase, user.id);
+
   const { data: booking } = await supabase
     .from("bookings")
     .select(`
@@ -97,7 +100,7 @@ export default async function BookingConfirmationPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#111827]">
-      <CustomerNavbar />
+      <CustomerNavbar user={user} profile={profile} />
 
       <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <Link

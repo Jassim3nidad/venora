@@ -8,9 +8,7 @@ import {
   ChevronRight,
   Compass,
   Heart,
-  LogOut,
   Menu,
-  UserRound,
   type LucideIcon,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@venora/ui";
@@ -41,12 +39,6 @@ const NAV_ITEMS: NavItem[] = [
     description: "Venues you've saved",
     icon: Heart,
   },
-  {
-    href: "/account",
-    label: "Account",
-    description: "Manage your account settings",
-    icon: UserRound,
-  },
 ];
 
 function isNavItemActive(pathname: string, href: string) {
@@ -59,13 +51,10 @@ function isNavItemActive(pathname: string, href: string) {
 /**
  * Mobile-only burger menu for the venues browse and venue detail pages.
  * Mirrors the Account Center's burger drawer design (left slide-in panel,
- * icon + label + description rows, active-state highlighting).
+ * icon + label + description rows, active-state highlighting). Account
+ * and logout actions live in the profile-photo dropdown instead.
  */
-export default function VenuesMobileMenu({
-  logoutAction,
-}: {
-  logoutAction: () => Promise<void>;
-}) {
+export default function VenuesMobileMenu() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -79,7 +68,7 @@ export default function VenuesMobileMenu({
         <button
           type="button"
           aria-label="Open menu"
-          className="ml-auto inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#1D4ED8] transition hover:bg-[#EFF6FF] md:hidden"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#1D4ED8] transition hover:bg-[#EFF6FF] md:hidden"
         >
           <Menu className="h-5 w-5" />
         </button>
@@ -104,7 +93,7 @@ export default function VenuesMobileMenu({
           </h2>
         </div>
 
-        <div className="flex flex-col justify-between overflow-y-auto p-3">
+        <div className="flex flex-col overflow-y-auto p-3">
           <div className="space-y-1">
             {NAV_ITEMS.map((item) => {
               const isActive = isNavItemActive(pathname, item.href);
@@ -152,21 +141,6 @@ export default function VenuesMobileMenu({
                 </Link>
               );
             })}
-          </div>
-
-          <div className="mt-2 border-t border-[#E5E7EB]/80 pt-2">
-            <form action={logoutAction}>
-              <button
-                type="submit"
-                onClick={() => setIsOpen(false)}
-                className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-sm font-bold text-red-600 transition hover:bg-red-50"
-              >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600">
-                  <LogOut className="h-4 w-4" />
-                </div>
-                Sign Out
-              </button>
-            </form>
           </div>
         </div>
       </DialogContent>

@@ -11,27 +11,15 @@ export async function GET(request: NextRequest) {
   const next = requestUrl.searchParams.get("next");
 
   // ── Token-based verification (email confirmation links) ────────────
-  // Supabase email verification sends ?token_hash=...&type=signup
-  // rather than a PKCE ?code=... parameter.
+  // Redirect token_hash to the /confirm route to prevent email scanners
+  // from consuming the single-use token during pre-fetch.
   if (tokenHash && type) {
-    const supabase = await createClient();
-
-    const { error } = await supabase.auth.verifyOtp({
-      token_hash: tokenHash,
-      type: type as "signup" | "email",
-    });
-
-    if (error) {
-      console.error("[auth/callback] verifyOtp failed:", error.message);
-      const redirectUrl = new URL("/login", request.url);
-      redirectUrl.searchParams.set("error", "verification_failed");
-      return NextResponse.redirect(redirectUrl);
-    }
-
-    // Email confirmed — send to login with success indicator
-    const redirectUrl = new URL("/login", request.url);
-    redirectUrl.searchParams.set("verified", "true");
-    return NextResponse.redirect(redirectUrl);
+    const confirmUrl = new URL("/confirm", request.url);
+    confirmUrl.searchParams.set("token_hash", tokenHash);
+    confirmUrl.searchParams.set("type", type);
+    if (next) confirmUrl.searchParams.set("next", next);
+    
+    return NextResponse.redirect(confirmUrl);
   }
 
   // ── PKCE / OAuth code exchange ─────────────────────────────────────

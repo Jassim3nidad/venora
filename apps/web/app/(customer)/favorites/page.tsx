@@ -20,12 +20,18 @@ export default async function FavoritesPage() {
 
   if (!user) redirect("/login?redirectTo=/favorites");
 
+  const { data: profile } = (await supabase
+    .from("profiles")
+    .select("full_name, avatar_url")
+    .eq("id", user.id)
+    .maybeSingle()) as any;
+
   const favoriteVenues = await getFavoriteVenuesForUser(user.id);
   const favoriteCount = favoriteVenues.length;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#111827]">
-      <CustomerNavbar user={user} />
+      <CustomerNavbar user={user} profile={profile} />
 
       <main>
         <section className="relative overflow-hidden border-b border-[#E5E7EB] bg-[#F9FAFB]">

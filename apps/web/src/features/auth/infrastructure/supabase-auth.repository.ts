@@ -56,7 +56,7 @@ export class SupabaseAuthRepository implements AuthRepository {
     // but unverified emails (to prevent account enumeration). Detect this so
     // the UI can offer the "Resend verification" button.
     if (data.user.identities && data.user.identities.length === 0) {
-      throw new AuthError("User already registered");
+      throw new AuthError("Email is already in use");
     }
 
     return { userId: data.user.id };
@@ -179,6 +179,12 @@ export class SupabaseAuthRepository implements AuthRepository {
       .update({ full_name: data.fullName, phone: data.phone || null })
       .eq("id", userId);
 
+    if (error) throw new AuthError(error.message);
+  }
+
+  async verifyOtp(tokenHash: string, type: "signup" | "email") {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
     if (error) throw new AuthError(error.message);
   }
 }

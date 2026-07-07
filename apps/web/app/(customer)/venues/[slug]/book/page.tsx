@@ -9,6 +9,7 @@ import {
   CustomerStatusBadge,
 } from "@/src/components/customer/CustomerUI";
 import { createClient } from "@/lib/supabase/server";
+import { getNavbarProfile } from "@/lib/get-navbar-profile";
 import { BookingWorkflowForm } from "@/src/features/booking/ui/booking-workflow-form";
 
 interface Props {
@@ -65,6 +66,8 @@ export default async function BookVenuePage({ params, searchParams }: Props) {
     redirect(`/login?redirectTo=/venues/${slug}/book`);
   }
 
+  const profile = await getNavbarProfile(supabase, user.id);
+
   let venueQuery = supabase
     .from("venues")
     .select(
@@ -90,7 +93,11 @@ export default async function BookVenuePage({ params, searchParams }: Props) {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#111827]">
+<<<<<<< HEAD
       <CustomerNavbar user={user} />
+=======
+      <CustomerNavbar user={user} profile={profile} />
+>>>>>>> fb1bb38bc30d138797defc56a12cebb0b3513943
 
       <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <Link

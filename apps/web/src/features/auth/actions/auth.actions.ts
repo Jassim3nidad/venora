@@ -21,11 +21,11 @@ import {
   resetPasswordUseCase,
   updateProfileUseCase,
   getCurrentUserUseCase,
+  verifyOtpUseCase,
 } from "../application/auth.usecases";
 import type { ActionResult } from "../types/auth.types";
 import { defaultRouteForRoles, type RoleName } from "@/lib/rbac/roles";
 import { toErrorMessage } from "@/lib/errors";
-
 function isUnverifiedEmailError(message: string) {
   const normalized = message.toLowerCase();
 
@@ -386,5 +386,14 @@ export async function changePasswordAction(
       success: false,
       error: toErrorMessage(error),
     };
+  }
+}
+
+export async function verifyOtpAction(tokenHash: string, type: "signup" | "email"): Promise<ActionResult> {
+  try {
+    await verifyOtpUseCase(tokenHash, type);
+    return { success: true, data: undefined };
+  } catch (error) {
+    return { success: false, error: toErrorMessage(error) };
   }
 }

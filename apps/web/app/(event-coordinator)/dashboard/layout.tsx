@@ -8,9 +8,5 @@ export default function CoordinatorDashboardLayout({
 }: {
   children: ReactNode;
 }) {
-  return (
-    <EnterpriseShell role="coordinator" userName="Alex Rivera" userSubtitle="Switch Role">
-      {children}
-    </EnterpriseShell>
-  );
+  return <EnterpriseShell role="coordinator">{children}</EnterpriseShell>;
 }

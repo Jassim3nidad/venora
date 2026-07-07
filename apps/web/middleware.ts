@@ -33,6 +33,8 @@ const PROTECTED_PREFIXES = [
   "/bookings",
   "/favorites",
   "/account",
+  "/settings",
+  "/help",
   "/dashboard",
   "/admin",
 ];
@@ -229,7 +231,26 @@ export async function middleware(request: NextRequest) {
     );
   }
 
-  // 3. Role guard — redirect users without the required role
+  // 3. Bare /dashboard — send each role to its own dashboard home.
+  // Only venue owners (and admins) may stay on /dashboard; everyone else
+  // gets routed via defaultRouteForRoles so coordinators never land in the
+  // venue-owner shell.
+  if (user && pathname === "/dashboard") {
+    const { data: roleRows } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id);
+
+    const userRoles = ((roleRows ?? []) as { role: UserRole }[])
+      .map((r) => r.role)
+      .filter(Boolean);
+
+    const target = defaultRouteForRoles(userRoles);
+
+    return redirectWithCookies(new URL(target, request.url), supabaseResponse);
+  }
+
+  // 4. Role guard — redirect users without the required role
   if (user) {
     const matchedGuard = ROLE_GUARDS.find((guard) =>
       pathname.startsWith(guard.prefix),
