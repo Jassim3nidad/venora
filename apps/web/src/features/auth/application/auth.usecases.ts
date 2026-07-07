@@ -55,3 +55,7 @@ export async function getCurrentUserUseCase() {
 export async function updateProfileUseCase(userId: string, data: { fullName: string; phone?: string | null }) {
   return repository.updateProfile(userId, data);
 }
+
+export async function verifyOtpUseCase(tokenHash: string, type: "signup" | "email") {
+  return repository.verifyOtp(tokenHash, type);
+}

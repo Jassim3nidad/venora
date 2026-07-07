@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createServerAction } from "@/src/lib/server-action";
 import { UnauthorizedError } from "@/src/lib/errors";
+import { geocodeAddress } from "@/src/lib/geocode";
 import {
   isTodayOrFutureDateString,
   isValidDateOnlyString,
@@ -28,6 +29,17 @@ const checkAvailabilitySchema = z.object({
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format")
     .refine(isValidDateOnlyString, { message: "Invalid date" })
     .refine(isTodayOrFutureDateString, { message: PAST_DATE_MESSAGE }),
+});
+
+const updateVenueSchema = z.object({
+  venueId: z.string().uuid(),
+  name: z.string().min(1),
+  address: z.string().min(1),
+  city: z.string().min(1),
+  base_price: z.number().positive(),
+  capacity_min: z.number().int().nonnegative().optional(),
+  capacity_max: z.number().int().positive(),
+  description: z.string().optional(),
 });
 
 // ─── Actions ───
@@ -134,5 +146,56 @@ export async function checkAvailabilityAction(rawInput: unknown) {
       isAvailable,
       priceOverride: override?.seasonal_price_override ? Number(override.seasonal_price_override) : null,
     };
+  }, rawInput);
+}
+
+export async function updateVenueAction(rawInput: unknown) {
+  return createServerAction(updateVenueSchema, async (input) => {
+    const supabase = await createClient() as any;
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      throw new UnauthorizedError("You must be signed in to update a venue.");
+    }
+
+    // Ensure user owns the venue organization
+    const { data: venue } = await supabase
+      .from("venues")
+      .select("organization_id, province")
+      .eq("id", input.venueId)
+      .single();
+
+    if (!venue) {
+      throw new Error("Venue not found.");
+    }
+
+    // Geocode the address using OSM Nominatim
+    // We use the province from the existing venue record
+    const location = await geocodeAddress(input.address, input.city, venue.province);
+
+    const updateData: any = {
+      name: input.name,
+      address: input.address,
+      city: input.city,
+      base_price: input.base_price,
+      capacity_min: input.capacity_min,
+      capacity_max: input.capacity_max,
+      description: input.description,
+    };
+
+    if (location) {
+      updateData.latitude = location.latitude;
+      updateData.longitude = location.longitude;
+    }
+
+    const { data, error } = await supabase
+      .from("venues")
+      .update(updateData)
+      .eq("id", input.venueId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   }, rawInput);
 }
