@@ -8,12 +8,11 @@ import {
   CalendarDays,
   Heart,
   HelpCircle,
-  LogOut,
   Menu,
   Search,
-  UserRound,
   X,
 } from "lucide-react";
+import ProfileMenu from "@/components/layout/ProfileMenu";
 
 function isActive(pathname: string, href: string) {
   if (href === "/venues") {
@@ -23,11 +22,26 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function CustomerNavbar({ user }: { user?: any }) {
+type CustomerNavbarProfile = {
+  full_name?: string | null;
+  avatar_url?: string | null;
+};
+
+export function CustomerNavbar({
+  user,
+  profile,
+}: {
+  user?: { email?: string | null } | null;
+  profile?: CustomerNavbarProfile | null;
+}) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const closeMenu = () => setMenuOpen(false);
+
+  const displayName =
+    profile?.full_name || user?.email?.split("@")[0] || "Venora User";
+  const email = user?.email ?? "";
 
   const navLinks = user
     ? [
@@ -47,12 +61,10 @@ export function CustomerNavbar({ user }: { user?: any }) {
           mobileOnly: true,
         },
         { label: "Favorites", href: "/favorites", icon: Heart, mobileOnly: true },
-        { label: "Account", href: "/account", icon: UserRound },
-        { label: "Logout", href: "/logout", icon: LogOut },
       ]
     : [
         { label: "Browse", href: "/venues", icon: Search, mobileOnly: true },
-        { label: "Sign In", href: "/login", icon: UserRound },
+        { label: "Sign In", href: "/login", icon: Search },
       ];
 
   return (
@@ -118,7 +130,22 @@ export function CustomerNavbar({ user }: { user?: any }) {
             <HelpCircle className="h-4 w-4" />
           </button>
 
-          <div className="relative z-50">
+          {user ? (
+            <ProfileMenu
+              displayName={displayName}
+              email={email}
+              avatarUrl={profile?.avatar_url}
+            />
+          ) : (
+            <Link
+              href="/login"
+              className="hidden h-10 items-center justify-center rounded-full bg-[#2563EB] px-4 text-xs font-bold uppercase tracking-[0.1em] text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1d4ed8] md:inline-flex"
+            >
+              Log In
+            </Link>
+          )}
+
+          <div className="relative z-50 md:hidden">
             <button
               type="button"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
@@ -142,32 +169,14 @@ export function CustomerNavbar({ user }: { user?: any }) {
                 <div className="grid gap-1">
                   {menuLinks.map((item) => {
                     const Icon = item.icon;
-                    const isLogout = item.href === "/logout";
-                    const active = !isLogout && isActive(pathname, item.href);
+                    const active = isActive(pathname, item.href);
                     const itemClassName = [
                       "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold transition",
-                      item.mobileOnly ? "md:hidden" : "",
+                      item.mobileOnly ? "" : "",
                       active
                         ? "bg-[#EFF6FF] text-[#2563EB]"
-                        : item.href === "/account"
-                          ? "text-[#111827] hover:bg-[#EFF6FF] hover:text-[#2563EB]"
-                          : "text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]",
+                        : "text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]",
                     ].join(" ");
-
-                    if (isLogout) {
-                      return (
-                        <a
-                          key={item.href}
-                          href={item.href}
-                          role="menuitem"
-                          onClick={closeMenu}
-                          className={itemClassName}
-                        >
-                          <Icon className="h-5 w-5" />
-                          {item.label}
-                        </a>
-                      );
-                    }
 
                     return (
                       <Link
@@ -182,6 +191,17 @@ export function CustomerNavbar({ user }: { user?: any }) {
                       </Link>
                     );
                   })}
+
+                  {!user ? (
+                    <Link
+                      href="/login"
+                      role="menuitem"
+                      onClick={closeMenu}
+                      className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold text-[#2563EB] transition hover:bg-[#EFF6FF]"
+                    >
+                      Sign In
+                    </Link>
+                  ) : null}
                 </div>
               </div>
             ) : null}

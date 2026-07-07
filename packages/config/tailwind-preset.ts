@@ -43,6 +43,7 @@ const preset: Partial<Config> = {
         "sheet-out": "sheet-out 0.25s ease-in",
         "drawer-in": "drawer-in 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
         "drawer-out": "drawer-out 0.22s ease-in",
+        "scale-in": "scale-in 0.15s cubic-bezier(0.16, 1, 0.3, 1)",
         shimmer: "shimmer 1.5s infinite",
       },
       keyframes: {
@@ -69,6 +70,10 @@ const preset: Partial<Config> = {
         "drawer-out": {
           from: { transform: "translateX(0)" },
           to: { transform: "translateX(-100%)" },
+        },
+        "scale-in": {
+          from: { opacity: "0", transform: "scale(0.96) translateY(-4px)" },
+          to: { opacity: "1", transform: "scale(1) translateY(0)" },
         },
         shimmer: {
           "0%": { backgroundPosition: "-200% 0" },

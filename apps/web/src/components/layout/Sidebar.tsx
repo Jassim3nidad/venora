@@ -1,7 +1,8 @@
 ﻿"use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import {
   Bed,
   Building2,
@@ -376,7 +377,6 @@ export default function Sidebar({
     [selectedCity, selectedProvince, venues],
   );
 
-  const capacityValue = Number(selectedCapacity) || 0;
   const minBudgetValue = Number(selectedMinBudget) || 0;
   const maxBudgetValue = Number(selectedMaxBudget) || 0;
   const activeBudgetLabel =
@@ -415,6 +415,58 @@ export default function Sidebar({
       scroll: false,
     });
   };
+
+  // Text/number fields navigate (router.replace) on every change, which is
+  // expensive (re-renders the grid, re-runs middleware, etc). Typing into
+  // local state keeps the field itself instant; the URL only updates once
+  // the user pauses, so results still refresh automatically a moment later.
+  const [searchDraft, setSearchDraft] = useState(searchQuery);
+  const debouncedSearchDraft = useDebouncedValue(searchDraft, 300);
+
+  const [minBudgetDraft, setMinBudgetDraft] = useState(selectedMinBudget);
+  const debouncedMinBudgetDraft = useDebouncedValue(minBudgetDraft, 300);
+
+  const [maxBudgetDraft, setMaxBudgetDraft] = useState(selectedMaxBudget);
+  const debouncedMaxBudgetDraft = useDebouncedValue(maxBudgetDraft, 300);
+
+  useEffect(() => setSearchDraft(searchQuery), [searchQuery]);
+  useEffect(() => setMinBudgetDraft(selectedMinBudget), [selectedMinBudget]);
+  useEffect(() => setMaxBudgetDraft(selectedMaxBudget), [selectedMaxBudget]);
+
+  useEffect(() => {
+    if (debouncedSearchDraft !== searchQuery) {
+      updateFilters({ q: debouncedSearchDraft });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearchDraft]);
+
+  useEffect(() => {
+    if (debouncedMinBudgetDraft !== selectedMinBudget) {
+      updateFilters({ minBudget: debouncedMinBudgetDraft, budget: "" });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedMinBudgetDraft]);
+
+  useEffect(() => {
+    if (debouncedMaxBudgetDraft !== selectedMaxBudget) {
+      updateFilters({ maxBudget: debouncedMaxBudgetDraft, budget: "" });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedMaxBudgetDraft]);
+
+  const [capacityDraft, setCapacityDraft] = useState(selectedCapacity);
+  const debouncedCapacityDraft = useDebouncedValue(capacityDraft, 200);
+
+  useEffect(() => setCapacityDraft(selectedCapacity), [selectedCapacity]);
+
+  useEffect(() => {
+    if (debouncedCapacityDraft !== selectedCapacity) {
+      updateFilters({ capacity: debouncedCapacityDraft });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedCapacityDraft]);
+
+  const capacityDraftValue = Number(capacityDraft) || 0;
 
   const toggleAmenity = (amenity: string) => {
     const nextAmenities = selectedAmenities.includes(amenity)
@@ -543,8 +595,8 @@ export default function Sidebar({
 
           <input
             type="search"
-            value={searchQuery}
-            onChange={(event) => updateFilters({ q: event.target.value })}
+            value={searchDraft}
+            onChange={(event) => setSearchDraft(event.target.value)}
             placeholder="Search venues..."
             className="h-11 w-full rounded-2xl border border-[#E5E7EB] bg-white pl-11 pr-4 text-sm font-medium text-[#111827] outline-none transition placeholder:text-slate-400 hover:border-[#BFDBFE] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
           />
@@ -694,13 +746,8 @@ export default function Sidebar({
                 type="number"
                 min={0}
                 step={5000}
-                value={selectedMinBudget}
-                onChange={(event) =>
-                  updateFilters({
-                    minBudget: event.target.value,
-                    budget: "",
-                  })
-                }
+                value={minBudgetDraft}
+                onChange={(event) => setMinBudgetDraft(event.target.value)}
                 className="h-10 w-full rounded-2xl border border-[#E5E7EB] bg-white px-3 text-sm font-semibold text-[#111827] outline-none transition hover:border-[#BFDBFE] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
                 placeholder="₱ min"
               />
@@ -718,13 +765,8 @@ export default function Sidebar({
                 type="number"
                 min={0}
                 step={5000}
-                value={selectedMaxBudget}
-                onChange={(event) =>
-                  updateFilters({
-                    maxBudget: event.target.value,
-                    budget: "",
-                  })
-                }
+                value={maxBudgetDraft}
+                onChange={(event) => setMaxBudgetDraft(event.target.value)}
                 className="h-10 w-full rounded-2xl border border-[#E5E7EB] bg-white px-3 text-sm font-semibold text-[#111827] outline-none transition hover:border-[#BFDBFE] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
                 placeholder="₱ max"
               />
@@ -745,10 +787,8 @@ export default function Sidebar({
             min={capacityBounds.min}
             max={capacityBounds.max}
             step={10}
-            value={capacityValue || Math.min(150, capacityBounds.max)}
-            onChange={(event) =>
-              updateFilters({ capacity: event.target.value })
-            }
+            value={capacityDraftValue || Math.min(150, capacityBounds.max)}
+            onChange={(event) => setCapacityDraft(event.target.value)}
             className="mt-3 h-2 w-full accent-[#2563EB]"
             aria-label="Minimum guest capacity"
           />
@@ -766,10 +806,8 @@ export default function Sidebar({
               min={0}
               max={capacityBounds.max}
               step={10}
-              value={capacityValue || ""}
-              onChange={(event) =>
-                updateFilters({ capacity: event.target.value })
-              }
+              value={capacityDraftValue || ""}
+              onChange={(event) => setCapacityDraft(event.target.value)}
               className="h-11 w-full rounded-2xl border border-[#E5E7EB] bg-white px-3 text-sm font-semibold text-[#111827] outline-none transition hover:border-[#BFDBFE] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
               placeholder="Any"
             />
@@ -777,11 +815,11 @@ export default function Sidebar({
 
           <div className="mt-2 flex items-center justify-between gap-3">
             <p className="text-sm font-medium text-[#6B7280]">
-              {capacityValue ? (
+              {capacityDraftValue ? (
                 <>
                   At least{" "}
                   <span className="font-extrabold text-[#111827]">
-                    {capacityValue}
+                    {capacityDraftValue}
                   </span>{" "}
                   guests
                 </>
@@ -790,10 +828,10 @@ export default function Sidebar({
               )}
             </p>
 
-            {capacityValue > 0 && (
+            {capacityDraftValue > 0 && (
               <button
                 type="button"
-                onClick={() => updateFilters({ capacity: "" })}
+                onClick={() => setCapacityDraft("")}
                 className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#1D4ED8] hover:text-[#2563EB]"
               >
                 Reset

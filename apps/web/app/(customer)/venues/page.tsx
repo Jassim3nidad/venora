@@ -149,6 +149,8 @@ export default async function VenuesMarketplacePage() {
   } = await supabase.auth.getUser();
 
   let favoriteVenueIds = new Set<string>();
+  let profile: { full_name: string | null; avatar_url: string | null } | null =
+    null;
 
   if (user) {
     const { data: favoriteRows, error: favoritesError } = await (
@@ -167,6 +169,12 @@ export default async function VenuesMarketplacePage() {
         (favoriteRows ?? []).map((row: any) => String(row.venue_id)),
       );
     }
+
+    const { data: profileRow } = await (supabase.from("profiles") as any)
+      .select("full_name, avatar_url")
+      .eq("id", user.id)
+      .maybeSingle();
+    profile = profileRow ?? null;
   }
 
   const researchVenueById = new Map(
@@ -195,7 +203,7 @@ export default async function VenuesMarketplacePage() {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[#F9FAFB] text-[#111827]">
-      <CustomerNavbar user={user} />
+      <CustomerNavbar user={user} profile={profile} />
 
       <div className="flex min-h-0 w-full flex-1 overflow-hidden">
         <VenuesClient
