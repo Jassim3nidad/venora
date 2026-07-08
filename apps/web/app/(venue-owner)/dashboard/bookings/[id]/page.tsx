@@ -29,8 +29,6 @@ type BookingRow = {
   deposit_amount: number | null;
   guest_count: number;
   special_requests: string | null;
-  approval_note: string | null;
-  decline_reason: string | null;
   payment_due_at: string | null;
   venues: { id: string; name: string; base_price: number | null; organization_id: string } | null;
   venue_packages: { name: string; price: number; price_unit: string } | null;
@@ -93,8 +91,6 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
       deposit_amount,
       guest_count,
       special_requests,
-      approval_note,
-      decline_reason,
       payment_due_at,
       venues(id, name, base_price, organization_id),
       venue_packages(name, price, price_unit),
@@ -199,7 +195,7 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
               <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
                 <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">Venue response</p>
                 <p className="mt-2 text-sm font-medium leading-6 text-[#4B5563]">
-                  {typedBooking.approval_note || typedBooking.decline_reason || "No response yet."}
+                  {"No response yet."}
                 </p>
               </div>
             </div>

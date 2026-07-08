@@ -46,8 +46,6 @@ type BookingDetail = {
   total_amount: number | null;
   deposit_amount: number | null;
   special_requests: string | null;
-  approval_note: string | null;
-  decline_reason: string | null;
   payment_due_at: string | null;
   confirmed_at: string | null;
   completed_at: string | null;
@@ -169,8 +167,6 @@ export default async function BookingDetailPage({ params }: Props) {
       total_amount,
       deposit_amount,
       special_requests,
-      approval_note,
-      decline_reason,
       payment_due_at,
       confirmed_at,
       completed_at,
@@ -311,7 +307,7 @@ export default async function BookingDetailPage({ params }: Props) {
                 <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
                   <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">Venue response</p>
                   <p className="mt-2 text-sm font-medium leading-6 text-slate-600">
-                    {typedBooking.approval_note || typedBooking.decline_reason || "Awaiting venue response."}
+                    {"Awaiting venue response."}
                   </p>
                 </div>
               </div>
