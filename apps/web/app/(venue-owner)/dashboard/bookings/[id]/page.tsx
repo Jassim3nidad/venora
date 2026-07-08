@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, CalendarDays, CreditCard, MessageSquareText, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  CalendarDays,
+  CreditCard,
+  MessageSquareText,
+  Users,
+} from "lucide-react";
 import { createClient } from "@/src/lib/supabase/server";
 import {
   DashboardSubPage,
@@ -30,7 +36,12 @@ type BookingRow = {
   guest_count: number;
   special_requests: string | null;
   payment_due_at: string | null;
-  venues: { id: string; name: string; base_price: number | null; organization_id: string } | null;
+  venues: {
+    id: string;
+    name: string;
+    base_price: number | null;
+    organization_id: string;
+  } | null;
   venue_packages: { name: string; price: number; price_unit: string } | null;
   profiles: { full_name: string | null; phone: string | null } | null;
   transactions: Array<{
@@ -51,7 +62,9 @@ type BookingRow = {
 
 function formatDate(value?: string | null) {
   if (!value) return "Date not set";
-  const date = value.includes("T") ? new Date(value) : new Date(`${value}T00:00:00`);
+  const date = value.includes("T")
+    ? new Date(value)
+    : new Date(`${value}T00:00:00`);
   if (Number.isNaN(date.getTime())) return "Date not set";
   return new Intl.DateTimeFormat("en-PH", {
     dateStyle: value.includes("T") ? "medium" : "long",
@@ -60,7 +73,11 @@ function formatDate(value?: string | null) {
 }
 
 function formatCurrency(value?: number | null) {
-  if (value === null || value === undefined || !Number.isFinite(Number(value))) {
+  if (
+    value === null ||
+    value === undefined ||
+    !Number.isFinite(Number(value))
+  ) {
     return "-";
   }
 
@@ -81,7 +98,8 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
 
   const { data: booking } = await supabase
     .from("bookings")
-    .select(`
+    .select(
+      `
       id,
       event_date,
       event_start_time,
@@ -109,28 +127,47 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
         note,
         created_at
       )
-    `)
+    `,
+    )
     .eq("id", id)
     .single();
 
   if (!booking) notFound();
   const typedBooking = booking as BookingRow;
 
-  const { data: membership } = await supabase
-    .from("organization_members")
-    .select("organization_id")
-    .eq("user_id", user.id)
-    .eq("organization_id", typedBooking.venues?.organization_id ?? "__none__")
-    .maybeSingle();
+  const organizationId = typedBooking.venues?.organization_id;
+  if (!organizationId) redirect("/unauthorized");
 
-  if (!membership) redirect("/unauthorized");
+  const [{ data: roles }, { data: membership }, { data: organization }] =
+    await Promise.all([
+      supabase.from("user_roles").select("role").eq("user_id", user.id),
+      supabase
+        .from("organization_members")
+        .select("organization_id")
+        .eq("user_id", user.id)
+        .eq("organization_id", organizationId)
+        .maybeSingle(),
+      supabase
+        .from("organizations")
+        .select("id")
+        .eq("id", organizationId)
+        .eq("owner_id", user.id)
+        .maybeSingle(),
+    ]);
+
+  const isAdmin = (roles ?? []).some(
+    (row: { role: string }) => row.role === "admin",
+  );
+
+  if (!isAdmin && !membership && !organization) redirect("/unauthorized");
 
   const suggestedTotal =
     typedBooking.total_amount ??
     typedBooking.venue_packages?.price ??
     typedBooking.venues?.base_price ??
     0;
-  const suggestedDeposit = typedBooking.deposit_amount ?? Math.round(suggestedTotal * 0.5);
+  const suggestedDeposit =
+    typedBooking.deposit_amount ?? Math.round(suggestedTotal * 0.5);
 
   return (
     <DashboardSubPage
@@ -156,24 +193,43 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
                   Booking request
                 </h2>
               </div>
-              <p className="break-all text-xs font-bold text-[#6B7280]">{typedBooking.id}</p>
+              <p className="break-all text-xs font-bold text-[#6B7280]">
+                {typedBooking.id}
+              </p>
             </div>
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 ["Event", formatDate(typedBooking.event_date), CalendarDays],
-                ["Guests", typedBooking.guest_count.toLocaleString("en-PH"), Users],
-                ["Quote", formatCurrency(typedBooking.total_amount), CreditCard],
-                ["Deposit", formatCurrency(typedBooking.deposit_amount), CreditCard],
+                [
+                  "Guests",
+                  typedBooking.guest_count.toLocaleString("en-PH"),
+                  Users,
+                ],
+                [
+                  "Quote",
+                  formatCurrency(typedBooking.total_amount),
+                  CreditCard,
+                ],
+                [
+                  "Deposit",
+                  formatCurrency(typedBooking.deposit_amount),
+                  CreditCard,
+                ],
               ].map(([label, value, Icon]) => {
                 const DetailIcon = Icon as typeof CalendarDays;
                 return (
-                  <div key={label as string} className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
+                  <div
+                    key={label as string}
+                    className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4"
+                  >
                     <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">
                       <DetailIcon className="h-3.5 w-3.5 text-[#1D4ED8]" />
                       {label as string}
                     </div>
-                    <p className="mt-2 text-sm font-black text-[#111827]">{value as string}</p>
+                    <p className="mt-2 text-sm font-black text-[#111827]">
+                      {value as string}
+                    </p>
                   </div>
                 );
               })}
@@ -187,13 +243,17 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
             </h2>
             <div className="mt-4 grid gap-3">
               <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
-                <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">Customer inquiry</p>
+                <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">
+                  Customer inquiry
+                </p>
                 <p className="mt-2 text-sm font-medium leading-6 text-[#4B5563]">
                   {typedBooking.special_requests || "No inquiry note."}
                 </p>
               </div>
               <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
-                <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">Venue response</p>
+                <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">
+                  Venue response
+                </p>
                 <p className="mt-2 text-sm font-medium leading-6 text-[#4B5563]">
                   {"No response yet."}
                 </p>
@@ -202,15 +262,26 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
           </section>
 
           <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm sm:p-6">
-            <h2 className="text-xl font-black tracking-[-0.03em] text-[#111827]">Status history</h2>
+            <h2 className="text-xl font-black tracking-[-0.03em] text-[#111827]">
+              Status history
+            </h2>
             <div className="mt-5 grid gap-0">
               {(typedBooking.booking_status_history ?? []).map((item) => (
-                <div key={`${item.status}-${item.created_at}`} className="flex gap-3 border-l border-[#DBEAFE] pb-5 last:border-transparent last:pb-0">
+                <div
+                  key={`${item.status}-${item.created_at}`}
+                  className="flex gap-3 border-l border-[#DBEAFE] pb-5 last:border-transparent last:pb-0"
+                >
                   <span className="-ml-[13px] flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#1D4ED8] text-xs font-black text-white" />
                   <div>
-                    <p className="text-sm font-black capitalize text-[#111827]">{item.status.replace(/_/g, " ")}</p>
-                    <p className="mt-1 text-xs font-semibold text-[#6B7280]">{formatDate(item.created_at)}</p>
-                    {item.note ? <p className="mt-2 text-sm text-[#4B5563]">{item.note}</p> : null}
+                    <p className="text-sm font-black capitalize text-[#111827]">
+                      {item.status.replace(/_/g, " ")}
+                    </p>
+                    <p className="mt-1 text-xs font-semibold text-[#6B7280]">
+                      {formatDate(item.created_at)}
+                    </p>
+                    {item.note ? (
+                      <p className="mt-2 text-sm text-[#4B5563]">{item.note}</p>
+                    ) : null}
                   </div>
                 </div>
               ))}
@@ -220,7 +291,9 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
 
         <aside className="grid gap-5 xl:sticky xl:top-24">
           <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm sm:p-6">
-            <h2 className="text-xl font-black tracking-[-0.03em] text-[#111827]">Owner action</h2>
+            <h2 className="text-xl font-black tracking-[-0.03em] text-[#111827]">
+              Owner action
+            </h2>
             <div className="mt-4">
               {typedBooking.status === "pending" ? (
                 <OwnerBookingDecisionForm
@@ -239,17 +312,27 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
           </section>
 
           <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm sm:p-6">
-            <h2 className="text-xl font-black tracking-[-0.03em] text-[#111827]">Transactions</h2>
+            <h2 className="text-xl font-black tracking-[-0.03em] text-[#111827]">
+              Transactions
+            </h2>
             <div className="mt-4 grid gap-3">
               {(typedBooking.transactions ?? []).length > 0 ? (
                 typedBooking.transactions?.map((transaction) => (
-                  <div key={transaction.id} className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
+                  <div
+                    key={transaction.id}
+                    className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4"
+                  >
                     <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-black text-[#111827]">{formatCurrency(transaction.amount)}</p>
+                      <p className="text-sm font-black text-[#111827]">
+                        {formatCurrency(transaction.amount)}
+                      </p>
                       <StatusBadge status={transaction.status} />
                     </div>
                     <p className="mt-2 text-xs font-semibold text-[#6B7280]">
-                      {transaction.payment_provider.toUpperCase()} - {formatDate(transaction.paid_at ?? transaction.created_at)}
+                      {transaction.payment_provider.toUpperCase()} -{" "}
+                      {formatDate(
+                        transaction.paid_at ?? transaction.created_at,
+                      )}
                     </p>
                   </div>
                 ))

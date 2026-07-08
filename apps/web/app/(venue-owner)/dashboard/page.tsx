@@ -7,11 +7,16 @@ import {
   getOwnerDashboardContext,
   getOwnerVenueIds,
 } from "./_lib/owner-dashboard-data";
-import { getRevenueTrend, lastNMonthsRange } from "@/features/analytics/application/queries";
+import {
+  getRevenueTrend,
+  lastNMonthsRange,
+} from "@/features/analytics/application/queries";
 
 export const metadata = {
   title: "Venue Owner Dashboard",
 };
+
+export const dynamic = "force-dynamic";
 
 function initials(name: string) {
   return name
@@ -49,7 +54,11 @@ export default async function VenueOwnerDashboardPage() {
     isAdmin || orgIds.length > 0 ? await venuesQuery : { data: [] };
 
   const venueIds = await getOwnerVenueIds(context);
-  const revenueTrend = await getRevenueTrend(supabase, { kind: "venues", venueIds }, lastNMonthsRange(12));
+  const revenueTrend = await getRevenueTrend(
+    supabase,
+    { kind: "venues", venueIds },
+    lastNMonthsRange(12),
+  );
   const { data: bookingsRaw } =
     venueIds.length > 0
       ? await supabase

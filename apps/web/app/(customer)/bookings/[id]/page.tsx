@@ -74,18 +74,28 @@ type BookingDetail = {
     note: string | null;
     created_at: string;
   }> | null;
-  reviews: Array<{ id: string; overall_rating: number; comment: string | null }> | null;
+  reviews: Array<{
+    id: string;
+    overall_rating: number;
+    comment: string | null;
+  }> | null;
 };
 
 function formatDate(value?: string | null) {
   if (!value) return "Date not set";
-  const date = value.includes("T") ? new Date(value) : new Date(`${value}T00:00:00`);
+  const date = value.includes("T")
+    ? new Date(value)
+    : new Date(`${value}T00:00:00`);
   if (Number.isNaN(date.getTime())) return "Date not set";
   return new Intl.DateTimeFormat("en-PH", { dateStyle: "long" }).format(date);
 }
 
 function formatCurrency(value?: number | null) {
-  if (value === null || value === undefined || !Number.isFinite(Number(value))) {
+  if (
+    value === null ||
+    value === undefined ||
+    !Number.isFinite(Number(value))
+  ) {
     return "Pending quote";
   }
 
@@ -155,7 +165,10 @@ function nextAction(booking: BookingDetail) {
 
   if (booking.venues?.slug) {
     return (
-      <CustomerLinkButton href={`/venues/${booking.venues.slug}`} tone="secondary">
+      <CustomerLinkButton
+        href={`/venues/${booking.venues.slug}`}
+        tone="secondary"
+      >
         View Venue
       </CustomerLinkButton>
     );
@@ -176,7 +189,8 @@ export default async function BookingDetailPage({ params }: Props) {
 
   const { data: booking, error } = await supabase
     .from("bookings")
-    .select(`
+    .select(
+      `
       id,
       customer_id,
       status,
@@ -222,7 +236,8 @@ export default async function BookingDetailPage({ params }: Props) {
         overall_rating,
         comment
       )
-    `)
+    `,
+    )
     .eq("id", id)
     .eq("customer_id", user.id)
     .single();
@@ -232,9 +247,12 @@ export default async function BookingDetailPage({ params }: Props) {
   }
 
   const typedBooking = booking as BookingDetail;
-  const canCancel = ["pending", "approved", "payment_pending", "confirmed"].includes(
-    typedBooking.status,
-  );
+  const canCancel = [
+    "pending",
+    "approved",
+    "payment_pending",
+    "confirmed",
+  ].includes(typedBooking.status);
 
   return (
     <div className="bg-[#F8FAFC] text-[#111827]">
@@ -260,7 +278,9 @@ export default async function BookingDetailPage({ params }: Props) {
             <CustomerCard className="p-5 sm:p-6">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
-                  <CustomerStatusBadge icon={CalendarDays}>Event date</CustomerStatusBadge>
+                  <CustomerStatusBadge icon={CalendarDays}>
+                    Event date
+                  </CustomerStatusBadge>
                   <p className="mt-3 text-lg font-black text-slate-950">
                     {formatDate(typedBooking.event_date)}
                   </p>
@@ -288,7 +308,9 @@ export default async function BookingDetailPage({ params }: Props) {
                 </div>
 
                 <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
-                  <CustomerStatusBadge icon={CreditCard}>Quote</CustomerStatusBadge>
+                  <CustomerStatusBadge icon={CreditCard}>
+                    Quote
+                  </CustomerStatusBadge>
                   <p className="mt-3 text-lg font-black text-slate-950">
                     {formatCurrency(typedBooking.total_amount)}
                   </p>
@@ -358,11 +380,7 @@ export default async function BookingDetailPage({ params }: Props) {
                     Venue response
                   </p>
                   <p className="mt-2 text-sm font-medium leading-6 text-slate-600">
-<<<<<<< HEAD
                     {getVenueResponse(typedBooking)}
-=======
-                    {"Awaiting venue response."}
->>>>>>> cbca123740ebff7d69ce03050282ff94e0f1e776
                   </p>
                 </div>
               </div>
@@ -405,7 +423,9 @@ export default async function BookingDetailPage({ params }: Props) {
                       </div>
                       <p className="mt-2 text-xs font-semibold text-slate-500">
                         {transaction.payment_provider.toUpperCase()} -{" "}
-                        {formatDate(transaction.paid_at ?? transaction.created_at)}
+                        {formatDate(
+                          transaction.paid_at ?? transaction.created_at,
+                        )}
                       </p>
                     </div>
                   ))

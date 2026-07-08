@@ -6,6 +6,7 @@ import {
   CalendarDays,
   Loader2,
   Mail,
+  MapPin,
   MessageSquare,
   Phone,
   Send,
@@ -191,7 +192,9 @@ export function SupplierContactForm({
         </div>
 
         <label className="grid gap-1.5">
-          <span className="text-xs font-bold text-slate-500">Event location</span>
+          <span className="text-xs font-bold text-slate-500">
+            Event location
+          </span>
           {hasBookings ? (
             <span className="relative">
               <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
