@@ -135,20 +135,26 @@ export default async function VenuesMarketplacePage({
   const params = await searchParams;
 
   const filters: VenueSearchParams = {
-    q: params.q as string,
-    province: params.province as string,
-    city: params.city as string,
-    municipality: params.municipality as string,
-    location: params.location as string,
-    event: params.event as string,
-    budget: params.budget as string,
-    minBudget: params.minBudget as string,
-    maxBudget: params.maxBudget as string,
-    capacity: params.capacity as string,
-    venueTypes: params.venueTypes ? String(params.venueTypes).split(',') : undefined,
-    indoorOutdoor: params.indoorOutdoor as string,
-    amenities: params.amenities ? String(params.amenities).split(',') : undefined,
+    q: params.q as string | undefined,
+    province: params.province as string | undefined,
+    city: params.city as string | undefined,
+    municipality: params.municipality as string | undefined,
+    location: params.location as string | undefined,
+    event: params.event as string | undefined,
+    budget: params.budget as string | undefined,
+    minBudget: params.minBudget as string | undefined,
+    maxBudget: params.maxBudget as string | undefined,
+    capacity: params.capacity as string | undefined,
+    indoorOutdoor: params.indoorOutdoor as string | undefined,
   };
+
+  if (params.venueTypes) {
+    filters.venueTypes = String(params.venueTypes).split(',');
+  }
+
+  if (params.amenities) {
+    filters.amenities = String(params.amenities).split(',');
+  }
 
   const { data: dbVenues, error } = await searchMarketplaceVenues(supabase, filters);
 

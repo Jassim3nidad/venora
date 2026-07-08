@@ -1,19 +1,19 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export interface VenueSearchParams {
-  q?: string;
-  province?: string;
-  city?: string;
-  municipality?: string;
-  location?: string;
-  event?: string;
-  budget?: string;
-  minBudget?: string;
-  maxBudget?: string;
-  capacity?: string;
-  venueTypes?: string[];
-  indoorOutdoor?: string;
-  amenities?: string[];
+  q?: string | undefined;
+  province?: string | undefined;
+  city?: string | undefined;
+  municipality?: string | undefined;
+  location?: string | undefined;
+  event?: string | undefined;
+  budget?: string | undefined;
+  minBudget?: string | undefined;
+  maxBudget?: string | undefined;
+  capacity?: string | undefined;
+  venueTypes?: string[] | undefined;
+  indoorOutdoor?: string | undefined;
+  amenities?: string[] | undefined;
 }
 
 function parseMoney(value: string | undefined): number {
