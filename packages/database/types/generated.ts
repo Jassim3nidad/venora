@@ -251,8 +251,6 @@ export interface Database {
           total_amount:     number | null;
           deposit_amount:   number | null;
           special_requests: string | null;
-          approval_note:    string | null;
-          decline_reason:   string | null;
           created_at:       string;
           updated_at:       string;
           approved_at:      string | null;
@@ -278,8 +276,6 @@ export interface Database {
           total_amount?:     number | null;
           deposit_amount?:   number | null;
           special_requests?: string | null;
-          approval_note?:    string | null;
-          decline_reason?:   string | null;
           approved_at?:      string | null;
           payment_due_at?:   string | null;
           payment_started_at?: string | null;

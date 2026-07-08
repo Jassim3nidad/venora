@@ -34,8 +34,6 @@ export class CreateBookingUseCase {
       totalAmount: null,
       depositAmount: null,
       specialRequests: input.specialRequests ?? null,
-      approvalNote: null,
-      declineReason: null,
       createdAt: new Date(),
       updatedAt: new Date(),
       approvedAt: null,

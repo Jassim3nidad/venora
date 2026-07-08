@@ -23,8 +23,6 @@ function toDomain(row: BookingRow): BookingEntity {
     totalAmount:       row.total_amount ? Number(row.total_amount) : null,
     depositAmount:     row.deposit_amount ? Number(row.deposit_amount) : null,
     specialRequests:   row.special_requests,
-    approvalNote:      row.approval_note,
-    declineReason:     row.decline_reason,
     createdAt:         new Date(row.created_at),
     updatedAt:         new Date(row.updated_at),
     approvedAt:        row.approved_at ? new Date(row.approved_at) : null,
@@ -54,8 +52,6 @@ function toRow(entity: BookingEntity): Omit<BookingRow, "created_at" | "updated_
     total_amount:      p.totalAmount,
     deposit_amount:    p.depositAmount,
     special_requests:  p.specialRequests,
-    approval_note:     p.approvalNote,
-    decline_reason:    p.declineReason,
     approved_at:       p.approvedAt ? p.approvedAt.toISOString() : null,
     payment_due_at:    p.paymentDueAt ? p.paymentDueAt.toISOString() : null,
     payment_started_at:p.paymentStartedAt ? p.paymentStartedAt.toISOString() : null,
@@ -129,7 +125,8 @@ export class SupabaseBookingRepository implements BookingRepository {
     const { error } = await this.supabase
       .from("bookings")
       .update({ status, updated_at: new Date().toISOString() })
-      .eq("id", id);
+      .eq("id", id)
+      .select("id");
     if (error) throw new Error(`[BookingRepo] updateStatus: ${error.message}`);
   }
 
