@@ -11,7 +11,6 @@ import {
   Star,
   TicketCheck,
 } from "lucide-react";
-import { CustomerNavbar } from "@/components/layout/CustomerNavbar";
 import {
   CustomerCard,
   CustomerEmptyState,
@@ -236,10 +235,8 @@ export default async function CustomerBookingsPage({
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#111827]">
-      <CustomerNavbar user={user} />
-
-      <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <div className="bg-[#F8FAFC] text-[#111827]">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         {query.created ? (
           <div
             role="status"
@@ -366,7 +363,7 @@ export default async function CustomerBookingsPage({
             })}
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }

@@ -1,18 +1,16 @@
-﻿"use client";
-
-import { useState } from "react";
-import Link from "next/link";
+﻿import Link from "next/link";
 import {
   ArrowRight,
   Heart,
   MapPin,
-  Menu,
   Search,
   Sparkles,
   Star,
   Users,
-  X,
 } from "lucide-react";
+import MarketingNavbar from "@/components/layout/MarketingNavbar";
+import { createClient } from "@/lib/supabase/server";
+import { getNavbarProfile } from "@/lib/get-navbar-profile";
 import {
   getMarketplaceResearchVenues,
   researchVenueImageCount,
@@ -48,17 +46,6 @@ const stats = [
   { value: "100%", label: "Source Checked" },
 ];
 
-const desktopNavLinks = [
-  { label: "Experiences", href: "/venues" },
-  { label: "Planning Tools", href: "/bookings" },
-  { label: "Host a Venue", href: "/register" },
-];
-
-const mobileNavLinks = [
-  { label: "Venues", href: "/venues" },
-  ...desktopNavLinks,
-];
-
 const footerLinkGroups = [
   [
     { label: "About Us", href: "/about" },
@@ -76,126 +63,16 @@ const footerLinkGroups = [
   ],
 ];
 
-export default function MarketingHomePage() {
-  const [menuOpen, setMenuOpen] = useState(false);
+export default async function MarketingHomePage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const profile = await getNavbarProfile(supabase, user?.id);
 
   return (
     <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-[#F9FAFB] text-[#111827] antialiased">
-      {/* Top Navigation */}
-      <header className="sticky top-0 z-50 w-full border-b border-[#E5E7EB]/80 bg-white/90 backdrop-blur-xl">
-        <div className="mx-auto grid h-20 w-full max-w-7xl grid-cols-[1fr_auto] items-center gap-5 px-4 sm:px-6 md:grid-cols-[1fr_auto_1fr] lg:px-8">
-          <Link
-            className="justify-self-start text-xl font-black tracking-[-0.04em] text-[#2563EB] transition hover:text-[#1d4ed8]"
-            href="/"
-          >
-            Venora
-          </Link>
-
-          <nav
-            className="hidden items-center justify-center gap-1 rounded-full border border-[#E5E7EB]/80 bg-white p-1 shadow-sm md:flex"
-            aria-label="Main navigation"
-          >
-            <Link
-              className="rounded-full bg-[#EFF6FF] px-4 py-2 text-sm font-extrabold text-[#2563EB] transition hover:text-[#1d4ed8]"
-              href="/venues"
-            >
-              Venues
-            </Link>
-            {desktopNavLinks.map(({ label, href }) => (
-              <Link
-                key={label}
-                className="rounded-full px-4 py-2 text-sm font-bold text-[#6B7280] transition hover:bg-[#EFF6FF] hover:text-[#2563EB]"
-                href={href}
-              >
-                {label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="hidden items-center justify-end gap-3 justify-self-end md:flex">
-            <Link
-              className="text-sm font-extrabold text-[#6B7280] transition hover:text-[#2563EB]"
-              href="/login"
-            >
-              Log In
-            </Link>
-            <Link
-              className="inline-flex h-11 items-center justify-center rounded-full bg-[#2563EB] px-6 text-sm font-extrabold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1d4ed8]"
-              href="/register"
-            >
-              Sign Up
-            </Link>
-          </div>
-
-          <button
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#1D4ED8] transition hover:bg-[#EFF6FF] md:hidden"
-            type="button"
-            aria-label="Open menu"
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen(true)}
-          >
-            <Menu className="h-5 w-5" />
-          </button>
-        </div>
-      </header>
-
-      {menuOpen ? (
-        <>
-          <button
-            type="button"
-            className="fixed inset-0 z-40 bg-slate-950/35 md:hidden"
-            aria-label="Close menu"
-            onClick={() => setMenuOpen(false)}
-          />
-          <div
-            className="fixed inset-x-0 bottom-0 z-50 rounded-t-[28px] border border-[#E5E7EB] bg-white px-4 pb-6 pt-5 shadow-2xl md:hidden"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Mobile navigation"
-          >
-            <button
-              className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#F8FAFC] text-[#111827]"
-              type="button"
-              aria-label="Close menu"
-              onClick={() => setMenuOpen(false)}
-            >
-              <X className="h-5 w-5" />
-            </button>
-
-            <p className="mb-5 text-xl font-black tracking-[-0.04em] text-[#2563EB]">
-              Venora
-            </p>
-            <nav className="grid gap-2">
-              {mobileNavLinks.map(({ label, href }) => (
-                <Link
-                  key={label}
-                  href={href}
-                  className="rounded-2xl px-4 py-3 text-sm font-extrabold text-[#111827] transition hover:bg-[#EFF6FF] hover:text-[#2563EB]"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {label}
-                </Link>
-              ))}
-            </nav>
-            <div className="mt-5 grid gap-3">
-              <Link
-                href="/login"
-                className="inline-flex h-12 items-center justify-center rounded-2xl border border-[#E5E7EB] text-sm font-extrabold text-[#1D4ED8]"
-                onClick={() => setMenuOpen(false)}
-              >
-                Log In
-              </Link>
-              <Link
-                href="/register"
-                className="inline-flex h-12 items-center justify-center rounded-2xl bg-[#2563EB] text-sm font-extrabold text-white"
-                onClick={() => setMenuOpen(false)}
-              >
-                Sign Up
-              </Link>
-            </div>
-          </div>
-        </>
-      ) : null}
+      <MarketingNavbar user={user} profile={profile} />
 
       <main className="w-full flex-grow">
         {/* Hero Section */}

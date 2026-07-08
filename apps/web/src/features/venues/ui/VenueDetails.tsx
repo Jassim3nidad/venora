@@ -117,6 +117,14 @@ export default function VenueDetails({
     );
   };
 
+  const mapLatitude = venue.mapLatitude ?? venue.latitude;
+  const mapLongitude = venue.mapLongitude ?? venue.longitude;
+  const hasMap =
+    mapLatitude != null &&
+    mapLongitude != null &&
+    Number.isFinite(Number(mapLatitude)) &&
+    Number.isFinite(Number(mapLongitude));
+
   const amenitiesList =
     venue.venue_amenities
       ?.map((va: any) => va.amenities?.name)
@@ -306,18 +314,27 @@ export default function VenueDetails({
                 {venue.address}, {venue.city}
               </span>
             </div>
-            {venue.latitude && venue.longitude ? (
-              <VenueMap
-                latitude={venue.latitude}
-                longitude={venue.longitude}
-                markerLabel={venue.name}
-              />
-            ) : (
+            {!hasMap ? (
               <div className="h-[300px] bg-[var(--bg-subtle)] border border-[var(--border-default)] rounded-3xl flex flex-col items-center justify-center text-center p-4">
                 <Compass className="h-8 w-8 text-[var(--text-muted)] mb-2" />
                 <p className="text-sm font-semibold text-[var(--text-primary)]">
                   Map details unavailable
                 </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {venue.mapPrecision && venue.mapPrecision !== "exact" ? (
+                  <p className="text-xs font-medium text-[var(--text-muted)]">
+                    Approximate location shown (
+                    {venue.mapPrecision === "city" ? venue.city : venue.province})
+                  </p>
+                ) : null}
+                <VenueMap
+                  latitude={Number(mapLatitude)}
+                  longitude={Number(mapLongitude)}
+                  zoom={venue.mapZoom ?? 14}
+                  markerLabel={venue.name}
+                />
               </div>
             )}
           </section>

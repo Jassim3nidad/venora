@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { CustomerNavbar } from "@/components/layout/CustomerNavbar";
 import { createClient } from "@/lib/supabase/server";
 import VenueDetails from "@/src/features/venues/ui/VenueDetails";
 import {
@@ -12,6 +11,7 @@ import {
   type ResearchVenue,
 } from "@/src/features/venues/data/research-venues";
 import { getPublishedVenueReviewsRaw } from "@/features/reviews/application/queries";
+import { resolveVenueMapCoordinates } from "@/src/lib/venue-map-coordinates";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -61,6 +61,8 @@ function mergeVenueDetail(dbVenue: any, fallback?: ResearchVenue | null) {
   return {
     ...(fallbackRecord ?? {}),
     ...dbVenue,
+    latitude: dbVenue.latitude ?? fallbackRecord?.latitude ?? null,
+    longitude: dbVenue.longitude ?? fallbackRecord?.longitude ?? null,
     venue_images:
       dbVenue.venue_images?.length > 0
         ? dbVenue.venue_images
@@ -110,6 +112,17 @@ export default async function VenueDetailPage({ params }: Props) {
 
   if (!venue) notFound();
 
+  const mapLocation = await resolveVenueMapCoordinates(venue);
+  const venueWithMap = mapLocation
+    ? {
+        ...venue,
+        mapLatitude: mapLocation.latitude,
+        mapLongitude: mapLocation.longitude,
+        mapZoom: mapLocation.zoom,
+        mapPrecision: mapLocation.precision,
+      }
+    : venue;
+
   const reviews = dbVenue
     ? await getPublishedVenueReviewsRaw(supabase, venue.id)
     : getPublicResearchReviews();
@@ -131,16 +144,12 @@ export default async function VenueDetailPage({ params }: Props) {
   }
 
   return (
-    <>
-      <CustomerNavbar user={user} />
-
-      <VenueDetails
-        venue={venue}
-        reviews={reviews || []}
-        nearbyVenues={nearbyVenues}
-        initialIsFavorited={initialIsFavorited}
-        currentUser={user}
-      />
-    </>
+    <VenueDetails
+      venue={venueWithMap}
+      reviews={reviews || []}
+      nearbyVenues={nearbyVenues}
+      initialIsFavorited={initialIsFavorited}
+      currentUser={user}
+    />
   );
 }

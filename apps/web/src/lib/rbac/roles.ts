@@ -83,5 +83,5 @@ export function defaultRouteForRoles(roles: RoleName[]): string {
   if (roles.includes(ROLES.VENUE_OWNER))       return "/dashboard/venue-owner";
   if (roles.includes(ROLES.EVENT_COORDINATOR)) return "/dashboard/event-coordinator";
   if (roles.includes(ROLES.SUPPLIER))          return "/dashboard/supplier";
-  return "/venues";
+  return "/";
 }

@@ -14,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
+import type { CustomerBookingOption } from "../application/get-customer-bookings-for-contact";
 import type { SupplierMarketplaceProfile } from "../types/supplier.types";
 import {
   getSupplierHeroImage,
@@ -26,10 +27,13 @@ import {
   formatSupplierPrice,
 } from "../utils/supplier-format";
 import { SupplierContactForm } from "./SupplierContactForm";
+import { SupplierFavoriteButton } from "./SupplierFavoriteButton";
 
 type SupplierDetailProps = {
   supplier: SupplierMarketplaceProfile;
   currentUser: User | null;
+  bookings?: CustomerBookingOption[];
+  isFavorited?: boolean;
 };
 
 function InfoRow({
@@ -61,6 +65,8 @@ function InfoRow({
 export function SupplierDetail({
   supplier,
   currentUser,
+  bookings = [],
+  isFavorited = false,
 }: SupplierDetailProps) {
   const heroImage = getSupplierHeroImage(supplier);
   const startingPrice = getSupplierStartingPrice(supplier);
@@ -105,6 +111,13 @@ export function SupplierDetail({
             ) : null}
 
             <div className="mt-6 flex flex-wrap gap-3">
+              {currentUser ? (
+                <SupplierFavoriteButton
+                  supplierId={supplier.id}
+                  supplierName={supplier.businessName}
+                  initialIsFavorited={isFavorited}
+                />
+              ) : null}
               <span className="inline-flex items-center gap-2 rounded-lg bg-white/95 px-3 py-2 text-sm font-black text-slate-950">
                 <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
                 {formatRating(supplier.avgRating, supplier.reviewCount)}
@@ -321,6 +334,7 @@ export function SupplierDetail({
           <SupplierContactForm
             supplier={supplier}
             userEmail={currentUser?.email ?? null}
+            bookings={bookings}
           />
 
           <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">

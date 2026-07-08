@@ -1,8 +1,19 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
-import { CalendarDays, Loader2, Mail, MessageSquare, Phone, Send, Users } from "lucide-react";
+import {
+  CalendarDays,
+  Loader2,
+  Mail,
+  MapPin,
+  MessageSquare,
+  Phone,
+  Send,
+  Users,
+} from "lucide-react";
 import { createSupplierContactRequestAction } from "../application/actions";
+import type { CustomerBookingOption } from "../application/get-customer-bookings-for-contact";
 import type {
   SupplierMarketplaceProfile,
   SupplierPackage,
@@ -12,6 +23,7 @@ import { formatPriceUnit, formatSupplierPrice } from "../utils/supplier-format";
 type SupplierContactFormProps = {
   supplier: SupplierMarketplaceProfile;
   userEmail?: string | null;
+  bookings?: CustomerBookingOption[];
 };
 
 function packageLabel(pkg: SupplierPackage) {
@@ -23,11 +35,15 @@ function packageLabel(pkg: SupplierPackage) {
 export function SupplierContactForm({
   supplier,
   userEmail,
+  bookings = [],
 }: SupplierContactFormProps) {
   const [isPending, startTransition] = useTransition();
   const [selectedPackageId, setSelectedPackageId] = useState(
     supplier.packages.find((pkg) => pkg.isActive)?.id ?? "",
   );
+  const [selectedBookingId, setSelectedBookingId] = useState("");
+  const [eventDate, setEventDate] = useState("");
+  const [guestCount, setGuestCount] = useState("");
   const [status, setStatus] = useState<{
     type: "success" | "error";
     message: string;
@@ -36,6 +52,23 @@ export function SupplierContactForm({
     () => supplier.packages.filter((pkg) => pkg.isActive),
     [supplier.packages],
   );
+  const hasBookings = bookings.length > 0;
+
+  const handleBookingChange = (bookingId: string) => {
+    setSelectedBookingId(bookingId);
+
+    const booking = bookings.find((item) => item.id === bookingId);
+    if (!booking) {
+      setEventDate("");
+      setGuestCount("");
+      return;
+    }
+
+    setEventDate(booking.eventDate ?? "");
+    setGuestCount(
+      typeof booking.guestCount === "number" ? String(booking.guestCount) : "",
+    );
+  };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -44,12 +77,12 @@ export function SupplierContactForm({
     const payload = {
       supplierId: supplier.id,
       serviceId: selectedPackageId || undefined,
+      bookingId: selectedBookingId || undefined,
       contactName: String(formData.get("contactName") ?? ""),
       contactEmail: String(formData.get("contactEmail") ?? ""),
       contactPhone: String(formData.get("contactPhone") ?? ""),
-      eventDate: String(formData.get("eventDate") ?? ""),
-      eventLocation: String(formData.get("eventLocation") ?? ""),
-      guestCount: Number(formData.get("guestCount") || 0) || undefined,
+      eventDate,
+      guestCount: Number(guestCount) || undefined,
       message: String(formData.get("message") ?? ""),
     };
 
@@ -62,6 +95,9 @@ export function SupplierContactForm({
 
       form.reset();
       setSelectedPackageId(activePackages[0]?.id ?? "");
+      setSelectedBookingId("");
+      setEventDate("");
+      setGuestCount("");
       setStatus({
         type: "success",
         message: "Inquiry sent. The supplier can now follow up from their dashboard.",
@@ -74,10 +110,11 @@ export function SupplierContactForm({
       <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="text-lg font-black text-slate-950">Contact supplier</h2>
         <p className="mt-2 text-sm font-medium leading-6 text-slate-600">
-          Sign in as a customer to send inquiry details and keep supplier conversations tied to your Venora account.
+          Sign in as a customer to send inquiry details and keep supplier
+          conversations tied to your Venora account.
         </p>
         <a
-          href="/login"
+          href={`/login?redirectTo=/suppliers/${supplier.slug}`}
           className="mt-4 inline-flex h-11 items-center justify-center rounded-lg bg-[#2563EB] px-4 text-sm font-black text-white transition hover:bg-[#1D4ED8]"
         >
           Sign in
@@ -153,6 +190,42 @@ export function SupplierContactForm({
           </label>
         </div>
 
+        <label className="grid gap-1.5">
+          <span className="text-xs font-bold text-slate-500">Event location</span>
+          {hasBookings ? (
+            <span className="relative">
+              <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <select
+                name="bookingId"
+                required
+                value={selectedBookingId}
+                onChange={(event) => handleBookingChange(event.target.value)}
+                className="h-11 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+              >
+                <option value="">Select one of your bookings</option>
+                {bookings.map((booking) => (
+                  <option key={booking.id} value={booking.id}>
+                    {booking.label}
+                  </option>
+                ))}
+              </select>
+            </span>
+          ) : (
+            <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-4">
+              <p className="text-sm font-semibold leading-6 text-slate-600">
+                You need an existing venue booking before you can link an event
+                location to this inquiry.
+              </p>
+              <Link
+                href="/venues"
+                className="mt-3 inline-flex text-sm font-black text-[#2563EB] transition hover:text-[#1D4ED8]"
+              >
+                Browse venues to book first
+              </Link>
+            </div>
+          )}
+        </label>
+
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="grid gap-1.5">
             <span className="text-xs font-bold text-slate-500">Event date</span>
@@ -161,7 +234,10 @@ export function SupplierContactForm({
               <input
                 name="eventDate"
                 type="date"
-                className="h-11 w-full rounded-lg border border-slate-200 pl-9 pr-3 text-sm font-semibold outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                value={eventDate}
+                onChange={(event) => setEventDate(event.target.value)}
+                readOnly={Boolean(selectedBookingId)}
+                className="h-11 w-full rounded-lg border border-slate-200 pl-9 pr-3 text-sm font-semibold outline-none transition read-only:bg-slate-50 focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
               />
             </span>
           </label>
@@ -175,20 +251,14 @@ export function SupplierContactForm({
                 type="number"
                 min="1"
                 inputMode="numeric"
-                className="h-11 w-full rounded-lg border border-slate-200 pl-9 pr-3 text-sm font-semibold outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                value={guestCount}
+                onChange={(event) => setGuestCount(event.target.value)}
+                readOnly={Boolean(selectedBookingId)}
+                className="h-11 w-full rounded-lg border border-slate-200 pl-9 pr-3 text-sm font-semibold outline-none transition read-only:bg-slate-50 focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
               />
             </span>
           </label>
         </div>
-
-        <label className="grid gap-1.5">
-          <span className="text-xs font-bold text-slate-500">Event location</span>
-          <input
-            name="eventLocation"
-            placeholder="City, venue, or region"
-            className="h-11 rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
-          />
-        </label>
 
         <label className="grid gap-1.5">
           <span className="text-xs font-bold text-slate-500">Message</span>
@@ -199,7 +269,7 @@ export function SupplierContactForm({
               required
               minLength={10}
               rows={5}
-              placeholder="Share event type, schedule, location, and package needs."
+              placeholder="Share event type, schedule, and package needs."
               className="w-full resize-none rounded-lg border border-slate-200 py-3 pl-9 pr-3 text-sm font-semibold outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
             />
           </span>
@@ -222,7 +292,7 @@ export function SupplierContactForm({
 
       <button
         type="submit"
-        disabled={isPending}
+        disabled={isPending || !hasBookings}
         className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-black text-white transition hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-70"
       >
         {isPending ? (
