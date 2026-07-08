@@ -214,12 +214,9 @@ export async function approveBookingAction(rawInput: unknown) {
         status: "approved",
         total_amount: input.totalAmount,
         deposit_amount: input.depositAmount,
-        approved_at: new Date().toISOString(),
-        payment_due_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
-        updated_at: new Date().toISOString(),
       })
       .eq("id", input.bookingId)
-      .select("id, status, total_amount, deposit_amount, payment_due_at")
+      .select("id, status, total_amount, deposit_amount")
       .single();
 
     throwIfSupabaseError(error);
@@ -233,7 +230,7 @@ export async function approveBookingAction(rawInput: unknown) {
       status: data.status as string,
       totalAmount: Number(data.total_amount ?? 0),
       depositAmount: Number(data.deposit_amount ?? 0),
-      paymentDueAt: data.payment_due_at as string | null,
+      paymentDueAt: null,
     };
   }, rawInput);
 }
@@ -245,7 +242,7 @@ export async function declineBookingAction(rawInput: unknown) {
       .from("bookings")
       .update({
         status: "declined",
-        updated_at: new Date().toISOString(),
+        decline_reason: input.reason,
       })
       .eq("id", input.bookingId)
       .select("id, status")
