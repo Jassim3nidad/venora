@@ -61,7 +61,7 @@ export function VerificationUpload({
     setIsUploading(true);
     setError(null);
 
-    const uploadedUrls: string[] = [];
+    const uploadedPaths: string[] = [];
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -70,21 +70,24 @@ export function VerificationUpload({
       for (const file of files) {
         const fileExt = file.name.split('.').pop();
         const fileName = `${user.id}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-        
+
+        // The verification-docs bucket is private, so we keep the storage path
+        // (not a public URL, which would 403) and generate short-lived signed
+        // URLs on demand when an admin reviews them.
         const { data, error: uploadError } = await supabase.storage
-          .from("verification-documents")
+          .from("verification-docs")
           .upload(fileName, file);
 
         if (uploadError) throw uploadError;
 
-        const { data: urlData } = supabase.storage.from("verification-documents").getPublicUrl(data.path);
-        uploadedUrls.push(urlData.publicUrl);
+        uploadedPaths.push(data.path);
       }
 
-      onSubmit(uploadedUrls);
+      onSubmit(uploadedPaths);
     } catch (err: any) {
       console.error("Upload error", err);
-      setError("Failed to upload documents. Please try again.");
+      const detail = err?.message ? `: ${err.message}` : "";
+      setError(`Failed to upload documents${detail}. Please try again.`);
       setIsUploading(false);
     }
   };

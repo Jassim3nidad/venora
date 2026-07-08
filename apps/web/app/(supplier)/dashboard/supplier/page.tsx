@@ -1,25 +1,14 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/src/lib/supabase/server";
 import { SupplierOverview } from "@/components/dashboard/enterprise";
 import { EmptyState, DashButton } from "@/components/dashboard/enterprise";
+import { getSupplierDashboardContext } from "./_lib/supplier-dashboard-data";
 
 export const metadata = {
   title: "Supplier Dashboard",
 };
+export const dynamic = "force-dynamic";
 
 export default async function SupplierDashboardPage() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = (await createClient()) as any;
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-
-  const { data: supplierProfile } = await supabase
-    .from("supplier_profiles")
-    .select("id, business_name, accreditation_status")
-    .eq("profile_id", user.id)
-    .single();
+  const { supabase, supplierProfile } = await getSupplierDashboardContext();
 
   if (!supplierProfile) {
     return (
@@ -28,7 +17,9 @@ export default async function SupplierDashboardPage() {
           icon="storefront"
           title="Profile Setup Pending"
           description="Create your supplier profile to start listing event packages and coordination services."
-          action={<DashButton>Create Supplier Profile</DashButton>}
+          action={
+            <DashButton href="/account/become-partner">Create Supplier Profile</DashButton>
+          }
         />
       </div>
     );

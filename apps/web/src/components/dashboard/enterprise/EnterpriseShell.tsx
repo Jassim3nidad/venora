@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@venora/lib";
+import ProfileMenu from "@/components/layout/ProfileMenu";
 import { MaterialIcon } from "./MaterialIcon";
 import {
   NAV_BY_ROLE,
@@ -16,6 +17,7 @@ type EnterpriseShellProps = {
   role: EnterpriseRole;
   children: ReactNode;
   userName?: string;
+  userEmail?: string;
   userSubtitle?: string;
   userAvatar?: string;
   businessName?: string;
@@ -132,6 +134,7 @@ function Sidebar({
 function TopBar({
   role,
   userName,
+  userEmail,
   userSubtitle,
   userAvatar,
   businessName,
@@ -139,6 +142,7 @@ function TopBar({
 }: {
   role: EnterpriseRole;
   userName?: string;
+  userEmail?: string;
   userSubtitle?: string;
   userAvatar?: string;
   businessName?: string;
@@ -164,18 +168,12 @@ function TopBar({
           <p className="text-sm font-bold text-[#111827]">{displayName}</p>
           <p className="text-xs text-[#6b7280]">{subtitle}</p>
         </div>
-        {userAvatar ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={userAvatar}
-            alt=""
-            className="h-9 w-9 rounded-full object-cover ring-2 ring-[#e5e7eb]"
-          />
-        ) : (
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#eff6ff] text-sm font-bold text-[#1d4ed8]">
-            {displayName.charAt(0)}
-          </div>
-        )}
+        <ProfileMenu
+          displayName={displayName}
+          email={userEmail ?? ""}
+          avatarUrl={userAvatar}
+          showExitDashboard
+        />
       </div>
     </header>
   );
@@ -184,12 +182,16 @@ function TopBar({
 function DesktopTopBar({
   role,
   userName,
+  userEmail,
   userSubtitle,
+  userAvatar,
   businessName,
 }: {
   role: EnterpriseRole;
   userName?: string;
+  userEmail?: string;
   userSubtitle?: string;
+  userAvatar?: string;
   businessName?: string;
 }) {
   const displayName = userName ?? "Account User";
@@ -213,9 +215,12 @@ function DesktopTopBar({
             <p className="text-xs text-[#6b7280]">{userSubtitle}</p>
           ) : null}
         </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#eff6ff] text-sm font-bold text-[#1d4ed8]">
-          {displayName.charAt(0)}
-        </div>
+        <ProfileMenu
+          displayName={displayName}
+          email={userEmail ?? ""}
+          avatarUrl={userAvatar}
+          showExitDashboard
+        />
       </div>
     </div>
   );
@@ -225,6 +230,7 @@ export function EnterpriseShell({
   role,
   children,
   userName,
+  userEmail,
   userSubtitle,
   userAvatar,
   businessName,
@@ -263,6 +269,7 @@ export function EnterpriseShell({
         <TopBar
           role={role}
           {...(userName ? { userName } : {})}
+          {...(userEmail ? { userEmail } : {})}
           {...(userSubtitle ? { userSubtitle } : {})}
           {...(userAvatar ? { userAvatar } : {})}
           {...(businessName ? { businessName } : {})}
@@ -271,7 +278,9 @@ export function EnterpriseShell({
         <DesktopTopBar
           role={role}
           {...(userName ? { userName } : {})}
+          {...(userEmail ? { userEmail } : {})}
           {...(userSubtitle ? { userSubtitle } : {})}
+          {...(userAvatar ? { userAvatar } : {})}
           {...(businessName ? { businessName } : {})}
         />
         <main className="min-w-0 flex-1">{children}</main>

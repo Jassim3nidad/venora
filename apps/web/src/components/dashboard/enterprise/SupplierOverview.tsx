@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   DashboardPage,
   DashButton,
@@ -82,7 +83,9 @@ export function SupplierOverview({
             </span>
           </p>
         </div>
-        <DashButton icon="add">Add Service</DashButton>
+        <DashButton href="/dashboard/supplier/services" icon="add">
+          Add Service
+        </DashButton>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -117,19 +120,19 @@ export function SupplierOverview({
           <PanelHeader title="Quick Actions" />
           <div className="grid gap-2">
             {[
-              "Add New Service",
-              "Review Inquiries",
-              "Update Availability",
-              "View Analytics",
+              { label: "Add New Service", href: "/dashboard/supplier/services" },
+              { label: "Review Inquiries", href: "/dashboard/supplier/inquiries" },
+              { label: "View Confirmed Bookings", href: "/dashboard/supplier/bookings" },
+              { label: "View Analytics", href: "/dashboard/supplier/analytics" },
             ].map((action) => (
-              <button
-                key={action}
-                type="button"
+              <Link
+                key={action.href}
+                href={action.href}
                 className="flex items-center justify-between rounded-xl border border-[#e5e7eb] px-4 py-3 text-left text-sm font-semibold text-[#111827] transition hover:border-[#1d4ed8] hover:bg-[#eff6ff] hover:text-[#1d4ed8]"
               >
-                {action}
+                {action.label}
                 <MaterialIcon name="chevron_right" />
-              </button>
+              </Link>
             ))}
           </div>
         </Panel>
@@ -139,14 +142,18 @@ export function SupplierOverview({
         <PanelHeader
           title="Service Packages"
           description="Packages available for venue partnerships and direct inquiries."
-          action={<DashButton variant="secondary">Add Package</DashButton>}
+          action={
+            <DashButton href="/dashboard/supplier/services" variant="secondary">
+              Manage Services
+            </DashButton>
+          }
         />
         {services.length === 0 ? (
           <EmptyState
             icon="inventory_2"
             title="No service packages yet"
             description="Create your first package to get discovered by venue owners."
-            action={<DashButton>Add Package</DashButton>}
+            action={<DashButton href="/dashboard/supplier/services">Add Package</DashButton>}
           />
         ) : (
           <div className="grid gap-4 md:grid-cols-3">

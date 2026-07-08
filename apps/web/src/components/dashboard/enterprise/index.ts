@@ -3,6 +3,11 @@ export { MaterialIcon } from "./MaterialIcon";
 export { VenueOwnerOverview } from "./VenueOwnerOverview";
 export type { VenueOwnerBooking, VenueOwnerOverviewProps } from "./VenueOwnerOverview";
 export { CoordinatorOverview } from "./CoordinatorOverview";
+export type {
+  CoordinatorOverviewProps,
+  CoordinatorEventRow,
+  CoordinatorVenueRow,
+} from "./CoordinatorOverview";
 export { SupplierOverview } from "./SupplierOverview";
 export type { SupplierOverviewProps } from "./SupplierOverview";
 export { AdminOverview } from "./AdminOverview";

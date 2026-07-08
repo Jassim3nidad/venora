@@ -2,71 +2,80 @@ import {
   DashboardPage,
   DashButton,
   DataTable,
+  EmptyState,
   KpiCard,
   Panel,
   PanelHeader,
   StatusBadge,
+  type DataTableColumn,
 } from "./ui";
 import { MaterialIcon } from "./MaterialIcon";
-import { getMarketplaceResearchVenues } from "@/src/features/venues/data/research-venues";
 
-const coordinatorVenues = getMarketplaceResearchVenues().slice(0, 3);
+export type CoordinatorEventRow = {
+  id: string;
+  eventName: string;
+  venue: string;
+  date: string;
+  guests: string;
+  status: string;
+};
 
-const UPCOMING_EVENTS = [
-  {
-    id: "1",
-    event: "Santos-Reyes Wedding",
-    venue: coordinatorVenues[0]?.name ?? "Venue",
-    date: "Feb 18, 2026",
-    status: "Final Coordination",
-  },
-  {
-    id: "2",
-    event: "Corporate Leadership Summit",
-    venue: coordinatorVenues[1]?.name ?? "Venue",
-    date: "Feb 24, 2026",
-    status: "Supplier Review",
-  },
-  {
-    id: "3",
-    event: "Debut Celebration",
-    venue: coordinatorVenues[2]?.name ?? "Venue",
-    date: "Mar 6, 2026",
-    status: "Pending Confirmation",
-  },
+export type CoordinatorVenueRow = {
+  id: string;
+  name: string;
+  eventCount: number;
+  status: string;
+};
+
+export type CoordinatorOverviewProps = {
+  coordinatorName: string;
+  organizationName?: string | null;
+  venueCount: number;
+  activeEventCount: number;
+  pendingEventCount: number;
+  completedEventCount: number;
+  upcomingEvents: CoordinatorEventRow[];
+  managedVenues: CoordinatorVenueRow[];
+};
+
+const QUICK_LINKS = [
+  { label: "Manage Events", href: "/dashboard/coordinator/events", icon: "celebration" },
+  { label: "Review Venues", href: "/dashboard/coordinator/venues", icon: "location_city" },
+  { label: "Find Suppliers", href: "/dashboard/coordinator/suppliers", icon: "storefront" },
+  { label: "View Reports", href: "/dashboard/coordinator/reports", icon: "assessment" },
 ];
 
-const CHECKLIST = [
-  "Confirm catering headcount",
-  "Finalize photo and video schedule",
-  "Review event styling package",
-  "Send updated event timeline",
-];
-
-const MANAGED_VENUES = coordinatorVenues.map((venue, index) => ({
-  name: venue.name,
-  events: [4, 2, 1][index] ?? 1,
-  status: index === 2 ? "pending" : "active",
-}));
-
-export function CoordinatorOverview() {
+export function CoordinatorOverview({
+  coordinatorName,
+  organizationName,
+  venueCount,
+  activeEventCount,
+  pendingEventCount,
+  completedEventCount,
+  upcomingEvents,
+  managedVenues,
+}: CoordinatorOverviewProps) {
   const kpis = [
-    { label: "Active Events", value: "14", icon: "celebration", highlight: true },
-    { label: "Pending Tasks", value: "32", icon: "checklist" },
-    { label: "Supplier Updates", value: "9", icon: "storefront" },
-    { label: "Client Messages", value: "18", icon: "mail" },
+    { label: "Active Events", value: String(activeEventCount), icon: "celebration", highlight: true },
+    { label: "Pending Requests", value: String(pendingEventCount), icon: "pending_actions" },
+    { label: "Completed Events", value: String(completedEventCount), icon: "task_alt" },
+    { label: "Venues Managed", value: String(venueCount), icon: "location_city" },
   ];
 
   return (
     <DashboardPage>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-semibold text-[#6b7280]">Event Coordinator</p>
+          <p className="text-sm font-semibold text-[#6b7280]">
+            {organizationName ?? "Event Coordinator"}
+          </p>
           <h1 className="font-display text-2xl font-bold text-[#111827] sm:text-3xl">
-            Coordination Hub
+            Welcome back, {coordinatorName}
           </h1>
         </div>
-        <DashButton icon="add">New Event</DashButton>
+        <DashButton href="/dashboard/coordinator/events" icon="celebration">
+          View Events
+        </DashButton>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -79,50 +88,59 @@ export function CoordinatorOverview() {
         <Panel padding={false} className="overflow-hidden">
           <div className="border-b border-[#e5e7eb] p-5 sm:p-6">
             <PanelHeader
-              title="Upcoming Coordinated Events"
-              description="Track event progress, venue coordination, and client status."
+              title="Upcoming Events"
+              description="Bookings across the venues your organization coordinates."
             />
           </div>
           <div className="p-5 sm:p-6">
-            <DataTable
-              rows={UPCOMING_EVENTS}
-              keyFn={(r) => r.id}
-              columns={[
-                {
-                  key: "event",
-                  header: "Event",
-                  cell: (r) => (
-                    <span className="font-semibold text-[#111827]">{r.event}</span>
-                  ),
-                },
-                { key: "venue", header: "Venue", cell: (r) => r.venue },
-                { key: "date", header: "Date", cell: (r) => r.date },
-                {
-                  key: "status",
-                  header: "Status",
-                  cell: (r) => <StatusBadge status="pending" label={r.status} />,
-                },
-              ]}
-            />
+            {upcomingEvents.length > 0 ? (
+              <DataTable
+                rows={upcomingEvents}
+                keyFn={(r) => r.id}
+                columns={[
+                  {
+                    key: "event",
+                    header: "Venue",
+                    cell: (r) => (
+                      <span className="font-semibold text-[#111827]">{r.venue}</span>
+                    ),
+                  },
+                  { key: "date", header: "Date", cell: (r) => r.date },
+                  { key: "guests", header: "Guests", cell: (r) => r.guests },
+                  {
+                    key: "status",
+                    header: "Status",
+                    cell: (r) => <StatusBadge status={r.status} />,
+                  },
+                ]}
+              />
+            ) : (
+              <p className="rounded-xl border border-dashed border-[#e5e7eb] px-6 py-10 text-center text-sm text-[#4b5563]">
+                No upcoming events yet. Events will appear here once your organization's venues receive bookings.
+              </p>
+            )}
           </div>
         </Panel>
 
         <Panel>
           <PanelHeader
-            title="Coordination Checklist"
-            description="High-priority tasks for today."
+            title="Quick Actions"
+            description="Jump straight into your coordination tools."
           />
-          <div className="space-y-3">
-            {CHECKLIST.map((task) => (
-              <div
-                key={task}
-                className="flex items-center gap-3 rounded-xl border border-[#e5e7eb] bg-[#f9fafb] p-3"
+          <div className="grid gap-2">
+            {QUICK_LINKS.map((link) => (
+              <DashButton
+                key={link.href}
+                href={link.href}
+                variant="secondary"
+                className="justify-between"
               >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#eff6ff] text-[#1d4ed8]">
-                  <MaterialIcon name="check_circle" className="text-lg" />
-                </div>
-                <p className="text-sm font-semibold text-[#111827]">{task}</p>
-              </div>
+                <span className="flex items-center gap-2">
+                  <MaterialIcon name={link.icon} className="text-lg" />
+                  {link.label}
+                </span>
+                <MaterialIcon name="chevron_right" />
+              </DashButton>
             ))}
           </div>
         </Panel>
@@ -132,27 +150,42 @@ export function CoordinatorOverview() {
         <PanelHeader
           title="Managed Venues"
           description="Venues under your coordination portfolio."
+          action={
+            <DashButton href="/dashboard/coordinator/venues" variant="secondary" icon="location_city">
+              View All
+            </DashButton>
+          }
         />
-        <div className="grid gap-4 md:grid-cols-3">
-          {MANAGED_VENUES.map((venue) => (
-            <div
-              key={venue.name}
-              className="rounded-xl border border-[#e5e7eb] bg-[#f9fafb] p-4"
-            >
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#eff6ff] text-[#1d4ed8]">
-                <MaterialIcon name="location_city" />
+        {managedVenues.length > 0 ? (
+          <div className="grid gap-4 md:grid-cols-3">
+            {managedVenues.slice(0, 3).map((venue) => (
+              <div
+                key={venue.id}
+                className="rounded-xl border border-[#e5e7eb] bg-[#f9fafb] p-4"
+              >
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-[#eff6ff] text-[#1d4ed8]">
+                  <MaterialIcon name="location_city" />
+                </div>
+                <p className="font-semibold text-[#111827]">{venue.name}</p>
+                <p className="mt-1 text-sm text-[#4b5563]">
+                  {venue.eventCount} active event{venue.eventCount !== 1 ? "s" : ""}
+                </p>
+                <div className="mt-3">
+                  <StatusBadge status={venue.status} />
+                </div>
               </div>
-              <p className="font-semibold text-[#111827]">{venue.name}</p>
-              <p className="mt-1 text-sm text-[#4b5563]">
-                {venue.events} active event{venue.events !== 1 ? "s" : ""}
-              </p>
-              <div className="mt-3">
-                <StatusBadge status={venue.status} />
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            icon="location_city"
+            title="No venues yet"
+            description="Ask your organization owner to add you as a coordinator on their venues."
+          />
+        )}
       </Panel>
     </DashboardPage>
   );
 }
+
+export type { DataTableColumn };
