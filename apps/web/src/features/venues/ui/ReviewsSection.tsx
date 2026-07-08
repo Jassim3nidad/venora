@@ -1,11 +1,15 @@
 "use client";
 
-import { Star, MessageSquare } from "lucide-react";
+import { Star, MessageSquare, ThumbsUp, Loader2 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@venora/ui";
 import { format } from "date-fns";
+import { useHelpfulVote } from "@/features/reviews/hooks/useHelpfulVote";
+import { ReportReviewDialog } from "@/features/reviews/ui/ReportReviewDialog";
+import { computeDimensionAverage } from "@/features/reviews/application/dimension-averages";
 
 interface Review {
   id: string;
+  customer_id?: string;
   overall_rating: number;
   venue_quality?: number;
   cleanliness?: number;
@@ -17,6 +21,9 @@ interface Review {
   comment?: string;
   created_at: string;
   owner_reply?: string;
+  owner_reply_at?: string;
+  helpful_count?: number;
+  review_photos?: { id: string; url: string; created_at: string }[];
   profiles?: {
     full_name: string;
     avatar_url: string | null;
@@ -27,19 +34,53 @@ interface ReviewsSectionProps {
   reviews: Review[];
   avgRating: number;
   reviewCount: number;
+  currentUserId?: string | null;
+}
+
+function HelpfulVoteButton({
+  reviewId,
+  initialCount,
+  isOwnReview,
+}: {
+  reviewId: string;
+  initialCount: number;
+  isOwnReview: boolean;
+}) {
+  const { voted, count, toggle, isPending, error } = useHelpfulVote(reviewId, initialCount);
+
+  if (isOwnReview) return null;
+
+  return (
+    <div className="flex flex-col gap-1">
+      <button
+        type="button"
+        disabled={isPending}
+        onClick={toggle}
+        className={`inline-flex items-center gap-1.5 text-xs font-semibold transition disabled:opacity-60 ${
+          voted ? "text-[var(--color-brand-500)]" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+        }`}
+      >
+        {isPending ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <ThumbsUp className={`h-3.5 w-3.5 ${voted ? "fill-current" : ""}`} />
+        )}
+        Helpful{count > 0 ? ` (${count})` : ""}
+      </button>
+      {error ? <span className="text-[11px] text-red-600">{error}</span> : null}
+    </div>
+  );
 }
 
 export default function ReviewsSection({
   reviews = [],
   avgRating,
   reviewCount,
+  currentUserId = null,
 }: ReviewsSectionProps) {
   // Dimension calculators
   const getDimensionAverage = (key: keyof Review) => {
-    const validReviews = reviews.filter((r) => typeof r[key] === "number" && (r[key] as number) > 0);
-    if (validReviews.length === 0) return 0;
-    const sum = validReviews.reduce((acc, r) => acc + (r[key] as number), 0);
-    return Number((sum / validReviews.length).toFixed(1));
+    return computeDimensionAverage(reviews.map((r) => r[key] as number | undefined));
   };
 
   const dimensions = [
@@ -151,6 +192,38 @@ export default function ReviewsSection({
                     </p>
                   )}
 
+                  {review.review_photos && review.review_photos.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+                      {review.review_photos.map((photo) => (
+                        <a
+                          key={photo.id}
+                          href={photo.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="aspect-square overflow-hidden rounded-lg border border-[var(--border-default)]"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={photo.url}
+                            alt="Review photo"
+                            className="h-full w-full object-cover transition hover:scale-105"
+                          />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <HelpfulVoteButton
+                      reviewId={review.id}
+                      initialCount={review.helpful_count ?? 0}
+                      isOwnReview={!!currentUserId && currentUserId === review.customer_id}
+                    />
+                    {currentUserId && currentUserId !== review.customer_id ? (
+                      <ReportReviewDialog reviewId={review.id} />
+                    ) : null}
+                  </div>
+
                   {/* Owner's reply */}
                   {review.owner_reply && (
                     <div className="bg-[var(--bg-subtle)] border-l-2 border-[var(--color-brand-500)] p-4 rounded-r-2xl space-y-2 ml-4">
@@ -158,6 +231,11 @@ export default function ReviewsSection({
                         <span className="text-xs font-semibold text-[var(--text-primary)]">
                           Response from host
                         </span>
+                        {review.owner_reply_at ? (
+                          <span className="text-[11px] text-[var(--text-muted)]">
+                            {format(new Date(review.owner_reply_at), "MMMM d, yyyy")}
+                          </span>
+                        ) : null}
                       </div>
                       <p className="text-xs text-[var(--text-secondary)] leading-relaxed italic">
                         "{review.owner_reply}"

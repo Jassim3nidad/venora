@@ -26,6 +26,7 @@ export const NAV_BY_ROLE: Record<EnterpriseRole, NavItem[]> = {
     { label: "Calendar", href: "/dashboard/calendar", icon: "event" },
     { label: "Packages", href: "/dashboard/packages", icon: "inventory_2" },
     { label: "Staff", href: "/dashboard/staff", icon: "groups" },
+    { label: "Reviews", href: "/dashboard/reviews", icon: "rate_review" },
     { label: "Analytics", href: "/dashboard/analytics", icon: "analytics" },
   ],
   coordinator: [
@@ -49,6 +50,7 @@ export const NAV_BY_ROLE: Record<EnterpriseRole, NavItem[]> = {
     { label: "Applications", href: "/admin/applications", icon: "how_to_reg" },
     { label: "Venues", href: "/admin/venues", icon: "location_city" },
     { label: "Suppliers", href: "/admin/suppliers", icon: "storefront" },
+    { label: "Reviews", href: "/admin/reviews", icon: "flag" },
     { label: "Users", href: "/admin/users", icon: "group" },
     { label: "Commissions", href: "/admin/commissions", icon: "payments" },
     { label: "Reports", href: "/admin/reports", icon: "assessment" },

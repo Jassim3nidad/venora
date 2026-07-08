@@ -11,6 +11,7 @@ import {
   toVenueDetailRecord,
   type ResearchVenue,
 } from "@/src/features/venues/data/research-venues";
+import { getPublishedVenueReviewsRaw } from "@/features/reviews/application/queries";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -109,22 +110,9 @@ export default async function VenueDetailPage({ params }: Props) {
 
   if (!venue) notFound();
 
-  const { data: reviews } = dbVenue
-    ? await supabase
-        .from("reviews")
-        .select(
-          `
-          *,
-          profiles(
-            full_name,
-            avatar_url
-          )
-        `,
-        )
-        .eq("venue_id", venue.id)
-        .eq("status", "published")
-        .order("created_at", { ascending: false })
-    : { data: getPublicResearchReviews() };
+  const reviews = dbVenue
+    ? await getPublishedVenueReviewsRaw(supabase, venue.id)
+    : getPublicResearchReviews();
 
   const nearbyVenues = datasetVenue
     ? getNearbyResearchVenueDetails(datasetVenue)

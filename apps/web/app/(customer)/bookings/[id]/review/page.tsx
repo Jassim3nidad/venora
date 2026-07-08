@@ -88,7 +88,7 @@ export default async function BookingReviewPage({ params }: Props) {
 
         <CustomerCard className="p-5 sm:p-6">
           {canReview ? (
-            <BookingReviewForm bookingId={booking.id} venueId={booking.venue_id} />
+            <BookingReviewForm bookingId={booking.id} venueId={booking.venue_id} userId={user.id} />
           ) : existingReview ? (
             <div className="grid gap-4">
               <div className="rounded-2xl border border-[#DBEAFE] bg-[#EFF6FF] p-5 text-[#1D4ED8]">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { CheckCircle2, CreditCard, Loader2, Star, XCircle } from "lucide-react";
 import {
   approveBookingAction,
@@ -12,6 +12,9 @@ import {
   submitBookingReviewAction,
 } from "../application/actions";
 import { CustomerButton } from "@/src/components/customer/CustomerUI";
+import { ReviewPhotoUploader } from "@/features/reviews/ui/ReviewPhotoUploader";
+import { attachReviewPhotosAction } from "@/features/reviews/application/actions";
+import type { UploadedPhoto } from "@/features/reviews/hooks/useReviewPhotoUpload";
 
 function ErrorMessage({ message }: { message: string | null }) {
   if (!message) return null;
@@ -258,13 +261,18 @@ export function OwnerCompleteBookingButton({ bookingId }: { bookingId: string })
 export function BookingReviewForm({
   bookingId,
   venueId,
+  userId,
 }: {
   bookingId: string;
   venueId: string;
+  userId: string;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<UploadedPhoto[]>([]);
+  // Temp folder id for photo uploads that happen before the review row exists.
+  const uploadFolderId = useMemo(() => crypto.randomUUID(), []);
 
   return (
     <form
@@ -292,6 +300,19 @@ export function BookingReviewForm({
             setError(result.error.message);
             return;
           }
+
+          if (photos.length > 0) {
+            const photoResult = await attachReviewPhotosAction({
+              reviewId: result.data.reviewId,
+              photos,
+            });
+            if (photoResult.error) {
+              // Review is already saved; surface the photo failure but don't block navigation.
+              setError(`Review submitted, but photos failed to attach: ${photoResult.error.message}`);
+              return;
+            }
+          }
+
           router.push(`/bookings/${bookingId}`);
           router.refresh();
         });
@@ -335,6 +356,8 @@ export function BookingReviewForm({
           className="min-h-32 resize-y rounded-2xl border border-[#E5E7EB] bg-white p-4 text-sm font-semibold leading-6 outline-none placeholder:text-slate-400 focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
         />
       </label>
+
+      <ReviewPhotoUploader folderId={uploadFolderId} userId={userId} onChange={setPhotos} />
 
       <ErrorMessage message={error} />
 

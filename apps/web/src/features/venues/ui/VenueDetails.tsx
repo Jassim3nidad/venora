@@ -363,6 +363,7 @@ export default function VenueDetails({
             reviews={reviews}
             avgRating={venue.avg_rating}
             reviewCount={venue.review_count}
+            currentUserId={currentUser?.id ?? null}
           />
         </div>
 

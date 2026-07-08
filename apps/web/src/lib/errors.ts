@@ -148,6 +148,38 @@ export class ReviewBookingNotCompletedError extends VenoraError {
   }
 }
 
+export class ReviewNotFoundError extends VenoraError {
+  readonly httpStatus = 404;
+
+  constructor() {
+    super("REVIEW_NOT_FOUND", "This review could not be found.");
+  }
+}
+
+export class PhotoLimitExceededError extends VenoraError {
+  readonly httpStatus = 400;
+
+  constructor(max = 5) {
+    super("PHOTO_LIMIT_EXCEEDED", `You can attach up to ${max} photos per review.`);
+  }
+}
+
+export class AlreadyFlaggedError extends VenoraError {
+  readonly httpStatus = 409;
+
+  constructor() {
+    super("ALREADY_FLAGGED", "You have already reported this review.");
+  }
+}
+
+export class ReviewReplyNotAllowedError extends VenoraError {
+  readonly httpStatus = 403;
+
+  constructor() {
+    super("REVIEW_REPLY_NOT_ALLOWED", "Only the venue owner can reply to this review.");
+  }
+}
+
 // ── User-facing message map ───────────────────────────────────
 
 export const ERROR_MESSAGES: Record<string, string> = {
@@ -160,6 +192,10 @@ export const ERROR_MESSAGES: Record<string, string> = {
   VENUE_NOT_APPROVED:            "This venue is not available for booking.",
   REVIEW_BOOKING_NOT_COMPLETED:  "You can review this venue once your event has taken place.",
   REVIEW_ALREADY_EXISTS:         "You've already submitted a review for this booking.",
+  REVIEW_NOT_FOUND:              "This review could not be found.",
+  PHOTO_LIMIT_EXCEEDED:          "You can attach up to 5 photos per review.",
+  ALREADY_FLAGGED:               "You've already reported this review.",
+  REVIEW_REPLY_NOT_ALLOWED:      "Only the venue owner can reply to this review.",
   PAYMENT_CAPTURE_FAILED:        "Payment could not be processed. Please try a different card or payment method.",
   REFUND_FAILED:                 "Refund could not be processed. Please contact our support team.",
   INTERNAL_ERROR:                "Something went wrong on our end. Our team has been notified.",
