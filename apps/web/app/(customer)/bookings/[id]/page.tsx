@@ -46,8 +46,6 @@ type BookingDetail = {
   total_amount: number | null;
   deposit_amount: number | null;
   special_requests: string | null;
-  approval_note: string | null;
-  decline_reason: string | null;
   payment_due_at: string | null;
   confirmed_at: string | null;
   completed_at: string | null;
@@ -106,6 +104,29 @@ function locationLabel(venue: BookingDetail["venues"]) {
   return venue.city || venue.province || "Location unavailable";
 }
 
+function getVenueResponse(booking: BookingDetail) {
+  const statusHistory = booking.booking_status_history ?? [];
+
+  const latestResponse = statusHistory
+    .filter((item) =>
+      [
+        "approved",
+        "confirmed",
+        "declined",
+        "cancelled",
+        "rejected",
+        "payment_pending",
+      ].includes(item.status),
+    )
+    .filter((item) => item.note)
+    .sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    )[0];
+
+  return latestResponse?.note ?? "Awaiting venue response.";
+}
+
 function nextAction(booking: BookingDetail) {
   if (booking.status === "approved" || booking.status === "payment_pending") {
     return (
@@ -148,6 +169,7 @@ function nextAction(booking: BookingDetail) {
 export default async function BookingDetailPage({ params }: Props) {
   const { id } = await params;
   const supabase = (await createClient()) as any;
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -169,8 +191,6 @@ export default async function BookingDetailPage({ params }: Props) {
       total_amount,
       deposit_amount,
       special_requests,
-      approval_note,
-      decline_reason,
       payment_due_at,
       confirmed_at,
       completed_at,
@@ -208,6 +228,7 @@ export default async function BookingDetailPage({ params }: Props) {
       )
     `)
     .eq("id", id)
+    .eq("customer_id", user.id)
     .single();
 
   if (error || !booking) {
@@ -215,7 +236,9 @@ export default async function BookingDetailPage({ params }: Props) {
   }
 
   const typedBooking = booking as BookingDetail;
-  const canCancel = ["pending", "approved", "payment_pending", "confirmed"].includes(typedBooking.status);
+  const canCancel = ["pending", "approved", "payment_pending", "confirmed"].includes(
+    typedBooking.status,
+  );
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#111827]">
@@ -244,16 +267,23 @@ export default async function BookingDetailPage({ params }: Props) {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
                   <CustomerStatusBadge icon={CalendarDays}>Event date</CustomerStatusBadge>
-                  <p className="mt-3 text-lg font-black text-slate-950">{formatDate(typedBooking.event_date)}</p>
+                  <p className="mt-3 text-lg font-black text-slate-950">
+                    {formatDate(typedBooking.event_date)}
+                  </p>
                   <p className="mt-1 text-sm font-semibold text-slate-500">
-                    {typedBooking.event_start_time || "Start time pending"} - {typedBooking.event_end_time || "End time pending"}
+                    {typedBooking.event_start_time || "Start time pending"} -{" "}
+                    {typedBooking.event_end_time || "End time pending"}
                   </p>
                 </div>
 
                 <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
                   <CustomerStatusBadge icon={MapPin}>Venue</CustomerStatusBadge>
-                  <p className="mt-3 text-lg font-black text-slate-950">{typedBooking.venues?.name ?? "Venue"}</p>
-                  <p className="mt-1 text-sm font-semibold text-slate-500">{locationLabel(typedBooking.venues)}</p>
+                  <p className="mt-3 text-lg font-black text-slate-950">
+                    {typedBooking.venues?.name ?? "Venue"}
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-slate-500">
+                    {locationLabel(typedBooking.venues)}
+                  </p>
                 </div>
 
                 <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
@@ -276,42 +306,65 @@ export default async function BookingDetailPage({ params }: Props) {
             </CustomerCard>
 
             <CustomerCard className="p-5 sm:p-6">
-              <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">Status timeline</h2>
+              <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">
+                Status timeline
+              </h2>
+
               <div className="mt-5 grid gap-0">
-                {(typedBooking.booking_status_history ?? []).map((item) => (
-                  <div key={`${item.status}-${item.created_at}`} className="flex gap-3 border-l border-[#DBEAFE] pb-5 last:border-transparent last:pb-0">
-                    <span className="-ml-[13px] flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#2563EB] text-white">
-                      <Clock3 className="h-3.5 w-3.5" />
-                    </span>
-                    <div>
-                      <p className="text-sm font-black capitalize text-slate-950">
-                        {item.status.replace(/_/g, " ")}
-                      </p>
-                      <p className="mt-1 text-xs font-semibold text-slate-500">
-                        {formatDate(item.created_at)}
-                      </p>
-                      {item.note ? (
-                        <p className="mt-2 text-sm font-medium text-slate-600">{item.note}</p>
-                      ) : null}
+                {(typedBooking.booking_status_history ?? []).length > 0 ? (
+                  typedBooking.booking_status_history?.map((item) => (
+                    <div
+                      key={`${item.status}-${item.created_at}`}
+                      className="flex gap-3 border-l border-[#DBEAFE] pb-5 last:border-transparent last:pb-0"
+                    >
+                      <span className="-ml-[13px] flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#2563EB] text-white">
+                        <Clock3 className="h-3.5 w-3.5" />
+                      </span>
+
+                      <div>
+                        <p className="text-sm font-black capitalize text-slate-950">
+                          {item.status.replace(/_/g, " ")}
+                        </p>
+                        <p className="mt-1 text-xs font-semibold text-slate-500">
+                          {formatDate(item.created_at)}
+                        </p>
+                        {item.note ? (
+                          <p className="mt-2 text-sm font-medium text-slate-600">
+                            {item.note}
+                          </p>
+                        ) : null}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="rounded-2xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-semibold text-slate-500">
+                    No status updates yet.
+                  </p>
+                )}
               </div>
             </CustomerCard>
 
             <CustomerCard className="p-5 sm:p-6">
-              <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">Notes</h2>
+              <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">
+                Notes
+              </h2>
+
               <div className="mt-4 grid gap-3">
                 <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
-                  <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">Your inquiry</p>
+                  <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
+                    Your inquiry
+                  </p>
                   <p className="mt-2 text-sm font-medium leading-6 text-slate-600">
                     {typedBooking.special_requests || "No notes added."}
                   </p>
                 </div>
+
                 <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
-                  <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">Venue response</p>
+                  <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
+                    Venue response
+                  </p>
                   <p className="mt-2 text-sm font-medium leading-6 text-slate-600">
-                    {typedBooking.approval_note || typedBooking.decline_reason || "Awaiting venue response."}
+                    {getVenueResponse(typedBooking)}
                   </p>
                 </div>
               </div>
@@ -320,27 +373,41 @@ export default async function BookingDetailPage({ params }: Props) {
 
           <aside className="grid gap-4 lg:sticky lg:top-24">
             <CustomerCard className="p-5 sm:p-6">
-              <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">Next step</h2>
+              <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">
+                Next step
+              </h2>
+
               <div className="mt-4 grid gap-3">
                 {nextAction(typedBooking)}
-                {canCancel ? <CustomerCancelBookingButton bookingId={typedBooking.id} /> : null}
+                {canCancel ? (
+                  <CustomerCancelBookingButton bookingId={typedBooking.id} />
+                ) : null}
               </div>
             </CustomerCard>
 
             <CustomerCard className="p-5 sm:p-6">
-              <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">Transactions</h2>
+              <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">
+                Transactions
+              </h2>
+
               <div className="mt-4 grid gap-3">
                 {(typedBooking.transactions ?? []).length > 0 ? (
                   typedBooking.transactions?.map((transaction) => (
-                    <div key={transaction.id} className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
+                    <div
+                      key={transaction.id}
+                      className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4"
+                    >
                       <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm font-black text-slate-950">{formatCurrency(transaction.amount)}</p>
+                        <p className="text-sm font-black text-slate-950">
+                          {formatCurrency(transaction.amount)}
+                        </p>
                         <span className="rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1 text-xs font-extrabold uppercase tracking-[0.08em] text-[#2563EB]">
                           {transaction.status}
                         </span>
                       </div>
                       <p className="mt-2 text-xs font-semibold text-slate-500">
-                        {transaction.payment_provider.toUpperCase()} - {formatDate(transaction.paid_at ?? transaction.created_at)}
+                        {transaction.payment_provider.toUpperCase()} -{" "}
+                        {formatDate(transaction.paid_at ?? transaction.created_at)}
                       </p>
                     </div>
                   ))

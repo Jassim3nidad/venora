@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/src/lib/supabase/server";
 
@@ -29,6 +30,52 @@ function apiError(code: string, message: string, status: number, details?: unkno
   );
 }
 
+async function canManageBooking(supabase: any, bookingId: string) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return false;
+
+  const { data: booking } = await supabase
+    .from("bookings")
+    .select("id, status, venues(organization_id)")
+    .eq("id", bookingId)
+    .maybeSingle();
+
+  if (!booking) return false;
+
+  const { data: roles } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", user.id);
+
+  if ((roles ?? []).some((row: { role: string }) => row.role === "admin")) {
+    return booking;
+  }
+
+  const organizationId = booking.venues?.organization_id;
+  if (!organizationId) return false;
+
+  const { data: membership } = await supabase
+    .from("organization_members")
+    .select("organization_id")
+    .eq("user_id", user.id)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  return membership ? booking : false;
+}
+
+function revalidateBookingViews(bookingId: string) {
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/venue-owner");
+  revalidatePath("/dashboard/bookings");
+  revalidatePath(`/dashboard/bookings/${bookingId}`);
+  revalidatePath("/bookings");
+  revalidatePath(`/bookings/${bookingId}`);
+}
+
 export async function PATCH(
   request: NextRequest,
   context: { params: Promise<{ id: string }> },
@@ -51,17 +98,48 @@ export async function PATCH(
     let result;
 
     if (input.action === "approve") {
-      result = await supabase.rpc("approve_booking_quote", {
-        p_booking_id: id,
-        p_total_amount: input.totalAmount,
-        p_deposit_amount: input.depositAmount,
-        p_note: input.note?.trim() || null,
-      });
+      const booking = await canManageBooking(supabase, id);
+      if (!booking) return apiError("FORBIDDEN", "You cannot manage this booking.", 403);
+      if (booking.status !== "pending") {
+        return apiError("VALIDATION_ERROR", "Only pending bookings can be approved.", 400);
+      }
+
+      const paymentDueAt = new Date();
+      paymentDueAt.setDate(paymentDueAt.getDate() + 7);
+
+      result = await supabase
+        .from("bookings")
+        .update({
+          status: "approved",
+          total_amount: input.totalAmount,
+          deposit_amount: input.depositAmount,
+          approval_note: input.note?.trim() || null,
+          decline_reason: null,
+          approved_at: new Date().toISOString(),
+          payment_due_at: paymentDueAt.toISOString(),
+        })
+        .eq("id", id)
+        .eq("status", "pending")
+        .select("id, status")
+        .single();
     } else if (input.action === "decline") {
-      result = await supabase.rpc("decline_booking_request", {
-        p_booking_id: id,
-        p_reason: input.reason,
-      });
+      const booking = await canManageBooking(supabase, id);
+      if (!booking) return apiError("FORBIDDEN", "You cannot manage this booking.", 403);
+      if (booking.status !== "pending") {
+        return apiError("VALIDATION_ERROR", "Only pending bookings can be declined.", 400);
+      }
+
+      result = await supabase
+        .from("bookings")
+        .update({
+          status: "declined",
+          decline_reason: input.reason.trim(),
+          approval_note: null,
+        })
+        .eq("id", id)
+        .eq("status", "pending")
+        .select("id, status")
+        .single();
     } else if (input.action === "cancel") {
       result = await supabase.rpc("cancel_booking_request", {
         p_booking_id: id,
@@ -76,6 +154,8 @@ export async function PATCH(
     if (result.error) {
       return apiError("BOOKING_ACTION_FAILED", result.error.message, 400);
     }
+
+    revalidateBookingViews(id);
 
     return NextResponse.json({
       data: {

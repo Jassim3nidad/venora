@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   ArrowUpDown,
   BadgeCheck,
+  BriefcaseBusiness,
   Clock3,
   MapPin,
   Search,
@@ -47,32 +48,36 @@ function SupplierCard({ supplier }: { supplier: SupplierMarketplaceProfile }) {
   const topAreas = supplier.serviceAreas.slice(0, 3);
 
   return (
-    <article className="group flex h-full overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-[#2563EB]/40 hover:shadow-lg">
-      <Link href={`/suppliers/${supplier.slug}`} className="flex min-w-0 flex-1 flex-col">
-        <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
+    <article className="group flex h-full overflow-hidden rounded-[28px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70 transition duration-300 hover:-translate-y-1 hover:border-[#BFDBFE] hover:shadow-xl hover:shadow-slate-200/80">
+      <Link
+        href={`/suppliers/${supplier.slug}`}
+        className="flex min-w-0 flex-1 flex-col"
+      >
+        <div className="relative aspect-[4/3] overflow-hidden bg-[#EFF6FF]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={image}
-            alt=""
+            alt={supplier.businessName}
             className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
             loading="lazy"
           />
-          <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-2.5 py-1 text-xs font-bold text-emerald-700 shadow-sm">
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#111827]/55 to-transparent" />
+          <div className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-extrabold text-emerald-700 shadow-sm">
             <BadgeCheck className="h-3.5 w-3.5" />
             Accredited
           </div>
           {supplier.isFeatured ? (
-            <div className="absolute right-3 top-3 rounded-full bg-[#111827]/85 px-2.5 py-1 text-xs font-bold text-white">
+            <div className="absolute right-4 top-4 rounded-full bg-[#111827]/85 px-3 py-1.5 text-xs font-extrabold text-white">
               Featured
             </div>
           ) : null}
         </div>
 
-        <div className="flex flex-1 flex-col gap-4 p-4">
+        <div className="flex flex-1 flex-col gap-5 p-5">
           <div>
-            <div className="mb-2 flex flex-wrap items-center gap-2">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
               {supplier.category ? (
-                <span className="rounded-full bg-[#EFF6FF] px-2.5 py-1 text-xs font-bold text-[#1D4ED8]">
+                <span className="rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1 text-xs font-extrabold text-[#1D4ED8]">
                   {supplier.category.name}
                 </span>
               ) : null}
@@ -82,17 +87,17 @@ function SupplierCard({ supplier }: { supplier: SupplierMarketplaceProfile }) {
               </span>
             </div>
 
-            <h2 className="text-lg font-black leading-6 tracking-tight text-slate-950">
+            <h2 className="text-xl font-black leading-6 tracking-[-0.03em] text-[#111827] transition group-hover:text-[#1D4ED8]">
               {supplier.businessName}
             </h2>
             {supplier.headline ? (
-              <p className="mt-2 line-clamp-2 text-sm font-medium leading-6 text-slate-600">
+              <p className="mt-2 line-clamp-2 text-sm font-medium leading-6 text-[#6B7280]">
                 {supplier.headline}
               </p>
             ) : null}
           </div>
 
-          <div className="grid gap-2 text-sm text-slate-600">
+          <div className="grid gap-2.5 text-sm text-[#6B7280]">
             <div className="flex min-w-0 items-start gap-2">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB]" />
               <span className="min-w-0 truncate font-semibold">
@@ -107,9 +112,9 @@ function SupplierCard({ supplier }: { supplier: SupplierMarketplaceProfile }) {
             </div>
           </div>
 
-          <div className="mt-auto flex items-end justify-between gap-3 border-t border-slate-100 pt-4">
+          <div className="mt-auto flex items-end justify-between gap-3 border-t border-[#E5E7EB] pt-4">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.08em] text-slate-400">
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">
                 Starts at
               </p>
               <p className="text-lg font-black text-slate-950">
@@ -121,8 +126,8 @@ function SupplierCard({ supplier }: { supplier: SupplierMarketplaceProfile }) {
                 </p>
               ) : null}
             </div>
-            <span className="rounded-lg border border-[#DBEAFE] px-3 py-2 text-xs font-black uppercase tracking-[0.08em] text-[#1D4ED8] transition group-hover:bg-[#EFF6FF]">
-              View
+            <span className="inline-flex h-11 items-center justify-center rounded-2xl bg-[#2563EB] px-4 text-xs font-black uppercase tracking-[0.08em] text-white shadow-sm shadow-[#2563EB]/20 transition group-hover:bg-[#1D4ED8]">
+              View Details
             </span>
           </div>
         </div>
@@ -221,8 +226,36 @@ export function SuppliersMarketplaceClient({
 
   return (
     <main className="min-h-[calc(100dvh-4rem)] bg-[#F8FAFC]">
-      <div className="mx-auto grid w-full max-w-[1540px] gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[300px_minmax(0,1fr)] lg:px-8">
-        <aside className="self-start rounded-lg border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-24">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <section className="overflow-hidden rounded-[28px] border border-[#E5E7EB] bg-white p-5 shadow-sm shadow-slate-200/70 sm:p-7">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="min-w-0">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#2563EB]">
+                <BriefcaseBusiness className="h-3.5 w-3.5" />
+                Supplier marketplace
+              </div>
+              <h1 className="max-w-3xl text-3xl font-black leading-9 tracking-[-0.04em] text-[#111827] sm:text-4xl sm:leading-tight">
+                Find trusted event suppliers
+              </h1>
+              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-[#6B7280] sm:text-base">
+                Browse photographers, caterers, stylists, hosts, production teams,
+                and other accredited suppliers for your event.
+              </p>
+            </div>
+
+            <div className="grid gap-2 rounded-2xl border border-[#DBEAFE] bg-[#EFF6FF] px-4 py-3 text-[#1D4ED8]">
+              <span className="text-[11px] font-extrabold uppercase tracking-[0.14em]">
+                Available suppliers
+              </span>
+              <span className="text-2xl font-black tracking-[-0.04em]">
+                {filteredSuppliers.length}
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <div className="grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
+        <aside className="self-start rounded-[28px] border border-[#E5E7EB] bg-white p-5 shadow-sm shadow-slate-200/70 lg:sticky lg:top-24">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <SlidersHorizontal className="h-4 w-4 text-[#2563EB]" />
@@ -251,7 +284,7 @@ export function SuppliersMarketplaceClient({
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Name, service, style"
-                  className="h-11 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm font-semibold outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                  className="h-12 w-full rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] pl-10 pr-3 text-sm font-semibold outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
                 />
               </span>
             </label>
@@ -261,7 +294,7 @@ export function SuppliersMarketplaceClient({
               <select
                 value={category}
                 onChange={(event) => setCategory(event.target.value)}
-                className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                className="h-12 rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
               >
                 <option value="all">All categories</option>
                 {categories.map((item) => (
@@ -277,7 +310,7 @@ export function SuppliersMarketplaceClient({
               <select
                 value={location}
                 onChange={(event) => setLocation(event.target.value)}
-                className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                className="h-12 rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
               >
                 <option value="">Any location</option>
                 {locations.map((item) => (
@@ -297,7 +330,7 @@ export function SuppliersMarketplaceClient({
                 value={maxPrice}
                 onChange={(event) => setMaxPrice(event.target.value)}
                 placeholder="PHP budget"
-                className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                className="h-12 rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
               />
             </label>
 
@@ -306,7 +339,7 @@ export function SuppliersMarketplaceClient({
               <select
                 value={minRating}
                 onChange={(event) => setMinRating(event.target.value)}
-                className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                className="h-12 rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
               >
                 <option value="0">Any rating</option>
                 <option value="4.5">4.5 and up</option>
@@ -318,22 +351,18 @@ export function SuppliersMarketplaceClient({
         </aside>
 
         <section className="min-w-0">
-          <div className="mb-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="mb-6 rounded-[28px] border border-[#E5E7EB] bg-white p-5 shadow-sm shadow-slate-200/70 sm:p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div className="min-w-0">
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1 text-xs font-black uppercase tracking-[0.12em] text-[#1D4ED8]">
-                  <BadgeCheck className="h-3.5 w-3.5" />
-                  Supplier marketplace
-                </div>
-                <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-                  Event Suppliers
-                </h1>
-                <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-600 sm:text-base">
+                <p className="text-sm font-extrabold text-[#111827]">
+                  Supplier results
+                </p>
+                <p className="mt-1 max-w-2xl text-sm font-medium leading-6 text-[#6B7280]">
                   {filteredSuppliers.length} supplier{filteredSuppliers.length === 1 ? "" : "s"} found across catering, photo, styling, production, and coordination.
                 </p>
               </div>
 
-              <label className="grid min-w-[220px] gap-1.5">
+              <label className="grid w-full gap-1.5 sm:w-[240px]">
                 <span className="flex items-center gap-2 text-xs font-bold text-slate-500">
                   <ArrowUpDown className="h-3.5 w-3.5" />
                   Sort
@@ -341,7 +370,7 @@ export function SuppliersMarketplaceClient({
                 <select
                   value={sort}
                   onChange={(event) => setSort(event.target.value as SortValue)}
-                  className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                  className="h-12 rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-3 text-sm font-bold text-slate-700 outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
                 >
                   <option value="recommended">Recommended</option>
                   <option value="rating">Highest rated</option>
@@ -353,11 +382,14 @@ export function SuppliersMarketplaceClient({
           </div>
 
           {filteredSuppliers.length === 0 ? (
-            <div className="flex min-h-[360px] flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white px-6 py-12 text-center shadow-sm">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[#EFF6FF] text-[#2563EB]">
-                <Search className="h-5 w-5" />
+            <div className="flex min-h-[360px] flex-col items-center justify-center rounded-[28px] border border-dashed border-[#BFDBFE] bg-white px-6 py-12 text-center shadow-sm shadow-slate-200/70">
+              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB]">
+                <Search className="h-6 w-6" />
               </div>
-              <h2 className="text-lg font-black text-slate-950">
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
+                No matches
+              </p>
+              <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-slate-950">
                 No suppliers match those filters
               </h2>
               <p className="mt-2 max-w-md text-sm font-medium leading-6 text-slate-500">
@@ -366,7 +398,7 @@ export function SuppliersMarketplaceClient({
               <button
                 type="button"
                 onClick={clearFilters}
-                className="mt-5 rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-black text-white shadow-sm transition hover:bg-[#1D4ED8]"
+                className="mt-6 inline-flex h-12 items-center justify-center rounded-2xl bg-[#2563EB] px-5 text-sm font-extrabold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8]"
               >
                 Clear filters
               </button>
@@ -379,6 +411,7 @@ export function SuppliersMarketplaceClient({
             </div>
           )}
         </section>
+        </div>
       </div>
     </main>
   );

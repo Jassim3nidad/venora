@@ -76,6 +76,81 @@ function normalizeOptionalString(value?: string | null) {
   return trimmed.length > 0 ? trimmed : null;
 }
 
+async function assertCanManageBooking(
+  supabase: any,
+  bookingId: string,
+): Promise<{
+  booking: {
+    id: string;
+    status: string;
+    venues: { organization_id: string } | null;
+  };
+}> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new UnauthorizedError("You must be signed in to manage bookings.");
+  }
+
+  const { data: booking, error: bookingError } = await supabase
+    .from("bookings")
+    .select("id, status, venues(organization_id)")
+    .eq("id", bookingId)
+    .maybeSingle();
+
+  throwIfSupabaseError(bookingError);
+
+  if (!booking) {
+    throw new ValidationError("Booking not found.");
+  }
+
+  const { data: roleRows, error: rolesError } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", user.id);
+
+  throwIfSupabaseError(rolesError);
+
+  const isAdmin = (roleRows ?? []).some(
+    (row: { role: string }) => row.role === "admin",
+  );
+
+  if (isAdmin) {
+    return { booking };
+  }
+
+  const organizationId = booking.venues?.organization_id;
+  if (!organizationId) {
+    throw new ForbiddenError("You do not have permission to manage this booking.");
+  }
+
+  const { data: membership, error: membershipError } = await supabase
+    .from("organization_members")
+    .select("organization_id")
+    .eq("user_id", user.id)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  throwIfSupabaseError(membershipError);
+
+  if (!membership) {
+    throw new ForbiddenError("You do not have permission to manage this booking.");
+  }
+
+  return { booking };
+}
+
+function revalidateBookingViews(bookingId: string) {
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/venue-owner");
+  revalidatePath("/dashboard/bookings");
+  revalidatePath(`/dashboard/bookings/${bookingId}`);
+  revalidatePath("/bookings");
+  revalidatePath(`/bookings/${bookingId}`);
+}
+
 export async function createBookingAction(rawInput: unknown) {
   return createServerAction(createBookingSchema, async (input) => {
     const supabase = (await createClient()) as any;
@@ -208,21 +283,34 @@ export async function createBookingAction(rawInput: unknown) {
 export async function approveBookingAction(rawInput: unknown) {
   return createServerAction(approveBookingSchema, async (input) => {
     const supabase = (await createClient()) as any;
-    const { data, error } = await supabase.rpc("approve_booking_quote", {
-      p_booking_id: input.bookingId,
-      p_total_amount: input.totalAmount,
-      p_deposit_amount: input.depositAmount,
-      p_note: normalizeOptionalString(input.note),
-    });
+    const { booking } = await assertCanManageBooking(supabase, input.bookingId);
+
+    if (booking.status !== "pending") {
+      throw new ValidationError("Only pending bookings can be approved.");
+    }
+
+    const paymentDueAt = new Date();
+    paymentDueAt.setDate(paymentDueAt.getDate() + 7);
+
+    const { data, error } = await supabase
+      .from("bookings")
+      .update({
+        status: "approved",
+        total_amount: input.totalAmount,
+        deposit_amount: input.depositAmount,
+        approval_note: normalizeOptionalString(input.note),
+        decline_reason: null,
+        approved_at: new Date().toISOString(),
+        payment_due_at: paymentDueAt.toISOString(),
+      })
+      .eq("id", input.bookingId)
+      .eq("status", "pending")
+      .select("id, status, total_amount, deposit_amount, payment_due_at")
+      .single();
 
     throwIfSupabaseError(error);
 
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/venue-owner");
-    revalidatePath("/dashboard/bookings");
-    revalidatePath(`/dashboard/bookings/${input.bookingId}`);
-    revalidatePath("/bookings");
-    revalidatePath(`/bookings/${input.bookingId}`);
+    revalidateBookingViews(input.bookingId);
 
     return {
       bookingId: data.id as string,
@@ -237,19 +325,27 @@ export async function approveBookingAction(rawInput: unknown) {
 export async function declineBookingAction(rawInput: unknown) {
   return createServerAction(declineBookingSchema, async (input) => {
     const supabase = (await createClient()) as any;
-    const { data, error } = await supabase.rpc("decline_booking_request", {
-      p_booking_id: input.bookingId,
-      p_reason: input.reason,
-    });
+    const { booking } = await assertCanManageBooking(supabase, input.bookingId);
+
+    if (booking.status !== "pending") {
+      throw new ValidationError("Only pending bookings can be declined.");
+    }
+
+    const { data, error } = await supabase
+      .from("bookings")
+      .update({
+        status: "declined",
+        decline_reason: normalizeOptionalString(input.reason),
+        approval_note: null,
+      })
+      .eq("id", input.bookingId)
+      .eq("status", "pending")
+      .select("id, status")
+      .single();
 
     throwIfSupabaseError(error);
 
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/venue-owner");
-    revalidatePath("/dashboard/bookings");
-    revalidatePath(`/dashboard/bookings/${input.bookingId}`);
-    revalidatePath("/bookings");
-    revalidatePath(`/bookings/${input.bookingId}`);
+    revalidateBookingViews(input.bookingId);
 
     return {
       bookingId: data.id as string,

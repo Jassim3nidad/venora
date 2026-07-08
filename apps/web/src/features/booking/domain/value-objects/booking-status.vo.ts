@@ -32,8 +32,8 @@ export const BOOKING_STATUS_LABEL: Record<BookingStatusValue, string> = {
 
 export const BOOKING_STATUS_COLOR: Record<BookingStatusValue, string> = {
   pending:         "hsl(45 96% 42%)",
-  approved:        "hsl(217 91% 48%)",
-  payment_pending: "hsl(24 95% 45%)",
+  approved:        "hsl(142 71% 35%)",
+  payment_pending: "hsl(142 71% 35%)",
   confirmed:       "hsl(142 71% 35%)",
   declined:        "hsl(0 72% 42%)",
   cancelled:       "hsl(0 72% 42%)",
@@ -44,8 +44,8 @@ export const BOOKING_STATUS_COLOR: Record<BookingStatusValue, string> = {
 
 export const BOOKING_STATUS_BG: Record<BookingStatusValue, string> = {
   pending:         "hsl(45 96% 54% / 0.14)",
-  approved:        "hsl(217 91% 60% / 0.14)",
-  payment_pending: "hsl(24 95% 53% / 0.14)",
+  approved:        "hsl(142 71% 45% / 0.14)",
+  payment_pending: "hsl(142 71% 45% / 0.14)",
   confirmed:       "hsl(142 71% 45% / 0.14)",
   declined:        "hsl(0 72% 51% / 0.12)",
   cancelled:       "hsl(0 72% 51% / 0.12)",
