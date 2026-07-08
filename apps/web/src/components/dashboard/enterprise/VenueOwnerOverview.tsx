@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 import { MaterialIcon } from "./MaterialIcon";
 import {
   DashboardPage,
@@ -40,16 +38,6 @@ export type VenueOwnerOverviewProps = {
   revenueTrend: RevenueTrendPoint[];
 };
 
-function Toast({ show, message }: { show: boolean; message: string }) {
-  if (!show) return null;
-  return (
-    <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-[#111827] px-4 py-3 text-sm font-semibold text-white shadow-lg">
-      <MaterialIcon name="check_circle" className="text-lg text-emerald-400" />
-      {message}
-    </div>
-  );
-}
-
 export function VenueOwnerOverview({
   userName,
   businessName,
@@ -62,35 +50,8 @@ export function VenueOwnerOverview({
   bookings: initialBookings,
   revenueTrend,
 }: VenueOwnerOverviewProps) {
-  const [requests, setRequests] = useState(initialBookings);
-  const [loadingId, setLoadingId] = useState<string | null>(null);
-  const [toast, setToast] = useState(false);
-  const supabase = createClient();
-
-  const handleAction = async (id: string, status: "approved" | "declined") => {
-    setLoadingId(id);
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any)
-        .from("bookings")
-        .update({ status })
-        .eq("id", id)
-        .select("id");
-      if (error) throw error;
-
-      setRequests((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, status } : r)),
-      );
-      if (status === "approved") {
-        setToast(true);
-        setTimeout(() => setToast(false), 3000);
-      }
-    } catch {
-      // keep UI responsive on failure
-    } finally {
-      setLoadingId(null);
-    }
-  };
+  // We no longer need local state here because actions are handled
+  // by server actions on the detailed booking page.
 
   const kpis = [
     {
@@ -146,14 +107,14 @@ export function VenueOwnerOverview({
               description="Review and respond to incoming reservation requests."
               action={
                 <span className="rounded-full bg-[#eff6ff] px-3 py-1 text-xs font-bold text-[#1d4ed8]">
-                  {requests.filter((r) => r.status === "pending").length} pending
+                  {initialBookings.filter((r) => r.status === "pending").length} pending
                 </span>
               }
             />
           </div>
           <div className="p-5 sm:p-6">
             <DataTable
-              rows={requests}
+              rows={initialBookings}
               keyFn={(r) => r.id}
               emptyMessage="No booking requests yet."
               columns={[
@@ -207,22 +168,18 @@ export function VenueOwnerOverview({
                   cell: (r) =>
                     r.status === "pending" ? (
                       <div className="flex gap-2">
-                        <button
-                          type="button"
-                          disabled={loadingId === r.id}
-                          onClick={() => handleAction(r.id, "approved")}
-                          className="rounded-lg bg-[#1d4ed8] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#1e40af] disabled:opacity-50"
+                        <Link
+                          href={`/dashboard/bookings/${r.id}`}
+                          className="rounded-lg bg-[#1d4ed8] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#1e40af]"
                         >
                           Accept
-                        </button>
-                        <button
-                          type="button"
-                          disabled={loadingId === r.id}
-                          onClick={() => handleAction(r.id, "declined")}
-                          className="rounded-lg border border-[#e5e7eb] px-3 py-1.5 text-xs font-bold text-[#4b5563] hover:border-red-300 hover:text-red-700 disabled:opacity-50"
+                        </Link>
+                        <Link
+                          href={`/dashboard/bookings/${r.id}`}
+                          className="rounded-lg border border-[#e5e7eb] px-3 py-1.5 text-xs font-bold text-[#4b5563] hover:border-red-300 hover:text-red-700"
                         >
                           Decline
-                        </button>
+                        </Link>
                       </div>
                     ) : (
                       <span className="text-xs text-[#6b7280]">-</span>
@@ -280,8 +237,6 @@ export function VenueOwnerOverview({
           </Panel>
         </div>
       </div>
-
-      <Toast show={toast} message="Booking accepted successfully!" />
     </DashboardPage>
   );
 }
