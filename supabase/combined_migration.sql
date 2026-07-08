@@ -1,4 +1,4 @@
-﻿-- ============================================================
+-- ============================================================
 -- Migration 001 â€” PostgreSQL Extensions
 -- ============================================================
 
@@ -275,6 +275,9 @@ RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.organization_members
     WHERE organization_id = org_id AND user_id = auth.uid()
+  ) OR EXISTS (
+    SELECT 1 FROM public.organizations
+    WHERE id = org_id AND owner_id = auth.uid()
   );
 $$;
 
