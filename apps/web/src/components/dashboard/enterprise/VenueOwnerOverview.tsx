@@ -304,10 +304,7 @@ export function VenueOwnerOverview({
               title="Performance Trend"
               description="Revenue from confirmed bookings"
             />
-            <RevenueTrendChart
-              data={revenueTrend}
-              valueFormatter={(value) => `₱${value.toLocaleString()}`}
-            />
+            <RevenueTrendChart data={revenueTrend} format="currency" />
           </Panel>
         </div>
       </div>
