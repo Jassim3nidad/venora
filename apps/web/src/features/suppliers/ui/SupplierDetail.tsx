@@ -16,6 +16,7 @@ import {
   Users,
 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
+import type { CustomerBookingOption } from "../application/get-customer-bookings-for-contact";
 import type { SupplierMarketplaceProfile } from "../types/supplier.types";
 import {
   getSupplierHeroImage,
@@ -28,10 +29,13 @@ import {
   formatSupplierPrice,
 } from "../utils/supplier-format";
 import { SupplierContactForm } from "./SupplierContactForm";
+import { SupplierFavoriteButton } from "./SupplierFavoriteButton";
 
 type SupplierDetailProps = {
   supplier: SupplierMarketplaceProfile;
   currentUser: User | null;
+  bookings?: CustomerBookingOption[];
+  isFavorited?: boolean;
 };
 
 function InfoCard({

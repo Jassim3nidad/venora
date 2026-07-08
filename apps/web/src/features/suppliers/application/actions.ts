@@ -15,6 +15,7 @@ import {
   supplierPackageSchema,
   supplierPortfolioSchema,
   supplierProfileSchema,
+  toggleSupplierFavoriteSchema,
 } from "../schemas/supplier.schema";
 
 function normalizeOptionalString(value?: string | null) {
@@ -259,6 +260,47 @@ export async function createSupplierContactRequestAction(rawInput: unknown) {
       throw new NotFoundError("Supplier");
     }
 
+    let eventDate = normalizeOptionalString(input.eventDate);
+    let eventLocation = normalizeOptionalString(input.eventLocation);
+    let guestCount = normalizeOptionalNumber(input.guestCount);
+
+    if (input.bookingId) {
+      const { data: booking, error: bookingError } = await supabase
+        .from("bookings")
+        .select(
+          `
+            id,
+            event_date,
+            guest_count,
+            venues(name, city, province)
+          `,
+        )
+        .eq("id", input.bookingId)
+        .eq("customer_id", user.id)
+        .maybeSingle();
+
+      throwIfSupabaseError(bookingError);
+
+      if (!booking) {
+        throw new ValidationError("Select one of your existing bookings.");
+      }
+
+      const venue = booking.venues as
+        | { name?: string | null; city?: string | null; province?: string | null }
+        | null;
+      const venueName = venue?.name ?? "Venue booking";
+      const locationParts = [venue?.city, venue?.province].filter(Boolean);
+      const locationSuffix =
+        locationParts.length > 0 ? locationParts.join(", ") : "Location unavailable";
+
+      eventLocation = `${venueName} — ${locationSuffix}`;
+      eventDate = booking.event_date ?? eventDate;
+      guestCount =
+        typeof booking.guest_count === "number"
+          ? booking.guest_count
+          : guestCount;
+    }
+
     const { data, error } = await supabase
       .from("supplier_contact_requests")
       .insert({
@@ -268,9 +310,9 @@ export async function createSupplierContactRequestAction(rawInput: unknown) {
         contact_name: input.contactName,
         contact_email: input.contactEmail,
         contact_phone: normalizeOptionalString(input.contactPhone),
-        event_date: normalizeOptionalString(input.eventDate),
-        event_location: normalizeOptionalString(input.eventLocation),
-        guest_count: normalizeOptionalNumber(input.guestCount),
+        event_date: eventDate,
+        event_location: eventLocation,
+        guest_count: guestCount,
         message: input.message,
       })
       .select("id, status")
@@ -286,5 +328,43 @@ export async function createSupplierContactRequestAction(rawInput: unknown) {
       requestId: data.id as string,
       status: data.status as string,
     };
+  }, rawInput);
+}
+
+export async function toggleSupplierFavoriteAction(rawInput: unknown) {
+  return createServerAction(toggleSupplierFavoriteSchema, async ({ supplierId }) => {
+    const { supabase, user } = await requireUser();
+
+    const { data: existing } = await supabase
+      .from("supplier_favorites")
+      .select("customer_id")
+      .eq("customer_id", user.id)
+      .eq("supplier_id", supplierId)
+      .maybeSingle();
+
+    if (existing) {
+      const { error } = await supabase
+        .from("supplier_favorites")
+        .delete()
+        .eq("customer_id", user.id)
+        .eq("supplier_id", supplierId);
+
+      throwIfSupabaseError(error);
+      revalidatePath("/favorites");
+      revalidatePath("/suppliers");
+
+      return { isFavorited: false };
+    }
+
+    const { error } = await supabase.from("supplier_favorites").insert({
+      customer_id: user.id,
+      supplier_id: supplierId,
+    });
+
+    throwIfSupabaseError(error);
+    revalidatePath("/favorites");
+    revalidatePath("/suppliers");
+
+    return { isFavorited: true };
   }, rawInput);
 }

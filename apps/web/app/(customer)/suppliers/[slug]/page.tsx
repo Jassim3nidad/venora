@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { CustomerNavbar } from "@/components/layout/CustomerNavbar";
 import { createClient } from "@/lib/supabase/server";
+import { getCustomerBookingsForContact } from "@/features/suppliers/application/get-customer-bookings-for-contact";
+import { isSupplierFavoritedByUser } from "@/features/suppliers/application/get-favorite-suppliers";
 import { getPublicSupplierBySlug } from "@/features/suppliers/application/queries";
 import { SupplierDetail } from "@/features/suppliers/ui/SupplierDetail";
 
@@ -43,18 +44,19 @@ export default async function SupplierDetailPage({
 
   if (!supplier) notFound();
 
-  const { data: profile } = user
-    ? await supabase
-        .from("profiles")
-        .select("full_name, avatar_url")
-        .eq("id", user.id)
-        .maybeSingle()
-    : { data: null };
+  const [bookings, isFavorited] = user
+    ? await Promise.all([
+        getCustomerBookingsForContact(user.id),
+        isSupplierFavoritedByUser(supabase, user.id, supplier.id),
+      ])
+    : [[], false];
 
   return (
-    <div className="min-h-dvh bg-[#F8FAFC] text-slate-950">
-      <CustomerNavbar user={user} profile={profile} />
-      <SupplierDetail supplier={supplier} currentUser={user} />
-    </div>
+    <SupplierDetail
+      supplier={supplier}
+      currentUser={user}
+      bookings={bookings}
+      isFavorited={isFavorited}
+    />
   );
 }

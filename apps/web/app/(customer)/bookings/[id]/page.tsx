@@ -12,7 +12,6 @@ import {
   TicketCheck,
   Users,
 } from "lucide-react";
-import { CustomerNavbar } from "@/components/layout/CustomerNavbar";
 import {
   CustomerCard,
   CustomerLinkButton,
@@ -20,7 +19,6 @@ import {
   CustomerStatusBadge,
 } from "@/src/components/customer/CustomerUI";
 import { createClient } from "@/lib/supabase/server";
-import { getNavbarProfile } from "@/lib/get-navbar-profile";
 import { BookingStatusBadge } from "@/src/features/booking/ui/booking-status-badge";
 import { CustomerCancelBookingButton } from "@/src/features/booking/ui/booking-action-controls";
 import type { BookingStatusValue } from "@/src/features/booking/domain/value-objects/booking-status.vo";
@@ -176,8 +174,6 @@ export default async function BookingDetailPage({ params }: Props) {
 
   if (!user) redirect(`/login?redirectTo=/bookings/${id}`);
 
-  const profile = await getNavbarProfile(supabase, user.id);
-
   const { data: booking, error } = await supabase
     .from("bookings")
     .select(`
@@ -241,10 +237,8 @@ export default async function BookingDetailPage({ params }: Props) {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#111827]">
-      <CustomerNavbar user={user} profile={profile} />
-
-      <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <div className="bg-[#F8FAFC] text-[#111827]">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <Link
           href="/bookings"
           className="inline-flex w-fit items-center gap-2 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-bold text-[#6B7280] shadow-sm transition hover:border-[#2563EB]/50 hover:bg-[#EFF6FF] hover:text-[#2563EB]"
@@ -364,7 +358,11 @@ export default async function BookingDetailPage({ params }: Props) {
                     Venue response
                   </p>
                   <p className="mt-2 text-sm font-medium leading-6 text-slate-600">
+<<<<<<< HEAD
                     {getVenueResponse(typedBooking)}
+=======
+                    {"Awaiting venue response."}
+>>>>>>> cbca123740ebff7d69ce03050282ff94e0f1e776
                   </p>
                 </div>
               </div>
@@ -420,7 +418,7 @@ export default async function BookingDetailPage({ params }: Props) {
             </CustomerCard>
           </aside>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

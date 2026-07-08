@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, CalendarDays, CheckCircle2, Clock3, CreditCard, MapPin, TicketCheck } from "lucide-react";
-import { CustomerNavbar } from "@/components/layout/CustomerNavbar";
 import {
   CustomerCard,
   CustomerLinkButton,
@@ -10,7 +9,6 @@ import {
   CustomerStatusBadge,
 } from "@/src/components/customer/CustomerUI";
 import { createClient } from "@/lib/supabase/server";
-import { getNavbarProfile } from "@/lib/get-navbar-profile";
 import { BookingStatusBadge } from "@/src/features/booking/ui/booking-status-badge";
 import type { BookingStatusValue } from "@/src/features/booking/domain/value-objects/booking-status.vo";
 
@@ -55,8 +53,6 @@ export default async function BookingConfirmationPage({ params }: Props) {
 
   if (!user) redirect(`/login?redirectTo=/bookings/${id}/confirmation`);
 
-  const profile = await getNavbarProfile(supabase, user.id);
-
   const { data: booking } = await supabase
     .from("bookings")
     .select(`
@@ -99,10 +95,8 @@ export default async function BookingConfirmationPage({ params }: Props) {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#111827]">
-      <CustomerNavbar user={user} profile={profile} />
-
-      <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <div className="bg-[#F8FAFC] text-[#111827]">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <Link
           href={`/bookings/${id}`}
           className="inline-flex w-fit items-center gap-2 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-bold text-[#6B7280] shadow-sm transition hover:border-[#2563EB]/50 hover:bg-[#EFF6FF] hover:text-[#2563EB]"
@@ -174,7 +168,7 @@ export default async function BookingConfirmationPage({ params }: Props) {
             ) : null}
           </div>
         </CustomerCard>
-      </main>
+      </div>
     </div>
   );
 }

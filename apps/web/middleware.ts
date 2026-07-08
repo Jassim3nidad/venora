@@ -127,7 +127,7 @@ function defaultRouteForRoles(roles: UserRole[]) {
   if (roles.includes("venue_owner")) return "/dashboard/venue-owner";
   if (roles.includes("event_coordinator")) return "/dashboard/event-coordinator";
   if (roles.includes("supplier")) return "/dashboard/supplier";
-  return "/venues";
+  return "/";
 }
 
 function redirectWithCookies(url: URL | string, sourceResponse: NextResponse) {
@@ -201,7 +201,7 @@ export async function middleware(request: NextRequest) {
     isVenueBookingPath;
 
   if (pathname === "/dashboard/customer") {
-    return redirectWithCookies(new URL("/venues", request.url), supabaseResponse);
+    return redirectWithCookies(new URL("/", request.url), supabaseResponse);
   }
 
   // 1. Auth guard — redirect unauthenticated users

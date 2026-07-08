@@ -17,6 +17,7 @@ export {
 } from "../utils/supplier-derive";
 
 type VenoraSupabase = any;
+export type { VenoraSupabase };
 
 const SUPPLIER_PROFILE_SELECT = `
   id,

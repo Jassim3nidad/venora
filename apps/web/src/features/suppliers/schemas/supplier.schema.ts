@@ -139,6 +139,7 @@ export const supplierPortfolioSchema = z.object({
 export const supplierContactRequestSchema = z.object({
   supplierId: z.string().uuid(),
   serviceId: z.string().uuid().optional(),
+  bookingId: z.string().uuid().optional(),
   contactName: z.string().trim().min(2, "Name is required").max(120),
   contactEmail: z.string().trim().email("Enter a valid email"),
   contactPhone: optionalPhone,
@@ -150,6 +151,10 @@ export const supplierContactRequestSchema = z.object({
     "Guest count must be greater than zero",
   ),
   message: z.string().trim().min(10, "Message must be at least 10 characters").max(1500),
+});
+
+export const toggleSupplierFavoriteSchema = z.object({
+  supplierId: z.string().uuid(),
 });
 
 export type SupplierSearchInput = z.infer<typeof supplierSearchSchema>;

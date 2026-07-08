@@ -1,4 +1,3 @@
-import { CustomerNavbar } from "@/components/layout/CustomerNavbar";
 import { createClient } from "@/lib/supabase/server";
 import VenuesClient from "@/src/features/venues/ui/VenuesClient";
 import {
@@ -6,6 +5,7 @@ import {
   toMarketplaceVenue,
   type ResearchVenue,
 } from "@/src/features/venues/data/research-venues";
+import { searchMarketplaceVenues, type VenueSearchParams } from "@/src/features/venues/application/queries";
 
 export interface Venue {
   id: string | number;
@@ -125,20 +125,37 @@ function toLiveMarketplaceVenue(
   };
 }
 
-export default async function VenuesMarketplacePage() {
+export default async function VenuesMarketplacePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const supabase = await createClient();
+  const params = await searchParams;
 
-  const { data: dbVenues, error } = await (supabase.from("venues") as any)
-    .select(
-      `
-      *,
-      venue_images(storage_path, is_featured, display_order),
-      venue_category_assignments(venue_categories(name, slug)),
-      venue_event_types(event_types(name, slug)),
-      venue_amenities(amenities(name))
-    `,
-    )
-    .order("created_at", { ascending: false });
+  const filters: VenueSearchParams = {
+    q: params.q as string | undefined,
+    province: params.province as string | undefined,
+    city: params.city as string | undefined,
+    municipality: params.municipality as string | undefined,
+    location: params.location as string | undefined,
+    event: params.event as string | undefined,
+    budget: params.budget as string | undefined,
+    minBudget: params.minBudget as string | undefined,
+    maxBudget: params.maxBudget as string | undefined,
+    capacity: params.capacity as string | undefined,
+    indoorOutdoor: params.indoorOutdoor as string | undefined,
+  };
+
+  if (params.venueTypes) {
+    filters.venueTypes = String(params.venueTypes).split(',');
+  }
+
+  if (params.amenities) {
+    filters.amenities = String(params.amenities).split(',');
+  }
+
+  const { data: dbVenues, error } = await searchMarketplaceVenues(supabase, filters);
 
   if (error) {
     console.error("[venues/page] Supabase fetch error:", error.message);
@@ -149,8 +166,6 @@ export default async function VenuesMarketplacePage() {
   } = await supabase.auth.getUser();
 
   let favoriteVenueIds = new Set<string>();
-  let profile: { full_name: string | null; avatar_url: string | null } | null =
-    null;
 
   if (user) {
     const { data: favoriteRows, error: favoritesError } = await (
@@ -169,12 +184,6 @@ export default async function VenuesMarketplacePage() {
         (favoriteRows ?? []).map((row: any) => String(row.venue_id)),
       );
     }
-
-    const { data: profileRow } = await (supabase.from("profiles") as any)
-      .select("full_name, avatar_url")
-      .eq("id", user.id)
-      .maybeSingle();
-    profile = profileRow ?? null;
   }
 
   const researchVenueById = new Map(
@@ -202,9 +211,7 @@ export default async function VenuesMarketplacePage() {
       : researchVenues.map((venue) => toMarketplaceVenue(venue, favoriteVenueIds));
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[#F9FAFB] text-[#111827]">
-      <CustomerNavbar user={user} profile={profile} />
-
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-[#F9FAFB] text-[#111827]">
       <div className="flex min-h-0 w-full flex-1 overflow-hidden">
         <VenuesClient
           initialVenues={venues}

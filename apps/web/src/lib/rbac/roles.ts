@@ -59,6 +59,7 @@ export const PROTECTED_ROUTES: { prefix: string; allow: RoleName[] }[] = [
   { prefix: "/dashboard/bookings",  allow: [ROLES.VENUE_OWNER, ROLES.EVENT_COORDINATOR, ROLES.ADMIN] },
   // analytics is accessible to suppliers too (read-only earnings view)
   { prefix: "/dashboard/analytics", allow: [ROLES.VENUE_OWNER, ROLES.EVENT_COORDINATOR, ROLES.SUPPLIER, ROLES.ADMIN] },
+  { prefix: "/dashboard/reviews",   allow: [ROLES.VENUE_OWNER, ROLES.EVENT_COORDINATOR, ROLES.ADMIN] },
 
   // ── Generic venue-owner dashboard root ────────────────────────────────────
   {
@@ -82,5 +83,5 @@ export function defaultRouteForRoles(roles: RoleName[]): string {
   if (roles.includes(ROLES.VENUE_OWNER))       return "/dashboard/venue-owner";
   if (roles.includes(ROLES.EVENT_COORDINATOR)) return "/dashboard/event-coordinator";
   if (roles.includes(ROLES.SUPPLIER))          return "/dashboard/supplier";
-  return "/venues";
+  return "/";
 }

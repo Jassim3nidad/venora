@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import {
   CalendarDays,
@@ -11,6 +12,7 @@ import {
   Users,
 } from "lucide-react";
 import { createSupplierContactRequestAction } from "../application/actions";
+import type { CustomerBookingOption } from "../application/get-customer-bookings-for-contact";
 import type {
   SupplierMarketplaceProfile,
   SupplierPackage,
@@ -20,6 +22,7 @@ import { formatPriceUnit, formatSupplierPrice } from "../utils/supplier-format";
 type SupplierContactFormProps = {
   supplier: SupplierMarketplaceProfile;
   userEmail?: string | null;
+  bookings?: CustomerBookingOption[];
 };
 
 function packageLabel(pkg: SupplierPackage) {
@@ -31,11 +34,15 @@ function packageLabel(pkg: SupplierPackage) {
 export function SupplierContactForm({
   supplier,
   userEmail,
+  bookings = [],
 }: SupplierContactFormProps) {
   const [isPending, startTransition] = useTransition();
   const [selectedPackageId, setSelectedPackageId] = useState(
     supplier.packages.find((pkg) => pkg.isActive)?.id ?? "",
   );
+  const [selectedBookingId, setSelectedBookingId] = useState("");
+  const [eventDate, setEventDate] = useState("");
+  const [guestCount, setGuestCount] = useState("");
   const [status, setStatus] = useState<{
     type: "success" | "error";
     message: string;
@@ -44,6 +51,23 @@ export function SupplierContactForm({
     () => supplier.packages.filter((pkg) => pkg.isActive),
     [supplier.packages],
   );
+  const hasBookings = bookings.length > 0;
+
+  const handleBookingChange = (bookingId: string) => {
+    setSelectedBookingId(bookingId);
+
+    const booking = bookings.find((item) => item.id === bookingId);
+    if (!booking) {
+      setEventDate("");
+      setGuestCount("");
+      return;
+    }
+
+    setEventDate(booking.eventDate ?? "");
+    setGuestCount(
+      typeof booking.guestCount === "number" ? String(booking.guestCount) : "",
+    );
+  };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -52,12 +76,12 @@ export function SupplierContactForm({
     const payload = {
       supplierId: supplier.id,
       serviceId: selectedPackageId || undefined,
+      bookingId: selectedBookingId || undefined,
       contactName: String(formData.get("contactName") ?? ""),
       contactEmail: String(formData.get("contactEmail") ?? ""),
       contactPhone: String(formData.get("contactPhone") ?? ""),
-      eventDate: String(formData.get("eventDate") ?? ""),
-      eventLocation: String(formData.get("eventLocation") ?? ""),
-      guestCount: Number(formData.get("guestCount") || 0) || undefined,
+      eventDate,
+      guestCount: Number(guestCount) || undefined,
       message: String(formData.get("message") ?? ""),
     };
 
@@ -70,6 +94,9 @@ export function SupplierContactForm({
 
       form.reset();
       setSelectedPackageId(activePackages[0]?.id ?? "");
+      setSelectedBookingId("");
+      setEventDate("");
+      setGuestCount("");
       setStatus({
         type: "success",
         message:
@@ -162,6 +189,42 @@ export function SupplierContactForm({
             </span>
           </label>
         </div>
+
+        <label className="grid gap-1.5">
+          <span className="text-xs font-bold text-slate-500">Event location</span>
+          {hasBookings ? (
+            <span className="relative">
+              <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <select
+                name="bookingId"
+                required
+                value={selectedBookingId}
+                onChange={(event) => handleBookingChange(event.target.value)}
+                className="h-11 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+              >
+                <option value="">Select one of your bookings</option>
+                {bookings.map((booking) => (
+                  <option key={booking.id} value={booking.id}>
+                    {booking.label}
+                  </option>
+                ))}
+              </select>
+            </span>
+          ) : (
+            <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-4">
+              <p className="text-sm font-semibold leading-6 text-slate-600">
+                You need an existing venue booking before you can link an event
+                location to this inquiry.
+              </p>
+              <Link
+                href="/venues"
+                className="mt-3 inline-flex text-sm font-black text-[#2563EB] transition hover:text-[#1D4ED8]"
+              >
+                Browse venues to book first
+              </Link>
+            </div>
+          )}
+        </label>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="grid gap-1.5">

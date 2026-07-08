@@ -34,12 +34,40 @@ type CustomerNavbarProfile = {
   avatar_url?: string | null;
 };
 
+type NavLink = {
+  label: string;
+  href: string;
+  icon?: typeof Search;
+  mobileOnly?: boolean;
+};
+
+const primaryNavLinks: NavLink[] = [
+  { label: "Browse", href: "/venues" },
+  { label: "Suppliers", href: "/suppliers" },
+  { label: "Bookings", href: "/bookings" },
+  { label: "Favorites", href: "/favorites" },
+];
+
+const mobileNavLinks: NavLink[] = [
+  { label: "Browse", href: "/venues", icon: Search, mobileOnly: true },
+  { label: "Suppliers", href: "/suppliers", icon: Store, mobileOnly: true },
+  {
+    label: "Bookings",
+    href: "/bookings",
+    icon: CalendarDays,
+    mobileOnly: true,
+  },
+  { label: "Favorites", href: "/favorites", icon: Heart, mobileOnly: true },
+];
+
 export function CustomerNavbar({
   user,
   profile,
+  variant = "full",
 }: {
   user?: { email?: string | null } | null;
   profile?: CustomerNavbarProfile | null;
+  variant?: "full" | "subnav";
 }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -50,52 +78,35 @@ export function CustomerNavbar({
     profile?.full_name || user?.email?.split("@")[0] || "Venora User";
   const email = user?.email ?? "";
 
-  const navLinks = user
-    ? [
-        { label: "Browse", href: "/venues" },
-        { label: "Suppliers", href: "/suppliers" },
-        { label: "Bookings", href: "/bookings" },
-        { label: "Favorites", href: "/favorites" },
-      ]
-    : [
-        { label: "Browse", href: "/venues" },
-        { label: "Suppliers", href: "/suppliers" },
-      ];
+  if (variant === "subnav") {
+    return (
+      <header className="shrink-0 border-b border-[#E5E7EB]/80 bg-white/95 backdrop-blur-xl">
+        <nav
+          aria-label="Marketplace navigation"
+          className="mx-auto flex w-full max-w-[1600px] overflow-x-auto px-2 sm:px-4 lg:px-8"
+        >
+          {primaryNavLinks.map((item) => {
+            const active = isActive(pathname, item.href);
 
-  const menuLinks = user
-    ? [
-        { label: "Browse", href: "/venues", icon: Search, mobileOnly: true },
-        {
-          label: "Suppliers",
-          href: "/suppliers",
-          icon: Store,
-          mobileOnly: true,
-        },
-        {
-          label: "Bookings",
-          href: "/bookings",
-          icon: CalendarDays,
-          mobileOnly: true,
-        },
-        {
-          label: "Favorites",
-          href: "/favorites",
-          icon: Heart,
-          mobileOnly: true,
-        },
-        { label: "Account", href: "/account", icon: UserRound },
-        { label: "Logout", href: "/logout", icon: LogOut },
-      ]
-    : [
-        { label: "Browse", href: "/venues", icon: Search, mobileOnly: true },
-        {
-          label: "Suppliers",
-          href: "/suppliers",
-          icon: Store,
-          mobileOnly: true,
-        },
-        { label: "Sign In", href: "/login", icon: Search },
-      ];
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={[
+                  "min-w-[5.5rem] flex-1 whitespace-nowrap border-b-2 px-3 py-3 text-center text-sm font-bold transition sm:px-4 sm:py-3.5",
+                  active
+                    ? "border-[#2563EB] bg-[#EFF6FF]/60 text-[#1D4ED8]"
+                    : "border-transparent text-[#6B7280] hover:border-[#BFDBFE] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
+                ].join(" ")}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+      </header>
+    );
+  }
 
   return (
     <header className="sticky top-0 z-50 shrink-0 border-b border-[#E5E7EB]/80 bg-white/85 backdrop-blur-xl">
@@ -122,7 +133,7 @@ export function CustomerNavbar({
           className="absolute left-1/2 hidden -translate-x-1/2 justify-center md:flex"
         >
           <div className="inline-flex items-center gap-1 rounded-full border border-[#E5E7EB]/90 bg-white/90 p-1">
-            {navLinks.map((item) => {
+            {primaryNavLinks.map((item) => {
               const active = isActive(pathname, item.href);
 
               return (
@@ -197,8 +208,8 @@ export function CustomerNavbar({
                 className="absolute right-0 mt-2 w-64 overflow-hidden rounded-[26px] border border-[#E5E7EB] bg-white p-3 shadow-lg shadow-slate-200/70"
               >
                 <div className="grid gap-1">
-                  {menuLinks.map((item) => {
-                    const Icon = item.icon;
+                  {mobileNavLinks.map((item) => {
+                    const Icon = item.icon ?? Search;
                     const active = isActive(pathname, item.href);
                     const itemClassName = [
                       "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold transition",
