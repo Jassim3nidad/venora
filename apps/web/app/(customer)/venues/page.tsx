@@ -6,6 +6,7 @@ import {
   toMarketplaceVenue,
   type ResearchVenue,
 } from "@/src/features/venues/data/research-venues";
+import { searchMarketplaceVenues, type VenueSearchParams } from "@/src/features/venues/application/queries";
 
 export interface Venue {
   id: string | number;
@@ -125,20 +126,31 @@ function toLiveMarketplaceVenue(
   };
 }
 
-export default async function VenuesMarketplacePage() {
+export default async function VenuesMarketplacePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const supabase = await createClient();
+  const params = await searchParams;
 
-  const { data: dbVenues, error } = await (supabase.from("venues") as any)
-    .select(
-      `
-      *,
-      venue_images(storage_path, is_featured, display_order),
-      venue_category_assignments(venue_categories(name, slug)),
-      venue_event_types(event_types(name, slug)),
-      venue_amenities(amenities(name))
-    `,
-    )
-    .order("created_at", { ascending: false });
+  const filters: VenueSearchParams = {
+    q: params.q as string,
+    province: params.province as string,
+    city: params.city as string,
+    municipality: params.municipality as string,
+    location: params.location as string,
+    event: params.event as string,
+    budget: params.budget as string,
+    minBudget: params.minBudget as string,
+    maxBudget: params.maxBudget as string,
+    capacity: params.capacity as string,
+    venueTypes: params.venueTypes ? String(params.venueTypes).split(',') : undefined,
+    indoorOutdoor: params.indoorOutdoor as string,
+    amenities: params.amenities ? String(params.amenities).split(',') : undefined,
+  };
+
+  const { data: dbVenues, error } = await searchMarketplaceVenues(supabase, filters);
 
   if (error) {
     console.error("[venues/page] Supabase fetch error:", error.message);
