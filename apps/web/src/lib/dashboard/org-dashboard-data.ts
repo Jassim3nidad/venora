@@ -38,9 +38,15 @@ export async function getOwnerDashboardContext(): Promise<OwnerDashboardContext>
     .from("organization_members")
     .select("organization_id")
     .eq("user_id", user.id);
-  const orgIds = (members ?? []).map(
-    (member: { organization_id: string }) => member.organization_id,
-  );
+  const memberOrgs = (members ?? []).map((m: { organization_id: string }) => m.organization_id);
+
+  const { data: owned } = await supabase
+    .from("organizations")
+    .select("id")
+    .eq("owner_id", user.id);
+  const ownedOrgs = (owned ?? []).map((o: { id: string }) => o.id);
+
+  const orgIds = Array.from(new Set([...memberOrgs, ...ownedOrgs]));
 
   return {
     supabase,

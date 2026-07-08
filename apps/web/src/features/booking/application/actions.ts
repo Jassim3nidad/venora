@@ -317,7 +317,7 @@ export async function approveBookingAction(rawInput: unknown) {
       status: data.status as string,
       totalAmount: Number(data.total_amount ?? 0),
       depositAmount: Number(data.deposit_amount ?? 0),
-      paymentDueAt: data.payment_due_at as string | null,
+      paymentDueAt: null,
     };
   }, rawInput);
 }
