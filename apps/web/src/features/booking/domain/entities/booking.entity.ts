@@ -30,8 +30,7 @@ export interface BookingProps {
   totalAmount: number | null;
   depositAmount: number | null;
   specialRequests: string | null;
-  approvalNote: string | null;
-  declineReason: string | null;
+
   createdAt: Date;
   updatedAt: Date;
   approvedAt: Date | null;
@@ -76,8 +75,7 @@ export class BookingEntity {
   get totalAmount(): number | null        { return this.props.totalAmount; }
   get depositAmount(): number | null      { return this.props.depositAmount; }
   get specialRequests(): string | null    { return this.props.specialRequests; }
-  get approvalNote(): string | null       { return this.props.approvalNote; }
-  get declineReason(): string | null      { return this.props.declineReason; }
+
   get createdAt(): Date                   { return this.props.createdAt; }
   get updatedAt(): Date                   { return this.props.updatedAt; }
   get approvedAt(): Date | null           { return this.props.approvedAt; }
@@ -168,7 +166,6 @@ export class BookingEntity {
     return new BookingEntity({
       ...this.props,
       status: "declined",
-      declineReason: reason,
       updatedAt: new Date(),
     });
   }

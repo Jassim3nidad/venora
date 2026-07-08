@@ -71,7 +71,8 @@ export function VenueOwnerOverview({
       const { error } = await (supabase as any)
         .from("bookings")
         .update({ status })
-        .eq("id", id);
+        .eq("id", id)
+        .select("id");
       if (error) throw error;
 
       setRequests((prev) =>

@@ -208,12 +208,19 @@ export async function createBookingAction(rawInput: unknown) {
 export async function approveBookingAction(rawInput: unknown) {
   return createServerAction(approveBookingSchema, async (input) => {
     const supabase = (await createClient()) as any;
-    const { data, error } = await supabase.rpc("approve_booking_quote", {
-      p_booking_id: input.bookingId,
-      p_total_amount: input.totalAmount,
-      p_deposit_amount: input.depositAmount,
-      p_note: normalizeOptionalString(input.note),
-    });
+    const { data, error } = await supabase
+      .from("bookings")
+      .update({
+        status: "approved",
+        total_amount: input.totalAmount,
+        deposit_amount: input.depositAmount,
+        approved_at: new Date().toISOString(),
+        payment_due_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", input.bookingId)
+      .select("id, status, total_amount, deposit_amount, payment_due_at")
+      .single();
 
     throwIfSupabaseError(error);
 
@@ -234,10 +241,15 @@ export async function approveBookingAction(rawInput: unknown) {
 export async function declineBookingAction(rawInput: unknown) {
   return createServerAction(declineBookingSchema, async (input) => {
     const supabase = (await createClient()) as any;
-    const { data, error } = await supabase.rpc("decline_booking_request", {
-      p_booking_id: input.bookingId,
-      p_reason: input.reason,
-    });
+    const { data, error } = await supabase
+      .from("bookings")
+      .update({
+        status: "declined",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", input.bookingId)
+      .select("id, status")
+      .single();
 
     throwIfSupabaseError(error);
 

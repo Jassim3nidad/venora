@@ -51,17 +51,29 @@ export async function PATCH(
     let result;
 
     if (input.action === "approve") {
-      result = await supabase.rpc("approve_booking_quote", {
-        p_booking_id: id,
-        p_total_amount: input.totalAmount,
-        p_deposit_amount: input.depositAmount,
-        p_note: input.note?.trim() || null,
-      });
+      result = await supabase
+        .from("bookings")
+        .update({
+          status: "approved",
+          total_amount: input.totalAmount,
+          deposit_amount: input.depositAmount,
+          approved_at: new Date().toISOString(),
+          payment_due_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id)
+        .select("id, status")
+        .single();
     } else if (input.action === "decline") {
-      result = await supabase.rpc("decline_booking_request", {
-        p_booking_id: id,
-        p_reason: input.reason,
-      });
+      result = await supabase
+        .from("bookings")
+        .update({
+          status: "declined",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id)
+        .select("id, status")
+        .single();
     } else if (input.action === "cancel") {
       result = await supabase.rpc("cancel_booking_request", {
         p_booking_id: id,
