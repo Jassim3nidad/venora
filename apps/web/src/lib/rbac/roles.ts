@@ -60,6 +60,7 @@ export const PROTECTED_ROUTES: { prefix: string; allow: RoleName[] }[] = [
   // analytics is accessible to suppliers too (read-only earnings view)
   { prefix: "/dashboard/analytics", allow: [ROLES.VENUE_OWNER, ROLES.EVENT_COORDINATOR, ROLES.SUPPLIER, ROLES.ADMIN] },
   { prefix: "/dashboard/reviews",   allow: [ROLES.VENUE_OWNER, ROLES.EVENT_COORDINATOR, ROLES.ADMIN] },
+  { prefix: "/dashboard/customer",  allow: [ROLES.CUSTOMER, ROLES.ADMIN] },
 
   // ── Generic venue-owner dashboard root ────────────────────────────────────
   {
