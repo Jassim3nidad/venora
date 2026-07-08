@@ -1,5 +1,13 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/src/lib/supabase/server";
+import { formatCurrency } from "@venora/lib";
+import { createClient } from "@/lib/supabase/server";
+import {
+  getSupplierDashboardContext as getMarketplaceSupplierDashboardContext,
+} from "@/features/suppliers/application/queries";
+import type {
+  SupplierCategory,
+  SupplierMarketplaceProfile,
+} from "@/features/suppliers/types/supplier.types";
 
 export type SupplierProfile = {
   id: string;
@@ -11,29 +19,44 @@ export type SupplierDashboardContext = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any;
   user: { id: string; email?: string | null };
+  profile: SupplierMarketplaceProfile | null;
+  categories: SupplierCategory[];
   supplierProfile: SupplierProfile | null;
 };
 
-export async function getSupplierDashboardContext(): Promise<SupplierDashboardContext> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = (await createClient()) as any;
+export async function getRequiredSupplierDashboardContext(): Promise<SupplierDashboardContext> {
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
   if (!user) redirect("/login");
 
-  const { data: supplierProfile } = await supabase
-    .from("supplier_profiles")
-    .select("id, business_name, accreditation_status")
-    .eq("profile_id", user.id)
-    .maybeSingle();
+  const context = await getMarketplaceSupplierDashboardContext(supabase, user.id);
+  const supplierProfile = context.profile
+    ? {
+        id: context.profile.id,
+        business_name: context.profile.businessName,
+        accreditation_status: context.profile.accreditationStatus,
+      }
+    : null;
 
-  return { supabase, user, supplierProfile: supplierProfile ?? null };
+  return {
+    supabase,
+    user,
+    profile: context.profile,
+    categories: context.categories,
+    supplierProfile,
+  };
+}
+
+export async function getSupplierDashboardContext(): Promise<SupplierDashboardContext> {
+  return getRequiredSupplierDashboardContext();
 }
 
 export function formatPeso(amount: number | null | undefined) {
   if (amount == null || Number.isNaN(Number(amount))) return "-";
-  return `PHP ${Number(amount).toLocaleString("en-PH")}`;
+  return formatCurrency(Number(amount));
 }
 
 export function formatDate(value: string | null | undefined) {

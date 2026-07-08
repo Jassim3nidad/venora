@@ -37,7 +37,9 @@ export const NAV_BY_ROLE: Record<EnterpriseRole, NavItem[]> = {
   ],
   supplier: [
     { label: "Overview", href: "/dashboard/supplier", icon: "dashboard" },
+    { label: "Profile", href: "/dashboard/supplier/profile", icon: "storefront" },
     { label: "Services", href: "/dashboard/supplier/services", icon: "design_services" },
+    { label: "Portfolio", href: "/dashboard/supplier/portfolio", icon: "photo_library" },
     { label: "Inquiries", href: "/dashboard/supplier/inquiries", icon: "mail" },
     { label: "Bookings", href: "/dashboard/supplier/bookings", icon: "event_available" },
     { label: "Analytics", href: "/dashboard/supplier/analytics", icon: "trending_up" },

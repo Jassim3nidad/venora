@@ -9,6 +9,7 @@ import {
   Heart,
   HelpCircle,
   Menu,
+  Store,
   Search,
   X,
 } from "lucide-react";
@@ -17,6 +18,10 @@ import ProfileMenu from "@/components/layout/ProfileMenu";
 function isActive(pathname: string, href: string) {
   if (href === "/venues") {
     return pathname === "/venues" || pathname.startsWith("/venues/");
+  }
+
+  if (href === "/suppliers") {
+    return pathname === "/suppliers" || pathname.startsWith("/suppliers/");
   }
 
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -46,14 +51,24 @@ export function CustomerNavbar({
   const navLinks = user
     ? [
         { label: "Browse", href: "/venues" },
+        { label: "Suppliers", href: "/suppliers" },
         { label: "Bookings", href: "/bookings" },
         { label: "Favorites", href: "/favorites" },
       ]
-    : [{ label: "Browse", href: "/venues" }];
+    : [
+        { label: "Browse", href: "/venues" },
+        { label: "Suppliers", href: "/suppliers" },
+      ];
 
   const menuLinks = user
     ? [
         { label: "Browse", href: "/venues", icon: Search, mobileOnly: true },
+        {
+          label: "Suppliers",
+          href: "/suppliers",
+          icon: Store,
+          mobileOnly: true,
+        },
         {
           label: "Bookings",
           href: "/bookings",
@@ -64,6 +79,7 @@ export function CustomerNavbar({
       ]
     : [
         { label: "Browse", href: "/venues", icon: Search, mobileOnly: true },
+        { label: "Suppliers", href: "/suppliers", icon: Store, mobileOnly: true },
         { label: "Sign In", href: "/login", icon: Search },
       ];
 
