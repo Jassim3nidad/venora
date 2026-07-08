@@ -323,17 +323,50 @@ export interface Database {
           id:                   string;
           profile_id:           string;
           business_name:        string;
+          slug:                 string;
           category_id:          string | null;
+          headline:             string | null;
           description:          string | null;
           base_price:           number | null;
           price_unit:           PriceUnit | null;
+          service_areas:        string[];
+          coverage_radius_km:   number | null;
+          contact_email:        string | null;
+          contact_phone:        string | null;
+          website_url:          string | null;
+          instagram_url:        string | null;
+          profile_image_url:    string | null;
+          hero_image_url:       string | null;
+          response_time_hours:  number;
+          years_in_business:    number | null;
+          team_size:            number | null;
+          minimum_booking_notice_days: number;
+          is_featured:          boolean;
+          published_at:         string | null;
           accreditation_status: AccreditationStatus;
           avg_rating:           number;
           review_count:         number;
           created_at:           string;
           updated_at:           string;
         };
-        Insert: Omit<Database["public"]["Tables"]["supplier_profiles"]["Row"], "id" | "avg_rating" | "review_count" | "created_at" | "updated_at"> & { id?: string };
+        Insert: Omit<
+          Database["public"]["Tables"]["supplier_profiles"]["Row"],
+          | "id"
+          | "avg_rating"
+          | "review_count"
+          | "service_areas"
+          | "response_time_hours"
+          | "minimum_booking_notice_days"
+          | "is_featured"
+          | "created_at"
+          | "updated_at"
+        > & {
+          id?: string;
+          service_areas?: string[];
+          response_time_hours?: number;
+          minimum_booking_notice_days?: number;
+          is_featured?: boolean;
+        };
         Update: Partial<Database["public"]["Tables"]["supplier_profiles"]["Insert"]>;
       };
 
@@ -345,10 +378,80 @@ export interface Database {
           description: string | null;
           price:       number | null;
           price_unit:  PriceUnit | null;
+          package_type: string;
+          inclusions:  string[];
+          min_guests:  number | null;
+          max_guests:  number | null;
+          is_active:   boolean;
+          sort_order:  number;
           created_at:  string;
+          updated_at:  string;
         };
-        Insert: Omit<Database["public"]["Tables"]["supplier_services"]["Row"], "id" | "created_at"> & { id?: string };
+        Insert: Omit<
+          Database["public"]["Tables"]["supplier_services"]["Row"],
+          | "id"
+          | "package_type"
+          | "inclusions"
+          | "is_active"
+          | "sort_order"
+          | "created_at"
+          | "updated_at"
+        > & {
+          id?: string;
+          package_type?: string;
+          inclusions?: string[];
+          is_active?: boolean;
+          sort_order?: number;
+        };
         Update: Partial<Database["public"]["Tables"]["supplier_services"]["Insert"]>;
+      };
+
+      supplier_portfolio_items: {
+        Row: {
+          id:          string;
+          supplier_id: string;
+          title:       string;
+          description: string | null;
+          image_url:   string;
+          event_type:  string | null;
+          city:        string | null;
+          province:    string | null;
+          event_date:  string | null;
+          is_featured: boolean;
+          sort_order:  number;
+          created_at:  string;
+          updated_at:  string;
+        };
+        Insert: Omit<
+          Database["public"]["Tables"]["supplier_portfolio_items"]["Row"],
+          "id" | "is_featured" | "sort_order" | "created_at" | "updated_at"
+        > & {
+          id?: string;
+          is_featured?: boolean;
+          sort_order?: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["supplier_portfolio_items"]["Insert"]>;
+      };
+
+      supplier_contact_requests: {
+        Row: {
+          id:             string;
+          supplier_id:    string;
+          service_id:     string | null;
+          customer_id:    string | null;
+          contact_name:   string;
+          contact_email:  string;
+          contact_phone:  string | null;
+          event_date:     string | null;
+          event_location: string | null;
+          guest_count:    number | null;
+          message:        string;
+          status:         InquiryStatus;
+          created_at:     string;
+          updated_at:     string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["supplier_contact_requests"]["Row"], "id" | "status" | "created_at" | "updated_at"> & { id?: string; status?: InquiryStatus };
+        Update: Partial<Pick<Database["public"]["Tables"]["supplier_contact_requests"]["Row"], "status" | "updated_at">>;
       };
 
       venue_suppliers: {

@@ -1,141 +1,104 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/src/lib/supabase/server";
 import { SupplierOverview } from "@/components/dashboard/enterprise";
-import { EmptyState, DashButton } from "@/components/dashboard/enterprise";
+import { DashButton, EmptyState } from "@/components/dashboard/enterprise";
+import { formatSupplierPrice } from "@/features/suppliers/utils/supplier-format";
+import { getRequiredSupplierDashboardContext } from "./_lib/supplier-dashboard-data";
 
 export const metadata = {
   title: "Supplier Dashboard",
 };
 
+type ContactInquiryRow = {
+  id: string;
+  contact_name: string;
+  event_date: string | null;
+  status: string;
+  supplier_services: { name: string } | null;
+};
+
+function formatDate(value: string | null) {
+  if (!value) return "Not set";
+  return new Date(value).toLocaleDateString("en-PH", { dateStyle: "medium" });
+}
+
 export default async function SupplierDashboardPage() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = (await createClient()) as any;
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const { supabase, profile } = await getRequiredSupplierDashboardContext();
 
-  const { data: supplierProfile } = await supabase
-    .from("supplier_profiles")
-    .select("id, business_name, accreditation_status")
-    .eq("profile_id", user.id)
-    .single();
-
-  if (!supplierProfile) {
+  if (!profile) {
     return (
       <div className="mx-auto max-w-lg px-4 py-12">
         <EmptyState
           icon="storefront"
           title="Profile Setup Pending"
           description="Create your supplier profile to start listing event packages and coordination services."
-          action={<DashButton>Create Supplier Profile</DashButton>}
+          action={
+            <DashButton href="/dashboard/supplier/profile" icon="storefront">
+              Create Supplier Profile
+            </DashButton>
+          }
         />
       </div>
     );
   }
 
-  const supplierId = supplierProfile.id;
+  const supplierId = profile.id;
+  const activeServices = profile.packages.filter((pkg) => pkg.isActive).length;
 
-  const { count: activeServices } = await supabase
-    .from("supplier_services")
-    .select("id", { count: "exact", head: true })
-    .eq("supplier_id", supplierId);
+  const [{ count: clientInquiries }, { count: confirmedBookings }, bookingSupsResult, contactResult] =
+    await Promise.all([
+      (supabase as any)
+        .from("supplier_contact_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("supplier_id", supplierId)
+        .eq("status", "new"),
+      (supabase as any)
+        .from("booking_suppliers")
+        .select("id", { count: "exact", head: true })
+        .eq("supplier_id", supplierId)
+        .eq("status", "confirmed"),
+      (supabase as any)
+        .from("booking_suppliers")
+        .select("agreed_price")
+        .eq("supplier_id", supplierId)
+        .eq("status", "confirmed"),
+      (supabase as any)
+        .from("supplier_contact_requests")
+        .select(
+          "id, contact_name, event_date, status, supplier_services(name)",
+        )
+        .eq("supplier_id", supplierId)
+        .order("created_at", { ascending: false })
+        .limit(5),
+    ]);
 
-  const { count: clientInquiries } = await supabase
-    .from("booking_suppliers")
-    .select("id", { count: "exact", head: true })
-    .eq("supplier_id", supplierId)
-    .eq("status", "pending");
-
-  const { count: confirmedBookings } = await supabase
-    .from("booking_suppliers")
-    .select("id", { count: "exact", head: true })
-    .eq("supplier_id", supplierId)
-    .eq("status", "confirmed");
-
-  const { data: bookingSups } = await supabase
-    .from("booking_suppliers")
-    .select("agreed_price")
-    .eq("supplier_id", supplierId)
-    .eq("status", "confirmed");
-
-  const monthlyRevenue = (bookingSups ?? []).reduce(
-    (sum: number, s: { agreed_price: number | null }) =>
-      sum + (Number(s.agreed_price) || 0),
+  const monthlyRevenue = (bookingSupsResult.data ?? []).reduce(
+    (sum: number, row: { agreed_price: number | null }) =>
+      sum + (Number(row.agreed_price) || 0),
     0,
   );
 
-  const { data: dbServices } = await supabase
-    .from("supplier_services")
-    .select("id, name, price, price_unit")
-    .eq("supplier_id", supplierId)
-    .limit(6);
-
-  const services = (dbServices ?? []).map(
-    (s: {
-      id: string;
-      name: string;
-      price: number | null;
-      price_unit: string | null;
-    }) => ({
-    id: s.id,
-    name: s.name,
-    category: s.price_unit ? s.price_unit.replace(/_/g, " ") : "Service",
-    price: s.price ? `₱${Number(s.price).toLocaleString()}` : "Contact for price",
-    status: "Active",
+  const services = profile.packages.slice(0, 6).map((pkg) => ({
+    id: pkg.id,
+    name: pkg.name,
+    category: pkg.packageType.replace(/_/g, " "),
+    price: formatSupplierPrice(pkg.price),
+    status: pkg.isActive ? "Active" : "Archived",
   }));
 
-  const { data: dbInquiries } = await supabase
-    .from("booking_suppliers")
-    .select(
-      `
-      id,
-      status,
-      bookings (
-        event_date,
-        profiles!customer_id (
-          full_name
-        )
-      )
-    `,
-    )
-    .eq("supplier_id", supplierId)
-    .order("id", { ascending: false })
-    .limit(5);
-
-  const inquiries = (dbInquiries ?? []).map(
-    (di: {
-      id: string;
-      status: string;
-      bookings: {
-        event_date: string;
-        profiles: { full_name: string } | null;
-      } | null;
-    }) => {
-    const booking = di.bookings as {
-      event_date: string;
-      profiles: { full_name: string } | null;
-    } | null;
-
-    return {
-      id: di.id,
-      client: booking?.profiles?.full_name ?? "Client Partner",
-      service: supplierProfile.business_name,
-      eventDate: booking?.event_date
-        ? new Date(booking.event_date).toLocaleDateString("en-PH", {
-            dateStyle: "medium",
-          })
-        : "—",
-      status: di.status,
-    };
-  },
+  const inquiries = ((contactResult.data ?? []) as ContactInquiryRow[]).map(
+    (row) => ({
+      id: row.id,
+      client: row.contact_name,
+      service: row.supplier_services?.name ?? "General inquiry",
+      eventDate: formatDate(row.event_date),
+      status: row.status,
+    }),
   );
 
   return (
     <SupplierOverview
-      businessName={supplierProfile.business_name}
-      accreditationStatus={supplierProfile.accreditation_status}
-      activeServices={activeServices ?? 0}
+      businessName={profile.businessName}
+      accreditationStatus={profile.accreditationStatus}
+      activeServices={activeServices}
       clientInquiries={clientInquiries ?? 0}
       confirmedBookings={confirmedBookings ?? 0}
       monthlyRevenue={monthlyRevenue}
