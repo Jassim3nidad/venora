@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { slugify } from "@venora/lib";
 import { createClient } from "@/lib/supabase/server";
 import { createServerAction } from "@/src/lib/server-action";
 import {
@@ -29,11 +28,6 @@ function normalizeOptionalNumber(value?: number | null) {
   return value;
 }
 
-function supplierSlug(businessName: string, userId: string) {
-  const base = slugify(businessName) || "supplier";
-  return `${base}-${userId.slice(0, 8)}`;
-}
-
 function throwIfSupabaseError(error: { message?: string } | null | undefined) {
   if (!error) return;
   throw new ValidationError(error.message ?? "Supplier action failed");
@@ -55,23 +49,21 @@ async function requireUser() {
 async function getOwnedSupplierProfile(supabase: any, userId: string) {
   const { data, error } = await supabase
     .from("supplier_profiles")
-    .select("id, slug, business_name, profile_id")
+    .select("id, business_name, profile_id")
     .eq("profile_id", userId)
     .maybeSingle();
 
   throwIfSupabaseError(error);
-  return data as { id: string; slug: string; business_name: string; profile_id: string } | null;
+  return data as { id: string; business_name: string; profile_id: string } | null;
 }
 
 export async function upsertSupplierProfileAction(rawInput: unknown) {
   return createServerAction(supplierProfileSchema, async (input) => {
     const { supabase, user } = await requireUser();
     const existing = await getOwnedSupplierProfile(supabase, user.id);
-    const slug = supplierSlug(input.businessName, user.id);
     const payload = {
       profile_id: user.id,
       business_name: input.businessName,
-      slug,
       category_id: input.categoryId ?? null,
       headline: normalizeOptionalString(input.headline),
       description: normalizeOptionalString(input.description),
@@ -96,25 +88,25 @@ export async function upsertSupplierProfileAction(rawInput: unknown) {
           .from("supplier_profiles")
           .update(payload)
           .eq("id", existing.id)
-          .select("id, slug")
+          .select("id")
           .single()
       : await supabase
           .from("supplier_profiles")
           .insert(payload)
-          .select("id, slug")
+          .select("id")
           .single();
 
     throwIfSupabaseError(error);
 
     revalidatePath("/suppliers");
-    revalidatePath(`/suppliers/${existing?.slug ?? data.slug}`);
-    revalidatePath(`/suppliers/${data.slug}`);
+    if (existing?.id) revalidatePath(`/suppliers/${existing.id}`);
+    revalidatePath(`/suppliers/${data.id}`);
     revalidatePath("/dashboard/supplier");
     revalidatePath("/dashboard/supplier/profile");
 
     return {
       supplierId: data.id as string,
-      slug: data.slug as string,
+      slug: data.id as string,
     };
   }, rawInput);
 }
@@ -163,7 +155,7 @@ export async function upsertSupplierPackageAction(rawInput: unknown) {
     throwIfSupabaseError(error);
 
     revalidatePath("/suppliers");
-    revalidatePath(`/suppliers/${supplier.slug}`);
+    revalidatePath(`/suppliers/${supplier.id}`);
     revalidatePath("/dashboard/supplier");
     revalidatePath("/dashboard/supplier/services");
 
@@ -189,7 +181,7 @@ export async function archiveSupplierPackageAction(rawInput: unknown) {
     throwIfSupabaseError(error);
 
     revalidatePath("/suppliers");
-    revalidatePath(`/suppliers/${supplier.slug}`);
+    revalidatePath(`/suppliers/${supplier.id}`);
     revalidatePath("/dashboard/supplier/services");
 
     return { packageId: input.id };
@@ -239,7 +231,7 @@ export async function upsertSupplierPortfolioAction(rawInput: unknown) {
     throwIfSupabaseError(error);
 
     revalidatePath("/suppliers");
-    revalidatePath(`/suppliers/${supplier.slug}`);
+    revalidatePath(`/suppliers/${supplier.id}`);
     revalidatePath("/dashboard/supplier");
     revalidatePath("/dashboard/supplier/portfolio");
 
@@ -256,7 +248,7 @@ export async function createSupplierContactRequestAction(rawInput: unknown) {
 
     const { data: supplier, error: supplierError } = await supabase
       .from("supplier_profiles")
-      .select("id, slug, accreditation_status")
+      .select("id, accreditation_status")
       .eq("id", input.supplierId)
       .eq("accreditation_status", "accredited")
       .single();
@@ -286,7 +278,7 @@ export async function createSupplierContactRequestAction(rawInput: unknown) {
 
     throwIfSupabaseError(error);
 
-    revalidatePath(`/suppliers/${supplier.slug}`);
+    revalidatePath(`/suppliers/${supplier.id}`);
     revalidatePath("/dashboard/supplier");
     revalidatePath("/dashboard/supplier/inquiries");
 

@@ -18,69 +18,53 @@ export {
 
 type VenoraSupabase = any;
 
-const SUPPLIER_SELECT = `
+const SUPPLIER_PROFILE_SELECT = `
   id,
   profile_id,
   business_name,
-  slug,
   category_id,
-  headline,
   description,
   base_price,
   price_unit,
-  service_areas,
-  coverage_radius_km,
-  contact_email,
-  contact_phone,
-  website_url,
-  instagram_url,
-  profile_image_url,
-  hero_image_url,
-  response_time_hours,
-  years_in_business,
-  team_size,
-  minimum_booking_notice_days,
-  is_featured,
   accreditation_status,
-  avg_rating,
-  review_count,
-  created_at,
-  supplier_categories(id, name, slug),
-  supplier_services(
-    id,
-    supplier_id,
-    name,
-    description,
-    price,
-    price_unit,
-    package_type,
-    inclusions,
-    min_guests,
-    max_guests,
-    is_active,
-    sort_order
-  ),
-  supplier_portfolio_items(
-    id,
-    supplier_id,
-    title,
-    description,
-    image_url,
-    event_type,
-    city,
-    province,
-    event_date,
-    is_featured,
-    sort_order
-  ),
-  supplier_reviews(
-    id,
-    supplier_id,
-    overall_rating,
-    comment,
-    created_at,
-    profiles(full_name, avatar_url)
-  )
+  avg_rating
+`;
+
+const SUPPLIER_SERVICE_SELECT = `
+  id,
+  supplier_id,
+  name,
+  description,
+  price,
+  price_unit,
+  package_type,
+  inclusions,
+  min_guests,
+  max_guests,
+  is_active,
+  sort_order
+`;
+
+const SUPPLIER_PORTFOLIO_SELECT = `
+  id,
+  supplier_id,
+  title,
+  description,
+  image_url,
+  event_type,
+  city,
+  province,
+  event_date,
+  is_featured,
+  sort_order
+`;
+
+const SUPPLIER_REVIEW_SELECT = `
+  id,
+  supplier_id,
+  overall_rating,
+  comment,
+  created_at
 `;
 
 function firstRelation<T>(value: T | T[] | null | undefined): T | null {
@@ -155,12 +139,104 @@ function normalizeReviews(rows: any[] | null | undefined): SupplierReview[] {
   });
 }
 
+function groupBySupplierId<T extends { supplier_id?: string | null }>(
+  rows: T[] | null | undefined,
+): Record<string, T[]> {
+  return (rows ?? []).reduce<Record<string, T[]>>((acc, row) => {
+    if (!row.supplier_id) return acc;
+
+    const supplierId = String(row.supplier_id);
+    acc[supplierId] = acc[supplierId] ?? [];
+    acc[supplierId].push(row);
+
+    return acc;
+  }, {});
+}
+
+function attachSupplierRelations(
+  rows: any[],
+  categories: SupplierCategory[],
+  services: any[] = [],
+  portfolioItems: any[] = [],
+  reviews: any[] = [],
+) {
+  const servicesBySupplierId = groupBySupplierId(services);
+  const portfolioBySupplierId = groupBySupplierId(portfolioItems);
+  const reviewsBySupplierId = groupBySupplierId(reviews);
+
+  return rows.map((row) => {
+    const supplierId = String(row.id);
+    const category =
+      categories.find((item) => item.id === String(row.category_id)) ?? null;
+
+    return {
+      ...row,
+      supplier_categories: category,
+      supplier_services: servicesBySupplierId[supplierId] ?? [],
+      supplier_portfolio_items: portfolioBySupplierId[supplierId] ?? [],
+      supplier_reviews: reviewsBySupplierId[supplierId] ?? [],
+    };
+  });
+}
+
+async function getSupplierRelations(
+  supabase: VenoraSupabase,
+  supplierIds: string[],
+) {
+  if (supplierIds.length === 0) {
+    return {
+      services: [],
+      portfolioItems: [],
+      reviews: [],
+    };
+  }
+
+  const [servicesResult, portfolioResult, reviewsResult] = await Promise.all([
+    supabase
+      .from("supplier_services")
+      .select(SUPPLIER_SERVICE_SELECT)
+      .in("supplier_id", supplierIds)
+      .order("sort_order", { ascending: true }),
+
+    supabase
+      .from("supplier_portfolio_items")
+      .select(SUPPLIER_PORTFOLIO_SELECT)
+      .in("supplier_id", supplierIds)
+      .order("is_featured", { ascending: false })
+      .order("sort_order", { ascending: true }),
+
+    supabase
+      .from("supplier_reviews")
+      .select(SUPPLIER_REVIEW_SELECT)
+      .in("supplier_id", supplierIds)
+      .order("created_at", { ascending: false }),
+  ]);
+
+  if (servicesResult.error) {
+    console.error("[suppliers] services fetch failed:", servicesResult.error.message);
+  }
+
+  if (portfolioResult.error) {
+    console.error("[suppliers] portfolio fetch failed:", portfolioResult.error.message);
+  }
+
+  if (reviewsResult.error) {
+    console.error("[suppliers] reviews fetch failed:", reviewsResult.error.message);
+  }
+
+  return {
+    services: servicesResult.data ?? [],
+    portfolioItems: portfolioResult.data ?? [],
+    reviews: reviewsResult.data ?? [],
+  };
+}
+
 export function mapDbSupplier(row: any): SupplierMarketplaceProfile {
   return {
     id: String(row.id),
     profileId: String(row.profile_id),
     businessName: String(row.business_name),
-    slug: String(row.slug),
+    slug: row.slug ? String(row.slug) : String(row.id),
     category: normalizeCategory(row),
     headline: row.headline ?? null,
     description: row.description ?? null,
@@ -179,10 +255,10 @@ export function mapDbSupplier(row: any): SupplierMarketplaceProfile {
     teamSize: row.team_size ?? null,
     minimumBookingNoticeDays: row.minimum_booking_notice_days ?? 14,
     isFeatured: Boolean(row.is_featured),
-    accreditationStatus: row.accreditation_status,
+    accreditationStatus: row.accreditation_status ?? "pending",
     avgRating: Number(row.avg_rating) || 0,
     reviewCount: Number(row.review_count) || 0,
-    createdAt: String(row.created_at),
+    createdAt: row.created_at ? String(row.created_at) : new Date().toISOString(),
     packages: normalizePackages(row.supplier_services),
     portfolio: normalizePortfolio(row.supplier_portfolio_items),
     reviews: normalizeReviews(row.supplier_reviews),
@@ -202,10 +278,10 @@ export async function getSupplierCategories(
     return sampleSupplierCategories;
   }
 
-  return (data as SupplierCategory[]).map((category) => ({
-    id: category.id,
-    name: category.name,
-    slug: category.slug,
+  return data.map((category: any) => ({
+    id: String(category.id),
+    name: String(category.name),
+    slug: String(category.slug),
   }));
 }
 
@@ -216,11 +292,10 @@ export async function getPublicSupplierList(
     getSupplierCategories(supabase),
     supabase
       .from("supplier_profiles")
-      .select(SUPPLIER_SELECT)
+      .select(SUPPLIER_PROFILE_SELECT)
       .eq("accreditation_status", "accredited")
-      .order("is_featured", { ascending: false })
       .order("avg_rating", { ascending: false })
-      .order("created_at", { ascending: false }),
+      .order("business_name", { ascending: true }),
   ]);
 
   if (suppliersResult.error || !suppliersResult.data?.length) {
@@ -237,9 +312,24 @@ export async function getPublicSupplierList(
     };
   }
 
+  const supplierRows = suppliersResult.data ?? [];
+  const supplierIds = supplierRows.map((supplier: any) => String(supplier.id));
+  const { services, portfolioItems, reviews } = await getSupplierRelations(
+    supabase,
+    supplierIds,
+  );
+
+  const suppliersWithRelations = attachSupplierRelations(
+    supplierRows,
+    categories,
+    services,
+    portfolioItems,
+    reviews,
+  );
+
   return {
     categories,
-    suppliers: suppliersResult.data.map(mapDbSupplier),
+    suppliers: suppliersWithRelations.map(mapDbSupplier),
   };
 }
 
@@ -253,20 +343,36 @@ export async function getPublicSupplierBySlug(
   supabase: VenoraSupabase,
   identifier: string,
 ): Promise<SupplierMarketplaceProfile | null> {
-  const query = supabase
-    .from("supplier_profiles")
-    .select(SUPPLIER_SELECT)
-    .eq("accreditation_status", "accredited");
+  const categories = await getSupplierCategories(supabase);
 
-  const { data, error } = await (isUuid(identifier)
-    ? query.eq("id", identifier)
-    : query.eq("slug", identifier)
-  ).maybeSingle();
+  if (isUuid(identifier)) {
+    const { data, error } = await supabase
+      .from("supplier_profiles")
+      .select(SUPPLIER_PROFILE_SELECT)
+      .eq("accreditation_status", "accredited")
+      .eq("id", identifier)
+      .maybeSingle();
 
-  if (!error && data) return mapDbSupplier(data);
+    if (!error && data) {
+      const { services, portfolioItems, reviews } = await getSupplierRelations(
+        supabase,
+        [String(data.id)],
+      );
 
-  if (error) {
-    console.error("[suppliers] detail fetch failed:", error.message);
+      const [supplierWithRelations] = attachSupplierRelations(
+        [data],
+        categories,
+        services,
+        portfolioItems,
+        reviews,
+      );
+
+      return mapDbSupplier(supplierWithRelations);
+    }
+
+    if (error) {
+      console.error("[suppliers] detail fetch failed:", error.message);
+    }
   }
 
   return (
@@ -286,7 +392,7 @@ export async function getSupplierDashboardContext(
     getSupplierCategories(supabase),
     supabase
       .from("supplier_profiles")
-      .select(SUPPLIER_SELECT)
+      .select(SUPPLIER_PROFILE_SELECT)
       .eq("profile_id", userId)
       .maybeSingle(),
   ]);
@@ -295,8 +401,28 @@ export async function getSupplierDashboardContext(
     console.error("[suppliers] dashboard profile fetch failed:", profileResult.error.message);
   }
 
+  if (!profileResult.data) {
+    return {
+      categories,
+      profile: null,
+    };
+  }
+
+  const { services, portfolioItems, reviews } = await getSupplierRelations(
+    supabase,
+    [String(profileResult.data.id)],
+  );
+
+  const [supplierWithRelations] = attachSupplierRelations(
+    [profileResult.data],
+    categories,
+    services,
+    portfolioItems,
+    reviews,
+  );
+
   return {
     categories,
-    profile: profileResult.data ? mapDbSupplier(profileResult.data) : null,
+    profile: mapDbSupplier(supplierWithRelations),
   };
 }

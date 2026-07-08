@@ -1,7 +1,15 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { CalendarDays, Loader2, Mail, MessageSquare, Phone, Send, Users } from "lucide-react";
+import {
+  CalendarDays,
+  Loader2,
+  Mail,
+  MessageSquare,
+  Phone,
+  Send,
+  Users,
+} from "lucide-react";
 import { createSupplierContactRequestAction } from "../application/actions";
 import type {
   SupplierMarketplaceProfile,
@@ -64,21 +72,23 @@ export function SupplierContactForm({
       setSelectedPackageId(activePackages[0]?.id ?? "");
       setStatus({
         type: "success",
-        message: "Inquiry sent. The supplier can now follow up from their dashboard.",
+        message:
+          "Inquiry sent. The supplier can now follow up from their dashboard.",
       });
     });
   };
 
   if (!userEmail) {
     return (
-      <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-black text-slate-950">Contact supplier</h2>
-        <p className="mt-2 text-sm font-medium leading-6 text-slate-600">
-          Sign in as a customer to send inquiry details and keep supplier conversations tied to your Venora account.
+      <div className="min-w-0 rounded-[28px] border border-[#E5E7EB] bg-white p-4 shadow-sm shadow-slate-200/70 sm:p-5">
+        <h2 className="text-lg font-black text-[#111827]">Contact supplier</h2>
+        <p className="mt-2 break-words text-sm font-medium leading-6 text-[#6B7280]">
+          Sign in as a customer to send inquiry details and keep supplier
+          conversations tied to your Venora account.
         </p>
         <a
           href="/login"
-          className="mt-4 inline-flex h-11 items-center justify-center rounded-lg bg-[#2563EB] px-4 text-sm font-black text-white transition hover:bg-[#1D4ED8]"
+          className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-2xl bg-[#2563EB] px-5 text-sm font-black text-white transition hover:bg-[#1D4ED8] sm:w-auto"
         >
           Sign in
         </a>
@@ -89,11 +99,11 @@ export function SupplierContactForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
+      className="min-w-0 rounded-[28px] border border-[#E5E7EB] bg-white p-4 shadow-sm shadow-slate-200/70 sm:p-5"
     >
       <div className="mb-5">
-        <h2 className="text-lg font-black text-slate-950">Contact supplier</h2>
-        <p className="mt-1 text-sm font-medium text-slate-500">
+        <h2 className="text-lg font-black text-[#111827]">Contact supplier</h2>
+        <p className="mt-1 text-sm font-medium text-[#6B7280]">
           Sent from {userEmail}
         </p>
       </div>
@@ -104,7 +114,7 @@ export function SupplierContactForm({
           <select
             value={selectedPackageId}
             onChange={(event) => setSelectedPackageId(event.target.value)}
-            className="h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+            className="h-12 w-full rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
           >
             <option value="">General inquiry</option>
             {activePackages.map((pkg) => (
@@ -121,7 +131,7 @@ export function SupplierContactForm({
             name="contactName"
             required
             minLength={2}
-            className="h-11 rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+            className="h-12 w-full rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-3 text-sm font-semibold outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
           />
         </label>
 
@@ -135,7 +145,7 @@ export function SupplierContactForm({
                 type="email"
                 defaultValue={userEmail}
                 required
-                className="h-11 w-full rounded-lg border border-slate-200 pl-9 pr-3 text-sm font-semibold outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                className="h-12 w-full rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] pl-9 pr-3 text-sm font-semibold outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
               />
             </span>
           </label>
@@ -147,7 +157,7 @@ export function SupplierContactForm({
               <input
                 name="contactPhone"
                 type="tel"
-                className="h-11 w-full rounded-lg border border-slate-200 pl-9 pr-3 text-sm font-semibold outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                className="h-12 w-full rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] pl-9 pr-3 text-sm font-semibold outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
               />
             </span>
           </label>
@@ -161,7 +171,7 @@ export function SupplierContactForm({
               <input
                 name="eventDate"
                 type="date"
-                className="h-11 w-full rounded-lg border border-slate-200 pl-9 pr-3 text-sm font-semibold outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                className="h-12 w-full rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] pl-9 pr-3 text-sm font-semibold outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
               />
             </span>
           </label>
@@ -175,18 +185,20 @@ export function SupplierContactForm({
                 type="number"
                 min="1"
                 inputMode="numeric"
-                className="h-11 w-full rounded-lg border border-slate-200 pl-9 pr-3 text-sm font-semibold outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                className="h-12 w-full rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] pl-9 pr-3 text-sm font-semibold outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
               />
             </span>
           </label>
         </div>
 
         <label className="grid gap-1.5">
-          <span className="text-xs font-bold text-slate-500">Event location</span>
+          <span className="text-xs font-bold text-slate-500">
+            Event location
+          </span>
           <input
             name="eventLocation"
             placeholder="City, venue, or region"
-            className="h-11 rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+            className="h-12 w-full rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-3 text-sm font-semibold outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
           />
         </label>
 
@@ -200,7 +212,7 @@ export function SupplierContactForm({
               minLength={10}
               rows={5}
               placeholder="Share event type, schedule, location, and package needs."
-              className="w-full resize-none rounded-lg border border-slate-200 py-3 pl-9 pr-3 text-sm font-semibold outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+              className="w-full resize-none rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] py-3 pl-9 pr-3 text-sm font-semibold outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
             />
           </span>
         </label>
@@ -210,7 +222,7 @@ export function SupplierContactForm({
         <p
           role={status.type === "error" ? "alert" : "status"}
           className={[
-            "mt-4 rounded-lg border px-3 py-2 text-sm font-semibold",
+            "mt-4 rounded-2xl border px-3 py-2 text-sm font-semibold",
             status.type === "error"
               ? "border-red-200 bg-red-50 text-red-700"
               : "border-emerald-200 bg-emerald-50 text-emerald-700",
@@ -223,7 +235,7 @@ export function SupplierContactForm({
       <button
         type="submit"
         disabled={isPending}
-        className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-black text-white transition hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-70"
+        className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-4 text-sm font-black text-white transition hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-70"
       >
         {isPending ? (
           <Loader2 className="h-4 w-4 animate-spin" />

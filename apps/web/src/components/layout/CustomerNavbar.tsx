@@ -8,9 +8,11 @@ import {
   CalendarDays,
   Heart,
   HelpCircle,
+  LogOut,
   Menu,
   Store,
   Search,
+  UserRound,
   X,
 } from "lucide-react";
 import ProfileMenu from "@/components/layout/ProfileMenu";
@@ -75,11 +77,23 @@ export function CustomerNavbar({
           icon: CalendarDays,
           mobileOnly: true,
         },
-        { label: "Favorites", href: "/favorites", icon: Heart, mobileOnly: true },
+        {
+          label: "Favorites",
+          href: "/favorites",
+          icon: Heart,
+          mobileOnly: true,
+        },
+        { label: "Account", href: "/account", icon: UserRound },
+        { label: "Logout", href: "/logout", icon: LogOut },
       ]
     : [
         { label: "Browse", href: "/venues", icon: Search, mobileOnly: true },
-        { label: "Suppliers", href: "/suppliers", icon: Store, mobileOnly: true },
+        {
+          label: "Suppliers",
+          href: "/suppliers",
+          icon: Store,
+          mobileOnly: true,
+        },
         { label: "Sign In", href: "/login", icon: Search },
       ];
 

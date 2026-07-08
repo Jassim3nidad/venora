@@ -113,7 +113,6 @@ export async function PATCH(
           status: "approved",
           total_amount: input.totalAmount,
           deposit_amount: input.depositAmount,
-<<<<<<< HEAD
           approval_note: input.note?.trim() || null,
           decline_reason: null,
           approved_at: new Date().toISOString(),
@@ -130,31 +129,15 @@ export async function PATCH(
         return apiError("VALIDATION_ERROR", "Only pending bookings can be declined.", 400);
       }
 
-=======
-          approved_at: new Date().toISOString(),
-          payment_due_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", id)
-        .select("id, status")
-        .single();
-    } else if (input.action === "decline") {
->>>>>>> 305da23439c4e045fcec5261020ff7f4d7a48ca9
       result = await supabase
         .from("bookings")
         .update({
           status: "declined",
-<<<<<<< HEAD
           decline_reason: input.reason.trim(),
           approval_note: null,
         })
         .eq("id", id)
         .eq("status", "pending")
-=======
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", id)
->>>>>>> 305da23439c4e045fcec5261020ff7f4d7a48ca9
         .select("id, status")
         .single();
     } else if (input.action === "cancel") {
