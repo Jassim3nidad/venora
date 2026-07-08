@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
+import {
+  approveBookingAction,
+  declineBookingAction,
+} from "@/src/features/booking/application/actions";
 import { MaterialIcon } from "./MaterialIcon";
 import {
   DashboardPage,
@@ -24,6 +27,8 @@ export type VenueOwnerBooking = {
   time: string;
   revenue: string;
   status: "pending" | "approved" | "declined";
+  suggestedTotal: number;
+  suggestedDeposit: number;
 };
 
 export type VenueOwnerOverviewProps = {
@@ -62,27 +67,49 @@ export function VenueOwnerOverview({
   const [requests, setRequests] = useState(initialBookings);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [toast, setToast] = useState(false);
-  const supabase = createClient();
+  const [toastMessage, setToastMessage] = useState("Booking updated successfully.");
+  const [error, setError] = useState<string | null>(null);
 
-  const handleAction = async (id: string, status: "approved" | "declined") => {
-    setLoadingId(id);
+  const handleAction = async (request: VenueOwnerBooking, status: "approved" | "declined") => {
+    setLoadingId(request.id);
+    setError(null);
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any)
-        .from("bookings")
-        .update({ status })
-        .eq("id", id);
-      if (error) throw error;
+      const result =
+        status === "approved"
+          ? await approveBookingAction({
+              bookingId: request.id,
+              totalAmount: Math.max(Math.round(request.suggestedTotal), 1),
+              depositAmount: Math.max(
+                Math.min(
+                  Math.round(request.suggestedDeposit),
+                  Math.round(request.suggestedTotal),
+                ),
+                1,
+              ),
+              note: "Approved from venue owner overview.",
+            })
+          : await declineBookingAction({
+              bookingId: request.id,
+              reason: "Declined from venue owner overview.",
+            });
+
+      if (result.error) {
+        setError(result.error.message);
+        return;
+      }
 
       setRequests((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, status } : r)),
+        prev.map((r) => (r.id === request.id ? { ...r, status } : r)),
       );
-      if (status === "approved") {
-        setToast(true);
-        setTimeout(() => setToast(false), 3000);
-      }
+      setToastMessage(
+        status === "approved"
+          ? "Booking accepted successfully."
+          : "Booking declined successfully.",
+      );
+      setToast(true);
+      setTimeout(() => setToast(false), 3000);
     } catch {
-      // keep UI responsive on failure
+      setError("Unable to update booking. Please try again.");
     } finally {
       setLoadingId(null);
     }
@@ -148,6 +175,11 @@ export function VenueOwnerOverview({
             />
           </div>
           <div className="p-5 sm:p-6">
+            {error ? (
+              <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                {error}
+              </div>
+            ) : null}
             <DataTable
               rows={requests}
               keyFn={(r) => r.id}
@@ -206,7 +238,7 @@ export function VenueOwnerOverview({
                         <button
                           type="button"
                           disabled={loadingId === r.id}
-                          onClick={() => handleAction(r.id, "approved")}
+                          onClick={() => handleAction(r, "approved")}
                           className="rounded-lg bg-[#1d4ed8] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#1e40af] disabled:opacity-50"
                         >
                           Accept
@@ -214,7 +246,7 @@ export function VenueOwnerOverview({
                         <button
                           type="button"
                           disabled={loadingId === r.id}
-                          onClick={() => handleAction(r.id, "declined")}
+                          onClick={() => handleAction(r, "declined")}
                           className="rounded-lg border border-[#e5e7eb] px-3 py-1.5 text-xs font-bold text-[#4b5563] hover:border-red-300 hover:text-red-700 disabled:opacity-50"
                         >
                           Decline
@@ -284,7 +316,7 @@ export function VenueOwnerOverview({
         </div>
       </div>
 
-      <Toast show={toast} message="Booking accepted successfully!" />
+      <Toast show={toast} message={toastMessage} />
     </DashboardPage>
   );
 }

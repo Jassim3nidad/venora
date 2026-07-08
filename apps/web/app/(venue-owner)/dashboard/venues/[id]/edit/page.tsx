@@ -60,6 +60,8 @@ export default async function EditVenuePage({
     const basePrice = numberValue(formData, "base_price");
     const capacityMax = numberValue(formData, "capacity_max");
     const capacityMin = optionalNumber(formData, "capacity_min");
+    const latitude = optionalNumber(formData, "latitude");
+    const longitude = optionalNumber(formData, "longitude");
 
     if (!name || !province || !city || !address) {
       redirect(editVenuePath(id, "error=Please%20complete%20all%20required%20fields."));
@@ -68,13 +70,22 @@ export default async function EditVenuePage({
     if (
       Number.isNaN(basePrice) ||
       Number.isNaN(capacityMax) ||
-      (capacityMin != null && Number.isNaN(capacityMin))
+      (capacityMin != null && Number.isNaN(capacityMin)) ||
+      (latitude != null && Number.isNaN(latitude)) ||
+      (longitude != null && Number.isNaN(longitude))
     ) {
       redirect(editVenuePath(id, "error=Please%20enter%20valid%20numbers."));
     }
 
     if (capacityMin != null && capacityMin > capacityMax) {
       redirect(editVenuePath(id, "error=Minimum%20capacity%20must%20not%20exceed%20maximum%20capacity."));
+    }
+
+    if (
+      (latitude != null && (latitude < -90 || latitude > 90)) ||
+      (longitude != null && (longitude < -180 || longitude > 180))
+    ) {
+      redirect(editVenuePath(id, "error=Please%20enter%20valid%20map%20coordinates."));
     }
 
     const { error } = await actionContext.supabase
@@ -89,6 +100,8 @@ export default async function EditVenuePage({
         base_price: basePrice,
         capacity_min: capacityMin,
         capacity_max: capacityMax,
+        latitude,
+        longitude,
       })
       .eq("id", id);
 
@@ -102,6 +115,7 @@ export default async function EditVenuePage({
     }
 
     revalidatePath("/dashboard");
+    revalidatePath("/dashboard/venue-owner");
     revalidatePath("/dashboard/venues");
     revalidatePath(editVenuePath(id));
     revalidatePath("/venues");
@@ -257,6 +271,38 @@ export default async function EditVenuePage({
                   name="address"
                   required
                   defaultValue={venue.address}
+                  className={inputClass}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label htmlFor="edit-venue-latitude" className={labelClass}>
+                  Map latitude
+                </label>
+                <input
+                  id="edit-venue-latitude"
+                  type="number"
+                  step="any"
+                  min="-90"
+                  max="90"
+                  name="latitude"
+                  defaultValue={venue.latitude ?? ""}
+                  className={inputClass}
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label htmlFor="edit-venue-longitude" className={labelClass}>
+                  Map longitude
+                </label>
+                <input
+                  id="edit-venue-longitude"
+                  type="number"
+                  step="any"
+                  min="-180"
+                  max="180"
+                  name="longitude"
+                  defaultValue={venue.longitude ?? ""}
                   className={inputClass}
                 />
               </div>

@@ -217,8 +217,11 @@ export async function approveBookingAction(rawInput: unknown) {
 
     throwIfSupabaseError(error);
 
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/venue-owner");
     revalidatePath("/dashboard/bookings");
     revalidatePath(`/dashboard/bookings/${input.bookingId}`);
+    revalidatePath("/bookings");
     revalidatePath(`/bookings/${input.bookingId}`);
 
     return {
@@ -241,8 +244,11 @@ export async function declineBookingAction(rawInput: unknown) {
 
     throwIfSupabaseError(error);
 
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/venue-owner");
     revalidatePath("/dashboard/bookings");
     revalidatePath(`/dashboard/bookings/${input.bookingId}`);
+    revalidatePath("/bookings");
     revalidatePath(`/bookings/${input.bookingId}`);
 
     return {
@@ -317,8 +323,11 @@ export async function completeBookingAction(rawInput: unknown) {
 
     throwIfSupabaseError(error);
 
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/venue-owner");
     revalidatePath("/dashboard/bookings");
     revalidatePath(`/dashboard/bookings/${input.bookingId}`);
+    revalidatePath("/bookings");
     revalidatePath(`/bookings/${input.bookingId}`);
 
     return {

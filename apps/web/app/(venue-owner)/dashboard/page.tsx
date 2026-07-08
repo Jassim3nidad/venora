@@ -53,7 +53,7 @@ export default async function VenueOwnerDashboardPage() {
       ? await supabase
           .from("bookings")
           .select(
-            "id, event_date, status, total_amount, guest_count, venues(name), profiles!customer_id(full_name)",
+            "id, event_date, status, total_amount, deposit_amount, guest_count, venues(name, base_price), venue_packages(price), profiles!customer_id(full_name)",
           )
           .in("venue_id", venueIds)
           .order("event_date", { ascending: false })
@@ -105,14 +105,18 @@ export default async function VenueOwnerDashboardPage() {
       event_date: string;
       status: string;
       total_amount: number | null;
+      deposit_amount: number | null;
       guest_count: number;
-      venues: { name: string } | null;
+      venues: { name: string; base_price: number | null } | null;
+      venue_packages: { price: number | null } | null;
       profiles: { full_name: string } | null;
     }) => {
       const venue = b.venues;
       const customer = b.profiles;
       const clientName = customer?.full_name ?? "Client";
       const eventDate = new Date(b.event_date);
+      const suggestedTotal =
+        b.total_amount ?? b.venue_packages?.price ?? venue?.base_price ?? 1;
 
       return {
         id: b.id,
@@ -126,6 +130,8 @@ export default async function VenueOwnerDashboardPage() {
           minute: "2-digit",
         }),
         revenue: formatPeso(b.total_amount),
+        suggestedTotal,
+        suggestedDeposit: b.deposit_amount ?? Math.round(suggestedTotal * 0.5),
         status:
           b.status === "approved" || b.status === "confirmed"
             ? "approved"

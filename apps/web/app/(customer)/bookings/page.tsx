@@ -115,7 +115,7 @@ function buildVenueImageUrl(storagePath?: string | null) {
   return `${supabaseUrl}/storage/v1/object/public/venue-images/${storagePath}`;
 }
 
-function actionForBooking(booking: BookingRecord) {
+function actionForBooking(booking: BookingRecord, venue?: VenueRecord | null) {
   if (booking.status === "approved" || booking.status === "payment_pending") {
     return (
       <CustomerLinkButton href={`/bookings/${booking.id}/payment`}>
@@ -143,10 +143,18 @@ function actionForBooking(booking: BookingRecord) {
     );
   }
 
+  if (venue?.slug) {
+    return (
+      <CustomerLinkButton href={`/venues/${venue.slug}`} tone="secondary">
+        View Details
+      </CustomerLinkButton>
+    );
+  }
+
   return (
-    <CustomerLinkButton href={`/bookings/${booking.id}`} tone="secondary">
-      View Details
-    </CustomerLinkButton>
+    <span className="inline-flex h-12 items-center justify-center rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-5 text-sm font-extrabold text-[#6B7280]">
+      Venue unavailable
+    </span>
   );
 }
 
@@ -345,7 +353,7 @@ export default async function CustomerBookingsPage({
                       </div>
 
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                        {actionForBooking(booking)}
+                        {actionForBooking(booking, venue)}
                         {venue?.slug ? (
                           <Link
                             href={`/venues/${venue.slug}`}
