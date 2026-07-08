@@ -40,7 +40,10 @@ export async function searchMarketplaceVenues(
     .eq("status", "published");
 
   if (params.q) {
-    query = query.ilike("name", `%${params.q}%`);
+    const q = params.q;
+    query = query.or(
+      `name.ilike.%${q}%,city.ilike.%${q}%,province.ilike.%${q}%,municipality.ilike.%${q}%`
+    );
   }
 
   if (params.province) {
