@@ -164,6 +164,29 @@ function textIncludes(value: unknown, query: string) {
   return normalize(value).includes(query);
 }
 
+// City/municipality names are sometimes stored with a trailing "City"
+// (e.g. "Antipolo City") while the location filter's canonical PSGC list
+// uses the bare name (e.g. "Antipolo"). Normalize away that suffix, and
+// match loosely in either direction, so selecting a locality still finds
+// venues regardless of which form was used when the venue was entered.
+function normalizeLocality(value: unknown) {
+  return normalize(value).replace(/\bcity\b/g, "").replace(/\s+/g, " ").trim();
+}
+
+function localityMatches(venueValue: unknown, filterValue: string) {
+  const venueLocality = normalizeLocality(venueValue);
+  const filterLocality = normalizeLocality(filterValue);
+
+  if (!filterLocality) return true;
+  if (!venueLocality) return false;
+
+  return (
+    venueLocality === filterLocality ||
+    venueLocality.includes(filterLocality) ||
+    filterLocality.includes(venueLocality)
+  );
+}
+
 function toVenueTypeValue(value: string): VenueTypeValue | null {
   const normalized = normalize(value).replace(/\s+/g, "-");
   const match = venueTypeValues.find(
@@ -366,9 +389,9 @@ function getBudgetSummary(filters: {
     }`;
   }
 
-  if (filters.budget === "under-100k") return "Under ₱100k";
-  if (filters.budget === "100k-300k") return "₱100k-300k";
-  if (filters.budget === "luxury") return "Luxury";
+  if (filters.budget === "under-100k") return "Standard (Under ₱100k)";
+  if (filters.budget === "100k-300k") return "Deluxe (₱100k-300k)";
+  if (filters.budget === "luxury") return "Luxury (₱300k+)";
   if (filters.budget) return filters.budget;
 
   return "";
@@ -856,6 +879,41 @@ export default function VenuesClient({
     });
   };
 
+  const removeFilterKeys = (keys: string[]) => {
+    const params = new URLSearchParams(queryString);
+    keys.forEach((key) => params.delete(key));
+
+    const nextQuery = params.toString();
+    router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, {
+      scroll: false,
+    });
+  };
+
+  const removeVenueType = (venueType: string) => {
+    const nextVenueTypes = filters.venueTypes.filter(
+      (item) => item !== venueType,
+    );
+    const params = new URLSearchParams(queryString);
+    params.delete("style");
+    if (nextVenueTypes.length > 0) {
+      params.set("venueTypes", nextVenueTypes.join(","));
+    } else {
+      params.delete("venueTypes");
+    }
+
+    const nextQuery = params.toString();
+    router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, {
+      scroll: false,
+    });
+  };
+
+  const removeAmenity = (amenity: string) => {
+    const nextAmenities = filters.amenities.filter(
+      (item) => item !== amenity,
+    );
+    updateFilter("amenities", nextAmenities.join(","));
+  };
+
   // Keep the search box snappy: type into local state instantly, and only
   // push the (expensive) URL navigation + refiltering after the user pauses.
   const [queryDraft, setQueryDraft] = useState(filters.query);
@@ -913,9 +971,11 @@ export default function VenuesClient({
         if (!matchesQuery) return false;
       }
 
-      if (province && normalize(venue.province) !== province) return false;
-      if (city && normalize(venue.city) !== city) return false;
-      if (municipality && normalize(venue.municipality) !== municipality) {
+      if (province && !localityMatches(venue.province, province)) {
+        return false;
+      }
+      if (city && !localityMatches(venue.city, city)) return false;
+      if (municipality && !localityMatches(venue.municipality, municipality)) {
         return false;
       }
 
@@ -1131,21 +1191,60 @@ export default function VenuesClient({
   const aiIntentSummary = aiSearchResult
     ? getIntentSummary(aiSearchResult.parsedFilters)
     : localAiSummary;
-  const filterSummary = [
-    filters.query && `Search: ${filters.query}`,
-    filters.location ||
-      filters.municipality ||
-      filters.city ||
-      filters.province,
-    filters.eventType,
-    budgetSummary,
-    filters.capacity && `${filters.capacity}+ guests`,
-    ...filters.venueTypes,
-    filters.indoorOutdoor &&
-      filters.indoorOutdoor.charAt(0).toUpperCase() +
+  interface FilterChip {
+    key: string;
+    label: string;
+    onRemove: () => void;
+  }
+
+  const locationLabel =
+    filters.location || filters.municipality || filters.city || filters.province;
+
+  const filterChips: FilterChip[] = [
+    filters.query && {
+      key: "query",
+      label: `Search: ${filters.query}`,
+      onRemove: () => updateFilter("q", ""),
+    },
+    locationLabel && {
+      key: "location",
+      label: locationLabel,
+      onRemove: () =>
+        removeFilterKeys(["location", "municipality", "city", "province"]),
+    },
+    filters.eventType && {
+      key: "event",
+      label: filters.eventType,
+      onRemove: () => updateFilter("event", ""),
+    },
+    budgetSummary && {
+      key: "budget",
+      label: budgetSummary,
+      onRemove: () => removeFilterKeys(["budget", "minBudget", "maxBudget"]),
+    },
+    filters.capacity && {
+      key: "capacity",
+      label: `${filters.capacity}+ guests`,
+      onRemove: () => updateFilter("capacity", ""),
+    },
+    ...filters.venueTypes.map((venueType) => ({
+      key: `venueType-${venueType}`,
+      label: venueType,
+      onRemove: () => removeVenueType(venueType),
+    })),
+    filters.indoorOutdoor && {
+      key: "indoorOutdoor",
+      label:
+        filters.indoorOutdoor.charAt(0).toUpperCase() +
         filters.indoorOutdoor.slice(1),
-    ...filters.amenities,
-  ].filter(Boolean);
+      onRemove: () => updateFilter("indoorOutdoor", ""),
+    },
+    ...filters.amenities.map((amenity) => ({
+      key: `amenity-${amenity}`,
+      label: amenity,
+      onRemove: () => removeAmenity(amenity),
+    })),
+  ].filter((chip): chip is FilterChip => Boolean(chip));
 
   return (
     <div className="flex h-full min-w-0 flex-1 overflow-hidden bg-[linear-gradient(180deg,#F9FAFB_0%,#F8FAFC_100%)]">
@@ -1386,24 +1485,34 @@ export default function VenuesClient({
               </div>
             </div>
 
-            {filterSummary.length > 0 && (
+            {filterChips.length > 0 && (
               <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4">
-                {filterSummary.map((item) => (
+                {filterChips.map((chip) => (
                   <span
-                    key={item}
-                    className="rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-3 py-1.5 text-xs font-bold text-[#1D4ED8]"
+                    key={chip.key}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-[#E5E7EB] bg-[#F9FAFB] py-1.5 pl-3 pr-1.5 text-xs font-bold text-[#1D4ED8]"
                   >
-                    {item}
+                    {chip.label}
+                    <button
+                      type="button"
+                      onClick={chip.onRemove}
+                      aria-label={`Remove ${chip.label} filter`}
+                      className="flex h-4 w-4 items-center justify-center rounded-full text-[#1D4ED8]/70 transition hover:bg-[#DBEAFE] hover:text-[#1D4ED8]"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
                   </span>
                 ))}
 
-                <button
-                  type="button"
-                  onClick={clearFilters}
-                  className="rounded-full px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.08em] text-slate-500 transition hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
-                >
-                  Clear all
-                </button>
+                {filterChips.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="rounded-full px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.08em] text-slate-500 transition hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
+                  >
+                    Clear all
+                  </button>
+                )}
               </div>
             )}
           </div>

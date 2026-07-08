@@ -4,6 +4,11 @@ import React, { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import {
+  LUZON_PROVINCE_NAMES,
+  getCitiesForProvince,
+  getMunicipalitiesForProvince,
+} from "@/data/luzon-locations";
+import {
   Bed,
   Building2,
   CalendarDays,
@@ -73,6 +78,14 @@ const indoorOutdoorModes = [
   { label: "Indoor", value: "indoor" },
   { label: "Outdoor", value: "outdoor" },
   { label: "Both", value: "both" },
+];
+
+// Fixed budget tiers, keyed to the preset values matchesBudgetPreset()
+// already understands in VenuesClient.tsx (under-100k / 100k-300k / luxury).
+const budgetTabs = [
+  { label: "Standard", value: "under-100k", range: "Under ₱100k" },
+  { label: "Deluxe", value: "100k-300k", range: "₱100k - ₱300k" },
+  { label: "Luxury", value: "luxury", range: "₱300k+" },
 ];
 
 function normalize(value: unknown) {
@@ -169,31 +182,6 @@ function SelectBox({
   );
 }
 
-function Pill({
-  children,
-  active = false,
-  onClick,
-}: {
-  children: React.ReactNode;
-  active?: boolean;
-  onClick?: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={[
-        "rounded-full border px-3.5 py-2 text-sm font-semibold transition",
-        active
-          ? "border-[#BFDBFE] bg-[#EFF6FF] text-[#2563EB]"
-          : "border-[#E5E7EB] bg-white text-[#6B7280] hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
-      ].join(" ")}
-    >
-      {children}
-    </button>
-  );
-}
-
 function OptionButton({
   children,
   active = false,
@@ -280,24 +268,6 @@ export default function Sidebar({
     [venues],
   );
 
-  const quickLocations = useMemo(
-    () =>
-      uniqueStrings(
-        venues.flatMap((venue) => [venue.city, venue.province]),
-      ).slice(0, 4),
-    [venues],
-  );
-
-  const budgetTabs = useMemo(
-    () =>
-      uniqueStrings(venues.map((venue) => venue.budgetRange)).map((range) => ({
-        label: range,
-        value: range,
-        range,
-      })),
-    [venues],
-  );
-
   const venueTypes = useMemo(
     () =>
       uniqueStrings(venues.flatMap((venue) => venue.categories ?? [])).map(
@@ -334,47 +304,16 @@ export default function Sidebar({
     };
   }, [venues]);
 
-  const provinceOptions = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          venues.map((venue) => venue.province).filter(Boolean) as string[],
-        ),
-      ).sort(),
-    [venues],
-  );
+  const provinceOptions = LUZON_PROVINCE_NAMES;
 
   const cityOptions = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          venues
-            .filter(
-              (venue) =>
-                !selectedProvince || venue.province === selectedProvince,
-            )
-            .map((venue) => venue.city)
-            .filter(Boolean) as string[],
-        ),
-      ).sort(),
-    [selectedProvince, venues],
+    () => getCitiesForProvince(selectedProvince),
+    [selectedProvince],
   );
 
   const municipalityOptions = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          venues
-            .filter(
-              (venue) =>
-                (!selectedProvince || venue.province === selectedProvince) &&
-                (!selectedCity || venue.city === selectedCity),
-            )
-            .map((venue) => venue.municipality)
-            .filter(Boolean) as string[],
-        ),
-      ).sort(),
-    [selectedCity, selectedProvince, venues],
+    () => getMunicipalitiesForProvince(selectedProvince),
+    [selectedProvince],
   );
 
   const minBudgetValue = Number(selectedMinBudget) || 0;
@@ -655,24 +594,6 @@ export default function Sidebar({
                 {locationStatus}
               </p>
             )}
-
-            <div className="flex flex-wrap gap-2 pt-1">
-              {quickLocations.map((location) => (
-                <Pill
-                  key={location}
-                  active={selectedLocation === location}
-                  onClick={() =>
-                    updateFilters({
-                      location: selectedLocation === location ? "" : location,
-                      province: "",
-                      city: "",
-                    })
-                  }
-                >
-                  {location}
-                </Pill>
-              ))}
-            </div>
           </div>
         </section>
 
