@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import { useState } from "react";
 import {
   approveBookingAction,
   declineBookingAction,
@@ -172,7 +172,7 @@ export function VenueOwnerOverview({
               description="Review and respond to incoming reservation requests."
               action={
                 <span className="rounded-full bg-[#eff6ff] px-3 py-1 text-xs font-bold text-[#1d4ed8]">
-                  {requests.filter((r) => r.status === "pending").length} pending
+                  {initialBookings.filter((r) => r.status === "pending").length} pending
                 </span>
               }
             />
@@ -184,7 +184,7 @@ export function VenueOwnerOverview({
               </div>
             ) : null}
             <DataTable
-              rows={requests}
+              rows={initialBookings}
               keyFn={(r) => r.id}
               emptyMessage="No booking requests yet."
               columns={[
@@ -311,7 +311,6 @@ export function VenueOwnerOverview({
           </Panel>
         </div>
       </div>
-
       <Toast show={toast} message={toastMessage} />
     </DashboardPage>
   );
