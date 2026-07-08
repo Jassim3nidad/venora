@@ -1,16 +1,27 @@
 import type { Metadata } from "next";
 import {
   DashboardSubPage,
+  DemographicsBarChart,
   EmptyState,
   KpiCard,
   Panel,
   PanelHeader,
+  RevenueTrendChart,
   StatusBadge,
+  StatusDistributionChart,
+  TopItemsBarChart,
 } from "@/components/dashboard/enterprise";
 import {
   formatPeso,
   getSupplierDashboardContext,
 } from "../_lib/supplier-dashboard-data";
+import {
+  getBookingDemographics,
+  getConversionRate,
+  getRevenueTrend,
+  getTopPackages,
+  lastNMonthsRange,
+} from "@/features/analytics/application/queries";
 
 export const metadata: Metadata = { title: "Analytics - Supplier Dashboard" };
 export const dynamic = "force-dynamic";
@@ -21,10 +32,6 @@ type BookingSupplierRow = {
   status: string;
   bookings: { event_date: string } | null;
 };
-
-function monthLabel(value: string) {
-  return new Date(value).toLocaleDateString("en-PH", { month: "short", year: "numeric" });
-}
 
 export default async function SupplierAnalyticsPage() {
   const { supabase, supplierProfile } = await getSupplierDashboardContext();
@@ -51,6 +58,15 @@ export default async function SupplierAnalyticsPage() {
     .select("id", { count: "exact", head: true })
     .eq("supplier_id", supplierProfile.id);
 
+  const scope = { kind: "supplier" as const, supplierId: supplierProfile.id };
+  const range = lastNMonthsRange(12);
+  const [revenueTrend, conversion, topPackages, demographics] = await Promise.all([
+    getRevenueTrend(supabase, scope, range),
+    getConversionRate(supabase, scope, range),
+    getTopPackages(supabase, scope, range),
+    getBookingDemographics(supabase, scope, range),
+  ]);
+
   const rows = (bookingSupsRaw ?? []) as BookingSupplierRow[];
   const confirmed = rows.filter((r) => r.status === "confirmed");
   const pending = rows.filter((r) => r.status === "pending");
@@ -62,24 +78,21 @@ export default async function SupplierAnalyticsPage() {
       ? Math.round((confirmed.length / (confirmed.length + cancelled.length)) * 100)
       : null;
 
-  const revenueByMonth = confirmed.reduce<Record<string, number>>((months, r) => {
-    if (!r.bookings?.event_date) return months;
-    const label = monthLabel(r.bookings.event_date);
-    months[label] = (months[label] ?? 0) + (Number(r.agreed_price) || 0);
-    return months;
-  }, {});
-  const monthRows = Object.entries(revenueByMonth).slice(0, 6);
-
   return (
     <DashboardSubPage
       title="Analytics"
       description="Track your inquiry performance and revenue over time."
     >
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <KpiCard label="Total Revenue" value={formatPeso(totalRevenue)} icon="payments" highlight />
         <KpiCard label="Confirmed Bookings" value={String(confirmed.length)} icon="event_available" />
         <KpiCard label="Pending Inquiries" value={String(pending.length)} icon="mail" />
         <KpiCard label="Active Services" value={String(servicesCount ?? 0)} icon="design_services" />
+        <KpiCard
+          label="Conversion Rate"
+          value={conversion ? `${conversion.rate}%` : "-"}
+          icon="trending_up"
+        />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -88,35 +101,7 @@ export default async function SupplierAnalyticsPage() {
             title="Revenue by Month"
             description="Revenue from confirmed bookings only."
           />
-          {monthRows.length > 0 ? (
-            <div className="space-y-3">
-              {monthRows.map(([label, amount]) => {
-                const width =
-                  totalRevenue > 0 ? Math.max(8, Math.round((amount / totalRevenue) * 100)) : 0;
-                return (
-                  <div key={label} className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-semibold text-[#111827]">{label}</span>
-                      <span className="font-bold text-[#1d4ed8]">{formatPeso(amount)}</span>
-                    </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-[#e5e7eb]">
-                      <div
-                        className="h-full rounded-full bg-[#1d4ed8]"
-                        style={{ width: `${width}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-dashed border-[#e5e7eb] bg-[#f9fafb] px-6 py-12 text-center">
-              <h3 className="font-display text-lg font-bold text-[#111827]">No revenue yet</h3>
-              <p className="mx-auto mt-2 max-w-md text-sm text-[#4b5563]">
-                Revenue analytics will appear once you accept and confirm inquiries.
-              </p>
-            </div>
-          )}
+          <RevenueTrendChart data={revenueTrend} format="currency" />
         </Panel>
 
         <Panel>
@@ -153,6 +138,27 @@ export default async function SupplierAnalyticsPage() {
                 ) : null}
               </div>
             </div>
+          </div>
+        </Panel>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-2">
+        <Panel>
+          <PanelHeader
+            title="Top Packages"
+            description="Your most-booked services."
+          />
+          <TopItemsBarChart data={topPackages} />
+        </Panel>
+
+        <Panel>
+          <PanelHeader
+            title="Customer Demographics"
+            description="Event type mix and guest count distribution (based on available booking data)."
+          />
+          <div className="grid gap-6 sm:grid-cols-2">
+            <StatusDistributionChart data={demographics?.eventTypeMix ?? []} />
+            <DemographicsBarChart data={demographics?.guestCountBuckets ?? []} />
           </div>
         </Panel>
       </div>
