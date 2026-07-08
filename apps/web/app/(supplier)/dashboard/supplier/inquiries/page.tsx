@@ -9,11 +9,16 @@ import {
   StatusBadge,
   type DataTableColumn,
 } from "@/components/dashboard/enterprise";
-import { getRequiredSupplierDashboardContext } from "../_lib/supplier-dashboard-data";
+import {
+  formatDate,
+  getRequiredSupplierDashboardContext,
+} from "../_lib/supplier-dashboard-data";
+import { InquiryActions } from "../_components/inquiry-actions";
 
-export const metadata: Metadata = { title: "Supplier Inquiries - Dashboard" };
+export const metadata: Metadata = { title: "Inquiries - Supplier Dashboard" };
+export const dynamic = "force-dynamic";
 
-type InquiryRow = {
+type DirectInquiryRow = {
   id: string;
   contact_name: string;
   event_date: string | null;
@@ -24,7 +29,7 @@ type InquiryRow = {
   supplier_services: { name: string } | null;
 };
 
-type InquiryDisplayRow = {
+type DirectInquiryDisplayRow = {
   id: string;
   client: string;
   packageName: string;
@@ -34,10 +39,16 @@ type InquiryDisplayRow = {
   status: string;
 };
 
-function formatDate(value: string | null) {
-  if (!value) return "Not set";
-  return new Date(value).toLocaleDateString("en-PH", { dateStyle: "medium" });
-}
+type BookingInquiryRow = {
+  id: string;
+  status: string;
+  bookings: {
+    event_date: string;
+    guest_count: number | null;
+    venues: { name: string } | null;
+    profiles: { full_name: string | null } | null;
+  } | null;
+};
 
 export default async function SupplierInquiriesPage() {
   const { supabase, profile } = await getRequiredSupplierDashboardContext();
@@ -46,7 +57,7 @@ export default async function SupplierInquiriesPage() {
     return (
       <DashboardSubPage
         title="Inquiries"
-        description="Review direct marketplace requests from customers."
+        description="Review direct marketplace requests and venue coordination requests."
       >
         <EmptyState
           icon="storefront"
@@ -62,32 +73,55 @@ export default async function SupplierInquiriesPage() {
     );
   }
 
-  const { data, error } = await (supabase as any)
-    .from("supplier_contact_requests")
-    .select(
-      "id, contact_name, event_date, event_location, guest_count, status, created_at, supplier_services(name)",
-    )
-    .eq("supplier_id", profile.id)
-    .order("created_at", { ascending: false })
-    .limit(50);
+  const [directResult, bookingResult] = await Promise.all([
+    (supabase as any)
+      .from("supplier_contact_requests")
+      .select(
+        "id, contact_name, event_date, event_location, guest_count, status, created_at, supplier_services(name)",
+      )
+      .eq("supplier_id", profile.id)
+      .order("created_at", { ascending: false })
+      .limit(50),
+    (supabase as any)
+      .from("booking_suppliers")
+      .select(
+        `
+        id,
+        status,
+        bookings (
+          event_date,
+          guest_count,
+          venues(name),
+          profiles!customer_id(full_name)
+        )
+      `,
+      )
+      .eq("supplier_id", profile.id)
+      .eq("status", "pending")
+      .order("id", { ascending: false }),
+  ]);
 
-  if (error) {
-    console.error("[supplier inquiries] fetch failed:", error.message);
+  if (directResult.error) {
+    console.error("[supplier direct inquiries] fetch failed:", directResult.error.message);
   }
 
-  const rows: InquiryDisplayRow[] = ((data ?? []) as InquiryRow[]).map((row) => ({
-    id: row.id,
-    client: row.contact_name,
-    packageName: row.supplier_services?.name ?? "General inquiry",
-    event: [formatDate(row.event_date), row.event_location]
-      .filter(Boolean)
-      .join(" / "),
-    guests: row.guest_count ? `${row.guest_count.toLocaleString("en-PH")} guests` : "Not set",
-    received: formatDate(row.created_at),
-    status: row.status,
-  }));
+  const directRows: DirectInquiryDisplayRow[] = ((directResult.data ?? []) as DirectInquiryRow[]).map(
+    (row) => ({
+      id: row.id,
+      client: row.contact_name,
+      packageName: row.supplier_services?.name ?? "General inquiry",
+      event: [formatDate(row.event_date), row.event_location]
+        .filter((value) => value && value !== "-")
+        .join(" / ") || "-",
+      guests: row.guest_count
+        ? `${row.guest_count.toLocaleString("en-PH")} guests`
+        : "-",
+      received: formatDate(row.created_at),
+      status: row.status,
+    }),
+  );
 
-  const columns: DataTableColumn<InquiryDisplayRow>[] = [
+  const directColumns: DataTableColumn<DirectInquiryDisplayRow>[] = [
     {
       key: "client",
       header: "Client",
@@ -108,26 +142,72 @@ export default async function SupplierInquiriesPage() {
     },
   ];
 
+  const bookingRows = (bookingResult.data ?? []) as BookingInquiryRow[];
+
   return (
     <DashboardSubPage
       title="Inquiries"
-      description="Review direct marketplace requests from customers."
+      description="Review direct marketplace requests and venue coordination requests."
     >
-      {rows.length > 0 ? (
-        <Panel>
-          <PanelHeader
-            title="Recent inquiries"
-            description="Direct supplier requests submitted from public supplier profile pages."
-          />
-          <DataTable rows={rows} columns={columns} keyFn={(row) => row.id} />
-        </Panel>
-      ) : (
-        <EmptyState
-          icon="mail"
-          title="No inquiries yet"
-          description="New customer requests will appear here after they contact your supplier profile."
+      <Panel>
+        <PanelHeader
+          title="Direct Marketplace Requests"
+          description="Customer requests submitted from your public supplier profile."
         />
-      )}
+        {directRows.length > 0 ? (
+          <DataTable
+            rows={directRows}
+            columns={directColumns}
+            keyFn={(row) => row.id}
+          />
+        ) : (
+          <EmptyState
+            icon="mail"
+            title="No direct inquiries yet"
+            description="New customer requests will appear here after they contact your supplier profile."
+          />
+        )}
+      </Panel>
+
+      <Panel>
+        <PanelHeader
+          title="Pending Booking Requests"
+          description="Accept to confirm your participation in venue-coordinated events."
+        />
+        {bookingRows.length > 0 ? (
+          <div className="space-y-3">
+            {bookingRows.map((inquiry) => (
+              <div
+                key={inquiry.id}
+                className="flex flex-col gap-3 rounded-lg border border-[#e5e7eb] bg-[#f9fafb] p-4 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-[#111827]">
+                      {inquiry.bookings?.venues?.name ?? "Event"}
+                    </p>
+                    <StatusBadge status="pending" />
+                  </div>
+                  <p className="mt-1 text-sm text-[#4b5563]">
+                    {inquiry.bookings?.profiles?.full_name ?? "Client"} -{" "}
+                    {formatDate(inquiry.bookings?.event_date)}
+                    {inquiry.bookings?.guest_count
+                      ? ` - ${inquiry.bookings.guest_count} guests`
+                      : ""}
+                  </p>
+                </div>
+                <InquiryActions bookingSupplierId={inquiry.id} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            icon="mail"
+            title="No pending booking requests"
+            description="New venue-coordinated supplier requests will show up here."
+          />
+        )}
+      </Panel>
     </DashboardSubPage>
   );
 }

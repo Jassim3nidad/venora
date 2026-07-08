@@ -67,9 +67,12 @@ export function SupplierOverview({
       icon: "payments",
     },
   ];
+
   const quickActions = [
     { label: "Add New Service", href: "/dashboard/supplier/services" },
     { label: "Review Inquiries", href: "/dashboard/supplier/inquiries" },
+    { label: "View Confirmed Bookings", href: "/dashboard/supplier/bookings" },
+    { label: "View Analytics", href: "/dashboard/supplier/analytics" },
     { label: "Update Profile", href: "/dashboard/supplier/profile" },
     { label: "Add Portfolio Work", href: "/dashboard/supplier/portfolio" },
   ];
@@ -124,10 +127,10 @@ export function SupplierOverview({
 
         <Panel>
           <PanelHeader title="Quick Actions" />
-          <div className="grid gap-2">
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
             {quickActions.map((action) => (
               <DashButton
-                key={action.label}
+                key={action.href}
                 href={action.href}
                 variant="secondary"
                 className="justify-between"
@@ -146,7 +149,7 @@ export function SupplierOverview({
           description="Packages available for venue partnerships and direct inquiries."
           action={
             <DashButton href="/dashboard/supplier/services" variant="secondary">
-              Add Package
+              Manage Services
             </DashButton>
           }
         />

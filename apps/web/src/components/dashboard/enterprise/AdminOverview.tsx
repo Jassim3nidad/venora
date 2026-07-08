@@ -16,7 +16,7 @@ export type AdminOverviewProps = {
   totalUsers: number;
   pendingVenues: number;
   supplierReviews: number;
-  monthlyCommission: number;
+  pendingApplications: number;
   pendingReviews: Array<{
     id: string;
     item: string;
@@ -27,6 +27,12 @@ export type AdminOverviewProps = {
 };
 
 const ADMIN_MODULES = [
+  {
+    title: "Partner Applications",
+    description: "Approve or deny applications for venue owner, coordinator, and supplier roles.",
+    href: "/admin/applications",
+    icon: "how_to_reg",
+  },
   {
     title: "User Management",
     description: "Review users, manage roles, and monitor platform access.",
@@ -70,7 +76,7 @@ export function AdminOverview({
   totalUsers,
   pendingVenues,
   supplierReviews,
-  monthlyCommission,
+  pendingApplications,
   pendingReviews,
 }: AdminOverviewProps) {
   const kpis = [
@@ -81,6 +87,11 @@ export function AdminOverview({
       highlight: true,
     },
     {
+      label: "Partner Applications",
+      value: String(pendingApplications),
+      icon: "how_to_reg",
+    },
+    {
       label: "Pending Venues",
       value: String(pendingVenues),
       icon: "location_city",
@@ -89,11 +100,6 @@ export function AdminOverview({
       label: "Supplier Reviews",
       value: String(supplierReviews),
       icon: "storefront",
-    },
-    {
-      label: "Monthly Commission",
-      value: `₱${monthlyCommission.toLocaleString()}`,
-      icon: "payments",
     },
   ];
 
@@ -113,8 +119,8 @@ export function AdminOverview({
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <DashButton href="/admin/reports" variant="secondary" icon="assessment">
-            View Reports
+          <DashButton href="/admin/applications" variant="secondary" icon="how_to_reg">
+            Review Applications
           </DashButton>
           <DashButton href="/admin/venues" icon="arrow_forward">
             Review Venues

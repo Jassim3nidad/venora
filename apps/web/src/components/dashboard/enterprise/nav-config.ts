@@ -30,10 +30,10 @@ export const NAV_BY_ROLE: Record<EnterpriseRole, NavItem[]> = {
   ],
   coordinator: [
     { label: "Overview", href: "/dashboard/coordinator", icon: "dashboard" },
-    { label: "Events", href: "/dashboard/coordinator", icon: "celebration" },
-    { label: "Venues", href: "/dashboard/coordinator", icon: "location_city" },
-    { label: "Suppliers", href: "/dashboard/coordinator", icon: "storefront" },
-    { label: "Reports", href: "/dashboard/coordinator", icon: "assessment" },
+    { label: "Events", href: "/dashboard/coordinator/events", icon: "celebration" },
+    { label: "Venues", href: "/dashboard/coordinator/venues", icon: "location_city" },
+    { label: "Suppliers", href: "/dashboard/coordinator/suppliers", icon: "storefront" },
+    { label: "Reports", href: "/dashboard/coordinator/reports", icon: "assessment" },
   ],
   supplier: [
     { label: "Overview", href: "/dashboard/supplier", icon: "dashboard" },
@@ -41,10 +41,12 @@ export const NAV_BY_ROLE: Record<EnterpriseRole, NavItem[]> = {
     { label: "Services", href: "/dashboard/supplier/services", icon: "design_services" },
     { label: "Portfolio", href: "/dashboard/supplier/portfolio", icon: "photo_library" },
     { label: "Inquiries", href: "/dashboard/supplier/inquiries", icon: "mail" },
-    { label: "Bookings", href: "/dashboard/supplier", icon: "event_available" },
+    { label: "Bookings", href: "/dashboard/supplier/bookings", icon: "event_available" },
+    { label: "Analytics", href: "/dashboard/supplier/analytics", icon: "trending_up" },
   ],
   admin: [
     { label: "Overview", href: "/admin", icon: "dashboard" },
+    { label: "Applications", href: "/admin/applications", icon: "how_to_reg" },
     { label: "Venues", href: "/admin/venues", icon: "location_city" },
     { label: "Suppliers", href: "/admin/suppliers", icon: "storefront" },
     { label: "Users", href: "/admin/users", icon: "group" },

@@ -1,8 +1,30 @@
 import { redirect } from "next/navigation";
+import { formatCurrency } from "@venora/lib";
 import { createClient } from "@/lib/supabase/server";
-import { getSupplierDashboardContext } from "@/features/suppliers/application/queries";
+import {
+  getSupplierDashboardContext as getMarketplaceSupplierDashboardContext,
+} from "@/features/suppliers/application/queries";
+import type {
+  SupplierCategory,
+  SupplierMarketplaceProfile,
+} from "@/features/suppliers/types/supplier.types";
 
-export async function getRequiredSupplierDashboardContext() {
+export type SupplierProfile = {
+  id: string;
+  business_name: string;
+  accreditation_status: string;
+};
+
+export type SupplierDashboardContext = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any;
+  user: { id: string; email?: string | null };
+  profile: SupplierMarketplaceProfile | null;
+  categories: SupplierCategory[];
+  supplierProfile: SupplierProfile | null;
+};
+
+export async function getRequiredSupplierDashboardContext(): Promise<SupplierDashboardContext> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -10,11 +32,34 @@ export async function getRequiredSupplierDashboardContext() {
 
   if (!user) redirect("/login");
 
-  const context = await getSupplierDashboardContext(supabase, user.id);
+  const context = await getMarketplaceSupplierDashboardContext(supabase, user.id);
+  const supplierProfile = context.profile
+    ? {
+        id: context.profile.id,
+        business_name: context.profile.businessName,
+        accreditation_status: context.profile.accreditationStatus,
+      }
+    : null;
 
   return {
     supabase,
     user,
-    ...context,
+    profile: context.profile,
+    categories: context.categories,
+    supplierProfile,
   };
+}
+
+export async function getSupplierDashboardContext(): Promise<SupplierDashboardContext> {
+  return getRequiredSupplierDashboardContext();
+}
+
+export function formatPeso(amount: number | null | undefined) {
+  if (amount == null || Number.isNaN(Number(amount))) return "-";
+  return formatCurrency(Number(amount));
+}
+
+export function formatDate(value: string | null | undefined) {
+  if (!value) return "-";
+  return new Date(value).toLocaleDateString("en-PH", { dateStyle: "medium" });
 }

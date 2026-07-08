@@ -7,7 +7,8 @@ import {
 import { SupplierPackageManager } from "@/features/suppliers/ui/SupplierPackageManager";
 import { getRequiredSupplierDashboardContext } from "../_lib/supplier-dashboard-data";
 
-export const metadata: Metadata = { title: "Supplier Services - Dashboard" };
+export const metadata: Metadata = { title: "Services - Supplier Dashboard" };
+export const dynamic = "force-dynamic";
 
 export default async function SupplierServicesPage() {
   const { profile } = await getRequiredSupplierDashboardContext();

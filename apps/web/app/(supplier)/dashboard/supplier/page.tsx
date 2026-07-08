@@ -1,11 +1,11 @@
-import { SupplierOverview } from "@/components/dashboard/enterprise";
-import { DashButton, EmptyState } from "@/components/dashboard/enterprise";
+import { DashButton, EmptyState, SupplierOverview } from "@/components/dashboard/enterprise";
 import { formatSupplierPrice } from "@/features/suppliers/utils/supplier-format";
 import { getRequiredSupplierDashboardContext } from "./_lib/supplier-dashboard-data";
 
 export const metadata = {
   title: "Supplier Dashboard",
 };
+export const dynamic = "force-dynamic";
 
 type ContactInquiryRow = {
   id: string;
@@ -15,7 +15,17 @@ type ContactInquiryRow = {
   supplier_services: { name: string } | null;
 };
 
-function formatDate(value: string | null) {
+type BookingInquiryRow = {
+  id: string;
+  status: string;
+  bookings: {
+    event_date: string;
+    venues: { name: string } | null;
+    profiles: { full_name: string | null } | null;
+  } | null;
+};
+
+function formatDate(value: string | null | undefined) {
   if (!value) return "Not set";
   return new Date(value).toLocaleDateString("en-PH", { dateStyle: "medium" });
 }
@@ -43,32 +53,58 @@ export default async function SupplierDashboardPage() {
   const supplierId = profile.id;
   const activeServices = profile.packages.filter((pkg) => pkg.isActive).length;
 
-  const [{ count: clientInquiries }, { count: confirmedBookings }, bookingSupsResult, contactResult] =
-    await Promise.all([
-      (supabase as any)
-        .from("supplier_contact_requests")
-        .select("id", { count: "exact", head: true })
-        .eq("supplier_id", supplierId)
-        .eq("status", "new"),
-      (supabase as any)
-        .from("booking_suppliers")
-        .select("id", { count: "exact", head: true })
-        .eq("supplier_id", supplierId)
-        .eq("status", "confirmed"),
-      (supabase as any)
-        .from("booking_suppliers")
-        .select("agreed_price")
-        .eq("supplier_id", supplierId)
-        .eq("status", "confirmed"),
-      (supabase as any)
-        .from("supplier_contact_requests")
-        .select(
-          "id, contact_name, event_date, status, supplier_services(name)",
+  const [
+    directInquiryCountResult,
+    bookingInquiryCountResult,
+    confirmedBookingsResult,
+    bookingSupsResult,
+    contactResult,
+    bookingInquiryResult,
+  ] = await Promise.all([
+    (supabase as any)
+      .from("supplier_contact_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("supplier_id", supplierId)
+      .eq("status", "new"),
+    (supabase as any)
+      .from("booking_suppliers")
+      .select("id", { count: "exact", head: true })
+      .eq("supplier_id", supplierId)
+      .eq("status", "pending"),
+    (supabase as any)
+      .from("booking_suppliers")
+      .select("id", { count: "exact", head: true })
+      .eq("supplier_id", supplierId)
+      .eq("status", "confirmed"),
+    (supabase as any)
+      .from("booking_suppliers")
+      .select("agreed_price")
+      .eq("supplier_id", supplierId)
+      .eq("status", "confirmed"),
+    (supabase as any)
+      .from("supplier_contact_requests")
+      .select("id, contact_name, event_date, status, supplier_services(name)")
+      .eq("supplier_id", supplierId)
+      .order("created_at", { ascending: false })
+      .limit(3),
+    (supabase as any)
+      .from("booking_suppliers")
+      .select(
+        `
+        id,
+        status,
+        bookings (
+          event_date,
+          venues(name),
+          profiles!customer_id(full_name)
         )
-        .eq("supplier_id", supplierId)
-        .order("created_at", { ascending: false })
-        .limit(5),
-    ]);
+      `,
+      )
+      .eq("supplier_id", supplierId)
+      .eq("status", "pending")
+      .order("id", { ascending: false })
+      .limit(3),
+  ]);
 
   const monthlyRevenue = (bookingSupsResult.data ?? []).reduce(
     (sum: number, row: { agreed_price: number | null }) =>
@@ -84,7 +120,7 @@ export default async function SupplierDashboardPage() {
     status: pkg.isActive ? "Active" : "Archived",
   }));
 
-  const inquiries = ((contactResult.data ?? []) as ContactInquiryRow[]).map(
+  const directInquiries = ((contactResult.data ?? []) as ContactInquiryRow[]).map(
     (row) => ({
       id: row.id,
       client: row.contact_name,
@@ -94,16 +130,29 @@ export default async function SupplierDashboardPage() {
     }),
   );
 
+  const bookingInquiries = ((bookingInquiryResult.data ?? []) as BookingInquiryRow[]).map(
+    (row) => ({
+      id: row.id,
+      client: row.bookings?.profiles?.full_name ?? "Client",
+      service: row.bookings?.venues?.name ?? "Venue request",
+      eventDate: formatDate(row.bookings?.event_date),
+      status: row.status,
+    }),
+  );
+
   return (
     <SupplierOverview
       businessName={profile.businessName}
       accreditationStatus={profile.accreditationStatus}
       activeServices={activeServices}
-      clientInquiries={clientInquiries ?? 0}
-      confirmedBookings={confirmedBookings ?? 0}
+      clientInquiries={
+        (directInquiryCountResult.count ?? 0) +
+        (bookingInquiryCountResult.count ?? 0)
+      }
+      confirmedBookings={confirmedBookingsResult.count ?? 0}
       monthlyRevenue={monthlyRevenue}
       services={services}
-      inquiries={inquiries}
+      inquiries={[...directInquiries, ...bookingInquiries]}
     />
   );
 }
