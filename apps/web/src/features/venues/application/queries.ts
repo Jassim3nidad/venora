@@ -22,8 +22,10 @@ function parseMoney(value: string | undefined): number {
   return Number.isFinite(amount) ? amount : 0;
 }
 
+// SupabaseClient generic typing can conflict with generated Database types
+// We use any here since the query result is processed dynamically anyway.
 export async function searchMarketplaceVenues(
-  supabase: SupabaseClient,
+  supabase: any,
   params: VenueSearchParams
 ) {
   let query = supabase
