@@ -3,6 +3,7 @@
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@venora/ui";
 import { CHART_COLORS } from "./palette";
+import { formatChartValue, type ChartValueFormat } from "./format";
 
 export type TopItem = { label: string; value: number; meta?: string };
 
@@ -12,10 +13,10 @@ const chartConfig: ChartConfig = {
 
 export function TopItemsBarChart({
   data,
-  valueFormatter,
+  format = "number",
 }: {
   data: TopItem[];
-  valueFormatter?: (value: number) => string;
+  format?: ChartValueFormat;
 }) {
   if (data.length === 0) {
     return (
@@ -24,6 +25,8 @@ export function TopItemsBarChart({
       </div>
     );
   }
+
+  const valueFormatter = (value: number) => formatChartValue(value, format);
 
   return (
     <ChartContainer config={chartConfig} className="h-[220px] w-full">
@@ -34,10 +37,10 @@ export function TopItemsBarChart({
           tickLine={false}
           axisLine={false}
           fontSize={11}
-          tickFormatter={(value) => (valueFormatter ? valueFormatter(value) : String(value))}
+          tickFormatter={valueFormatter}
         />
         <YAxis type="category" dataKey="label" tickLine={false} axisLine={false} width={120} fontSize={11} />
-        <ChartTooltip content={<ChartTooltipContent valueFormatter={valueFormatter ?? ((value) => String(value))} />} />
+        <ChartTooltip content={<ChartTooltipContent valueFormatter={valueFormatter} />} />
         <Bar dataKey="value" fill={CHART_COLORS.primary} radius={[0, 6, 6, 0]} />
       </BarChart>
     </ChartContainer>

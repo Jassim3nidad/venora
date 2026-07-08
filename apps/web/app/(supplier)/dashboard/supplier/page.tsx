@@ -1,6 +1,7 @@
 import { DashButton, EmptyState, SupplierOverview } from "@/components/dashboard/enterprise";
 import { formatSupplierPrice } from "@/features/suppliers/utils/supplier-format";
 import { getRequiredSupplierDashboardContext } from "./_lib/supplier-dashboard-data";
+import { getRevenueTrend, lastNMonthsRange } from "@/features/analytics/application/queries";
 
 export const metadata = {
   title: "Supplier Dashboard",
@@ -106,6 +107,12 @@ export default async function SupplierDashboardPage() {
       .limit(3),
   ]);
 
+  const revenueTrend = await getRevenueTrend(
+    supabase,
+    { kind: "supplier", supplierId },
+    lastNMonthsRange(12),
+  );
+
   const monthlyRevenue = (bookingSupsResult.data ?? []).reduce(
     (sum: number, row: { agreed_price: number | null }) =>
       sum + (Number(row.agreed_price) || 0),
@@ -153,6 +160,7 @@ export default async function SupplierDashboardPage() {
       monthlyRevenue={monthlyRevenue}
       services={services}
       inquiries={[...directInquiries, ...bookingInquiries]}
+      revenueTrend={revenueTrend}
     />
   );
 }

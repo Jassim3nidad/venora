@@ -109,6 +109,10 @@ const ROLE_GUARDS: Array<{ prefix: string; roles: UserRole[] }> = [
     roles: ["venue_owner", "event_coordinator", "supplier", "admin"],
   },
   {
+    prefix: "/dashboard/customer",
+    roles: ["customer", "admin"],
+  },
+  {
     prefix: "/dashboard",
     roles: ["venue_owner", "admin"],
   },
@@ -199,10 +203,6 @@ export async function middleware(request: NextRequest) {
   const isProtected =
     PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix)) ||
     isVenueBookingPath;
-
-  if (pathname === "/dashboard/customer") {
-    return redirectWithCookies(new URL("/", request.url), supabaseResponse);
-  }
 
   // 1. Auth guard — redirect unauthenticated users
   if (isProtected && !user) {

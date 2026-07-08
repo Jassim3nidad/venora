@@ -469,3 +469,35 @@ export async function getBookingDemographics(
 
   return { eventTypeMix, guestCountBuckets, ...(newVsReturning ? { newVsReturning } : {}) };
 }
+
+// ── getCommissionTrend ───────────────────────────────────────────────────────
+
+/**
+ * Platform-only — commissions/payouts have no other scope concept in this
+ * app, so this deliberately takes no `AnalyticsScope` param. Feeds the same
+ * RevenueTrendChart component as getRevenueTrend, but with commission
+ * amounts instead of gross booking revenue (a distinct call site).
+ */
+export async function getCommissionTrend(
+  supabase: VenoraSupabase,
+  range: DateRange = lastNMonthsRange(),
+): Promise<RevenueTrendRow[]> {
+  const { data, error } = await supabase
+    .from("transactions")
+    .select("created_at, commission_amount")
+    .eq("status", "paid")
+    .gte("created_at", range.from)
+    .lte("created_at", range.to);
+
+  if (error || !data) return [];
+
+  const buckets = new Map<string, RevenueTrendRow>();
+  for (const row of data as { created_at: string; commission_amount: number | null }[]) {
+    const key = monthKey(row.created_at);
+    const bucket = buckets.get(key) ?? { period: monthLabel(row.created_at), revenue: 0, bookings: 0 };
+    bucket.revenue += Number(row.commission_amount) || 0;
+    bucket.bookings += 1;
+    buckets.set(key, bucket);
+  }
+  return [...buckets.entries()].sort(([a], [b]) => (a < b ? -1 : 1)).map(([, value]) => value);
+}

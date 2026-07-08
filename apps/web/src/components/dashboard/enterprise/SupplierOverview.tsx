@@ -10,6 +10,7 @@ import {
   StatusBadge,
 } from "./ui";
 import { MaterialIcon } from "./MaterialIcon";
+import { RevenueTrendChart, type RevenueTrendPoint } from "./charts";
 
 export type SupplierOverviewProps = {
   businessName: string;
@@ -32,6 +33,7 @@ export type SupplierOverviewProps = {
     eventDate: string;
     status: string;
   }>;
+  revenueTrend: RevenueTrendPoint[];
 };
 
 export function SupplierOverview({
@@ -43,6 +45,7 @@ export function SupplierOverview({
   monthlyRevenue,
   services,
   inquiries,
+  revenueTrend,
 }: SupplierOverviewProps) {
   const kpis = [
     {
@@ -106,23 +109,15 @@ export function SupplierOverview({
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <Panel>
           <PanelHeader
-            title="Inquiry Performance"
-            description="Monthly supplier inquiries from customers and venue partners."
+            title="Revenue Performance"
+            description="Revenue from confirmed bookings over time."
             action={
               <span className="rounded-full bg-[#eff6ff] px-3 py-1 text-xs font-bold text-[#1d4ed8]">
                 This Year
               </span>
             }
           />
-          <div className="flex h-40 items-end gap-2 rounded-lg bg-[#f9fafb] p-4">
-            {[10, 15, 12, 18, 22, 25, 20, 28, 24, 30, 26, 34].map((height, index) => (
-              <div
-                key={index}
-                className="flex-1 rounded-t bg-[#1d4ed8]/70"
-                style={{ height: `${height * 4}px` }}
-              />
-            ))}
-          </div>
+          <RevenueTrendChart data={revenueTrend} format="currency" />
         </Panel>
 
         <Panel>

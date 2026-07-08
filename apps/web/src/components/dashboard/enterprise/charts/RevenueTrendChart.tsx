@@ -3,6 +3,7 @@
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@venora/ui";
 import { CHART_COLORS } from "./palette";
+import { formatChartValue, type ChartValueFormat } from "./format";
 
 export type RevenueTrendPoint = { period: string; revenue: number; bookings?: number };
 
@@ -12,10 +13,10 @@ const chartConfig: ChartConfig = {
 
 export function RevenueTrendChart({
   data,
-  valueFormatter,
+  format = "currency",
 }: {
   data: RevenueTrendPoint[];
-  valueFormatter?: (value: number) => string;
+  format?: ChartValueFormat;
 }) {
   if (data.length === 0) {
     return (
@@ -24,6 +25,8 @@ export function RevenueTrendChart({
       </div>
     );
   }
+
+  const valueFormatter = (value: number) => formatChartValue(value, format);
 
   return (
     <ChartContainer config={chartConfig} className="h-[240px] w-full">
@@ -42,9 +45,9 @@ export function RevenueTrendChart({
           tickMargin={8}
           fontSize={11}
           width={48}
-          tickFormatter={(value) => (valueFormatter ? valueFormatter(value) : String(value))}
+          tickFormatter={valueFormatter}
         />
-        <ChartTooltip content={<ChartTooltipContent valueFormatter={valueFormatter ?? ((value) => String(value))} />} />
+        <ChartTooltip content={<ChartTooltipContent valueFormatter={valueFormatter} />} />
         <Area
           dataKey="revenue"
           type="monotone"

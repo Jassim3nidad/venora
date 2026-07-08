@@ -141,7 +141,7 @@ export default async function AnalyticsPage() {
             title="Revenue Overview"
             description="Revenue from approved, confirmed, and completed bookings."
           />
-          <RevenueTrendChart data={revenueTrend} valueFormatter={(value) => formatPeso(value)} />
+          <RevenueTrendChart data={revenueTrend} format="currency" />
         </Panel>
 
         <Panel>
