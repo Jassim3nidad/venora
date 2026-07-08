@@ -40,10 +40,13 @@ export async function searchMarketplaceVenues(
     .eq("status", "published");
 
   if (params.q) {
-    const q = params.q;
-    query = query.or(
-      `name.ilike.%${q}%,city.ilike.%${q}%,province.ilike.%${q}%,municipality.ilike.%${q}%`
-    );
+    // Sanitize to prevent PostgREST syntax errors (commas, quotes, parentheses break .or)
+    const q = params.q.replace(/[,()"]/g, '').trim();
+    if (q) {
+      query = query.or(
+        `name.ilike.%${q}%,city.ilike.%${q}%,province.ilike.%${q}%,municipality.ilike.%${q}%`
+      );
+    }
   }
 
   if (params.province) {
@@ -57,7 +60,10 @@ export async function searchMarketplaceVenues(
   }
   
   if (params.location) {
-    query = query.or(`location.ilike.%${params.location}%,city.ilike.%${params.location}%,municipality.ilike.%${params.location}%,province.ilike.%${params.location}%`);
+    const loc = params.location.replace(/[,()"]/g, '').trim();
+    if (loc) {
+      query = query.or(`location.ilike.%${loc}%,city.ilike.%${loc}%,municipality.ilike.%${loc}%,province.ilike.%${loc}%`);
+    }
   }
 
   if (params.capacity) {
@@ -97,8 +103,12 @@ export async function searchMarketplaceVenues(
   }
 
   if (params.venueTypes && params.venueTypes.length > 0) {
-    const typesFilters = params.venueTypes.map(t => `venue_category_assignments.venue_categories.name.ilike.%${t}%`).join(',');
-    query = query.or(typesFilters);
+    const typesFilters = params.venueTypes
+      .map(t => t.replace(/[,()"]/g, '').trim())
+      .filter(Boolean)
+      .map(safeT => `venue_category_assignments.venue_categories.name.ilike.%${safeT}%`)
+      .join(',');
+    if (typesFilters) query = query.or(typesFilters);
   }
 
   // Handling amenities is tricky in PostgREST for exact matches across a many-to-many.
@@ -124,8 +134,12 @@ export async function searchMarketplaceVenues(
   }
 
   if (textAmenities.length > 0) {
-    const amFilters = textAmenities.map(a => `venue_amenities.amenities.name.ilike.%${a}%`).join(',');
-    query = query.or(amFilters);
+    const amFilters = textAmenities
+      .map(a => a.replace(/[,()"]/g, '').trim())
+      .filter(Boolean)
+      .map(safeA => `venue_amenities.amenities.name.ilike.%${safeA}%`)
+      .join(',');
+    if (amFilters) query = query.or(amFilters);
   }
 
   return query.order("created_at", { ascending: false });
