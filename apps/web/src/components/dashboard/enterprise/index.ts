@@ -30,3 +30,17 @@ export {
   ROLE_LABELS,
 } from "./nav-config";
 export type { EnterpriseRole, NavItem } from "./nav-config";
+export {
+  RevenueTrendChart,
+  StatusDistributionChart,
+  TopItemsBarChart,
+  DemographicsBarChart,
+  CHART_COLORS,
+  CATEGORICAL_PALETTE,
+} from "./charts";
+export type {
+  RevenueTrendPoint,
+  StatusDistributionPoint,
+  TopItem,
+  DemographicsBucket,
+} from "./charts";

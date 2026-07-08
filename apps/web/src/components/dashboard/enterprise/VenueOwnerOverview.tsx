@@ -13,6 +13,7 @@ import {
   PanelHeader,
   StatusBadge,
 } from "./ui";
+import { RevenueTrendChart, type RevenueTrendPoint } from "./charts";
 
 export type VenueOwnerBooking = {
   id: string;
@@ -36,6 +37,7 @@ export type VenueOwnerOverviewProps = {
   avgRating: number | null;
   profileCompletion: number;
   bookings: VenueOwnerBooking[];
+  revenueTrend: RevenueTrendPoint[];
 };
 
 function Toast({ show, message }: { show: boolean; message: string }) {
@@ -58,6 +60,7 @@ export function VenueOwnerOverview({
   avgRating,
   profileCompletion,
   bookings: initialBookings,
+  revenueTrend,
 }: VenueOwnerOverviewProps) {
   const [requests, setRequests] = useState(initialBookings);
   const [loadingId, setLoadingId] = useState<string | null>(null);
@@ -268,19 +271,12 @@ export function VenueOwnerOverview({
           <Panel className="bg-[#eff6ff]/40">
             <PanelHeader
               title="Performance Trend"
-              description="Confirmed bookings this year"
+              description="Revenue from confirmed bookings"
             />
-            <div className="flex h-32 items-end gap-2">
-              {[40, 55, 48, 72, 65, 88, 76, 95, 82, 100, 90, 110].map(
-                (h, i) => (
-                  <div
-                    key={i}
-                    className="flex-1 rounded-t-md bg-[#1d4ed8]/70"
-                    style={{ height: `${h * 0.9}px` }}
-                  />
-                ),
-              )}
-            </div>
+            <RevenueTrendChart
+              data={revenueTrend}
+              valueFormatter={(value) => `₱${value.toLocaleString()}`}
+            />
           </Panel>
         </div>
       </div>

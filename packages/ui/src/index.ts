@@ -104,3 +104,12 @@ export {
   ToastAction,
 } from "./toast";
 export type { ToastProps, ToastActionElement } from "./toast";
+
+export {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from "./chart";
+export type { ChartConfig } from "./chart";
