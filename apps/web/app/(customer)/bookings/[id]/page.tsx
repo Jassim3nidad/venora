@@ -358,11 +358,7 @@ export default async function BookingDetailPage({ params }: Props) {
                     Venue response
                   </p>
                   <p className="mt-2 text-sm font-medium leading-6 text-slate-600">
-<<<<<<< HEAD
                     {getVenueResponse(typedBooking)}
-=======
-                    {"Awaiting venue response."}
->>>>>>> cbca123740ebff7d69ce03050282ff94e0f1e776
                   </p>
                 </div>
               </div>
