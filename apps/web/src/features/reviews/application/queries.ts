@@ -65,7 +65,8 @@ function topReasonOf(flags: { reason: string }[]): ReviewFlagReason | null {
   if (flags.length === 0) return null;
   const counts = new Map<string, number>();
   for (const flag of flags) counts.set(flag.reason, (counts.get(flag.reason) ?? 0) + 1);
-  return [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0] as ReviewFlagReason;
+  const top = [...counts.entries()].sort((a, b) => b[1] - a[1])[0];
+  return (top?.[0] as ReviewFlagReason) ?? null;
 }
 
 function normalizeReviewForModeration(row: any): ReviewForModeration {
@@ -160,7 +161,7 @@ export async function getReviewsForModeration(
     return [];
   }
 
-  const normalized = (data ?? []).map(normalizeReviewForModeration);
+  const normalized: ReviewForModeration[] = (data ?? []).map(normalizeReviewForModeration);
   const filtered = onlyFlagged ? normalized.filter((review) => review.flagCount > 0) : normalized;
 
   return filtered.sort((a, b) => b.flagCount - a.flagCount || (a.createdAt < b.createdAt ? 1 : -1));

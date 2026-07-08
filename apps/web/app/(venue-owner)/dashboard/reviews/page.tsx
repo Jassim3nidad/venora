@@ -65,7 +65,7 @@ export default async function OwnerReviewsPage() {
       key: "reply",
       header: "Reply",
       className: "min-w-[280px]",
-      cell: (row) => <OwnerReplyForm reviewId={row.id} existingReply={row.ownerReply} />,
+      cell: (row) => <OwnerReplyForm reviewId={row.id} existingReply={row.ownerReply ?? null} />,
     },
   ];
 
