@@ -18,7 +18,7 @@ export const ACCOUNT_NAV_ITEMS: AccountNavItem[] = [
   {
     href: "/account",
     label: "Personal Information",
-    description: "Profile, contact details, and password",
+    description: "Profile details and account security",
     icon: UserRound,
   },
   {

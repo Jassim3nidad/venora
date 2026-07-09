@@ -22,7 +22,17 @@ export default function AccountMobileMenu() {
     setIsOpen(false);
   }, [pathname]);
 
-  const activeItem = ACCOUNT_NAV_ITEMS.find((item) => item.href === pathname);
+  const activeItem = ACCOUNT_NAV_ITEMS.find((item) => {
+    if (item.href === "/account") {
+      return (
+        pathname === "/account" ||
+        pathname.startsWith("/account/personal-details") ||
+        pathname.startsWith("/account/change-password")
+      );
+    }
+
+    return pathname === item.href || pathname.startsWith(`${item.href}/`);
+  });
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -82,7 +92,15 @@ export default function AccountMobileMenu() {
             <div className="my-2 border-t border-[#E5E7EB]/80" />
 
             {ACCOUNT_NAV_ITEMS.map((item) => {
-              const isActive = pathname === item.href;
+              const isPersonalInfoSection =
+                item.href === "/account" &&
+                (pathname === "/account" ||
+                  pathname.startsWith("/account/personal-details") ||
+                  pathname.startsWith("/account/change-password"));
+              const isActive =
+                item.href === "/account"
+                  ? isPersonalInfoSection
+                  : pathname === item.href || pathname.startsWith(`${item.href}/`);
               const Icon = item.icon;
 
               return (
