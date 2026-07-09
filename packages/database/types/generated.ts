@@ -54,10 +54,20 @@ export interface Database {
           avatar_url: string | null;
           phone:      string | null;
           status:     AccountStatus;
+          profile_setup_completed_at: string | null;
+          preferences: Json;
           created_at: string;
           updated_at: string;
         };
-        Insert: { id: string; full_name: string; avatar_url?: string | null; phone?: string | null; status?: AccountStatus };
+        Insert: {
+          id: string;
+          full_name: string;
+          avatar_url?: string | null;
+          phone?: string | null;
+          status?: AccountStatus;
+          profile_setup_completed_at?: string | null;
+          preferences?: Json;
+        };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
       };
 

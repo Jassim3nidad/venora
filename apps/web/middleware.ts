@@ -1,6 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import type { Database } from "@venora/database";
+import {
+  isProfileSetupExemptPath,
+  needsProfileSetup,
+  resolvePostAuthRedirect,
+} from "@/lib/profile-setup";
 
 /**
  * Middleware — two responsibilities:
@@ -225,8 +230,23 @@ export async function middleware(request: NextRequest) {
       .map((r) => r.role)
       .filter(Boolean);
 
+    const { data: profile } = (await supabase
+      .from("profiles")
+      .select("profile_setup_completed_at")
+      .eq("id", user.id)
+      .single()) as {
+      data: { profile_setup_completed_at: string | null } | null;
+    };
+
     return redirectWithCookies(
-      new URL(defaultRouteForRoles(userRoles), request.url),
+      new URL(
+        resolvePostAuthRedirect({
+          roles: userRoles,
+          profile,
+          redirectTo: searchParams.get("redirectTo") ?? searchParams.get("next"),
+        }),
+        request.url,
+      ),
       supabaseResponse,
     );
   }
@@ -280,6 +300,36 @@ export async function middleware(request: NextRequest) {
         const redirectUrl = request.nextUrl.clone();
         redirectUrl.pathname = "/unauthorized";
         return redirectWithCookies(redirectUrl, supabaseResponse);
+      }
+    }
+  }
+
+  // 5. Profile setup gate — prompt new customers before using the app
+  if (user && !isProfileSetupExemptPath(pathname)) {
+    const { data: roleRows } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .limit(1);
+
+    const userRoles = ((roleRows ?? []) as { role: UserRole }[])
+      .map((r) => r.role)
+      .filter(Boolean);
+
+    if (userRoles.includes("customer")) {
+      const { data: profile } = (await supabase
+        .from("profiles")
+        .select("profile_setup_completed_at")
+        .eq("id", user.id)
+        .single()) as {
+        data: { profile_setup_completed_at: string | null } | null;
+      };
+
+      if (needsProfileSetup(userRoles, profile)) {
+        return redirectWithCookies(
+          new URL("/profile/setup", request.url),
+          supabaseResponse,
+        );
       }
     }
   }

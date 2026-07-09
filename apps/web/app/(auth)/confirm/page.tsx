@@ -12,7 +12,7 @@ function ConfirmEmailContent() {
 
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as "signup" | "email" | null;
-  const next = searchParams.get("next") || "/login";
+  const next = searchParams.get("next") || "/profile/setup";
 
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);

@@ -25,7 +25,8 @@ import {
   verifyOtpUseCase,
 } from "../application/auth.usecases";
 import type { ActionResult } from "../types/auth.types";
-import { defaultRouteForRoles, type RoleName } from "@/lib/rbac/roles";
+import { type RoleName } from "@/lib/rbac/roles";
+import { resolvePostAuthRedirect } from "@/lib/profile-setup";
 import { toErrorMessage } from "@/lib/errors";
 function isUnverifiedEmailError(message: string) {
   const normalized = message.toLowerCase();
@@ -147,7 +148,21 @@ export async function loginAction(rawInput: unknown): Promise<ActionResult> {
     .map((row) => row.role)
     .filter(Boolean);
 
-  redirect(defaultRouteForRoles(roles));
+  const { data: profile } = (await supabase
+    .from("profiles")
+    .select("profile_setup_completed_at")
+    .eq("id", user.id)
+    .single()) as {
+    data: { profile_setup_completed_at: string | null } | null;
+  };
+
+  redirect(
+    resolvePostAuthRedirect({
+      roles,
+      profile,
+      redirectTo: parsed.data.redirectTo ?? null,
+    }),
+  );
 }
 
 export async function resendVerificationEmailAction(

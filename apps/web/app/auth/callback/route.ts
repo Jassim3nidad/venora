@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { defaultRouteForRoles, type RoleName } from "@/lib/rbac/roles";
+import { type RoleName } from "@/lib/rbac/roles";
+import { resolvePostAuthRedirect } from "@/lib/profile-setup";
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
@@ -42,6 +43,38 @@ export async function GET(request: NextRequest) {
   }
 
   if (next) {
+    const {
+      data: { user: nextUser },
+    } = await supabase.auth.getUser();
+
+    if (nextUser) {
+      const { data: roleRows } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", nextUser.id)
+        .limit(1);
+
+      const roles = ((roleRows ?? []) as { role: RoleName }[])
+        .map((row) => row.role)
+        .filter(Boolean);
+
+      const { data: profile } = (await supabase
+        .from("profiles")
+        .select("profile_setup_completed_at")
+        .eq("id", nextUser.id)
+        .single()) as {
+        data: { profile_setup_completed_at: string | null } | null;
+      };
+
+      const target = resolvePostAuthRedirect({
+        roles,
+        profile,
+        redirectTo: next,
+      });
+
+      return NextResponse.redirect(new URL(target, request.url));
+    }
+
     return NextResponse.redirect(new URL(next, request.url));
   }
 
@@ -63,5 +96,15 @@ export async function GET(request: NextRequest) {
     .map((row) => row.role)
     .filter(Boolean);
 
-  return NextResponse.redirect(new URL(defaultRouteForRoles(roles), request.url));
+  const { data: profile } = (await supabase
+    .from("profiles")
+    .select("profile_setup_completed_at")
+    .eq("id", user.id)
+    .single()) as {
+    data: { profile_setup_completed_at: string | null } | null;
+  };
+
+  return NextResponse.redirect(
+    new URL(resolvePostAuthRedirect({ roles, profile }), request.url),
+  );
 }
