@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ACCOUNT_NAV_ITEMS } from "./nav-items";
+import { isAccountNavItemActive } from "./account-nav-utils";
 
 /**
  * Desktop sidebar navigation for the Account Center.
@@ -18,15 +19,7 @@ export default function AccountNav() {
     >
       <div className="overflow-hidden rounded-[24px] border border-[#E5E7EB]/80 bg-white p-2 shadow-sm shadow-slate-200/60">
         {ACCOUNT_NAV_ITEMS.map((item) => {
-          const isPersonalInfoSection =
-            item.href === "/account" &&
-            (pathname === "/account" ||
-              pathname.startsWith("/account/personal-details") ||
-              pathname.startsWith("/account/change-password"));
-          const isActive =
-            item.href === "/account"
-              ? isPersonalInfoSection
-              : pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const isActive = isAccountNavItemActive(pathname, item.href);
           const Icon = item.icon;
 
           return (

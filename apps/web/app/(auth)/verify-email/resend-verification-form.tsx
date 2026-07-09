@@ -13,7 +13,7 @@ export function ResendVerificationForm() {
   const [email, setEmail] = useState(initialEmail);
   const [message, setMessage] = useState(
     resendAvailable
-      ? "That email is already registered but still needs verification."
+      ? "This email is already registered but not yet verified. Please request a new verification email."
       : "",
   );
   const [error, setError] = useState("");

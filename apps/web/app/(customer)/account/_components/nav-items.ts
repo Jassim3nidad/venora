@@ -1,6 +1,7 @@
 import {
   Building2,
   CreditCard,
+  LayoutDashboard,
   Lock,
   Receipt,
   UserRound,
@@ -20,6 +21,12 @@ export const ACCOUNT_NAV_ITEMS: AccountNavItem[] = [
     label: "Personal Information",
     description: "Profile details and account security",
     icon: UserRound,
+  },
+  {
+    href: "/account/dashboard",
+    label: "Customer Dashboard",
+    description: "Bookings, spending, and activity overview",
+    icon: LayoutDashboard,
   },
   {
     href: "/account/payments",

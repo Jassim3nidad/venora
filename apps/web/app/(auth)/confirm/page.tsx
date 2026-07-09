@@ -97,7 +97,14 @@ function ConfirmEmailContent() {
             </button>
           )}
 
-          <div className="mt-7 text-center">
+          <div className="mt-7 flex flex-col items-center justify-center gap-4 sm:flex-row">
+             <Link
+                href="/verify-email"
+                className="text-sm font-bold text-[#2563EB] transition hover:text-[#1D4ED8]"
+              >
+                Request new link
+              </Link>
+              <span className="hidden text-[#E5E7EB] sm:inline">•</span>
              <Link
                 href="/login"
                 className="text-sm font-bold text-[#6B7280] transition hover:text-[#111827]"
