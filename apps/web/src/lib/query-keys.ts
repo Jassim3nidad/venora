@@ -61,6 +61,13 @@ export const queryKeys = {
     profile: (userId: string)              => ["auth", "profile", userId] as const,
   },
 
+  // Notifications
+  notifications: {
+    all: ["notifications"] as const,
+    list: (filters: Record<string, unknown>) => ["notifications", "list", filters] as const,
+    preferences: ["notifications", "preferences"] as const,
+  },
+
   // ── Search ─────────────────────────────────────────────────
   search: {
     results: (query: Record<string, unknown>) => ["search", "results", query] as const,
@@ -71,6 +78,15 @@ export const queryKeys = {
   calendar: {
     availability: (venueId: string, month: string) => ["calendar", "availability", venueId, month] as const,
     bookings: (venueId: string, month: string) => ["calendar", "bookings", venueId, month] as const,
+  },
+
+  // ── AI ──────────────────────────────────────────────────────
+  ai: {
+    costEstimate:     (venueId: string, params: Record<string, unknown>) => ["ai", "costEstimate", venueId, params] as const,
+    recommendations:  (userId: string)                    => ["ai", "recommendations", userId] as const,
+    descriptionDrafts: (venueId: string)                  => ["ai", "descriptionDrafts", venueId] as const,
+    packageComparison: (packageIds: string[])             => ["ai", "packageComparison", [...packageIds].sort()] as const,
+    conversation:      (sessionId: string)                => ["ai", "conversation", sessionId] as const,
   },
 } as const;
 

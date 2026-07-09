@@ -35,6 +35,9 @@ import ReviewsSection from "./ReviewsSection";
 import VenueMap from "@/src/components/VenueMap";
 import { toggleFavoriteAction } from "../application/actions";
 import { isOptimizableImageSrc } from "@/src/lib/image-host";
+import CostEstimatorPanel from "@/features/ai/ui/CostEstimatorPanel";
+import RecommendedVenues from "@/features/ai/ui/RecommendedVenues";
+import PackageComparePicker from "./PackageComparePicker";
 
 interface VenueDetailsProps {
   venue: any;
@@ -246,6 +249,11 @@ export default function VenueDetails({
 
           <Separator />
 
+          {/* Package Comparison */}
+          <PackageComparePicker packages={venue.venue_packages ?? []} />
+
+          <Separator />
+
           {/* Parking, Rules, and Policies */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-3">
@@ -385,7 +393,7 @@ export default function VenueDetails({
         </div>
 
         {/* Right Sticky Column - Booking Card Widget */}
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 space-y-4">
           <BookingSidebar
             venueId={venue.id}
             venueSlug={venue.slug}
@@ -395,6 +403,12 @@ export default function VenueDetails({
             capacityMin={venue.capacity_min ?? 1}
             capacityMax={venue.capacity_max}
             packages={venue.venue_packages ?? []}
+          />
+          <CostEstimatorPanel
+            venueId={venue.id}
+            venueName={venue.name}
+            capacityMin={venue.capacity_min}
+            capacityMax={venue.capacity_max}
           />
         </div>
       </div>
@@ -481,6 +495,9 @@ export default function VenueDetails({
           </div>
         </section>
       )}
+
+      {/* AI Recommendations */}
+      <RecommendedVenues />
 
       {/* Global Toast component */}
       {toastOpen && (

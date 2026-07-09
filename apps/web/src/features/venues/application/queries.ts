@@ -144,3 +144,25 @@ export async function searchMarketplaceVenues(
 
   return query.order("created_at", { ascending: false });
 }
+
+/** Latest ai_generated_content draft/approved/rejected row per content type for a venue. */
+export async function getLatestGeneratedContentByType(
+  supabase: any,
+  venueId: string,
+): Promise<Record<string, any>> {
+  const { data, error } = await supabase
+    .from("ai_generated_content")
+    .select("id, content_type, generated_text, status, created_at")
+    .eq("venue_id", venueId)
+    .order("created_at", { ascending: false });
+
+  if (error || !data) return {};
+
+  const latestByType: Record<string, any> = {};
+  for (const row of data) {
+    if (!latestByType[row.content_type]) {
+      latestByType[row.content_type] = row;
+    }
+  }
+  return latestByType;
+}

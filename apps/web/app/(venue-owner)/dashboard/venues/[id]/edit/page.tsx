@@ -8,6 +8,8 @@ import {
   PanelHeader,
 } from "@/components/dashboard/enterprise";
 import VenuePhotoUpload from "@/components/venues/VenuePhotoUpload";
+import DescriptionGeneratorPanel from "@/features/venues/ui/DescriptionGeneratorPanel";
+import { getLatestGeneratedContentByType } from "@/features/venues/application/queries";
 import {
   getOwnerDashboardContext,
   getOwnerVenueById,
@@ -47,6 +49,16 @@ export default async function EditVenuePage({
   const venue = await getOwnerVenueById(context, id);
 
   if (!venue) notFound();
+
+  const [initialDrafts, packagesResult] = await Promise.all([
+    getLatestGeneratedContentByType(context.supabase, id),
+    context.supabase
+      .from("venue_packages")
+      .select("id, name")
+      .eq("venue_id", id)
+      .eq("is_active", true),
+  ]);
+  const venuePackageOptions = (packagesResult.data ?? []) as { id: string; name: string }[];
 
   async function updateVenueAction(formData: FormData) {
     "use server";

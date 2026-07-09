@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createServerAction } from "@/src/lib/server-action";
-import { UnauthorizedError } from "@/src/lib/errors";
+import { UnauthorizedError, ForbiddenError } from "@/src/lib/errors";
 import { geocodeAddress } from "@/src/lib/geocode";
 import {
   isTodayOrFutureDateString,
@@ -29,6 +29,14 @@ const checkAvailabilitySchema = z.object({
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format")
     .refine(isValidDateOnlyString, { message: "Invalid date" })
     .refine(isTodayOrFutureDateString, { message: PAST_DATE_MESSAGE }),
+});
+
+const approveGeneratedContentSchema = z.object({
+  contentId: z.string().uuid(),
+});
+
+const rejectGeneratedContentSchema = z.object({
+  contentId: z.string().uuid(),
 });
 
 const updateVenueSchema = z.object({
@@ -146,6 +154,73 @@ export async function checkAvailabilityAction(rawInput: unknown) {
       isAvailable,
       priceOverride: override?.seasonal_price_override ? Number(override.seasonal_price_override) : null,
     };
+  }, rawInput);
+}
+
+/**
+ * Approves an AI-generated content draft. Relies on the
+ * "ai_content.update.owner" RLS policy (migration 029) to enforce that
+ * only an org member for the venue (or admin) can move status ->
+ * approved — an UPDATE the policy denies simply matches zero rows
+ * rather than throwing, so we detect that via .select().maybeSingle()
+ * and surface it as a ForbiddenError.
+ */
+export async function approveGeneratedContentAction(rawInput: unknown) {
+  return createServerAction(approveGeneratedContentSchema, async ({ contentId }) => {
+    const supabase = await createClient() as any;
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      throw new UnauthorizedError("You must be signed in to approve AI content.");
+    }
+
+    const { data: updated, error } = await supabase
+      .from("ai_generated_content")
+      .update({ status: "approved" })
+      .eq("id", contentId)
+      .select("id, venue_id, content_type, generated_text")
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!updated) {
+      throw new ForbiddenError("You do not have access to approve this content.");
+    }
+
+    if (updated.content_type === "description") {
+      const { error: venueUpdateError } = await supabase
+        .from("venues")
+        .update({ ai_generated_description: updated.generated_text })
+        .eq("id", updated.venue_id);
+
+      if (venueUpdateError) throw venueUpdateError;
+    }
+
+    return { id: updated.id, status: "approved" as const };
+  }, rawInput);
+}
+
+export async function rejectGeneratedContentAction(rawInput: unknown) {
+  return createServerAction(rejectGeneratedContentSchema, async ({ contentId }) => {
+    const supabase = await createClient() as any;
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      throw new UnauthorizedError("You must be signed in to reject AI content.");
+    }
+
+    const { data: updated, error } = await supabase
+      .from("ai_generated_content")
+      .update({ status: "rejected" })
+      .eq("id", contentId)
+      .select("id")
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!updated) {
+      throw new ForbiddenError("You do not have access to reject this content.");
+    }
+
+    return { id: updated.id, status: "rejected" as const };
   }, rawInput);
 }
 
