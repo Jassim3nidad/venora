@@ -15,7 +15,6 @@ import {
   X,
 } from "lucide-react";
 import ProfileMenu from "@/components/layout/ProfileMenu";
-import { NotificationBell } from "@/features/notifications/ui/NotificationBell";
 
 interface MarketingNavbarProfile {
   full_name?: string | null;
@@ -124,7 +123,6 @@ export default function MarketingNavbar({
         <div className="hidden items-center justify-end gap-3 justify-self-end md:flex">
           {user ? (
             <>
-              <NotificationBell />
               <ProfileMenu
                 displayName={displayName}
                 email={email}
@@ -152,7 +150,6 @@ export default function MarketingNavbar({
         <div className="flex items-center justify-self-end gap-2 md:hidden">
           {user ? (
             <>
-              <NotificationBell />
               <ProfileMenu
                 displayName={displayName}
                 email={email}
