@@ -8,7 +8,6 @@ import {
   CalendarDays,
   Heart,
   HelpCircle,
-  LayoutDashboard,
   LogOut,
   Menu,
   Store,
@@ -48,7 +47,6 @@ const primaryNavLinks: NavLink[] = [
   { label: "Suppliers", href: "/suppliers" },
   { label: "Bookings", href: "/bookings" },
   { label: "Favorites", href: "/favorites" },
-  { label: "Dashboard", href: "/dashboard/customer" },
 ];
 
 const mobileNavLinks: NavLink[] = [
@@ -62,12 +60,6 @@ const mobileNavLinks: NavLink[] = [
   },
   { label: "Favorites", href: "/favorites", icon: Heart, mobileOnly: true },
   { label: "Notifications", href: "/notifications", icon: Bell, mobileOnly: true },
-  {
-    label: "Dashboard",
-    href: "/dashboard/customer",
-    icon: LayoutDashboard,
-    mobileOnly: true,
-  },
 ];
 
 export function CustomerNavbar({
