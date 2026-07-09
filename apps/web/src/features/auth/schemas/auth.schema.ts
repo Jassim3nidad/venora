@@ -59,6 +59,12 @@ export const updateProfileSchema = z.object({
 });
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 
+export const updateAvatarSchema = z.object({
+  avatarUrl: z.string().url("Invalid avatar URL"),
+  storagePath: z.string().trim().min(1, "Storage path is required"),
+});
+export type UpdateAvatarInput = z.infer<typeof updateAvatarSchema>;
+
 export const changePasswordSchema = z
   .object({
     oldPassword: z.string().min(1, "Enter your current password"),

@@ -22,14 +22,17 @@ import {
   changePasswordAction,
   updateProfileAction,
 } from "@/features/auth/actions/auth.actions";
+import { AvatarUpload } from "@/features/auth/ui/AvatarUpload";
 import {
   changePasswordSchema,
   updateProfileSchema,
 } from "@/features/auth/schemas/auth.schema";
 
 interface AccountFormProps {
+  userId: string;
   initialFullName: string;
   initialPhone: string;
+  initialAvatarUrl: string | null;
 }
 
 
@@ -202,8 +205,10 @@ function SubmitButton({
 }
 
 export default function AccountForm({
+  userId,
   initialFullName,
   initialPhone,
+  initialAvatarUrl,
 }: AccountFormProps) {
   const [fullName, setFullName] = useState(initialFullName);
   const [phone, setPhone] = useState(initialPhone);
@@ -345,6 +350,12 @@ export default function AccountForm({
               {generalError && (
                 <AlertBanner type="error">{generalError}</AlertBanner>
               )}
+
+              <AvatarUpload
+                userId={userId}
+                initialAvatarUrl={initialAvatarUrl}
+                displayName={fullName || initialFullName || "Venora User"}
+              />
 
               <TextField
                 id="account-full-name"

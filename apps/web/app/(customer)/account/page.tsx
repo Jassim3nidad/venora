@@ -122,8 +122,10 @@ export default async function AccountPage() {
       </div>
 
       <AccountForm
+        userId={user.id}
         initialFullName={profile?.full_name ?? ""}
         initialPhone={profile?.phone ?? ""}
+        initialAvatarUrl={profile?.avatar_url ?? null}
       />
 
       <div className="overflow-hidden rounded-[28px] border border-[#E5E7EB]/80 bg-white shadow-xl shadow-slate-200/60">
