@@ -77,3 +77,19 @@ export const changePasswordSchema = z
     path: ["confirmPassword"],
   });
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+
+export const DELETE_ACCOUNT_CONFIRMATION_PHRASE = "DELETE MY ACCOUNT";
+
+export const deleteAccountSchema = z.object({
+  password: z.string().min(1, "Password is required"),
+  confirmPassword: z.string().min(1, "Re-enter your password"),
+  confirmationPhrase: z
+    .string()
+    .refine((value) => value === DELETE_ACCOUNT_CONFIRMATION_PHRASE, {
+      message: `Type ${DELETE_ACCOUNT_CONFIRMATION_PHRASE} to confirm.`,
+    }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
+export type DeleteAccountInput = z.infer<typeof deleteAccountSchema>;

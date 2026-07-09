@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import {
   registerSchema,
@@ -11,6 +12,7 @@ import {
   updateProfileSchema,
   updateAvatarSchema,
   changePasswordSchema,
+  deleteAccountSchema,
 } from "../schemas/auth.schema";
 import {
   registerUserUseCase,
@@ -534,6 +536,140 @@ export async function changePasswordAction(
       error: toErrorMessage(error),
     };
   }
+}
+
+export async function deleteAccountAction(
+  rawInput: unknown,
+): Promise<ActionResult> {
+  const parsed = deleteAccountSchema.safeParse(rawInput);
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: "Validation failed.",
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
+  }
+
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return {
+        success: false,
+        error: "You must be logged in to delete your account.",
+      };
+    }
+
+    if (!user.email) {
+      return {
+        success: false,
+        error: "Account deletion requires an email/password account.",
+      };
+    }
+
+    const { createClient: createJSClient } = require("@supabase/supabase-js");
+
+    const tempClient = createJSClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+      },
+    );
+
+    const { error: verifyError } = await tempClient.auth.signInWithPassword({
+      email: user.email,
+      password: parsed.data.password,
+    });
+
+    await tempClient.auth.signOut();
+
+    if (verifyError) {
+      return {
+        success: false,
+        error: "Incorrect password.",
+        fieldErrors: {
+          password: ["Incorrect password."],
+        },
+      };
+    }
+
+    const admin = createAdminClient();
+
+    const { data: currentProfile } = await (admin.from("profiles") as any)
+      .select("full_name, avatar_url, phone, status, preferences")
+      .eq("id", user.id)
+      .single();
+
+    const { error: profileError } = await (admin.from("profiles") as any)
+      .update({
+        full_name: "Deleted User",
+        avatar_url: null,
+        phone: null,
+        status: "suspended",
+        preferences: {},
+      })
+      .eq("id", user.id);
+
+    if (profileError) {
+      console.error("[deleteAccountAction] Profile anonymization failed:", profileError);
+      return {
+        success: false,
+        error: "Account deletion failed. Please try again.",
+      };
+    }
+
+    const { error: disableError } = await admin.auth.admin.updateUserById(
+      user.id,
+      {
+        ban_duration: "876000h",
+      } as any,
+    );
+
+    if (disableError) {
+      console.error("[deleteAccountAction] Auth user disable failed:", disableError);
+
+      if (currentProfile) {
+        await (admin.from("profiles") as any)
+          .update({
+            full_name: currentProfile.full_name,
+            avatar_url: currentProfile.avatar_url,
+            phone: currentProfile.phone,
+            status: currentProfile.status,
+            preferences: currentProfile.preferences,
+          })
+          .eq("id", user.id);
+      }
+
+      return {
+        success: false,
+        error: "Account deletion failed. Please try again.",
+      };
+    }
+
+    const { error: signOutError } = await supabase.auth.signOut();
+
+    if (signOutError) {
+      console.error("[deleteAccountAction] Sign-out after deletion failed:", signOutError);
+    }
+  } catch (error) {
+    console.error("[deleteAccountAction] Unexpected deletion failure:", error);
+    return {
+      success: false,
+      error: "Account deletion failed. Please try again.",
+    };
+  }
+
+  redirect("/login");
 }
 
 export async function verifyOtpAction(tokenHash: string, type: "signup" | "email"): Promise<ActionResult> {

@@ -13,6 +13,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { getFavoriteVenuesForUser } from "@/src/features/venues/application/get-favorite-venues";
 import AccountSettingsList from "./_components/AccountSettingsList";
+import DeleteAccountDangerZone from "./_components/DeleteAccountDangerZone";
 
 export const metadata: Metadata = {
   title: "Personal Information",
@@ -248,6 +249,8 @@ export default async function AccountPage() {
           </div>
         </div>
       )}
+
+      <DeleteAccountDangerZone />
     </div>
   );
 }
