@@ -1,5 +1,5 @@
-import 'dotenv/config';
-
+import dotenv from 'dotenv';
+dotenv.config({ path: 'apps/web/.env.local' });
 console.log('Validating environment variables for Notification Platform...');
 
 const requiredEnvVars = [

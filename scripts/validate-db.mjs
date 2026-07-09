@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
-import 'dotenv/config';
+import dotenv from 'dotenv';
+dotenv.config({ path: 'apps/web/.env.local' });
 
 console.log('Validating Database Schema and Configurations...');
 
