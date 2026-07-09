@@ -45,6 +45,7 @@ interface VenueDetailsProps {
   nearbyVenues: any[];
   initialIsFavorited: boolean;
   currentUser: any;
+  eligibleReviewBooking?: { id: string; event_date: string | null } | null;
 }
 
 function formatCurrency(value?: number | null) {
@@ -59,12 +60,22 @@ function formatCurrency(value?: number | null) {
   }).format(value);
 }
 
+function formatDate(value?: string | null) {
+  if (!value) return "your completed event";
+  const date = value.includes("T")
+    ? new Date(value)
+    : new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return "your completed event";
+  return new Intl.DateTimeFormat("en-PH", { dateStyle: "long" }).format(date);
+}
+
 export default function VenueDetails({
   venue,
   reviews = [],
   nearbyVenues = [],
   initialIsFavorited,
   currentUser,
+  eligibleReviewBooking = null,
 }: VenueDetailsProps) {
   const [isFavorited, setIsFavorited] = useState(initialIsFavorited);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
@@ -334,7 +345,10 @@ export default function VenueDetails({
                 {venue.mapPrecision && venue.mapPrecision !== "exact" ? (
                   <p className="text-xs font-medium text-[var(--text-muted)]">
                     Approximate location shown (
-                    {venue.mapPrecision === "city" ? venue.city : venue.province})
+                    {venue.mapPrecision === "city"
+                      ? venue.city
+                      : venue.province}
+                    )
                   </p>
                 ) : null}
                 <VenueMap
@@ -382,6 +396,38 @@ export default function VenueDetails({
           </section>
 
           <Separator />
+
+          {eligibleReviewBooking ? (
+            <>
+              <section className="rounded-[24px] border border-[#DBEAFE] bg-[#EFF6FF] p-5 shadow-sm shadow-slate-200/60 sm:p-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#2563EB]">
+                      <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                      Verified guest review
+                    </div>
+                    <h3 className="mt-3 text-xl font-black tracking-[-0.03em] text-slate-950">
+                      Share your experience at {venue.name}
+                    </h3>
+                    <p className="mt-2 text-sm font-medium leading-6 text-[#6B7280]">
+                      You can review this venue because your booking on{" "}
+                      {formatDate(eligibleReviewBooking.event_date)} is marked
+                      completed.
+                    </p>
+                  </div>
+                  <Link
+                    href={`/bookings/${eligibleReviewBooking.id}/review`}
+                    className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-5 text-sm font-black text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8]"
+                  >
+                    <Star className="h-4 w-4" />
+                    Write a Review
+                  </Link>
+                </div>
+              </section>
+
+              <Separator />
+            </>
+          ) : null}
 
           {/* Reviews Section */}
           <ReviewsSection

@@ -86,7 +86,11 @@ function formatDate(value?: string | null) {
 }
 
 function formatCurrency(value?: number | null) {
-  if (value === null || value === undefined || !Number.isFinite(Number(value))) {
+  if (
+    value === null ||
+    value === undefined ||
+    !Number.isFinite(Number(value))
+  ) {
     return "Pending quote";
   }
 
@@ -159,6 +163,15 @@ function actionForBooking(booking: BookingRecord, venue?: VenueRecord | null) {
     );
   }
 
+  if (booking.reviews?.length || booking.status === "reviewed") {
+    return (
+      <CustomerLinkButton href={`/bookings/${booking.id}/review`}>
+        <Star className="h-4 w-4" />
+        View Review
+      </CustomerLinkButton>
+    );
+  }
+
   if (venue?.slug) {
     return (
       <CustomerLinkButton href={`/venues/${venue.slug}`} tone="secondary">
@@ -211,12 +224,14 @@ async function getCustomerBookings(userId: string) {
     return [];
   }
 
-  return ((data ?? []) as Array<Omit<BookingRecord, "status"> & { status?: string | null }>).map(
-    (booking) => ({
-      ...booking,
-      status: toBookingStatus(booking.status),
-    }),
-  );
+  return (
+    (data ?? []) as Array<
+      Omit<BookingRecord, "status"> & { status?: string | null }
+    >
+  ).map((booking) => ({
+    ...booking,
+    status: toBookingStatus(booking.status),
+  }));
 }
 
 function getFilterCounts(bookings: BookingRecord[]) {
@@ -345,7 +360,9 @@ export default async function CustomerBookingsPage({
             title="Start with your first venue inquiry."
             description="Browse curated Venora spaces and send your event details when a venue feels right."
             action={
-              <CustomerLinkButton href="/venues">Browse Venues</CustomerLinkButton>
+              <CustomerLinkButton href="/venues">
+                Browse Venues
+              </CustomerLinkButton>
             }
           />
         ) : filteredBookings.length === 0 ? (
@@ -355,7 +372,9 @@ export default async function CustomerBookingsPage({
             title="No bookings match this status."
             description="Try another filter to see more of your booking history."
             action={
-              <CustomerLinkButton href="/bookings">Show all bookings</CustomerLinkButton>
+              <CustomerLinkButton href="/bookings">
+                Show all bookings
+              </CustomerLinkButton>
             }
           />
         ) : (
@@ -402,14 +421,19 @@ export default async function CustomerBookingsPage({
                             </span>
                             <span className="inline-flex items-center gap-2">
                               <TicketCheck className="h-4 w-4 text-[#2563EB]" />
-                              {(booking.guest_count ?? 0).toLocaleString("en-PH")} guests
+                              {(booking.guest_count ?? 0).toLocaleString(
+                                "en-PH",
+                              )}{" "}
+                              guests
                             </span>
                           </div>
                         </div>
 
                         <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 lg:text-right">
                           <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">
-                            {booking.status === "approved" ? "Deposit due" : "Quote"}
+                            {booking.status === "approved"
+                              ? "Deposit due"
+                              : "Quote"}
                           </p>
                           <p className="mt-1 text-lg font-black text-[#111827]">
                             {formatCurrency(quote)}

@@ -166,6 +166,15 @@ function nextAction(booking: BookingDetail) {
     );
   }
 
+  if (booking.reviews?.length || booking.status === "reviewed") {
+    return (
+      <CustomerLinkButton href={`/bookings/${booking.id}/review`}>
+        <Star className="h-4 w-4" />
+        View Review
+      </CustomerLinkButton>
+    );
+  }
+
   if (booking.venues?.slug) {
     return (
       <CustomerLinkButton

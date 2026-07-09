@@ -39,7 +39,10 @@ function getResearchVenueByIdentifier(identifier: string) {
   );
 }
 
-async function getPublishedVenueByIdentifier(supabase: any, identifier: string) {
+async function getPublishedVenueByIdentifier(
+  supabase: any,
+  identifier: string,
+) {
   let query = supabase
     .from("venues")
     .select(VENUE_DETAIL_SELECT)
@@ -75,7 +78,8 @@ function mergeVenueDetail(dbVenue: any, fallback?: ResearchVenue | null) {
       dbVenue.venue_amenities?.length > 0
         ? dbVenue.venue_amenities
         : (fallbackRecord?.venue_amenities ?? []),
-    organizations: dbVenue.organizations ?? fallbackRecord?.organizations ?? null,
+    organizations:
+      dbVenue.organizations ?? fallbackRecord?.organizations ?? null,
   };
 }
 
@@ -127,6 +131,31 @@ export default async function VenueDetailPage({ params }: Props) {
     ? await getPublishedVenueReviewsRaw(supabase, venue.id)
     : getPublicResearchReviews();
 
+  let eligibleReviewBooking: { id: string; event_date: string | null } | null =
+    null;
+  if (user && dbVenue) {
+    const { data: reviewBookings } = await supabase
+      .from("bookings")
+      .select(
+        `
+          id,
+          event_date,
+          reviews (
+            id
+          )
+        `,
+      )
+      .eq("customer_id", user.id)
+      .eq("venue_id", venue.id)
+      .eq("status", "completed")
+      .order("event_date", { ascending: false });
+
+    eligibleReviewBooking =
+      (reviewBookings ?? []).find(
+        (booking: any) => (booking.reviews ?? []).length === 0,
+      ) ?? null;
+  }
+
   const nearbyVenues = datasetVenue
     ? getNearbyResearchVenueDetails(datasetVenue)
     : [];
@@ -150,6 +179,7 @@ export default async function VenueDetailPage({ params }: Props) {
       nearbyVenues={nearbyVenues}
       initialIsFavorited={initialIsFavorited}
       currentUser={user}
+      eligibleReviewBooking={eligibleReviewBooking}
     />
   );
 }

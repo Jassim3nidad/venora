@@ -502,11 +502,54 @@ export async function submitBookingReviewAction(rawInput: unknown) {
         );
       }
 
+      const { data: booking, error: bookingError } = await supabase
+        .from("bookings")
+        .select(
+          `
+            id,
+            customer_id,
+            venue_id,
+            status,
+            event_date,
+            venues (
+              slug
+            ),
+            reviews (
+              id
+            )
+          `,
+        )
+        .eq("id", input.bookingId)
+        .eq("customer_id", user.id)
+        .maybeSingle();
+
+      throwIfSupabaseError(bookingError);
+
+      if (!booking) {
+        throw new ValidationError("Booking not found.");
+      }
+
+      if (booking.customer_id !== user.id) {
+        throw new ForbiddenError("You can only review your own booking.");
+      }
+
+      if (booking.venue_id !== input.venueId) {
+        throw new ValidationError("This booking does not match the venue.");
+      }
+
+      if (booking.status !== "completed") {
+        throw new ReviewBookingNotCompletedError();
+      }
+
+      if ((booking.reviews ?? []).length > 0) {
+        throw new ReviewAlreadyExistsError();
+      }
+
       const { data, error } = await supabase
         .from("reviews")
         .insert({
           booking_id: input.bookingId,
-          venue_id: input.venueId,
+          venue_id: booking.venue_id,
           customer_id: user.id,
           overall_rating: input.overallRating,
           venue_quality: input.venueQuality ?? null,
@@ -528,7 +571,14 @@ export async function submitBookingReviewAction(rawInput: unknown) {
       revalidatePath("/bookings");
       revalidatePath(`/bookings/${input.bookingId}`);
       revalidatePath(`/bookings/${input.bookingId}/review`);
-      revalidatePath(`/venues/${input.venueId}`);
+      revalidatePath("/venues");
+
+      const venue = Array.isArray(booking.venues)
+        ? booking.venues[0]
+        : booking.venues;
+      if (venue?.slug) {
+        revalidatePath(`/venues/${venue.slug}`);
+      }
 
       return {
         reviewId: data.id as string,

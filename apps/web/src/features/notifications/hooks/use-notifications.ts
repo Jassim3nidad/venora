@@ -68,15 +68,17 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
   useEffect(() => {
     const supabase = createClient();
     let isMounted = true;
-    let subscription:
-      | ReturnType<ReturnType<typeof supabase.channel>["subscribe"]>
-      | undefined;
+    let channel: ReturnType<typeof supabase.channel> | undefined;
 
     void supabase.auth.getUser().then(({ data }) => {
       if (!isMounted || !data.user) return;
 
-      subscription = supabase
-        .channel(`notifications:${data.user.id}`)
+      const channelName = `notifications:${data.user.id}:${Math.random()
+        .toString(36)
+        .slice(2)}`;
+
+      channel = supabase.channel(channelName);
+      channel
         .on(
           "postgres_changes",
           {
@@ -96,8 +98,8 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
 
     return () => {
       isMounted = false;
-      if (subscription) {
-        void supabase.removeChannel(subscription);
+      if (channel) {
+        void supabase.removeChannel(channel);
       }
     };
   }, [queryClient]);

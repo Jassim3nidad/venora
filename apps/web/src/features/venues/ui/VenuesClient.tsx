@@ -32,7 +32,10 @@ import type {
   SmartVenueSearchIntent,
   SmartVenueSearchResponse,
 } from "@/features/search/schemas/search.schema";
-import { toggleFavoriteAction, loadMoreVenuesAction } from "../application/actions";
+import {
+  toggleFavoriteAction,
+  loadMoreVenuesAction,
+} from "../application/actions";
 
 export interface Venue {
   id: string | number;
@@ -774,17 +777,15 @@ const VenueCard = memo(function VenueCard({
             </div>
           </div>
 
-          <div className="mt-auto flex items-end justify-between gap-3 border-t border-[#E5E7EB] pt-4">
-            <div className="min-w-0">
+          <div className="mt-auto grid gap-3 border-t border-[#E5E7EB] pt-4">
+            <div>
               <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">
                 Starts at
               </p>
-              <p className="truncate text-lg font-black text-slate-950">
-                {venue.price}
-              </p>
+              <p className="text-lg font-black text-slate-950">{venue.price}</p>
             </div>
 
-            <span className="inline-flex h-11 min-w-[140px] shrink-0 items-center justify-center rounded-2xl bg-[#2563EB] px-4 text-center text-xs font-black uppercase tracking-[0.08em] text-white shadow-sm shadow-[#2563EB]/20 transition group-hover:bg-[#1D4ED8]">
+            <span className="inline-flex h-11 w-full items-center justify-center rounded-2xl bg-[#2563EB] px-4 text-center text-xs font-black uppercase tracking-[0.08em] text-white shadow-sm shadow-[#2563EB]/20 transition group-hover:bg-[#1D4ED8]">
               View Details
             </span>
           </div>
@@ -1118,7 +1119,8 @@ export default function VenuesClient({
         minBudget: filters.minBudget || undefined,
         maxBudget: filters.maxBudget || undefined,
         capacity: filters.capacity || undefined,
-        venueTypes: filters.venueTypes.length > 0 ? filters.venueTypes : undefined,
+        venueTypes:
+          filters.venueTypes.length > 0 ? filters.venueTypes : undefined,
         indoorOutdoor: filters.indoorOutdoor || undefined,
         amenities: filters.amenities.length > 0 ? filters.amenities : undefined,
       };
@@ -1136,12 +1138,18 @@ export default function VenuesClient({
       if (result.data) {
         setDynamicVenues((prev) => {
           // Prevent duplicates by checking ID
-          const existingIds = new Set(prev.map(v => String(v.id)));
-          const newVenues = result.data.venues.filter(v => !existingIds.has(String(v.id)));
-          
-          const newFavorites = newVenues.filter(v => v.isFavorited).map(v => String(v.id));
+          const existingIds = new Set(prev.map((v) => String(v.id)));
+          const newVenues = result.data.venues.filter(
+            (v) => !existingIds.has(String(v.id)),
+          );
+
+          const newFavorites = newVenues
+            .filter((v) => v.isFavorited)
+            .map((v) => String(v.id));
           if (newFavorites.length > 0) {
-            setFavoriteIds((prevFavs) => new Set([...prevFavs, ...newFavorites]));
+            setFavoriteIds(
+              (prevFavs) => new Set([...prevFavs, ...newFavorites]),
+            );
           }
 
           return [...prev, ...newVenues];
