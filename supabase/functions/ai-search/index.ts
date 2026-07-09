@@ -1,14 +1,16 @@
 /**
  * Supabase Edge Function: ai-search
  *
- * Parses natural-language venue searches with OpenAI, then maps the parsed
- * parameters into the existing public.search_venues RPC.
+ * Parses natural-language venue searches via OpenRouter, then maps the
+ * parsed parameters into the existing public.search_venues RPC. Semantic
+ * embeddings (optional) still go directly to OpenAI — see embeddings.ts.
  */
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { embedQuery, warmVenueEmbeddings, toVectorLiteral } from "../_shared/embeddings.ts";
 import { toVenuePayload } from "../_shared/venues.ts";
 import { cleanString, normalizeText } from "../_shared/text.ts";
+import { OPENROUTER_BASE_URL, DEFAULT_CHAT_MODEL, openRouterHeaders } from "../_shared/openrouter.ts";
 
 type VenueType =
   | "garden"
@@ -78,8 +80,6 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const openAiBaseUrl = "https://api.openai.com/v1";
-const defaultSearchModel = "gpt-4o-mini";
 const venueTypes: VenueType[] = [
   "garden",
   "beach",
@@ -208,18 +208,19 @@ function extractChatContent(payload: any) {
 
 async function parseQueryWithOpenAI(
   query: string,
-  openAiApiKey: string,
+  openRouterApiKey: string,
 ): Promise<ExtractedSearchParameters> {
   const deterministic = deterministicExtraction(query);
-  const response = await fetch(`${openAiBaseUrl}/chat/completions`, {
+  const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${openAiApiKey}`,
-      "Content-Type": "application/json",
-    },
+    headers: openRouterHeaders(openRouterApiKey),
     body: JSON.stringify({
-      model: Deno.env.get("OPENAI_SEARCH_MODEL") ?? defaultSearchModel,
+      model: Deno.env.get("OPENROUTER_SEARCH_MODEL") ?? DEFAULT_CHAT_MODEL,
       temperature: 0,
+      // Generous budget: the default free model is a reasoning model that
+      // spends tokens on hidden chain-of-thought before writing `content` —
+      // too low a cap truncates it mid-thought with content: null.
+      max_tokens: 2000,
       messages: [
         {
           role: "system",
@@ -257,12 +258,12 @@ async function parseQueryWithOpenAI(
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`OpenAI parsing failed: ${errorText}`);
+    throw new Error(`OpenRouter parsing failed: ${errorText}`);
   }
 
   const payload = await response.json();
   const content = extractChatContent(payload);
-  if (!content) throw new Error("OpenAI parsing returned no JSON content.");
+  if (!content) throw new Error("OpenRouter parsing returned no JSON content.");
 
   return normalizeExtractedParameters(JSON.parse(content), deterministic);
 }
@@ -438,6 +439,9 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const openRouterApiKey = Deno.env.get("OPENROUTER_API_KEY");
+    // Optional — only used for semantic embeddings, which degrade
+    // gracefully to keyword/rating ranking when unset or unfunded.
     const openAiApiKey = Deno.env.get("OPENAI_API_KEY");
 
     if (!supabaseUrl || !serviceRoleKey) {
@@ -448,10 +452,10 @@ serve(async (req) => {
       );
     }
 
-    if (!openAiApiKey) {
+    if (!openRouterApiKey) {
       return errorResponse(
-        "OPENAI_NOT_CONFIGURED",
-        "OPENAI_API_KEY is not configured for ai-search.",
+        "OPENROUTER_NOT_CONFIGURED",
+        "OPENROUTER_API_KEY is not configured for ai-search.",
         500,
       );
     }
@@ -473,7 +477,7 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
     const parameters = query
-      ? await parseQueryWithOpenAI(query, openAiApiKey)
+      ? await parseQueryWithOpenAI(query, openRouterApiKey)
       : normalizeExtractedParameters({}, {});
     const intent = await buildIntent(supabase, parameters, filters);
     const matchCount = Math.min(
@@ -485,7 +489,7 @@ serve(async (req) => {
     let embeddedVenueCount = 0;
     let queryVector: number[] | null = null;
 
-    if (semanticText) {
+    if (semanticText && openAiApiKey) {
       embeddedVenueCount = await warmVenueEmbeddings(
         supabase,
         openAiApiKey,

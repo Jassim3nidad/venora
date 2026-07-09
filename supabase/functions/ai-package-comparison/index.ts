@@ -9,6 +9,7 @@
  */
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { OPENROUTER_BASE_URL, DEFAULT_CHAT_MODEL, openRouterHeaders } from "../_shared/openrouter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,8 +18,6 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const openAiBaseUrl = "https://api.openai.com/v1";
-const defaultModel = "gpt-4o-mini";
 const uuidPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -108,20 +107,19 @@ function isValidSummary(value: any, validPackageIds: Set<string>): value is AiSu
 }
 
 async function requestSummary(
-  openAiApiKey: string,
+  openRouterApiKey: string,
   table: ComparisonRow[],
 ): Promise<AiSummary | null> {
   try {
-    const response = await fetch(`${openAiBaseUrl}/chat/completions`, {
+    const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${openAiApiKey}`,
-        "Content-Type": "application/json",
-      },
+      headers: openRouterHeaders(openRouterApiKey),
       body: JSON.stringify({
-        model: Deno.env.get("OPENAI_COMPARISON_MODEL") ?? defaultModel,
+        model: Deno.env.get("OPENROUTER_COMPARISON_MODEL") ?? DEFAULT_CHAT_MODEL,
         temperature: 0.3,
-        max_tokens: 600,
+        // Generous budget — the default free model reasons before writing
+        // content; too low a cap truncates it mid-thought.
+        max_tokens: 4000,
         messages: [
           {
             role: "system",
@@ -165,7 +163,7 @@ async function requestSummary(
     });
 
     if (!response.ok) {
-      console.error("[ai-package-comparison] OpenAI request failed:", await response.text());
+      console.error("[ai-package-comparison] OpenRouter request failed:", await response.text());
       return null;
     }
 
@@ -194,7 +192,7 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const openAiApiKey = Deno.env.get("OPENAI_API_KEY");
+    const openRouterApiKey = Deno.env.get("OPENROUTER_API_KEY");
 
     if (!supabaseUrl || !serviceRoleKey) {
       return errorResponse("CONFIGURATION_ERROR", "Missing Supabase configuration.", 500);
@@ -239,7 +237,9 @@ serve(async (req) => {
     }
 
     const comparisonTable = buildComparisonTable(publishedRows);
-    const aiSummary = openAiApiKey ? await requestSummary(openAiApiKey, comparisonTable) : null;
+    const aiSummary = openRouterApiKey
+      ? await requestSummary(openRouterApiKey, comparisonTable)
+      : null;
 
     const userId = await getAuthenticatedUserId(req, supabaseUrl);
     const { error: logError } = await supabase.from("ai_package_comparisons").insert({

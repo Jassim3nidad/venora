@@ -2,11 +2,12 @@
  * Supabase Edge Function: ai-cost-estimator
  *
  * Given event details (venue, guest count, duration, extras), produces an
- * itemized PHP cost breakdown using OpenAI structured output, validated
+ * itemized PHP cost breakdown via OpenRouter structured output, validated
  * server-side before it's persisted or returned.
  */
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { OPENROUTER_BASE_URL, DEFAULT_CHAT_MODEL, openRouterHeaders } from "../_shared/openrouter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,9 +15,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
-
-const openAiBaseUrl = "https://api.openai.com/v1";
-const defaultModel = "gpt-4o-mini";
 
 type EstimatorInput = {
   venueId: string;
@@ -96,18 +94,15 @@ function isValidEstimate(value: any): value is CostEstimate {
 }
 
 async function requestEstimate(
-  openAiApiKey: string,
+  openRouterApiKey: string,
   venueInfo: string,
   input: EstimatorInput,
 ): Promise<CostEstimate> {
-  const response = await fetch(`${openAiBaseUrl}/chat/completions`, {
+  const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${openAiApiKey}`,
-      "Content-Type": "application/json",
-    },
+    headers: openRouterHeaders(openRouterApiKey),
     body: JSON.stringify({
-      model: Deno.env.get("OPENAI_ESTIMATOR_MODEL") ?? defaultModel,
+      model: Deno.env.get("OPENROUTER_ESTIMATOR_MODEL") ?? DEFAULT_CHAT_MODEL,
       temperature: 0.2,
       messages: [
         {
@@ -140,19 +135,21 @@ async function requestEstimate(
           },
         },
       },
-      max_tokens: 500,
+      // Generous budget — the default free model reasons before writing
+      // content; too low a cap truncates it mid-thought.
+      max_tokens: 4000,
     }),
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`OpenAI cost estimate failed: ${errorText}`);
+    throw new Error(`OpenRouter cost estimate failed: ${errorText}`);
   }
 
   const payload = await response.json();
   const content = payload?.choices?.[0]?.message?.content;
   if (typeof content !== "string") {
-    throw new Error("OpenAI returned no estimate content.");
+    throw new Error("OpenRouter returned no estimate content.");
   }
 
   return JSON.parse(content);
@@ -182,7 +179,7 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const openAiApiKey = Deno.env.get("OPENAI_API_KEY");
+    const openRouterApiKey = Deno.env.get("OPENROUTER_API_KEY");
 
     if (!supabaseUrl || !serviceRoleKey) {
       return errorResponse(
@@ -192,10 +189,10 @@ serve(async (req) => {
       );
     }
 
-    if (!openAiApiKey) {
+    if (!openRouterApiKey) {
       return errorResponse(
-        "OPENAI_NOT_CONFIGURED",
-        "OPENAI_API_KEY is not configured for ai-cost-estimator.",
+        "OPENROUTER_NOT_CONFIGURED",
+        "OPENROUTER_API_KEY is not configured for ai-cost-estimator.",
         500,
       );
     }
@@ -236,7 +233,7 @@ serve(async (req) => {
     // One retry if the model's arithmetic doesn't check out.
     for (let attempt = 0; attempt < 2 && !estimate; attempt++) {
       try {
-        const candidate = await requestEstimate(openAiApiKey, venueInfo, input);
+        const candidate = await requestEstimate(openRouterApiKey, venueInfo, input);
         if (isValidEstimate(candidate)) {
           estimate = candidate;
         } else {

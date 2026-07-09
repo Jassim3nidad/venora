@@ -1,17 +1,18 @@
 /**
  * Supabase Edge Function: ai-assistant
  *
- * Site-wide customer chat assistant. Streams the OpenAI response back to
- * the client as raw SSE (the one deliberate exception to this codebase's
- * {data,error} JSON envelope — a single JSON response can't stream).
- * Retrieval context (matching venues, the caller's own recent bookings)
- * is injected as a system message so the model never has to invent
- * prices, availability, or booking details.
+ * Site-wide customer chat assistant. Streams the OpenRouter response back
+ * to the client as raw SSE (the one deliberate exception to this
+ * codebase's {data,error} JSON envelope — a single JSON response can't
+ * stream). Retrieval context (matching venues, the caller's own recent
+ * bookings) is injected as a system message so the model never has to
+ * invent prices, availability, or booking details.
  */
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { cleanString, looksVenueRelated } from "../_shared/text.ts";
 import { toVenuePayload } from "../_shared/venues.ts";
+import { OPENROUTER_BASE_URL, DEFAULT_CHAT_MODEL, openRouterHeaders } from "../_shared/openrouter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,8 +21,6 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const openAiBaseUrl = "https://api.openai.com/v1";
-const defaultModel = "gpt-4o-mini";
 const maxMessagesPerConversation = 60; // 30 user + 30 assistant turns
 const historyLimit = 20;
 
@@ -63,13 +62,13 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const openAiApiKey = Deno.env.get("OPENAI_API_KEY");
+    const openRouterApiKey = Deno.env.get("OPENROUTER_API_KEY");
 
     if (!supabaseUrl || !serviceRoleKey) {
       return errorResponse("CONFIGURATION_ERROR", "Missing Supabase configuration.", 500);
     }
-    if (!openAiApiKey) {
-      return errorResponse("OPENAI_NOT_CONFIGURED", "OPENAI_API_KEY is not configured.", 500);
+    if (!openRouterApiKey) {
+      return errorResponse("OPENROUTER_NOT_CONFIGURED", "OPENROUTER_API_KEY is not configured.", 500);
     }
 
     const rawBody = await req.json().catch(() => null);
@@ -203,16 +202,15 @@ serve(async (req) => {
       console.error("[ai-assistant] Failed to persist user message:", userMessageError);
     }
 
-    const upstream = await fetch(`${openAiBaseUrl}/chat/completions`, {
+    const upstream = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${openAiApiKey}`,
-        "Content-Type": "application/json",
-      },
+      headers: openRouterHeaders(openRouterApiKey),
       body: JSON.stringify({
-        model: Deno.env.get("OPENAI_ASSISTANT_MODEL") ?? defaultModel,
+        model: Deno.env.get("OPENROUTER_ASSISTANT_MODEL") ?? DEFAULT_CHAT_MODEL,
         temperature: 0.4,
-        max_tokens: 400,
+        // Generous budget — the default free model reasons before writing
+        // content; too low a cap truncates it mid-thought.
+        max_tokens: 4000,
         stream: true,
         messages,
       }),
@@ -220,7 +218,7 @@ serve(async (req) => {
 
     if (!upstream.ok || !upstream.body) {
       const errorText = await upstream.text().catch(() => "");
-      console.error("[ai-assistant] OpenAI stream request failed:", errorText);
+      console.error("[ai-assistant] OpenRouter stream request failed:", errorText);
       return errorResponse("ASSISTANT_FAILED", "The assistant is temporarily unavailable.", 502);
     }
 
