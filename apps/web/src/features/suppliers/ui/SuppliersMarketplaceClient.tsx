@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ChangeEventHandler, type ReactNode } from "react";
 import Link from "next/link";
 import {
   ArrowUpDown,
@@ -40,6 +40,34 @@ type SuppliersMarketplaceClientProps = {
 
 function normalize(value: unknown) {
   return String(value ?? "").trim().toLowerCase();
+}
+
+function FilterSelect({
+  value,
+  onChange,
+  children,
+  bold = false,
+}: {
+  value: string;
+  onChange: ChangeEventHandler<HTMLSelectElement>;
+  children: ReactNode;
+  bold?: boolean;
+}) {
+  return (
+    <span className="relative block">
+      <select
+        value={value}
+        onChange={onChange}
+        className={`h-12 w-full appearance-none rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] pl-3 pr-10 text-sm ${bold ? "font-bold" : "font-semibold"} text-slate-700 outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10`}
+      >
+        {children}
+      </select>
+      <ChevronDown
+        aria-hidden
+        className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+      />
+    </span>
+  );
 }
 
 function SupplierCard({ supplier }: { supplier: SupplierMarketplaceProfile }) {
@@ -306,40 +334,32 @@ export function SuppliersMarketplaceClient({
 
             <label className="grid gap-1.5">
               <span className="text-xs font-bold text-slate-500">Category</span>
-              <div className="relative">
-                <select
-                  value={category}
-                  onChange={(event) => setCategory(event.target.value)}
-                  className="h-12 w-full appearance-none rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] pl-3 pr-9 text-sm font-semibold text-slate-700 outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
-                >
-                  <option value="all">All categories</option>
-                  {categories.map((item) => (
-                    <option key={item.id} value={item.slug}>
-                      {item.name}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              </div>
+              <FilterSelect
+                value={category}
+                onChange={(event) => setCategory(event.target.value)}
+              >
+                <option value="all">All categories</option>
+                {categories.map((item) => (
+                  <option key={item.id} value={item.slug}>
+                    {item.name}
+                  </option>
+                ))}
+              </FilterSelect>
             </label>
 
             <label className="grid gap-1.5">
               <span className="text-xs font-bold text-slate-500">Location</span>
-              <div className="relative">
-                <select
-                  value={location}
-                  onChange={(event) => setLocation(event.target.value)}
-                  className="h-12 w-full appearance-none rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] pl-3 pr-9 text-sm font-semibold text-slate-700 outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
-                >
-                  <option value="">Any location</option>
-                  {locations.map((item) => (
-                    <option key={item} value={item.toLowerCase()}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              </div>
+              <FilterSelect
+                value={location}
+                onChange={(event) => setLocation(event.target.value)}
+              >
+                <option value="">Any location</option>
+                {locations.map((item) => (
+                  <option key={item} value={item.toLowerCase()}>
+                    {item}
+                  </option>
+                ))}
+              </FilterSelect>
             </label>
 
             <label className="grid gap-1.5">
@@ -357,19 +377,15 @@ export function SuppliersMarketplaceClient({
 
             <label className="grid gap-1.5">
               <span className="text-xs font-bold text-slate-500">Minimum rating</span>
-              <div className="relative">
-                <select
-                  value={minRating}
-                  onChange={(event) => setMinRating(event.target.value)}
-                  className="h-12 w-full appearance-none rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] pl-3 pr-9 text-sm font-semibold text-slate-700 outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
-                >
-                  <option value="0">Any rating</option>
-                  <option value="4.5">4.5 and up</option>
-                  <option value="4">4.0 and up</option>
-                  <option value="3.5">3.5 and up</option>
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              </div>
+              <FilterSelect
+                value={minRating}
+                onChange={(event) => setMinRating(event.target.value)}
+              >
+                <option value="0">Any rating</option>
+                <option value="4.5">4.5 and up</option>
+                <option value="4">4.0 and up</option>
+                <option value="3.5">3.5 and up</option>
+              </FilterSelect>
             </label>
           </div>
         </aside>
@@ -400,19 +416,16 @@ export function SuppliersMarketplaceClient({
                   <ArrowUpDown className="h-3.5 w-3.5" />
                   Sort
                 </span>
-                <div className="relative">
-                  <select
-                    value={sort}
-                    onChange={(event) => setSort(event.target.value as SortValue)}
-                    className="h-12 w-full appearance-none rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] pl-3 pr-9 text-sm font-bold text-slate-700 outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
-                  >
-                    <option value="recommended">Recommended</option>
-                    <option value="rating">Highest rated</option>
-                    <option value="price">Lowest starting price</option>
-                    <option value="newest">Newest</option>
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                </div>
+                <FilterSelect
+                  value={sort}
+                  bold
+                  onChange={(event) => setSort(event.target.value as SortValue)}
+                >
+                  <option value="recommended">Recommended</option>
+                  <option value="rating">Highest rated</option>
+                  <option value="price">Lowest starting price</option>
+                  <option value="newest">Newest</option>
+                </FilterSelect>
               </label>
             </div>
           </div>
