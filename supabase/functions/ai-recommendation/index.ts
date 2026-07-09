@@ -11,6 +11,7 @@ import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { embedQuery, warmVenueEmbeddings, toVectorLiteral } from "../_shared/embeddings.ts";
 import { toVenuePayload } from "../_shared/venues.ts";
+import { OPENROUTER_BASE_URL, DEFAULT_CHAT_MODEL, openRouterHeaders } from "../_shared/openrouter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,8 +20,6 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const openAiBaseUrl = "https://api.openai.com/v1";
-const defaultChatModel = "gpt-4o-mini";
 const recommendationCount = 8;
 
 function jsonResponse(body: unknown, status = 200) {
@@ -35,19 +34,18 @@ function errorResponse(code: string, message: string, status = 500) {
 }
 
 async function buildPreferenceQuery(
-  openAiApiKey: string,
+  openRouterApiKey: string,
   venueNames: string[],
 ): Promise<string> {
-  const response = await fetch(`${openAiBaseUrl}/chat/completions`, {
+  const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${openAiApiKey}`,
-      "Content-Type": "application/json",
-    },
+    headers: openRouterHeaders(openRouterApiKey),
     body: JSON.stringify({
-      model: Deno.env.get("OPENAI_RECOMMENDATION_MODEL") ?? defaultChatModel,
+      model: Deno.env.get("OPENROUTER_RECOMMENDATION_MODEL") ?? DEFAULT_CHAT_MODEL,
       temperature: 0.3,
-      max_tokens: 100,
+      // Generous budget — the default free model reasons before writing
+      // content; too low a cap truncates it mid-thought.
+      max_tokens: 4000,
       messages: [
         {
           role: "system",
@@ -64,7 +62,7 @@ async function buildPreferenceQuery(
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`OpenAI preference summary failed: ${errorText}`);
+    throw new Error(`OpenRouter preference summary failed: ${errorText}`);
   }
 
   const payload = await response.json();
@@ -87,6 +85,8 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const openRouterApiKey = Deno.env.get("OPENROUTER_API_KEY");
+    // Optional — only used for semantic embeddings; degrades gracefully.
     const openAiApiKey = Deno.env.get("OPENAI_API_KEY");
 
     if (!supabaseUrl || !anonKey || !serviceRoleKey) {
@@ -97,10 +97,10 @@ serve(async (req) => {
       );
     }
 
-    if (!openAiApiKey) {
+    if (!openRouterApiKey) {
       return errorResponse(
-        "OPENAI_NOT_CONFIGURED",
-        "OPENAI_API_KEY is not configured for ai-recommendation.",
+        "OPENROUTER_NOT_CONFIGURED",
+        "OPENROUTER_API_KEY is not configured for ai-recommendation.",
         500,
       );
     }
@@ -166,16 +166,18 @@ serve(async (req) => {
       venueRows = data ?? [];
     } else {
       mode = "personalized";
-      preferenceQuery = await buildPreferenceQuery(openAiApiKey, venueNames);
+      preferenceQuery = await buildPreferenceQuery(openRouterApiKey, venueNames);
 
       // Best-effort backfill so newer venues have embeddings to match against.
-      await warmVenueEmbeddings(
-        supabase,
-        openAiApiKey,
-        Number(Deno.env.get("AI_SEARCH_EMBED_REFRESH_LIMIT") ?? 8),
-      );
-
-      const queryVector = await embedQuery(openAiApiKey, preferenceQuery);
+      let queryVector: number[] | null = null;
+      if (openAiApiKey) {
+        await warmVenueEmbeddings(
+          supabase,
+          openAiApiKey,
+          Number(Deno.env.get("AI_SEARCH_EMBED_REFRESH_LIMIT") ?? 8),
+        );
+        queryVector = await embedQuery(openAiApiKey, preferenceQuery);
+      }
 
       const { data, error } = await supabase.rpc("search_venues", {
         query_embedding: queryVector ? toVectorLiteral(queryVector) : null,

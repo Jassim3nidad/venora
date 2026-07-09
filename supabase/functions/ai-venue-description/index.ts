@@ -10,6 +10,7 @@
  */
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { OPENROUTER_BASE_URL, DEFAULT_CHAT_MODEL, openRouterHeaders } from "../_shared/openrouter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,9 +18,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
-
-const openAiBaseUrl = "https://api.openai.com/v1";
-const defaultModel = "gpt-4o-mini";
 
 const contentTypes = ["description", "seo_meta", "package_description"] as const;
 type ContentType = (typeof contentTypes)[number];
@@ -125,19 +123,18 @@ function buildPrompt(
 }
 
 async function requestCopy(
-  openAiApiKey: string,
+  openRouterApiKey: string,
   prompt: { system: string; user: string },
 ): Promise<string> {
-  const response = await fetch(`${openAiBaseUrl}/chat/completions`, {
+  const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${openAiApiKey}`,
-      "Content-Type": "application/json",
-    },
+    headers: openRouterHeaders(openRouterApiKey),
     body: JSON.stringify({
-      model: Deno.env.get("OPENAI_COPY_MODEL") ?? defaultModel,
+      model: Deno.env.get("OPENROUTER_COPY_MODEL") ?? DEFAULT_CHAT_MODEL,
       temperature: 0.6,
-      max_tokens: 500,
+      // Generous budget — the default free model reasons before writing
+      // content; too low a cap truncates it mid-thought.
+      max_tokens: 4000,
       messages: [
         { role: "system", content: prompt.system },
         { role: "user", content: prompt.user },
@@ -147,13 +144,13 @@ async function requestCopy(
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`OpenAI copy generation failed: ${errorText}`);
+    throw new Error(`OpenRouter copy generation failed: ${errorText}`);
   }
 
   const payload = await response.json();
   const content = payload?.choices?.[0]?.message?.content;
   if (typeof content !== "string" || !content.trim()) {
-    throw new Error("OpenAI returned no copy content.");
+    throw new Error("OpenRouter returned no copy content.");
   }
 
   return content.trim();
@@ -172,13 +169,13 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const openAiApiKey = Deno.env.get("OPENAI_API_KEY");
+    const openRouterApiKey = Deno.env.get("OPENROUTER_API_KEY");
 
     if (!supabaseUrl || !anonKey || !serviceRoleKey) {
       return errorResponse("CONFIGURATION_ERROR", "Missing Supabase configuration.", 500);
     }
-    if (!openAiApiKey) {
-      return errorResponse("OPENAI_NOT_CONFIGURED", "OPENAI_API_KEY is not configured.", 500);
+    if (!openRouterApiKey) {
+      return errorResponse("OPENROUTER_NOT_CONFIGURED", "OPENROUTER_API_KEY is not configured.", 500);
     }
 
     const authHeader = req.headers.get("Authorization");
@@ -270,7 +267,7 @@ serve(async (req) => {
     }
 
     const prompt = buildPrompt(input.contentType, input.tone, venue, pkg);
-    const generatedText = await requestCopy(openAiApiKey, prompt);
+    const generatedText = await requestCopy(openRouterApiKey, prompt);
     const maxLength = maxLengthByType[input.contentType];
 
     if (generatedText.length > maxLength) {
