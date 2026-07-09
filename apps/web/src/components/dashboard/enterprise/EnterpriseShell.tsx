@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@venora/lib";
 import ProfileMenu from "@/components/layout/ProfileMenu";
+import { NotificationBell } from "@/features/notifications/ui/NotificationBell";
 import { MaterialIcon } from "./MaterialIcon";
 import {
   NAV_BY_ROLE,
@@ -164,6 +165,7 @@ function TopBar({
       </button>
 
       <div className="flex items-center gap-2">
+        <NotificationBell />
         <div className="text-right">
           <p className="text-sm font-bold text-[#111827]">{displayName}</p>
           <p className="text-xs text-[#6b7280]">{subtitle}</p>
@@ -209,6 +211,7 @@ function DesktopTopBar({
         ) : null}
       </div>
       <div className="flex items-center gap-3">
+        <NotificationBell />
         <div className="text-right">
           <p className="text-sm font-bold text-[#111827]">{displayName}</p>
           {userSubtitle ? (

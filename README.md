@@ -112,5 +112,25 @@ Interactive states and visual tokens are mapped via CSS Custom Properties in `gl
 | `pnpm dev` | Starts Next.js development server (runs with Webpack/PostCSS) |
 | `pnpm build` | Compiles optimized production bundle across all packages |
 | `pnpm type-check` | Runs typescript compiler checks for clean builds |
-| `pnpm db:types` | Generates TypeScript definitions from the local Supabase container |
 | `supabase db reset` | Dry-runs and applies all migrations in the local Supabase database |
+
+---
+
+## 🚀 Production Requirements
+
+The repository and architecture are production-ready. The following manual steps must be completed in the production environment:
+
+### Email
+- Verify the Resend sending domain.
+- Configure `RESEND_API_KEY`.
+- Configure `RESEND_FROM` using a verified sender.
+
+### Web Push
+- Generate VAPID keys.
+- Configure:
+  - `VAPID_PUBLIC_KEY`
+  - `VAPID_PRIVATE_KEY`
+  - `VAPID_SUBJECT`
+- Create a browser Push Subscription after deployment.
+
+*Note: These are deployment prerequisites, not code issues.*

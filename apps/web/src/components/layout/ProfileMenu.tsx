@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import {
+  Bell,
   Clock,
   DoorOpen,
   HelpCircle,
@@ -125,7 +126,15 @@ export default function ProfileMenu({
               <Settings className="h-4 w-4" />
             </div>
             <span className="font-bold text-slate-700">Settings</span>
-            <SoonBadge />
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <Link href="/notifications" className="cursor-pointer">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#F9FAFB] text-[#2563EB]">
+              <Bell className="h-4 w-4" />
+            </div>
+            <span className="font-bold text-slate-700">Notifications</span>
           </Link>
         </DropdownMenuItem>
 

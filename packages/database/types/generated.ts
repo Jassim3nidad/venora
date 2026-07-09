@@ -34,7 +34,10 @@ export type PaymentProvider     = "paymongo" | "maya" | "stripe";
 export type TransactionStatus   = "pending" | "paid" | "failed" | "refunded" | "partially_refunded";
 export type VerificationType    = "venue_owner" | "supplier" | "venue";
 export type VerificationStatus  = "pending" | "approved" | "rejected";
+export type NotificationKind    = "booking_update" | "payment_update" | "review_request" | "admin_alert" | "supplier_inquiry" | "system";
 export type NotificationChannel = "email" | "sms" | "push" | "in_app";
+export type NotificationPriority = "low" | "normal" | "high" | "urgent";
+export type NotificationDeliveryStatus = "queued" | "sent" | "failed" | "skipped";
 
 // ─── Database ───────────────────────────────────────────────
 
@@ -670,14 +673,152 @@ export interface Database {
           id:         string;
           user_id:    string;
           channel:    NotificationChannel;
+          kind:       NotificationKind;
+          actor_id:   string | null;
           title:      string;
           body:       string | null;
           link:       string | null;
+          metadata:   Json;
+          priority:   NotificationPriority;
           is_read:    boolean;
+          read_at:    string | null;
+          expires_at: string | null;
+          dedupe_key: string | null;
           created_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["notifications"]["Row"], "id" | "created_at"> & { id?: string };
-        Update: { is_read?: boolean };
+        Insert: {
+          id?: string;
+          user_id: string;
+          channel?: NotificationChannel;
+          kind?: NotificationKind;
+          actor_id?: string | null;
+          title: string;
+          body?: string | null;
+          link?: string | null;
+          metadata?: Json;
+          priority?: NotificationPriority;
+          is_read?: boolean;
+          read_at?: string | null;
+          expires_at?: string | null;
+          dedupe_key?: string | null;
+        };
+        Update: {
+          is_read?: boolean;
+          read_at?: string | null;
+        };
+      };
+
+      notification_preferences: {
+        Row: {
+          user_id:           string;
+          email_enabled:     boolean;
+          sms_enabled:       boolean;
+          push_enabled:      boolean;
+          in_app_enabled:    boolean;
+          booking_updates:   boolean;
+          payment_updates:   boolean;
+          review_requests:   boolean;
+          admin_alerts:      boolean;
+          quiet_hours_start: string | null;
+          quiet_hours_end:   string | null;
+          timezone:          string;
+          created_at:        string;
+          updated_at:        string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["notification_preferences"]["Row"], "created_at" | "updated_at"> & {
+          email_enabled?: boolean;
+          sms_enabled?: boolean;
+          push_enabled?: boolean;
+          in_app_enabled?: boolean;
+          booking_updates?: boolean;
+          payment_updates?: boolean;
+          review_requests?: boolean;
+          admin_alerts?: boolean;
+          timezone?: string;
+        };
+        Update: Partial<Omit<Database["public"]["Tables"]["notification_preferences"]["Insert"], "user_id">>;
+      };
+
+      push_subscriptions: {
+        Row: {
+          id:          string;
+          user_id:     string;
+          endpoint:    string;
+          p256dh:      string;
+          auth:        string;
+          user_agent:  string | null;
+          disabled_at: string | null;
+          created_at:  string;
+          updated_at:  string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["push_subscriptions"]["Row"], "id" | "created_at" | "updated_at"> & { id?: string };
+        Update: {
+          endpoint?: string;
+          p256dh?: string;
+          auth?: string;
+          user_agent?: string | null;
+          disabled_at?: string | null;
+        };
+      };
+
+      notification_deliveries: {
+        Row: {
+          id:                  string;
+          notification_id:     string;
+          user_id:             string;
+          channel:             NotificationChannel;
+          status:              NotificationDeliveryStatus;
+          provider:            string | null;
+          provider_message_id: string | null;
+          error_message:       string | null;
+          attempt_count:       number;
+          next_attempt_at:     string | null;
+          attempted_at:        string | null;
+          sent_at:             string | null;
+          created_at:          string;
+          updated_at:          string;
+        };
+        Insert: {
+          id?: string;
+          notification_id: string;
+          user_id: string;
+          channel: NotificationChannel;
+          status?: NotificationDeliveryStatus;
+          provider?: string | null;
+          provider_message_id?: string | null;
+          error_message?: string | null;
+          attempt_count?: number;
+          next_attempt_at?: string | null;
+          attempted_at?: string | null;
+          sent_at?: string | null;
+        };
+        Update: {
+          status?: NotificationDeliveryStatus;
+          provider?: string | null;
+          provider_message_id?: string | null;
+          error_message?: string | null;
+          attempt_count?: number;
+          next_attempt_at?: string | null;
+          attempted_at?: string | null;
+          sent_at?: string | null;
+        };
+      };
+
+      notification_webhook_config: {
+        Row: {
+          name:       string;
+          value:      string;
+          updated_at: string;
+        };
+        Insert: {
+          name: string;
+          value: string;
+          updated_at?: string;
+        };
+        Update: {
+          value?: string;
+          updated_at?: string;
+        };
       };
 
       audit_logs: {
@@ -737,6 +878,24 @@ export interface Database {
         Args: { p_action: string; p_entity_type: string; p_entity_id?: string; p_metadata?: Json };
         Returns: void;
       };
+      ensure_notification_preferences: {
+        Args: { p_user_id: string };
+        Returns: Database["public"]["Tables"]["notification_preferences"]["Row"];
+      };
+      mark_notification_read: {
+        Args: { p_notification_id: string };
+        Returns: void;
+      };
+      mark_all_notifications_read: {
+        Returns: number;
+      };
+      disable_sms_notification_deliveries: {
+        Returns: number;
+      };
+      retry_failed_notification_deliveries: {
+        Args: { p_limit?: number };
+        Returns: number;
+      };
       get_venue_analytics: {
         Args: { p_venue_id: string; p_from?: string; p_to?: string; p_granularity?: string };
         Returns: Array<{ period: string; booking_count: number; revenue: number; commission: number; avg_rating: number }>;
@@ -761,7 +920,10 @@ export interface Database {
       transaction_status:    TransactionStatus;
       verification_type:     VerificationType;
       verification_status:   VerificationStatus;
+      notification_kind:     NotificationKind;
       notification_channel:  NotificationChannel;
+      notification_priority: NotificationPriority;
+      notification_delivery_status: NotificationDeliveryStatus;
     };
   };
 }

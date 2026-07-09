@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import ProfileMenu from "@/components/layout/ProfileMenu";
+import { NotificationBell } from "@/features/notifications/ui/NotificationBell";
 
 function isActive(pathname: string, href: string) {
   if (href === "/venues") {
@@ -60,6 +61,7 @@ const mobileNavLinks: NavLink[] = [
     mobileOnly: true,
   },
   { label: "Favorites", href: "/favorites", icon: Heart, mobileOnly: true },
+  { label: "Notifications", href: "/notifications", icon: Bell, mobileOnly: true },
   {
     label: "Dashboard",
     href: "/dashboard/customer",
@@ -163,13 +165,7 @@ export function CustomerNavbar({
         </nav>
 
         <div className="ml-auto flex min-w-0 items-center justify-end gap-1.5 sm:gap-3">
-          <button
-            type="button"
-            className="hidden h-10 w-10 items-center justify-center rounded-full border border-transparent text-slate-400 transition hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] lg:inline-flex"
-            aria-label="Notifications"
-          >
-            <Bell className="h-4 w-4" />
-          </button>
+          {user ? <NotificationBell className="hidden lg:inline-flex" /> : null}
 
           <button
             type="button"

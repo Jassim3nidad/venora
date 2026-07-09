@@ -9,7 +9,7 @@
   },
   "scripts": {
     "type-check": "tsc --noEmit",
-    "lint": "eslint src --ext .ts,.tsx"
+    "lint": "eslint ."
   },
   "peerDependencies": {
     "react": "^19",
