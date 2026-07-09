@@ -12,6 +12,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Heart,
+  ChevronDown,
   Loader2,
   MapPin,
   PanelLeftClose,
@@ -84,6 +85,8 @@ const filterKeys = [
   "amenities",
   "sort",
 ];
+
+const PAGE_SIZE = 12;
 
 const eventHints: Record<string, string[]> = {
   wedding: ["wedding", "ceremony", "reception", "garden", "estate", "church"],
@@ -821,6 +824,7 @@ export default function VenuesClient({
   const [favoritePendingId, setFavoritePendingId] = useState<string | null>(
     null,
   );
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const filters = useMemo(() => {
     const params = new URLSearchParams(queryString);
@@ -942,6 +946,7 @@ export default function VenuesClient({
     setLocalAiSummary([]);
     setAiPrompt("");
     smartSearch.reset();
+    setVisibleCount(PAGE_SIZE);
   };
 
   const aiResultRank = useMemo(() => {
@@ -1051,6 +1056,15 @@ export default function VenuesClient({
       return a.name.localeCompare(b.name);
     });
   }, [aiResultRank, favoriteIds, filters, initialVenues]);
+
+  // Reset visible count whenever filters change the result set
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [filtered]);
+
+  const visibleVenues = filtered.slice(0, visibleCount);
+  const hasMoreVenues = visibleCount < filtered.length;
+  const remainingVenues = filtered.length - visibleCount;
 
   const applyLocalSmartSearch = (query: string) => {
     const intent = parseLocalSmartSearch(query, initialVenues);
@@ -1314,9 +1328,16 @@ export default function VenuesClient({
                 </h1>
 
                 <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-[#6B7280] sm:text-base">
-                  {filtered.length} venue{filtered.length === 1 ? "" : "s"} found
-                  matching your criteria. Search, filter, and compare spaces by
-                  location, pricing, capacity, and amenities.
+                  Showing{" "}
+                  <span className="font-extrabold text-slate-950">
+                    {Math.min(visibleCount, filtered.length)}
+                  </span>
+                  {" "}of{" "}
+                  <span className="font-extrabold text-slate-950">
+                    {filtered.length}
+                  </span>{" "}
+                  venue{filtered.length === 1 ? "" : "s"}
+                  {activeFilterCount > 0 ? " matching your filters" : ""}
                 </p>
               </div>
 
@@ -1481,6 +1502,8 @@ export default function VenuesClient({
                     <option value="rating">Highest rated</option>
                     <option value="capacity">Largest capacity</option>
                   </select>
+
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 </div>
               </div>
             </div>
@@ -1519,40 +1542,63 @@ export default function VenuesClient({
         </section>
 
         {filtered.length === 0 ? (
-          <div className="flex min-h-[320px] flex-col items-center justify-center rounded-[24px] border border-dashed border-[#E5E7EB] bg-white px-6 py-12 text-center shadow-sm">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#EFF6FF] text-[#2563EB]">
-              <Search className="h-5 w-5" />
+          <div className="flex min-h-[380px] flex-col items-center justify-center rounded-[24px] border border-dashed border-[#BFDBFE] bg-white px-6 py-14 text-center shadow-sm">
+            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB]">
+              <Search className="h-7 w-7" />
             </div>
 
-            <h2 className="text-lg font-extrabold text-slate-950">
-              No venues match those filters
-            </h2>
-
-            <p className="mt-2 max-w-md text-sm font-medium leading-6 text-slate-500">
-              Try a wider location, a broader budget, or fewer amenities to
-              bring more spaces back into view.
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
+              No results
             </p>
 
-            <button
-              type="button"
-              onClick={clearFilters}
-              className="mt-5 rounded-full bg-[#2563EB] px-5 py-2.5 text-sm font-extrabold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1d4ed8]"
-            >
-              Clear all filters
-            </button>
+            <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-slate-950">
+              No venues found
+            </h2>
+
+            <p className="mt-3 max-w-md text-sm font-medium leading-6 text-slate-500">
+              Try adjusting your filters or search terms. A wider location, broader
+              budget, or fewer amenities may bring more spaces into view.
+            </p>
+
+            {activeFilterCount > 0 ? (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="mt-6 inline-flex h-12 items-center justify-center rounded-2xl bg-[#2563EB] px-6 text-sm font-extrabold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
+              >
+                Clear all filters
+              </button>
+            ) : null}
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-            {filtered.map((venue) => (
-              <VenueCard
-                key={venue.id}
-                venue={venue}
-                isFavorited={favoriteIds.has(String(venue.id))}
-                isPending={favoritePendingId === String(venue.id)}
-                onToggleFavorite={handleFavoriteToggle}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+              {visibleVenues.map((venue) => (
+                <VenueCard
+                  key={venue.id}
+                  venue={venue}
+                  isFavorited={favoriteIds.has(String(venue.id))}
+                  isPending={favoritePendingId === String(venue.id)}
+                  onToggleFavorite={handleFavoriteToggle}
+                />
+              ))}
+            </div>
+
+            {hasMoreVenues ? (
+              <div className="mt-4 flex flex-col items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-[#DBEAFE] bg-white px-6 text-sm font-extrabold text-[#1D4ED8] shadow-sm transition hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
+                >
+                  Load more venues
+                </button>
+                <p className="text-xs font-semibold text-slate-400">
+                  {remainingVenues} more venue{remainingVenues === 1 ? "" : "s"} available
+                </p>
+              </div>
+            ) : null}
+          </>
         )}
         </div>
       </main>
