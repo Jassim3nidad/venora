@@ -86,13 +86,10 @@ export async function registerAction(rawInput: unknown): Promise<ActionResult> {
     const message = toErrorMessage(error);
 
     if (isAlreadyRegisteredError(message)) {
-      try {
-        await resendVerificationEmailUseCase(parsed.data.email);
-      } catch (resendError) {
-        console.error("[registerAction] Existing user verification resend failed:", resendError);
-      }
-
-      redirect(`/verify-email?email=${encodeURIComponent(parsed.data.email)}&resend=available`);
+      return {
+        success: false,
+        error: "This email is already registered. Please log in instead.",
+      };
     }
 
     return {
@@ -544,6 +541,13 @@ export async function verifyOtpAction(tokenHash: string, type: "signup" | "email
     await verifyOtpUseCase(tokenHash, type);
     return { success: true, data: undefined };
   } catch (error) {
-    return { success: false, error: toErrorMessage(error) };
+    let message = toErrorMessage(error);
+    const normalized = message.toLowerCase();
+    
+    if (normalized.includes("expired") || normalized.includes("invalid")) {
+      message = "We could not verify this email. Please request a new verification email or return to login.";
+    }
+    
+    return { success: false, error: message };
   }
 }
