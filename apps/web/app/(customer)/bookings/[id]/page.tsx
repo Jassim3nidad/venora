@@ -21,7 +21,10 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { BookingStatusBadge } from "@/src/features/booking/ui/booking-status-badge";
 import { CustomerCancelBookingButton } from "@/src/features/booking/ui/booking-action-controls";
-import type { BookingStatusValue } from "@/src/features/booking/domain/value-objects/booking-status.vo";
+import {
+  canCancelBookingStatus,
+  type BookingStatusValue,
+} from "@/src/features/booking/domain/value-objects/booking-status.vo";
 
 export const metadata: Metadata = {
   title: "Booking Details | Venora",
@@ -247,12 +250,7 @@ export default async function BookingDetailPage({ params }: Props) {
   }
 
   const typedBooking = booking as BookingDetail;
-  const canCancel = [
-    "pending",
-    "approved",
-    "payment_pending",
-    "confirmed",
-  ].includes(typedBooking.status);
+  const canCancel = canCancelBookingStatus(typedBooking.status);
 
   return (
     <div className="bg-[#F8FAFC] text-[#111827]">

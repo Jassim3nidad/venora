@@ -22,9 +22,11 @@ import { getNavbarProfile } from "@/lib/get-navbar-profile";
 import {
   BOOKING_STATUSES,
   BOOKING_STATUS_LABEL,
+  canCancelBookingStatus,
   type BookingStatusValue,
 } from "@/src/features/booking/domain/value-objects/booking-status.vo";
 import { BookingStatusBadge } from "@/src/features/booking/ui/booking-status-badge";
+import { CustomerCancelBookingButton } from "@/src/features/booking/ui/booking-action-controls";
 
 export const metadata: Metadata = {
   title: "My Bookings | Venora",
@@ -115,6 +117,14 @@ function buildVenueImageUrl(storagePath?: string | null) {
 }
 
 function actionForBooking(booking: BookingRecord, venue?: VenueRecord | null) {
+  if (booking.status === "pending") {
+    return (
+      <CustomerLinkButton href={`/bookings/${booking.id}`} tone="secondary">
+        View Request
+      </CustomerLinkButton>
+    );
+  }
+
   if (booking.status === "approved" || booking.status === "payment_pending") {
     return (
       <CustomerLinkButton href={`/bookings/${booking.id}/payment`}>
@@ -205,7 +215,7 @@ async function getCustomerBookings(userId: string) {
 export default async function CustomerBookingsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ created?: string }>;
+  searchParams?: Promise<{ created?: string; cancelled?: string }>;
 }) {
   const query = (await searchParams) ?? {};
   const supabase = await createClient();
@@ -251,6 +261,15 @@ export default async function CustomerBookingsPage({
             className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700 shadow-sm"
           >
             Booking request submitted. The venue team can now review it.
+          </div>
+        ) : null}
+
+        {query.cancelled ? (
+          <div
+            role="status"
+            className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800 shadow-sm"
+          >
+            Your booking request has been cancelled.
           </div>
         ) : null}
 
@@ -349,8 +368,14 @@ export default async function CustomerBookingsPage({
                         </div>
                       </div>
 
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                         {actionForBooking(booking, venue)}
+                        {canCancelBookingStatus(booking.status) ? (
+                          <CustomerCancelBookingButton
+                            bookingId={booking.id}
+                            compact
+                          />
+                        ) : null}
                         {venue?.slug ? (
                           <Link
                             href={`/venues/${venue.slug}`}

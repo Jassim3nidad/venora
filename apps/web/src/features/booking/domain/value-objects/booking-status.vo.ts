@@ -67,6 +67,17 @@ export const BOOKING_STATUS_TRANSITIONS: Record<BookingStatusValue, BookingStatu
   expired:         [],
 };
 
+export const CANCELLABLE_BOOKING_STATUSES = [
+  "pending",
+  "approved",
+  "payment_pending",
+  "confirmed",
+] as const satisfies readonly BookingStatusValue[];
+
+export function canCancelBookingStatus(status: BookingStatusValue) {
+  return (CANCELLABLE_BOOKING_STATUSES as readonly string[]).includes(status);
+}
+
 export function isValidTransition(
   from: BookingStatusValue,
   to: BookingStatusValue,

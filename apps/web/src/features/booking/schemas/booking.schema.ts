@@ -4,6 +4,10 @@ import {
   isValidDateOnlyString,
   PAST_DATE_MESSAGE,
 } from "@/src/lib/date-only";
+import {
+  BOOKING_CANCELLATION_REASONS,
+  type BookingCancellationReasonCode,
+} from "../constants/cancellation-reasons";
 
 /**
  * Booking schemas - Zod is the single source of truth at UI and server action
@@ -54,10 +58,29 @@ export const declineBookingSchema = z.object({
 
 export type DeclineBookingInput = z.infer<typeof declineBookingSchema>;
 
-export const cancelBookingSchema = z.object({
-  bookingId: z.string().uuid(),
-  reason: z.string().max(500).optional(),
-});
+export const cancelBookingSchema = z
+  .object({
+    bookingId: z.string().uuid(),
+    reasonCode: z.enum(
+      BOOKING_CANCELLATION_REASONS.map((item) => item.value) as [
+        BookingCancellationReasonCode,
+        ...BookingCancellationReasonCode[],
+      ],
+    ),
+    reasonDetail: z.string().max(500).optional(),
+  })
+  .superRefine((input, ctx) => {
+    if (
+      input.reasonCode === "other" &&
+      (!input.reasonDetail || input.reasonDetail.trim().length < 5)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please describe your reason (at least 5 characters).",
+        path: ["reasonDetail"],
+      });
+    }
+  });
 
 export type CancelBookingInput = z.infer<typeof cancelBookingSchema>;
 
