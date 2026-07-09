@@ -20,9 +20,10 @@ const PH_LAT_MAX = 21.5;
 const PH_LNG_MIN = 116;
 const PH_LNG_MAX = 127;
 
-const MAX_EXACT_DISTANCE_FROM_CITY_KM = 60;
-
-const PH_PROVINCE_CENTROIDS: Record<string, { latitude: number; longitude: number }> = {
+const PH_PROVINCE_CENTROIDS: Record<
+  string,
+  { latitude: number; longitude: number }
+> = {
   "metro manila": { latitude: 14.5995, longitude: 120.9842 },
   cavite: { latitude: 14.4791, longitude: 120.897 },
   batangas: { latitude: 13.7565, longitude: 121.0583 },
@@ -39,7 +40,10 @@ const PH_PROVINCE_CENTROIDS: Record<string, { latitude: number; longitude: numbe
   benguet: { latitude: 16.4023, longitude: 120.596 },
 };
 
-const PH_CITY_CENTROIDS: Record<string, { latitude: number; longitude: number }> = {
+const PH_CITY_CENTROIDS: Record<
+  string,
+  { latitude: number; longitude: number }
+> = {
   paranaque: { latitude: 14.4793, longitude: 121.0198 },
   alfonso: { latitude: 14.1398, longitude: 120.8538 },
   nasugbu: { latitude: 14.0678, longitude: 120.6317 },
@@ -92,28 +96,12 @@ function isWithinPhilippines(latitude: number, longitude: number): boolean {
   );
 }
 
-function haversineDistanceKm(
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number,
-): number {
-  const toRadians = (value: number) => (value * Math.PI) / 180;
-  const earthRadiusKm = 6371;
-  const dLat = toRadians(lat2 - lat1);
-  const dLon = toRadians(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(dLon / 2) ** 2;
-
-  return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
 export function parseVenueCoordinates(
   latitude: unknown,
   longitude: unknown,
 ): { latitude: number; longitude: number } | null {
-  let parsedLatitude = typeof latitude === "number" ? latitude : Number(latitude);
+  let parsedLatitude =
+    typeof latitude === "number" ? latitude : Number(latitude);
   let parsedLongitude =
     typeof longitude === "number" ? longitude : Number(longitude);
 
@@ -199,25 +187,6 @@ export async function resolveVenueMapCoordinates(venue: {
   const parsed = parseVenueCoordinates(venue.latitude, venue.longitude);
 
   if (parsed) {
-    if (cityCentroid) {
-      const distanceKm = haversineDistanceKm(
-        parsed.latitude,
-        parsed.longitude,
-        cityCentroid.latitude,
-        cityCentroid.longitude,
-      );
-
-      if (distanceKm <= MAX_EXACT_DISTANCE_FROM_CITY_KM) {
-        return toResolvedLocation(parsed.latitude, parsed.longitude, "exact");
-      }
-
-      return toResolvedLocation(
-        cityCentroid.latitude,
-        cityCentroid.longitude,
-        "city",
-      );
-    }
-
     return toResolvedLocation(parsed.latitude, parsed.longitude, "exact");
   }
 

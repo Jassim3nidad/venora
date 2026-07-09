@@ -14,6 +14,8 @@ import {
   getOwnerDashboardContext,
   getOwnerVenueById,
 } from "../../../_lib/owner-dashboard-data";
+import { resolveVenueMapCoordinates } from "@/src/lib/venue-map-coordinates";
+import VenueLocationPicker from "@/src/features/venues/ui/VenueLocationPicker";
 
 export const metadata: Metadata = { title: "Edit Venue" };
 
@@ -62,7 +64,11 @@ export default async function EditVenuePage({
     "use server";
 
     const actionContext = await getOwnerDashboardContext();
-    const existingVenue = await getOwnerVenueById(actionContext, id, "id, slug");
+    const existingVenue = await getOwnerVenueById(
+      actionContext,
+      id,
+      "id, slug",
+    );
     if (!existingVenue) notFound();
 
     const name = fieldValue(formData, "name");
@@ -76,7 +82,9 @@ export default async function EditVenuePage({
     const longitude = optionalNumber(formData, "longitude");
 
     if (!name || !province || !city || !address) {
-      redirect(editVenuePath(id, "error=Please%20complete%20all%20required%20fields."));
+      redirect(
+        editVenuePath(id, "error=Please%20complete%20all%20required%20fields."),
+      );
     }
 
     if (
@@ -89,15 +97,31 @@ export default async function EditVenuePage({
       redirect(editVenuePath(id, "error=Please%20enter%20valid%20numbers."));
     }
 
+    if ((latitude == null) !== (longitude == null)) {
+      redirect(
+        editVenuePath(
+          id,
+          "error=Please%20set%20both%20latitude%20and%20longitude%20for%20the%20map%20point.",
+        ),
+      );
+    }
+
     if (capacityMin != null && capacityMin > capacityMax) {
-      redirect(editVenuePath(id, "error=Minimum%20capacity%20must%20not%20exceed%20maximum%20capacity."));
+      redirect(
+        editVenuePath(
+          id,
+          "error=Minimum%20capacity%20must%20not%20exceed%20maximum%20capacity.",
+        ),
+      );
     }
 
     if (
       (latitude != null && (latitude < -90 || latitude > 90)) ||
       (longitude != null && (longitude < -180 || longitude > 180))
     ) {
-      redirect(editVenuePath(id, "error=Please%20enter%20valid%20map%20coordinates."));
+      redirect(
+        editVenuePath(id, "error=Please%20enter%20valid%20map%20coordinates."),
+      );
     }
 
     const { error } = await actionContext.supabase
@@ -141,13 +165,18 @@ export default async function EditVenuePage({
   const inputClass =
     "h-11 rounded-xl border border-[#e5e7eb] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9ca3af] focus:border-[#2563eb] focus:ring-4 focus:ring-[#eff6ff]";
   const labelClass = "text-sm font-semibold text-[#374151]";
+  const fallbackMapLocation = await resolveVenueMapCoordinates(venue);
 
   return (
     <DashboardSubPage
       title="Edit Venue"
       description="Update core venue details, pricing, guest capacity, and media for this listing."
       action={
-        <DashButton href="/dashboard/venues" variant="secondary" icon="arrow_back">
+        <DashButton
+          href="/dashboard/venues"
+          variant="secondary"
+          icon="arrow_back"
+        >
           Back to Venues
         </DashButton>
       }
@@ -161,7 +190,8 @@ export default async function EditVenuePage({
 
           {query.created ? (
             <div className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
-              Venue created. It is pending admin approval before appearing publicly.
+              Venue created. It is pending admin approval before appearing
+              publicly.
             </div>
           ) : query.saved ? (
             <div className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
@@ -287,37 +317,12 @@ export default async function EditVenuePage({
                 />
               </div>
 
-              <div className="flex flex-col gap-2">
-                <label htmlFor="edit-venue-latitude" className={labelClass}>
-                  Map latitude
-                </label>
-                <input
-                  id="edit-venue-latitude"
-                  type="number"
-                  step="any"
-                  min="-90"
-                  max="90"
-                  name="latitude"
-                  defaultValue={venue.latitude ?? ""}
-                  className={inputClass}
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label htmlFor="edit-venue-longitude" className={labelClass}>
-                  Map longitude
-                </label>
-                <input
-                  id="edit-venue-longitude"
-                  type="number"
-                  step="any"
-                  min="-180"
-                  max="180"
-                  name="longitude"
-                  defaultValue={venue.longitude ?? ""}
-                  className={inputClass}
-                />
-              </div>
+              <VenueLocationPicker
+                initialLatitude={venue.latitude}
+                initialLongitude={venue.longitude}
+                fallbackLatitude={fallbackMapLocation?.latitude ?? null}
+                fallbackLongitude={fallbackMapLocation?.longitude ?? null}
+              />
 
               <div className="flex flex-col gap-2 sm:col-span-2">
                 <label htmlFor="edit-venue-description" className={labelClass}>
@@ -348,15 +353,10 @@ export default async function EditVenuePage({
           </form>
         </Panel>
 
-        <div className="space-y-6">
-          <VenuePhotoUpload venueId={venue.id} organizationId={venue.organization_id} />
-          <DescriptionGeneratorPanel
-            venueId={venue.id}
-            currentDescription={venue.description ?? null}
-            packages={venuePackageOptions}
-            initialDrafts={initialDrafts}
-          />
-        </div>
+        <VenuePhotoUpload
+          venueId={venue.id}
+          organizationId={venue.organization_id}
+        />
       </div>
     </DashboardSubPage>
   );
