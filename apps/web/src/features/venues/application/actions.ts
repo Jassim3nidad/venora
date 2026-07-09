@@ -10,8 +10,16 @@ import {
   isValidDateOnlyString,
   PAST_DATE_MESSAGE,
 } from "@/src/lib/date-only";
+import { searchMarketplaceVenues, type VenueSearchParams } from "./queries";
+import { toLiveMarketplaceVenue } from "../utils/venue-mappers";
+import { researchVenues } from "../data/research-venues";
 
 // ─── Input Schemas ───
+
+const loadMoreVenuesSchema = z.object({
+  filters: z.any(), // Passes VenueSearchParams
+  page: z.number().int().min(1),
+});
 
 const toggleFavoriteSchema = z.object({
   venueId: z.string().uuid(),
@@ -51,6 +59,45 @@ const updateVenueSchema = z.object({
 });
 
 // ─── Actions ───
+
+export async function loadMoreVenuesAction(rawInput: unknown) {
+  return createServerAction(loadMoreVenuesSchema, async ({ filters, page }) => {
+    const supabase = await createClient() as any;
+    
+    // Fetch favorites
+    const { data: { user } } = await supabase.auth.getUser();
+    let favoriteVenueIds = new Set<string>();
+
+    if (user) {
+      const { data: favoriteRows } = await supabase
+        .from("favorites")
+        .select("venue_id")
+        .eq("customer_id", user.id);
+      
+      if (favoriteRows) {
+        favoriteVenueIds = new Set(favoriteRows.map((r: any) => String(r.venue_id)));
+      }
+    }
+
+    const searchParams = { ...filters, page, limit: 12 } as VenueSearchParams;
+    const { data: dbVenues, error } = await searchMarketplaceVenues(supabase, searchParams);
+
+    if (error) throw error;
+
+    const researchVenueById = new Map(researchVenues.map((v) => [v.id, v]));
+    const dbRows = (dbVenues ?? []) as any[];
+
+    const mapped = dbRows.map((venue) =>
+      toLiveMarketplaceVenue(
+        venue,
+        favoriteVenueIds,
+        researchVenueById.get(String(venue.id)),
+      )
+    );
+
+    return { venues: mapped, hasMore: mapped.length === 12 };
+  }, rawInput);
+}
 
 export async function toggleFavoriteAction(rawInput: unknown) {
   return createServerAction(toggleFavoriteSchema, async ({ venueId }) => {

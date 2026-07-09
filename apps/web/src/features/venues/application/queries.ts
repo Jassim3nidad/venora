@@ -14,6 +14,8 @@ export interface VenueSearchParams {
   venueTypes?: string[] | undefined;
   indoorOutdoor?: string | undefined;
   amenities?: string[] | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
 }
 
 function parseMoney(value: string | undefined): number {
@@ -142,7 +144,12 @@ export async function searchMarketplaceVenues(
     if (amFilters) query = query.or(amFilters);
   }
 
-  return query.order("created_at", { ascending: false });
+  const page = params.page && params.page > 0 ? params.page : 1;
+  const limit = params.limit && params.limit > 0 ? params.limit : 12;
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  return query.order("created_at", { ascending: false }).range(from, to);
 }
 
 /** Latest ai_generated_content draft/approved/rejected row per content type for a venue. */
