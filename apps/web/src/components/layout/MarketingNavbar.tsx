@@ -3,7 +3,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import {
+  CalendarDays,
+  Heart,
+  type LucideIcon,
+  LogOut,
+  Menu,
+  Search,
+  Store,
+  UserRound,
+  X,
+} from "lucide-react";
 import ProfileMenu from "@/components/layout/ProfileMenu";
 
 interface MarketingNavbarProfile {
@@ -11,15 +21,34 @@ interface MarketingNavbarProfile {
   avatar_url?: string | null;
 }
 
-const navLinks = [
+type MobileLink = {
+  label: string;
+  href: string;
+  icon?: LucideIcon;
+};
+
+const navLinks: MobileLink[] = [
   { label: "Home", href: "/" },
   { label: "Venues", href: "/venues" },
   { label: "About", href: "/about" },
   { label: "Host a Venue", href: "/register" },
 ];
 
+const customerMobileLinks: MobileLink[] = [
+  { label: "Browse", href: "/venues", icon: Search },
+  { label: "Suppliers", href: "/suppliers", icon: Store },
+  { label: "Bookings", href: "/bookings", icon: CalendarDays },
+  { label: "Favorites", href: "/favorites", icon: Heart },
+];
+
 function isActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
+  if (href === "/venues") {
+    return pathname === "/venues" || pathname.startsWith("/venues/");
+  }
+  if (href === "/suppliers") {
+    return pathname === "/suppliers" || pathname.startsWith("/suppliers/");
+  }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -45,6 +74,10 @@ export default function MarketingNavbar({
   const email = user?.email ?? "";
 
   const closeMenu = () => setMenuOpen(false);
+  const mobileLinks = embedded && user ? customerMobileLinks : navLinks;
+  const mobilePanelPosition = embedded
+    ? "top-[8.75rem] max-h-[calc(100dvh-9.25rem)]"
+    : "top-24 max-h-[calc(100dvh-6.5rem)]";
 
   return (
     <header
@@ -113,22 +146,18 @@ export default function MarketingNavbar({
         </div>
 
         <div className="flex items-center justify-self-end gap-2 md:hidden">
-          {user ? (
-            <ProfileMenu
-              displayName={displayName}
-              email={email}
-              avatarUrl={profile?.avatar_url}
-            />
-          ) : null}
-
           <button
             className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#1D4ED8] transition hover:bg-[#EFF6FF]"
             type="button"
-            aria-label="Open menu"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
-            onClick={() => setMenuOpen(true)}
+            onClick={() => setMenuOpen((open) => !open)}
           >
-            <Menu className="h-5 w-5" />
+            {menuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
           </button>
         </div>
       </div>
@@ -142,9 +171,11 @@ export default function MarketingNavbar({
             onClick={closeMenu}
           />
           <div
-            className="fixed inset-x-0 bottom-0 z-50 rounded-t-[28px] border border-[#E5E7EB] bg-white px-4 pb-6 pt-5 shadow-2xl md:hidden"
-            role="dialog"
-            aria-modal="true"
+            className={[
+              "fixed inset-x-3 z-[60] overflow-y-auto rounded-[28px] border border-[#E5E7EB] bg-white p-4 shadow-2xl shadow-slate-300/50 md:hidden",
+              mobilePanelPosition,
+            ].join(" ")}
+            role="menu"
             aria-label="Mobile navigation"
           >
             <button
@@ -161,28 +192,51 @@ export default function MarketingNavbar({
             </p>
 
             <nav className="grid gap-2">
-              {navLinks.map(({ label, href }) => {
+              {mobileLinks.map(({ label, href, icon: Icon }) => {
                 const active = isActive(pathname, href);
 
                 return (
                   <Link
                     key={label}
                     href={href}
+                    role="menuitem"
                     className={[
-                      "rounded-2xl px-4 py-3 text-sm font-extrabold transition",
+                      "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold transition",
                       active
                         ? "bg-[#EFF6FF] text-[#2563EB]"
                         : "text-[#111827] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
                     ].join(" ")}
                     onClick={closeMenu}
                   >
+                    {Icon ? <Icon className="h-5 w-5" /> : null}
                     {label}
                   </Link>
                 );
               })}
             </nav>
 
-            {!user ? (
+            {user ? (
+              <div className="mt-3 grid gap-2">
+                <Link
+                  href="/account"
+                  role="menuitem"
+                  className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold text-[#111827] transition hover:bg-[#EFF6FF] hover:text-[#2563EB]"
+                  onClick={closeMenu}
+                >
+                  <UserRound className="h-5 w-5" />
+                  Account
+                </Link>
+                <Link
+                  href="/logout"
+                  role="menuitem"
+                  className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold text-[#6B7280] transition hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+                  onClick={closeMenu}
+                >
+                  <LogOut className="h-5 w-5" />
+                  Logout
+                </Link>
+              </div>
+            ) : (
               <div className="mt-5 grid gap-3">
                 <Link
                   href="/login"
@@ -199,7 +253,7 @@ export default function MarketingNavbar({
                   Sign Up
                 </Link>
               </div>
-            ) : null}
+            )}
           </div>
         </>
       ) : null}

@@ -4,8 +4,17 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { queryKeys } from "@/lib/query-keys";
-import { format, startOfMonth, endOfMonth, parseISO, isSameDay } from "date-fns";
-import { BookingStatusValue, AvailabilityStatusValue } from "../types/calendar.types";
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  parseISO,
+  isSameDay,
+} from "date-fns";
+import {
+  BookingStatusValue,
+  AvailabilityStatusValue,
+} from "../types/calendar.types";
 
 export interface Booking {
   id: string;
@@ -15,7 +24,6 @@ export interface Booking {
   total_amount: number | null;
   deposit_amount: number | null;
   special_requests: string | null;
-  decline_reason: string | null;
   created_at: string;
   venue: {
     id: string;
@@ -58,18 +66,20 @@ export function useCalendar(venueId: string, currentMonth: Date) {
       if (!venueId) return [];
       const { data, error } = await (supabase as any)
         .from("bookings")
-        .select(`
+        .select(
+          `
           id, event_date, status, guest_count, total_amount, deposit_amount,
-          special_requests, decline_reason, created_at,
+          special_requests, created_at,
           venue:venues!bookings_venue_id_fkey(id, name),
           customer:profiles!bookings_customer_id_fkey(id, full_name, email, phone),
           package:venue_packages!bookings_package_id_fkey(id, name, price)
-        `)
+        `,
+        )
         .eq("venue_id", venueId)
         .gte("event_date", startDate)
         .lte("event_date", endDate)
         .order("event_date", { ascending: true });
-        
+
       if (error) throw error;
       return (data as unknown as Booking[]) || [];
     },
@@ -86,7 +96,7 @@ export function useCalendar(venueId: string, currentMonth: Date) {
         .eq("venue_id", venueId)
         .gte("date", startDate)
         .lte("date", endDate);
-        
+
       if (error) throw error;
       return (data as VenueAvailability[]) || [];
     },
@@ -97,20 +107,35 @@ export function useCalendar(venueId: string, currentMonth: Date) {
   useEffect(() => {
     if (!venueId) return;
 
-    const channel = supabase.channel(`calendar-updates-${venueId}`)
+    const channel = supabase
+      .channel(`calendar-updates-${venueId}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "bookings", filter: `venue_id=eq.${venueId}` },
+        {
+          event: "*",
+          schema: "public",
+          table: "bookings",
+          filter: `venue_id=eq.${venueId}`,
+        },
         () => {
-          queryClient.invalidateQueries({ queryKey: queryKeys.calendar.bookings(venueId, monthStr) });
-        }
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.calendar.bookings(venueId, monthStr),
+          });
+        },
       )
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "venue_availability", filter: `venue_id=eq.${venueId}` },
+        {
+          event: "*",
+          schema: "public",
+          table: "venue_availability",
+          filter: `venue_id=eq.${venueId}`,
+        },
         () => {
-          queryClient.invalidateQueries({ queryKey: queryKeys.calendar.availability(venueId, monthStr) });
-        }
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.calendar.availability(venueId, monthStr),
+          });
+        },
       )
       .subscribe();
 
@@ -120,9 +145,9 @@ export function useCalendar(venueId: string, currentMonth: Date) {
   }, [venueId, monthStr, supabase, queryClient]);
 
   // Helper functions
-  const getBookingsForDay = (day: Date) => 
+  const getBookingsForDay = (day: Date) =>
     bookings.filter((b) => isSameDay(parseISO(b.event_date), day));
-    
+
   const getAvailabilityForDay = (day: Date) =>
     availability.find((a) => isSameDay(parseISO(a.date), day));
 

@@ -23,7 +23,12 @@ const statusActionSchema = z.discriminatedUnion("action", [
   }),
 ]);
 
-function apiError(code: string, message: string, status: number, details?: unknown) {
+function apiError(
+  code: string,
+  message: string,
+  status: number,
+  details?: unknown,
+) {
   return NextResponse.json(
     { data: null, error: { code, message, details } },
     { status },
@@ -57,14 +62,22 @@ async function canManageBooking(supabase: any, bookingId: string) {
   const organizationId = booking.venues?.organization_id;
   if (!organizationId) return false;
 
-  const { data: membership } = await supabase
-    .from("organization_members")
-    .select("organization_id")
-    .eq("user_id", user.id)
-    .eq("organization_id", organizationId)
-    .maybeSingle();
+  const [{ data: membership }, { data: organization }] = await Promise.all([
+    supabase
+      .from("organization_members")
+      .select("organization_id")
+      .eq("user_id", user.id)
+      .eq("organization_id", organizationId)
+      .maybeSingle(),
+    supabase
+      .from("organizations")
+      .select("id")
+      .eq("id", organizationId)
+      .eq("owner_id", user.id)
+      .maybeSingle(),
+  ]);
 
-  return membership ? booking : false;
+  return membership || organization ? booking : false;
 }
 
 function revalidateBookingViews(bookingId: string) {
@@ -99,24 +112,20 @@ export async function PATCH(
 
     if (input.action === "approve") {
       const booking = await canManageBooking(supabase, id);
-      if (!booking) return apiError("FORBIDDEN", "You cannot manage this booking.", 403);
+      if (!booking)
+        return apiError("FORBIDDEN", "You cannot manage this booking.", 403);
       if (booking.status !== "pending") {
-        return apiError("VALIDATION_ERROR", "Only pending bookings can be approved.", 400);
+        return apiError(
+          "VALIDATION_ERROR",
+          "Only pending bookings can be approved.",
+          400,
+        );
       }
-
-      const paymentDueAt = new Date();
-      paymentDueAt.setDate(paymentDueAt.getDate() + 7);
 
       result = await supabase
         .from("bookings")
         .update({
           status: "approved",
-          total_amount: input.totalAmount,
-          deposit_amount: input.depositAmount,
-          approval_note: input.note?.trim() || null,
-          decline_reason: null,
-          approved_at: new Date().toISOString(),
-          payment_due_at: paymentDueAt.toISOString(),
         })
         .eq("id", id)
         .eq("status", "pending")
@@ -124,17 +133,20 @@ export async function PATCH(
         .single();
     } else if (input.action === "decline") {
       const booking = await canManageBooking(supabase, id);
-      if (!booking) return apiError("FORBIDDEN", "You cannot manage this booking.", 403);
+      if (!booking)
+        return apiError("FORBIDDEN", "You cannot manage this booking.", 403);
       if (booking.status !== "pending") {
-        return apiError("VALIDATION_ERROR", "Only pending bookings can be declined.", 400);
+        return apiError(
+          "VALIDATION_ERROR",
+          "Only pending bookings can be declined.",
+          400,
+        );
       }
 
       result = await supabase
         .from("bookings")
         .update({
           status: "declined",
-          decline_reason: input.reason.trim(),
-          approval_note: null,
         })
         .eq("id", id)
         .eq("status", "pending")

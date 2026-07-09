@@ -180,11 +180,13 @@ export function CustomerNavbar({
           </button>
 
           {user ? (
-            <ProfileMenu
-              displayName={displayName}
-              email={email}
-              avatarUrl={profile?.avatar_url}
-            />
+            <div className="hidden md:block">
+              <ProfileMenu
+                displayName={displayName}
+                email={email}
+                avatarUrl={profile?.avatar_url}
+              />
+            </div>
           ) : (
             <Link
               href="/login"
@@ -213,7 +215,8 @@ export function CustomerNavbar({
             {menuOpen ? (
               <div
                 role="menu"
-                className="absolute right-0 mt-2 w-64 overflow-hidden rounded-[26px] border border-[#E5E7EB] bg-white p-3 shadow-lg shadow-slate-200/70"
+                aria-label="Customer navigation"
+                className="fixed inset-x-3 top-20 z-[60] max-h-[calc(100dvh-5.5rem)] overflow-y-auto rounded-[28px] border border-[#E5E7EB] bg-white p-3 shadow-2xl shadow-slate-300/50"
               >
                 <div className="grid gap-1">
                   {mobileNavLinks.map((item) => {
@@ -241,7 +244,34 @@ export function CustomerNavbar({
                     );
                   })}
 
-                  {!user ? (
+                  {user ? (
+                    <>
+                      <Link
+                        href="/account"
+                        role="menuitem"
+                        onClick={closeMenu}
+                        className={[
+                          "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold transition",
+                          isActive(pathname, "/account")
+                            ? "bg-[#EFF6FF] text-[#2563EB]"
+                            : "text-[#111827] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]",
+                        ].join(" ")}
+                      >
+                        <UserRound className="h-5 w-5" />
+                        Account
+                      </Link>
+
+                      <Link
+                        href="/logout"
+                        role="menuitem"
+                        onClick={closeMenu}
+                        className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold text-[#6B7280] transition hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+                      >
+                        <LogOut className="h-5 w-5" />
+                        Logout
+                      </Link>
+                    </>
+                  ) : (
                     <Link
                       href="/login"
                       role="menuitem"
@@ -250,7 +280,7 @@ export function CustomerNavbar({
                     >
                       Sign In
                     </Link>
-                  ) : null}
+                  )}
                 </div>
               </div>
             ) : null}
