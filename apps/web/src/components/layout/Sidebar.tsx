@@ -503,10 +503,10 @@ export default function Sidebar({
         "flex h-full max-h-full flex-shrink-0 flex-col overflow-hidden bg-white",
         presentation === "mobile"
           ? "w-full rounded-[28px] border border-[#E5E7EB]"
-          : "w-[360px] max-w-[360px] border-r border-[#E5E7EB]",
+          : "w-[300px] max-w-[300px] border-r border-[#E5E7EB]",
       ].join(" ")}
     >
-      <div className="shrink-0 border-b border-[#E5E7EB] bg-[#F9FAFB] px-6 pb-5 pt-6">
+      <div className="shrink-0 border-b border-[#E5E7EB] bg-[#F9FAFB] px-4 pb-4 pt-4">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-xl font-black tracking-[-0.03em] text-[#111827]">
@@ -542,7 +542,7 @@ export default function Sidebar({
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [&>section:not(:last-child)]:mb-7">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [&>section:not(:last-child)]:mb-4">
         <section>
           <SectionTitle icon={MapPin} title="Location" />
 
@@ -839,7 +839,7 @@ export default function Sidebar({
         </section>
       </div>
 
-      <div className="sticky bottom-0 z-10 shrink-0 border-t border-[#E5E7EB] bg-white/95 px-6 py-4 backdrop-blur">
+      <div className="sticky bottom-0 z-10 shrink-0 border-t border-[#E5E7EB] bg-white/95 px-4 py-3 backdrop-blur">
         <button
           type="button"
           onClick={onApply}

@@ -173,7 +173,10 @@ function textIncludes(value: unknown, query: string) {
 // match loosely in either direction, so selecting a locality still finds
 // venues regardless of which form was used when the venue was entered.
 function normalizeLocality(value: unknown) {
-  return normalize(value).replace(/\bcity\b/g, "").replace(/\s+/g, " ").trim();
+  return normalize(value)
+    .replace(/\bcity\b/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function localityMatches(venueValue: unknown, filterValue: string) {
@@ -705,69 +708,85 @@ const VenueCard = memo(function VenueCard({
     venueId: string | number,
   ) => void;
 }) {
+  const detailTags = [
+    venue.category,
+    ...(venue.categories ?? []).slice(0, 1),
+    ...(venue.eventTypes ?? []).slice(0, 1),
+  ].filter(Boolean) as string[];
+  const uniqueDetailTags = [...new Set(detailTags)].slice(0, 2);
+
   return (
-    <article className="group relative flex h-full overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-sm shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1 hover:border-[#2563EB]/50 hover:shadow-xl hover:shadow-slate-200/80">
+    <article className="group relative flex h-full overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70 transition duration-300 hover:-translate-y-1 hover:border-[#BFDBFE] hover:shadow-xl hover:shadow-slate-200/80">
       <Link
         href={`/venues/${venue.slug ?? venue.id}`}
-        className="flex h-full w-full flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
+        className="flex min-w-0 flex-1 flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
       >
-        <div className="relative aspect-[16/11] overflow-hidden bg-slate-100">
+        <div className="relative aspect-[4/3] overflow-hidden bg-[#EFF6FF]">
           <img
             src={venue.image}
             alt={venue.name}
-            className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
+            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
           />
 
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-slate-950/5 to-transparent" />
-
-          <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#1D4ED8] shadow-sm backdrop-blur-md">
-            {venue.category}
-          </span>
-
-          <div className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-slate-800 shadow-sm backdrop-blur-md">
-            <Star className="h-3.5 w-3.5 fill-[#F59E0B] text-[#F59E0B]" />
-
-            <span className="text-xs font-extrabold">
-              {String(
-                typeof venue.rating === "number"
-                  ? venue.rating.toFixed(1)
-                  : "New",
-              )}
-            </span>
-          </div>
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#111827]/55 to-transparent" />
         </div>
 
-        <div className="flex min-h-[190px] flex-1 flex-col justify-between gap-5 p-5">
-          <div className="min-w-0">
-            <h2 className="line-clamp-1 text-lg font-extrabold leading-6 tracking-[-0.02em] text-slate-950 transition group-hover:text-[#1D4ED8]">
-              {venue.name}
-            </h2>
-
-            <p className="mt-2 flex min-w-0 items-center gap-2 text-sm font-medium leading-5 text-slate-500">
-              <MapPin className="h-4 w-4 shrink-0 text-slate-400" />
-
-              <span className="line-clamp-1">{venue.location}</span>
-            </p>
-          </div>
-
-          <div className="flex items-end justify-between gap-4 border-t border-slate-100 pt-4">
-            <div className="min-w-0">
-              <p className="text-lg font-black leading-6 text-slate-950">
-                {venue.price}
-              </p>
-
-              <p className="mt-0.5 text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">
-                starting price
-              </p>
-            </div>
-
-            <div className="inline-flex max-w-[60%] items-center gap-1.5 rounded-2xl bg-slate-100 px-3 py-2 text-slate-600">
-              <Users className="h-3.5 w-3.5 shrink-0" />
-
-              <span className="truncate text-[11px] font-extrabold uppercase tracking-[0.08em]">
-                {venue.capacity}
+        <div className="flex flex-1 flex-col gap-4 p-5">
+          <div className="flex min-h-[112px] flex-col">
+            <div className="mb-3 flex min-h-[28px] flex-wrap items-start gap-2">
+              {uniqueDetailTags.length > 0 ? (
+                uniqueDetailTags.map((detailTag) => (
+                  <span
+                    key={`${venue.id}-${detailTag}`}
+                    className="inline-flex max-w-full items-center rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1 text-xs font-extrabold text-[#1D4ED8]"
+                  >
+                    <span className="truncate">{detailTag}</span>
+                  </span>
+                ))
+              ) : (
+                <span className="inline-flex max-w-full items-center rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1 text-xs font-extrabold text-[#1D4ED8]">
+                  Venue
+                </span>
+              )}
+              <span className="inline-flex shrink-0 items-center gap-1 py-1 text-xs font-bold text-amber-700">
+                <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                {typeof venue.rating === "number"
+                  ? venue.rating.toFixed(1)
+                  : "New"}
               </span>
             </div>
+
+            <h2 className="line-clamp-2 min-h-[48px] text-lg font-black leading-6 tracking-[-0.03em] text-[#111827] transition group-hover:text-[#1D4ED8]">
+              {venue.name}
+            </h2>
+          </div>
+
+          <div className="grid min-h-[58px] content-start gap-2.5 text-sm text-[#6B7280]">
+            <div className="flex min-w-0 items-start gap-2">
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB]" />
+              <span className="min-w-0 truncate font-semibold">
+                {venue.location}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-[#2563EB]" />
+              <span className="font-semibold">{venue.capacity}</span>
+            </div>
+          </div>
+
+          <div className="mt-auto flex items-end justify-between gap-3 border-t border-[#E5E7EB] pt-4">
+            <div className="min-w-0">
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">
+                Starts at
+              </p>
+              <p className="truncate text-lg font-black text-slate-950">
+                {venue.price}
+              </p>
+            </div>
+
+            <span className="inline-flex h-11 min-w-[140px] shrink-0 items-center justify-center rounded-2xl bg-[#2563EB] px-4 text-center text-xs font-black uppercase tracking-[0.08em] text-white shadow-sm shadow-[#2563EB]/20 transition group-hover:bg-[#1D4ED8]">
+              View Details
+            </span>
           </div>
         </div>
       </Link>
@@ -912,9 +931,7 @@ export default function VenuesClient({
   };
 
   const removeAmenity = (amenity: string) => {
-    const nextAmenities = filters.amenities.filter(
-      (item) => item !== amenity,
-    );
+    const nextAmenities = filters.amenities.filter((item) => item !== amenity);
     updateFilter("amenities", nextAmenities.join(","));
   };
 
@@ -1212,7 +1229,10 @@ export default function VenuesClient({
   }
 
   const locationLabel =
-    filters.location || filters.municipality || filters.city || filters.province;
+    filters.location ||
+    filters.municipality ||
+    filters.city ||
+    filters.province;
 
   const filterChips: FilterChip[] = [
     filters.query && {
@@ -1302,304 +1322,306 @@ export default function VenuesClient({
       <aside
         className={[
           "hidden h-full shrink-0 overflow-hidden transition-[width,opacity] duration-300 ease-out lg:block",
-          desktopFiltersOpen ? "w-[360px] opacity-100" : "w-0 opacity-0",
+          desktopFiltersOpen ? "w-[300px] opacity-100" : "w-0 opacity-0",
         ].join(" ")}
         aria-label="Venue filters"
       >
         <Sidebar venues={initialVenues} />
       </aside>
 
-      <main className="h-full min-w-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8 xl:px-12">
-        <div className="flex flex-col gap-9">
-        <section className="max-w-full overflow-hidden rounded-[24px] border border-[#E5E7EB]/90 bg-white shadow-sm shadow-slate-200/60">
-          <div className="grid gap-5 p-5 sm:p-7">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div className="min-w-0">
-                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1.5 text-[#2563EB]">
-                  <Sparkles className="h-3.5 w-3.5" />
+      <main className="h-full min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-4 py-5 sm:px-6 sm:py-6 lg:px-7 xl:px-10">
+        <div className="flex flex-col gap-6">
+          <section className="max-w-full overflow-hidden rounded-[24px] border border-[#E5E7EB]/90 bg-white shadow-sm shadow-slate-200/60">
+            <div className="grid gap-4 p-5 sm:p-6 lg:p-7">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div className="min-w-0">
+                  <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1.5 text-[#2563EB]">
+                    <Sparkles className="h-3.5 w-3.5" />
 
-                  <span className="text-[11px] font-extrabold uppercase tracking-[0.14em]">
-                    Venue marketplace
-                  </span>
-                </div>
-
-                <h1 className="max-w-3xl break-words text-3xl font-black leading-9 tracking-[-0.04em] text-slate-950 sm:text-4xl sm:leading-tight">
-                  Wedding & Event Venues
-                </h1>
-
-                <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-[#6B7280] sm:text-base">
-                  Showing{" "}
-                  <span className="font-extrabold text-slate-950">
-                    {Math.min(visibleCount, filtered.length)}
-                  </span>
-                  {" "}of{" "}
-                  <span className="font-extrabold text-slate-950">
-                    {filtered.length}
-                  </span>{" "}
-                  venue{filtered.length === 1 ? "" : "s"}
-                  {activeFilterCount > 0 ? " matching your filters" : ""}
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setDesktopFiltersOpen((open) => !open)}
-                aria-pressed={desktopFiltersOpen}
-                className="hidden h-11 shrink-0 items-center justify-center gap-2 rounded-2xl border border-[#DBEAFE] bg-white px-4 text-sm font-extrabold text-[#1D4ED8] shadow-sm transition hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/20 lg:inline-flex"
-              >
-                {desktopFiltersOpen ? (
-                  <PanelLeftClose className="h-4 w-4" />
-                ) : (
-                  <PanelLeftOpen className="h-4 w-4" />
-                )}
-
-                {desktopFiltersOpen ? "Hide filters" : "Show filters"}
-
-                {activeFilterCount > 0 && (
-                  <span className="rounded-full bg-[#2563EB] px-2 py-0.5 text-xs text-white">
-                    {activeFilterCount}
-                  </span>
-                )}
-              </button>
-            </div>
-
-            <form
-              onSubmit={handleSmartSearch}
-              className="grid gap-3 rounded-[20px] border border-slate-200 bg-[#F9FAFB] p-3 sm:p-4"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">
-                  Optional smart search
-                </p>
-                <p className="text-xs font-medium text-slate-500">
-                  Describe the event when filters are not enough.
-                </p>
-              </div>
-
-              <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
-                <div className="relative min-w-0">
-                  <label htmlFor="venue-ai-search" className="sr-only">
-                    Natural language venue search
-                  </label>
-
-                  <Sparkles className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#2563EB]" />
-
-                  <input
-                    id="venue-ai-search"
-                    name="aiPrompt"
-                    type="search"
-                    value={aiPrompt}
-                    onChange={(event) => setAiPrompt(event.target.value)}
-                    placeholder="Try: outdoor garden in Tagaytay for 150 guests under PHP 250k with parking"
-                    className="h-12 w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-[#93C5FD] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={
-                    smartSearch.isPending ||
-                    (!aiPrompt.trim() && activeFilterCount === 0)
-                  }
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-[#BFDBFE] bg-white px-5 text-sm font-extrabold text-[#1D4ED8] shadow-sm transition hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                  {smartSearch.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Sparkles className="h-4 w-4" />
-                  )}
-                  Search AI
-                </button>
-              </div>
-
-              {smartSearch.error && localAiSummary.length === 0 && (
-                <p
-                  className="rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700"
-                  role="alert"
-                >
-                  {smartSearch.error.message}
-                </p>
-              )}
-
-              {localAiSummary.length > 0 && !aiSearchResult && (
-                <p
-                  className="rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800"
-                  role="status"
-                >
-                  AI search is temporarily unavailable, so local smart filters
-                  were applied.
-                </p>
-              )}
-
-              {(aiSearchResult || localAiSummary.length > 0) && (
-                <div className="flex flex-wrap items-center gap-2 border-t border-[#DBEAFE] pt-3">
-                  {aiIntentSummary.slice(0, 10).map((item) => (
-                    <span
-                      key={item}
-                      className="rounded-full border border-[#DBEAFE] bg-white px-3 py-1.5 text-xs font-bold text-[#1D4ED8]"
-                    >
-                      {item}
+                    <span className="text-[11px] font-extrabold uppercase tracking-[0.14em]">
+                      Venue marketplace
                     </span>
-                  ))}
+                  </div>
 
-                  <button
-                    type="button"
-                    onClick={clearAiSearch}
-                    className="rounded-full px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.08em] text-slate-500 transition hover:bg-white hover:text-[#1D4ED8]"
-                  >
-                    Clear AI
-                  </button>
+                  <h1 className="max-w-3xl break-words text-2xl font-black leading-8 tracking-[-0.04em] text-slate-950 sm:text-3xl sm:leading-tight">
+                    Wedding & Event Venues
+                  </h1>
+
+                  <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-[#6B7280] sm:text-[15px]">
+                    Showing{" "}
+                    <span className="font-extrabold text-slate-950">
+                      {Math.min(visibleCount, filtered.length)}
+                    </span>{" "}
+                    of{" "}
+                    <span className="font-extrabold text-slate-950">
+                      {filtered.length}
+                    </span>{" "}
+                    venue{filtered.length === 1 ? "" : "s"}
+                    {activeFilterCount > 0 ? " matching your filters" : ""}
+                  </p>
                 </div>
-              )}
-            </form>
 
-            <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
-              <div className="relative min-w-0">
-                <label htmlFor="venue-search" className="sr-only">
-                  Keyword venue search
-                </label>
-
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-
-                <input
-                  id="venue-search"
-                  type="search"
-                  value={queryDraft}
-                  onChange={(event) => setQueryDraft(event.target.value)}
-                  placeholder="Search venue name, location, category, or amenity..."
-                  className="h-12 w-full rounded-2xl border border-slate-200 bg-[#F9FAFB] pl-11 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-[#93C5FD] focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
-                />
-              </div>
-
-              <div className="grid gap-2 sm:grid-cols-[auto_minmax(180px,auto)]">
                 <button
                   type="button"
-                  onClick={() => setMobileFiltersOpen(true)}
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-600 transition hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/20 lg:hidden"
+                  onClick={() => setDesktopFiltersOpen((open) => !open)}
+                  aria-pressed={desktopFiltersOpen}
+                  className="hidden h-11 shrink-0 items-center justify-center gap-2 rounded-2xl border border-[#DBEAFE] bg-white px-4 text-sm font-extrabold text-[#1D4ED8] shadow-sm transition hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/20 lg:inline-flex"
                 >
-                  <SlidersHorizontal className="h-4 w-4" />
-                  Filters
+                  {desktopFiltersOpen ? (
+                    <PanelLeftClose className="h-4 w-4" />
+                  ) : (
+                    <PanelLeftOpen className="h-4 w-4" />
+                  )}
+
+                  {desktopFiltersOpen ? "Hide filters" : "Show filters"}
+
                   {activeFilterCount > 0 && (
                     <span className="rounded-full bg-[#2563EB] px-2 py-0.5 text-xs text-white">
                       {activeFilterCount}
                     </span>
                   )}
                 </button>
-
-                <div className="relative min-w-0">
-                  <SlidersHorizontal className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-
-                  <select
-                    value={filters.sort}
-                    onChange={(event) =>
-                      updateFilter("sort", event.target.value)
-                    }
-                    className="h-12 w-full appearance-none rounded-2xl border border-slate-200 bg-white pl-11 pr-9 text-sm font-bold text-slate-600 outline-none transition hover:border-[#BFDBFE] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
-                    aria-label="Sort venues"
-                  >
-                    <option value="recommended">Recommended</option>
-                    <option value="price">Price (low to high)</option>
-                    <option value="rating">Highest rated</option>
-                    <option value="capacity">Largest capacity</option>
-                  </select>
-
-                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                </div>
               </div>
-            </div>
 
-            {filterChips.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4">
-                {filterChips.map((chip) => (
-                  <span
-                    key={chip.key}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-[#E5E7EB] bg-[#F9FAFB] py-1.5 pl-3 pr-1.5 text-xs font-bold text-[#1D4ED8]"
+              <form
+                onSubmit={handleSmartSearch}
+                className="grid gap-3 rounded-[18px] border border-slate-200 bg-[#F9FAFB] p-3 sm:p-4"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-slate-500">
+                    Optional AI search
+                  </p>
+                  <p className="text-xs font-medium text-slate-500">
+                    Use natural language when filters feel too narrow.
+                  </p>
+                </div>
+
+                <div className="grid gap-2 lg:grid-cols-[minmax(0,1fr)_auto]">
+                  <div className="relative min-w-0">
+                    <label htmlFor="venue-ai-search" className="sr-only">
+                      Natural language venue search
+                    </label>
+
+                    <Sparkles className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#2563EB]" />
+
+                    <input
+                      id="venue-ai-search"
+                      name="aiPrompt"
+                      type="search"
+                      value={aiPrompt}
+                      onChange={(event) => setAiPrompt(event.target.value)}
+                      placeholder="Try: garden venue in Tagaytay for 150 guests under ₱250k"
+                      className="h-11 w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-[#93C5FD] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={
+                      smartSearch.isPending ||
+                      (!aiPrompt.trim() && activeFilterCount === 0)
+                    }
+                    className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-[#BFDBFE] bg-white px-4 text-sm font-extrabold text-[#1D4ED8] shadow-sm transition hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 disabled:cursor-not-allowed disabled:opacity-70"
                   >
-                    {chip.label}
+                    {smartSearch.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4" />
+                    )}
+                    AI search
+                  </button>
+                </div>
+
+                {smartSearch.error && localAiSummary.length === 0 && (
+                  <p
+                    className="rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700"
+                    role="alert"
+                  >
+                    {smartSearch.error.message}
+                  </p>
+                )}
+
+                {localAiSummary.length > 0 && !aiSearchResult && (
+                  <p
+                    className="rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800"
+                    role="status"
+                  >
+                    AI search is temporarily unavailable, so local smart filters
+                    were applied.
+                  </p>
+                )}
+
+                {(aiSearchResult || localAiSummary.length > 0) && (
+                  <div className="flex flex-wrap items-center gap-2 border-t border-[#DBEAFE] pt-3">
+                    {aiIntentSummary.slice(0, 10).map((item) => (
+                      <span
+                        key={item}
+                        className="rounded-full border border-[#DBEAFE] bg-white px-3 py-1.5 text-xs font-bold text-[#1D4ED8]"
+                      >
+                        {item}
+                      </span>
+                    ))}
+
                     <button
                       type="button"
-                      onClick={chip.onRemove}
-                      aria-label={`Remove ${chip.label} filter`}
-                      className="flex h-4 w-4 items-center justify-center rounded-full text-[#1D4ED8]/70 transition hover:bg-[#DBEAFE] hover:text-[#1D4ED8]"
+                      onClick={clearAiSearch}
+                      className="rounded-full px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.08em] text-slate-500 transition hover:bg-white hover:text-[#1D4ED8]"
                     >
-                      <X className="h-3 w-3" />
+                      Clear AI
                     </button>
-                  </span>
-                ))}
+                  </div>
+                )}
+              </form>
 
-                {filterChips.length > 1 && (
+              <div className="grid gap-2 lg:grid-cols-[minmax(0,1fr)_auto]">
+                <div className="relative min-w-0">
+                  <label htmlFor="venue-search" className="sr-only">
+                    Keyword venue search
+                  </label>
+
+                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+                  <input
+                    id="venue-search"
+                    type="search"
+                    value={queryDraft}
+                    onChange={(event) => setQueryDraft(event.target.value)}
+                    placeholder="Search venue name, location, category, or amenity..."
+                    className="h-12 w-full rounded-2xl border border-slate-200 bg-[#F9FAFB] pl-11 pr-4 text-sm font-medium text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-[#93C5FD] focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
+                  />
+                </div>
+
+                <div className="grid gap-2 sm:grid-cols-[auto_minmax(180px,auto)]">
                   <button
                     type="button"
-                    onClick={clearFilters}
-                    className="rounded-full px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.08em] text-slate-500 transition hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
+                    onClick={() => setMobileFiltersOpen(true)}
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-600 transition hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/20 lg:hidden"
                   >
-                    Clear all
+                    <SlidersHorizontal className="h-4 w-4" />
+                    Filters
+                    {activeFilterCount > 0 && (
+                      <span className="rounded-full bg-[#2563EB] px-2 py-0.5 text-xs text-white">
+                        {activeFilterCount}
+                      </span>
+                    )}
                   </button>
-                )}
+
+                  <div className="relative min-w-0">
+                    <SlidersHorizontal className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+
+                    <select
+                      value={filters.sort}
+                      onChange={(event) =>
+                        updateFilter("sort", event.target.value)
+                      }
+                      className="h-12 w-full appearance-none rounded-2xl border border-slate-200 bg-white pl-11 pr-9 text-sm font-bold text-slate-600 outline-none transition hover:border-[#BFDBFE] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                      aria-label="Sort venues"
+                    >
+                      <option value="recommended">Recommended</option>
+                      <option value="price">Price (low to high)</option>
+                      <option value="rating">Highest rated</option>
+                      <option value="capacity">Largest capacity</option>
+                    </select>
+
+                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  </div>
+                </div>
               </div>
-            )}
-          </div>
-        </section>
 
-        {filtered.length === 0 ? (
-          <div className="flex min-h-[380px] flex-col items-center justify-center rounded-[24px] border border-dashed border-[#BFDBFE] bg-white px-6 py-14 text-center shadow-sm">
-            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB]">
-              <Search className="h-7 w-7" />
+              {filterChips.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4">
+                  {filterChips.map((chip) => (
+                    <span
+                      key={chip.key}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-[#E5E7EB] bg-[#F9FAFB] py-1.5 pl-3 pr-1.5 text-xs font-bold text-[#1D4ED8]"
+                    >
+                      {chip.label}
+                      <button
+                        type="button"
+                        onClick={chip.onRemove}
+                        aria-label={`Remove ${chip.label} filter`}
+                        className="flex h-4 w-4 items-center justify-center rounded-full text-[#1D4ED8]/70 transition hover:bg-[#DBEAFE] hover:text-[#1D4ED8]"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+
+                  {filterChips.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={clearFilters}
+                      className="rounded-full px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.08em] text-slate-500 transition hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
+                    >
+                      Clear all
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
+          </section>
 
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
-              No results
-            </p>
+          {filtered.length === 0 ? (
+            <div className="flex min-h-[380px] flex-col items-center justify-center rounded-[24px] border border-dashed border-[#BFDBFE] bg-white px-6 py-14 text-center shadow-sm">
+              <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB]">
+                <Search className="h-7 w-7" />
+              </div>
 
-            <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-slate-950">
-              No venues found
-            </h2>
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
+                No results
+              </p>
 
-            <p className="mt-3 max-w-md text-sm font-medium leading-6 text-slate-500">
-              Try adjusting your filters or search terms. A wider location, broader
-              budget, or fewer amenities may bring more spaces into view.
-            </p>
+              <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-slate-950">
+                No venues found
+              </h2>
 
-            {activeFilterCount > 0 ? (
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="mt-6 inline-flex h-12 items-center justify-center rounded-2xl bg-[#2563EB] px-6 text-sm font-extrabold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
-              >
-                Clear all filters
-              </button>
-            ) : null}
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-              {visibleVenues.map((venue) => (
-                <VenueCard
-                  key={venue.id}
-                  venue={venue}
-                  isFavorited={favoriteIds.has(String(venue.id))}
-                  isPending={favoritePendingId === String(venue.id)}
-                  onToggleFavorite={handleFavoriteToggle}
-                />
-              ))}
-            </div>
+              <p className="mt-3 max-w-md text-sm font-medium leading-6 text-slate-500">
+                Try adjusting your filters or search terms. A wider location,
+                broader budget, or fewer amenities may bring more spaces into
+                view.
+              </p>
 
-            {hasMoreVenues ? (
-              <div className="mt-4 flex flex-col items-center gap-3">
+              {activeFilterCount > 0 ? (
                 <button
                   type="button"
-                  onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-[#DBEAFE] bg-white px-6 text-sm font-extrabold text-[#1D4ED8] shadow-sm transition hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
+                  onClick={clearFilters}
+                  className="mt-6 inline-flex h-12 items-center justify-center rounded-2xl bg-[#2563EB] px-6 text-sm font-extrabold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
                 >
-                  Load more venues
+                  Clear all filters
                 </button>
-                <p className="text-xs font-semibold text-slate-400">
-                  {remainingVenues} more venue{remainingVenues === 1 ? "" : "s"} available
-                </p>
+              ) : null}
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                {visibleVenues.map((venue) => (
+                  <VenueCard
+                    key={venue.id}
+                    venue={venue}
+                    isFavorited={favoriteIds.has(String(venue.id))}
+                    isPending={favoritePendingId === String(venue.id)}
+                    onToggleFavorite={handleFavoriteToggle}
+                  />
+                ))}
               </div>
-            ) : null}
-          </>
-        )}
+
+              {hasMoreVenues ? (
+                <div className="mt-4 flex flex-col items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-[#DBEAFE] bg-white px-6 text-sm font-extrabold text-[#1D4ED8] shadow-sm transition hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
+                  >
+                    Load more venues
+                  </button>
+                  <p className="text-xs font-semibold text-slate-400">
+                    {remainingVenues} more venue
+                    {remainingVenues === 1 ? "" : "s"} available
+                  </p>
+                </div>
+              ) : null}
+            </>
+          )}
         </div>
       </main>
     </div>

@@ -1,9 +1,9 @@
 export default function SuppliersLoading() {
   return (
     <main className="min-h-[calc(100dvh-4rem)] bg-[#F8FAFC]">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
         {/* Header card skeleton */}
-        <section className="overflow-hidden rounded-[28px] border border-[#E5E7EB] bg-white p-5 shadow-sm shadow-slate-200/70 sm:p-7">
+        <section className="overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white p-5 shadow-sm shadow-slate-200/70 sm:p-6">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="min-w-0 grid gap-3">
               <div className="h-6 w-40 rounded-full bg-slate-100 animate-pulse" />
@@ -14,9 +14,9 @@ export default function SuppliersLoading() {
           </div>
         </section>
 
-        <div className="grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
+        <div className="grid gap-5 lg:grid-cols-[300px_minmax(0,1fr)]">
           {/* Sidebar skeleton */}
-          <aside className="self-start rounded-[28px] border border-[#E5E7EB] bg-white p-5 shadow-sm shadow-slate-200/70 lg:sticky lg:top-24">
+          <aside className="self-start rounded-[24px] border border-[#E5E7EB] bg-white p-4 shadow-sm shadow-slate-200/70 lg:sticky lg:top-24">
             <div className="mb-4 flex items-center gap-2">
               <div className="h-4 w-4 rounded bg-slate-200 animate-pulse" />
               <div className="h-4 w-16 rounded bg-slate-200 animate-pulse" />
@@ -33,7 +33,7 @@ export default function SuppliersLoading() {
 
           {/* Card grid skeleton */}
           <section className="min-w-0">
-            <div className="mb-6 rounded-[28px] border border-[#E5E7EB] bg-white p-5 shadow-sm shadow-slate-200/70 sm:p-6">
+            <div className="mb-5 rounded-[24px] border border-[#E5E7EB] bg-white p-4 shadow-sm shadow-slate-200/70 sm:p-5">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div className="grid gap-2">
                   <div className="h-4 w-32 rounded bg-slate-200 animate-pulse" />
