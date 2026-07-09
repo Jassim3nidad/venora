@@ -645,6 +645,23 @@ Each module gets its own deep-dive doc in `docs/modules/<feature>.md` following 
 | 10 | **AI** | High | Search, Venues |
 | 11 | **Admin** | Medium | All |
 
+> **AI module status**: implemented. Natural Language Search, Cost Estimator,
+> Venue Recommendation, Venue Description Generator, Package Comparison,
+> and the Customer Assistant are all live — see
+> [`docs/modules/ai-features.md`](modules/ai-features.md) for per-feature
+> structure, DB, API/prompts, error handling, security, and scalability
+> notes, and
+> [`apps/web/src/features/search/SMART_SEARCH_ENGINE.md`](../apps/web/src/features/search/SMART_SEARCH_ENGINE.md)
+> for Natural Language Search specifically. All provider calls use OpenAI
+> only (no Anthropic Claude integration exists despite the diagram above listing it as an option) —
+> every LLM call runs inside a Supabase Edge Function under `supabase/functions/`,
+> never in Next.js code, so `OPENAI_API_KEY` never reaches the Vercel bundle.
+> The §3.3 schema below predates the real migrations and is kept as the
+> original design sketch — the authoritative schema is
+> `supabase/migrations/009_ai_search.sql`, `015_smart_search_engine.sql`,
+> `028_recommendation_click_rpc.sql`, `029_ai_generated_content_owner_update.sql`,
+> and `030_ai_package_comparisons.sql`.
+
 ---
 
 *For questions, create a GitHub Discussion or ping the #venora-eng Slack channel.*

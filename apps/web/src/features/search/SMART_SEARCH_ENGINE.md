@@ -13,9 +13,19 @@ apps/web/src/features/search/
 supabase/functions/ai-search/
   index.ts                         OpenAI intent parsing, embeddings, RPC orchestration
 
+supabase/functions/_shared/
+  text.ts                          normalizeText/cleanString/looksVenueRelated (shared with ai-assistant)
+  embeddings.ts                    createEmbeddings/embedQuery/warmVenueEmbeddings (shared with ai-recommendation)
+  venues.ts                        toVenuePayload row mapper (shared with ai-recommendation, ai-assistant)
+
 supabase/migrations/
   015_smart_search_engine.sql      Search RPC, indexes, embedding payload function
 ```
+
+See `docs/modules/ai-features.md` for the other five AI features
+(Cost Estimator, Recommendation, Description Generator, Package
+Comparison, Customer Assistant), which reuse the `_shared/` modules
+above.
 
 ## Database Schema
 
@@ -158,8 +168,10 @@ supabase secrets set AI_SEARCH_EMBED_REFRESH_LIMIT=8
 
 ## Future Scalability
 
-- Move embedding refresh to a scheduled Supabase cron job when venue volume grows.
+- Embedding warm-up (`warmVenueEmbeddings`, bounded by `AI_SEARCH_EMBED_REFRESH_LIMIT`) currently runs inline on each search/recommendation request — move it to a scheduled Supabase cron job once venue volume grows enough that per-request warm-up latency matters.
 - Add cursor pagination once the marketplace stops preloading all published venues.
 - Add analytics dashboards over `ai_search_logs` for zero-result searches and popular filters.
-- Add click-through events to `ai_recommendation_events` from result cards.
 - Upgrade `venue_embeddings` from IVFFlat to HNSW when recall is more important than faster bulk indexing.
+
+Click-through tracking into `ai_recommendation_events` is implemented (see
+`docs/modules/ai-features.md` → Venue Recommendation) — no longer a future item.

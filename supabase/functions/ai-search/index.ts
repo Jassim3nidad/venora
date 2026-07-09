@@ -6,6 +6,9 @@
  */
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { embedQuery, warmVenueEmbeddings, toVectorLiteral } from "../_shared/embeddings.ts";
+import { toVenuePayload } from "../_shared/venues.ts";
+import { cleanString, normalizeText } from "../_shared/text.ts";
 
 type VenueType =
   | "garden"
@@ -109,21 +112,6 @@ function jsonResponse(body: unknown, status = 200) {
 
 function errorResponse(code: string, message: string, status = 500) {
   return jsonResponse({ data: null, error: { code, message } }, status);
-}
-
-function cleanString(value: unknown, maxLength = 120) {
-  if (typeof value !== "string") return null;
-
-  const trimmed = value.trim().replace(/\s+/g, " ");
-  return trimmed ? trimmed.slice(0, maxLength) : null;
-}
-
-function normalizeText(value: unknown) {
-  return String(value ?? "")
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim()
-    .toLowerCase();
 }
 
 function toPositiveNumber(value: unknown) {
@@ -424,31 +412,6 @@ async function buildIntent(
   };
 }
 
-function toVenuePayload(venue: any) {
-  return {
-    id: venue.id,
-    name: venue.name,
-    slug: venue.slug,
-    city: venue.city,
-    province: venue.province,
-    municipality: venue.municipality,
-    basePrice: venue.base_price === null ? null : Number(venue.base_price),
-    capacityMin: venue.capacity_min === null ? null : Number(venue.capacity_min),
-    capacityMax: venue.capacity_max === null ? null : Number(venue.capacity_max),
-    indoorOutdoor: venue.indoor_outdoor,
-    parkingAvailable: venue.parking_available,
-    petFriendly: venue.pet_friendly,
-    wheelchairAccessible: venue.wheelchair_accessible,
-    avgRating: venue.avg_rating === null ? null : Number(venue.avg_rating),
-    similarity: venue.similarity === null ? null : Number(venue.similarity ?? 0),
-    relevanceScore:
-      venue.relevance_score === null ? null : Number(venue.relevance_score ?? 0),
-    categories: venue.categories ?? [],
-    amenities: venue.amenities ?? [],
-    eventTypes: venue.event_types ?? [],
-  };
-}
-
 async function getAuthenticatedUserId(req: Request, supabaseUrl: string) {
   const authorization = req.headers.get("Authorization");
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
@@ -518,10 +481,23 @@ serve(async (req) => {
       Math.max(1, Number(filters.per_page ?? 24)),
     );
 
+    const semanticText = cleanString(query, 500) ?? intent.keyword;
+    let embeddedVenueCount = 0;
+    let queryVector: number[] | null = null;
+
+    if (semanticText) {
+      embeddedVenueCount = await warmVenueEmbeddings(
+        supabase,
+        openAiApiKey,
+        Number(Deno.env.get("AI_SEARCH_EMBED_REFRESH_LIMIT") ?? 8),
+      );
+      queryVector = await embedQuery(openAiApiKey, semanticText);
+    }
+
     const { data: venueRows, error: searchError } = await supabase.rpc(
       "search_venues",
       {
-        query_embedding: null,
+        query_embedding: queryVector ? toVectorLiteral(queryVector) : null,
         keyword: intent.keyword,
         filter_province: intent.province,
         filter_city: intent.city,
@@ -567,7 +543,7 @@ serve(async (req) => {
         parsedFilters: intent,
         searchParameters: parameters,
         fallbackReason: null,
-        embeddedVenueCount: 0,
+        embeddedVenueCount,
       },
       error: null,
     });

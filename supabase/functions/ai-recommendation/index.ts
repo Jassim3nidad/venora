@@ -1,107 +1,244 @@
 /**
  * Supabase Edge Function: ai-recommendation
  *
- * Returns personalised venue recommendations based on a customer's
- * booking history and favourites using collaborative filtering + OpenAI.
+ * Personalised venue recommendations from a customer's booking/favorite
+ * history, ranked via the same hybrid public.search_venues() RPC that
+ * backs ai-search — semantic similarity (once embeddings are warmed) plus
+ * keyword/rating signals, so results are useful even for venues that
+ * haven't been embedded yet.
  */
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { embedQuery, warmVenueEmbeddings, toVectorLiteral } from "../_shared/embeddings.ts";
+import { toVenuePayload } from "../_shared/venues.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
+
+const openAiBaseUrl = "https://api.openai.com/v1";
+const defaultChatModel = "gpt-4o-mini";
+const recommendationCount = 8;
+
+function jsonResponse(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+function errorResponse(code: string, message: string, status = 500) {
+  return jsonResponse({ data: null, error: { code, message } }, status);
+}
+
+async function buildPreferenceQuery(
+  openAiApiKey: string,
+  venueNames: string[],
+): Promise<string> {
+  const response = await fetch(`${openAiBaseUrl}/chat/completions`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${openAiApiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: Deno.env.get("OPENAI_RECOMMENDATION_MODEL") ?? defaultChatModel,
+      temperature: 0.3,
+      max_tokens: 100,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a venue recommendation engine for a Philippine events marketplace. Given a user's past booked and favorited venues, write one sentence (used as a semantic search query) describing the kind of venue they'd likely want next — style, setting, price tier. Return only that sentence, no preamble.",
+        },
+        {
+          role: "user",
+          content: `Past venues: ${venueNames.join(", ") || "none yet"}. Return only the search query string.`,
+        },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`OpenAI preference summary failed: ${errorText}`);
+  }
+
+  const payload = await response.json();
+  const content = payload?.choices?.[0]?.message?.content;
+  return typeof content === "string" && content.trim()
+    ? content.trim()
+    : "elegant event venue";
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  if (req.method !== "POST") {
+    return errorResponse("METHOD_NOT_ALLOWED", "Use POST for recommendations.", 405);
+  }
+
   try {
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const openAiApiKey = Deno.env.get("OPENAI_API_KEY");
+
+    if (!supabaseUrl || !anonKey || !serviceRoleKey) {
+      return errorResponse(
+        "CONFIGURATION_ERROR",
+        "Recommendations are missing Supabase configuration.",
+        500,
+      );
     }
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
+    if (!openAiApiKey) {
+      return errorResponse(
+        "OPENAI_NOT_CONFIGURED",
+        "OPENAI_API_KEY is not configured for ai-recommendation.",
+        500,
+      );
+    }
 
-    // Get current user
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error("User not found");
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return errorResponse("UNAUTHORIZED", "Sign in to see personalised recommendations.", 401);
+    }
+
+    const userClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const {
+      data: { user },
+    } = await userClient.auth.getUser();
+
+    if (!user) {
+      return errorResponse("UNAUTHORIZED", "Sign in to see personalised recommendations.", 401);
+    }
+
+    // Service-role client for writes/RPCs that must bypass RLS (impression logging, embedding warm-up).
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const [bookingsRes, favsRes] = await Promise.all([
       supabase
         .from("bookings")
-        .select("venue_id, venues(name, city)")
+        .select("venue_id, venues(name)")
         .eq("customer_id", user.id)
         .eq("status", "completed")
+        .order("created_at", { ascending: false })
         .limit(10),
       supabase
         .from("favorites")
-        .select("venue_id, venues(name, city)")
+        .select("venue_id, venues(name)")
         .eq("customer_id", user.id)
+        .order("created_at", { ascending: false })
         .limit(10),
     ]);
 
-    // Build context for OpenAI
-    const context = [
-      ...(bookingsRes.data ?? []),
-      ...(favsRes.data ?? []),
-    ].map((r) => (r as { venues: { name: string } }).venues?.name).filter(Boolean).join(", ");
+    const history = [...(bookingsRes.data ?? []), ...(favsRes.data ?? [])];
+    const excludeVenueIds = [...new Set(history.map((row: any) => row.venue_id))];
+    const venueNames = history
+      .map((row: any) => row.venues?.name)
+      .filter((name: unknown): name is string => typeof name === "string");
 
-    // Ask OpenAI for a preference summary
-    const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: "You are a venue recommendation engine. Given a user's past venues, summarize their preferences as a short search query for pgvector.",
-          },
-          {
-            role: "user",
-            content: `Past venues: ${context || "none yet"}. Return only the search query string.`,
-          },
-        ],
-        max_tokens: 100,
-      }),
+    let mode: "personalized" | "cold_start" = "cold_start";
+    let preferenceQuery: string | null = null;
+    let venueRows: any[] = [];
+
+    if (venueNames.length === 0) {
+      const { data, error } = await supabase.rpc("search_venues", {
+        query_embedding: null,
+        keyword: null,
+        match_count: recommendationCount + excludeVenueIds.length,
+        sort_by: "rating",
+      });
+
+      if (error) {
+        console.error("[ai-recommendation] Cold-start search_venues failed:", error);
+        return errorResponse("RECOMMENDATION_FAILED", "Could not load recommendations.", 500);
+      }
+
+      venueRows = data ?? [];
+    } else {
+      mode = "personalized";
+      preferenceQuery = await buildPreferenceQuery(openAiApiKey, venueNames);
+
+      // Best-effort backfill so newer venues have embeddings to match against.
+      await warmVenueEmbeddings(
+        supabase,
+        openAiApiKey,
+        Number(Deno.env.get("AI_SEARCH_EMBED_REFRESH_LIMIT") ?? 8),
+      );
+
+      const queryVector = await embedQuery(openAiApiKey, preferenceQuery);
+
+      const { data, error } = await supabase.rpc("search_venues", {
+        query_embedding: queryVector ? toVectorLiteral(queryVector) : null,
+        keyword: preferenceQuery,
+        match_count: recommendationCount + excludeVenueIds.length,
+        sort_by: "relevance",
+      });
+
+      if (error) {
+        console.error("[ai-recommendation] Personalized search_venues failed:", error);
+        return errorResponse("RECOMMENDATION_FAILED", "Could not load recommendations.", 500);
+      }
+
+      venueRows = data ?? [];
+    }
+
+    const excludeSet = new Set(excludeVenueIds);
+    const venues = venueRows
+      .filter((row: any) => !excludeSet.has(row.id))
+      .slice(0, recommendationCount)
+      .map(toVenuePayload);
+
+    if (venues.length === 0) {
+      return jsonResponse({
+        data: { venues: [], recommendationEventIds: {}, mode, preferenceQuery },
+        error: null,
+      });
+    }
+
+    const impressionRows = venues.map((venue) => ({
+      user_id: user.id,
+      venue_id: venue.id,
+      reason:
+        mode === "cold_start"
+          ? { cold_start: true }
+          : { matched: ["preference_summary"], preferenceQuery, similarity: venue.similarity },
+      shown_at: new Date().toISOString(),
+    }));
+
+    const { data: insertedEvents, error: insertError } = await supabase
+      .from("ai_recommendation_events")
+      .insert(impressionRows)
+      .select("id, venue_id");
+
+    if (insertError) {
+      console.error("[ai-recommendation] Failed to log impressions:", insertError);
+    }
+
+    const recommendationEventIds: Record<string, string> = {};
+    for (const event of insertedEvents ?? []) {
+      recommendationEventIds[event.venue_id] = event.id;
+    }
+
+    return jsonResponse({
+      data: { venues, recommendationEventIds, mode, preferenceQuery },
+      error: null,
     });
-
-    const { choices } = await openaiRes.json();
-    const preferenceQuery: string = choices?.[0]?.message?.content ?? "elegant event venue";
-
-    // Reuse ai-search logic via internal fetch
-    const searchRes = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/ai-search`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ query: preferenceQuery }),
-    });
-
-    const searchPayload = await searchRes.json();
-    const venues = searchPayload.data?.venues ?? searchPayload.venues ?? [];
-
-    return new Response(JSON.stringify({ venues, preferenceQuery }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (err) {
-    return new Response(JSON.stringify({ error: (err as Error).message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+  } catch (error) {
+    console.error("[ai-recommendation] Unexpected error:", error);
+    return errorResponse(
+      "INTERNAL_ERROR",
+      error instanceof Error ? error.message : "Recommendations are temporarily unavailable.",
+      500,
+    );
   }
 });

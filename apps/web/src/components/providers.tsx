@@ -5,6 +5,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ToastProvider, ToastViewport } from "@venora/ui";
 import { Toaster } from "sonner";
 import { useState, type ReactNode } from "react";
+import AssistantWidgetGate from "@/features/ai/ui/AssistantWidgetGate";
 
 /**
  * Global providers wrapper.
@@ -47,6 +48,7 @@ export function Providers({ children }: { children: ReactNode }) {
         {children}
         <ToastViewport />
       </ToastProvider>
+      <AssistantWidgetGate />
       <Toaster richColors position="top-center" />
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
