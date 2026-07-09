@@ -45,9 +45,9 @@ test.describe('Notification Platform E2E', () => {
     await page.waitForTimeout(3000);
 
     // Verify DB
-    const { data: user } = await supabase.from('profiles').select('id').eq('email', email).single();
+    const { data: user } = await supabase!.from('profiles').select('id').eq('email', email).single();
     if (user) {
-      const { data: subs } = await supabase
+      const { data: subs } = await supabase!
         .from('push_subscriptions')
         .select('*')
         .eq('user_id', user.id);
@@ -65,11 +65,11 @@ test.describe('Notification Platform E2E', () => {
     await page.goto('/dashboard');
     
     // Get user id
-    const { data: user } = await supabase.from('profiles').select('id').eq('email', email).single();
+    const { data: user } = await supabase!.from('profiles').select('id').eq('email', email).single();
     if (!user) return;
 
     // Trigger a backend notification via Supabase
-    await supabase.from('notifications').insert({
+    await supabase!.from('notifications').insert({
       user_id: user.id,
       channel: 'in_app',
       title: 'E2E Test Notification',
@@ -98,7 +98,7 @@ test.describe('Notification Platform E2E', () => {
 
     // Verify it updates in DB
     await page.waitForTimeout(2000);
-    const { data: updatedNotif } = await supabase
+    const { data: updatedNotif } = await supabase!
       .from('notifications')
       .select('read_at, is_read')
       .eq('title', 'E2E Test Notification')
