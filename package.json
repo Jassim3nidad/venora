@@ -15,7 +15,12 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "db:types": "supabase gen types typescript --local > packages/database/types/generated.ts",
-    "db:fix-cancel": "node scripts/print-booking-cancel-sql.mjs"
+    "db:fix-cancel": "node scripts/print-booking-cancel-sql.mjs",
+    "test:notifications:db": "node scripts/validate-db.mjs",
+    "test:notifications:providers": "node scripts/validate-env.mjs && node scripts/validate-resend.mjs",
+    "test:notifications:pipeline": "node scripts/validate-pipeline.mjs",
+    "test:notifications:e2e": "pnpm --filter @venora/web exec playwright test",
+    "validate:notifications": "pnpm run test:notifications:providers && pnpm run test:notifications:db && pnpm run test:notifications:pipeline && pnpm run test:notifications:e2e"
   },
   "devDependencies": {
     "prettier": "^3.3.3",
@@ -24,6 +29,8 @@
   },
   "packageManager": "pnpm@9.15.0",
   "dependencies": {
+    "@supabase/supabase-js": "^2.47.2",
+    "dotenv": "^17.4.2",
     "react": "^19.2.7"
   }
 }
