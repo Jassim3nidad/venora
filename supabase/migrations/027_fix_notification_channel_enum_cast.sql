@@ -1,14 +1,22 @@
 -- ============================================================
--- Migration 027 — Fix notification_channel enum cast in trigger
+-- Migration 027 — Fix notification channel type cast
 -- ============================================================
--- Root cause: create_booking_status_notifications() inserts plain
--- text 'in_app' into the `channel` column which is of type
--- notification_channel enum. PostgreSQL does not implicitly cast
--- text → enum inside PL/pgSQL INSERT statements.
--- Fix: cast the literal to notification_channel explicitly.
+-- create_booking_status_notifications() (021_booking_workflow_transactions.sql,
+-- re-declared SECURITY DEFINER in 026) inserts into public.notifications via
+-- two statements: a plain VALUES() INSERT (customer notification) and an
+-- INSERT ... SELECT (owner notification, one row per org member). Postgres
+-- infers the target column type for unknown-typed string literals in a plain
+-- VALUES() list, but NOT inside a SELECT list feeding an INSERT — so the
+-- literal 'in_app' in the SELECT statement stays typed as text and fails
+-- against notifications.channel's notification_channel enum column with
+-- "column is of type notification_channel but expression is of type text".
+--
+-- Fix: explicitly cast both literals to public.notification_channel.
+-- Idempotent — CREATE OR REPLACE, safe to re-run.
+-- ============================================================
 
 CREATE OR REPLACE FUNCTION public.create_booking_status_notifications()
-RETURNS TRIGGER LANGUAGE plpgsql AS $$
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE
   venue_name text;
   customer_title text;
@@ -75,29 +83,24 @@ BEGIN
       owner_title := NULL;
   END CASE;
 
-  -- Non-blocking: notification failure must not roll back the booking update
-  BEGIN
-    IF customer_title IS NOT NULL THEN
-      INSERT INTO public.notifications (user_id, channel, title, body, link)
-      VALUES (
-        NEW.customer_id,
-        'in_app'::public.notification_channel,
-        customer_title,
-        customer_body,
-        '/bookings/' || NEW.id::text
-      );
-    END IF;
+  IF customer_title IS NOT NULL THEN
+    INSERT INTO public.notifications (user_id, channel, title, body, link)
+    VALUES (
+      NEW.customer_id,
+      'in_app'::public.notification_channel,
+      customer_title,
+      customer_body,
+      '/bookings/' || NEW.id::text
+    );
+  END IF;
 
-    IF owner_title IS NOT NULL THEN
-      INSERT INTO public.notifications (user_id, channel, title, body, link)
-      SELECT DISTINCT om.user_id, 'in_app'::public.notification_channel, owner_title, owner_body, '/dashboard/bookings/' || NEW.id::text
-      FROM public.venues v
-      JOIN public.organization_members om ON om.organization_id = v.organization_id
-      WHERE v.id = NEW.venue_id;
-    END IF;
-  EXCEPTION WHEN OTHERS THEN
-    RAISE WARNING 'create_booking_status_notifications failed for booking %: %', NEW.id, SQLERRM;
-  END;
+  IF owner_title IS NOT NULL THEN
+    INSERT INTO public.notifications (user_id, channel, title, body, link)
+    SELECT DISTINCT om.user_id, 'in_app'::public.notification_channel, owner_title, owner_body, '/dashboard/bookings/' || NEW.id::text
+    FROM public.venues v
+    JOIN public.organization_members om ON om.organization_id = v.organization_id
+    WHERE v.id = NEW.venue_id;
+  END IF;
 
   RETURN NEW;
 END;

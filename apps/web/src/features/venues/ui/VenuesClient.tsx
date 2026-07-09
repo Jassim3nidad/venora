@@ -32,7 +32,7 @@ import type {
   SmartVenueSearchIntent,
   SmartVenueSearchResponse,
 } from "@/features/search/schemas/search.schema";
-import { toggleFavoriteAction } from "../application/actions";
+import { toggleFavoriteAction, loadMoreVenuesAction } from "../application/actions";
 
 export interface Venue {
   id: string | number;
@@ -843,7 +843,19 @@ export default function VenuesClient({
   const [favoritePendingId, setFavoritePendingId] = useState<string | null>(
     null,
   );
+  const [dynamicVenues, setDynamicVenues] = useState<Venue[]>(initialVenues);
+  const [page, setPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMoreDbVenues, setHasMoreDbVenues] = useState(true);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  // Sync when URL filters change (initialVenues from server changes)
+  useEffect(() => {
+    setDynamicVenues(initialVenues);
+    setPage(1);
+    setHasMoreDbVenues(true);
+    setVisibleCount(PAGE_SIZE);
+  }, [initialVenues]);
 
   const filters = useMemo(() => {
     const params = new URLSearchParams(queryString);
@@ -983,8 +995,8 @@ export default function VenuesClient({
     const requestedCapacity = Number(filters.capacity) || 0;
     const source =
       aiResultRank.size > 0
-        ? initialVenues.filter((venue) => aiResultRank.has(String(venue.id)))
-        : initialVenues;
+        ? dynamicVenues.filter((venue) => aiResultRank.has(String(venue.id)))
+        : dynamicVenues;
 
     const list = source.filter((venue) => {
       if (query) {
@@ -1072,7 +1084,7 @@ export default function VenuesClient({
 
       return a.name.localeCompare(b.name);
     });
-  }, [aiResultRank, favoriteIds, filters, initialVenues]);
+  }, [aiResultRank, favoriteIds, filters, dynamicVenues]);
 
   // Reset visible count whenever filters change the result set
   useEffect(() => {
@@ -1080,11 +1092,71 @@ export default function VenuesClient({
   }, [filtered]);
 
   const visibleVenues = filtered.slice(0, visibleCount);
-  const hasMoreVenues = visibleCount < filtered.length;
+  const hasMoreVenues = visibleCount < filtered.length || hasMoreDbVenues;
   const remainingVenues = filtered.length - visibleCount;
 
+  const handleLoadMore = async () => {
+    if (visibleCount < filtered.length) {
+      // Still have local filtered items to show
+      setVisibleCount((n) => n + PAGE_SIZE);
+      return;
+    }
+
+    if (!hasMoreDbVenues || isLoadingMore) return;
+
+    setIsLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const searchParams = {
+        q: filters.query || undefined,
+        province: filters.province || undefined,
+        city: filters.city || undefined,
+        municipality: filters.municipality || undefined,
+        location: filters.location || undefined,
+        event: filters.eventType || undefined,
+        budget: filters.budget || undefined,
+        minBudget: filters.minBudget || undefined,
+        maxBudget: filters.maxBudget || undefined,
+        capacity: filters.capacity || undefined,
+        venueTypes: filters.venueTypes.length > 0 ? filters.venueTypes : undefined,
+        indoorOutdoor: filters.indoorOutdoor || undefined,
+        amenities: filters.amenities.length > 0 ? filters.amenities : undefined,
+      };
+
+      const result = await loadMoreVenuesAction({
+        filters: searchParams,
+        page: nextPage,
+      });
+
+      if (result.error) {
+        console.error("Failed to load more venues:", result.error);
+        return;
+      }
+
+      if (result.data) {
+        setDynamicVenues((prev) => {
+          // Prevent duplicates by checking ID
+          const existingIds = new Set(prev.map(v => String(v.id)));
+          const newVenues = result.data.venues.filter(v => !existingIds.has(String(v.id)));
+          
+          const newFavorites = newVenues.filter(v => v.isFavorited).map(v => String(v.id));
+          if (newFavorites.length > 0) {
+            setFavoriteIds((prevFavs) => new Set([...prevFavs, ...newFavorites]));
+          }
+
+          return [...prev, ...newVenues];
+        });
+        setHasMoreDbVenues(result.data.hasMore);
+        setPage(nextPage);
+        setVisibleCount((n) => n + PAGE_SIZE);
+      }
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
   const applyLocalSmartSearch = (query: string) => {
-    const intent = parseLocalSmartSearch(query, initialVenues);
+    const intent = parseLocalSmartSearch(query, dynamicVenues);
 
     if (intent.summary.length === 0) return false;
 

@@ -21,6 +21,7 @@ import {
   declineBookingSchema,
   startBookingPaymentSchema,
 } from "../schemas/booking.schema";
+import { formatCancellationReason } from "../constants/cancellation-reasons";
 
 function bookingErrorFromMessage(message: string) {
   const normalized = message.toLowerCase();
@@ -398,13 +399,17 @@ export async function cancelBookingAction(rawInput: unknown) {
       const supabase = (await createClient()) as any;
       const { data, error } = await supabase.rpc("cancel_booking_request", {
         p_booking_id: input.bookingId,
-        p_reason: normalizeOptionalString(input.reason),
+        p_reason: formatCancellationReason(
+          input.reasonCode,
+          input.reasonDetail,
+        ),
       });
 
       throwIfSupabaseError(error);
 
       revalidatePath("/bookings");
       revalidatePath(`/bookings/${input.bookingId}`);
+      revalidatePath(`/bookings/${input.bookingId}/cancel`);
       revalidatePath("/dashboard/bookings");
       revalidatePath(`/dashboard/bookings/${input.bookingId}`);
 

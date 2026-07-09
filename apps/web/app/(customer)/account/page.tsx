@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getFavoriteVenuesForUser } from "@/src/features/venues/application/get-favorite-venues";
-import AccountForm from "./account-form";
+import AccountSettingsList from "./_components/AccountSettingsList";
 
 export const metadata: Metadata = {
   title: "Personal Information",
@@ -28,12 +28,6 @@ export default async function AccountPage() {
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
-
-  const { data: profile } = (await supabase
-    .from("profiles")
-    .select("full_name, avatar_url, phone")
-    .eq("id", user.id)
-    .single()) as any;
 
   const { data: roleRows } = await supabase
     .from("user_roles")
@@ -121,10 +115,7 @@ export default async function AccountPage() {
         </Link>
       </div>
 
-      <AccountForm
-        initialFullName={profile?.full_name ?? ""}
-        initialPhone={profile?.phone ?? ""}
-      />
+      <AccountSettingsList />
 
       <div className="overflow-hidden rounded-[28px] border border-[#E5E7EB]/80 bg-white shadow-xl shadow-slate-200/60">
         <div className="flex flex-col gap-4 border-b border-[#E5E7EB]/80 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">

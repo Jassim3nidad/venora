@@ -33,6 +33,8 @@ function LoginForm() {
   const didReset = searchParams.get("reset") === "true";
   const didRegister = searchParams.get("registered") === "true";
   const didVerify = searchParams.get("verified") === "true";
+  const redirectTo =
+    searchParams.get("redirectTo") || searchParams.get("next") || undefined;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -68,6 +70,7 @@ function LoginForm() {
       const response = await loginAction({
         email,
         password,
+        redirectTo,
       });
 
       if (response && !response.success) {

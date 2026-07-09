@@ -1,22 +1,87 @@
 -- ============================================================
--- Migration 027 — Fix notification channel type cast
+-- Migration 033 — Booking cancellation notification fixes
 -- ============================================================
--- create_booking_status_notifications() (021_booking_workflow_transactions.sql,
--- re-declared SECURITY DEFINER in 026) inserts into public.notifications via
--- two statements: a plain VALUES() INSERT (customer notification) and an
--- INSERT ... SELECT (owner notification, one row per org member). Postgres
--- infers the target column type for unknown-typed string literals in a plain
--- VALUES() list, but NOT inside a SELECT list feeding an INSERT — so the
--- literal 'in_app' in the SELECT statement stays typed as text and fails
--- against notifications.channel's notification_channel enum column with
--- "column is of type notification_channel but expression is of type text".
---
--- Fix: explicitly cast both literals to public.notification_channel.
--- Idempotent — CREATE OR REPLACE, safe to re-run.
--- ============================================================
+-- Some environments reference public.create_notification(...) from
+-- booking status triggers. Provide the helper and make status
+-- notifications non-blocking so cancellations cannot fail.
+
+DO $$
+BEGIN
+  CREATE TYPE public.notification_kind AS ENUM (
+    'booking_inquiry',
+    'booking_approved',
+    'booking_declined',
+    'booking_cancelled',
+    'booking_confirmed',
+    'booking_payment',
+    'booking_completed',
+    'booking_reviewed',
+    'booking_expired',
+    'system'
+  );
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
+CREATE OR REPLACE FUNCTION public.create_notification(
+  p_user_id uuid,
+  p_kind public.notification_kind,
+  p_title text,
+  p_body text,
+  p_link text DEFAULT NULL,
+  p_metadata jsonb DEFAULT NULL,
+  p_email_template text DEFAULT NULL,
+  p_sms_template text DEFAULT NULL
+)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_id uuid;
+BEGIN
+  INSERT INTO public.notifications (user_id, channel, title, body, link)
+  VALUES (
+    p_user_id,
+    'in_app'::public.notification_channel,
+    p_title,
+    p_body,
+    p_link
+  )
+  RETURNING id INTO v_id;
+
+  IF p_metadata IS NOT NULL OR p_email_template IS NOT NULL OR p_sms_template IS NOT NULL THEN
+    BEGIN
+      PERFORM public.log_audit(
+        'notification.created',
+        'notification',
+        v_id,
+        jsonb_build_object(
+          'kind', p_kind::text,
+          'metadata', p_metadata,
+          'email_template', p_email_template,
+          'sms_template', p_sms_template
+        )
+      );
+    EXCEPTION WHEN OTHERS THEN
+      NULL;
+    END;
+  END IF;
+
+  RETURN v_id;
+EXCEPTION WHEN OTHERS THEN
+  RAISE WARNING 'create_notification failed for user %: %', p_user_id, SQLERRM;
+  RETURN NULL;
+END;
+$$;
 
 CREATE OR REPLACE FUNCTION public.create_booking_status_notifications()
-RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 DECLARE
   venue_name text;
   customer_title text;
@@ -60,9 +125,9 @@ BEGIN
       owner_body := 'The customer has been notified.';
     WHEN 'cancelled' THEN
       customer_title := 'Booking cancelled';
-      customer_body := 'This booking has been cancelled.';
+      customer_body := COALESCE(NULLIF(BTRIM(NEW.decline_reason), ''), 'This booking has been cancelled.');
       owner_title := 'Booking cancelled';
-      owner_body := 'This booking has been cancelled.';
+      owner_body := COALESCE(NULLIF(BTRIM(NEW.decline_reason), ''), 'This booking has been cancelled.');
     WHEN 'completed' THEN
       customer_title := 'Event completed';
       customer_body := 'Your event is complete. Share a review to help future customers.';
@@ -83,24 +148,33 @@ BEGIN
       owner_title := NULL;
   END CASE;
 
-  IF customer_title IS NOT NULL THEN
-    INSERT INTO public.notifications (user_id, channel, title, body, link)
-    VALUES (
-      NEW.customer_id,
-      'in_app'::public.notification_channel,
-      customer_title,
-      customer_body,
-      '/bookings/' || NEW.id::text
-    );
-  END IF;
+  BEGIN
+    IF customer_title IS NOT NULL THEN
+      INSERT INTO public.notifications (user_id, channel, title, body, link)
+      VALUES (
+        NEW.customer_id,
+        'in_app'::public.notification_channel,
+        customer_title,
+        customer_body,
+        '/bookings/' || NEW.id::text
+      );
+    END IF;
 
-  IF owner_title IS NOT NULL THEN
-    INSERT INTO public.notifications (user_id, channel, title, body, link)
-    SELECT DISTINCT om.user_id, 'in_app'::public.notification_channel, owner_title, owner_body, '/dashboard/bookings/' || NEW.id::text
-    FROM public.venues v
-    JOIN public.organization_members om ON om.organization_id = v.organization_id
-    WHERE v.id = NEW.venue_id;
-  END IF;
+    IF owner_title IS NOT NULL THEN
+      INSERT INTO public.notifications (user_id, channel, title, body, link)
+      SELECT DISTINCT
+        om.user_id,
+        'in_app'::public.notification_channel,
+        owner_title,
+        owner_body,
+        '/dashboard/bookings/' || NEW.id::text
+      FROM public.venues v
+      JOIN public.organization_members om ON om.organization_id = v.organization_id
+      WHERE v.id = NEW.venue_id;
+    END IF;
+  EXCEPTION WHEN OTHERS THEN
+    RAISE WARNING 'create_booking_status_notifications failed for booking %: %', NEW.id, SQLERRM;
+  END;
 
   RETURN NEW;
 END;

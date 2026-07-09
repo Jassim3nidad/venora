@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Bell,
   CalendarDays,
   Heart,
   type LucideIcon,
@@ -15,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import ProfileMenu from "@/components/layout/ProfileMenu";
+import { NotificationBell } from "@/features/notifications/ui/NotificationBell";
 
 interface MarketingNavbarProfile {
   full_name?: string | null;
@@ -39,6 +41,7 @@ const customerMobileLinks: MobileLink[] = [
   { label: "Suppliers", href: "/suppliers", icon: Store },
   { label: "Bookings", href: "/bookings", icon: CalendarDays },
   { label: "Favorites", href: "/favorites", icon: Heart },
+  { label: "Notifications", href: "/notifications", icon: Bell },
 ];
 
 function isActive(pathname: string, href: string) {
@@ -123,6 +126,7 @@ export default function MarketingNavbar({
         <div className="hidden items-center justify-end gap-3 justify-self-end md:flex">
           {user ? (
             <>
+              <NotificationBell />
               <ProfileMenu
                 displayName={displayName}
                 email={email}
@@ -150,6 +154,7 @@ export default function MarketingNavbar({
         <div className="flex items-center justify-self-end gap-2 md:hidden">
           {user ? (
             <>
+              <NotificationBell />
               <ProfileMenu
                 displayName={displayName}
                 email={email}

@@ -45,7 +45,7 @@ export class SupabaseAuthRepository implements AuthRepository {
       password,
       options: {
         data: { full_name: fullName, role },
-        emailRedirectTo: `${siteUrl}/auth/callback?next=/venues`,
+        emailRedirectTo: `${siteUrl}/auth/callback?next=/profile/setup`,
       },
     });
 
@@ -76,7 +76,7 @@ export class SupabaseAuthRepository implements AuthRepository {
       type: "signup",
       email,
       options: {
-        emailRedirectTo: `${siteUrl}/auth/callback?next=/venues`,
+        emailRedirectTo: `${siteUrl}/auth/callback?next=/profile/setup`,
       },
     });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ChangeEventHandler, type ReactNode } from "react";
 import Link from "next/link";
 import {
   ArrowUpDown,
@@ -45,6 +45,34 @@ function normalize(value: unknown) {
   return String(value ?? "")
     .trim()
     .toLowerCase();
+}
+
+function FilterSelect({
+  value,
+  onChange,
+  children,
+  bold = false,
+}: {
+  value: string;
+  onChange: ChangeEventHandler<HTMLSelectElement>;
+  children: ReactNode;
+  bold?: boolean;
+}) {
+  return (
+    <span className="relative block">
+      <select
+        value={value}
+        onChange={onChange}
+        className={`h-12 w-full appearance-none rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] pl-3 pr-10 text-sm ${bold ? "font-bold" : "font-semibold"} text-slate-700 outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10`}
+      >
+        {children}
+      </select>
+      <ChevronDown
+        aria-hidden
+        className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+      />
+    </span>
+  );
 }
 
 function SupplierCard({ supplier }: { supplier: SupplierMarketplaceProfile }) {

@@ -9,6 +9,7 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
   updateProfileSchema,
+  updateAvatarSchema,
   changePasswordSchema,
 } from "../schemas/auth.schema";
 import {
@@ -24,7 +25,8 @@ import {
   verifyOtpUseCase,
 } from "../application/auth.usecases";
 import type { ActionResult } from "../types/auth.types";
-import { defaultRouteForRoles, type RoleName } from "@/lib/rbac/roles";
+import { type RoleName } from "@/lib/rbac/roles";
+import { resolvePostAuthRedirect } from "@/lib/profile-setup";
 import { toErrorMessage } from "@/lib/errors";
 function isUnverifiedEmailError(message: string) {
   const normalized = message.toLowerCase();
@@ -44,6 +46,16 @@ function isAlreadyRegisteredError(message: string) {
     normalized.includes("already exists") ||
     normalized.includes("user already")
   );
+}
+
+function getAvatarsStoragePath(publicUrl: string | null | undefined) {
+  if (!publicUrl) return null;
+
+  const marker = "/storage/v1/object/public/avatars/";
+  const index = publicUrl.indexOf(marker);
+  if (index === -1) return null;
+
+  return publicUrl.slice(index + marker.length);
 }
 
 export async function registerAction(rawInput: unknown): Promise<ActionResult> {
@@ -136,7 +148,21 @@ export async function loginAction(rawInput: unknown): Promise<ActionResult> {
     .map((row) => row.role)
     .filter(Boolean);
 
-  redirect(defaultRouteForRoles(roles));
+  const { data: profile } = (await supabase
+    .from("profiles")
+    .select("profile_setup_completed_at")
+    .eq("id", user.id)
+    .single()) as {
+    data: { profile_setup_completed_at: string | null } | null;
+  };
+
+  redirect(
+    resolvePostAuthRedirect({
+      roles,
+      profile,
+      redirectTo: parsed.data.redirectTo ?? null,
+    }),
+  );
 }
 
 export async function resendVerificationEmailAction(
@@ -319,6 +345,130 @@ export async function updateProfileAction(
     return {
       success: true,
       data: updatedProfile,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: toErrorMessage(error),
+    };
+  }
+}
+
+export async function updateAvatarAction(
+  rawInput: unknown,
+): Promise<ActionResult<{ avatar_url: string | null }>> {
+  const parsed = updateAvatarSchema.safeParse(rawInput);
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: "Validation failed.",
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
+  }
+
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return {
+        success: false,
+        error: "You must be logged in to update your profile picture.",
+      };
+    }
+
+    const expectedPrefix = `${user.id}/`;
+    if (!parsed.data.storagePath.startsWith(expectedPrefix)) {
+      return {
+        success: false,
+        error: "Invalid avatar storage path.",
+      };
+    }
+
+    const { data: currentProfile } = await (supabase.from("profiles") as any)
+      .select("avatar_url")
+      .eq("id", user.id)
+      .single();
+
+    const { error: updateError } = await (supabase.from("profiles") as any)
+      .update({ avatar_url: parsed.data.avatarUrl })
+      .eq("id", user.id);
+
+    if (updateError) {
+      return {
+        success: false,
+        error: updateError.message,
+      };
+    }
+
+    const previousPath = getAvatarsStoragePath(currentProfile?.avatar_url);
+    if (previousPath && previousPath !== parsed.data.storagePath) {
+      await supabase.storage.from("avatars").remove([previousPath]);
+    }
+
+    revalidatePath("/account", "layout");
+
+    return {
+      success: true,
+      data: { avatar_url: parsed.data.avatarUrl },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: toErrorMessage(error),
+    };
+  }
+}
+
+export async function removeAvatarAction(): Promise<
+  ActionResult<{ avatar_url: null }>
+> {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return {
+        success: false,
+        error: "You must be logged in to remove your profile picture.",
+      };
+    }
+
+    const { data: currentProfile } = await (supabase.from("profiles") as any)
+      .select("avatar_url")
+      .eq("id", user.id)
+      .single();
+
+    const { error: updateError } = await (supabase.from("profiles") as any)
+      .update({ avatar_url: null })
+      .eq("id", user.id);
+
+    if (updateError) {
+      return {
+        success: false,
+        error: updateError.message,
+      };
+    }
+
+    const previousPath = getAvatarsStoragePath(currentProfile?.avatar_url);
+    if (previousPath) {
+      await supabase.storage.from("avatars").remove([previousPath]);
+    }
+
+    revalidatePath("/account", "layout");
+
+    return {
+      success: true,
+      data: { avatar_url: null },
     };
   } catch (error) {
     return {

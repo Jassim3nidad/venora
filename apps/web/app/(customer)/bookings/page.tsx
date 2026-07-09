@@ -22,9 +22,18 @@ import { getNavbarProfile } from "@/lib/get-navbar-profile";
 import {
   BOOKING_STATUSES,
   BOOKING_STATUS_LABEL,
+  canCancelBookingStatus,
   type BookingStatusValue,
 } from "@/src/features/booking/domain/value-objects/booking-status.vo";
 import { BookingStatusBadge } from "@/src/features/booking/ui/booking-status-badge";
+import { CustomerCancelBookingButton } from "@/src/features/booking/ui/booking-action-controls";
+import { BookingStatusFilterBar } from "@/src/features/booking/ui/BookingStatusFilterBar";
+import {
+  bookingMatchesStatusFilter,
+  CUSTOMER_BOOKING_STATUS_FILTERS,
+  parseCustomerBookingStatusFilter,
+  type CustomerBookingStatusFilter,
+} from "@/src/features/booking/constants/customer-booking-filters";
 
 export const metadata: Metadata = {
   title: "My Bookings | Venora",
@@ -115,6 +124,14 @@ function buildVenueImageUrl(storagePath?: string | null) {
 }
 
 function actionForBooking(booking: BookingRecord, venue?: VenueRecord | null) {
+  if (booking.status === "pending") {
+    return (
+      <CustomerLinkButton href={`/bookings/${booking.id}`} tone="secondary">
+        View Request
+      </CustomerLinkButton>
+    );
+  }
+
   if (booking.status === "approved" || booking.status === "payment_pending") {
     return (
       <CustomerLinkButton href={`/bookings/${booking.id}/payment`}>
@@ -202,12 +219,29 @@ async function getCustomerBookings(userId: string) {
   );
 }
 
+function getFilterCounts(bookings: BookingRecord[]) {
+  return CUSTOMER_BOOKING_STATUS_FILTERS.reduce(
+    (counts, option) => {
+      counts[option.value] = bookings.filter((booking) =>
+        bookingMatchesStatusFilter(booking.status, option.value),
+      ).length;
+      return counts;
+    },
+    {} as Record<CustomerBookingStatusFilter, number>,
+  );
+}
+
 export default async function CustomerBookingsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ created?: string }>;
+  searchParams?: Promise<{
+    created?: string;
+    cancelled?: string;
+    status?: string;
+  }>;
 }) {
   const query = (await searchParams) ?? {};
+  const statusFilter = parseCustomerBookingStatusFilter(query.status);
   const supabase = await createClient();
 
   const {
@@ -220,6 +254,10 @@ export default async function CustomerBookingsPage({
 
   const profile = await getNavbarProfile(supabase, user.id);
   const bookings = await getCustomerBookings(user.id);
+  const filterCounts = getFilterCounts(bookings);
+  const filteredBookings = bookings.filter((booking) =>
+    bookingMatchesStatusFilter(booking.status, statusFilter),
+  );
 
   const pendingCount = bookings.filter(
     (booking) => booking.status === "pending",
@@ -254,6 +292,15 @@ export default async function CustomerBookingsPage({
           </div>
         ) : null}
 
+        {query.cancelled ? (
+          <div
+            role="status"
+            className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800 shadow-sm"
+          >
+            Your booking request has been cancelled.
+          </div>
+        ) : null}
+
         <CustomerPageHeader
           eyebrow="Booking center"
           icon={Sparkles}
@@ -280,6 +327,17 @@ export default async function CustomerBookingsPage({
           ))}
         </div>
 
+        {bookings.length > 0 ? (
+          <BookingStatusFilterBar
+            activeFilter={statusFilter}
+            counts={filterCounts}
+            query={{
+              ...(query.created ? { created: query.created } : {}),
+              ...(query.cancelled ? { cancelled: query.cancelled } : {}),
+            }}
+          />
+        ) : null}
+
         {bookings.length === 0 ? (
           <CustomerEmptyState
             icon={TicketCheck}
@@ -290,9 +348,19 @@ export default async function CustomerBookingsPage({
               <CustomerLinkButton href="/venues">Browse Venues</CustomerLinkButton>
             }
           />
+        ) : filteredBookings.length === 0 ? (
+          <CustomerEmptyState
+            icon={TicketCheck}
+            eyebrow="No matches"
+            title="No bookings match this status."
+            description="Try another filter to see more of your booking history."
+            action={
+              <CustomerLinkButton href="/bookings">Show all bookings</CustomerLinkButton>
+            }
+          />
         ) : (
           <div className="grid gap-5">
-            {bookings.map((booking) => {
+            {filteredBookings.map((booking) => {
               const venue = getVenue(booking);
               const venueImage = venue?.venue_images?.[0]?.storage_path;
               const quote =
@@ -349,8 +417,14 @@ export default async function CustomerBookingsPage({
                         </div>
                       </div>
 
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                         {actionForBooking(booking, venue)}
+                        {canCancelBookingStatus(booking.status) ? (
+                          <CustomerCancelBookingButton
+                            bookingId={booking.id}
+                            compact
+                          />
+                        ) : null}
                         {venue?.slug ? (
                           <Link
                             href={`/venues/${venue.slug}`}

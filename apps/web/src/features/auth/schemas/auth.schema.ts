@@ -29,6 +29,7 @@ export type RegisterInput = z.infer<typeof registerSchema>;
 export const loginSchema = z.object({
   email: z.string().trim().toLowerCase().email("Enter a valid email address"),
   password: z.string().min(1, "Enter your password"),
+  redirectTo: z.string().optional(),
 });
 export type LoginInput = z.infer<typeof loginSchema>;
 
@@ -58,6 +59,12 @@ export const updateProfileSchema = z.object({
     .or(z.literal("")),
 });
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+
+export const updateAvatarSchema = z.object({
+  avatarUrl: z.string().url("Invalid avatar URL"),
+  storagePath: z.string().trim().min(1, "Storage path is required"),
+});
+export type UpdateAvatarInput = z.infer<typeof updateAvatarSchema>;
 
 export const changePasswordSchema = z
   .object({

@@ -5,13 +5,12 @@ import { useMemo, useState, useTransition } from "react";
 import { CheckCircle2, CreditCard, Loader2, Star, XCircle } from "lucide-react";
 import {
   approveBookingAction,
-  cancelBookingAction,
   completeBookingAction,
   declineBookingAction,
   startBookingPaymentAction,
   submitBookingReviewAction,
 } from "../application/actions";
-import { CustomerButton } from "@/src/components/customer/CustomerUI";
+import { CustomerButton, CustomerLinkButton } from "@/src/components/customer/CustomerUI";
 import { ReviewPhotoUploader } from "@/features/reviews/ui/ReviewPhotoUploader";
 import { attachReviewPhotosAction } from "@/features/reviews/application/actions";
 import type { UploadedPhoto } from "@/features/reviews/hooks/useReviewPhotoUpload";
@@ -25,34 +24,22 @@ function ErrorMessage({ message }: { message: string | null }) {
   );
 }
 
-export function CustomerCancelBookingButton({ bookingId }: { bookingId: string }) {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState<string | null>(null);
-
+export function CustomerCancelBookingButton({
+  bookingId,
+  compact = false,
+}: {
+  bookingId: string;
+  compact?: boolean;
+}) {
   return (
-    <div className="grid gap-3">
-      <ErrorMessage message={error} />
-      <CustomerButton
-        type="button"
-        tone="danger"
-        disabled={isPending}
-        onClick={() => {
-          setError(null);
-          startTransition(async () => {
-            const result = await cancelBookingAction({ bookingId });
-            if (result.error) {
-              setError(result.error.message);
-              return;
-            }
-            router.refresh();
-          });
-        }}
-      >
-        {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
-        Cancel Booking
-      </CustomerButton>
-    </div>
+    <CustomerLinkButton
+      href={`/bookings/${bookingId}/cancel`}
+      tone="danger"
+      className={compact ? "w-full sm:w-auto" : undefined}
+    >
+      <XCircle className="h-4 w-4" />
+      Cancel Booking
+    </CustomerLinkButton>
   );
 }
 
