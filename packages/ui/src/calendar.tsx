@@ -27,6 +27,12 @@ function isPastDate(date: Date) {
   );
 }
 
+function isToday(date: Date) {
+  return (
+    startOfLocalDay(date).getTime() === startOfLocalDay(new Date()).getTime()
+  );
+}
+
 export function Calendar({
   className,
   selectedDate,
@@ -157,76 +163,100 @@ export function Calendar({
             selectedDate.getMonth() === monthIndex &&
             selectedDate.getFullYear() === year;
 
+          const isTodayDate = isToday(date);
+
+          let ariaLabel = `${monthNames[monthIndex]} ${day}, ${year}`;
+          if (isPast) ariaLabel += ", past, not selectable";
+          else if (status === "available") ariaLabel += ", available";
+          else if (status === "reserved") ariaLabel += ", booked, not selectable";
+          else if (status === "tentative") ariaLabel += ", pending request, not selectable";
+          else if (status === "maintenance") ariaLabel += ", maintenance, not selectable";
+          else if (status === "blackout") ariaLabel += ", unavailable, not selectable";
+
+          let title = "";
+          if (isPast) title = "Past date";
+          else if (status === "available") title = "Available for booking";
+          else if (status === "reserved") title = "This date is already booked.";
+          else if (status === "tentative") title = "This date has a pending request and cannot be booked yet.";
+          else if (status === "maintenance") title = "This date is unavailable due to maintenance.";
+          else if (status === "blackout") title = "This date is unavailable.";
+
           return (
             <button
               key={`day-${day}`}
               type="button"
               disabled={isDisabled}
               aria-disabled={isDisabled}
-              title={
-                isPast
-                  ? "Please choose today or a future date."
-                  : isUnavailable
-                    ? "This date is not available for booking."
-                    : undefined
-              }
+              aria-label={ariaLabel}
+              title={title}
               onClick={() => {
                 if (isDisabled) return;
                 onDateSelect?.(date);
               }}
               className={cn(
-                "aspect-square rounded-lg text-xs font-semibold flex items-center justify-center transition-all cursor-pointer relative",
+                "w-full aspect-square rounded-full text-xs font-semibold flex flex-col items-center justify-center transition-all relative outline-none",
                 isPast &&
-                  "cursor-not-allowed border border-[var(--border-default)] bg-[var(--bg-muted)] text-[var(--text-muted)] opacity-50 hover:bg-[var(--bg-muted)]",
+                  "cursor-not-allowed bg-[var(--bg-muted)] text-[var(--text-muted)] opacity-50",
                 // Available
                 !isPast &&
                   status === "available" &&
-                  "border border-[var(--border-default)] hover:bg-[var(--bg-subtle)] text-[var(--text-primary)]",
+                  "hover:bg-[var(--bg-subtle)] text-[var(--text-primary)] cursor-pointer",
                 // Reserved
                 !isPast &&
                   status === "reserved" &&
-                  "cursor-not-allowed bg-[var(--color-success)] text-white opacity-75",
+                  "cursor-not-allowed bg-[var(--color-brand-600)] text-white shadow-sm",
                 // Tentative
                 !isPast &&
                   status === "tentative" &&
-                  "cursor-not-allowed border-2 border-dashed border-[var(--color-warning)] text-[var(--color-warning)] opacity-75",
+                  "cursor-not-allowed border-2 border-dashed border-orange-400 text-orange-700 bg-orange-50",
                 // Maintenance
                 !isPast &&
                   status === "maintenance" &&
-                  "cursor-not-allowed bg-[var(--bg-muted)] text-[var(--text-muted)] line-through opacity-75",
+                  "cursor-not-allowed bg-slate-200 text-slate-500",
                 // Blackout
                 !isPast &&
                   status === "blackout" &&
-                  "cursor-not-allowed bg-[var(--color-danger-bg)] text-[var(--color-danger)] border border-[var(--color-danger)]/30 opacity-75",
+                  "cursor-not-allowed bg-red-50 text-red-500 border border-red-100",
                 // Selected override
                 isSelected &&
-                  !isPast &&
-                  "ring-2 ring-[var(--color-brand-500)] ring-offset-1",
+                  "ring-2 ring-[var(--color-brand-600)] ring-offset-2",
+                // Today indicator
+                isTodayDate && !isSelected &&
+                  "ring-1 ring-[var(--border-default)] ring-offset-1 font-bold"
               )}
             >
-              {day}
+              <span>{day}</span>
+              {!isPast && status === "available" && (
+                <span className="absolute bottom-1 h-1 w-1 rounded-full bg-[var(--color-success)]" />
+              )}
             </button>
           );
         })}
       </div>
 
       {/* Status Legend */}
-      <div className="mt-4 pt-4 border-t border-[var(--border-default)] flex flex-wrap gap-x-3 gap-y-1.5 text-[10px] font-medium text-[var(--text-secondary)]">
-        <div className="flex items-center gap-1">
-          <div className="h-2 w-2 rounded bg-[var(--color-success)]" />
-          <span>Reserved</span>
+      <div className="mt-4 pt-4 border-t border-[var(--border-default)] flex flex-wrap gap-x-4 gap-y-2 text-[11px] font-medium text-[var(--text-secondary)] justify-center">
+        <div className="flex items-center gap-1.5">
+          <div className="flex items-center justify-center h-4 w-4 relative">
+            <div className="absolute bottom-0 h-1.5 w-1.5 rounded-full bg-[var(--color-success)]" />
+          </div>
+          <span>Available</span>
         </div>
-        <div className="flex items-center gap-1">
-          <div className="h-2 w-2 rounded border border-dashed border-[var(--color-warning)]" />
-          <span>Tentative</span>
+        <div className="flex items-center gap-1.5">
+          <div className="h-3 w-3 rounded-full border-2 border-dashed border-orange-400 bg-orange-50" />
+          <span>Pending</span>
         </div>
-        <div className="flex items-center gap-1">
-          <div className="h-2 w-2 rounded bg-[var(--bg-muted)]" />
+        <div className="flex items-center gap-1.5">
+          <div className="h-3 w-3 rounded-full bg-[var(--color-brand-600)]" />
+          <span>Booked</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="h-3 w-3 rounded-full bg-slate-200" />
           <span>Maintenance</span>
         </div>
-        <div className="flex items-center gap-1">
-          <div className="h-2 w-2 rounded bg-[var(--color-danger-bg)] border border-[var(--color-danger)]/30" />
-          <span>Blackout</span>
+        <div className="flex items-center gap-1.5">
+          <div className="h-3 w-3 rounded-full bg-red-50 border border-red-100" />
+          <span>Unavailable</span>
         </div>
       </div>
     </div>
