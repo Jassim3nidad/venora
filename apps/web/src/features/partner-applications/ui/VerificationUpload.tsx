@@ -43,8 +43,30 @@ export function VerificationUpload({
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      setFiles((prev) => [...prev, ...newFiles]);
+      const selectedFiles = Array.from(e.target.files);
+      const validFiles: File[] = [];
+      const MAX_SIZE = 20 * 1024 * 1024; // 20 MB
+      const ALLOWED_TYPES = [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "application/pdf",
+      ];
+
+      for (const file of selectedFiles) {
+        if (!ALLOWED_TYPES.includes(file.type)) {
+          setError(`File type not supported: ${file.name}. Only PDF, JPEG, PNG, and WebP are allowed.`);
+          return;
+        }
+        if (file.size > MAX_SIZE) {
+          setError(`File too large: ${file.name}. Maximum size is 20MB.`);
+          return;
+        }
+        validFiles.push(file);
+      }
+
+      setError(null);
+      setFiles((prev) => [...prev, ...validFiles]);
     }
   };
 

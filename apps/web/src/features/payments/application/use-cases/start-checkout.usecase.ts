@@ -54,6 +54,24 @@ export async function startCheckout(
   serviceClient: SupabaseClient,
   input: StartCheckoutInput,
 ): Promise<StartCheckoutResult> {
+  if (process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "production") {
+    if (!input.appUrl) {
+      throw new PaymentError("INVALID_APP_URL", "Production application URL is missing.");
+    }
+    if (!input.appUrl.startsWith("https://")) {
+      throw new PaymentError("INVALID_APP_URL", "Production application URL must use HTTPS.");
+    }
+    let parsedUrl: URL;
+    try {
+      parsedUrl = new URL(input.appUrl);
+    } catch {
+      throw new PaymentError("INVALID_APP_URL", "Production application URL is incorrectly formatted.");
+    }
+    if (parsedUrl.hostname === "localhost" || parsedUrl.hostname === "127.0.0.1") {
+      throw new PaymentError("INVALID_APP_URL", "Production application URL cannot be localhost.");
+    }
+  }
+
   const gateway = getGateway(input.provider);
 
   const { data: transaction, error: startError } = (await supabase.rpc(

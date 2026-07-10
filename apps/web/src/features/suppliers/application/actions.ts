@@ -263,6 +263,13 @@ export async function createSupplierContactRequestAction(rawInput: unknown) {
     let eventDate = normalizeOptionalString(input.eventDate);
     let eventLocation = normalizeOptionalString(input.eventLocation);
     let guestCount = normalizeOptionalNumber(input.guestCount);
+    
+    let venueId: string | undefined = undefined;
+    let venueNameSnapshot: string | undefined = undefined;
+    let eventStartTimeSnapshot: string | undefined = undefined;
+
+    let eventDateSnapshot: string | undefined = undefined;
+    let guestCountSnapshot: number | undefined = undefined;
 
     if (input.bookingId) {
       const { data: booking, error: bookingError } = await supabase
@@ -272,13 +279,15 @@ export async function createSupplierContactRequestAction(rawInput: unknown) {
             id,
             status,
             event_date,
+            event_start_time,
             guest_count,
+            venue_id,
             venues(name, city, province)
           `,
         )
         .eq("id", input.bookingId)
         .eq("customer_id", user.id)
-        .in("status", ["approved", "confirmed", "completed"])
+        .in("status", ["approved", "confirmed"])
         .maybeSingle();
 
       throwIfSupabaseError(bookingError);
@@ -303,6 +312,12 @@ export async function createSupplierContactRequestAction(rawInput: unknown) {
         typeof booking.guest_count === "number"
           ? booking.guest_count
           : guestCount;
+          
+      venueId = booking.venue_id;
+      venueNameSnapshot = venueName;
+      eventStartTimeSnapshot = booking.event_start_time ?? undefined;
+      eventDateSnapshot = booking.event_date ?? undefined;
+      guestCountSnapshot = typeof booking.guest_count === "number" ? booking.guest_count : undefined;
     }
 
     const { data, error } = await supabase
@@ -311,6 +326,8 @@ export async function createSupplierContactRequestAction(rawInput: unknown) {
         supplier_id: input.supplierId,
         service_id: input.serviceId ?? null,
         customer_id: user.id,
+        booking_id: input.bookingId ?? null,
+        venue_id: venueId ?? null,
         contact_name: input.contactName,
         contact_email: input.contactEmail,
         contact_phone: normalizeOptionalString(input.contactPhone),
@@ -318,6 +335,11 @@ export async function createSupplierContactRequestAction(rawInput: unknown) {
         event_location: eventLocation,
         guest_count: guestCount,
         message: input.message,
+        venue_name_snapshot: venueNameSnapshot ?? null,
+        event_start_time_snapshot: eventStartTimeSnapshot ?? null,
+        location_snapshot: eventLocation ?? null,
+        event_date_snapshot: eventDateSnapshot ?? null,
+        guest_count_snapshot: guestCountSnapshot ?? null,
       })
       .select("id, status")
       .single();

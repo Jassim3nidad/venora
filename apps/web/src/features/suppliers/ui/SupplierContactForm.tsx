@@ -56,12 +56,23 @@ export function SupplierContactForm({
     () => supplier.packages.filter((pkg) => pkg.isActive),
     [supplier.packages],
   );
-  const hasApprovedBookings = bookings.length > 0;
+  
+  const approvedBookings = useMemo(
+    () => bookings.filter((b) => b.status === "approved" || b.status === "confirmed"),
+    [bookings]
+  );
+  const pendingBookings = useMemo(
+    () => bookings.filter((b) => b.status === "pending"),
+    [bookings]
+  );
+  
+  const hasApprovedBookings = approvedBookings.length > 0;
+  const hasOnlyPendingBookings = !hasApprovedBookings && pendingBookings.length > 0;
 
   const handleBookingChange = (bookingId: string) => {
     setSelectedBookingId(bookingId);
 
-    const booking = bookings.find((item) => item.id === bookingId);
+    const booking = approvedBookings.find((item) => item.id === bookingId);
     if (!booking) {
       setEventDate("");
       setGuestCount("");
@@ -147,25 +158,35 @@ export function SupplierContactForm({
               <p className="text-sm font-bold text-amber-900">
                 Approved venue booking required
               </p>
-              <p className="mt-1 text-sm font-medium leading-6 text-amber-700">
-                You need an approved venue booking before sending a supplier
-                inquiry. Once your venue approves your booking, you can link it
-                here.
-              </p>
+              {hasOnlyPendingBookings ? (
+                <p className="mt-1 text-sm font-medium leading-6 text-amber-700">
+                  You have pending venue bookings. Pending venue bookings cannot be used as confirmed event locations yet. Please wait for the venue owner to approve your booking first.
+                </p>
+              ) : (
+                <p className="mt-1 text-sm font-medium leading-6 text-amber-700">
+                  You need an approved venue booking before you can link an event location to this supplier inquiry. Browse venues to book first.
+                </p>
+              )}
             </div>
           </div>
 
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-            <Link
-              href="/venues"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-4 text-sm font-black text-white transition hover:bg-[#1D4ED8]"
-            >
-              <Building2 className="h-4 w-4" />
-              Browse Venues
-            </Link>
+            {!hasOnlyPendingBookings && (
+              <Link
+                href="/venues"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-4 text-sm font-black text-white transition hover:bg-[#1D4ED8]"
+              >
+                <Building2 className="h-4 w-4" />
+                Browse Venues
+              </Link>
+            )}
             <Link
               href="/bookings"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white px-4 text-sm font-black text-[#111827] transition hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
+              className={
+                hasOnlyPendingBookings
+                  ? "inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-4 text-sm font-black text-white transition hover:bg-[#1D4ED8]"
+                  : "inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white px-4 text-sm font-black text-[#111827] transition hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
+              }
             >
               <TicketCheck className="h-4 w-4" />
               View My Bookings
@@ -259,7 +280,7 @@ export function SupplierContactForm({
               className="h-11 w-full appearance-none rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] pl-9 pr-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
             >
               <option value="">Select approved booking</option>
-              {bookings.map((booking) => (
+              {approvedBookings.map((booking) => (
                 <option key={booking.id} value={booking.id}>
                   {booking.label}
                 </option>

@@ -467,8 +467,8 @@ export async function startBookingPaymentAction(rawInput: unknown) {
     startBookingPaymentSchema,
     async (input) => {
       const appUrl =
-        process.env.NEXT_PUBLIC_APP_URL ??
-        process.env.VERCEL_URL?.replace(/^/, "https://") ??
+        process.env.NEXT_PUBLIC_APP_URL ||
+        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "") ||
         "http://localhost:3000";
       const supabase = (await createClient()) as any;
 

@@ -27,6 +27,9 @@ type DirectInquiryRow = {
   status: string;
   created_at: string;
   supplier_services: { name: string } | null;
+  venue_name_snapshot: string | null;
+  event_start_time_snapshot: string | null;
+  location_snapshot: string | null;
 };
 
 type DirectInquiryDisplayRow = {
@@ -77,7 +80,7 @@ export default async function SupplierInquiriesPage() {
     (supabase as any)
       .from("supplier_contact_requests")
       .select(
-        "id, contact_name, event_date, event_location, guest_count, status, created_at, supplier_services(name)",
+        "id, contact_name, event_date, event_location, guest_count, status, created_at, supplier_services(name), venue_name_snapshot, event_start_time_snapshot, location_snapshot",
       )
       .eq("supplier_id", profile.id)
       .order("created_at", { ascending: false })
@@ -106,19 +109,30 @@ export default async function SupplierInquiriesPage() {
   }
 
   const directRows: DirectInquiryDisplayRow[] = ((directResult.data ?? []) as DirectInquiryRow[]).map(
-    (row) => ({
-      id: row.id,
-      client: row.contact_name,
-      packageName: row.supplier_services?.name ?? "General inquiry",
-      event: [formatDate(row.event_date), row.event_location]
-        .filter((value) => value && value !== "-")
-        .join(" / ") || "-",
-      guests: row.guest_count
-        ? `${row.guest_count.toLocaleString("en-PH")} guests`
-        : "-",
-      received: formatDate(row.created_at),
-      status: row.status,
-    }),
+    (row) => {
+      const eventLocation = row.venue_name_snapshot || row.location_snapshot || row.event_location;
+      
+      const timeStr = row.event_start_time_snapshot 
+        ? new Date(`1970-01-01T${row.event_start_time_snapshot}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+        : null;
+        
+      const eventDateTimeParts = [formatDate(row.event_date), timeStr].filter(Boolean);
+      const eventDateTime = eventDateTimeParts.length > 0 ? eventDateTimeParts.join(" at ") : null;
+      
+      return {
+        id: row.id,
+        client: row.contact_name,
+        packageName: row.supplier_services?.name ?? "General inquiry",
+        event: [eventDateTime, eventLocation]
+          .filter((value) => value && value !== "-")
+          .join(" / ") || "-",
+        guests: row.guest_count
+          ? `${row.guest_count.toLocaleString("en-PH")} guests`
+          : "-",
+        received: formatDate(row.created_at),
+        status: row.status,
+      };
+    },
   );
 
   const directColumns: DataTableColumn<DirectInquiryDisplayRow>[] = [
