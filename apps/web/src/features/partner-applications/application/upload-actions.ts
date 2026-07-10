@@ -29,7 +29,7 @@ export async function generateVerificationUploadUrlsAction(
       .eq("user_id", user.id)
       .maybeSingle();
 
-    if (existingApp && ["pending", "under_review", "approved", "rejected"].includes(existingApp.status)) {
+    if (existingApp && ["pending", "approved", "denied"].includes(existingApp.status)) {
       return { success: false, error: "Cannot upload documents for a submitted application." };
     }
 

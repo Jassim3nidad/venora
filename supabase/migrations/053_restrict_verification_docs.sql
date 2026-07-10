@@ -31,7 +31,7 @@ CREATE POLICY "verification-docs.insert.strict"
     AND NOT EXISTS (
       SELECT 1 FROM partner_applications pa 
       WHERE pa.user_id = auth.uid() 
-        AND pa.status IN ('pending', 'under_review', 'approved', 'rejected')
+        AND pa.status IN ('pending', 'approved', 'denied')
     )
   );
 
@@ -60,7 +60,7 @@ CREATE POLICY "verification-docs.update.strict"
     AND NOT EXISTS (
       SELECT 1 FROM partner_applications pa 
       WHERE pa.user_id = auth.uid() 
-        AND pa.status IN ('pending', 'under_review', 'approved', 'rejected')
+        AND pa.status IN ('pending', 'approved', 'denied')
     )
   )
   WITH CHECK (
@@ -69,7 +69,7 @@ CREATE POLICY "verification-docs.update.strict"
     AND NOT EXISTS (
       SELECT 1 FROM partner_applications pa 
       WHERE pa.user_id = auth.uid() 
-        AND pa.status IN ('pending', 'under_review', 'approved', 'rejected')
+        AND pa.status IN ('pending', 'approved', 'denied')
     )
   );
 
@@ -84,6 +84,6 @@ CREATE POLICY "verification-docs.delete.strict"
     AND NOT EXISTS (
       SELECT 1 FROM partner_applications pa 
       WHERE pa.user_id = auth.uid() 
-        AND pa.status IN ('pending', 'under_review', 'approved', 'rejected')
+        AND pa.status IN ('pending', 'approved', 'denied')
     )
   );
