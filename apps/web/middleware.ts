@@ -39,7 +39,6 @@ const PROTECTED_PREFIXES = [
   "/favorites",
   "/account",
   "/settings",
-  "/help",
   "/dashboard",
   "/admin",
 ];

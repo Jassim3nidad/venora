@@ -4,6 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import MarketingNavbar from "@/components/layout/MarketingNavbar";
+import { SiteFooter } from "@/components/layout/SiteFooter";
 import { createClient } from "@/lib/supabase/server";
 import AccountNav from "./_components/AccountNav";
 import AccountMobileMenu from "./_components/AccountMobileMenu";
@@ -117,6 +118,7 @@ export default async function AccountLayout({
           </div>
         </section>
       </main>
+      <SiteFooter />
     </div>
   );
 }
