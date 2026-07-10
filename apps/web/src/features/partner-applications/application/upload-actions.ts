@@ -23,7 +23,7 @@ export async function generateVerificationUploadUrlsAction(
     }
 
     // Check application status
-    const { data: existingApp } = await supabase
+    const { data: existingApp } = await (supabase as any)
       .from("partner_applications")
       .select("status")
       .eq("user_id", user.id)
@@ -48,12 +48,13 @@ export async function generateVerificationUploadUrlsAction(
         return { success: false, error: `Invalid file size for ${file.name}. Max 20MB.` };
       }
 
-      if (!ALLOWED_MIME_TYPES[file.type]) {
+      const allowedExts = ALLOWED_MIME_TYPES[file.type];
+      if (!allowedExts) {
         return { success: false, error: `Disallowed MIME type for ${file.name}.` };
       }
 
       const ext = file.name.split(".").pop()?.toLowerCase();
-      if (!ext || !ALLOWED_MIME_TYPES[file.type].includes(ext)) {
+      if (!ext || !allowedExts.includes(ext)) {
         return { success: false, error: `Extension mismatch for ${file.name}.` };
       }
 

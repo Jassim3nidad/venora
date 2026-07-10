@@ -112,6 +112,7 @@ export function VerificationUpload({
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const payload = res.payloads[i];
+        if (!file || !payload) throw new Error("Missing file or payload");
 
         const { error: uploadError } = await supabase.storage
           .from("verification-docs")

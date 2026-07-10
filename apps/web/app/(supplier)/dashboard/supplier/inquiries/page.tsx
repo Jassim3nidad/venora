@@ -30,6 +30,8 @@ type DirectInquiryRow = {
   venue_name_snapshot: string | null;
   event_start_time_snapshot: string | null;
   location_snapshot: string | null;
+  event_date_snapshot: string | null;
+  guest_count_snapshot: number | null;
 };
 
 type DirectInquiryDisplayRow = {
