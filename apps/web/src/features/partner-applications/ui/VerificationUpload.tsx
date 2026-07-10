@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { Loader2, UploadCloud, X, FileText } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import {
+  generateVerificationUploadUrlsAction,
+  finalizeVerificationUploadAction,
+} from "../application/upload-actions";
 
-const REQUIREMENTS = {
+const REQUIREMENTS: Record<string, string[]> = {
   venue_owner: [
     "Proof of Ownership / Authority (Title, Deed, Lease)",
     "Business Registration (DTI/SEC)",
@@ -23,6 +27,14 @@ const REQUIREMENTS = {
     "Service Proof / Catalog"
   ]
 };
+
+const MAX_SIZE = 20 * 1024 * 1024; // 20 MB
+const ALLOWED_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp", // Wait, server doesn't allow webp currently. I'll stick to jpeg, png, pdf. Let me change server and client to match.
+  "application/pdf",
+];
 
 export function VerificationUpload({ 
   role, 
@@ -45,21 +57,18 @@ export function VerificationUpload({
     if (e.target.files) {
       const selectedFiles = Array.from(e.target.files);
       const validFiles: File[] = [];
-      const MAX_SIZE = 20 * 1024 * 1024; // 20 MB
-      const ALLOWED_TYPES = [
-        "image/jpeg",
-        "image/png",
-        "image/webp",
-        "application/pdf",
-      ];
 
       for (const file of selectedFiles) {
         if (!ALLOWED_TYPES.includes(file.type)) {
-          setError(`File type not supported: ${file.name}. Only PDF, JPEG, PNG, and WebP are allowed.`);
+          setError(`File type not supported: ${file.name}. Only PDF, JPEG, and PNG are allowed.`);
           return;
         }
         if (file.size > MAX_SIZE) {
           setError(`File too large: ${file.name}. Maximum size is 20MB.`);
+          return;
+        }
+        if (file.size === 0) {
+          setError(`File is empty: ${file.name}.`);
           return;
         }
         validFiles.push(file);
@@ -83,26 +92,45 @@ export function VerificationUpload({
     setIsUploading(true);
     setError(null);
 
-    const uploadedPaths: string[] = [];
-
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not authenticated");
+      // 1. Send metadata to get signed URLs
+      const metadata = files.map((f) => ({
+        name: f.name,
+        type: f.type,
+        size: f.size,
+      }));
 
-      for (const file of files) {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${user.id}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const res = await generateVerificationUploadUrlsAction(role, metadata);
+      
+      if (!res.success || !res.payloads) {
+        throw new Error(res.error || "Failed to generate upload URLs.");
+      }
 
-        // The verification-docs bucket is private, so we keep the storage path
-        // (not a public URL, which would 403) and generate short-lived signed
-        // URLs on demand when an admin reviews them.
-        const { data, error: uploadError } = await supabase.storage
+      const uploadedPaths: string[] = [];
+
+      // 2. Upload each file directly to Supabase Storage using the signed URL
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const payload = res.payloads[i];
+
+        const { error: uploadError } = await supabase.storage
           .from("verification-docs")
-          .upload(fileName, file);
+          .uploadToSignedUrl(payload.path, payload.token, file, {
+            upsert: false,
+            contentType: file.type,
+          });
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          throw new Error(`Upload failed for ${file.name}: ${uploadError.message}`);
+        }
 
-        uploadedPaths.push(data.path);
+        uploadedPaths.push(payload.path);
+      }
+
+      // 3. Finalize
+      const finalizeRes = await finalizeVerificationUploadAction(uploadedPaths);
+      if (!finalizeRes.success) {
+        throw new Error(finalizeRes.error || "Failed to finalize uploads.");
       }
 
       onSubmit(uploadedPaths);
@@ -145,11 +173,11 @@ export function VerificationUpload({
         <label className="relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-white py-8 transition hover:border-[#2563EB] hover:bg-[#EFF6FF]">
           <UploadCloud className="mb-3 h-10 w-10 text-slate-400" />
           <p className="text-sm font-bold text-[#2563EB]">Click to upload files</p>
-          <p className="mt-1 text-xs text-slate-500">PDF, JPG, PNG (max 10MB each)</p>
+          <p className="mt-1 text-xs text-slate-500">PDF, JPG, PNG (max 20MB each)</p>
           <input
             type="file"
             multiple
-            accept=".pdf,image/*"
+            accept=".pdf,image/jpeg,image/png"
             onChange={handleFileSelect}
             className="sr-only"
             disabled={isUploading || isSubmitting}

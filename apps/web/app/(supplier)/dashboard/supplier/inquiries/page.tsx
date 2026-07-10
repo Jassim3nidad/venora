@@ -80,7 +80,7 @@ export default async function SupplierInquiriesPage() {
     (supabase as any)
       .from("supplier_contact_requests")
       .select(
-        "id, contact_name, event_date, event_location, guest_count, status, created_at, supplier_services(name), venue_name_snapshot, event_start_time_snapshot, location_snapshot",
+        "id, contact_name, event_date, event_location, guest_count, status, created_at, supplier_services(name), venue_name_snapshot, event_start_time_snapshot, location_snapshot, event_date_snapshot, guest_count_snapshot",
       )
       .eq("supplier_id", profile.id)
       .order("created_at", { ascending: false })
@@ -116,7 +116,7 @@ export default async function SupplierInquiriesPage() {
         ? new Date(`1970-01-01T${row.event_start_time_snapshot}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
         : null;
         
-      const eventDateTimeParts = [formatDate(row.event_date), timeStr].filter(Boolean);
+      const eventDateTimeParts = [formatDate(row.event_date_snapshot || row.event_date), timeStr].filter(Boolean);
       const eventDateTime = eventDateTimeParts.length > 0 ? eventDateTimeParts.join(" at ") : null;
       
       return {
@@ -126,8 +126,8 @@ export default async function SupplierInquiriesPage() {
         event: [eventDateTime, eventLocation]
           .filter((value) => value && value !== "-")
           .join(" / ") || "-",
-        guests: row.guest_count
-          ? `${row.guest_count.toLocaleString("en-PH")} guests`
+        guests: (row.guest_count_snapshot || row.guest_count)
+          ? `${(row.guest_count_snapshot || row.guest_count)!.toLocaleString("en-PH")} guests`
           : "-",
         received: formatDate(row.created_at),
         status: row.status,
