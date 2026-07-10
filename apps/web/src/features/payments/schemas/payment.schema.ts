@@ -1,16 +1,28 @@
 import { z } from "zod";
+import { PAYMENT_PROVIDERS } from "../types/payment.types";
+
+export const paymentProviderSchema = z.enum(PAYMENT_PROVIDERS);
+export type PaymentProviderInput = z.infer<typeof paymentProviderSchema>;
+
+export const startPaymentSchema = z.object({
+  provider: paymentProviderSchema.default("paymongo"),
+});
+export type StartPaymentInput = z.infer<typeof startPaymentSchema>;
 
 export const paymentIntentSchema = z.object({
   booking_id: z.string().uuid(),
-  amount:     z.number().positive(),
-  gateway:    z.enum(["paymongo", "maya", "stripe"]),
-  currency:   z.literal("PHP").default("PHP"),
+  amount: z.number().positive(),
+  gateway: paymentProviderSchema,
+  currency: z.literal("PHP").default("PHP"),
 });
 export type PaymentIntentInput = z.infer<typeof paymentIntentSchema>;
 
-export const refundSchema = z.object({
-  booking_id:          z.string().uuid(),
-  payment_reference:   z.string().min(1),
-  reason:              z.string().max(255).optional(),
+export const refundRequestSchema = z.object({
+  reason: z
+    .string()
+    .trim()
+    .max(500, "Refund reason must be 500 characters or fewer")
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
 });
-export type RefundInput = z.infer<typeof refundSchema>;
+export type RefundRequestInput = z.infer<typeof refundRequestSchema>;

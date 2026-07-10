@@ -3,8 +3,8 @@ import { createClient } from "@/src/lib/supabase/server";
 import { createServiceClient } from "@/src/lib/supabase/service";
 import { VenoraError } from "@/src/lib/errors";
 import "@/src/features/payments/infrastructure/register-gateways";
-import { startPaymentSchema } from "@/src/features/payments/schemas/payment.schema";
-import { startCheckout } from "@/src/features/payments/application/use-cases/start-checkout.usecase";
+import { refundRequestSchema } from "@/src/features/payments/schemas/payment.schema";
+import { requestRefund } from "@/src/features/payments/application/use-cases/request-refund.usecase";
 
 function apiError(code: string, message: string, status: number, details?: unknown) {
   return NextResponse.json(
@@ -14,10 +14,10 @@ function apiError(code: string, message: string, status: number, details?: unkno
 }
 
 /**
- * POST /api/bookings/:id/payment
- * Starts (or resumes) the deposit checkout and returns the hosted
- * provider checkout URL. Auth + booking ownership are enforced by the
- * `start_booking_payment` RPC under RLS.
+ * POST /api/bookings/:id/refund
+ * Requests a refund of the paid deposit for a cancelled booking.
+ * Permission (customer / venue org member / admin) and state validation
+ * happen in the `request_booking_refund` RPC.
  */
 export async function POST(
   request: NextRequest,
@@ -28,35 +28,29 @@ export async function POST(
       context.params,
       request.json().catch(() => ({})),
     ]);
-    const parsed = startPaymentSchema.safeParse(body ?? {});
+    const parsed = refundRequestSchema.safeParse(body ?? {});
 
     if (!parsed.success) {
       return apiError(
         "VALIDATION_ERROR",
-        "Invalid payment request.",
+        "Invalid refund request.",
         400,
         parsed.error.flatten(),
       );
     }
 
-    const appUrl =
-      process.env.NEXT_PUBLIC_APP_URL ??
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
     const supabase = (await createClient()) as any;
-
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return apiError("UNAUTHORIZED", "You must be signed in to pay.", 401);
+      return apiError("UNAUTHORIZED", "You must be signed in to request a refund.", 401);
     }
 
-    const result = await startCheckout(supabase, createServiceClient(), {
+    const result = await requestRefund(supabase, createServiceClient(), {
       bookingId: id,
-      provider: parsed.data.provider,
-      appUrl,
-      customerEmail: user.email ?? null,
+      reason: parsed.data.reason ?? null,
     });
 
     return NextResponse.json({ data: result, error: null });
@@ -64,7 +58,7 @@ export async function POST(
     if (error instanceof VenoraError) {
       return apiError(error.code, error.message, error.httpStatus);
     }
-    console.error("[api/bookings/payment] Unexpected error:", error);
+    console.error("[api/bookings/refund] Unexpected error:", error);
     return apiError("INTERNAL_ERROR", "Something went wrong.", 500);
   }
 }

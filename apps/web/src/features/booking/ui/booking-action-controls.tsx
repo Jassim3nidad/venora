@@ -43,21 +43,31 @@ export function CustomerCancelBookingButton({
   );
 }
 
+const PROVIDER_LABELS: Record<string, string> = {
+  paymongo: "PayMongo — Cards, GCash, Maya, GrabPay",
+  maya: "Maya",
+  stripe: "Stripe",
+};
+
 export function StartPaymentForm({
   bookingId,
   compact = false,
+  providers = ["paymongo"],
 }: {
   bookingId: string;
   compact?: boolean;
+  providers?: Array<"paymongo" | "maya" | "stripe">;
 }) {
   const router = useRouter();
-  const [provider, setProvider] = useState<"paymongo" | "maya" | "stripe">("paymongo");
+  const [provider, setProvider] = useState<"paymongo" | "maya" | "stripe">(
+    providers[0] ?? "paymongo",
+  );
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   return (
     <div className="grid gap-3">
-      {!compact ? (
+      {!compact && providers.length > 1 ? (
         <label className="grid gap-2 text-sm font-bold text-slate-700">
           Payment provider
           <select
@@ -65,9 +75,11 @@ export function StartPaymentForm({
             onChange={(event) => setProvider(event.target.value as "paymongo" | "maya" | "stripe")}
             className="h-12 rounded-2xl border border-[#E5E7EB] bg-white px-4 text-sm font-semibold outline-none focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
           >
-            <option value="paymongo">PayMongo</option>
-            <option value="maya">Maya</option>
-            <option value="stripe">Stripe</option>
+            {providers.map((id) => (
+              <option key={id} value={id}>
+                {PROVIDER_LABELS[id] ?? id}
+              </option>
+            ))}
           </select>
         </label>
       ) : null}
@@ -85,7 +97,13 @@ export function StartPaymentForm({
               setError(result.error.message);
               return;
             }
-            router.push(`/bookings/${bookingId}/confirmation`);
+            const checkoutUrl = result.data?.checkoutUrl;
+            if (checkoutUrl && /^https?:\/\//.test(checkoutUrl)) {
+              // Hosted provider checkout lives on an external domain.
+              window.location.assign(checkoutUrl);
+              return;
+            }
+            router.push(`/bookings/${bookingId}/payment`);
             router.refresh();
           });
         }}

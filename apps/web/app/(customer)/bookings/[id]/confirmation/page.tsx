@@ -11,6 +11,9 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { BookingStatusBadge } from "@/src/features/booking/ui/booking-status-badge";
 import type { BookingStatusValue } from "@/src/features/booking/domain/value-objects/booking-status.vo";
+import { PendingPaymentRefresh } from "@/src/features/payments/ui/pending-payment-refresh";
+import { ReceiptCard } from "@/src/features/payments/ui/payment-documents";
+import type { ReceiptRow } from "@/src/features/payments/types/payment.types";
 
 export const metadata: Metadata = {
   title: "Booking Confirmation | Venora",
@@ -88,6 +91,12 @@ export default async function BookingConfirmationPage({ params }: Props) {
 
   if (!booking) notFound();
 
+  const { data: receipts } = await supabase
+    .from("receipts")
+    .select("*")
+    .eq("booking_id", id)
+    .order("created_at", { ascending: false });
+
   const status = booking.status as BookingStatusValue;
   const isConfirmed = ["confirmed", "completed", "reviewed"].includes(status);
   const paidTransaction = (booking.transactions ?? []).find(
@@ -96,6 +105,7 @@ export default async function BookingConfirmationPage({ params }: Props) {
 
   return (
     <div className="bg-[#F8FAFC] text-[#111827]">
+      {!isConfirmed && status === "payment_pending" ? <PendingPaymentRefresh /> : null}
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <Link
           href={`/bookings/${id}`}
@@ -150,6 +160,14 @@ export default async function BookingConfirmationPage({ params }: Props) {
               </p>
             </div>
           </div>
+
+          {(receipts ?? []).length > 0 ? (
+            <div className="mt-6 grid gap-3">
+              {(receipts ?? []).map((receipt: ReceiptRow) => (
+                <ReceiptCard key={receipt.id} receipt={receipt} />
+              ))}
+            </div>
+          ) : null}
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             {isConfirmed ? (

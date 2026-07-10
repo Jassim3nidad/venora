@@ -24,6 +24,8 @@ interface MarketingNavbarProfile {
   isVenueOwner?: boolean;
 }
 
+const HOST_VENUE_PATH = "/account/become-partner";
+
 type MobileLink = {
   label: string;
   href: string;
@@ -52,7 +54,10 @@ const customerMobileLinks: MobileLink[] = [
   { label: "Notifications", href: "/notifications", icon: Bell },
 ];
 
-function isActive(pathname: string, href: string) {
+function isActive(pathname: string, href: string, label?: string) {
+  if (label === "Host a Venue") {
+    return pathname === HOST_VENUE_PATH || pathname.startsWith(`${HOST_VENUE_PATH}/`);
+  }
   if (href === "/") return pathname === "/";
   if (href === "/venues") {
     return pathname === "/venues" || pathname.startsWith("/venues/");
@@ -140,7 +145,7 @@ export default function MarketingNavbar({
                 displayName={displayName}
                 email={email}
                 avatarUrl={profile?.avatar_url}
-                showEnterVenueDashboard={profile?.isVenueOwner}
+                showEnterVenueDashboard={profile?.isVenueOwner ?? false}
               />
             </>
           ) : (
@@ -220,7 +225,7 @@ export default function MarketingNavbar({
 
             <nav className="grid gap-2">
               {mobileLinks.map(({ label, href, icon: Icon }) => {
-                const active = isActive(pathname, href);
+                const active = isActive(pathname, href, label);
 
                 return (
                   <Link

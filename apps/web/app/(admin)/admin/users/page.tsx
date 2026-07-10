@@ -16,7 +16,7 @@ type UserRow = {
   id: string;
   full_name: string | null;
   created_at: string;
-  user_roles?: { role: string }[] | null;
+  user_roles?: { role: string } | { role: string }[] | null;
 };
 
 type UserDisplayRow = {
@@ -30,6 +30,16 @@ function formatDate(value: string) {
   return new Date(value).toLocaleDateString("en-PH", { dateStyle: "medium" });
 }
 
+function getProfileRoles(
+  userRoles: UserRow["user_roles"],
+): string[] {
+  if (!userRoles) return [];
+  if (Array.isArray(userRoles)) {
+    return userRoles.map((entry) => entry.role);
+  }
+  return [userRoles.role];
+}
+
 export default async function AdminUsersPage() {
   const supabase = (await createClient()) as any;
   const { data: profiles } = await supabase
@@ -41,7 +51,7 @@ export default async function AdminUsersPage() {
   const rows: UserDisplayRow[] = ((profiles ?? []) as UserRow[]).map((profile) => ({
     id: profile.id,
     name: profile.full_name ?? "Unnamed user",
-    roles: (profile.user_roles ?? []).map((role) => role.role),
+    roles: getProfileRoles(profile.user_roles),
     joined: formatDate(profile.created_at),
   }));
 
