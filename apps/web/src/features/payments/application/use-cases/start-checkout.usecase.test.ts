@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { startCheckout } from "./start-checkout.usecase";
 
 vi.mock("@/src/features/payments/application/gateway-registry", () => ({
@@ -6,18 +6,12 @@ vi.mock("@/src/features/payments/application/gateway-registry", () => ({
 }));
 
 describe("startCheckout URL validation", () => {
-  const originalEnv = process.env;
-
-  beforeEach(() => {
-    process.env = { ...originalEnv };
-  });
-
   afterEach(() => {
-    process.env = originalEnv;
+    vi.unstubAllEnvs();
   });
 
   it("rejects checkout creation when production appUrl is missing", async () => {
-    process.env.NODE_ENV = "production";
+    vi.stubEnv("NODE_ENV", "production");
     
     await expect(
       startCheckout(null as any, null as any, {
@@ -29,7 +23,7 @@ describe("startCheckout URL validation", () => {
   });
 
   it("rejects checkout creation when production appUrl is not HTTPS", async () => {
-    process.env.NODE_ENV = "production";
+    vi.stubEnv("NODE_ENV", "production");
     
     await expect(
       startCheckout(null as any, null as any, {
@@ -41,7 +35,7 @@ describe("startCheckout URL validation", () => {
   });
 
   it("rejects checkout creation when production appUrl is localhost", async () => {
-    process.env.NODE_ENV = "production";
+    vi.stubEnv("NODE_ENV", "production");
     
     await expect(
       startCheckout(null as any, null as any, {
