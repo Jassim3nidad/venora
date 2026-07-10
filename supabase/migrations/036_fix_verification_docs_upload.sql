@@ -6,8 +6,8 @@ DROP POLICY IF EXISTS "verification-docs.insert.owner" ON storage.objects;
 
 CREATE POLICY "verification-docs.insert.owner"
   ON storage.objects FOR INSERT
+  TO authenticated
   WITH CHECK (
     bucket_id = 'verification-docs'
-    AND auth.role() = 'authenticated'
     AND (storage.foldername(name))[1] = auth.uid()::text
   );
