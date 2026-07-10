@@ -326,24 +326,21 @@ export async function approveBookingAction(rawInput: unknown) {
     approveBookingSchema,
     async (input) => {
       const supabase = (await createClient()) as any;
-      const { booking } = await assertCanManageBooking(
-        supabase,
-        input.bookingId,
-      );
+      // Permission check only — approve_booking_quote() re-validates
+      // org membership/admin internally and is the sole writer of
+      // total_amount/deposit_amount/approved_at/payment_due_at. A raw
+      // table UPDATE here would bypass that validation (and the
+      // invoice-issuance trigger, which only fires when this RPC sets a
+      // positive deposit_amount) — this previously caused bookings to
+      // reach "approved" with a null total/deposit and no invoice.
+      await assertCanManageBooking(supabase, input.bookingId);
 
-      if (booking.status !== "pending") {
-        throw new ValidationError("Only pending bookings can be approved.");
-      }
-
-      const { data, error } = await supabase
-        .from("bookings")
-        .update({
-          status: "approved",
-        })
-        .eq("id", input.bookingId)
-        .eq("status", "pending")
-        .select("id, status")
-        .single();
+      const { data, error } = await supabase.rpc("approve_booking_quote", {
+        p_booking_id: input.bookingId,
+        p_total_amount: input.totalAmount,
+        p_deposit_amount: input.depositAmount,
+        p_note: input.note ?? null,
+      });
 
       throwIfSupabaseError(error);
 
@@ -352,6 +349,8 @@ export async function approveBookingAction(rawInput: unknown) {
       return {
         bookingId: data.id as string,
         status: data.status as string,
+        totalAmount: Number(data.total_amount),
+        depositAmount: Number(data.deposit_amount),
       };
     },
     rawInput,
@@ -363,24 +362,15 @@ export async function declineBookingAction(rawInput: unknown) {
     declineBookingSchema,
     async (input) => {
       const supabase = (await createClient()) as any;
-      const { booking } = await assertCanManageBooking(
-        supabase,
-        input.bookingId,
-      );
+      // Same reasoning as approveBookingAction: decline_booking_request()
+      // is the sole writer of decline_reason — a raw update here
+      // previously validated a reason and then silently discarded it.
+      await assertCanManageBooking(supabase, input.bookingId);
 
-      if (booking.status !== "pending") {
-        throw new ValidationError("Only pending bookings can be declined.");
-      }
-
-      const { data, error } = await supabase
-        .from("bookings")
-        .update({
-          status: "declined",
-        })
-        .eq("id", input.bookingId)
-        .eq("status", "pending")
-        .select("id, status")
-        .single();
+      const { data, error } = await supabase.rpc("decline_booking_request", {
+        p_booking_id: input.bookingId,
+        p_reason: input.reason,
+      });
 
       throwIfSupabaseError(error);
 
