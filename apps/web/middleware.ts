@@ -19,12 +19,19 @@ type CookieToSet = {
   options?: CookieOptions;
 };
 
+function assertPublicSupabaseKey(key: string): string {
+  if (key.startsWith("sb_secret_")) {
+    throw new Error(
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY holds a secret key (sb_secret_...). " +
+        "Middleware must use a public anon or publishable key so RLS remains enforced.",
+    );
+  }
+
+  return key;
+}
+
 type UserRole =
-  | "customer"
-  | "venue_owner"
-  | "event_coordinator"
-  | "supplier"
-  | "admin";
+  "customer" | "venue_owner" | "event_coordinator" | "supplier" | "admin";
 
 // Routes that require authentication.
 // Important: /venues is intentionally NOT protected.
@@ -46,15 +53,15 @@ const PROTECTED_PREFIXES = [
 // Routes that require specific roles
 const ROLE_GUARDS: Array<{ prefix: string; roles: UserRole[] }> = [
   {
-  prefix: "/favorites",
-  roles: ["customer"],
-  }, 
+    prefix: "/favorites",
+    roles: ["customer"],
+  },
 
   {
-  prefix: "/bookings",
-  roles: ["customer", "admin"],
-  }, 
-  
+    prefix: "/bookings",
+    roles: ["customer", "admin"],
+  },
+
   // Administrator dashboard
   {
     prefix: "/dashboard/admin",
@@ -133,7 +140,8 @@ const AUTH_PATHS = ["/login", "/register", "/forgot-password"];
 function defaultRouteForRoles(roles: UserRole[]) {
   if (roles.includes("admin")) return "/dashboard/admin";
   if (roles.includes("venue_owner")) return "/dashboard/venue-owner";
-  if (roles.includes("event_coordinator")) return "/dashboard/event-coordinator";
+  if (roles.includes("event_coordinator"))
+    return "/dashboard/event-coordinator";
   if (roles.includes("supplier")) return "/dashboard/supplier";
   return "/";
 }
@@ -151,7 +159,7 @@ export async function middleware(request: NextRequest) {
 
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    assertPublicSupabaseKey(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!),
     {
       cookies: {
         getAll() {
@@ -193,11 +201,13 @@ export async function middleware(request: NextRequest) {
 
   // Intercept Supabase Auth errors on the root (e.g., expired OTPs)
   if (pathname === "/" && searchParams.get("error") === "access_denied") {
-    const errorDesc = searchParams.get("error_description") || "Your link is invalid or has expired.";
+    const errorDesc =
+      searchParams.get("error_description") ||
+      "Your link is invalid or has expired.";
     const redirectUrl = request.nextUrl.clone();
-    
+
     redirectUrl.pathname = "/login";
-    redirectUrl.search = ""; 
+    redirectUrl.search = "";
     redirectUrl.searchParams.set("error", errorDesc);
     return redirectWithCookies(redirectUrl, supabaseResponse);
   }
@@ -242,7 +252,8 @@ export async function middleware(request: NextRequest) {
         resolvePostAuthRedirect({
           roles: userRoles,
           profile,
-          redirectTo: searchParams.get("redirectTo") ?? searchParams.get("next"),
+          redirectTo:
+            searchParams.get("redirectTo") ?? searchParams.get("next"),
         }),
         request.url,
       ),
