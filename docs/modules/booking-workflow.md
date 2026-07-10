@@ -127,6 +127,24 @@ Client mutation controls use disabled buttons plus spinner icons. Server pages a
 - RLS still protects table reads for bookings, transactions, notifications, and reviews.
 - Venue owner access is checked through organization membership.
 - Customer review eligibility is enforced by trigger and unique `booking_id`.
+- **Fixed 2026-07: raw-update bypass of `approve_booking_quote`/`decline_booking_request`.**
+  `approveBookingAction`/`declineBookingAction` (and the equivalent branch
+  of `PATCH /api/bookings/[id]/status`) validated `totalAmount`/
+  `depositAmount`/`reason` via Zod, then performed a raw
+  `UPDATE bookings SET status = 'approved' | 'declined'` directly on the
+  table instead of calling the RPC — silently discarding the validated
+  amounts/reason. RLS's `admin_full_access_bookings` / `venue_org_manages_bookings`
+  policies grant `FOR ALL` on bookings, so the raw write succeeded; the
+  booking reached `approved` with `total_amount`, `deposit_amount`, and
+  `approved_at` all `NULL`, and no invoice was ever issued
+  (`issue_deposit_invoice` only fires when the RPC sets a positive
+  `deposit_amount`). All three call sites now go through the RPCs.
+  Migration 043 adds `bookings_approved_requires_valid_amounts`, a `CHECK`
+  constraint that rejects `approved`-or-later status without a valid
+  positive total/deposit and an `approved_at` timestamp — a database-level
+  guard against any future code path making the same mistake — and adds
+  the `booking.approved` audit log entry `approve_booking_quote` was
+  missing.
 
 ## Responsive Behavior
 

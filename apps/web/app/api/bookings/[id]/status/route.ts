@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/src/lib/supabase/server";
@@ -132,44 +132,28 @@ export async function PATCH(
       const booking = await canManageBooking(supabase, id);
       if (!booking)
         return apiError("FORBIDDEN", "You cannot manage this booking.", 403);
-      if (booking.status !== "pending") {
-        return apiError(
-          "VALIDATION_ERROR",
-          "Only pending bookings can be approved.",
-          400,
-        );
-      }
 
-      result = await supabase
-        .from("bookings")
-        .update({
-          status: "approved",
-        })
-        .eq("id", id)
-        .eq("status", "pending")
-        .select("id, status")
-        .single();
+      // approve_booking_quote() is the sole writer of total_amount/
+      // deposit_amount/approved_at/payment_due_at and is what triggers
+      // invoice issuance. A raw status update here previously validated
+      // totalAmount/depositAmount via Zod and then discarded them,
+      // leaving bookings "approved" with no payable amount and no
+      // invoice.
+      result = await supabase.rpc("approve_booking_quote", {
+        p_booking_id: id,
+        p_total_amount: input.totalAmount,
+        p_deposit_amount: input.depositAmount,
+        p_note: input.note ?? null,
+      });
     } else if (input.action === "decline") {
       const booking = await canManageBooking(supabase, id);
       if (!booking)
         return apiError("FORBIDDEN", "You cannot manage this booking.", 403);
-      if (booking.status !== "pending") {
-        return apiError(
-          "VALIDATION_ERROR",
-          "Only pending bookings can be declined.",
-          400,
-        );
-      }
 
-      result = await supabase
-        .from("bookings")
-        .update({
-          status: "declined",
-        })
-        .eq("id", id)
-        .eq("status", "pending")
-        .select("id, status")
-        .single();
+      result = await supabase.rpc("decline_booking_request", {
+        p_booking_id: id,
+        p_reason: input.reason,
+      });
     } else if (input.action === "cancel") {
       result = await supabase.rpc("cancel_booking_request", {
         p_booking_id: id,
