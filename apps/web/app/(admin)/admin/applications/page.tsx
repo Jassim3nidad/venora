@@ -1,24 +1,16 @@
-import { createClient } from "@/lib/supabase/server";
+import { getPendingPartnerApplicationsForAdmin } from "@/features/partner-applications/application/get-pending-partner-applications";
 import { ApplicationReviewModal } from "@/features/partner-applications/ui/ApplicationReviewModal";
 import { formatDistanceToNow } from "date-fns";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminApplicationsPage() {
-  const supabase = await createClient();
-
-  const { data: applications, error } = await (supabase.from("partner_applications") as any)
-    .select(`
-      *,
-      profiles:user_id (full_name, email)
-    `)
-    .eq("status", "pending")
-    .order("created_at", { ascending: false });
+  const { applications, error } = await getPendingPartnerApplicationsForAdmin();
 
   if (error) {
     return (
       <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
-        Error loading applications: {error.message}
+        Error loading applications: {error}
       </div>
     );
   }
@@ -45,7 +37,7 @@ export default async function AdminApplicationsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {applications.map((app: any) => (
+              {applications.map((app) => (
                 <tr key={app.id} className="transition hover:bg-slate-50">
                   <td className="px-6 py-4">
                     <p className="font-bold text-slate-900">{app.profiles?.full_name || "Unknown"}</p>

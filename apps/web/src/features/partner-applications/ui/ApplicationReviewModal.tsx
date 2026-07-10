@@ -7,10 +7,15 @@ import {
   denyApplicationAction,
   getVerificationDocumentUrlAction,
 } from "../actions/admin.actions";
+import type { PartnerApplicationForReview } from "../application/get-pending-partner-applications";
 
 type DocLink = { path: string; url: string | null; error: string | null };
 
-export function ApplicationReviewModal({ application }: { application: any }) {
+export function ApplicationReviewModal({
+  application,
+}: {
+  application: PartnerApplicationForReview;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [isDenying, setIsDenying] = useState(false);

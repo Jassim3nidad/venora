@@ -92,6 +92,7 @@ export async function approveApplicationAction(applicationId: string) {
 
     revalidatePath("/admin/applications");
     revalidatePath("/account");
+    revalidatePath("/account/become-partner");
 
     return { success: true };
   } catch (error) {
@@ -127,6 +128,7 @@ export async function denyApplicationAction(applicationId: string, reason: strin
     }
 
     revalidatePath("/admin/applications");
+    revalidatePath("/account/become-partner");
 
     return { success: true };
   } catch (error) {
