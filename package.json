@@ -16,6 +16,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "db:types": "supabase gen types typescript --local > packages/database/types/generated.ts",
     "db:fix-cancel": "node scripts/print-booking-cancel-sql.mjs",
+    "db:fix-verification-docs": "node scripts/print-verification-docs-sql.mjs",
     "test:notifications:db": "node scripts/validate-db.mjs",
     "test:notifications:providers": "node scripts/validate-env.mjs && node scripts/validate-resend.mjs",
     "test:notifications:pipeline": "node scripts/validate-pipeline.mjs",

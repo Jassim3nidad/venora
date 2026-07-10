@@ -129,14 +129,14 @@ CREATE POLICY "verification-docs.select.owner-or-admin"
     )
   );
 
--- Venue owners and suppliers can upload verification documents
+-- Authenticated users can upload verification documents to their own folder
+-- (including customers applying via Become a Partner before role approval)
 CREATE POLICY "verification-docs.insert.owner"
   ON storage.objects FOR INSERT
   WITH CHECK (
     bucket_id = 'verification-docs'
     AND auth.role() = 'authenticated'
     AND (storage.foldername(name))[1] = auth.uid()::text
-    AND (public.has_role('venue_owner') OR public.has_role('supplier'))
   );
 
 -- Users can replace only their own docs
