@@ -60,6 +60,9 @@ function mergeVenueDetail(dbVenue: any, fallback?: ResearchVenue | null) {
   const fallbackRecord = fallback ? toVenueDetailRecord(fallback) : null;
 
   if (!dbVenue) return fallbackRecord;
+  const activePackages = (dbVenue.venue_packages ?? []).filter(
+    (pkg: any) => pkg.is_active !== false,
+  );
 
   return {
     ...(fallbackRecord ?? {}),
@@ -70,14 +73,8 @@ function mergeVenueDetail(dbVenue: any, fallback?: ResearchVenue | null) {
       dbVenue.venue_images?.length > 0
         ? dbVenue.venue_images
         : (fallbackRecord?.venue_images ?? []),
-    venue_packages:
-      dbVenue.venue_packages?.length > 0
-        ? dbVenue.venue_packages
-        : (fallbackRecord?.venue_packages ?? []),
-    venue_amenities:
-      dbVenue.venue_amenities?.length > 0
-        ? dbVenue.venue_amenities
-        : (fallbackRecord?.venue_amenities ?? []),
+    venue_packages: activePackages,
+    venue_amenities: dbVenue.venue_amenities ?? [],
     organizations:
       dbVenue.organizations ?? fallbackRecord?.organizations ?? null,
   };

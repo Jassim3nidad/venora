@@ -46,23 +46,6 @@ const stats = [
   { value: "100%", label: "Source Checked" },
 ];
 
-const footerLinkGroups = [
-  [
-    { label: "About Us", href: "/about" },
-    { label: "Press", href: "/about" },
-    { label: "Careers", href: "/about" },
-  ],
-  [
-    { label: "Privacy Policy", href: "/privacy" },
-    { label: "Terms of Service", href: "/terms" },
-    { label: "Help Center", href: "/about" },
-  ],
-  [
-    { label: "List Your Venue", href: "/register" },
-    { label: "Partner Program", href: "/register" },
-  ],
-];
-
 export default async function MarketingHomePage() {
   const supabase = await createClient();
   const {
@@ -296,34 +279,6 @@ export default async function MarketingHomePage() {
           </div>
         </section>
       </main>
-
-      {/* Footer */}
-      <footer className="w-full border-t border-[#E5E7EB] bg-white py-12">
-        <div className="mx-auto grid w-full max-w-7xl grid-cols-2 gap-8 px-4 sm:px-6 md:grid-cols-4 lg:px-8">
-          <div className="col-span-2 md:col-span-1">
-            <div className="mb-4 text-xl font-black tracking-[-0.04em] text-[#2563EB]">
-              Venora
-            </div>
-            <p className="text-sm font-medium leading-6 text-[#6B7280]">
-              (c) 2024 Venora Marketplace. AI-powered venue curation.
-            </p>
-          </div>
-
-          {footerLinkGroups.map((group, index) => (
-            <div key={index} className="flex flex-col space-y-2">
-              {group.map(({ label, href }) => (
-                <Link
-                  key={label}
-                  className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#6B7280] transition hover:text-[#2563EB]"
-                  href={href}
-                >
-                  {label}
-                </Link>
-              ))}
-            </div>
-          ))}
-        </div>
-      </footer>
     </div>
   );
 }

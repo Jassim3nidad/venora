@@ -40,6 +40,12 @@ function isUnverifiedEmailError(message: string) {
   );
 }
 
+function isBannedUserError(message: string) {
+  const normalized = message.toLowerCase();
+
+  return normalized.includes("banned");
+}
+
 function isAlreadyRegisteredError(message: string) {
   const normalized = message.toLowerCase();
 
@@ -118,11 +124,12 @@ export async function loginAction(rawInput: unknown): Promise<ActionResult> {
     await authenticateUserUseCase(parsed.data);
   } catch (error) {
     const message = toErrorMessage(error);
+    const isUnverifiedEmail = isUnverifiedEmailError(message);
 
     return {
       success: false,
-      error: message,
-      data: isUnverifiedEmailError(message)
+      error: isBannedUserError(message) ? "Invalid login credentials" : message,
+      data: isUnverifiedEmail
         ? { reason: "email_unverified", email: parsed.data.email }
         : undefined,
     };

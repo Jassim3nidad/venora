@@ -38,6 +38,7 @@ import { isOptimizableImageSrc } from "@/src/lib/image-host";
 import CostEstimatorPanel from "@/features/ai/ui/CostEstimatorPanel";
 import RecommendedVenues from "@/features/ai/ui/RecommendedVenues";
 import PackageComparePicker from "./PackageComparePicker";
+import VenuePricingSection from "./VenuePricingSection";
 
 interface VenueDetailsProps {
   venue: any;
@@ -143,6 +144,13 @@ export default function VenueDetails({
     venue.venue_amenities
       ?.map((va: any) => va.amenities?.name)
       .filter(Boolean) ?? [];
+  const activePackages = (venue.venue_packages ?? []).filter(
+    (pkg: any) => pkg.is_active !== false,
+  );
+  const rulesList = String(venue.venue_rules ?? "")
+    .split(/\r?\n/)
+    .map((rule) => rule.trim())
+    .filter(Boolean);
 
   return (
     <main className="mx-auto max-w-7xl space-y-8 px-4 pb-28 pt-6 font-sans sm:px-6 sm:pt-8 lg:px-8 lg:pb-8">
@@ -239,11 +247,11 @@ export default function VenueDetails({
           <Separator />
 
           {/* Amenities grid */}
-          {amenitiesList.length > 0 && (
-            <section className="space-y-4">
-              <h3 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
-                Amenities & Features
-              </h3>
+          <section className="space-y-4">
+            <h3 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
+              Amenities & Features
+            </h3>
+            {amenitiesList.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {amenitiesList.map((amenity: string) => (
                   <div
@@ -255,13 +263,22 @@ export default function VenueDetails({
                   </div>
                 ))}
               </div>
-            </section>
-          )}
+            ) : (
+              <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--bg-subtle)] p-4 text-sm font-medium text-[var(--text-secondary)]">
+                Amenities have not been added for this venue yet.
+              </div>
+            )}
+          </section>
 
           <Separator />
 
-          {/* Package Comparison */}
-          <PackageComparePicker packages={venue.venue_packages ?? []} />
+          {/* Packages */}
+          <VenuePricingSection
+            basePrice={venue.base_price}
+            priceUnit={venue.price_unit}
+            packages={activePackages}
+          />
+          <PackageComparePicker packages={activePackages} />
 
           <Separator />
 
@@ -294,6 +311,18 @@ export default function VenueDetails({
                     </p>
                   </div>
                 )}
+                {venue.overnight_accommodation && (
+                  <div className="mt-3 flex gap-3 border-t border-[#E5E7EB] pt-3">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                    <p>Overnight accommodation is available.</p>
+                  </div>
+                )}
+                {venue.pet_friendly && (
+                  <div className="mt-3 flex gap-3 border-t border-[#E5E7EB] pt-3">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+                    <p>Pet-friendly arrangements are supported.</p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -302,10 +331,25 @@ export default function VenueDetails({
                 <Clock className="h-4.5 w-4.5 text-[var(--color-brand-600)]" />
                 Venue Rules
               </span>
-              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                {venue.venue_rules ||
-                  "Standard booking policies apply. Respect operating hours, maximum guest capacity constraints, and municipal noise ordinances."}
-              </p>
+              {rulesList.length > 0 ? (
+                <ul className="space-y-2 rounded-2xl border border-[var(--border-default)] bg-[var(--bg-subtle)] p-4">
+                  {rulesList.map((rule) => (
+                    <li
+                      key={rule}
+                      className="flex gap-2 text-xs leading-relaxed text-[var(--text-secondary)]"
+                    >
+                      <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#2563EB]" />
+                      <span>{rule}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                  Standard booking policies apply. Respect operating hours,
+                  maximum guest capacity constraints, and municipal noise
+                  ordinances.
+                </p>
+              )}
             </div>
 
             <div className="space-y-3 md:col-span-2">
@@ -448,7 +492,7 @@ export default function VenueDetails({
             priceUnit={venue.price_unit}
             capacityMin={venue.capacity_min ?? 1}
             capacityMax={venue.capacity_max}
-            packages={venue.venue_packages ?? []}
+            packages={activePackages}
           />
           <CostEstimatorPanel
             venueId={venue.id}
