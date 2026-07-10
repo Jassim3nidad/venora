@@ -374,7 +374,10 @@ export async function approveBookingAction(rawInput: unknown) {
       // invoice-issuance trigger, which only fires when this RPC sets a
       // positive deposit_amount) — this previously caused bookings to
       // reach "approved" with a null total/deposit and no invoice.
-      await assertCanManageBooking(supabase, input.bookingId);
+      const { booking } = await assertCanManageBooking(
+        supabase,
+        input.bookingId,
+      );
 
       const { data, error } = await supabase.rpc("approve_booking_quote", {
         p_booking_id: input.bookingId,
@@ -406,7 +409,10 @@ export async function declineBookingAction(rawInput: unknown) {
       // Same reasoning as approveBookingAction: decline_booking_request()
       // is the sole writer of decline_reason — a raw update here
       // previously validated a reason and then silently discarded it.
-      await assertCanManageBooking(supabase, input.bookingId);
+      const { booking } = await assertCanManageBooking(
+        supabase,
+        input.bookingId,
+      );
 
       const { data, error } = await supabase.rpc("decline_booking_request", {
         p_booking_id: input.bookingId,
