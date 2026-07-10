@@ -12,6 +12,19 @@ import { createClient } from "@/lib/supabase/server";
 import { BookingStatusBadge } from "@/src/features/booking/ui/booking-status-badge";
 import { StartPaymentForm } from "@/src/features/booking/ui/booking-action-controls";
 import type { BookingStatusValue } from "@/src/features/booking/domain/value-objects/booking-status.vo";
+import "@/src/features/payments/infrastructure/register-gateways";
+import { listAvailableProviders } from "@/src/features/payments/application/gateway-registry";
+import {
+  InvoiceCard,
+  ReceiptCard,
+  RefundList,
+} from "@/src/features/payments/ui/payment-documents";
+import { RefundRequestForm } from "@/src/features/payments/ui/refund-request-form";
+import type {
+  InvoiceRow,
+  ReceiptRow,
+  RefundRow,
+} from "@/src/features/payments/types/payment.types";
 
 export const metadata: Metadata = {
   title: "Payment | Venora",
@@ -81,12 +94,41 @@ export default async function BookingPaymentPage({ params }: Props) {
 
   if (!booking) notFound();
 
+  const [{ data: invoices }, { data: receipts }, { data: refunds }] = await Promise.all([
+    supabase
+      .from("invoices")
+      .select("*")
+      .eq("booking_id", id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("receipts")
+      .select("*")
+      .eq("booking_id", id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("refunds")
+      .select("*")
+      .eq("booking_id", id)
+      .order("created_at", { ascending: false }),
+  ]);
+
   const status = booking.status as BookingStatusValue;
   const payable = status === "approved" || status === "payment_pending";
   const paid = ["confirmed", "completed", "reviewed"].includes(status);
   const pendingTransaction = (booking.transactions ?? []).find(
     (transaction: { status: string }) => transaction.status === "pending",
   );
+
+  const paidTransaction = (booking.transactions ?? []).find(
+    (transaction: { status: string }) =>
+      ["paid", "partially_refunded"].includes(transaction.status),
+  );
+  const hasActiveRefund = (refunds ?? []).some((refund: RefundRow) =>
+    ["pending", "processing", "succeeded"].includes(refund.status),
+  );
+  const refundable = status === "cancelled" && Boolean(paidTransaction) && !hasActiveRefund;
+
+  const availableProviders = listAvailableProviders();
 
   return (
     <div className="bg-[#F8FAFC] text-[#111827]">
@@ -136,10 +178,12 @@ export default async function BookingPaymentPage({ params }: Props) {
                   : pendingTransaction
                     ? "A payment attempt is pending provider confirmation."
                     : payable
-                      ? "Choose a provider to start the deposit payment."
-                      : "This booking is not currently payable."}
+                      ? "You'll be redirected to a secure checkout page to complete the deposit."
+                      : refundable
+                        ? "This booking was cancelled after payment. You can request a refund of your deposit."
+                        : "This booking is not currently payable."}
               </p>
-              {booking.payment_due_at ? (
+              {booking.payment_due_at && payable ? (
                 <p className="mt-2 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
                   Due by {formatDate(booking.payment_due_at)}
                 </p>
@@ -148,7 +192,7 @@ export default async function BookingPaymentPage({ params }: Props) {
 
             {payable ? (
               <div className="mt-5">
-                <StartPaymentForm bookingId={id} />
+                <StartPaymentForm bookingId={id} providers={availableProviders} />
               </div>
             ) : paid ? (
               <div className="mt-5">
@@ -156,11 +200,43 @@ export default async function BookingPaymentPage({ params }: Props) {
                   View Confirmation
                 </CustomerLinkButton>
               </div>
+            ) : refundable ? (
+              <div className="mt-5">
+                <RefundRequestForm bookingId={id} />
+              </div>
+            ) : null}
+
+            {(refunds ?? []).length > 0 ? (
+              <div className="mt-5">
+                <h2 className="text-sm font-extrabold uppercase tracking-[0.12em] text-slate-400">
+                  Refunds
+                </h2>
+                <div className="mt-3">
+                  <RefundList refunds={(refunds ?? []) as RefundRow[]} />
+                </div>
+              </div>
             ) : null}
           </CustomerCard>
 
           <CustomerCard className="p-5 sm:p-6 lg:sticky lg:top-24">
             <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">
+              Billing documents
+            </h2>
+            <div className="mt-4 grid gap-3">
+              {(invoices ?? []).map((invoice: InvoiceRow) => (
+                <InvoiceCard key={invoice.id} invoice={invoice} />
+              ))}
+              {(receipts ?? []).map((receipt: ReceiptRow) => (
+                <ReceiptCard key={receipt.id} receipt={receipt} />
+              ))}
+              {(invoices ?? []).length === 0 && (receipts ?? []).length === 0 ? (
+                <p className="rounded-2xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-semibold text-slate-500">
+                  Your invoice will appear here once the venue approves your booking.
+                </p>
+              ) : null}
+            </div>
+
+            <h2 className="mt-6 text-xl font-black tracking-[-0.03em] text-slate-950">
               Payment records
             </h2>
             <div className="mt-4 grid gap-3">
@@ -170,7 +246,7 @@ export default async function BookingPaymentPage({ params }: Props) {
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-sm font-black text-slate-950">{formatCurrency(transaction.amount)}</p>
                       <span className="rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1 text-xs font-extrabold uppercase tracking-[0.08em] text-[#2563EB]">
-                        {transaction.status}
+                        {String(transaction.status).replace(/_/g, " ")}
                       </span>
                     </div>
                     <p className="mt-2 text-xs font-semibold text-slate-500">

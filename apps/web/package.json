@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "clean": "rm -rf .next"
   },
   "dependencies": {
@@ -52,10 +54,12 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@venora/config": "workspace:*",
+    "@vitest/ui": "^4.1.10",
     "autoprefixer": "^10.4.20",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
     "tailwindcss": "^4.0.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^4.1.10"
   }
 }

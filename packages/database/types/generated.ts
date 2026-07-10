@@ -1,11 +1,20 @@
 /**
- * AUTO-GENERATED TYPES — DO NOT EDIT MANUALLY.
+ * DATABASE TYPES.
  *
- * Regenerate from local Supabase instance:
+ * Regenerate from a live Supabase instance when possible:
  *   pnpm db:types
  *   (supabase gen types typescript --local > packages/database/types/generated.ts)
  *
- * Reflects: supabase/migrations/001_extensions.sql → 012_rls.sql (v2 schema)
+ * This file predates that workflow being consistently run and has been
+ * hand-maintained/extended since — most recently to add the payments
+ * platform tables, enums, and RPCs from migrations 037-041 (refunds,
+ * invoices, receipts, payment_webhook_events, RefundStatus,
+ * InvoiceStatus, and the confirm_booking_payment/attach_payment_session/
+ * etc. function signatures) because no local Postgres instance was
+ * available to run the official generator in this environment.
+ * Re-run `pnpm db:types` against a live/local database at the next
+ * opportunity to confirm these hand-added entries exactly match the
+ * live schema, then remove this note.
  */
 
 export type Json =
@@ -32,6 +41,8 @@ export type AccreditationStatus = "pending" | "accredited" | "rejected" | "suspe
 export type ReviewStatus        = "published" | "flagged" | "removed";
 export type PaymentProvider     = "paymongo" | "maya" | "stripe";
 export type TransactionStatus   = "pending" | "paid" | "failed" | "refunded" | "partially_refunded";
+export type RefundStatus        = "pending" | "processing" | "succeeded" | "failed" | "cancelled";
+export type InvoiceStatus       = "issued" | "paid" | "void" | "refunded";
 export type VerificationType    = "venue_owner" | "supplier" | "venue";
 export type VerificationStatus  = "pending" | "approved" | "rejected";
 export type NotificationKind    = "booking_update" | "payment_update" | "review_request" | "admin_alert" | "supplier_inquiry" | "system";
@@ -645,6 +656,122 @@ export interface Database {
         };
       };
 
+      refunds: {
+        Row: {
+          id:                 string;
+          booking_id:         string;
+          transaction_id:     string;
+          amount:             number;
+          currency:           string;
+          status:             RefundStatus;
+          reason:             string | null;
+          requested_by:       string | null;
+          payment_provider:   PaymentProvider;
+          provider_reference: string | null;
+          failure_reason:     string | null;
+          processed_at:       string | null;
+          metadata:           Json;
+          created_at:         string;
+          updated_at:         string;
+        };
+        Insert: {
+          id?: string;
+          booking_id: string;
+          transaction_id: string;
+          amount: number;
+          currency?: string;
+          status?: RefundStatus;
+          reason?: string | null;
+          requested_by?: string | null;
+          payment_provider: PaymentProvider;
+          provider_reference?: string | null;
+          failure_reason?: string | null;
+          processed_at?: string | null;
+          metadata?: Json;
+        };
+        Update: {
+          status?: RefundStatus;
+          provider_reference?: string | null;
+          failure_reason?: string | null;
+          processed_at?: string | null;
+          metadata?: Json;
+        };
+      };
+
+      invoices: {
+        Row: {
+          id:              string;
+          invoice_number:  string;
+          booking_id:      string;
+          customer_id:     string;
+          organization_id: string | null;
+          status:          InvoiceStatus;
+          currency:        string;
+          line_items:      Json;
+          total_amount:    number;
+          amount_due:      number;
+          amount_paid:     number;
+          issued_at:       string;
+          due_at:          string | null;
+          paid_at:         string | null;
+          voided_at:       string | null;
+          metadata:        Json;
+          created_at:      string;
+          updated_at:      string;
+        };
+        Insert: Omit<
+          Database["public"]["Tables"]["invoices"]["Row"],
+          "id" | "invoice_number" | "issued_at" | "created_at" | "updated_at"
+        > & { id?: string; invoice_number?: string };
+        Update: {
+          status?: InvoiceStatus;
+          amount_due?: number;
+          amount_paid?: number;
+          paid_at?: string | null;
+          voided_at?: string | null;
+          metadata?: Json;
+        };
+      };
+
+      receipts: {
+        Row: {
+          id:                 string;
+          receipt_number:     string;
+          invoice_id:         string | null;
+          transaction_id:     string;
+          booking_id:         string;
+          customer_id:        string;
+          amount:             number;
+          currency:           string;
+          payment_provider:   PaymentProvider;
+          provider_reference: string | null;
+          issued_at:          string;
+          metadata:           Json;
+          created_at:         string;
+        };
+        Insert: Omit<
+          Database["public"]["Tables"]["receipts"]["Row"],
+          "id" | "receipt_number" | "issued_at" | "created_at"
+        > & { id?: string; receipt_number?: string };
+        Update: never;
+      };
+
+      payment_webhook_events: {
+        Row: {
+          id:           string;
+          provider:     PaymentProvider;
+          event_id:     string;
+          event_type:   string;
+          payload:      Json;
+          status:       "processing" | "processed" | "failed" | "skipped";
+          error:        string | null;
+          received_at:  string;
+          processed_at: string | null;
+        };
+        Insert: Omit<Database["public"]["Tables"]["payment_webhook_events"]["Row"], "id" | "received_at"> & { id?: string };
+        Update: { status?: "processing" | "processed" | "failed" | "skipped"; error?: string | null; processed_at?: string | null };
+      };
+
       payouts: {
         Row: {
           id:              string;
@@ -869,6 +996,92 @@ export interface Database {
       is_org_member_for_venue: { Args: { p_venue_id: string }; Returns: boolean };
       is_booking_customer: { Args: { p_booking_id: string }; Returns: boolean };
       owns_booking_venue:  { Args: { p_booking_id: string }; Returns: boolean };
+
+      // ── Payments (migrations 021, 037-041) ────────────────
+      start_booking_payment: {
+        Args: {
+          p_booking_id: string;
+          p_payment_provider: PaymentProvider;
+          p_checkout_url?: string | null;
+          p_provider_reference?: string | null;
+        };
+        Returns: Database["public"]["Tables"]["transactions"]["Row"];
+      };
+      attach_payment_session: {
+        Args: {
+          p_transaction_id: string;
+          p_provider_reference: string;
+          p_checkout_url: string;
+          p_metadata?: Json;
+          p_force?: boolean;
+        };
+        Returns: Database["public"]["Tables"]["transactions"]["Row"];
+      };
+      confirm_booking_payment: {
+        Args: {
+          p_payment_provider: PaymentProvider;
+          p_checkout_reference: string;
+          p_payment_reference: string;
+          p_amount_minor: number;
+          p_currency: string;
+        };
+        Returns: Database["public"]["Tables"]["bookings"]["Row"];
+      };
+      fail_booking_payment: {
+        Args: {
+          p_booking_id: string;
+          p_payment_provider: PaymentProvider;
+          p_provider_reference: string;
+          p_failure_reason?: string | null;
+        };
+        Returns: Database["public"]["Tables"]["bookings"]["Row"];
+      };
+      request_booking_refund: {
+        Args: { p_booking_id: string; p_reason?: string | null };
+        Returns: Database["public"]["Tables"]["refunds"]["Row"];
+      };
+      mark_refund_processing: {
+        Args: { p_refund_id: string; p_provider_reference: string };
+        Returns: Database["public"]["Tables"]["refunds"]["Row"];
+      };
+      complete_booking_refund: {
+        Args: {
+          p_payment_provider: PaymentProvider;
+          p_provider_reference: string;
+          p_amount?: number | null;
+        };
+        Returns: Database["public"]["Tables"]["refunds"]["Row"];
+      };
+      fail_booking_refund: {
+        Args: {
+          p_payment_provider: PaymentProvider;
+          p_provider_reference: string;
+          p_failure_reason?: string | null;
+        };
+        Returns: Database["public"]["Tables"]["refunds"]["Row"];
+      };
+      claim_payment_webhook_event: {
+        Args: {
+          p_provider: PaymentProvider;
+          p_event_id: string;
+          p_event_type: string;
+          p_payload: Json;
+        };
+        Returns: boolean;
+      };
+      finish_payment_webhook_event: {
+        Args: {
+          p_provider: PaymentProvider;
+          p_event_id: string;
+          p_status: string;
+          p_error?: string | null;
+        };
+        Returns: void;
+      };
+      calculate_commission: {
+        Args: { p_venue_id: string; p_amount: number };
+        Returns: number;
+      };
       match_venues: {
         Args: {
           query_embedding:  number[];
@@ -928,6 +1141,8 @@ export interface Database {
       review_status:         ReviewStatus;
       payment_provider:      PaymentProvider;
       transaction_status:    TransactionStatus;
+      refund_status:         RefundStatus;
+      invoice_status:        InvoiceStatus;
       verification_type:     VerificationType;
       verification_status:   VerificationStatus;
       notification_kind:     NotificationKind;

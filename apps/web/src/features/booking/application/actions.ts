@@ -22,6 +22,9 @@ import {
   startBookingPaymentSchema,
 } from "../schemas/booking.schema";
 import { formatCancellationReason } from "../constants/cancellation-reasons";
+import "@/src/features/payments/infrastructure/register-gateways";
+import { startCheckout } from "@/src/features/payments/application/use-cases/start-checkout.usecase";
+import { createServiceClient } from "@/src/lib/supabase/service";
 
 function bookingErrorFromMessage(message: string) {
   const normalized = message.toLowerCase();
@@ -430,31 +433,25 @@ export async function startBookingPaymentAction(rawInput: unknown) {
         process.env.NEXT_PUBLIC_APP_URL ??
         process.env.VERCEL_URL?.replace(/^/, "https://") ??
         "http://localhost:3000";
-      const checkoutUrl = `${appUrl}/bookings/${input.bookingId}/confirmation`;
       const supabase = (await createClient()) as any;
 
-      const { data, error } = await supabase.rpc("start_booking_payment", {
-        p_booking_id: input.bookingId,
-        p_payment_provider: input.provider,
-        p_checkout_url: checkoutUrl,
-        p_provider_reference: null,
-      });
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      throwIfSupabaseError(error);
+      const result = await startCheckout(supabase, createServiceClient(), {
+        bookingId: input.bookingId,
+        provider: input.provider,
+        appUrl,
+        customerEmail: user?.email ?? null,
+      });
 
       revalidatePath("/bookings");
       revalidatePath(`/bookings/${input.bookingId}`);
       revalidatePath(`/bookings/${input.bookingId}/payment`);
       revalidatePath(`/bookings/${input.bookingId}/confirmation`);
 
-      return {
-        bookingId: input.bookingId,
-        transactionId: data.id as string,
-        amount: Number(data.amount ?? 0),
-        provider: data.payment_provider as string,
-        checkoutUrl: (data.checkout_url as string | null) ?? checkoutUrl,
-        status: data.status as string,
-      };
+      return result;
     },
     rawInput,
   );

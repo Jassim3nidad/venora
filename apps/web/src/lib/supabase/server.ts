@@ -2,6 +2,22 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "@venora/database";
 
+/**
+ * Guards against a secret/service-role key ever being wired into this
+ * RLS-scoped variable — see src/lib/supabase/client.ts for why.
+ */
+function assertPublicKey(key: string): string {
+  if (key.startsWith("sb_secret_")) {
+    throw new Error(
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY holds a secret key (sb_secret_...). " +
+        "This client is meant to run with RLS enforced under the caller's " +
+        "session, not with a key that bypasses it. Fix the value in your " +
+        "environment configuration.",
+    );
+  }
+  return key;
+}
+
 type CookieToSet = {
   name: string;
   value: string;
@@ -17,7 +33,7 @@ export async function createClient() {
 
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    assertPublicKey(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!),
     {
       cookies: {
         getAll() {
