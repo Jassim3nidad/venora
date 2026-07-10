@@ -51,7 +51,6 @@ async function getExportContext(
     ]);
 
   const roles = (roleRows ?? []).map((row: { role: string }) => row.role);
-  const isAdmin = roles.includes("admin");
   const orgIds = Array.from(
     new Set<string>([
       ...(memberRows ?? []).map(
@@ -60,14 +59,6 @@ async function getExportContext(
       ...(ownedRows ?? []).map((row: { id: string }) => row.id),
     ]),
   );
-
-  if (isAdmin) {
-    const { data: venues } = await supabase.from("venues").select("id");
-    return {
-      roles,
-      venueIds: (venues ?? []).map((venue: { id: string }) => venue.id),
-    };
-  }
 
   if (orgIds.length === 0) return { roles, venueIds: [] };
 

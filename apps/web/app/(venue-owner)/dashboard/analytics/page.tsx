@@ -55,17 +55,18 @@ type AnalyticsVenue = {
 
 export default async function AnalyticsPage() {
   const context = await getOwnerDashboardContext();
-  const { supabase, orgIds, isAdmin } = context;
+  const { supabase, orgIds } = context;
+  const orgScopedContext = { ...context, isAdmin: false };
 
-  let venuesQuery = supabase
+  const venuesQuery = supabase
     .from("venues")
-    .select("id, status, avg_rating, review_count");
-  if (!isAdmin) venuesQuery = venuesQuery.in("organization_id", orgIds);
+    .select("id, status, avg_rating, review_count")
+    .in("organization_id", orgIds);
 
   const { data: venues } =
-    isAdmin || orgIds.length > 0 ? await venuesQuery : { data: [] };
+    orgIds.length > 0 ? await venuesQuery : { data: [] };
 
-  const venueIds = await getOwnerVenueIds(context);
+  const venueIds = await getOwnerVenueIds(orgScopedContext);
   const { data: bookings } =
     venueIds.length > 0
       ? await supabase
