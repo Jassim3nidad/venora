@@ -29,12 +29,21 @@ type MobileLink = {
   icon?: LucideIcon;
 };
 
-const navLinks: MobileLink[] = [
-  { label: "Home", href: "/" },
-  { label: "Venues", href: "/venues" },
-  { label: "About", href: "/about" },
-  { label: "Host a Venue", href: "/register" },
-];
+const HOST_VENUE_PATH = "/account/become-partner";
+
+function getMarketingNavLinks(isAuthenticated: boolean): MobileLink[] {
+  return [
+    { label: "Home", href: "/" },
+    { label: "Venues", href: "/venues" },
+    { label: "About", href: "/about" },
+    {
+      label: "Host a Venue",
+      href: isAuthenticated
+        ? HOST_VENUE_PATH
+        : `/login?redirectTo=${encodeURIComponent(HOST_VENUE_PATH)}`,
+    },
+  ];
+}
 
 const customerMobileLinks: MobileLink[] = [
   { label: "Browse", href: "/venues", icon: Search },
@@ -44,7 +53,10 @@ const customerMobileLinks: MobileLink[] = [
   { label: "Notifications", href: "/notifications", icon: Bell },
 ];
 
-function isActive(pathname: string, href: string) {
+function isActive(pathname: string, href: string, label?: string) {
+  if (label === "Host a Venue") {
+    return pathname === HOST_VENUE_PATH || pathname.startsWith(`${HOST_VENUE_PATH}/`);
+  }
   if (href === "/") return pathname === "/";
   if (href === "/venues") {
     return pathname === "/venues" || pathname.startsWith("/venues/");
@@ -77,6 +89,7 @@ export default function MarketingNavbar({
   const email = user?.email ?? "";
 
   const closeMenu = () => setMenuOpen(false);
+  const navLinks = getMarketingNavLinks(Boolean(user));
   const mobileLinks = embedded && user ? customerMobileLinks : navLinks;
   const mobilePanelPosition = embedded
     ? "top-[8.75rem] max-h-[calc(100dvh-9.25rem)]"
@@ -104,7 +117,7 @@ export default function MarketingNavbar({
           aria-label="Main navigation"
         >
           {navLinks.map(({ label, href }) => {
-            const active = isActive(pathname, href);
+            const active = isActive(pathname, href, label);
 
             return (
               <Link
@@ -210,7 +223,7 @@ export default function MarketingNavbar({
 
             <nav className="grid gap-2">
               {mobileLinks.map(({ label, href, icon: Icon }) => {
-                const active = isActive(pathname, href);
+                const active = isActive(pathname, href, label);
 
                 return (
                   <Link
