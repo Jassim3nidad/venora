@@ -154,6 +154,7 @@ export default function VenuePhotoUpload({ venueId, organizationId }: VenuePhoto
         .from("venue_images")
         .select("*")
         .eq("venue_id", venueId)
+        .eq("media_type", "image")
         .order("display_order", { ascending: true });
 
       if (error) throw error;

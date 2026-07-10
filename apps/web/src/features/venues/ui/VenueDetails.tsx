@@ -30,6 +30,7 @@ import {
   ToastTitle,
 } from "@venora/ui";
 import VenueGallery from "./VenueGallery";
+import VenuePromotionalVideo from "./VenuePromotionalVideo";
 import BookingSidebar from "./BookingSidebar";
 import ReviewsSection from "./ReviewsSection";
 import VenueMap from "@/src/components/VenueMap";
@@ -39,6 +40,10 @@ import CostEstimatorPanel from "@/features/ai/ui/CostEstimatorPanel";
 import RecommendedVenues from "@/features/ai/ui/RecommendedVenues";
 import PackageComparePicker from "./PackageComparePicker";
 import VenuePricingSection from "./VenuePricingSection";
+import {
+  pickGalleryImages,
+  pickPromotionalVideo,
+} from "../utils/venue-media";
 
 interface VenueDetailsProps {
   venue: any;
@@ -153,6 +158,8 @@ export default function VenueDetails({
     .split(/\r?\n/)
     .map((rule) => rule.trim())
     .filter(Boolean);
+  const promotionalVideo = pickPromotionalVideo(venue.venue_images ?? []);
+  const galleryImages = pickGalleryImages(venue.venue_images ?? []);
 
   return (
     <main className="mx-auto max-w-7xl space-y-8 px-4 pb-28 pt-6 font-sans sm:px-6 sm:pt-8 lg:px-8 lg:pb-8">
@@ -221,7 +228,14 @@ export default function VenueDetails({
       </div>
 
       {/* Gallery Section */}
-      <VenueGallery media={venue.venue_images} venueName={venue.name} />
+      <VenueGallery media={galleryImages} venueName={venue.name} />
+
+      {promotionalVideo ? (
+        <VenuePromotionalVideo
+          video={promotionalVideo}
+          venueName={venue.name}
+        />
+      ) : null}
 
       {/* Main Details Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
@@ -564,8 +578,10 @@ export default function VenueDetails({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {nearbyVenues.map((item) => {
               const coverImg =
-                item.venue_images?.find((i: any) => i.is_featured) ??
-                item.venue_images?.[0];
+                item.venue_images?.find(
+                  (i: any) => i.is_featured && i.media_type !== "video",
+                ) ??
+                item.venue_images?.find((i: any) => i.media_type !== "video");
               const imgUrl = coverImg
                 ? String(coverImg.storage_path).startsWith("http")
                   ? coverImg.storage_path

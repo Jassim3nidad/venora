@@ -59,7 +59,9 @@ export function relationNames(rows: any[] | null | undefined, relationName: stri
 }
 
 export function firstVenueImage(venue: any) {
-  return [...(venue.venue_images ?? [])].sort((a: any, b: any) => {
+  return [...(venue.venue_images ?? [])]
+    .filter((item: any) => item.media_type !== "video")
+    .sort((a: any, b: any) => {
     if (a.is_featured && !b.is_featured) return -1;
     if (!a.is_featured && b.is_featured) return 1;
     return (a.display_order ?? 0) - (b.display_order ?? 0);
