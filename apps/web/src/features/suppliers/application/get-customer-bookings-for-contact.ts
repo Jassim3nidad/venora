@@ -39,8 +39,8 @@ function formatBookingLabel(
 }
 
 // Only approved bookings are valid for supplier inquiries.
-// pending, declined, cancelled, expired must not appear.
-const allowedStatuses = new Set(["approved", "confirmed", "completed"]);
+// pending bookings are fetched only to display the correct empty states.
+const allowedStatuses = new Set(["approved", "confirmed"]);
 
 export async function getCustomerBookingsForContact(
   userId: string,
@@ -62,7 +62,7 @@ export async function getCustomerBookingsForContact(
       `,
     )
     .eq("customer_id", userId)
-    .in("status", ["approved", "confirmed", "completed"])
+    .in("status", ["pending", "approved", "confirmed"])
     .order("event_date", { ascending: false });
 
   if (error) {
@@ -74,7 +74,7 @@ export async function getCustomerBookingsForContact(
   }
 
   return ((data ?? []) as any[])
-    .filter((row) => allowedStatuses.has(String(row.status)))
+    // We do NOT filter out pending here; we return it so the UI can check for pending bookings.
     .map((row) => {
       const venue = row.venues as VenueRecord | null;
       const venueName = venue?.name ?? "Venue booking";
