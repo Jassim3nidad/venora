@@ -17,7 +17,7 @@ export class SupabaseAuthRepository implements AuthRepository {
       url = `https://${process.env.VERCEL_URL}`;
     }
 
-    url = url ?? "http://localhost:3000";
+    url = url || "http://localhost:3000";
     
     // Ensure it starts with http/https and has no trailing slash
     url = url.startsWith("http") ? url : `https://${url}`;
