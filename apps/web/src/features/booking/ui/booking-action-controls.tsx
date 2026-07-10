@@ -133,8 +133,8 @@ export function OwnerBookingDecisionForm({
           });
         }}
       >
-        <div className="grid gap-3 sm:grid-cols-2">
-          <label className="grid gap-1.5 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">
+        <div className="flex flex-col gap-3">
+          <label className="flex flex-col gap-1.5 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">
             Total quote
             <input
               name="totalAmount"
@@ -145,7 +145,7 @@ export function OwnerBookingDecisionForm({
               className="h-11 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm font-bold text-slate-950 outline-none focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
             />
           </label>
-          <label className="grid gap-1.5 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">
+          <label className="flex flex-col gap-1.5 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">
             Deposit
             <input
               name="depositAmount"

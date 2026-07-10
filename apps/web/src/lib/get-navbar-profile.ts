@@ -8,14 +8,22 @@ export async function getNavbarProfile(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any,
   userId: string | undefined | null,
-): Promise<{ full_name: string | null; avatar_url: string | null } | null> {
+): Promise<{ full_name: string | null; avatar_url: string | null; isVenueOwner?: boolean } | null> {
   if (!userId) return null;
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name, avatar_url")
-    .eq("id", userId)
-    .maybeSingle();
+  const [{ data: profile }, { data: roles }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("full_name, avatar_url")
+      .eq("id", userId)
+      .maybeSingle(),
+    supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId),
+  ]);
 
-  return profile ?? null;
+  const isVenueOwner = roles?.some((r: any) => r.role === "venue_owner") ?? false;
+
+  return { ...(profile ?? {}), isVenueOwner } as any;
 }

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createServerAction } from "@/lib/server-action";
 import { requireAuth, requireRole } from "@/lib/rbac/guards";
+import { userOwnsVenue } from "@/lib/rbac/ownership";
 import { ROLES } from "@/lib/rbac/roles";
 import {
   AlreadyFlaggedError,
@@ -61,32 +62,6 @@ function revalidateVenuePage(slug: string | null) {
   if (slug) revalidatePath(`/venues/${slug}`);
 }
 
-/**
- * App-level ownership check mirroring the RLS `is_org_member_for_venue`
- * policy — used instead of getOwnerDashboardContext() (which redirects on
- * missing auth, appropriate for pages, not Server Actions).
- */
-async function userOwnsVenue(supabase: any, userId: string, venueId: string): Promise<boolean> {
-  const { data: roleRows } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-  const roles = (roleRows ?? []).map((row: { role: string }) => row.role);
-  if (roles.includes(ROLES.ADMIN)) return true;
-
-  const { data: members } = await supabase
-    .from("organization_members")
-    .select("organization_id")
-    .eq("user_id", userId);
-  const orgIds = (members ?? []).map((member: { organization_id: string }) => member.organization_id);
-  if (orgIds.length === 0) return false;
-
-  const { data: venue } = await supabase
-    .from("venues")
-    .select("id")
-    .eq("id", venueId)
-    .in("organization_id", orgIds)
-    .maybeSingle();
-
-  return !!venue;
-}
 
 export async function attachReviewPhotosAction(rawInput: unknown) {
   return createServerAction(attachReviewPhotosSchema, async (input) => {

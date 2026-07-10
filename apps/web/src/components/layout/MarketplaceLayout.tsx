@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import MarketingNavbar from "@/components/layout/MarketingNavbar";
+
 import { CustomerNavbar } from "@/components/layout/CustomerNavbar";
 import { isMarketplaceRoute } from "@/src/lib/is-marketplace-route";
 
@@ -28,18 +28,7 @@ export function MarketplaceLayout({
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-[#F8FAFC] text-[#111827]">
-      <header className="sticky top-0 z-50 shrink-0 bg-white">
-        <MarketingNavbar
-          embedded
-          user={user ?? null}
-          profile={profile ?? null}
-        />
-        <CustomerNavbar
-          variant="subnav"
-          user={user ?? null}
-          profile={profile ?? null}
-        />
-      </header>
+      <CustomerNavbar user={user ?? null} profile={profile ?? null} />
 
       <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">
         {children}

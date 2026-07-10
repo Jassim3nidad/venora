@@ -1,130 +1,180 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useEffect, useMemo, useState } from "react";
 import { CalendarGrid } from "./CalendarGrid";
 import { DateEditorModal } from "./DateEditorModal";
 import { format, addMonths, subMonths } from "date-fns";
 import { ChevronLeft, ChevronRight, CalendarDays, Loader2 } from "lucide-react";
 import { useCalendar } from "../hooks/use-calendar";
+import {
+  AVAILABILITY_BADGE_CLASSES,
+  AVAILABILITY_LABELS,
+} from "../utils/availability";
 
-export default function BookingCalendar() {
+type OwnerCalendarVenue = {
+  id: string;
+  name: string;
+  city: string | null;
+  province: string | null;
+};
+
+type BookingCalendarProps = {
+  venues: OwnerCalendarVenue[];
+};
+
+const LEGEND_STATUSES = [
+  "available",
+  "tentative",
+  "reserved",
+  "maintenance",
+  "blackout",
+] as const;
+
+export default function BookingCalendar({ venues }: BookingCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const [venueId, setVenueId] = useState<string | null>(null);
-  const [loadingVenues, setLoadingVenues] = useState(true);
-
-  const supabase = createClient();
+  const [venueId, setVenueId] = useState<string>(venues[0]?.id ?? "");
 
   useEffect(() => {
-    async function fetchUserVenue() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data, error } = await (supabase as any)
-        .from("venues")
-        .select("id")
-        .eq("organization_id", user.id) // Assuming simple mapping for now
-        .limit(1)
-        .single();
-      
-      if (!error && data) {
-        setVenueId((data as { id: string }).id);
-      } else {
-        // Fallback for demo if organization_id isn't directly user.id
-        const { data: altData } = await (supabase as any).from("venues").select("id").limit(1).single();
-        if (altData) setVenueId((altData as { id: string }).id);
-      }
-      setLoadingVenues(false);
+    if (venues.length > 0 && !venues.some((venue) => venue.id === venueId)) {
+      setVenueId(venues[0]?.id ?? "");
     }
-    fetchUserVenue();
-  }, [supabase]);
+  }, [venueId, venues]);
 
-  const { getAvailabilityForDay } = useCalendar(venueId || "", currentMonth);
+  const selectedVenue = useMemo(
+    () => venues.find((venue) => venue.id === venueId) ?? venues[0] ?? null,
+    [venueId, venues],
+  );
+
+  const { isLoading, getAvailabilityForDay, getBookingsForDay } = useCalendar(
+    venueId,
+    currentMonth,
+  );
 
   const handleDayClick = (day: Date) => {
     setSelectedDay(day);
     setIsEditorOpen(true);
   };
 
-  if (loadingVenues) {
+  if (venues.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] text-gray-500">
-        <Loader2 className="w-8 h-8 animate-spin mb-4" />
-        <p>Loading your calendar...</p>
-      </div>
-    );
-  }
-
-  if (!venueId) {
-    return (
-      <div className="p-8 text-center text-gray-500 bg-gray-50 rounded-xl border">
-        <CalendarDays className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-        <p>No venues found. Please create a venue first.</p>
+      <div className="rounded-[24px] border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-8 text-center text-[#64748b]">
+        <CalendarDays className="mx-auto mb-4 h-12 w-12 text-[#94a3b8]" />
+        <p className="font-display text-lg font-black text-[#0f172a]">
+          No venues yet
+        </p>
+        <p className="mt-2 text-sm font-medium">
+          Add a venue first before managing availability.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6 font-sans">
-      {/* Header Controls */}
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4 rounded-[24px] border border-[#e5e7eb] bg-white p-4 shadow-sm shadow-slate-200/60 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-3">
-          <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-2.5 rounded-xl shadow-lg shadow-blue-200">
-            <CalendarDays className="w-6 h-6 text-white" />
+          <div className="rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 p-2.5 shadow-lg shadow-blue-200">
+            <CalendarDays className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">
+            <h2 className="font-display text-2xl font-black tracking-tight text-[#0f172a]">
               {format(currentMonth, "MMMM yyyy")}
-            </h1>
-            <p className="text-sm text-gray-500 font-medium">Interactive Booking Calendar</p>
+            </h2>
+            <p className="text-sm font-medium text-[#64748b]">
+              {selectedVenue
+                ? `Managing ${selectedVenue.name}`
+                : "Choose a venue to manage availability."}
+            </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg p-1 shadow-sm">
-          <button
-            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-            className="p-2 rounded-md hover:bg-gray-100 transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4 text-gray-700" />
-          </button>
-          <button
-            onClick={() => setCurrentMonth(new Date())}
-            className="px-4 py-1.5 text-sm font-bold text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
-          >
-            Today
-          </button>
-          <button
-            onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-            className="p-2 rounded-md hover:bg-gray-100 transition-colors"
-          >
-            <ChevronRight className="w-4 h-4 text-gray-700" />
-          </button>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <label className="grid gap-1 text-xs font-black uppercase tracking-wide text-[#64748b]">
+            Venue
+            <select
+              value={venueId}
+              onChange={(event) => {
+                setVenueId(event.target.value);
+                setSelectedDay(null);
+                setIsEditorOpen(false);
+              }}
+              className="h-11 min-w-[260px] rounded-2xl border border-[#dbe3ef] bg-white px-4 text-sm font-bold normal-case tracking-normal text-[#0f172a] outline-none transition focus:border-[#2563eb] focus:ring-4 focus:ring-[#dbeafe]"
+            >
+              {venues.map((venue) => (
+                <option key={venue.id} value={venue.id}>
+                  {venue.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <div className="flex items-center gap-2 rounded-2xl border border-[#dbe3ef] bg-[#f8fbff] p-1 shadow-sm">
+            <button
+              type="button"
+              onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+              className="rounded-xl p-2 transition-colors hover:bg-white"
+              aria-label="Previous month"
+            >
+              <ChevronLeft className="h-4 w-4 text-[#334155]" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setCurrentMonth(new Date())}
+              className="rounded-xl px-4 py-2 text-sm font-black text-[#334155] transition-colors hover:bg-white"
+            >
+              Today
+            </button>
+            <button
+              type="button"
+              onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+              className="rounded-xl p-2 transition-colors hover:bg-white"
+              aria-label="Next month"
+            >
+              <ChevronRight className="h-4 w-4 text-[#334155]" />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Legend */}
-      <div className="flex items-center gap-4 flex-wrap bg-white p-3 border border-gray-100 rounded-xl shadow-sm text-xs font-semibold text-gray-600 uppercase tracking-wider">
-        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-white border border-gray-200" /> Available</div>
-        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-orange-100 border border-orange-200" /> Maintenance</div>
-        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded bg-gray-200 border border-gray-300" /> Blackout</div>
-        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500" /> Approved Booking</div>
-        <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-amber-500" /> Pending Booking</div>
-        <div className="ml-auto text-blue-600">Tip: Drag and drop bookings to move them</div>
+      <div className="flex flex-wrap items-center gap-2 rounded-[22px] border border-[#e5e7eb] bg-white p-3 text-xs font-black uppercase tracking-wide text-[#64748b] shadow-sm shadow-slate-200/60">
+        {LEGEND_STATUSES.map((status) => (
+          <span
+            key={status}
+            className={`inline-flex rounded-full px-3 py-1 ${AVAILABILITY_BADGE_CLASSES[status]}`}
+          >
+            {AVAILABILITY_LABELS[status]}
+          </span>
+        ))}
+        <span className="ml-auto normal-case tracking-normal text-[#2563eb]">
+          Click a future date to block, unblock, or mark maintenance.
+        </span>
       </div>
 
-      {/* Calendar Grid */}
-      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-4">
-        <CalendarGrid venueId={venueId} currentMonth={currentMonth} onDayClick={handleDayClick} />
+      <div className="relative rounded-[24px] border border-[#e5e7eb] bg-white p-4 shadow-sm shadow-slate-200/60">
+        {isLoading ? (
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-[24px] bg-white/70 text-[#64748b] backdrop-blur-sm">
+            <Loader2 className="mr-2 h-5 w-5 animate-spin text-[#2563eb]" />
+            Loading calendar data...
+          </div>
+        ) : null}
+        <CalendarGrid
+          venueId={venueId}
+          currentMonth={currentMonth}
+          onDayClick={handleDayClick}
+          disablePastDates
+        />
       </div>
 
-      {/* Admin Editor Modal */}
       <DateEditorModal
         venueId={venueId}
         isOpen={isEditorOpen}
         date={selectedDay}
-        availability={selectedDay ? getAvailabilityForDay(selectedDay) : undefined}
+        availability={
+          selectedDay ? getAvailabilityForDay(selectedDay) : undefined
+        }
+        bookings={selectedDay ? getBookingsForDay(selectedDay) : []}
         onClose={() => setIsEditorOpen(false)}
       />
     </div>

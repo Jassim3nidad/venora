@@ -147,8 +147,7 @@ export async function loginAction(rawInput: unknown): Promise<ActionResult> {
   const { data: roleRows } = await supabase
     .from("user_roles")
     .select("role")
-    .eq("user_id", user.id)
-    .limit(1);
+    .eq("user_id", user.id);
 
   const roles = ((roleRows ?? []) as { role: RoleName }[])
     .map((row) => row.role)

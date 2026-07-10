@@ -21,6 +21,7 @@ import { NotificationBell } from "@/features/notifications/ui/NotificationBell";
 interface MarketingNavbarProfile {
   full_name?: string | null;
   avatar_url?: string | null;
+  isVenueOwner?: boolean;
 }
 
 type MobileLink = {
@@ -29,12 +30,19 @@ type MobileLink = {
   icon?: LucideIcon;
 };
 
-const navLinks: MobileLink[] = [
-  { label: "Home", href: "/" },
-  { label: "Venues", href: "/venues" },
-  { label: "About", href: "/about" },
-  { label: "Host a Venue", href: "/register" },
-];
+function getNavLinks(user?: { email?: string | null } | null): MobileLink[] {
+  return [
+    { label: "Home", href: "/" },
+    { label: "Venues", href: "/venues" },
+    { label: "About", href: "/about" },
+    {
+      label: "Host a Venue",
+      href: user
+        ? "/account/become-partner"
+        : "/login?redirectTo=/account/become-partner",
+    },
+  ];
+}
 
 const customerMobileLinks: MobileLink[] = [
   { label: "Browse", href: "/venues", icon: Search },
@@ -77,7 +85,8 @@ export default function MarketingNavbar({
   const email = user?.email ?? "";
 
   const closeMenu = () => setMenuOpen(false);
-  const mobileLinks = embedded && user ? customerMobileLinks : navLinks;
+  const navLinksForUser = getNavLinks(user);
+  const mobileLinks = embedded && user ? customerMobileLinks : navLinksForUser;
   const mobilePanelPosition = embedded
     ? "top-[8.75rem] max-h-[calc(100dvh-9.25rem)]"
     : "top-24 max-h-[calc(100dvh-6.5rem)]";
@@ -103,7 +112,7 @@ export default function MarketingNavbar({
           className="hidden items-center justify-center gap-1 rounded-full border border-[#E5E7EB]/80 bg-white p-1 shadow-sm md:flex"
           aria-label="Main navigation"
         >
-          {navLinks.map(({ label, href }) => {
+          {navLinksForUser.map(({ label, href }) => {
             const active = isActive(pathname, href);
 
             return (
@@ -131,6 +140,7 @@ export default function MarketingNavbar({
                 displayName={displayName}
                 email={email}
                 avatarUrl={profile?.avatar_url}
+                showEnterVenueDashboard={profile?.isVenueOwner}
               />
             </>
           ) : (
@@ -234,6 +244,17 @@ export default function MarketingNavbar({
 
             {user ? (
               <div className="mt-3 grid gap-2">
+                {profile?.isVenueOwner ? (
+                  <Link
+                    href="/dashboard/venue-owner"
+                    role="menuitem"
+                    className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold text-[#1D4ED8] bg-[#EFF6FF] transition hover:bg-[#DBEAFE]"
+                    onClick={closeMenu}
+                  >
+                    <Store className="h-5 w-5" />
+                    Enter Venue Owner Dashboard
+                  </Link>
+                ) : null}
                 <Link
                   href="/account"
                   role="menuitem"

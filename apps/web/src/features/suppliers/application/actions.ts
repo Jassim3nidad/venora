@@ -270,6 +270,7 @@ export async function createSupplierContactRequestAction(rawInput: unknown) {
         .select(
           `
             id,
+            status,
             event_date,
             guest_count,
             venues(name, city, province)
@@ -277,12 +278,15 @@ export async function createSupplierContactRequestAction(rawInput: unknown) {
         )
         .eq("id", input.bookingId)
         .eq("customer_id", user.id)
+        .in("status", ["approved", "confirmed", "completed"])
         .maybeSingle();
 
       throwIfSupabaseError(bookingError);
 
       if (!booking) {
-        throw new ValidationError("Select one of your existing bookings.");
+        throw new ValidationError(
+          "You can only link an approved venue booking to a supplier inquiry. Pending, declined, or cancelled bookings are not accepted.",
+        );
       }
 
       const venue = booking.venues as

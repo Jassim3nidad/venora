@@ -12,6 +12,7 @@ import {
   getOwnerDashboardContext,
   getOwnerVenueIds,
 } from "../_lib/owner-dashboard-data";
+import { BookingFilter } from "@/src/features/booking/ui/BookingFilter";
 
 export const metadata: Metadata = { title: "Bookings - Dashboard" };
 export const dynamic = "force-dynamic";
@@ -75,35 +76,50 @@ function formatTime(start?: string | null, end?: string | null) {
   return start ?? end ?? "Time pending";
 }
 
-export default async function OwnerBookingsPage() {
+export default async function OwnerBookingsPage(
+  props: {
+    searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const context = await getOwnerDashboardContext();
   const { supabase } = context;
   const venueIds = await getOwnerVenueIds(context);
+  const filter = (searchParams?.filter as string) || "latest";
 
-  const { data: bookings } =
-    venueIds.length > 0
-      ? await supabase
-          .from("bookings")
-          .select(
-            `
-              id,
-              event_date,
-              event_start_time,
-              event_end_time,
-              status,
-              total_amount,
-              deposit_amount,
-              guest_count,
-              payment_due_at,
-              created_at,
-              venues(name, base_price),
-              venue_packages(name, price, price_unit),
-              profiles!customer_id(full_name, phone)
-            `,
-          )
-          .in("venue_id", venueIds)
-          .order("event_date", { ascending: false })
-      : { data: [] };
+  let query = supabase
+    .from("bookings")
+    .select(
+      `
+        id,
+        event_date,
+        event_start_time,
+        event_end_time,
+        status,
+        total_amount,
+        deposit_amount,
+        guest_count,
+        payment_due_at,
+        created_at,
+        venues(name, base_price),
+        venue_packages(name, price, price_unit),
+        profiles!customer_id(full_name, phone)
+      `,
+    )
+    .in("venue_id", venueIds);
+
+  if (filter === "approved") {
+    query = query.eq("status", "approved").order("created_at", { ascending: false });
+  } else if (filter === "declined") {
+    query = query.eq("status", "declined").order("created_at", { ascending: false });
+  } else if (filter === "oldest") {
+    query = query.order("created_at", { ascending: true });
+  } else {
+    // Default to latest
+    query = query.order("created_at", { ascending: false });
+  }
+
+  const { data: bookings } = venueIds.length > 0 ? await query : { data: [] };
 
   const rows: BookingDisplayRow[] = ((bookings ?? []) as BookingRow[]).map(
     (booking) => ({
@@ -181,7 +197,6 @@ export default async function OwnerBookingsPage() {
         <DashButton
           href={`/dashboard/bookings/${row.id}`}
           variant="secondary"
-          icon="visible"
         >
           View
         </DashButton>
@@ -194,9 +209,12 @@ export default async function OwnerBookingsPage() {
       title="Bookings"
       description="Manage reservation requests and confirmed events across your venues."
       action={
-        <DashButton href="/dashboard/calendar" variant="secondary" icon="event">
-          Calendar
-        </DashButton>
+        <div className="flex items-center gap-3">
+          <BookingFilter />
+          <DashButton href="/dashboard/calendar" variant="secondary" icon="event">
+            Calendar
+          </DashButton>
+        </div>
       }
     >
       <Panel>

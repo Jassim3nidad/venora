@@ -9,6 +9,7 @@ import {
 } from "@/src/components/customer/CustomerUI";
 import { createClient } from "@/lib/supabase/server";
 import { BookingWorkflowForm } from "@/src/features/booking/ui/booking-workflow-form";
+import { userOwnsVenue } from "@/src/lib/rbac/ownership";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -87,6 +88,8 @@ export default async function BookVenuePage({ params, searchParams }: Props) {
   const initialPackageId =
     query?.packageId && query.packageId !== "none" ? query.packageId : undefined;
 
+  const isOwnVenue = await userOwnsVenue(supabase, user.id, venue.id);
+
   return (
     <div className="bg-[#F8FAFC] text-[#111827]">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -99,7 +102,7 @@ export default async function BookVenuePage({ params, searchParams }: Props) {
         </Link>
 
         <CustomerPageHeader
-          eyebrow="Booking inquiry"
+          eyebrow="Booking request"
           icon={Sparkles}
           title={<>Book {venue.name}</>}
           description={
@@ -121,19 +124,52 @@ export default async function BookVenuePage({ params, searchParams }: Props) {
         />
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-          <BookingWorkflowForm
-            venueId={venue.id}
-            venueName={venue.name}
-            venueSlug={bookingIdentifier}
-            basePrice={venue.base_price}
-            priceUnit={venue.price_unit ?? "per_event"}
-            capacityMin={capacityMin}
-            capacityMax={capacityMax}
-            packages={activePackages}
-            initialGuests={initialGuests}
-            {...(query?.date ? { initialDate: query.date } : {})}
-            {...(initialPackageId ? { initialPackageId } : {})}
-          />
+          {isOwnVenue ? (
+            <div className="rounded-[32px] border border-[#BFDBFE] bg-[#EFF6FF] p-8 shadow-sm shadow-blue-200/50 flex flex-col items-center justify-center text-center gap-6 py-16">
+              <div>
+                <h3 className="text-2xl font-black tracking-[-0.03em] text-[#1D4ED8]">
+                  You cannot book your own venue.
+                </h3>
+                <p className="mt-3 text-base font-medium leading-relaxed text-[#3B82F6] max-w-md mx-auto">
+                  Use your Venue Owner Dashboard to manage availability, block dates, and view bookings for this venue.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4 mt-2">
+                <Link
+                  href="/dashboard/calendar"
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-6 text-sm font-bold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8]"
+                >
+                  Manage Calendar
+                </Link>
+                <Link
+                  href={`/dashboard/venues/${venue.id}/edit`}
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-[#93C5FD] bg-white px-6 text-sm font-bold text-[#1D4ED8] transition hover:bg-[#DBEAFE]"
+                >
+                  Edit Venue
+                </Link>
+                <Link
+                  href="/dashboard/venue-owner"
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl border border-[#93C5FD] bg-white px-6 text-sm font-bold text-[#1D4ED8] transition hover:bg-[#DBEAFE]"
+                >
+                  View Dashboard
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <BookingWorkflowForm
+              venueId={venue.id}
+              venueName={venue.name}
+              venueSlug={bookingIdentifier}
+              basePrice={venue.base_price}
+              priceUnit={venue.price_unit ?? "per_event"}
+              capacityMin={capacityMin}
+              capacityMax={capacityMax}
+              packages={activePackages}
+              initialGuests={initialGuests}
+              {...(query?.date ? { initialDate: query.date } : {})}
+              {...(initialPackageId ? { initialPackageId } : {})}
+            />
+          )}
 
           <CustomerCard className="lg:sticky lg:top-24">
             <div className="border-b border-[#E5E7EB] p-5 sm:p-6">

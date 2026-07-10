@@ -72,7 +72,7 @@ function EmptyPanel({ message }: { message: string }) {
   );
 }
 
-export function SupplierDetail({ supplier, currentUser }: SupplierDetailProps) {
+export function SupplierDetail({ supplier, currentUser, bookings = [], isFavorited = false }: SupplierDetailProps) {
   const heroImage = getSupplierHeroImage(supplier);
   const startingPrice = getSupplierStartingPrice(supplier);
   const startingPackage = supplier.packages.find(
@@ -146,7 +146,7 @@ export function SupplierDetail({ supplier, currentUser }: SupplierDetailProps) {
                   href="#contact-supplier"
                   className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-[#2563EB] px-5 text-sm font-extrabold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8] sm:w-auto"
                 >
-                  Contact Supplier
+                  Send Inquiry
                 </a>
                 <Link
                   href="/suppliers"
@@ -400,7 +400,9 @@ export function SupplierDetail({ supplier, currentUser }: SupplierDetailProps) {
           >
             <SupplierContactForm
               supplier={supplier}
+              supplierSlug={supplier.slug}
               userEmail={currentUser?.email ?? null}
+              bookings={bookings}
             />
 
             <section className="min-w-0 rounded-[28px] border border-[#E5E7EB] bg-white p-4 shadow-sm shadow-slate-200/70 sm:p-5">

@@ -25,7 +25,6 @@ import {
   DialogTitle,
 } from "@venora/ui";
 import { format, startOfMonth } from "date-fns";
-import InquiryDialog from "./InquiryDialog";
 import { checkAvailabilityAction } from "../application/actions";
 import { isPastDate, PAST_DATE_MESSAGE } from "@/src/lib/date-only";
 import { useCalendar } from "@/src/features/calendar/hooks/use-calendar";
@@ -402,8 +401,6 @@ export default function BookingSidebar({
         >
           Book This Venue
         </Button>
-
-        <InquiryDialog venueId={venueId} venueName={venueName} />
       </div>
 
       <div className="mt-4 flex items-center gap-2 justify-center text-xs text-[var(--text-muted)] font-medium">

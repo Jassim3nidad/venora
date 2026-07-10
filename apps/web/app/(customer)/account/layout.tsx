@@ -45,8 +45,7 @@ export default async function AccountLayout({
     "?";
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-950">
-      <MarketingNavbar user={user} profile={profile} />
+    <div className="flex flex-col">
 
       <main>
         <section className="relative border-b border-[#E5E7EB]/70 bg-[#F9FAFB]">

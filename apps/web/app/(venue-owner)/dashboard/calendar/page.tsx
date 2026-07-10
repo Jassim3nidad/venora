@@ -3,56 +3,47 @@ import {
   DashButton,
   DashboardSubPage,
   EmptyState,
-  Panel,
-  PanelHeader,
-  StatusBadge,
 } from "@/components/dashboard/enterprise";
-import {
-  formatDate,
-  formatPeso,
-  getOwnerDashboardContext,
-  getOwnerVenueIds,
-} from "../_lib/owner-dashboard-data";
+import BookingCalendar from "@/src/features/calendar/ui/BookingCalendar";
+import { getOwnerDashboardContext } from "../_lib/owner-dashboard-data";
 
 export const metadata: Metadata = {
   title: "Booking Calendar - Venora Dashboard",
 };
 
-type CalendarBooking = {
+type CalendarVenue = {
   id: string;
-  event_date: string;
-  status: string;
-  guest_count: number;
-  total_amount: number | null;
-  venues: { name: string } | null;
-  profiles: { full_name: string } | null;
+  name: string;
+  city: string | null;
+  province: string | null;
 };
 
 export default async function CalendarPage() {
-  const context = await getOwnerDashboardContext();
-  const { supabase } = context;
-  const venueIds = await getOwnerVenueIds(context);
-  const today = new Date().toISOString().slice(0, 10);
+  const { supabase, orgIds, isAdmin } = await getOwnerDashboardContext();
 
-  const { data: bookings } =
-    venueIds.length > 0
-      ? await supabase
-          .from("bookings")
-          .select(
-            "id, event_date, status, guest_count, total_amount, venues(name), profiles!customer_id(full_name)",
-          )
-          .in("venue_id", venueIds)
-          .gte("event_date", today)
-          .order("event_date", { ascending: true })
-          .limit(30)
-      : { data: [] };
+  let venuesQuery = supabase
+    .from("venues")
+    .select("id, name, city, province")
+    .order("name", { ascending: true });
 
-  const upcomingBookings = (bookings ?? []) as CalendarBooking[];
+  if (!isAdmin) venuesQuery = venuesQuery.in("organization_id", orgIds);
+
+  const { data: venues, error } =
+    isAdmin || orgIds.length > 0
+      ? await venuesQuery
+      : { data: [], error: null };
+
+  const venueRows = ((venues ?? []) as CalendarVenue[]).map((venue) => ({
+    id: venue.id,
+    name: venue.name,
+    city: venue.city,
+    province: venue.province,
+  }));
 
   return (
     <DashboardSubPage
-      title="Booking Calendar"
-      description="View upcoming reserved dates, tentative requests, and confirmed events."
+      title="Availability Calendar"
+      description="Control which dates customers can request. Pending and booked dates from Venora bookings are shown automatically."
       action={
         <DashButton
           href="/dashboard/bookings"
@@ -63,68 +54,25 @@ export default async function CalendarPage() {
         </DashButton>
       }
     >
-      {upcomingBookings.length > 0 ? (
-        <Panel>
-          <PanelHeader
-            title="Upcoming Schedule"
-            description="The next 30 dated bookings across your venues."
-          />
-          <div className="grid gap-3">
-            {upcomingBookings.map((booking) => (
-              <article
-                key={booking.id}
-                className="flex flex-col gap-4 rounded-[22px] border border-[#e5e7eb] bg-white p-4 shadow-sm shadow-slate-200/60 transition hover:border-[#bfdbfe] hover:bg-[#f8fbff] sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="flex gap-4">
-                  <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-2xl bg-[#eff6ff] text-[#1d4ed8] ring-1 ring-[#dbeafe]">
-                    <span className="text-xs font-bold uppercase">
-                      {new Date(booking.event_date).toLocaleDateString(
-                        "en-PH",
-                        {
-                          month: "short",
-                        },
-                      )}
-                    </span>
-                    <span className="font-display text-xl font-black">
-                      {new Date(booking.event_date).getDate()}
-                    </span>
-                  </div>
-                  <div>
-                    <h2 className="font-display text-base font-black text-[#0f172a]">
-                      {booking.venues?.name ?? "Venue booking"}
-                    </h2>
-                    <p className="mt-1 text-sm text-[#475569]">
-                      {booking.profiles?.full_name ?? "Customer"} -{" "}
-                      {booking.guest_count} guests -{" "}
-                      {formatPeso(booking.total_amount)}
-                    </p>
-                    <p className="mt-1 text-xs font-bold uppercase tracking-wide text-[#64748b]">
-                      {formatDate(booking.event_date)}
-                    </p>
-                  </div>
-                </div>
-                <div className="shrink-0">
-                  <StatusBadge status={booking.status} />
-                </div>
-              </article>
-            ))}
-          </div>
-        </Panel>
-      ) : (
+      {error ? (
+        <EmptyState
+          icon="error"
+          title="Calendar could not load"
+          description="Please refresh the page or try again later."
+        />
+      ) : venueRows.length === 0 ? (
         <EmptyState
           icon="event"
-          title="No upcoming bookings"
-          description="Confirmed and pending bookings for your venues will appear here once customers submit reservation requests."
+          title="No venues yet"
+          description="Add a venue first before managing availability."
           action={
-            <DashButton
-              href="/dashboard/venues"
-              variant="secondary"
-              icon="location_city"
-            >
-              Review Venues
+            <DashButton href="/dashboard/venues/new" icon="add">
+              Add Venue
             </DashButton>
           }
         />
+      ) : (
+        <BookingCalendar venues={venueRows} />
       )}
     </DashboardSubPage>
   );

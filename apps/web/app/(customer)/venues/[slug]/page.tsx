@@ -12,6 +12,7 @@ import {
 } from "@/src/features/venues/data/research-venues";
 import { getPublishedVenueReviewsRaw } from "@/features/reviews/application/queries";
 import { resolveVenueMapCoordinates } from "@/src/lib/venue-map-coordinates";
+import { userOwnsVenue } from "@/src/lib/rbac/ownership";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -169,6 +170,11 @@ export default async function VenueDetailPage({ params }: Props) {
     initialIsFavorited = !!fav;
   }
 
+  let isOwnVenue = false;
+  if (user && dbVenue) {
+    isOwnVenue = await userOwnsVenue(supabase, user.id, dbVenue.id);
+  }
+
   return (
     <VenueDetails
       venue={venueWithMap}
@@ -177,6 +183,7 @@ export default async function VenueDetailPage({ params }: Props) {
       initialIsFavorited={initialIsFavorited}
       currentUser={user}
       eligibleReviewBooking={eligibleReviewBooking}
+      isOwnVenue={isOwnVenue}
     />
   );
 }

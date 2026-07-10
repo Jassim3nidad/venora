@@ -136,3 +136,14 @@ export const bookingFiltersSchema = z.object({
 });
 
 export type BookingFilters = z.infer<typeof bookingFiltersSchema>;
+
+export const sendBookingMessageSchema = z.object({
+  bookingId: z.string().uuid("Invalid booking ID"),
+  message: z
+    .string()
+    .trim()
+    .min(1, "Message cannot be empty")
+    .max(2000, "Message must not exceed 2000 characters"),
+});
+
+export type SendBookingMessageInput = z.infer<typeof sendBookingMessageSchema>;

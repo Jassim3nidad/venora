@@ -5,11 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@venora/lib";
 
 export type CalendarAvailabilityStatus =
-  | "available"
-  | "reserved"
-  | "tentative"
-  | "maintenance"
-  | "blackout";
+  "available" | "reserved" | "tentative" | "maintenance" | "blackout";
 
 interface CalendarProps {
   className?: string;
@@ -26,7 +22,9 @@ function startOfLocalDay(date: Date) {
 }
 
 function isPastDate(date: Date) {
-  return startOfLocalDay(date).getTime() < startOfLocalDay(new Date()).getTime();
+  return (
+    startOfLocalDay(date).getTime() < startOfLocalDay(new Date()).getTime()
+  );
 }
 
 export function Calendar({
@@ -38,7 +36,9 @@ export function Calendar({
   currentMonth,
   onMonthChange,
 }: CalendarProps) {
-  const [currentDate, setCurrentDate] = React.useState(currentMonth ?? new Date());
+  const [currentDate, setCurrentDate] = React.useState(
+    currentMonth ?? new Date(),
+  );
 
   React.useEffect(() => {
     if (currentMonth) {
@@ -50,8 +50,18 @@ export function Calendar({
   const monthIndex = currentDate.getMonth();
 
   const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
   // Helper to format date key YYYY-MM-DD
@@ -91,7 +101,7 @@ export function Calendar({
     <div
       className={cn(
         "w-full max-w-sm rounded-2xl border border-[var(--border-default)] bg-[var(--bg-base)] p-4 shadow-[var(--shadow-sm)]",
-        className
+        className,
       )}
     >
       {/* Header */}
@@ -138,6 +148,8 @@ export function Calendar({
           const status = availability[key] ?? "available";
           const date = new Date(year, monthIndex, day);
           const isPast = disablePastDates && isPastDate(date);
+          const isUnavailable = status !== "available";
+          const isDisabled = isPast || isUnavailable;
 
           const isSelected =
             selectedDate &&
@@ -149,11 +161,17 @@ export function Calendar({
             <button
               key={`day-${day}`}
               type="button"
-              disabled={isPast}
-              aria-disabled={isPast}
-              title={isPast ? "Please choose today or a future date." : undefined}
+              disabled={isDisabled}
+              aria-disabled={isDisabled}
+              title={
+                isPast
+                  ? "Please choose today or a future date."
+                  : isUnavailable
+                    ? "This date is not available for booking."
+                    : undefined
+              }
               onClick={() => {
-                if (isPast) return;
+                if (isDisabled) return;
                 onDateSelect?.(date);
               }}
               className={cn(
@@ -161,17 +179,29 @@ export function Calendar({
                 isPast &&
                   "cursor-not-allowed border border-[var(--border-default)] bg-[var(--bg-muted)] text-[var(--text-muted)] opacity-50 hover:bg-[var(--bg-muted)]",
                 // Available
-                !isPast && status === "available" && "border border-[var(--border-default)] hover:bg-[var(--bg-subtle)] text-[var(--text-primary)]",
+                !isPast &&
+                  status === "available" &&
+                  "border border-[var(--border-default)] hover:bg-[var(--bg-subtle)] text-[var(--text-primary)]",
                 // Reserved
-                !isPast && status === "reserved" && "bg-[var(--color-success)] text-white",
+                !isPast &&
+                  status === "reserved" &&
+                  "cursor-not-allowed bg-[var(--color-success)] text-white opacity-75",
                 // Tentative
-                !isPast && status === "tentative" && "border-2 border-dashed border-[var(--color-warning)] text-[var(--color-warning)]",
+                !isPast &&
+                  status === "tentative" &&
+                  "cursor-not-allowed border-2 border-dashed border-[var(--color-warning)] text-[var(--color-warning)] opacity-75",
                 // Maintenance
-                !isPast && status === "maintenance" && "bg-[var(--bg-muted)] text-[var(--text-muted)] line-through",
+                !isPast &&
+                  status === "maintenance" &&
+                  "cursor-not-allowed bg-[var(--bg-muted)] text-[var(--text-muted)] line-through opacity-75",
                 // Blackout
-                !isPast && status === "blackout" && "bg-[var(--color-danger-bg)] text-[var(--color-danger)] border border-[var(--color-danger)]/30",
+                !isPast &&
+                  status === "blackout" &&
+                  "cursor-not-allowed bg-[var(--color-danger-bg)] text-[var(--color-danger)] border border-[var(--color-danger)]/30 opacity-75",
                 // Selected override
-                isSelected && !isPast && "ring-2 ring-[var(--color-brand-500)] ring-offset-1"
+                isSelected &&
+                  !isPast &&
+                  "ring-2 ring-[var(--color-brand-500)] ring-offset-1",
               )}
             >
               {day}

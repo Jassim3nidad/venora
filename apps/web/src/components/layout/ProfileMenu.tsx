@@ -8,6 +8,7 @@ import {
   HelpCircle,
   LogOut,
   Settings,
+  Store,
   UserRound,
 } from "lucide-react";
 import {
@@ -29,8 +30,9 @@ interface ProfileMenuProps {
    * marketplace. Only relevant when this menu renders inside a dashboard
    * shell — the regular customer nav never passes this.
    */
-  showExitDashboard?: boolean;
-  exitDashboardHref?: string;
+  showExitDashboard?: boolean | undefined;
+  exitDashboardHref?: string | undefined;
+  showEnterVenueDashboard?: boolean | undefined;
 }
 
 function SoonBadge() {
@@ -54,6 +56,7 @@ export default function ProfileMenu({
   logoutAction,
   showExitDashboard = false,
   exitDashboardHref = "/venues",
+  showEnterVenueDashboard = false,
 }: ProfileMenuProps) {
   const avatarInitial =
     displayName?.charAt(0)?.toUpperCase() ||
@@ -110,6 +113,17 @@ export default function ProfileMenu({
         </div>
 
         <DropdownMenuSeparator />
+
+        {showEnterVenueDashboard ? (
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard/venue-owner" className="cursor-pointer">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#EFF6FF] text-[#1D4ED8]">
+                <Store className="h-4 w-4" />
+              </div>
+              <span className="font-bold text-[#1D4ED8]">Enter Venue Owner Dashboard</span>
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
 
         <DropdownMenuItem asChild>
           <Link href="/account" className="cursor-pointer">

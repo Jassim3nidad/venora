@@ -47,6 +47,7 @@ interface VenueDetailsProps {
   initialIsFavorited: boolean;
   currentUser: any;
   eligibleReviewBooking?: { id: string; event_date: string | null } | null;
+  isOwnVenue?: boolean;
 }
 
 function formatCurrency(value?: number | null) {
@@ -77,6 +78,7 @@ export default function VenueDetails({
   initialIsFavorited,
   currentUser,
   eligibleReviewBooking = null,
+  isOwnVenue = false,
 }: VenueDetailsProps) {
   const [isFavorited, setIsFavorited] = useState(initialIsFavorited);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
@@ -197,21 +199,23 @@ export default function VenueDetails({
               <Share2 className="h-4 w-4" />
               Share
             </Button>
-            <Button
-              onClick={handleFavoriteToggle}
-              variant="outline"
-              disabled={isTogglingFavorite}
-              className={`flex h-11 items-center gap-2 rounded-2xl border-[#E5E7EB] px-4 text-sm font-bold transition-all hover:border-[#BFDBFE] hover:bg-[#EFF6FF] ${
-                isFavorited
-                  ? "text-red-500 border-red-200 bg-red-50/50"
-                  : "text-[var(--text-primary)]"
-              }`}
-            >
-              <Heart
-                className={`h-4 w-4 ${isFavorited ? "fill-current" : ""}`}
-              />
-              {isFavorited ? "Favorited" : "Favorite"}
-            </Button>
+            {!isOwnVenue && (
+              <Button
+                onClick={handleFavoriteToggle}
+                variant="outline"
+                disabled={isTogglingFavorite}
+                className={`flex h-11 items-center gap-2 rounded-2xl border-[#E5E7EB] px-4 text-sm font-bold transition-all hover:border-[#BFDBFE] hover:bg-[#EFF6FF] ${
+                  isFavorited
+                    ? "text-red-500 border-red-200 bg-red-50/50"
+                    : "text-[var(--text-primary)]"
+                }`}
+              >
+                <Heart
+                  className={`h-4 w-4 ${isFavorited ? "fill-current" : ""}`}
+                />
+                {isFavorited ? "Favorited" : "Favorite"}
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -441,7 +445,7 @@ export default function VenueDetails({
 
           <Separator />
 
-          {eligibleReviewBooking ? (
+          {!isOwnVenue && eligibleReviewBooking ? (
             <>
               <section className="rounded-[24px] border border-[#DBEAFE] bg-[#EFF6FF] p-5 shadow-sm shadow-slate-200/60 sm:p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -484,22 +488,64 @@ export default function VenueDetails({
 
         {/* Right Sticky Column - Booking Card Widget */}
         <div className="lg:col-span-1 space-y-4">
-          <BookingSidebar
-            venueId={venue.id}
-            venueSlug={venue.slug}
-            venueName={venue.name}
-            basePrice={venue.base_price}
-            priceUnit={venue.price_unit}
-            capacityMin={venue.capacity_min ?? 1}
-            capacityMax={venue.capacity_max}
-            packages={activePackages}
-          />
-          <CostEstimatorPanel
-            venueId={venue.id}
-            venueName={venue.name}
-            capacityMin={venue.capacity_min}
-            capacityMax={venue.capacity_max}
-          />
+          {isOwnVenue ? (
+            <div className="sticky top-[100px] rounded-[32px] border border-[#BFDBFE] bg-[#EFF6FF] p-6 shadow-sm shadow-blue-200/50 flex flex-col gap-5">
+              <div>
+                <h3 className="text-xl font-black tracking-[-0.03em] text-[#1D4ED8]">
+                  This is your venue listing.
+                </h3>
+                <p className="mt-2 text-sm font-medium leading-relaxed text-[#3B82F6]">
+                  You are viewing your venue as customers see it. Manage bookings, availability, packages, and listing details from your Venue Owner Dashboard.
+                </p>
+              </div>
+              
+              <div className="flex flex-col gap-3">
+                <Link
+                  href="/dashboard/venues"
+                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-5 text-sm font-bold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8]"
+                >
+                  Manage Venue
+                </Link>
+                <Link
+                  href={`/dashboard/venues/${venue.id}/edit`}
+                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#93C5FD] bg-white px-5 text-sm font-bold text-[#1D4ED8] transition hover:bg-[#DBEAFE]"
+                >
+                  Edit Venue
+                </Link>
+                <Link
+                  href="/dashboard/bookings"
+                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#93C5FD] bg-white px-5 text-sm font-bold text-[#1D4ED8] transition hover:bg-[#DBEAFE]"
+                >
+                  View Bookings
+                </Link>
+                <Link
+                  href="/dashboard/venue-owner"
+                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#93C5FD] bg-white px-5 text-sm font-bold text-[#1D4ED8] transition hover:bg-[#DBEAFE]"
+                >
+                  View Dashboard
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <>
+              <BookingSidebar
+                venueId={venue.id}
+                venueSlug={venue.slug}
+                venueName={venue.name}
+                basePrice={venue.base_price}
+                priceUnit={venue.price_unit}
+                capacityMin={venue.capacity_min ?? 1}
+                capacityMax={venue.capacity_max}
+                packages={activePackages}
+              />
+              <CostEstimatorPanel
+                venueId={venue.id}
+                venueName={venue.name}
+                capacityMin={venue.capacity_min}
+                capacityMax={venue.capacity_max}
+              />
+            </>
+          )}
         </div>
       </div>
 

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/src/lib/supabase/server";
+import { userOwnsVenue } from "@/src/lib/rbac/ownership";
 import { createServerAction } from "@/src/lib/server-action";
 import {
   BookingConflictError,
@@ -22,6 +23,10 @@ import {
   startBookingPaymentSchema,
 } from "../schemas/booking.schema";
 import { formatCancellationReason } from "../constants/cancellation-reasons";
+import {
+  ACTIVE_BOOKING_STATUSES,
+  isBlockingAvailabilityStatus,
+} from "@/src/features/calendar/utils/availability";
 
 function bookingErrorFromMessage(message: string) {
   const normalized = message.toLowerCase();
@@ -94,7 +99,9 @@ async function assertCanManageBooking(
   booking: {
     id: string;
     status: string;
-    venues: { organization_id: string } | null;
+    venue_id: string;
+    event_date: string;
+    venues: { organization_id: string; slug: string | null } | null;
   };
 }> {
   const {
@@ -107,7 +114,7 @@ async function assertCanManageBooking(
 
   const { data: booking, error: bookingError } = await supabase
     .from("bookings")
-    .select("id, status, venues(organization_id)")
+    .select("id, status, venue_id, event_date, venues(organization_id, slug)")
     .eq("id", bookingId)
     .maybeSingle();
 
@@ -169,13 +176,41 @@ async function assertCanManageBooking(
   return { booking };
 }
 
-function revalidateBookingViews(bookingId: string) {
+async function getVenueSlug(supabase: any, venueId: string) {
+  const { data } = await supabase
+    .from("venues")
+    .select("slug")
+    .eq("id", venueId)
+    .maybeSingle();
+
+  return (data?.slug as string | null | undefined) ?? null;
+}
+
+async function getBookingVenueSlug(supabase: any, bookingId: string) {
+  const { data } = await supabase
+    .from("bookings")
+    .select("venues(slug)")
+    .eq("id", bookingId)
+    .maybeSingle();
+
+  const venue = Array.isArray(data?.venues) ? data.venues[0] : data?.venues;
+  return (venue?.slug as string | null | undefined) ?? null;
+}
+
+function revalidateBookingViews(bookingId: string, venueSlug?: string | null) {
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/calendar");
   revalidatePath("/dashboard/venue-owner");
   revalidatePath("/dashboard/bookings");
   revalidatePath(`/dashboard/bookings/${bookingId}`);
   revalidatePath("/bookings");
   revalidatePath(`/bookings/${bookingId}`);
+  revalidatePath("/venues");
+
+  if (venueSlug) {
+    revalidatePath(`/venues/${venueSlug}`);
+    revalidatePath(`/venues/${venueSlug}/book`);
+  }
 }
 
 export async function createBookingAction(rawInput: unknown) {
@@ -190,6 +225,12 @@ export async function createBookingAction(rawInput: unknown) {
       if (!user) {
         throw new UnauthorizedError(
           "You must be signed in to submit a booking inquiry.",
+        );
+      }
+
+      if (await userOwnsVenue(supabase, user.id, input.venueId)) {
+        throw new ForbiddenError(
+          "You cannot book your own venue. Manage this venue from your Venue Owner Dashboard.",
         );
       }
 
@@ -254,10 +295,7 @@ export async function createBookingAction(rawInput: unknown) {
 
         throwIfSupabaseError(availabilityError);
 
-        if (
-          availability &&
-          ["reserved", "maintenance", "blackout"].includes(availability.status)
-        ) {
+        if (availability && isBlockingAvailabilityStatus(availability.status)) {
           throw new BookingConflictError();
         }
 
@@ -266,7 +304,7 @@ export async function createBookingAction(rawInput: unknown) {
           .select("id")
           .eq("venue_id", input.venueId)
           .eq("event_date", input.eventDate)
-          .in("status", ["pending", "approved", "completed"])
+          .in("status", ACTIVE_BOOKING_STATUSES)
           .limit(1);
 
         throwIfSupabaseError(conflictsError);
@@ -293,8 +331,10 @@ export async function createBookingAction(rawInput: unknown) {
 
         throwIfSupabaseError(insertError);
 
-        revalidatePath("/bookings");
-        revalidatePath(`/bookings/${insertedBooking.id}`);
+        revalidateBookingViews(
+          insertedBooking.id,
+          await getVenueSlug(supabase, input.venueId),
+        );
 
         return {
           bookingId: insertedBooking.id as string,
@@ -305,8 +345,10 @@ export async function createBookingAction(rawInput: unknown) {
 
       throwIfSupabaseError(error);
 
-      revalidatePath("/bookings");
-      revalidatePath(`/bookings/${data.id}`);
+      revalidateBookingViews(
+        data.id,
+        await getVenueSlug(supabase, input.venueId),
+      );
 
       return {
         bookingId: data.id as string,
@@ -344,7 +386,7 @@ export async function approveBookingAction(rawInput: unknown) {
 
       throwIfSupabaseError(error);
 
-      revalidateBookingViews(input.bookingId);
+      revalidateBookingViews(input.bookingId, booking.venues?.slug);
 
       return {
         bookingId: data.id as string,
@@ -381,7 +423,7 @@ export async function declineBookingAction(rawInput: unknown) {
 
       throwIfSupabaseError(error);
 
-      revalidateBookingViews(input.bookingId);
+      revalidateBookingViews(input.bookingId, booking.venues?.slug);
 
       return {
         bookingId: data.id as string,
@@ -407,11 +449,11 @@ export async function cancelBookingAction(rawInput: unknown) {
 
       throwIfSupabaseError(error);
 
-      revalidatePath("/bookings");
-      revalidatePath(`/bookings/${input.bookingId}`);
+      revalidateBookingViews(
+        input.bookingId,
+        await getVenueSlug(supabase, data.venue_id as string),
+      );
       revalidatePath(`/bookings/${input.bookingId}/cancel`);
-      revalidatePath("/dashboard/bookings");
-      revalidatePath(`/dashboard/bookings/${input.bookingId}`);
 
       return {
         bookingId: data.id as string,
@@ -442,8 +484,10 @@ export async function startBookingPaymentAction(rawInput: unknown) {
 
       throwIfSupabaseError(error);
 
-      revalidatePath("/bookings");
-      revalidatePath(`/bookings/${input.bookingId}`);
+      revalidateBookingViews(
+        input.bookingId,
+        await getBookingVenueSlug(supabase, input.bookingId),
+      );
       revalidatePath(`/bookings/${input.bookingId}/payment`);
       revalidatePath(`/bookings/${input.bookingId}/confirmation`);
 
@@ -471,12 +515,10 @@ export async function completeBookingAction(rawInput: unknown) {
 
       throwIfSupabaseError(error);
 
-      revalidatePath("/dashboard");
-      revalidatePath("/dashboard/venue-owner");
-      revalidatePath("/dashboard/bookings");
-      revalidatePath(`/dashboard/bookings/${input.bookingId}`);
-      revalidatePath("/bookings");
-      revalidatePath(`/bookings/${input.bookingId}`);
+      revalidateBookingViews(
+        input.bookingId,
+        await getVenueSlug(supabase, data.venue_id as string),
+      );
 
       return {
         bookingId: data.id as string,

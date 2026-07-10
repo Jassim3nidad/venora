@@ -25,6 +25,8 @@ import {
   canCancelBookingStatus,
   type BookingStatusValue,
 } from "@/src/features/booking/domain/value-objects/booking-status.vo";
+import { getBookingMessages } from "@/src/features/booking/application/messages-actions";
+import { BookingConversation } from "@/src/features/booking/ui/BookingConversation";
 
 export const metadata: Metadata = {
   title: "Booking Details | Venora",
@@ -261,6 +263,17 @@ export default async function BookingDetailPage({ params }: Props) {
   const typedBooking = booking as BookingDetail;
   const canCancel = canCancelBookingStatus(typedBooking.status);
 
+  // Messaging is allowed for active statuses
+  const MESSAGING_ALLOWED = new Set([
+    "pending",
+    "approved",
+    "payment_pending",
+    "confirmed",
+  ]);
+  const isReadOnly = !MESSAGING_ALLOWED.has(typedBooking.status);
+
+  const messages = await getBookingMessages(id);
+
   return (
     <div className="bg-[#F8FAFC] text-[#111827]">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -391,6 +404,28 @@ export default async function BookingDetailPage({ params }: Props) {
                   </p>
                 </div>
               </div>
+            </CustomerCard>
+
+            {/* Booking Conversation */}
+            <CustomerCard className="p-5 sm:p-6">
+              <div className="mb-5 flex items-center gap-2">
+                <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">
+                  Chat with the Venue Owner
+                </h2>
+                {isReadOnly && (
+                  <span className="rounded-full border border-[#E5E7EB] bg-[#F3F4F6] px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#6B7280]">
+                    Read-only
+                  </span>
+                )}
+              </div>
+              <BookingConversation
+                bookingId={typedBooking.id}
+                initialMessages={messages}
+                currentUserId={user.id}
+                currentRole="customer"
+                isReadOnly={isReadOnly}
+                counterpartLabel="the venue owner"
+              />
             </CustomerCard>
           </div>
 

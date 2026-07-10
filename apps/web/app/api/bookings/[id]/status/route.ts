@@ -80,13 +80,31 @@ async function canManageBooking(supabase: any, bookingId: string) {
   return membership || organization ? booking : false;
 }
 
-function revalidateBookingViews(bookingId: string) {
+async function getBookingVenueSlug(supabase: any, bookingId: string) {
+  const { data } = await supabase
+    .from("bookings")
+    .select("venues(slug)")
+    .eq("id", bookingId)
+    .maybeSingle();
+
+  const venue = Array.isArray(data?.venues) ? data.venues[0] : data?.venues;
+  return (venue?.slug as string | null | undefined) ?? null;
+}
+
+function revalidateBookingViews(bookingId: string, venueSlug?: string | null) {
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/calendar");
   revalidatePath("/dashboard/venue-owner");
   revalidatePath("/dashboard/bookings");
   revalidatePath(`/dashboard/bookings/${bookingId}`);
   revalidatePath("/bookings");
   revalidatePath(`/bookings/${bookingId}`);
+  revalidatePath("/venues");
+
+  if (venueSlug) {
+    revalidatePath(`/venues/${venueSlug}`);
+    revalidatePath(`/venues/${venueSlug}/book`);
+  }
 }
 
 export async function PATCH(
@@ -167,7 +185,7 @@ export async function PATCH(
       return apiError("BOOKING_ACTION_FAILED", result.error.message, 400);
     }
 
-    revalidateBookingViews(id);
+    revalidateBookingViews(id, await getBookingVenueSlug(supabase, id));
 
     return NextResponse.json({
       data: {

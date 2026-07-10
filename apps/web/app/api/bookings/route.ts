@@ -3,8 +3,17 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/src/lib/supabase/server";
 import { createBookingSchema } from "@/src/features/booking/schemas/booking.schema";
 import { VenoraError } from "@/src/lib/errors";
+import {
+  ACTIVE_BOOKING_STATUSES,
+  isBlockingAvailabilityStatus,
+} from "@/src/features/calendar/utils/availability";
 
-function apiError(code: string, message: string, status: number, details?: unknown) {
+function apiError(
+  code: string,
+  message: string,
+  status: number,
+  details?: unknown,
+) {
   return NextResponse.json(
     { data: null, error: { code, message, details } },
     { status },
@@ -23,13 +32,38 @@ function mapUnknownError(error: unknown) {
   return apiError("INTERNAL_ERROR", "Something went wrong.", 500);
 }
 
-function isMissingRpcError(error: { message?: string; code?: string } | null | undefined) {
+function isMissingRpcError(
+  error: { message?: string; code?: string } | null | undefined,
+) {
   const message = error?.message?.toLowerCase() ?? "";
   return (
     error?.code === "PGRST202" ||
     message.includes("could not find the function") ||
     message.includes("schema cache")
   );
+}
+
+async function getVenueSlug(supabase: any, venueId: string) {
+  const { data } = await supabase
+    .from("venues")
+    .select("slug")
+    .eq("id", venueId)
+    .maybeSingle();
+
+  return (data?.slug as string | null | undefined) ?? null;
+}
+
+function revalidateBookingCreateViews(venueSlug?: string | null) {
+  revalidatePath("/bookings");
+  revalidatePath("/dashboard/calendar");
+  revalidatePath("/dashboard/venue-owner");
+  revalidatePath("/dashboard/bookings");
+  revalidatePath("/venues");
+
+  if (venueSlug) {
+    revalidatePath(`/venues/${venueSlug}`);
+    revalidatePath(`/venues/${venueSlug}/book`);
+  }
 }
 
 export async function GET() {
@@ -39,11 +73,13 @@ export async function GET() {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) return apiError("UNAUTHORIZED", "Please sign in to continue.", 401);
+    if (!user)
+      return apiError("UNAUTHORIZED", "Please sign in to continue.", 401);
 
     const { data, error } = await supabase
       .from("bookings")
-      .select(`
+      .select(
+        `
         id,
         status,
         event_date,
@@ -52,7 +88,8 @@ export async function GET() {
         deposit_amount,
         payment_due_at,
         venues(id, name, slug, city, province)
-      `)
+      `,
+      )
       .eq("customer_id", user.id)
       .order("created_at", { ascending: false });
 
@@ -83,7 +120,8 @@ export async function POST(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) return apiError("UNAUTHORIZED", "Please sign in to continue.", 401);
+    if (!user)
+      return apiError("UNAUTHORIZED", "Please sign in to continue.", 401);
 
     const input = parsed.data;
     const { data, error } = await supabase.rpc("create_booking_inquiry", {
@@ -129,8 +167,10 @@ export async function POST(request: NextRequest) {
         if (packageError) throw packageError;
 
         if (
-          (selectedPackage.min_guests !== null && input.guestCount < selectedPackage.min_guests) ||
-          (selectedPackage.max_guests !== null && input.guestCount > selectedPackage.max_guests)
+          (selectedPackage.min_guests !== null &&
+            input.guestCount < selectedPackage.min_guests) ||
+          (selectedPackage.max_guests !== null &&
+            input.guestCount > selectedPackage.max_guests)
         ) {
           return apiError(
             "VALIDATION_ERROR",
@@ -149,8 +189,12 @@ export async function POST(request: NextRequest) {
 
       if (availabilityError) throw availabilityError;
 
-      if (availability && ["reserved", "maintenance", "blackout"].includes(availability.status)) {
-        return apiError("BOOKING_CONFLICT", "This venue is unavailable on the selected date.", 409);
+      if (availability && isBlockingAvailabilityStatus(availability.status)) {
+        return apiError(
+          "BOOKING_CONFLICT",
+          "This venue is unavailable on the selected date.",
+          409,
+        );
       }
 
       const { data: conflicts, error: conflictsError } = await supabase
@@ -158,7 +202,7 @@ export async function POST(request: NextRequest) {
         .select("id")
         .eq("venue_id", input.venueId)
         .eq("event_date", input.eventDate)
-        .in("status", ["pending", "approved", "completed"])
+        .in("status", ACTIVE_BOOKING_STATUSES)
         .limit(1);
 
       if (conflictsError) throw conflictsError;
@@ -189,7 +233,7 @@ export async function POST(request: NextRequest) {
 
       if (insertError) throw insertError;
 
-      revalidatePath("/bookings");
+      revalidateBookingCreateViews(await getVenueSlug(supabase, input.venueId));
 
       return NextResponse.json(
         {
@@ -206,7 +250,7 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
-    revalidatePath("/bookings");
+    revalidateBookingCreateViews(await getVenueSlug(supabase, input.venueId));
 
     return NextResponse.json(
       {

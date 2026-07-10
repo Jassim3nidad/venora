@@ -17,6 +17,8 @@ import {
   OwnerBookingDecisionForm,
   OwnerCompleteBookingButton,
 } from "@/src/features/booking/ui/booking-action-controls";
+import { getBookingMessages } from "@/src/features/booking/application/messages-actions";
+import { BookingConversation } from "@/src/features/booking/ui/BookingConversation";
 
 export const metadata: Metadata = { title: "Booking Detail - Dashboard" };
 export const dynamic = "force-dynamic";
@@ -169,6 +171,16 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
   const suggestedDeposit =
     typedBooking.deposit_amount ?? Math.round(suggestedTotal * 0.5);
 
+  const MESSAGING_ALLOWED = new Set([
+    "pending",
+    "approved",
+    "payment_pending",
+    "confirmed",
+  ]);
+  const isReadOnly = !MESSAGING_ALLOWED.has(typedBooking.status);
+
+  const messages = await getBookingMessages(id);
+
   return (
     <DashboardSubPage
       title={typedBooking.venues?.name ?? "Booking detail"}
@@ -259,6 +271,28 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
                 </p>
               </div>
             </div>
+          </section>
+
+          {/* Booking Conversation */}
+          <section className="rounded-[24px] border border-[#e5e7eb] bg-white p-5 shadow-sm shadow-slate-200/60 sm:p-6">
+            <div className="mb-5 flex items-center gap-2">
+              <h2 className="text-xl font-black tracking-tight text-[#0f172a]">
+                Booking Conversation
+              </h2>
+              {isReadOnly && (
+                <span className="rounded-full border border-[#e5e7eb] bg-[#f3f4f6] px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#64748b]">
+                  Read-only
+                </span>
+              )}
+            </div>
+            <BookingConversation
+              bookingId={typedBooking.id}
+              initialMessages={messages}
+              currentUserId={user.id}
+              currentRole="venue_owner"
+              isReadOnly={isReadOnly}
+              counterpartLabel="the customer"
+            />
           </section>
 
           <section className="rounded-[24px] border border-[#e5e7eb] bg-white p-5 shadow-sm shadow-slate-200/60 sm:p-6">

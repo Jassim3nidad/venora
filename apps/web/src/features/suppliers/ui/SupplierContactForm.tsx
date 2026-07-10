@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import {
+  Building2,
   CalendarDays,
   Loader2,
   Mail,
@@ -10,6 +11,7 @@ import {
   MessageSquare,
   Phone,
   Send,
+  TicketCheck,
   Users,
 } from "lucide-react";
 import { createSupplierContactRequestAction } from "../application/actions";
@@ -22,6 +24,7 @@ import { formatPriceUnit, formatSupplierPrice } from "../utils/supplier-format";
 
 type SupplierContactFormProps = {
   supplier: SupplierMarketplaceProfile;
+  supplierSlug?: string | null;
   userEmail?: string | null;
   bookings?: CustomerBookingOption[];
 };
@@ -34,6 +37,7 @@ function packageLabel(pkg: SupplierPackage) {
 
 export function SupplierContactForm({
   supplier,
+  supplierSlug,
   userEmail,
   bookings = [],
 }: SupplierContactFormProps) {
@@ -52,7 +56,7 @@ export function SupplierContactForm({
     () => supplier.packages.filter((pkg) => pkg.isActive),
     [supplier.packages],
   );
-  const hasBookings = bookings.length > 0;
+  const hasApprovedBookings = bookings.length > 0;
 
   const handleBookingChange = (bookingId: string) => {
     setSelectedBookingId(bookingId);
@@ -106,20 +110,68 @@ export function SupplierContactForm({
     });
   };
 
+  // Not logged in
   if (!userEmail) {
+    const redirectTo = supplierSlug
+      ? `/login?redirectTo=/suppliers/${supplierSlug}`
+      : "/login";
     return (
       <div className="min-w-0 rounded-[28px] border border-[#E5E7EB] bg-white p-4 shadow-sm shadow-slate-200/70 sm:p-5">
-        <h2 className="text-lg font-black text-[#111827]">Contact supplier</h2>
+        <h2 className="text-lg font-black text-[#111827]">Send Inquiry</h2>
         <p className="mt-2 break-words text-sm font-medium leading-6 text-[#6B7280]">
-          Sign in as a customer to send inquiry details and keep supplier
+          Sign in as a customer to send an inquiry and keep supplier
           conversations tied to your Venora account.
         </p>
         <a
-          href="/login"
+          href={redirectTo}
           className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-2xl bg-[#2563EB] px-5 text-sm font-black text-white transition hover:bg-[#1D4ED8] sm:w-auto"
         >
-          Sign in
+          Sign in to continue
         </a>
+      </div>
+    );
+  }
+
+  // Logged in but no approved bookings — block the form entirely
+  if (!hasApprovedBookings) {
+    return (
+      <div className="min-w-0 rounded-[28px] border border-[#E5E7EB] bg-white p-4 shadow-sm shadow-slate-200/70 sm:p-5">
+        <h2 className="text-lg font-black text-[#111827]">Send Inquiry</h2>
+
+        <div className="mt-4 rounded-2xl border border-dashed border-amber-300 bg-amber-50 p-5">
+          <div className="flex items-start gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100">
+              <TicketCheck className="h-4 w-4 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-amber-900">
+                Approved venue booking required
+              </p>
+              <p className="mt-1 text-sm font-medium leading-6 text-amber-700">
+                You need an approved venue booking before sending a supplier
+                inquiry. Once your venue approves your booking, you can link it
+                here.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+            <Link
+              href="/venues"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-4 text-sm font-black text-white transition hover:bg-[#1D4ED8]"
+            >
+              <Building2 className="h-4 w-4" />
+              Browse Venues
+            </Link>
+            <Link
+              href="/bookings"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white px-4 text-sm font-black text-[#111827] transition hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
+            >
+              <TicketCheck className="h-4 w-4" />
+              View My Bookings
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
@@ -130,7 +182,7 @@ export function SupplierContactForm({
       className="min-w-0 rounded-[28px] border border-[#E5E7EB] bg-white p-4 shadow-sm shadow-slate-200/70 sm:p-5"
     >
       <div className="mb-5">
-        <h2 className="text-lg font-black text-[#111827]">Contact supplier</h2>
+        <h2 className="text-lg font-black text-[#111827]">Send Inquiry</h2>
         <p className="mt-1 text-sm font-medium text-[#6B7280]">
           Sent from {userEmail}
         </p>
@@ -191,42 +243,32 @@ export function SupplierContactForm({
           </label>
         </div>
 
+        {/* Approved venue booking selector — required */}
         <label className="grid gap-1.5">
           <span className="text-xs font-bold text-slate-500">
-            Event location
+            Event location (approved booking){" "}
+            <span className="text-red-500">*</span>
           </span>
-          {hasBookings ? (
-            <span className="relative">
-              <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <select
-                name="bookingId"
-                required
-                value={selectedBookingId}
-                onChange={(event) => handleBookingChange(event.target.value)}
-                className="h-11 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
-              >
-                <option value="">Select one of your bookings</option>
-                {bookings.map((booking) => (
-                  <option key={booking.id} value={booking.id}>
-                    {booking.label}
-                  </option>
-                ))}
-              </select>
-            </span>
-          ) : (
-            <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-4">
-              <p className="text-sm font-semibold leading-6 text-slate-600">
-                You need an existing venue booking before you can link an event
-                location to this inquiry.
-              </p>
-              <Link
-                href="/venues"
-                className="mt-3 inline-flex text-sm font-black text-[#2563EB] transition hover:text-[#1D4ED8]"
-              >
-                Browse venues to book first
-              </Link>
-            </div>
-          )}
+          <span className="relative">
+            <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <select
+              name="bookingId"
+              required
+              value={selectedBookingId}
+              onChange={(event) => handleBookingChange(event.target.value)}
+              className="h-11 w-full appearance-none rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] pl-9 pr-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
+            >
+              <option value="">Select approved booking</option>
+              {bookings.map((booking) => (
+                <option key={booking.id} value={booking.id}>
+                  {booking.label}
+                </option>
+              ))}
+            </select>
+          </span>
+          <p className="text-[11px] font-medium text-slate-400">
+            Only your approved venue bookings are shown.
+          </p>
         </label>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -237,6 +279,9 @@ export function SupplierContactForm({
               <input
                 name="eventDate"
                 type="date"
+                value={eventDate}
+                readOnly
+                placeholder="Auto-filled from booking"
                 className="h-12 w-full rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] pl-9 pr-3 text-sm font-semibold outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
               />
             </span>
@@ -250,23 +295,15 @@ export function SupplierContactForm({
                 name="guestCount"
                 type="number"
                 min="1"
+                value={guestCount}
+                readOnly
+                placeholder="Auto-filled from booking"
                 inputMode="numeric"
                 className="h-12 w-full rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] pl-9 pr-3 text-sm font-semibold outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
               />
             </span>
           </label>
         </div>
-
-        <label className="grid gap-1.5">
-          <span className="text-xs font-bold text-slate-500">
-            Event location
-          </span>
-          <input
-            name="eventLocation"
-            placeholder="City, venue, or region"
-            className="h-12 w-full rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-3 text-sm font-semibold outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
-          />
-        </label>
 
         <label className="grid gap-1.5">
           <span className="text-xs font-bold text-slate-500">Message</span>
@@ -277,7 +314,7 @@ export function SupplierContactForm({
               required
               minLength={10}
               rows={5}
-              placeholder="Share event type, schedule, location, and package needs."
+              placeholder="Describe the service you need, your event type, and any special requirements."
               className="w-full resize-none rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] py-3 pl-9 pr-3 text-sm font-semibold outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
             />
           </span>
@@ -308,7 +345,7 @@ export function SupplierContactForm({
         ) : (
           <Send className="h-4 w-4" />
         )}
-        Send inquiry
+        Send Inquiry
       </button>
     </form>
   );
