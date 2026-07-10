@@ -116,12 +116,18 @@ export default async function NewVenuePage({
       redirect(newVenuePath("Please enter valid numbers."));
     }
 
-    if (basePrice < 0 || capacityMax < 1 || (capacityMin != null && capacityMin < 0)) {
+    if (
+      basePrice < 0 ||
+      capacityMax < 1 ||
+      (capacityMin != null && capacityMin < 0)
+    ) {
       redirect(newVenuePath("Price and capacity values must be positive."));
     }
 
     if (capacityMin != null && capacityMin > capacityMax) {
-      redirect(newVenuePath("Minimum capacity must not exceed maximum capacity."));
+      redirect(
+        newVenuePath("Minimum capacity must not exceed maximum capacity."),
+      );
     }
 
     const baseSlug = slugify(name);
@@ -130,7 +136,9 @@ export default async function NewVenuePage({
       .select("id")
       .eq("slug", baseSlug)
       .maybeSingle();
-    const slug = existingSlug ? `${baseSlug}-${Date.now().toString(36)}` : baseSlug;
+    const slug = existingSlug
+      ? `${baseSlug}-${Date.now().toString(36)}`
+      : baseSlug;
 
     const { data: createdVenue, error } = await actionSupabase
       .from("venues")
@@ -180,15 +188,21 @@ export default async function NewVenuePage({
   }
 
   const inputClass =
-    "h-11 rounded-xl border border-[#e5e7eb] bg-white px-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9ca3af] focus:border-[#2563eb] focus:ring-4 focus:ring-[#eff6ff]";
-  const labelClass = "text-sm font-semibold text-[#374151]";
+    "h-12 rounded-2xl border border-[#dbe3ef] bg-white px-4 text-sm font-medium text-[#0f172a] outline-none transition placeholder:text-[#94a3b8] focus:border-[#2563eb] focus:ring-4 focus:ring-[#dbeafe]";
+  const textareaClass =
+    "rounded-2xl border border-[#dbe3ef] bg-white px-4 py-3 text-sm font-medium text-[#0f172a] outline-none transition placeholder:text-[#94a3b8] focus:border-[#2563eb] focus:ring-4 focus:ring-[#dbeafe]";
+  const labelClass = "text-sm font-bold text-[#334155]";
 
   return (
     <DashboardSubPage
       title="Add Venue"
       description="Create a new venue listing for your organization. New listings enter admin approval before going public."
       action={
-        <DashButton href="/dashboard/venues" variant="secondary" icon="arrow_back">
+        <DashButton
+          href="/dashboard/venues"
+          variant="secondary"
+          icon="arrow_back"
+        >
           Back to Venues
         </DashButton>
       }
@@ -199,174 +213,221 @@ export default async function NewVenuePage({
           title="No organization available"
           description="A venue must belong to an organization before it can be created."
           action={
-            <DashButton href="/account/become-partner" variant="secondary" icon="assignment">
+            <DashButton
+              href="/account/become-partner"
+              variant="secondary"
+              icon="assignment"
+            >
               Review Partner Profile
             </DashButton>
           }
         />
       ) : (
-        <Panel>
-          <PanelHeader
-            title="Venue Details"
-            description="Start with the core information. You can add photos after the venue record is created."
-          />
+        <Panel className="overflow-hidden" padding={false}>
+          <div className="border-b border-[#e5e7eb] bg-[#f8fbff] p-5 sm:p-6">
+            <PanelHeader
+              title="Venue Details"
+              description="Start with the core information. You can add photos after the venue record is created."
+            />
+          </div>
 
           {query.error ? (
-            <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+            <div className="mx-5 mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 sm:mx-6">
               {query.error}
             </div>
           ) : null}
 
-          <form action={createVenueAction} className="space-y-5">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="flex flex-col gap-2 sm:col-span-2">
-                <label htmlFor="new-venue-organization" className={labelClass}>
-                  Organization
-                </label>
-                <select
-                  id="new-venue-organization"
-                  name="organization_id"
-                  required
-                  defaultValue={orgRows[0]?.id}
-                  className={inputClass}
-                >
-                  {orgRows.map((organization) => (
-                    <option key={organization.id} value={organization.id}>
-                      {organization.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+          <form action={createVenueAction} className="space-y-6 p-5 sm:p-6">
+            <div className="rounded-[24px] border border-[#e5e7eb] bg-white p-4 sm:p-5">
+              <h2 className="font-display text-base font-black text-[#0f172a]">
+                Basic Information
+              </h2>
+              <p className="mt-1 text-sm text-[#64748b]">
+                Name the venue and connect it to the right organization.
+              </p>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <div className="flex flex-col gap-2 sm:col-span-2">
+                  <label
+                    htmlFor="new-venue-organization"
+                    className={labelClass}
+                  >
+                    Organization
+                  </label>
+                  <select
+                    id="new-venue-organization"
+                    name="organization_id"
+                    required
+                    defaultValue={orgRows[0]?.id}
+                    className={inputClass}
+                  >
+                    {orgRows.map((organization) => (
+                      <option key={organization.id} value={organization.id}>
+                        {organization.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-              <div className="flex flex-col gap-2 sm:col-span-2">
-                <label htmlFor="new-venue-name" className={labelClass}>
-                  Venue name
-                </label>
-                <input
-                  id="new-venue-name"
-                  name="name"
-                  required
-                  className={inputClass}
-                />
+                <div className="flex flex-col gap-2 sm:col-span-2">
+                  <label htmlFor="new-venue-name" className={labelClass}>
+                    Venue name
+                  </label>
+                  <input
+                    id="new-venue-name"
+                    name="name"
+                    required
+                    className={inputClass}
+                  />
+                </div>
               </div>
+            </div>
 
-              <div className="flex flex-col gap-2">
-                <label htmlFor="new-venue-province" className={labelClass}>
-                  Province
-                </label>
-                <input
-                  id="new-venue-province"
-                  name="province"
-                  required
-                  className={inputClass}
-                />
+            <div className="rounded-[24px] border border-[#e5e7eb] bg-[#f8fafc] p-4 sm:p-5">
+              <h2 className="font-display text-base font-black text-[#0f172a]">
+                Location & Capacity
+              </h2>
+              <p className="mt-1 text-sm text-[#64748b]">
+                Add the location, guest range, and base event pricing.
+              </p>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="new-venue-province" className={labelClass}>
+                    Province
+                  </label>
+                  <input
+                    id="new-venue-province"
+                    name="province"
+                    required
+                    className={inputClass}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="new-venue-city" className={labelClass}>
+                    City
+                  </label>
+                  <input
+                    id="new-venue-city"
+                    name="city"
+                    required
+                    className={inputClass}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="new-venue-municipality"
+                    className={labelClass}
+                  >
+                    Municipality
+                  </label>
+                  <input
+                    id="new-venue-municipality"
+                    name="municipality"
+                    className={inputClass}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="new-venue-setting" className={labelClass}>
+                    Venue setting
+                  </label>
+                  <select
+                    id="new-venue-setting"
+                    name="indoor_outdoor"
+                    defaultValue="indoor"
+                    className={inputClass}
+                  >
+                    <option value="indoor">Indoor</option>
+                    <option value="outdoor">Outdoor</option>
+                    <option value="both">Indoor and outdoor</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="new-venue-price" className={labelClass}>
+                    Base price
+                  </label>
+                  <input
+                    id="new-venue-price"
+                    type="number"
+                    min="0"
+                    step="1"
+                    name="base_price"
+                    required
+                    className={inputClass}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="new-venue-capacity-min"
+                    className={labelClass}
+                  >
+                    Min capacity
+                  </label>
+                  <input
+                    id="new-venue-capacity-min"
+                    type="number"
+                    min="0"
+                    step="1"
+                    name="capacity_min"
+                    className={inputClass}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="new-venue-capacity-max"
+                    className={labelClass}
+                  >
+                    Max capacity
+                  </label>
+                  <input
+                    id="new-venue-capacity-max"
+                    type="number"
+                    min="1"
+                    step="1"
+                    name="capacity_max"
+                    required
+                    className={inputClass}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2 sm:col-span-2">
+                  <label htmlFor="new-venue-address" className={labelClass}>
+                    Address
+                  </label>
+                  <input
+                    id="new-venue-address"
+                    name="address"
+                    required
+                    className={inputClass}
+                  />
+                </div>
               </div>
+            </div>
 
-              <div className="flex flex-col gap-2">
-                <label htmlFor="new-venue-city" className={labelClass}>
-                  City
-                </label>
-                <input
-                  id="new-venue-city"
-                  name="city"
-                  required
-                  className={inputClass}
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label htmlFor="new-venue-municipality" className={labelClass}>
-                  Municipality
-                </label>
-                <input
-                  id="new-venue-municipality"
-                  name="municipality"
-                  className={inputClass}
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label htmlFor="new-venue-setting" className={labelClass}>
-                  Venue setting
-                </label>
-                <select
-                  id="new-venue-setting"
-                  name="indoor_outdoor"
-                  defaultValue="indoor"
-                  className={inputClass}
-                >
-                  <option value="indoor">Indoor</option>
-                  <option value="outdoor">Outdoor</option>
-                  <option value="both">Indoor and outdoor</option>
-                </select>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label htmlFor="new-venue-price" className={labelClass}>
-                  Base price
-                </label>
-                <input
-                  id="new-venue-price"
-                  type="number"
-                  min="0"
-                  step="1"
-                  name="base_price"
-                  required
-                  className={inputClass}
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label htmlFor="new-venue-capacity-min" className={labelClass}>
-                  Min capacity
-                </label>
-                <input
-                  id="new-venue-capacity-min"
-                  type="number"
-                  min="0"
-                  step="1"
-                  name="capacity_min"
-                  className={inputClass}
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label htmlFor="new-venue-capacity-max" className={labelClass}>
-                  Max capacity
-                </label>
-                <input
-                  id="new-venue-capacity-max"
-                  type="number"
-                  min="1"
-                  step="1"
-                  name="capacity_max"
-                  required
-                  className={inputClass}
-                />
-              </div>
-
-              <div className="flex flex-col gap-2 sm:col-span-2">
-                <label htmlFor="new-venue-address" className={labelClass}>
-                  Address
-                </label>
-                <input
-                  id="new-venue-address"
-                  name="address"
-                  required
-                  className={inputClass}
-                />
-              </div>
-
-              <div className="flex flex-col gap-2 sm:col-span-2">
-                <label htmlFor="new-venue-description" className={labelClass}>
-                  Description
-                </label>
-                <textarea
-                  id="new-venue-description"
-                  name="description"
-                  rows={6}
-                  className="rounded-xl border border-[#e5e7eb] bg-white px-3 py-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9ca3af] focus:border-[#2563eb] focus:ring-4 focus:ring-[#eff6ff]"
-                />
+            <div className="rounded-[24px] border border-[#e5e7eb] bg-white p-4 sm:p-5">
+              <h2 className="font-display text-base font-black text-[#0f172a]">
+                Public Description
+              </h2>
+              <p className="mt-1 text-sm text-[#64748b]">
+                A short summary helps customers understand the venue before
+                photos are added.
+              </p>
+              <div className="mt-4 grid gap-4">
+                <div className="flex flex-col gap-2 sm:col-span-2">
+                  <label htmlFor="new-venue-description" className={labelClass}>
+                    Description
+                  </label>
+                  <textarea
+                    id="new-venue-description"
+                    name="description"
+                    rows={6}
+                    className={textareaClass}
+                  />
+                </div>
               </div>
             </div>
 
@@ -376,7 +437,7 @@ export default async function NewVenuePage({
               </DashButton>
               <button
                 type="submit"
-                className="inline-flex items-center justify-center rounded-xl bg-[#1d4ed8] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#1e40af]"
+                className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-[#1d4ed8] px-4 py-2.5 text-sm font-bold text-white shadow-sm shadow-blue-200/70 transition hover:bg-[#1e40af] focus:outline-none focus:ring-4 focus:ring-[#dbeafe]"
               >
                 Create Venue
               </button>

@@ -64,13 +64,14 @@ export default async function AnalyticsPage() {
 
   const scope = { kind: "venues" as const, venueIds };
   const range = lastNMonthsRange(12);
-  const [revenueTrend, occupancy, conversion, topPackages, demographics] = await Promise.all([
-    getRevenueTrend(supabase, scope, range),
-    getOccupancyRate(supabase, scope),
-    getConversionRate(supabase, scope, range),
-    getTopPackages(supabase, scope, range),
-    getBookingDemographics(supabase, scope, range),
-  ]);
+  const [revenueTrend, occupancy, conversion, topPackages, demographics] =
+    await Promise.all([
+      getRevenueTrend(supabase, scope, range),
+      getOccupancyRate(supabase, scope),
+      getConversionRate(supabase, scope, range),
+      getTopPackages(supabase, scope, range),
+      getBookingDemographics(supabase, scope, range),
+    ]);
 
   const venueRows = (venues ?? []) as AnalyticsVenue[];
   const bookingRows = (bookings ?? []) as AnalyticsBooking[];
@@ -150,35 +151,41 @@ export default async function AnalyticsPage() {
             description="A quick view of venue readiness across your portfolio."
           />
           <div className="space-y-4">
-            <div className="rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] p-4">
-              <p className="text-xs font-bold uppercase tracking-wider text-[#6b7280]">
+            <div className="rounded-[22px] border border-[#e5e7eb] bg-gradient-to-br from-white to-[#f8fbff] p-4 shadow-sm shadow-slate-200/60">
+              <p className="text-xs font-black uppercase tracking-wider text-[#64748b]">
                 Published Venues
               </p>
-              <p className="mt-2 font-display text-3xl font-bold text-[#111827]">
+              <p className="mt-2 font-display text-3xl font-black tracking-tight text-[#0f172a]">
                 {publishedVenues}/{venueRows.length}
               </p>
             </div>
-            <div className="rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] p-4">
-              <p className="text-xs font-bold uppercase tracking-wider text-[#6b7280]">
+            <div className="rounded-[22px] border border-[#e5e7eb] bg-white p-4 shadow-sm shadow-slate-200/60">
+              <p className="text-xs font-black uppercase tracking-wider text-[#64748b]">
                 Booking Status Mix
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
-                {["pending", "approved", "confirmed", "completed", "cancelled"].map(
-                  (status) => {
-                    const count = bookingRows.filter(
-                      (booking) => booking.status === status,
-                    ).length;
-                    return count > 0 ? (
-                      <StatusBadge
-                        key={status}
-                        status={status}
-                        label={`${status.replace(/_/g, " ")}: ${count}`}
-                      />
-                    ) : null;
-                  },
-                )}
+                {[
+                  "pending",
+                  "approved",
+                  "confirmed",
+                  "completed",
+                  "cancelled",
+                ].map((status) => {
+                  const count = bookingRows.filter(
+                    (booking) => booking.status === status,
+                  ).length;
+                  return count > 0 ? (
+                    <StatusBadge
+                      key={status}
+                      status={status}
+                      label={`${status.replace(/_/g, " ")}: ${count}`}
+                    />
+                  ) : null;
+                })}
                 {bookingRows.length === 0 ? (
-                  <span className="text-sm text-[#6b7280]">No bookings yet.</span>
+                  <span className="text-sm text-[#6b7280]">
+                    No bookings yet.
+                  </span>
                 ) : null}
               </div>
             </div>
@@ -202,7 +209,9 @@ export default async function AnalyticsPage() {
           />
           <div className="grid gap-6 sm:grid-cols-2">
             <StatusDistributionChart data={demographics?.eventTypeMix ?? []} />
-            <DemographicsBarChart data={demographics?.guestCountBuckets ?? []} />
+            <DemographicsBarChart
+              data={demographics?.guestCountBuckets ?? []}
+            />
           </div>
         </Panel>
       </div>

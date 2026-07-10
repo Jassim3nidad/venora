@@ -12,6 +12,7 @@ import {
   DashButton,
   DataTable,
   KpiCard,
+  PageHeader,
   Panel,
   PanelHeader,
   StatusBadge,
@@ -70,10 +71,15 @@ export function VenueOwnerOverview({
   const [requests, setRequests] = useState(initialBookings);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [toast, setToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("Booking updated successfully.");
+  const [toastMessage, setToastMessage] = useState(
+    "Booking updated successfully.",
+  );
   const [error, setError] = useState<string | null>(null);
 
-  const handleAction = async (request: VenueOwnerBooking, status: "approved" | "declined") => {
+  const handleAction = async (
+    request: VenueOwnerBooking,
+    status: "approved" | "declined",
+  ) => {
     setLoadingId(request.id);
     setError(null);
     try {
@@ -144,19 +150,16 @@ export function VenueOwnerOverview({
 
   return (
     <DashboardPage>
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-sm font-semibold text-[#6b7280]">
-            Welcome back, {userName.split(" ")[0]}
-          </p>
-          <h1 className="font-display text-2xl font-bold text-[#111827] sm:text-3xl">
-            {businessName ?? "Venue Dashboard"}
-          </h1>
-        </div>
-        <DashButton href="/dashboard/bookings" icon="calendar_month">
-          View All Bookings
-        </DashButton>
-      </div>
+      <PageHeader
+        badge={`Welcome back, ${userName.split(" ")[0]}`}
+        title={businessName ?? "Venue Dashboard"}
+        description="Monitor requests, revenue, profile readiness, and venue performance from one owner workspace."
+        action={
+          <DashButton href="/dashboard/bookings" icon="calendar_month">
+            View All Bookings
+          </DashButton>
+        }
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {kpis.map((kpi) => (
@@ -166,13 +169,14 @@ export function VenueOwnerOverview({
 
       <div className="grid gap-6 xl:grid-cols-[1fr_320px]">
         <Panel padding={false} className="overflow-hidden">
-          <div className="border-b border-[#e5e7eb] p-5 sm:p-6">
+          <div className="border-b border-[#e5e7eb] bg-[#f8fbff] p-5 sm:p-6">
             <PanelHeader
               title="Booking Requests"
               description="Review and respond to incoming reservation requests."
               action={
-                <span className="rounded-full bg-[#eff6ff] px-3 py-1 text-xs font-bold text-[#1d4ed8]">
-                  {initialBookings.filter((r) => r.status === "pending").length} pending
+                <span className="rounded-full border border-[#bfdbfe] bg-white px-3 py-1 text-xs font-bold text-[#1d4ed8] shadow-sm">
+                  {initialBookings.filter((r) => r.status === "pending").length}{" "}
+                  pending
                 </span>
               }
             />
@@ -193,7 +197,9 @@ export function VenueOwnerOverview({
                   header: "Event",
                   cell: (r) => (
                     <div>
-                      <p className="font-semibold text-[#111827]">{r.eventName}</p>
+                      <p className="font-semibold text-[#111827]">
+                        {r.eventName}
+                      </p>
                       <p className="text-xs text-[#6b7280]">{r.eventType}</p>
                     </div>
                   ),
@@ -224,7 +230,9 @@ export function VenueOwnerOverview({
                   key: "revenue",
                   header: "Revenue",
                   cell: (r) => (
-                    <span className="font-semibold text-[#111827]">{r.revenue}</span>
+                    <span className="font-semibold text-[#111827]">
+                      {r.revenue}
+                    </span>
                   ),
                 },
                 {
@@ -242,7 +250,7 @@ export function VenueOwnerOverview({
                           type="button"
                           disabled={loadingId === r.id}
                           onClick={() => handleAction(r, "approved")}
-                          className="rounded-lg bg-[#1d4ed8] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#1e40af] disabled:opacity-50"
+                          className="rounded-xl bg-[#1d4ed8] px-3 py-2 text-xs font-bold text-white shadow-sm shadow-blue-200/70 hover:bg-[#1e40af] disabled:opacity-50"
                         >
                           Accept
                         </button>
@@ -250,7 +258,7 @@ export function VenueOwnerOverview({
                           type="button"
                           disabled={loadingId === r.id}
                           onClick={() => handleAction(r, "declined")}
-                          className="rounded-lg border border-[#e5e7eb] px-3 py-1.5 text-xs font-bold text-[#4b5563] hover:border-red-300 hover:text-red-700 disabled:opacity-50"
+                          className="rounded-xl border border-[#dbe3ef] bg-white px-3 py-2 text-xs font-bold text-[#475569] shadow-sm hover:border-red-300 hover:text-red-700 disabled:opacity-50"
                         >
                           Decline
                         </button>
@@ -281,7 +289,9 @@ export function VenueOwnerOverview({
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-[#4b5563]">Profile completion</span>
-                <span className="font-bold text-[#1d4ed8]">{profileCompletion}%</span>
+                <span className="font-bold text-[#1d4ed8]">
+                  {profileCompletion}%
+                </span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-[#e5e7eb]">
                 <div
@@ -299,7 +309,7 @@ export function VenueOwnerOverview({
             </Link>
           </Panel>
 
-          <Panel className="bg-[#eff6ff]/40">
+          <Panel className="bg-gradient-to-br from-[#eff6ff] to-white">
             <PanelHeader
               title="Performance Trend"
               description="Revenue from confirmed bookings"

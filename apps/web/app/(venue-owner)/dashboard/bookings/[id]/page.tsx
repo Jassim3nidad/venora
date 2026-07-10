@@ -176,7 +176,7 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
       action={
         <Link
           href="/dashboard/bookings"
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 text-sm font-bold text-[#111827] transition hover:border-[#1D4ED8] hover:text-[#1D4ED8]"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-[#dbe3ef] bg-white px-4 text-sm font-bold text-[#0f172a] shadow-sm shadow-slate-200/60 transition hover:border-[#93c5fd] hover:text-[#1d4ed8]"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
@@ -185,15 +185,15 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
     >
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px] xl:items-start">
         <div className="grid gap-5">
-          <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm sm:p-6">
+          <section className="rounded-[24px] border border-[#e5e7eb] bg-white p-5 shadow-sm shadow-slate-200/60 sm:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <StatusBadge status={typedBooking.status} />
-                <h2 className="mt-3 text-2xl font-black tracking-[-0.04em] text-[#111827]">
+                <h2 className="mt-3 text-2xl font-black tracking-tight text-[#0f172a]">
                   Booking request
                 </h2>
               </div>
-              <p className="break-all text-xs font-bold text-[#6B7280]">
+              <p className="break-all text-xs font-bold text-[#64748b]">
                 {typedBooking.id}
               </p>
             </div>
@@ -221,13 +221,13 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
                 return (
                   <div
                     key={label as string}
-                    className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4"
+                    className="rounded-2xl border border-[#e5e7eb] bg-[#f8fbff] p-4 shadow-sm shadow-slate-200/60"
                   >
-                    <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">
-                      <DetailIcon className="h-3.5 w-3.5 text-[#1D4ED8]" />
+                    <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wide text-[#64748b]">
+                      <DetailIcon className="h-3.5 w-3.5 text-[#1d4ed8]" />
                       {label as string}
                     </div>
-                    <p className="mt-2 text-sm font-black text-[#111827]">
+                    <p className="mt-2 text-sm font-black text-[#0f172a]">
                       {value as string}
                     </p>
                   </div>
@@ -236,51 +236,51 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm sm:p-6">
-            <h2 className="flex items-center gap-2 text-xl font-black tracking-[-0.03em] text-[#111827]">
-              <MessageSquareText className="h-5 w-5 text-[#1D4ED8]" />
+          <section className="rounded-[24px] border border-[#e5e7eb] bg-white p-5 shadow-sm shadow-slate-200/60 sm:p-6">
+            <h2 className="flex items-center gap-2 text-xl font-black tracking-tight text-[#0f172a]">
+              <MessageSquareText className="h-5 w-5 text-[#1d4ed8]" />
               Notes
             </h2>
             <div className="mt-4 grid gap-3">
-              <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
-                <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">
+              <div className="rounded-2xl border border-[#e5e7eb] bg-[#f8fbff] p-4">
+                <p className="text-xs font-extrabold uppercase tracking-wide text-[#64748b]">
                   Customer inquiry
                 </p>
-                <p className="mt-2 text-sm font-medium leading-6 text-[#4B5563]">
+                <p className="mt-2 text-sm font-medium leading-6 text-[#475569]">
                   {typedBooking.special_requests || "No inquiry note."}
                 </p>
               </div>
-              <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
-                <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">
+              <div className="rounded-2xl border border-[#e5e7eb] bg-[#f8fbff] p-4">
+                <p className="text-xs font-extrabold uppercase tracking-wide text-[#64748b]">
                   Venue response
                 </p>
-                <p className="mt-2 text-sm font-medium leading-6 text-[#4B5563]">
+                <p className="mt-2 text-sm font-medium leading-6 text-[#475569]">
                   {"No response yet."}
                 </p>
               </div>
             </div>
           </section>
 
-          <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm sm:p-6">
-            <h2 className="text-xl font-black tracking-[-0.03em] text-[#111827]">
+          <section className="rounded-[24px] border border-[#e5e7eb] bg-white p-5 shadow-sm shadow-slate-200/60 sm:p-6">
+            <h2 className="text-xl font-black tracking-tight text-[#0f172a]">
               Status history
             </h2>
             <div className="mt-5 grid gap-0">
               {(typedBooking.booking_status_history ?? []).map((item) => (
                 <div
                   key={`${item.status}-${item.created_at}`}
-                  className="flex gap-3 border-l border-[#DBEAFE] pb-5 last:border-transparent last:pb-0"
+                  className="flex gap-3 border-l border-[#dbeafe] pb-5 last:border-transparent last:pb-0"
                 >
-                  <span className="-ml-[13px] flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#1D4ED8] text-xs font-black text-white" />
+                  <span className="-ml-[13px] flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#1d4ed8] text-xs font-black text-white" />
                   <div>
-                    <p className="text-sm font-black capitalize text-[#111827]">
+                    <p className="text-sm font-black capitalize text-[#0f172a]">
                       {item.status.replace(/_/g, " ")}
                     </p>
-                    <p className="mt-1 text-xs font-semibold text-[#6B7280]">
+                    <p className="mt-1 text-xs font-semibold text-[#64748b]">
                       {formatDate(item.created_at)}
                     </p>
                     {item.note ? (
-                      <p className="mt-2 text-sm text-[#4B5563]">{item.note}</p>
+                      <p className="mt-2 text-sm text-[#475569]">{item.note}</p>
                     ) : null}
                   </div>
                 </div>
@@ -290,8 +290,8 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
         </div>
 
         <aside className="grid gap-5 xl:sticky xl:top-24">
-          <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm sm:p-6">
-            <h2 className="text-xl font-black tracking-[-0.03em] text-[#111827]">
+          <section className="rounded-[24px] border border-[#e5e7eb] bg-white p-5 shadow-sm shadow-slate-200/60 sm:p-6">
+            <h2 className="text-xl font-black tracking-tight text-[#0f172a]">
               Owner action
             </h2>
             <div className="mt-4">
@@ -304,15 +304,15 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
               ) : typedBooking.status === "confirmed" ? (
                 <OwnerCompleteBookingButton bookingId={typedBooking.id} />
               ) : (
-                <p className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-semibold text-[#4B5563]">
+                <p className="rounded-2xl border border-[#e5e7eb] bg-[#f8fbff] p-4 text-sm font-semibold text-[#475569]">
                   No owner action is required for this status.
                 </p>
               )}
             </div>
           </section>
 
-          <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-sm sm:p-6">
-            <h2 className="text-xl font-black tracking-[-0.03em] text-[#111827]">
+          <section className="rounded-[24px] border border-[#e5e7eb] bg-white p-5 shadow-sm shadow-slate-200/60 sm:p-6">
+            <h2 className="text-xl font-black tracking-tight text-[#0f172a]">
               Transactions
             </h2>
             <div className="mt-4 grid gap-3">
@@ -320,15 +320,15 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
                 typedBooking.transactions?.map((transaction) => (
                   <div
                     key={transaction.id}
-                    className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4"
+                    className="rounded-2xl border border-[#e5e7eb] bg-[#f8fbff] p-4"
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-black text-[#111827]">
+                      <p className="text-sm font-black text-[#0f172a]">
                         {formatCurrency(transaction.amount)}
                       </p>
                       <StatusBadge status={transaction.status} />
                     </div>
-                    <p className="mt-2 text-xs font-semibold text-[#6B7280]">
+                    <p className="mt-2 text-xs font-semibold text-[#64748b]">
                       {transaction.payment_provider.toUpperCase()} -{" "}
                       {formatDate(
                         transaction.paid_at ?? transaction.created_at,
@@ -337,7 +337,7 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
                   </div>
                 ))
               ) : (
-                <p className="rounded-xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-semibold text-[#4B5563]">
+                <p className="rounded-2xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-4 text-sm font-semibold text-[#475569]">
                   No transactions yet.
                 </p>
               )}

@@ -15,7 +15,7 @@ export function DashboardPage({
   return (
     <div
       className={cn(
-        "mx-auto w-full max-w-[1320px] space-y-8 px-4 py-6 sm:px-6 lg:px-8 lg:py-8",
+        "mx-auto w-full max-w-[1320px] space-y-7 px-4 py-5 sm:px-6 lg:px-8 lg:py-7",
         className,
       )}
     >
@@ -59,23 +59,26 @@ export function PageHeader({
   badge?: string;
 }) {
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-      <div>
-        {badge ? (
-          <span className="mb-2 inline-flex rounded-full bg-[#eff6ff] px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-[#1d4ed8]">
-            {badge}
-          </span>
-        ) : null}
-        <h1 className="font-display text-2xl font-bold tracking-tight text-[#111827] sm:text-3xl">
-          {title}
-        </h1>
-        {description ? (
-          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#4b5563] sm:text-base">
-            {description}
-          </p>
-        ) : null}
+    <div className="relative overflow-hidden rounded-[28px] border border-[#dbeafe] bg-gradient-to-br from-white via-[#f8fbff] to-[#eff6ff] p-5 shadow-sm shadow-slate-200/70 sm:p-6">
+      <div className="pointer-events-none absolute right-0 top-0 h-32 w-32 rounded-full bg-[#bfdbfe]/30 blur-3xl" />
+      <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          {badge ? (
+            <span className="mb-3 inline-flex rounded-full border border-[#bfdbfe] bg-white/80 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#1d4ed8] shadow-sm">
+              {badge}
+            </span>
+          ) : null}
+          <h1 className="font-display text-2xl font-black tracking-tight text-[#0f172a] sm:text-[2rem] sm:leading-tight">
+            {title}
+          </h1>
+          {description ? (
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#475569]">
+              {description}
+            </p>
+          ) : null}
+        </div>
+        {action ? <div className="shrink-0 sm:pt-1">{action}</div> : null}
       </div>
-      {action ? <div className="shrink-0">{action}</div> : null}
     </div>
   );
 }
@@ -94,7 +97,7 @@ export function Panel({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-[#e5e7eb] bg-white shadow-sm",
+        "rounded-[24px] border border-[#e5e7eb] bg-white shadow-sm shadow-slate-200/60",
         padding && "p-5 sm:p-6",
         className,
       )}
@@ -116,9 +119,13 @@ export function PanelHeader({
   return (
     <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div>
-        <h2 className="font-display text-lg font-bold text-[#111827]">{title}</h2>
+        <h2 className="font-display text-lg font-black tracking-tight text-[#0f172a]">
+          {title}
+        </h2>
         {description ? (
-          <p className="mt-1 text-sm text-[#4b5563]">{description}</p>
+          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#64748b]">
+            {description}
+          </p>
         ) : null}
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}
@@ -140,26 +147,26 @@ export function KpiCard({
   highlight?: boolean;
 }) {
   return (
-    <Panel className="flex flex-col gap-3">
+    <Panel className="flex min-h-[150px] flex-col gap-4 transition hover:-translate-y-0.5 hover:border-[#bfdbfe] hover:shadow-md hover:shadow-blue-100/60">
       <div className="flex items-start justify-between">
         {icon ? (
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eff6ff] text-[#1d4ed8]">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eff6ff] text-[#1d4ed8] ring-1 ring-[#dbeafe]">
             <MaterialIcon name={icon} className="text-xl" />
           </div>
         ) : null}
         {change ? (
-          <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+          <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-100">
             {change}
           </span>
         ) : null}
       </div>
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-[#6b7280]">
+        <p className="text-xs font-bold uppercase tracking-wider text-[#64748b]">
           {label}
         </p>
         <p
           className={cn(
-            "font-display mt-1 text-3xl font-bold",
+            "font-display mt-2 text-3xl font-black tracking-tight",
             highlight ? "text-[#1d4ed8]" : "text-[#111827]",
           )}
         >
@@ -192,45 +199,53 @@ export function DataTable<T>({
 }) {
   if (rows.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-[#e5e7eb] px-6 py-12 text-center text-sm text-[#4b5563]">
+      <div className="rounded-[24px] border border-dashed border-[#cbd5e1] bg-[#f8fafc] px-6 py-12 text-center text-sm font-medium text-[#64748b]">
         {emptyMessage}
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-[#e5e7eb]">
-      <table className="w-full min-w-[640px] border-collapse text-left">
-        <thead className="bg-[#eff6ff]">
-          <tr>
-            {columns.map((col) => (
-              <th
-                key={col.key}
-                className={cn(
-                  "px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#1d4ed8]",
-                  col.className,
-                )}
-              >
-                {col.header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={keyFn(row)} className="border-t border-[#e5e7eb] bg-white">
+    <div className="overflow-hidden rounded-[22px] border border-[#e5e7eb] bg-white">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[640px] border-collapse text-left">
+          <thead className="bg-[#f8fafc]">
+            <tr>
               {columns.map((col) => (
-                <td
+                <th
                   key={col.key}
-                  className={cn("px-4 py-3.5 text-sm text-[#4b5563]", col.className)}
+                  className={cn(
+                    "px-4 py-3 text-xs font-black uppercase tracking-wider text-[#2563eb]",
+                    col.className,
+                  )}
                 >
-                  {col.cell(row)}
-                </td>
+                  {col.header}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr
+                key={keyFn(row)}
+                className="border-t border-[#e5e7eb] bg-white transition hover:bg-[#f8fbff]"
+              >
+                {columns.map((col) => (
+                  <td
+                    key={col.key}
+                    className={cn(
+                      "px-4 py-4 text-sm text-[#475569]",
+                      col.className,
+                    )}
+                  >
+                    {col.cell(row)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -248,6 +263,7 @@ const STATUS_STYLES: Record<string, string> = {
   reviewed: "bg-teal-50 text-teal-800 ring-1 ring-teal-200/60",
   expired: "bg-gray-50 text-gray-600 ring-1 ring-gray-200/60",
   active: "bg-[#eff6ff] text-[#1d4ed8] ring-1 ring-[#e5e7eb]",
+  inactive: "bg-slate-50 text-slate-600 ring-1 ring-slate-200/70",
 };
 
 export function StatusBadge({
@@ -261,7 +277,7 @@ export function StatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold capitalize",
+        "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold capitalize",
         STATUS_STYLES[normalized] ?? STATUS_STYLES.active,
       )}
     >
@@ -287,11 +303,11 @@ export function DashButton({
   href?: string;
 } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const styles = cn(
-    "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition",
+    "inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-bold transition focus:outline-none focus:ring-4 focus:ring-[#dbeafe]",
     variant === "primary" &&
-      "bg-[#1d4ed8] text-white hover:bg-[#1e40af] disabled:opacity-60",
+      "bg-[#1d4ed8] text-white shadow-sm shadow-blue-200/70 hover:bg-[#1e40af] disabled:opacity-60",
     variant === "secondary" &&
-      "border border-[#e5e7eb] bg-white text-[#111827] hover:border-[#1d4ed8] hover:text-[#1d4ed8]",
+      "border border-[#dbe3ef] bg-white text-[#0f172a] shadow-sm shadow-slate-200/60 hover:border-[#93c5fd] hover:text-[#1d4ed8]",
     variant === "ghost" &&
       "text-[#4b5563] hover:bg-[#eff6ff] hover:text-[#1d4ed8]",
     variant === "danger" &&
@@ -333,15 +349,19 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <Panel className="flex flex-col items-center py-12 text-center">
+    <Panel className="flex flex-col items-center border-dashed bg-gradient-to-br from-white to-[#f8fbff] py-12 text-center">
       {icon ? (
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#eff6ff] text-[#1d4ed8]">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#eff6ff] text-[#1d4ed8] ring-1 ring-[#dbeafe]">
           <MaterialIcon name={icon} className="text-3xl" />
         </div>
       ) : null}
-      <h3 className="font-display text-lg font-bold text-[#111827]">{title}</h3>
+      <h3 className="font-display text-lg font-black text-[#0f172a]">
+        {title}
+      </h3>
       {description ? (
-        <p className="mt-2 max-w-md text-sm text-[#4b5563]">{description}</p>
+        <p className="mt-2 max-w-md text-sm leading-relaxed text-[#64748b]">
+          {description}
+        </p>
       ) : null}
       {action ? <div className="mt-5">{action}</div> : null}
     </Panel>

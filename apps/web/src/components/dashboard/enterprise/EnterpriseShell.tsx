@@ -27,7 +27,8 @@ type EnterpriseShellProps = {
 function matchesRoute(href: string, pathname: string) {
   if (href === "/dashboard") return pathname === "/dashboard";
   if (href === "/admin") return pathname === "/admin";
-  if (href === "/dashboard/coordinator") return pathname === "/dashboard/coordinator";
+  if (href === "/dashboard/coordinator")
+    return pathname === "/dashboard/coordinator";
   if (href === "/dashboard/supplier") return pathname === "/dashboard/supplier";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
@@ -48,16 +49,24 @@ function NavLink({
       href={item.href}
       {...(onNavigate ? { onClick: onNavigate } : {})}
       className={cn(
-        "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition",
+        "group relative flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition",
         uppercase && "uppercase tracking-wide text-xs",
         isActive
-          ? "bg-[#eff6ff] text-[#1d4ed8]"
-          : "text-[#4b5563] hover:bg-[#eff6ff] hover:text-[#1d4ed8]",
+          ? "bg-white text-[#1d4ed8] shadow-sm ring-1 ring-[#dbeafe]"
+          : "text-[#475569] hover:bg-white/80 hover:text-[#1d4ed8]",
       )}
     >
+      {isActive ? (
+        <span className="absolute left-0 top-1/2 h-7 w-1 -translate-y-1/2 rounded-r-full bg-[#1d4ed8]" />
+      ) : null}
       <MaterialIcon
         name={item.icon}
-        className="text-xl"
+        className={cn(
+          "text-xl transition",
+          isActive
+            ? "text-[#1d4ed8]"
+            : "text-[#94a3b8] group-hover:text-[#1d4ed8]",
+        )}
         filled={isActive}
       />
       <span className="flex-1">{item.label}</span>
@@ -83,27 +92,33 @@ function Sidebar({
   // Some roles currently share a single destination page across multiple nav
   // entries; only the first matching item should render as "active" so the
   // sidebar always highlights exactly one button, like every other role.
-  const activeIndex = items.findIndex((item) => matchesRoute(item.href, pathname));
+  const activeIndex = items.findIndex((item) =>
+    matchesRoute(item.href, pathname),
+  );
 
   return (
     <div className="flex h-full flex-col">
-      <div className="mb-6 px-1">
-        <Link href="/" className="flex items-center gap-3" {...(onNavigate ? { onClick: onNavigate } : {})}>
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eff6ff] text-[#1d4ed8]">
+      <div className="mb-6">
+        <Link
+          href="/"
+          className="flex items-center gap-3 rounded-[22px] border border-[#dbeafe] bg-white p-3 shadow-sm shadow-slate-200/60"
+          {...(onNavigate ? { onClick: onNavigate } : {})}
+        >
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eff6ff] text-[#1d4ed8] ring-1 ring-[#dbeafe]">
             <MaterialIcon name="domain" className="text-xl" filled />
           </div>
           <div>
-            <p className="font-display text-lg font-bold text-[#111827]">
+            <p className="font-display text-lg font-black tracking-tight text-[#0f172a]">
               Venora
             </p>
-            <p className="text-xs font-medium text-[#6b7280]">
+            <p className="text-xs font-bold uppercase tracking-wide text-[#64748b]">
               {ROLE_LABELS[role]}
             </p>
           </div>
         </Link>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1">
+      <nav className="flex flex-1 flex-col gap-1.5">
         {items.map((item, index) => (
           <NavLink
             key={item.label}
@@ -115,14 +130,14 @@ function Sidebar({
         ))}
       </nav>
 
-      <div className="mt-6 border-t border-[#e5e7eb] pt-4">
+      <div className="mt-6 border-t border-[#dbe3ef] pt-4">
         <button
           type="button"
           onClick={() => {
             onNavigate?.();
             window.location.href = "/logout";
           }}
-          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+          className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50"
         >
           <MaterialIcon name="logout" className="text-xl" />
           Sign Out
@@ -150,15 +165,14 @@ function TopBar({
   onMenuClick?: () => void;
 }) {
   const displayName = userName ?? "Account User";
-  const subtitle =
-    userSubtitle ?? businessName ?? ROLE_LABELS[role];
+  const subtitle = userSubtitle ?? businessName ?? ROLE_LABELS[role];
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-[#e5e7eb] bg-white px-4 lg:hidden">
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-[#e5e7eb] bg-white/90 px-4 backdrop-blur lg:hidden">
       <button
         type="button"
         onClick={onMenuClick}
-        className="flex h-10 w-10 items-center justify-center rounded-xl text-[#4b5563] hover:bg-[#eff6ff]"
+        className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#dbe3ef] bg-white text-[#475569] shadow-sm hover:bg-[#eff6ff]"
         aria-label="Open menu"
       >
         <MaterialIcon name="menu" className="text-2xl" />
@@ -167,8 +181,8 @@ function TopBar({
       <div className="flex items-center gap-2">
         <NotificationBell />
         <div className="text-right">
-          <p className="text-sm font-bold text-[#111827]">{displayName}</p>
-          <p className="text-xs text-[#6b7280]">{subtitle}</p>
+          <p className="text-sm font-bold text-[#0f172a]">{displayName}</p>
+          <p className="text-xs text-[#64748b]">{subtitle}</p>
         </div>
         <ProfileMenu
           displayName={displayName}
@@ -199,13 +213,13 @@ function DesktopTopBar({
   const displayName = userName ?? "Account User";
 
   return (
-    <div className="sticky top-0 z-30 hidden items-center justify-between border-b border-[#e5e7eb] bg-white px-6 py-4 lg:flex">
+    <div className="sticky top-0 z-30 hidden items-center justify-between border-b border-[#e5e7eb] bg-white/90 px-6 py-4 backdrop-blur lg:flex">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-[#6b7280]">
+        <p className="inline-flex rounded-full border border-[#dbeafe] bg-[#eff6ff] px-3 py-1 text-xs font-black uppercase tracking-wider text-[#1d4ed8]">
           {ROLE_LABELS[role]}
         </p>
         {businessName ? (
-          <p className="font-display text-lg font-bold text-[#111827]">
+          <p className="mt-2 font-display text-lg font-black tracking-tight text-[#0f172a]">
             {businessName}
           </p>
         ) : null}
@@ -213,9 +227,9 @@ function DesktopTopBar({
       <div className="flex items-center gap-3">
         <NotificationBell />
         <div className="text-right">
-          <p className="text-sm font-bold text-[#111827]">{displayName}</p>
+          <p className="text-sm font-bold text-[#0f172a]">{displayName}</p>
           {userSubtitle ? (
-            <p className="text-xs text-[#6b7280]">{userSubtitle}</p>
+            <p className="text-xs text-[#64748b]">{userSubtitle}</p>
           ) : null}
         </div>
         <ProfileMenu
@@ -242,9 +256,9 @@ export function EnterpriseShell({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="flex min-h-dvh bg-[#f9fafb]">
+    <div className="flex min-h-dvh bg-[#f8fbff]">
       {/* Desktop sidebar - sticks in place while the page scrolls */}
-      <aside className="sticky top-0 hidden h-dvh w-[260px] shrink-0 overflow-y-auto border-r border-[#e5e7eb] bg-white p-5 lg:block">
+      <aside className="sticky top-0 hidden h-dvh w-[272px] shrink-0 overflow-y-auto border-r border-[#dbe3ef] bg-[#eef6ff] p-5 lg:block">
         <Sidebar role={role} pathname={pathname} />
       </aside>
 
@@ -257,7 +271,7 @@ export function EnterpriseShell({
             aria-label="Close menu"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="relative h-full w-[280px] overflow-y-auto bg-white p-5 shadow-xl">
+          <aside className="relative h-full w-[288px] overflow-y-auto bg-[#eef6ff] p-5 shadow-xl">
             <Sidebar
               role={role}
               pathname={pathname}
