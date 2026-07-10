@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useId, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { queryKeys } from "@/lib/query-keys";
 import {
@@ -52,8 +52,9 @@ export interface VenueAvailability {
 }
 
 export function useCalendar(venueId: string, currentMonth: Date) {
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const queryClient = useQueryClient();
+  const channelInstanceId = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const monthStr = format(currentMonth, "yyyy-MM");
 
   // Format bounds for the queries
@@ -108,7 +109,7 @@ export function useCalendar(venueId: string, currentMonth: Date) {
     if (!venueId) return;
 
     const channel = supabase
-      .channel(`calendar-updates-${venueId}`)
+      .channel(`calendar-updates-${venueId}-${monthStr}-${channelInstanceId}`)
       .on(
         "postgres_changes",
         {
@@ -142,7 +143,7 @@ export function useCalendar(venueId: string, currentMonth: Date) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [venueId, monthStr, supabase, queryClient]);
+  }, [venueId, monthStr, channelInstanceId, supabase, queryClient]);
 
   // Helper functions
   const getBookingsForDay = (day: Date) =>
