@@ -8,6 +8,7 @@ import {
   PanelHeader,
 } from "@/components/dashboard/enterprise";
 import VenuePhotoUpload from "@/components/venues/VenuePhotoUpload";
+import VenueVideoUpload from "@/components/venues/VenueVideoUpload";
 import DescriptionGeneratorPanel from "@/features/venues/ui/DescriptionGeneratorPanel";
 import { getLatestGeneratedContentByType } from "@/features/venues/application/queries";
 import {
@@ -1091,10 +1092,16 @@ export default async function EditVenuePage({
           </div>
         </Panel>
 
-        <VenuePhotoUpload
-          venueId={venue.id}
-          organizationId={venue.organization_id}
-        />
+        <div className="space-y-6">
+          <VenueVideoUpload
+            venueId={venue.id}
+            organizationId={venue.organization_id}
+          />
+          <VenuePhotoUpload
+            venueId={venue.id}
+            organizationId={venue.organization_id}
+          />
+        </div>
       </div>
     </DashboardSubPage>
   );

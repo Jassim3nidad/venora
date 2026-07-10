@@ -16,9 +16,17 @@ export function sortVenueMedia(media: VenueMedia[]): VenueMedia[] {
 }
 
 export function pickFeaturedMedia(media: VenueMedia[]): VenueMedia | null {
-  const sorted = sortVenueMedia(media);
-  if (sorted.length === 0) return null;
-  return sorted.find((item) => item.is_featured) ?? sorted[0] ?? null;
+  const images = pickGalleryImages(media);
+  if (images.length === 0) return null;
+  return images.find((item) => item.is_featured) ?? images[0] ?? null;
+}
+
+export function pickPromotionalVideo(media: VenueMedia[]): VenueMedia | null {
+  return sortVenueMedia(media).find((item) => item.media_type === "video") ?? null;
+}
+
+export function pickGalleryImages(media: VenueMedia[]): VenueMedia[] {
+  return sortVenueMedia(media).filter((item) => item.media_type === "image");
 }
 
 export function formatPriceUnit(unit: string): string {
