@@ -268,6 +268,9 @@ export async function createSupplierContactRequestAction(rawInput: unknown) {
     let venueNameSnapshot: string | undefined = undefined;
     let eventStartTimeSnapshot: string | undefined = undefined;
 
+    let eventDateSnapshot: string | undefined = undefined;
+    let guestCountSnapshot: number | undefined = undefined;
+
     if (input.bookingId) {
       const { data: booking, error: bookingError } = await supabase
         .from("bookings")
@@ -313,6 +316,8 @@ export async function createSupplierContactRequestAction(rawInput: unknown) {
       venueId = booking.venue_id;
       venueNameSnapshot = venueName;
       eventStartTimeSnapshot = booking.event_start_time ?? undefined;
+      eventDateSnapshot = booking.event_date ?? undefined;
+      guestCountSnapshot = typeof booking.guest_count === "number" ? booking.guest_count : undefined;
     }
 
     const { data, error } = await supabase
@@ -333,6 +338,8 @@ export async function createSupplierContactRequestAction(rawInput: unknown) {
         venue_name_snapshot: venueNameSnapshot ?? null,
         event_start_time_snapshot: eventStartTimeSnapshot ?? null,
         location_snapshot: eventLocation ?? null,
+        event_date_snapshot: eventDateSnapshot ?? null,
+        guest_count_snapshot: guestCountSnapshot ?? null,
       })
       .select("id, status")
       .single();
