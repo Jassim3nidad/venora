@@ -9,15 +9,14 @@ import { AddressConfirmation } from "./AddressConfirmation";
 import { VerificationUpload } from "./VerificationUpload";
 import { submitPartnerApplicationAction } from "../actions/partner.actions";
 import { PartnerApplicationInput } from "../schemas/partner.schema";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 type Step = 
   | "guidance" 
   | "role" 
   | "category" 
   | "address" 
-  | "documents" 
-  | "success";
+  | "documents";
 
 export function PartnerWizard() {
   const router = useRouter();
@@ -44,7 +43,7 @@ export function PartnerWizard() {
     const response = await submitPartnerApplicationAction(finalData);
     
     if (response.success) {
-      setStep("success");
+      router.refresh();
     } else {
       setError(response.error || "An unknown error occurred.");
     }
@@ -97,25 +96,6 @@ export function PartnerWizard() {
         />
       )}
 
-      {step === "success" && (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100 mb-6">
-            <CheckCircle2 className="h-10 w-10 text-green-600" />
-          </div>
-          <h2 className="text-3xl font-black tracking-tight text-slate-900 mb-4">
-            Application Submitted
-          </h2>
-          <p className="text-slate-500 mb-8 max-w-md">
-            We have received your application. Our Admin team will review your verification documents and business address. You will receive an email once approved!
-          </p>
-          <button
-            onClick={() => router.push("/account")}
-            className="rounded-full bg-[#2563EB] px-8 py-3 text-sm font-bold text-white transition hover:bg-[#1D4ED8]"
-          >
-            Return to Dashboard
-          </button>
-        </div>
-      )}
     </div>
   );
 }
