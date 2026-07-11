@@ -24,7 +24,8 @@
     "test:notifications:e2e": "pnpm --filter @venora/web exec playwright test",
     "validate:notifications": "pnpm run test:notifications:providers && pnpm run test:notifications:db && pnpm run test:notifications:pipeline && pnpm run test:notifications:e2e",
     "test:commission:resolution": "node scripts/validate-commission-resolution.mjs",
-    "test:notifications:booking-status": "node scripts/validate-booking-status-notifications.mjs"
+    "test:notifications:booking-status": "node scripts/validate-booking-status-notifications.mjs",
+    "test:bookings:cancellation-history": "node scripts/validate-cancellation-history.mjs"
   },
   "devDependencies": {
     "prettier": "^3.3.3",
