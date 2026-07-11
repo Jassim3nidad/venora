@@ -54,6 +54,12 @@ supabase/.temp
 
 # Test
 coverage/
+playwright/.auth/
+playwright-report/
+test-results/
+**/e2e/**/*.png
+**/e2e/**/*.webm
+**/e2e/**/*.zip
 
 # Misc
 *.tsbuildinfo
