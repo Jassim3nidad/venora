@@ -1,3 +1,5 @@
+import type { AdminPermission } from "@/lib/rbac/permissions";
+
 export type EnterpriseRole =
   | "venue_owner"
   | "coordinator"
@@ -9,6 +11,14 @@ export type NavItem = {
   href: string;
   icon: string;
   badge?: string;
+  /**
+   * Admin nav only: the permission required to see this item. Undefined
+   * means "visible to any admin-role account" (the pre-existing default).
+   * This only hides the link — the destination page/action still enforces
+   * the same permission server-side; see EnterpriseShell's navItems prop
+   * and app/(admin)/admin/layout.tsx for where this is applied.
+   */
+  permission?: AdminPermission;
 };
 
 export const ROLE_LABELS: Record<EnterpriseRole, string> = {
@@ -46,13 +56,18 @@ export const NAV_BY_ROLE: Record<EnterpriseRole, NavItem[]> = {
     { label: "Analytics", href: "/dashboard/supplier/analytics", icon: "trending_up" },
   ],
   admin: [
-    { label: "Overview", href: "/admin", icon: "dashboard" },
-    { label: "Applications", href: "/admin/applications", icon: "how_to_reg" },
-    { label: "Venues", href: "/admin/venues", icon: "location_city" },
-    { label: "Suppliers", href: "/admin/suppliers", icon: "storefront" },
-    { label: "Reviews", href: "/admin/reviews", icon: "flag" },
-    { label: "Users", href: "/admin/users", icon: "group" },
-    { label: "Commissions", href: "/admin/commissions", icon: "payments" },
-    { label: "Reports", href: "/admin/reports", icon: "assessment" },
+    { label: "Overview", href: "/admin", icon: "dashboard", permission: "admin.dashboard.view" },
+    { label: "Applications", href: "/admin/applications", icon: "how_to_reg", permission: "users.verify" },
+    { label: "Venues", href: "/admin/venues", icon: "location_city", permission: "venues.view" },
+    { label: "Suppliers", href: "/admin/suppliers", icon: "storefront", permission: "suppliers.view" },
+    { label: "Reviews", href: "/admin/reviews", icon: "flag", permission: "marketplace.moderate" },
+    { label: "Users", href: "/admin/users", icon: "group", permission: "users.view" },
+    { label: "Commissions", href: "/admin/commissions", icon: "payments", permission: "commissions.view" },
+    { label: "Reports", href: "/admin/reports", icon: "assessment", permission: "reports.view" },
+    { label: "Marketplace", href: "/admin/marketplace", icon: "storefront", permission: "marketplace.view" },
+    { label: "AI Configuration", href: "/admin/ai-configuration", icon: "smart_toy", permission: "ai_config.view" },
+    { label: "Settings", href: "/admin/settings", icon: "settings", permission: "system_settings.view" },
+    { label: "Administrators", href: "/admin/administrators", icon: "admin_panel_settings", permission: "admin_accounts.view" },
+    { label: "Audit Logs", href: "/admin/audit-logs", icon: "history", permission: "audit_logs.view" },
   ],
 };

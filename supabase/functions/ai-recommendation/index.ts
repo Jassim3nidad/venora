@@ -11,7 +11,16 @@ import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { embedQuery, warmVenueEmbeddings, toVectorLiteral } from "../_shared/embeddings.ts";
 import { toVenuePayload } from "../_shared/venues.ts";
-import { OPENROUTER_BASE_URL, DEFAULT_CHAT_MODEL, openRouterHeaders } from "../_shared/openrouter.ts";
+import {
+  loadAiConfig,
+  validateProviderModel,
+  checkAiUsageLimits,
+  logAiUsage,
+  postChatCompletion,
+  estimateCostCents,
+  extractTokenUsage,
+  type AiConfiguration,
+} from "../_shared/ai-config.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -35,17 +44,18 @@ function errorResponse(code: string, message: string, status = 500) {
 
 async function buildPreferenceQuery(
   openRouterApiKey: string,
+  openAiApiKey: string | null,
   venueNames: string[],
-): Promise<string> {
-  const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
-    method: "POST",
-    headers: openRouterHeaders(openRouterApiKey),
-    body: JSON.stringify({
-      model: Deno.env.get("OPENROUTER_RECOMMENDATION_MODEL") ?? DEFAULT_CHAT_MODEL,
-      temperature: 0.3,
+  config: AiConfiguration,
+): Promise<{ query: string; inputTokens: number | null; outputTokens: number | null; providerUsed: string; modelUsed: string }> {
+  const { response, providerUsed, modelUsed } = await postChatCompletion(
+    config,
+    { openrouter: openRouterApiKey, openai: openAiApiKey },
+    {
+      temperature: config.temperature ?? 0.3,
       // Generous budget — the default free model reasons before writing
       // content; too low a cap truncates it mid-thought.
-      max_tokens: 4000,
+      max_tokens: config.maxTokens,
       messages: [
         {
           role: "system",
@@ -57,19 +67,18 @@ async function buildPreferenceQuery(
           content: `Past venues: ${venueNames.join(", ") || "none yet"}. Return only the search query string.`,
         },
       ],
-    }),
-  });
+    },
+  );
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`OpenRouter preference summary failed: ${errorText}`);
+    throw new Error(`AI preference summary failed: ${errorText}`);
   }
 
   const payload = await response.json();
   const content = payload?.choices?.[0]?.message?.content;
-  return typeof content === "string" && content.trim()
-    ? content.trim()
-    : "elegant event venue";
+  const query = typeof content === "string" && content.trim() ? content.trim() : "elegant event venue";
+  return { query, ...extractTokenUsage(payload), providerUsed, modelUsed };
 }
 
 serve(async (req) => {
@@ -105,6 +114,23 @@ serve(async (req) => {
       );
     }
 
+    // Service-role client for writes/RPCs that must bypass RLS (impression
+    // logging, embedding warm-up) — also used to load AI config before auth
+    // resolves, since config gating doesn't depend on who's asking.
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+    const aiConfig = await loadAiConfig(supabase, "recommendation");
+    const providerCheck = aiConfig ? validateProviderModel(aiConfig) : { ok: false as const };
+    let aiLimitCheck: { allowed: boolean; reason?: string } = { allowed: true };
+    if (aiConfig?.enabled && providerCheck.ok) {
+      aiLimitCheck = await checkAiUsageLimits(supabase, "recommendation", aiConfig);
+    }
+    // If the AI personalization feature is disabled/misconfigured/rate-limited,
+    // this endpoint doesn't fail closed entirely — it falls back to the
+    // existing cold-start (rating-based) path below, which needs no AI call
+    // at all. That's a deliberate, narrower interpretation of "fail closed"
+    // for this specific endpoint: the AI call is skipped, not the feature.
+    const personalizationAllowed = !!aiConfig?.enabled && providerCheck.ok && aiLimitCheck.allowed;
+
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return errorResponse("UNAUTHORIZED", "Sign in to see personalised recommendations.", 401);
@@ -120,9 +146,6 @@ serve(async (req) => {
     if (!user) {
       return errorResponse("UNAUTHORIZED", "Sign in to see personalised recommendations.", 401);
     }
-
-    // Service-role client for writes/RPCs that must bypass RLS (impression logging, embedding warm-up).
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const [bookingsRes, favsRes] = await Promise.all([
       supabase
@@ -150,7 +173,7 @@ serve(async (req) => {
     let preferenceQuery: string | null = null;
     let venueRows: any[] = [];
 
-    if (venueNames.length === 0) {
+    if (venueNames.length === 0 || !personalizationAllowed) {
       const { data, error } = await supabase.rpc("search_venues", {
         query_embedding: null,
         keyword: null,
@@ -166,11 +189,44 @@ serve(async (req) => {
       venueRows = data ?? [];
     } else {
       mode = "personalized";
-      preferenceQuery = await buildPreferenceQuery(openRouterApiKey, venueNames);
+      const requestStartedAt = Date.now();
+      let queryResult: Awaited<ReturnType<typeof buildPreferenceQuery>>;
+      try {
+        queryResult = await buildPreferenceQuery(openRouterApiKey, openAiApiKey, venueNames, aiConfig!);
+      } catch (error) {
+        await logAiUsage(supabase, {
+          feature: "recommendation",
+          provider: aiConfig!.provider,
+          model: aiConfig!.model,
+          actorId: user.id,
+          durationMs: Date.now() - requestStartedAt,
+          success: false,
+          errorCategory: "provider_error",
+        });
+        throw error;
+      }
+      preferenceQuery = queryResult.query;
+      await logAiUsage(supabase, {
+        feature: "recommendation",
+        provider: queryResult.providerUsed,
+        model: queryResult.modelUsed,
+        actorId: user.id,
+        inputTokens: queryResult.inputTokens,
+        outputTokens: queryResult.outputTokens,
+        estimatedCostCents: estimateCostCents(queryResult.modelUsed, (queryResult.inputTokens ?? 0) + (queryResult.outputTokens ?? 0)),
+        durationMs: Date.now() - requestStartedAt,
+        success: true,
+      });
 
       // Best-effort backfill so newer venues have embeddings to match against.
+      // (Deliberate narrow exception to "fail closed": embeddings are a
+      // best-effort ranking enhancement that already degrades gracefully
+      // everywhere else, so a transient config-read failure here falls back
+      // to "attempt it" rather than silently disabling ranking quality.)
+      const embeddingsConfig = await loadAiConfig(supabase, "embeddings");
+      const embeddingsEnabled = embeddingsConfig?.enabled ?? true;
       let queryVector: number[] | null = null;
-      if (openAiApiKey) {
+      if (openAiApiKey && embeddingsEnabled) {
         await warmVenueEmbeddings(
           supabase,
           openAiApiKey,

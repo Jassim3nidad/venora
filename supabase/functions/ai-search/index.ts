@@ -10,7 +10,17 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { embedQuery, warmVenueEmbeddings, toVectorLiteral } from "../_shared/embeddings.ts";
 import { toVenuePayload } from "../_shared/venues.ts";
 import { cleanString, normalizeText } from "../_shared/text.ts";
-import { OPENROUTER_BASE_URL, DEFAULT_CHAT_MODEL, openRouterHeaders } from "../_shared/openrouter.ts";
+import {
+  loadAiConfig,
+  validateProviderModel,
+  checkAiUsageLimits,
+  logAiUsage,
+  postChatCompletion,
+  estimateCostCents,
+  extractTokenUsage,
+  moderateInputText,
+  type AiConfiguration,
+} from "../_shared/ai-config.ts";
 
 type VenueType =
   | "garden"
@@ -209,18 +219,19 @@ function extractChatContent(payload: any) {
 async function parseQueryWithOpenAI(
   query: string,
   openRouterApiKey: string,
-): Promise<ExtractedSearchParameters> {
+  openAiApiKey: string | null,
+  config: AiConfiguration,
+): Promise<ExtractedSearchParameters & { inputTokens: number | null; outputTokens: number | null; providerUsed: string; modelUsed: string }> {
   const deterministic = deterministicExtraction(query);
-  const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
-    method: "POST",
-    headers: openRouterHeaders(openRouterApiKey),
-    body: JSON.stringify({
-      model: Deno.env.get("OPENROUTER_SEARCH_MODEL") ?? DEFAULT_CHAT_MODEL,
-      temperature: 0,
+  const { response, providerUsed, modelUsed } = await postChatCompletion(
+    config,
+    { openrouter: openRouterApiKey, openai: openAiApiKey },
+    {
+      temperature: config.temperature ?? 0,
       // Generous budget: the default free model is a reasoning model that
       // spends tokens on hidden chain-of-thought before writing `content` —
       // too low a cap truncates it mid-thought with content: null.
-      max_tokens: 2000,
+      max_tokens: config.maxTokens,
       messages: [
         {
           role: "system",
@@ -253,19 +264,24 @@ async function parseQueryWithOpenAI(
           },
         },
       },
-    }),
-  });
+    },
+  );
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`OpenRouter parsing failed: ${errorText}`);
+    throw new Error(`AI query parsing failed: ${errorText}`);
   }
 
   const payload = await response.json();
   const content = extractChatContent(payload);
-  if (!content) throw new Error("OpenRouter parsing returned no JSON content.");
+  if (!content) throw new Error("AI provider returned no JSON content for query parsing.");
 
-  return normalizeExtractedParameters(JSON.parse(content), deterministic);
+  return {
+    ...normalizeExtractedParameters(JSON.parse(content), deterministic),
+    ...extractTokenUsage(payload),
+    providerUsed,
+    modelUsed,
+  };
 }
 
 function normalizeVenueType(value: string | null): VenueType | null {
@@ -460,6 +476,21 @@ serve(async (req) => {
       );
     }
 
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+    // Natural-language parsing is the "AI feature" here — a filters-only
+    // search never calls the LLM at all (see the ternary below). When AI
+    // parsing is disabled/rate-limited, a free-text query still gets
+    // *some* interpretation via the existing deterministic (regex-based)
+    // extraction rather than failing the whole search.
+    const searchAiConfig = await loadAiConfig(supabase, "search");
+    const searchProviderCheck = searchAiConfig ? validateProviderModel(searchAiConfig) : { ok: false as const };
+    let searchLimitCheck: { allowed: boolean; reason?: string } = { allowed: true };
+    if (searchAiConfig?.enabled && searchProviderCheck.ok) {
+      searchLimitCheck = await checkAiUsageLimits(supabase, "search", searchAiConfig);
+    }
+    const aiParsingAllowed = !!searchAiConfig?.enabled && searchProviderCheck.ok && searchLimitCheck.allowed;
+
     const body = (await req.json().catch(() => null)) as SearchRequest | null;
     const filters = body?.filters ?? {};
     const query =
@@ -475,10 +506,45 @@ serve(async (req) => {
       );
     }
 
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
-    const parameters = query
-      ? await parseQueryWithOpenAI(query, openRouterApiKey)
-      : normalizeExtractedParameters({}, {});
+    if (query && searchAiConfig?.moderationEnabled) {
+      const moderation = moderateInputText(query);
+      if (!moderation.allowed) {
+        return errorResponse("AI_MODERATION_BLOCKED", moderation.reason!, 400);
+      }
+    }
+
+    let parameters: ExtractedSearchParameters;
+    if (query && aiParsingAllowed) {
+      const requestStartedAt = Date.now();
+      try {
+        const result = await parseQueryWithOpenAI(query, openRouterApiKey, openAiApiKey ?? null, searchAiConfig!);
+        parameters = result;
+        await logAiUsage(supabase, {
+          feature: "search",
+          provider: result.providerUsed,
+          model: result.modelUsed,
+          inputTokens: result.inputTokens,
+          outputTokens: result.outputTokens,
+          estimatedCostCents: estimateCostCents(result.modelUsed, (result.inputTokens ?? 0) + (result.outputTokens ?? 0)),
+          durationMs: Date.now() - requestStartedAt,
+          success: true,
+        });
+      } catch (error) {
+        await logAiUsage(supabase, {
+          feature: "search",
+          provider: searchAiConfig!.provider,
+          model: searchAiConfig!.model,
+          durationMs: Date.now() - requestStartedAt,
+          success: false,
+          errorCategory: "provider_error",
+        });
+        throw error;
+      }
+    } else if (query) {
+      parameters = normalizeExtractedParameters({}, deterministicExtraction(query));
+    } else {
+      parameters = normalizeExtractedParameters({}, {});
+    }
     const intent = await buildIntent(supabase, parameters, filters);
     const matchCount = Math.min(
       50,
@@ -489,7 +555,10 @@ serve(async (req) => {
     let embeddedVenueCount = 0;
     let queryVector: number[] | null = null;
 
-    if (semanticText && openAiApiKey) {
+    const embeddingsConfig = await loadAiConfig(supabase, "embeddings");
+    const embeddingsEnabled = embeddingsConfig?.enabled ?? true; // fail open only if the row is somehow missing — embeddings already degrade gracefully everywhere else
+
+    if (semanticText && openAiApiKey && embeddingsEnabled) {
       embeddedVenueCount = await warmVenueEmbeddings(
         supabase,
         openAiApiKey,

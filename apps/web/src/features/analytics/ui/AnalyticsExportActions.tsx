@@ -5,14 +5,14 @@ import { toast } from "sonner";
 import { MaterialIcon } from "@/components/dashboard/enterprise";
 import type { DateRange } from "../application/queries";
 
-function exportHref(format: "csv" | "pdf", range: DateRange) {
+function exportHref(format: "csv" | "pdf", range: DateRange, endpoint: string) {
   const params = new URLSearchParams({
     format,
     from: range.from,
     to: range.to,
   });
 
-  return `/api/analytics/venue-owner/export?${params.toString()}`;
+  return `${endpoint}?${params.toString()}`;
 }
 
 function filenameFromDisposition(disposition: string | null, fallback: string) {
@@ -31,7 +31,13 @@ function triggerDownload(blob: Blob, filename: string) {
   URL.revokeObjectURL(url);
 }
 
-export function AnalyticsExportActions({ range }: { range: DateRange }) {
+export function AnalyticsExportActions({
+  range,
+  endpoint = "/api/analytics/venue-owner/export",
+}: {
+  range: DateRange;
+  endpoint?: string;
+}) {
   const [activeFormat, setActiveFormat] = useState<"csv" | "pdf" | null>(null);
 
   async function downloadExport(format: "csv" | "pdf") {
@@ -40,7 +46,7 @@ export function AnalyticsExportActions({ range }: { range: DateRange }) {
     setActiveFormat(format);
 
     try {
-      const response = await fetch(exportHref(format, range), {
+      const response = await fetch(exportHref(format, range, endpoint), {
         credentials: "include",
         cache: "no-store",
       });

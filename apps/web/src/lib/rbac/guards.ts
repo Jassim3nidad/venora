@@ -33,7 +33,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { UnauthorizedError, ForbiddenError } from "@/lib/errors";
-import type { RoleName } from "./roles";
+import { ROLES, type RoleName } from "./roles";
 
 export type SessionContext = {
   userId: string;
@@ -105,4 +105,21 @@ export async function hasRole(...checkRoles: RoleName[]): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+// ── requireAdmin ──────────────────────────────────────────────────────────────
+
+/**
+ * Assert the caller holds the admin role. Thin, documented alias for
+ * `requireRole(ROLES.ADMIN)` — use this for admin checks that don't need a
+ * specific permission (e.g. "any admin can view this"). For anything
+ * gated to specific admin tiers (finance_admin, analyst, etc.), use
+ * `requirePermission()` from `./admin-context` instead, which checks the
+ * granular admin_user_roles/admin_role_permissions tables.
+ *
+ * @throws {UnauthorizedError} when no session exists.
+ * @throws {ForbiddenError}    when signed in but not an admin.
+ */
+export async function requireAdmin(): Promise<SessionContext> {
+  return requireRole(ROLES.ADMIN);
 }

@@ -1,0 +1,33 @@
+-- ============================================================
+-- Migration 061 — Fix resolve_commission() grant leak
+-- ============================================================
+--
+-- Live verification after applying 059 found resolve_commission()
+-- callable by an unauthenticated (anon) session, returning full
+-- commission-rule detail (rule id, rate, flat fee, computed amount) for
+-- any venue_id. calculate_commission() and confirm_booking_payment()
+-- correctly reject anon — this function did not.
+--
+-- Root cause: this project auto-grants EXECUTE directly to `anon` and
+-- `authenticated` on any newly created function (documented in
+-- 047_explicit_role_revoke.sql, discovered the same way for
+-- confirm_booking_payment back then). `REVOKE ... FROM PUBLIC` does not
+-- remove a grant made directly to a named role, only naming the role
+-- explicitly does. 059 revoked resolve_commission only `FROM PUBLIC`
+-- (correct for calculate_commission/confirm_booking_payment, which
+-- already had the anon/authenticated grants revoked by 047 and were
+-- CREATE OR REPLACE'd — replace preserves existing grants) but missed
+-- this for resolve_commission, a genuinely new function, so the
+-- convenience default reopened it on creation exactly as described in
+-- 047's own postmortem.
+--
+-- No admin_* function from 054-058 is affected the same way: each one
+-- has its own internal has_admin_permission()/ownership check in the
+-- function body (defense in depth), so even with the same loose outer
+-- grant, non-admin/anon callers are rejected by that inner check. This
+-- fix is scoped to resolve_commission specifically, which has no such
+-- inner check and relies on the grant alone — the same design as
+-- calculate_commission.
+
+REVOKE EXECUTE ON FUNCTION public.resolve_commission(uuid, numeric) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.resolve_commission(uuid, numeric) TO service_role;

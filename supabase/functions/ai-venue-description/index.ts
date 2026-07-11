@@ -10,7 +10,16 @@
  */
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { OPENROUTER_BASE_URL, DEFAULT_CHAT_MODEL, openRouterHeaders } from "../_shared/openrouter.ts";
+import {
+  loadAiConfig,
+  validateProviderModel,
+  checkAiUsageLimits,
+  logAiUsage,
+  postChatCompletion,
+  estimateCostCents,
+  extractTokenUsage,
+  type AiConfiguration,
+} from "../_shared/ai-config.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -124,36 +133,37 @@ function buildPrompt(
 
 async function requestCopy(
   openRouterApiKey: string,
+  openAiApiKey: string | null,
   prompt: { system: string; user: string },
-): Promise<string> {
-  const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
-    method: "POST",
-    headers: openRouterHeaders(openRouterApiKey),
-    body: JSON.stringify({
-      model: Deno.env.get("OPENROUTER_COPY_MODEL") ?? DEFAULT_CHAT_MODEL,
-      temperature: 0.6,
+  config: AiConfiguration,
+): Promise<{ text: string; inputTokens: number | null; outputTokens: number | null; providerUsed: string; modelUsed: string; usedFallback: boolean }> {
+  const { response, providerUsed, modelUsed, usedFallback } = await postChatCompletion(
+    config,
+    { openrouter: openRouterApiKey, openai: openAiApiKey },
+    {
+      temperature: config.temperature ?? 0.6,
       // Generous budget — the default free model reasons before writing
       // content; too low a cap truncates it mid-thought.
-      max_tokens: 4000,
+      max_tokens: config.maxTokens,
       messages: [
         { role: "system", content: prompt.system },
         { role: "user", content: prompt.user },
       ],
-    }),
-  });
+    },
+  );
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`OpenRouter copy generation failed: ${errorText}`);
+    throw new Error(`AI copy generation failed: ${errorText}`);
   }
 
   const payload = await response.json();
   const content = payload?.choices?.[0]?.message?.content;
   if (typeof content !== "string" || !content.trim()) {
-    throw new Error("OpenRouter returned no copy content.");
+    throw new Error("AI provider returned no copy content.");
   }
 
-  return content.trim();
+  return { text: content.trim(), ...extractTokenUsage(payload), providerUsed, modelUsed, usedFallback };
 }
 
 serve(async (req) => {
@@ -170,10 +180,29 @@ serve(async (req) => {
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const openRouterApiKey = Deno.env.get("OPENROUTER_API_KEY");
+    // Optional — only used as a fallback provider if configured and OpenRouter fails.
+    const openAiApiKey = Deno.env.get("OPENAI_API_KEY") ?? null;
 
     if (!supabaseUrl || !anonKey || !serviceRoleKey) {
       return errorResponse("CONFIGURATION_ERROR", "Missing Supabase configuration.", 500);
     }
+
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+    // Fail closed: an admin-disabled feature (or an unsupported
+    // provider/model) never reaches the AI provider at all.
+    const config = await loadAiConfig(supabase, "venue_description");
+    if (!config) {
+      return errorResponse("AI_CONFIG_MISSING", "AI configuration for this feature is missing.", 500);
+    }
+    if (!config.enabled) {
+      return errorResponse("AI_FEATURE_DISABLED", "Venue copy generation is currently disabled.", 403);
+    }
+    const providerCheck = validateProviderModel(config);
+    if (!providerCheck.ok) {
+      return errorResponse("AI_PROVIDER_UNSUPPORTED", providerCheck.reason!, 500);
+    }
+
     if (!openRouterApiKey) {
       return errorResponse("OPENROUTER_NOT_CONFIGURED", "OPENROUTER_API_KEY is not configured.", 500);
     }
@@ -204,7 +233,10 @@ serve(async (req) => {
       );
     }
 
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
+    const limitCheck = await checkAiUsageLimits(supabase, "venue_description", config);
+    if (!limitCheck.allowed) {
+      return errorResponse("AI_LIMIT_EXCEEDED", limitCheck.reason!, 429);
+    }
 
     const { data: venue, error: venueError } = await supabase
       .from("venues")
@@ -267,7 +299,38 @@ serve(async (req) => {
     }
 
     const prompt = buildPrompt(input.contentType, input.tone, venue, pkg);
-    const generatedText = await requestCopy(openRouterApiKey, prompt);
+
+    const requestStartedAt = Date.now();
+    let copyResult: Awaited<ReturnType<typeof requestCopy>>;
+    try {
+      copyResult = await requestCopy(openRouterApiKey, openAiApiKey, prompt, config);
+    } catch (error) {
+      await logAiUsage(supabase, {
+        feature: "venue_description",
+        provider: config.provider,
+        model: config.model,
+        actorId: user.id,
+        durationMs: Date.now() - requestStartedAt,
+        success: false,
+        errorCategory: "provider_error",
+      });
+      throw error;
+    }
+
+    const { text: generatedText, inputTokens, outputTokens, providerUsed, modelUsed, usedFallback } = copyResult;
+    await logAiUsage(supabase, {
+      feature: "venue_description",
+      provider: providerUsed,
+      model: modelUsed,
+      actorId: user.id,
+      inputTokens,
+      outputTokens,
+      estimatedCostCents: estimateCostCents(modelUsed, (inputTokens ?? 0) + (outputTokens ?? 0)),
+      durationMs: Date.now() - requestStartedAt,
+      success: true,
+      errorCategory: usedFallback ? "used_fallback_provider" : null,
+    });
+
     const maxLength = maxLengthByType[input.contentType];
 
     if (generatedText.length > maxLength) {

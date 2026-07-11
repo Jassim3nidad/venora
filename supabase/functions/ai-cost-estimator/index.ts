@@ -7,7 +7,16 @@
  */
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { OPENROUTER_BASE_URL, DEFAULT_CHAT_MODEL, openRouterHeaders } from "../_shared/openrouter.ts";
+import {
+  loadAiConfig,
+  validateProviderModel,
+  checkAiUsageLimits,
+  logAiUsage,
+  postChatCompletion,
+  estimateCostCents,
+  extractTokenUsage,
+  type AiConfiguration,
+} from "../_shared/ai-config.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -95,15 +104,16 @@ function isValidEstimate(value: any): value is CostEstimate {
 
 async function requestEstimate(
   openRouterApiKey: string,
+  openAiApiKey: string | null,
   venueInfo: string,
   input: EstimatorInput,
-): Promise<CostEstimate> {
-  const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
-    method: "POST",
-    headers: openRouterHeaders(openRouterApiKey),
-    body: JSON.stringify({
-      model: Deno.env.get("OPENROUTER_ESTIMATOR_MODEL") ?? DEFAULT_CHAT_MODEL,
-      temperature: 0.2,
+  config: AiConfiguration,
+): Promise<{ estimate: CostEstimate; inputTokens: number | null; outputTokens: number | null; providerUsed: string; modelUsed: string; usedFallback: boolean }> {
+  const { response, providerUsed, modelUsed, usedFallback } = await postChatCompletion(
+    config,
+    { openrouter: openRouterApiKey, openai: openAiApiKey },
+    {
+      temperature: config.temperature ?? 0.2,
       messages: [
         {
           role: "system",
@@ -137,22 +147,22 @@ async function requestEstimate(
       },
       // Generous budget — the default free model reasons before writing
       // content; too low a cap truncates it mid-thought.
-      max_tokens: 4000,
-    }),
-  });
+      max_tokens: config.maxTokens,
+    },
+  );
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`OpenRouter cost estimate failed: ${errorText}`);
+    throw new Error(`AI cost estimate failed: ${errorText}`);
   }
 
   const payload = await response.json();
   const content = payload?.choices?.[0]?.message?.content;
   if (typeof content !== "string") {
-    throw new Error("OpenRouter returned no estimate content.");
+    throw new Error("AI provider returned no estimate content.");
   }
 
-  return JSON.parse(content);
+  return { estimate: JSON.parse(content), ...extractTokenUsage(payload), providerUsed, modelUsed, usedFallback };
 }
 
 async function getAuthenticatedUserId(req: Request, supabaseUrl: string) {
@@ -180,6 +190,8 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const openRouterApiKey = Deno.env.get("OPENROUTER_API_KEY");
+    // Optional — only used as a fallback provider if configured and OpenRouter fails.
+    const openAiApiKey = Deno.env.get("OPENAI_API_KEY") ?? null;
 
     if (!supabaseUrl || !serviceRoleKey) {
       return errorResponse(
@@ -187,6 +199,22 @@ serve(async (req) => {
         "Cost estimator is missing Supabase configuration.",
         500,
       );
+    }
+
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+    // Fail closed: an admin-disabled feature (or an unsupported
+    // provider/model) never reaches the AI provider at all.
+    const config = await loadAiConfig(supabase, "cost_estimator");
+    if (!config) {
+      return errorResponse("AI_CONFIG_MISSING", "AI configuration for this feature is missing.", 500);
+    }
+    if (!config.enabled) {
+      return errorResponse("AI_FEATURE_DISABLED", "The cost estimator is currently disabled.", 403);
+    }
+    const providerCheck = validateProviderModel(config);
+    if (!providerCheck.ok) {
+      return errorResponse("AI_PROVIDER_UNSUPPORTED", providerCheck.reason!, 500);
     }
 
     if (!openRouterApiKey) {
@@ -208,7 +236,12 @@ serve(async (req) => {
       );
     }
 
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
+    const limitCheck = await checkAiUsageLimits(supabase, "cost_estimator", config);
+    if (!limitCheck.allowed) {
+      return errorResponse("AI_LIMIT_EXCEEDED", limitCheck.reason!, 429);
+    }
+
+    const userId = await getAuthenticatedUserId(req, supabaseUrl);
 
     const { data: venue, error: venueError } = await supabase
       .from("venues")
@@ -229,13 +262,20 @@ serve(async (req) => {
     const venueInfo = JSON.stringify(venue);
     let estimate: CostEstimate | null = null;
     let lastError: unknown = null;
+    let lastTokens: { inputTokens: number | null; outputTokens: number | null } = { inputTokens: null, outputTokens: null };
+    let lastProviderUsed = config.provider;
+    let lastModelUsed = config.model;
+    const requestStartedAt = Date.now();
 
     // One retry if the model's arithmetic doesn't check out.
     for (let attempt = 0; attempt < 2 && !estimate; attempt++) {
       try {
-        const candidate = await requestEstimate(openRouterApiKey, venueInfo, input);
-        if (isValidEstimate(candidate)) {
-          estimate = candidate;
+        const candidate = await requestEstimate(openRouterApiKey, openAiApiKey, venueInfo, input, config);
+        lastTokens = { inputTokens: candidate.inputTokens, outputTokens: candidate.outputTokens };
+        lastProviderUsed = candidate.providerUsed;
+        lastModelUsed = candidate.modelUsed;
+        if (isValidEstimate(candidate.estimate)) {
+          estimate = candidate.estimate;
         } else {
           lastError = new Error("Estimate failed shape/arithmetic validation.");
         }
@@ -246,6 +286,15 @@ serve(async (req) => {
 
     if (!estimate) {
       console.error("[ai-cost-estimator] Failed to produce a valid estimate:", lastError);
+      await logAiUsage(supabase, {
+        feature: "cost_estimator",
+        provider: lastProviderUsed,
+        model: lastModelUsed,
+        actorId: userId,
+        durationMs: Date.now() - requestStartedAt,
+        success: false,
+        errorCategory: "provider_error",
+      });
       return errorResponse(
         "ESTIMATE_FAILED",
         "Could not generate a reliable cost estimate. Please try again.",
@@ -253,7 +302,18 @@ serve(async (req) => {
       );
     }
 
-    const userId = await getAuthenticatedUserId(req, supabaseUrl);
+    await logAiUsage(supabase, {
+      feature: "cost_estimator",
+      provider: lastProviderUsed,
+      model: lastModelUsed,
+      actorId: userId,
+      inputTokens: lastTokens.inputTokens,
+      outputTokens: lastTokens.outputTokens,
+      estimatedCostCents: estimateCostCents(lastModelUsed, (lastTokens.inputTokens ?? 0) + (lastTokens.outputTokens ?? 0)),
+      durationMs: Date.now() - requestStartedAt,
+      success: true,
+    });
+
     const { error: logError } = await supabase.from("ai_generated_content").insert({
       venue_id: input.venueId,
       content_type: "cost_estimate",

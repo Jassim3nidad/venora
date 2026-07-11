@@ -6,6 +6,11 @@ import {
   needsProfileSetup,
   resolvePostAuthRedirect,
 } from "@/lib/profile-setup";
+import {
+  PROTECTED_ROUTES,
+  defaultRouteForRoles,
+  type RoleName,
+} from "@/lib/rbac/roles";
 
 /**
  * Middleware — two responsibilities:
@@ -30,9 +35,6 @@ function assertPublicSupabaseKey(key: string): string {
   return key;
 }
 
-type UserRole =
-  "customer" | "venue_owner" | "event_coordinator" | "supplier" | "admin";
-
 // Routes that require authentication.
 // Important: /venues is intentionally NOT protected.
 // Public:
@@ -50,101 +52,13 @@ const PROTECTED_PREFIXES = [
   "/admin",
 ];
 
-// Routes that require specific roles
-const ROLE_GUARDS: Array<{ prefix: string; roles: UserRole[] }> = [
-  {
-    prefix: "/favorites",
-    roles: ["customer"],
-  },
-
-  {
-    prefix: "/bookings",
-    roles: ["customer", "admin"],
-  },
-
-  // Administrator dashboard
-  {
-    prefix: "/dashboard/admin",
-    roles: ["admin"],
-  },
-
-  // Venue owner dashboard
-  {
-    prefix: "/dashboard/venue-owner",
-    roles: ["venue_owner", "admin"],
-  },
-
-  // Supplier dashboard
-  {
-    prefix: "/dashboard/supplier",
-    roles: ["supplier", "admin"],
-  },
-
-  // Event coordinator dashboard
-  {
-    prefix: "/dashboard/event-coordinator",
-    roles: ["event_coordinator", "admin"],
-  },
-  {
-    prefix: "/dashboard/coordinator",
-    roles: ["event_coordinator", "admin"],
-  },
-
-  // Venue owner / coordinator dashboard pages
-  {
-    prefix: "/dashboard/venues/new",
-    roles: ["venue_owner", "admin"],
-  },
-  {
-    prefix: "/dashboard/venues",
-    roles: ["venue_owner", "event_coordinator", "admin"],
-  },
-  {
-    prefix: "/dashboard/bookings",
-    roles: ["venue_owner", "event_coordinator", "admin"],
-  },
-  {
-    prefix: "/dashboard/calendar",
-    roles: ["venue_owner", "event_coordinator", "admin"],
-  },
-  {
-    prefix: "/dashboard/packages",
-    roles: ["venue_owner", "event_coordinator", "admin"],
-  },
-  {
-    prefix: "/dashboard/staff",
-    roles: ["venue_owner", "event_coordinator", "admin"],
-  },
-  {
-    prefix: "/dashboard/analytics",
-    roles: ["venue_owner", "event_coordinator", "supplier", "admin"],
-  },
-  {
-    prefix: "/dashboard/customer",
-    roles: ["customer", "admin"],
-  },
-  {
-    prefix: "/dashboard",
-    roles: ["venue_owner", "admin"],
-  },
-
-  // Admin area
-  {
-    prefix: "/admin",
-    roles: ["admin"],
-  },
-];
+// Routes that require specific roles. Sourced from rbac/roles.ts's
+// PROTECTED_ROUTES — the single source of truth (also used by the
+// server-side requireRole()/requireAdmin() guards) — so this list can
+// never silently drift from what Server Components/Actions enforce.
+const ROLE_GUARDS = PROTECTED_ROUTES;
 
 const AUTH_PATHS = ["/login", "/register", "/forgot-password"];
-
-function defaultRouteForRoles(roles: UserRole[]) {
-  if (roles.includes("admin")) return "/dashboard/admin";
-  if (roles.includes("venue_owner")) return "/dashboard/venue-owner";
-  if (roles.includes("event_coordinator"))
-    return "/dashboard/event-coordinator";
-  if (roles.includes("supplier")) return "/dashboard/supplier";
-  return "/";
-}
 
 function redirectWithCookies(url: URL | string, sourceResponse: NextResponse) {
   const redirectResponse = NextResponse.redirect(url);
@@ -235,7 +149,7 @@ export async function middleware(request: NextRequest) {
       .eq("user_id", user.id)
       .limit(1);
 
-    const userRoles = ((roleRows ?? []) as { role: UserRole }[])
+    const userRoles = ((roleRows ?? []) as { role: RoleName }[])
       .map((r) => r.role)
       .filter(Boolean);
 
@@ -271,7 +185,7 @@ export async function middleware(request: NextRequest) {
       .select("role")
       .eq("user_id", user.id);
 
-    const userRoles = ((roleRows ?? []) as { role: UserRole }[])
+    const userRoles = ((roleRows ?? []) as { role: RoleName }[])
       .map((r) => r.role)
       .filter(Boolean);
 
@@ -298,11 +212,11 @@ export async function middleware(request: NextRequest) {
         return redirectWithCookies(redirectUrl, supabaseResponse);
       }
 
-      const userRoles = ((roleRows ?? []) as { role: UserRole }[])
+      const userRoles = ((roleRows ?? []) as { role: RoleName }[])
         .map((r) => r.role)
         .filter(Boolean);
 
-      const hasAccess = matchedGuard.roles.some((role) =>
+      const hasAccess = matchedGuard.allow.some((role) =>
         userRoles.includes(role),
       );
 
@@ -322,7 +236,7 @@ export async function middleware(request: NextRequest) {
       .eq("user_id", user.id)
       .limit(1);
 
-    const userRoles = ((roleRows ?? []) as { role: UserRole }[])
+    const userRoles = ((roleRows ?? []) as { role: RoleName }[])
       .map((r) => r.role)
       .filter(Boolean);
 

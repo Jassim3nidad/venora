@@ -12,6 +12,10 @@ import {
 } from "@/components/dashboard/enterprise";
 import { createClient } from "@/lib/supabase/server";
 import { getCommissionTrend, lastNMonthsRange } from "@/features/analytics/application/queries";
+import { requirePermission, hasPermission } from "@/lib/rbac/admin-context";
+import { getCommissionRules, getVenueCategoryOptions } from "@/features/admin-commissions/application/queries";
+import { CreateCommissionRuleForm, EditCommissionRuleDialog } from "@/features/admin-commissions/ui/CommissionRuleForm";
+import type { CommissionRule } from "@/features/admin-commissions/types/commission-rule.types";
 
 export const metadata: Metadata = { title: "Commissions - Admin" };
 export const dynamic = "force-dynamic";
@@ -45,6 +49,10 @@ type PayoutDisplayRow = {
 };
 
 export default async function AdminCommissionsPage() {
+  await requirePermission("commissions.view");
+  const canManage = await hasPermission("commissions.manage");
+  const canOverride = await hasPermission("commissions.override");
+
   const supabase = (await createClient()) as any;
 
   const range = lastNMonthsRange(12);
@@ -56,6 +64,8 @@ export default async function AdminCommissionsPage() {
     { count: activeRulesCount },
     commissionTrend,
     { data: recentPayoutsRaw },
+    { rules, error: rulesError },
+    categories,
   ] = await Promise.all([
     supabase.from("transactions").select("commission_amount").eq("status", "paid"),
     supabase.from("payouts").select("amount").in("status", ["scheduled", "processing"]),
@@ -67,6 +77,7 @@ export default async function AdminCommissionsPage() {
     supabase
       .from("commission_rules")
       .select("id", { count: "exact", head: true })
+      .eq("is_active", true)
       .or(`effective_to.is.null,effective_to.gte.${new Date().toISOString().slice(0, 10)}`),
     getCommissionTrend(supabase, range),
     supabase
@@ -74,6 +85,8 @@ export default async function AdminCommissionsPage() {
       .select("id, amount, status, scheduled_at, paid_at, organizations(name), supplier_profiles(business_name)")
       .order("scheduled_at", { ascending: false })
       .limit(10),
+    getCommissionRules(),
+    getVenueCategoryOptions(),
   ]);
 
   const totalCommission = (paidTransactions ?? []).reduce(
@@ -110,6 +123,54 @@ export default async function AdminCommissionsPage() {
     { key: "paid", header: "Paid", cell: (row) => row.paidAt },
   ];
 
+  const ruleColumns: DataTableColumn<CommissionRule>[] = [
+    {
+      key: "scope",
+      header: "Scope",
+      cell: (row) => (
+        <div>
+          <StatusBadge status="active" label={row.scope} />
+          {row.referenceLabel ? <p className="mt-1 text-xs text-[#6b7280]">{row.referenceLabel}</p> : null}
+        </div>
+      ),
+    },
+    { key: "label", header: "Label", cell: (row) => row.label ?? "—" },
+    {
+      key: "rate",
+      header: "Rate",
+      cell: (row) => (
+        <span>
+          {row.percentage !== null ? `${row.percentage}%` : ""}
+          {row.percentage !== null && row.flatFee !== null ? " + " : ""}
+          {row.flatFee !== null ? `₱${row.flatFee.toLocaleString()}` : ""}
+        </span>
+      ),
+    },
+    {
+      key: "bounds",
+      header: "Min / Max",
+      cell: (row) =>
+        row.minCommissionAmount !== null || row.maxCommissionAmount !== null
+          ? `₱${row.minCommissionAmount?.toLocaleString() ?? "0"} – ₱${row.maxCommissionAmount?.toLocaleString() ?? "∞"}`
+          : "—",
+    },
+    {
+      key: "window",
+      header: "Effective",
+      cell: (row) => `${formatDate(row.effectiveFrom)} – ${row.effectiveTo ? formatDate(row.effectiveTo) : "ongoing"}`,
+    },
+    { key: "status", header: "Status", cell: (row) => <StatusBadge status={row.isActive ? "active" : "inactive"} /> },
+    ...(canOverride
+      ? [
+          {
+            key: "actions",
+            header: "Actions",
+            cell: (row: CommissionRule) => <EditCommissionRuleDialog rule={row} />,
+          } satisfies DataTableColumn<CommissionRule>,
+        ]
+      : []),
+  ];
+
   return (
     <DashboardSubPage
       title="Commission Management"
@@ -128,6 +189,25 @@ export default async function AdminCommissionsPage() {
           description="Platform commission earned per month, distinct from gross booking revenue."
         />
         <RevenueTrendChart data={commissionTrend} format="currency" />
+      </Panel>
+
+      <Panel>
+        <PanelHeader
+          title="Commission Rules"
+          description="Resolution order is fixed: venue-specific rules win, then category, then the global default."
+          {...(canManage ? { action: <CreateCommissionRuleForm categories={categories} /> } : {})}
+        />
+        {rulesError ? (
+          <EmptyState icon="error" title="Could not load commission rules" description={rulesError} />
+        ) : rules && rules.length > 0 ? (
+          <DataTable rows={rules} columns={ruleColumns} keyFn={(row) => row.id} />
+        ) : (
+          <EmptyState
+            icon="rule"
+            title="No commission rules configured"
+            description="Commission defaults to 0 until at least a global rule is created."
+          />
+        )}
       </Panel>
 
       <Panel>

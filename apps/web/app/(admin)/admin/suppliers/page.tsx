@@ -8,87 +8,98 @@ import {
   StatusBadge,
   type DataTableColumn,
 } from "@/components/dashboard/enterprise";
-import { createClient } from "@/lib/supabase/server";
+import { requirePermission } from "@/lib/rbac/admin-context";
+import {
+  getSuppliersForAdminReview,
+  type SupplierQueueFilter,
+  type SupplierQueueRow,
+} from "@/features/suppliers/application/admin-queries";
 
-export const metadata: Metadata = { title: "Suppliers - Admin" };
+export const metadata: Metadata = { title: "Supplier Accreditation - Admin" };
+export const dynamic = "force-dynamic";
 
-type SupplierRow = {
-  id: string;
-  business_name: string;
-  accreditation_status: string;
-  avg_rating: number;
-  review_count: number;
-  created_at: string;
-};
-
-type SupplierDisplayRow = {
-  id: string;
-  name: string;
-  status: string;
-  rating: string;
-  added: string;
-};
+const FILTER_TABS: { key: SupplierQueueFilter; label: string }[] = [
+  { key: "pending", label: "Pending" },
+  { key: "accredited", label: "Accredited" },
+  { key: "suspended", label: "Suspended" },
+  { key: "rejected", label: "Rejected" },
+  { key: "all", label: "All" },
+];
 
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString("en-PH", { dateStyle: "medium" });
 }
 
-export default async function AdminSuppliersPage() {
-  const supabase = (await createClient()) as any;
-  const { data: suppliers } = await supabase
-    .from("supplier_profiles")
-    .select("id, business_name, accreditation_status, avg_rating, review_count, created_at")
-    .order("created_at", { ascending: false })
-    .limit(50);
+type Props = {
+  searchParams: Promise<{ filter?: string }>;
+};
 
-  const rows: SupplierDisplayRow[] = ((suppliers ?? []) as SupplierRow[]).map(
-    (supplier) => ({
-      id: supplier.id,
-      name: supplier.business_name,
-      status: supplier.accreditation_status,
-      rating:
-        supplier.review_count > 0
-          ? `${Number(supplier.avg_rating).toFixed(1)} (${supplier.review_count})`
-          : "No reviews",
-      added: formatDate(supplier.created_at),
-    }),
-  );
+export default async function AdminSuppliersPage({ searchParams }: Props) {
+  await requirePermission("suppliers.view");
 
-  const columns: DataTableColumn<SupplierDisplayRow>[] = [
+  const { filter: rawFilter } = await searchParams;
+  const filter: SupplierQueueFilter = FILTER_TABS.some((t) => t.key === rawFilter)
+    ? (rawFilter as SupplierQueueFilter)
+    : "pending";
+
+  const { suppliers, error } = await getSuppliersForAdminReview(filter);
+
+  const columns: DataTableColumn<SupplierQueueRow>[] = [
     {
       key: "supplier",
       header: "Supplier",
       cell: (row) => (
-        <span className="font-semibold text-[#111827]">{row.name}</span>
+        <a href={`/admin/suppliers/${row.id}`} className="font-semibold text-[#111827] hover:text-[#1d4ed8] hover:underline">
+          {row.businessName}
+        </a>
       ),
     },
+    { key: "status", header: "Accreditation", cell: (row) => <StatusBadge status={row.status} /> },
     {
-      key: "status",
-      header: "Accreditation",
-      cell: (row) => <StatusBadge status={row.status} />,
+      key: "rating",
+      header: "Rating",
+      cell: (row) => (row.reviewCount > 0 ? `${row.avgRating.toFixed(1)} (${row.reviewCount})` : "No reviews"),
     },
-    { key: "rating", header: "Rating", cell: (row) => row.rating },
-    { key: "added", header: "Added", cell: (row) => row.added },
+    { key: "added", header: "Added", cell: (row) => formatDate(row.createdAt) },
   ];
 
   return (
     <DashboardSubPage
       title="Supplier Accreditation"
-      description="Review supplier profiles and accreditation status."
+      description="Review supplier profiles and manage accreditation status."
+      action={
+        <div className="flex flex-wrap gap-2">
+          {FILTER_TABS.map((tab) => (
+            <a
+              key={tab.key}
+              href={`/admin/suppliers?filter=${tab.key}`}
+              className={`inline-flex h-9 items-center rounded-lg px-3 text-sm font-bold transition ${
+                filter === tab.key
+                  ? "bg-[#1d4ed8] text-white"
+                  : "border border-[#dbe3ef] bg-white text-[#111827] hover:border-[#1d4ed8] hover:text-[#1d4ed8]"
+              }`}
+            >
+              {tab.label}
+            </a>
+          ))}
+        </div>
+      }
     >
-      {rows.length > 0 ? (
+      {error ? (
+        <EmptyState icon="error" title="Could not load suppliers" description={error} />
+      ) : suppliers && suppliers.length > 0 ? (
         <Panel>
           <PanelHeader
-            title="Supplier Profiles"
-            description="Showing the latest supplier profile records."
+            title={FILTER_TABS.find((t) => t.key === filter)?.label ?? "Suppliers"}
+            description="Select a supplier to review details and take action."
           />
-          <DataTable rows={rows} columns={columns} keyFn={(row) => row.id} />
+          <DataTable rows={suppliers} columns={columns} keyFn={(row) => row.id} />
         </Panel>
       ) : (
         <EmptyState
           icon="storefront"
-          title="No suppliers yet"
-          description="Supplier profiles will appear here after suppliers complete onboarding."
+          title="No suppliers match this filter"
+          description="Supplier submissions that need admin review will appear here."
         />
       )}
     </DashboardSubPage>

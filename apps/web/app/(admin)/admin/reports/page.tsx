@@ -18,6 +18,8 @@ import {
   getTopPackages,
   lastNMonthsRange,
 } from "@/features/analytics/application/queries";
+import { AnalyticsExportActions } from "@/features/analytics/ui/AnalyticsExportActions";
+import { requirePermission, hasPermission } from "@/lib/rbac/admin-context";
 
 export const metadata: Metadata = { title: "Reports - Admin" };
 export const dynamic = "force-dynamic";
@@ -27,6 +29,8 @@ function formatPeso(amount: number) {
 }
 
 export default async function AdminReportsPage() {
+  await requirePermission("reports.view");
+  const canExport = await hasPermission("reports.export");
   const supabase = (await createClient()) as any;
 
   const { count: venueCount } = await supabase
@@ -55,6 +59,7 @@ export default async function AdminReportsPage() {
     <DashboardSubPage
       title="Reports"
       description="Platform-wide performance across every venue, booking, and supplier."
+      {...(canExport ? { action: <AnalyticsExportActions range={range} endpoint="/api/admin/reports/export" /> } : {})}
     >
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <KpiCard label="Total Revenue" value={formatPeso(totalRevenue)} icon="payments" highlight />
@@ -93,6 +98,23 @@ export default async function AdminReportsPage() {
           </div>
         </Panel>
       </div>
+
+      <Panel>
+        <PanelHeader
+          title="More reports"
+          description="Other report categories live on their own admin pages, or aren't available yet."
+        />
+        <ul className="grid gap-2 text-sm text-[#475569] sm:grid-cols-2">
+          <li>• User registrations, verification &amp; suspensions — <a href="/admin/users" className="font-semibold text-[#1d4ed8] hover:underline">Users</a></li>
+          <li>• Venue approvals &amp; review history — <a href="/admin/venues" className="font-semibold text-[#1d4ed8] hover:underline">Venues</a></li>
+          <li>• Supplier accreditation &amp; review history — <a href="/admin/suppliers" className="font-semibold text-[#1d4ed8] hover:underline">Suppliers</a></li>
+          <li>• Commission rules &amp; trend — <a href="/admin/commissions" className="font-semibold text-[#1d4ed8] hover:underline">Commissions</a></li>
+          <li>• Marketplace cases, cancellations, refunds — <a href="/admin/marketplace" className="font-semibold text-[#1d4ed8] hover:underline">Marketplace</a></li>
+          <li>• Administrator &amp; audit activity — <a href="/admin/audit-logs" className="font-semibold text-[#1d4ed8] hover:underline">Audit Logs</a></li>
+          <li className="text-[#9ca3af]">• AI usage reporting — not available yet (no usage tracking exists; planned for AI Configuration)</li>
+          <li className="text-[#9ca3af]">• System error reporting — not available yet (no error-tracking table exists)</li>
+        </ul>
+      </Panel>
     </DashboardSubPage>
   );
 }

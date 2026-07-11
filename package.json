@@ -22,7 +22,8 @@
     "test:notifications:providers": "node scripts/validate-env.mjs && node scripts/validate-resend.mjs",
     "test:notifications:pipeline": "node scripts/validate-pipeline.mjs",
     "test:notifications:e2e": "pnpm --filter @venora/web exec playwright test",
-    "validate:notifications": "pnpm run test:notifications:providers && pnpm run test:notifications:db && pnpm run test:notifications:pipeline && pnpm run test:notifications:e2e"
+    "validate:notifications": "pnpm run test:notifications:providers && pnpm run test:notifications:db && pnpm run test:notifications:pipeline && pnpm run test:notifications:e2e",
+    "test:commission:resolution": "node scripts/validate-commission-resolution.mjs"
   },
   "devDependencies": {
     "prettier": "^3.3.3",

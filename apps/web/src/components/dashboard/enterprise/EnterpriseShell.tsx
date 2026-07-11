@@ -22,6 +22,13 @@ type EnterpriseShellProps = {
   userSubtitle?: string;
   userAvatar?: string;
   businessName?: string;
+  /**
+   * Pre-filtered nav items to render instead of the full NAV_BY_ROLE[role]
+   * list. Used by the admin layout to hide items the current admin tier
+   * lacks the permission for (permission checks happen server-side in the
+   * layout; this is display-only, never the security boundary).
+   */
+  navItems?: NavItem[];
 };
 
 function matchesRoute(href: string, pathname: string) {
@@ -83,12 +90,14 @@ function Sidebar({
   role,
   pathname,
   onNavigate,
+  navItems,
 }: {
   role: EnterpriseRole;
   pathname: string;
   onNavigate?: () => void;
+  navItems?: NavItem[];
 }) {
-  const items = NAV_BY_ROLE[role];
+  const items = navItems ?? NAV_BY_ROLE[role];
   // Some roles currently share a single destination page across multiple nav
   // entries; only the first matching item should render as "active" so the
   // sidebar always highlights exactly one button, like every other role.
@@ -251,6 +260,7 @@ export function EnterpriseShell({
   userSubtitle,
   userAvatar,
   businessName,
+  navItems,
 }: EnterpriseShellProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -259,7 +269,7 @@ export function EnterpriseShell({
     <div className="flex min-h-dvh bg-[#f8fbff]">
       {/* Desktop sidebar - sticks in place while the page scrolls */}
       <aside className="sticky top-0 hidden h-dvh w-[272px] shrink-0 overflow-y-auto border-r border-[#dbe3ef] bg-[#eef6ff] p-5 lg:block">
-        <Sidebar role={role} pathname={pathname} />
+        <Sidebar role={role} pathname={pathname} {...(navItems ? { navItems } : {})} />
       </aside>
 
       {/* Mobile drawer */}
@@ -276,6 +286,7 @@ export function EnterpriseShell({
               role={role}
               pathname={pathname}
               onNavigate={() => setMobileOpen(false)}
+              {...(navItems ? { navItems } : {})}
             />
           </aside>
         </div>
