@@ -58,18 +58,24 @@ Deno.test("validateProviderModel rejects a blank model", () => {
 function mockSupabase(responses: { count?: number; rows?: { estimated_cost_cents: number }[] }) {
   return {
     from(_table: string) {
+      // checkAiUsageLimits() chains .select(...).eq(...).gte(...) before
+      // awaiting the result -- the real supabase-js query builder is both
+      // chainable AND thenable (each filter method returns the same
+      // builder, and awaiting it anywhere in the chain triggers the
+      // actual request). Model that shape here rather than resolving
+      // eagerly inside select(), which broke as soon as a filter was
+      // chained after it.
+      let wantsCount = false;
       const builder: any = {
-        select: () => builder,
+        select(_cols: string, opts?: { count?: string; head?: boolean }) {
+          wantsCount = !!opts?.count;
+          return builder;
+        },
         eq: () => builder,
         gte: () => builder,
-        then: undefined,
-      };
-      // Support both the count-only query shape and the spend-sum shape.
-      builder.select = (_cols: string, opts?: { count?: string; head?: boolean }) => {
-        if (opts?.count) {
-          return Promise.resolve({ count: responses.count ?? 0 });
-        }
-        return Promise.resolve({ data: responses.rows ?? [] });
+        then(resolve: (value: unknown) => void) {
+          resolve(wantsCount ? { count: responses.count ?? 0 } : { data: responses.rows ?? [] });
+        },
       };
       return builder;
     },
