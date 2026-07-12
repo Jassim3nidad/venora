@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/src/lib/supabase/server";
-import { AdminOverview } from "@/components/dashboard/enterprise";
+import { AdminOverview, ADMIN_MODULES, NAV_BY_ROLE } from "@/components/dashboard/enterprise";
+import { hasPermission } from "@/lib/rbac/admin-context";
 
 export const metadata = {
   title: "Admin Dashboard",
@@ -74,6 +75,26 @@ export default async function AdminDashboardPage() {
     })),
   ];
 
+  // Quick-link visibility is derived from the same NAV_BY_ROLE.admin
+  // permission mapping the sidebar uses (app/(admin)/admin/layout.tsx) --
+  // not a second, hand-maintained permission list. A module/link is shown
+  // only if its corresponding nav item has no permission requirement, or
+  // the current admin holds that permission.
+  const permissionByHref = new Map(
+    NAV_BY_ROLE.admin.map((item) => [item.href, item.permission]),
+  );
+  async function hrefVisible(href: string): Promise<boolean> {
+    const permission = permissionByHref.get(href);
+    return !permission || hasPermission(permission);
+  }
+
+  const [canReviewApplications, canReviewVenues, moduleVisibility] = await Promise.all([
+    hrefVisible("/admin/applications"),
+    hrefVisible("/admin/venues"),
+    Promise.all(ADMIN_MODULES.map(async (mod) => [mod.href, await hrefVisible(mod.href)] as const)),
+  ]);
+  const visibleModuleHrefs = moduleVisibility.filter(([, visible]) => visible).map(([href]) => href);
+
   return (
     <AdminOverview
       totalUsers={totalUsers ?? 0}
@@ -81,6 +102,9 @@ export default async function AdminDashboardPage() {
       supplierReviews={supplierReviews ?? 0}
       pendingApplications={pendingApplications ?? 0}
       pendingReviews={pendingReviews}
+      visibleModuleHrefs={visibleModuleHrefs}
+      canReviewApplications={canReviewApplications}
+      canReviewVenues={canReviewVenues}
     />
   );
 }

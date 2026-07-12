@@ -5,12 +5,14 @@ import {
   DashboardPage,
   DashButton,
   DataTable,
+  EmptyState,
   KpiCard,
   Panel,
   PanelHeader,
   StatusBadge,
 } from "./ui";
 import { MaterialIcon } from "./MaterialIcon";
+import { ADMIN_MODULES } from "./admin-modules";
 
 export type AdminOverviewProps = {
   totalUsers: number;
@@ -24,46 +26,16 @@ export type AdminOverviewProps = {
     submittedBy: string;
     status: string;
   }>;
+  /**
+   * hrefs from ADMIN_MODULES the current admin is permitted to see, computed
+   * server-side against the same NAV_BY_ROLE.admin permission mapping the
+   * sidebar uses (see app/(admin)/admin/page.tsx) -- not a second
+   * permission source.
+   */
+  visibleModuleHrefs: string[];
+  canReviewApplications: boolean;
+  canReviewVenues: boolean;
 };
-
-const ADMIN_MODULES = [
-  {
-    title: "Partner Applications",
-    description: "Approve or deny applications for venue owner, coordinator, and supplier roles.",
-    href: "/admin/applications",
-    icon: "how_to_reg",
-  },
-  {
-    title: "User Management",
-    description: "Review users, manage roles, and monitor platform access.",
-    href: "/admin/users",
-    icon: "group",
-  },
-  {
-    title: "Venue Approval",
-    description: "Approve, reject, and review venue listings.",
-    href: "/admin/venues",
-    icon: "location_city",
-  },
-  {
-    title: "Supplier Accreditation",
-    description: "Review supplier profiles and accreditation status.",
-    href: "/admin/suppliers",
-    icon: "storefront",
-  },
-  {
-    title: "Commission Tracking",
-    description: "Monitor platform fees and payout summaries.",
-    href: "/admin/commissions",
-    icon: "payments",
-  },
-  {
-    title: "Reports",
-    description: "Platform analytics, booking trends, and activity.",
-    href: "/admin/reports",
-    icon: "assessment",
-  },
-];
 
 const PLATFORM_HEALTH = [
   { label: "Role-based access control", status: "Active", icon: "shield" },
@@ -78,7 +50,14 @@ export function AdminOverview({
   supplierReviews,
   pendingApplications,
   pendingReviews,
+  visibleModuleHrefs,
+  canReviewApplications,
+  canReviewVenues,
 }: AdminOverviewProps) {
+  const visibleModules = ADMIN_MODULES.filter((mod) =>
+    visibleModuleHrefs.includes(mod.href),
+  );
+
   const kpis = [
     {
       label: "Total Users",
@@ -118,14 +97,20 @@ export function AdminOverview({
             and platform operations.
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <DashButton href="/admin/applications" variant="secondary" icon="how_to_reg">
-            Review Applications
-          </DashButton>
-          <DashButton href="/admin/venues" icon="arrow_forward">
-            Review Venues
-          </DashButton>
-        </div>
+        {(canReviewApplications || canReviewVenues) && (
+          <div className="flex flex-wrap gap-2">
+            {canReviewApplications && (
+              <DashButton href="/admin/applications" variant="secondary" icon="how_to_reg">
+                Review Applications
+              </DashButton>
+            )}
+            {canReviewVenues && (
+              <DashButton href="/admin/venues" icon="arrow_forward">
+                Review Venues
+              </DashButton>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -135,33 +120,43 @@ export function AdminOverview({
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+        <div data-testid="admin-modules-panel">
         <Panel>
           <PanelHeader
             title="Admin Modules"
             description="Quick access to major administrator tools."
           />
-          <div className="grid gap-3 md:grid-cols-2">
-            {ADMIN_MODULES.map((mod) => (
-              <Link
-                key={mod.title}
-                href={mod.href}
-                className="group rounded-xl border border-[#e5e7eb] bg-[#f9fafb] p-4 transition hover:border-[#1d4ed8] hover:bg-[#eff6ff]"
-              >
-                <div className="mb-3 flex items-center justify-between">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#1d4ed8] shadow-sm">
-                    <MaterialIcon name={mod.icon} />
+          {visibleModules.length > 0 ? (
+            <div className="grid gap-3 md:grid-cols-2">
+              {visibleModules.map((mod) => (
+                <Link
+                  key={mod.title}
+                  href={mod.href}
+                  className="group rounded-xl border border-[#e5e7eb] bg-[#f9fafb] p-4 transition hover:border-[#1d4ed8] hover:bg-[#eff6ff]"
+                >
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#1d4ed8] shadow-sm">
+                      <MaterialIcon name={mod.icon} />
+                    </div>
+                    <MaterialIcon
+                      name="arrow_forward"
+                      className="text-[#6b7280] transition group-hover:text-[#1d4ed8]"
+                    />
                   </div>
-                  <MaterialIcon
-                    name="arrow_forward"
-                    className="text-[#6b7280] transition group-hover:text-[#1d4ed8]"
-                  />
-                </div>
-                <p className="font-semibold text-[#111827]">{mod.title}</p>
-                <p className="mt-1 text-sm text-[#4b5563]">{mod.description}</p>
-              </Link>
-            ))}
-          </div>
+                  <p className="font-semibold text-[#111827]">{mod.title}</p>
+                  <p className="mt-1 text-sm text-[#4b5563]">{mod.description}</p>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon="lock"
+              title="No modules available"
+              description="Your administrator tier doesn't have access to any quick-access modules yet."
+            />
+          )}
         </Panel>
+        </div>
 
         <Panel>
           <PanelHeader title="Platform Health" />
@@ -192,9 +187,11 @@ export function AdminOverview({
             title="Pending Reviews"
             description="Latest venue and supplier submissions awaiting review."
             action={
-              <DashButton href="/admin/venues" variant="secondary">
-                Manage Reviews
-              </DashButton>
+              canReviewVenues ? (
+                <DashButton href="/admin/venues" variant="secondary">
+                  Manage Reviews
+                </DashButton>
+              ) : undefined
             }
           />
         </div>

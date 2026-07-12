@@ -12,6 +12,8 @@ export { SupplierOverview } from "./SupplierOverview";
 export type { SupplierOverviewProps } from "./SupplierOverview";
 export { AdminOverview } from "./AdminOverview";
 export type { AdminOverviewProps } from "./AdminOverview";
+export { ADMIN_MODULES } from "./admin-modules";
+export type { AdminModule } from "./admin-modules";
 export {
   DashboardPage,
   DashboardSubPage,
