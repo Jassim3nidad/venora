@@ -182,10 +182,13 @@ export default function VenueGallery({ media = [], venueName }: VenueGalleryProp
                 />
               ) : (
                 <div className="relative w-full h-full max-h-[70vh] flex items-center justify-center">
-                  <img
+                  <Image
                     src={getMediaUrl(activeMedia.storage_path)}
                     alt={activeMedia.alt_text || "Venue media"}
-                    className="max-w-full max-h-full rounded-2xl object-contain shadow-2xl"
+                    fill
+                    unoptimized={!isOptimizableImageSrc(getMediaUrl(activeMedia.storage_path))}
+                    sizes="100vw"
+                    className="rounded-2xl object-contain shadow-2xl"
                   />
                 </div>
               )}
@@ -210,10 +213,13 @@ export default function VenueGallery({ media = [], venueName }: VenueGalleryProp
                   idx === activeIndex ? "border-[var(--color-brand-500)] scale-105" : "border-transparent opacity-60 hover:opacity-100"
                 }`}
               >
-                <img
+                <Image
                   src={getMediaUrl(m.storage_path)}
                   alt="Thumbnail"
-                  className="h-full w-full object-cover"
+                  fill
+                  unoptimized={!isOptimizableImageSrc(getMediaUrl(m.storage_path))}
+                  sizes="80px"
+                  className="object-cover"
                 />
                 {m.media_type === "video" && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/20">

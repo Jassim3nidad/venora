@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Heart, MapPin, Star, Users } from "lucide-react";
+import { ArrowRight, Heart, Image as ImageIcon, MapPin, Star, Users } from "lucide-react";
 import { toggleFavoriteAction } from "../application/actions";
 import type { MarketplaceVenue } from "../data/research-venues";
+import { isOptimizableImageSrc } from "@/src/lib/image-host";
 
 interface FavoritesGridProps {
   initialVenues: MarketplaceVenue[];
@@ -84,11 +86,20 @@ export default function FavoritesGrid({ initialVenues }: FavoritesGridProps) {
               className="flex h-full w-full flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
             >
               <div className="relative aspect-[16/11] overflow-hidden bg-slate-100">
-                <img
-                  src={venue.image}
-                  alt={venue.name}
-                  className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
-                />
+                {venue.image ? (
+                  <Image
+                    src={venue.image}
+                    alt={venue.name}
+                    fill
+                    unoptimized={!isOptimizableImageSrc(venue.image)}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
+                    className="object-cover transition duration-700 group-hover:scale-[1.04]"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center">
+                    <ImageIcon className="h-8 w-8 text-slate-300" />
+                  </div>
+                )}
 
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-slate-950/5 to-transparent" />
 
