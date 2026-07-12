@@ -156,28 +156,72 @@ provider/model configuration, key handling, rate/spend limits, moderation,
 and usage-log content all matched policy, with the full Deno (20/20) and
 Vitest (payments: 45/45, full suite: 86/86) test suites passing.
 
+## Follow-up verification — SEO/performance pass, cancellation flow, and production smoke test
+
+A further follow-up session (after the SEO/performance/dead-code work
+described below this section in commit history — `feat(seo)` through
+`refactor(rbac)`) closed out the items this document had previously
+listed as blocked or deferred.
+
+**Production cancellation flow.** Explicitly authorized and run against
+`e2e/auth/cancellation-flow.spec.ts`, which already had proper
+disposable-record and cleanup mechanics: `beforeEach` inserts a synthetic
+booking (dedicated QA customer ID, a far-future event date of
+2099-10-01, real venue/package IDs only for the FK reference) and
+`afterEach` unconditionally deletes every row it touched — notifications,
+`booking_status_history`, `audit_logs`, then the booking itself —
+regardless of pass/fail. Both tests passed: the real customer fixture can
+cancel their own booking with **exactly one** `audit_logs` row and
+**exactly one** `booking_status_history` row (confirming migration 064's
+fix holds under a real authenticated session, not just the RPC-level
+check `scripts/validate-cancellation-history.mjs` already covered), and
+the cancel page's own re-entry guard blocks a second cancellation attempt
+before the RPC is ever reached. Cleanup was independently re-verified
+after the run by querying for any remaining bookings matching the test's
+customer ID + event date signature — zero found.
+
+**Migration history and remote sync.** `supabase migration list --linked`
+shows all 65 local migrations matching their remote counterparts,
+including 065. `supabase db push --dry-run` reports "Remote database is
+up to date."
+
+**Production smoke test against the exact deployed commit.** Verified via
+`vercel inspect <url> --logs`, which shows the live production
+deployment's build log cloning `github.com/Jassim3nidad/venora (Branch:
+main, Commit: 0409241)` — an exact match to local `HEAD`
+(`0409241547ce81fde05cd9c72641fbd6d4e6e894`) at the time of this check.
+Ran the full authenticated Playwright suite — analyst-admin, finance-admin,
+super-admin, customer, supplier, venue, and cross-tenant specs — with
+`APP_BASE_URL=https://venora-web.vercel.app` (not localhost) using the
+real QA fixture credentials: **109 passed, 2 skipped (the same
+pre-existing "not testable with current seed data" cross-tenant cases),
+0 failed**, in 4.2 minutes.
+
 ## Remaining risks
 
 - One moderate, transitive `postcss` advisory bundled inside
   `next@16.2.10`'s own dependency tree (GHSA-qx2v-qp2m-jg93) — not a
   direct dependency, not introduced by this work, not independently
   patchable without a Next.js upstream release.
-- Production cancellation-flow and notification-deduplication checks were
-  not run (see above) — pending explicit authorization or dedicated
-  non-production fixtures. Migration 064's fix to this same function is
-  now live, so the cancellation-flow test's assertions (exactly one
-  `audit_logs` row per cancellation) should hold if it's ever run.
+- Notification-deduplication has no dedicated test
+  (`e2e/notifications.spec.ts` covers push-subscription and realtime
+  delivery, not dedup specifically) and was not added in this pass.
 - The two QA fixture passwords should be rotated by the user now that they
   are retained long-term.
 - Two separate Supabase access tokens (one in the engagement that produced
   the rest of this document, one in the full-application audit that added
-  the Migration 065 section above) were shared directly in chat — both
-  recommended for revocation/rotation in the Supabase dashboard.
+  the Migration 065 section, both reused again in this follow-up pass)
+  were shared directly in chat — all recommended for revocation/rotation
+  in the Supabase dashboard.
 - The Maya payment webhook route is present but not functionally wired to
   a real gateway (no `MayaGateway` implementation is registered) and its
   `confirmBookingPayment` handler now throws a documented, safe error
   rather than attempting the stale RPC call. If Maya is ever activated,
   that handler needs a full rebuild to match the checkout-session
   reconciliation contract PayMongo's webhook already follows.
-- SEO, bundle/image optimization, and broader (non-admin, non-map)
-  accessibility were not in scope for this pass and remain unaudited.
+- A status-color-map drift risk (booking status colors hand-maintained
+  independently in two places using two different color systems) and one
+  duplicated "no results" empty-state JSX block (suppliers marketplace vs
+  venues marketplace) were identified during a code-duplication pass but
+  not fixed — accepted as low-priority technical debt, not a production
+  blocker.
