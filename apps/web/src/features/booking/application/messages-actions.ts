@@ -10,6 +10,7 @@ import {
   ValidationError,
 } from "@/src/lib/errors";
 import { sendBookingMessageSchema } from "../schemas/booking.schema";
+import { isAdminUser } from "@/src/lib/rbac/guards";
 
 // ── Status gate ──────────────────────────────────────────────
 const MESSAGING_ALLOWED_STATUSES = new Set([
@@ -117,14 +118,7 @@ async function assertBookingAccess(
   }
 
   // Admin path
-  const { data: roles } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId);
-
-  const isAdmin = (roles ?? []).some(
-    (row: { role: string }) => row.role === "admin",
-  );
+  const isAdmin = await isAdminUser(supabase, userId);
 
   if (isAdmin) {
     return {

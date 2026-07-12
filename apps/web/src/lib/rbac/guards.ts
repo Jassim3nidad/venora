@@ -123,3 +123,22 @@ export async function hasRole(...checkRoles: RoleName[]): Promise<boolean> {
 export async function requireAdmin(): Promise<SessionContext> {
   return requireRole(ROLES.ADMIN);
 }
+
+// ── isAdminUser ───────────────────────────────────────────────────────────────
+
+/**
+ * Checks whether an already-resolved user (and Supabase client) holds the
+ * admin role — for call sites that already have `user.id` in scope and
+ * would otherwise re-fetch it via requireRole()/hasRole() (which each do
+ * their own auth.getUser() call). Prefer hasRole(ROLES.ADMIN)/requireAdmin()
+ * when you don't already have a resolved user.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function isAdminUser(supabase: any, userId: string): Promise<boolean> {
+  const { data: roleRows } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId);
+
+  return (roleRows ?? []).some((row: { role: string }) => row.role === ROLES.ADMIN);
+}
