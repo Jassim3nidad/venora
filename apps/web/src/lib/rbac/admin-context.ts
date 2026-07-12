@@ -24,7 +24,7 @@
 
 import { cache } from "react";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentAuthUser } from "@/lib/supabase/current-user";
 import { UnauthorizedError, ForbiddenError } from "@/lib/errors";
 import { ROLES } from "./roles";
 import type { AdminPermission, AdminTier } from "./permissions";
@@ -52,11 +52,7 @@ type AdminUserRoleRow = {
  * directly and forgetting the null check.
  */
 export const getCurrentAdminContext = cache(async (): Promise<AdminContext | null> => {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getCurrentAuthUser();
 
   if (!user) return null;
 
@@ -115,10 +111,7 @@ export async function hasPermission(permission: AdminPermission): Promise<boolea
  *                              missing the permission.
  */
 export async function requirePermission(permission: AdminPermission): Promise<AdminContext> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getCurrentAuthUser();
 
   if (!user) throw new UnauthorizedError();
 

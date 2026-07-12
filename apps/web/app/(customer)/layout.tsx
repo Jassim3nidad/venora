@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { MarketplaceLayout } from "@/components/layout/MarketplaceLayout";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentAuthUser } from "@/lib/supabase/current-user";
 import { getNavbarProfile } from "@/lib/get-navbar-profile";
 
 export default async function CustomerLayout({
@@ -8,10 +8,7 @@ export default async function CustomerLayout({
 }: {
   children: ReactNode;
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getCurrentAuthUser();
   const profile = await getNavbarProfile(supabase, user?.id);
 
   return (
