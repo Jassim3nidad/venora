@@ -34,7 +34,7 @@ export default function VenueMap({
       center: [longitude, latitude],
       zoom: zoom,
       interactive: interactive,
-      attributionControl: false,
+      attributionControl: { compact: true },
     });
 
     mapRef.current = map;
@@ -88,7 +88,12 @@ export default function VenueMap({
         boxShadow: "var(--shadow-sm)",
       }}
     >
-      <div ref={mapContainerRef} style={{ width: "100%", height: "100%" }} />
+      <div
+        ref={mapContainerRef}
+        role="region"
+        aria-label={markerLabel ? `Map showing ${markerLabel}` : "Venue location map"}
+        style={{ width: "100%", height: "100%" }}
+      />
     </div>
   );
 }
