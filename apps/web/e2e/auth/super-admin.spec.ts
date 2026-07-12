@@ -25,6 +25,11 @@ test.describe("Super administrator", () => {
   });
 
   test("can access every administrator module", async ({ page }) => {
+    // 11 sequential real page loads against the hosted (non-local) Supabase
+    // backend routinely take ~25-30s of server time alone -- the default
+    // 30s test timeout is too tight for this test's shape, independent of
+    // anything permission-related.
+    test.setTimeout(60000);
     for (const path of [
       "/admin",
       "/admin/administrators",
