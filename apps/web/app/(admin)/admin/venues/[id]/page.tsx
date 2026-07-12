@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import nextDynamic from "next/dynamic";
 import {
   DashboardSubPage,
   EmptyState,
@@ -15,7 +16,9 @@ import {
 import { reviewVenueAction } from "@/features/venues/application/admin-actions";
 import type { VenueReviewAction } from "@/features/venues/types/venue-review-action.types";
 import { ReviewActionBar, type ReviewActionDef } from "@/components/admin/ReviewActionBar";
-import VenueMap from "@/components/VenueMap";
+const VenueMap = nextDynamic(() => import("@/components/VenueMap"), {
+  loading: () => <div className="h-[280px] w-full rounded-2xl bg-slate-100 animate-pulse" />,
+});
 
 export const metadata: Metadata = { title: "Venue Review - Admin" };
 export const dynamic = "force-dynamic";

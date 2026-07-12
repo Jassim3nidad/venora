@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import nextDynamic from "next/dynamic";
 import {
   DashButton,
   DashboardSubPage,
@@ -31,9 +32,14 @@ import {
 } from "@/features/analytics/application/queries";
 import { AnalyticsExportActions } from "@/features/analytics/ui/AnalyticsExportActions";
 import { BookingDemandHeatmap } from "@/features/analytics/ui/BookingDemandHeatmap";
-import { BookingsTrendChart } from "@/features/analytics/ui/BookingsTrendChart";
-import { CustomerGrowthChart } from "@/features/analytics/ui/CustomerGrowthChart";
 import { MonthlyReportsTable } from "@/features/analytics/ui/MonthlyReportsTable";
+
+const BookingsTrendChart = nextDynamic(() =>
+  import("@/features/analytics/ui/BookingsTrendChart").then((m) => m.BookingsTrendChart),
+);
+const CustomerGrowthChart = nextDynamic(() =>
+  import("@/features/analytics/ui/CustomerGrowthChart").then((m) => m.CustomerGrowthChart),
+);
 import { PopularVenuesTable } from "@/features/analytics/ui/PopularVenuesTable";
 
 export const metadata: Metadata = { title: "Analytics - Dashboard" };

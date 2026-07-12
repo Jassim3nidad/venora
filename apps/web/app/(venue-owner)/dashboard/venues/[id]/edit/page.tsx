@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import dynamic from "next/dynamic";
 import {
   DashButton,
   DashboardSubPage,
@@ -16,7 +17,14 @@ import {
   getOwnerVenueById,
 } from "../../../_lib/owner-dashboard-data";
 import { resolveVenueMapCoordinates } from "@/src/lib/venue-map-coordinates";
-import VenueLocationPicker from "@/src/features/venues/ui/VenueLocationPicker";
+const VenueLocationPicker = dynamic(
+  () => import("@/src/features/venues/ui/VenueLocationPicker"),
+  {
+    loading: () => (
+      <div className="h-[320px] w-full rounded-2xl border border-[#BFDBFE] bg-white/60 animate-pulse" />
+    ),
+  },
+);
 
 export const metadata: Metadata = { title: "Edit Venue" };
 
