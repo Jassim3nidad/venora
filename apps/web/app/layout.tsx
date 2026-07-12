@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Sora } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/src/components/providers";
+import { SITE_URL } from "@/src/lib/site-url";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,13 +27,7 @@ export const metadata: Metadata = {
   keywords: ["venue booking", "event venues", "Philippines", "wedding venue", "corporate events"],
   authors: [{ name: "Venora" }],
   creator: "Venora",
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || 
-    process.env.NEXT_PUBLIC_SITE_URL || 
-    (process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}` : null) || 
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) || 
-    "http://localhost:3000"
-  ),
+  metadataBase: new URL(SITE_URL),
   openGraph: {
     type: "website",
     locale: "en_PH",

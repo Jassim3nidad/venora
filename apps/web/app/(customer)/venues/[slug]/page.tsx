@@ -13,6 +13,8 @@ import {
 import { getPublishedVenueReviewsRaw } from "@/features/reviews/application/queries";
 import { resolveVenueMapCoordinates } from "@/src/lib/venue-map-coordinates";
 import { userOwnsVenue } from "@/src/lib/rbac/ownership";
+import { buildVenueImageUrl } from "@/src/features/venues/utils/venue-mappers";
+import { absoluteUrl } from "@/src/lib/site-url";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -38,6 +40,24 @@ function getResearchVenueByIdentifier(identifier: string) {
     researchVenues.find((venue) => venue.id === identifier) ??
     null
   );
+}
+
+// metadataVenue is either a raw DB row (venue_images: [{storage_path,
+// is_featured}]) or a raw ResearchVenue (photos: {cover_image_url,
+// image_urls}) — generateMetadata runs before the two shapes are merged
+// into the normalized record the page body uses, so both are handled here.
+function resolveVenueOgImage(metadataVenue: any): string | undefined {
+  if (Array.isArray(metadataVenue.venue_images) && metadataVenue.venue_images.length > 0) {
+    const featured =
+      metadataVenue.venue_images.find((img: any) => img.is_featured) ??
+      metadataVenue.venue_images[0];
+    if (featured?.storage_path) return buildVenueImageUrl(featured.storage_path);
+  }
+  if (metadataVenue.photos) {
+    const url = metadataVenue.photos.cover_image_url ?? metadataVenue.photos.image_urls?.[0];
+    if (url) return url;
+  }
+  return undefined;
 }
 
 async function getPublishedVenueByIdentifier(
@@ -89,14 +109,67 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const metadataVenue = dbVenue ?? datasetVenue;
 
   if (!metadataVenue) return { title: "Venue Not Found" };
+  const description =
+    "description" in metadataVenue
+      ? (metadataVenue.description ?? undefined)
+      : metadataVenue.short_description;
+  const ogImage = resolveVenueOgImage(metadataVenue);
+
   return {
     title: metadataVenue.name,
-    description:
-      "description" in metadataVenue
-        ? (metadataVenue.description ?? undefined)
-        : metadataVenue.short_description,
+    description,
     alternates: { canonical: `/venues/${slug}` },
+    openGraph: {
+      title: metadataVenue.name,
+      description,
+      type: "website",
+      ...(ogImage ? { images: [{ url: ogImage }] } : {}),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: metadataVenue.name,
+      description,
+      ...(ogImage ? { images: [ogImage] } : {}),
+    },
   };
+}
+
+function buildVenueJsonLd(venue: any, canonicalUrl: string) {
+  const image = resolveVenueOgImage(venue);
+
+  const jsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "EventVenue",
+    name: venue.name,
+    description: venue.description ?? undefined,
+    url: canonicalUrl,
+    ...(image ? { image: [image] } : {}),
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: venue.address ?? undefined,
+      addressLocality: venue.city ?? undefined,
+      addressRegion: venue.province ?? undefined,
+      addressCountry: "PH",
+    },
+  };
+
+  if (typeof venue.latitude === "number" && typeof venue.longitude === "number") {
+    jsonLd.geo = {
+      "@type": "GeoCoordinates",
+      latitude: venue.latitude,
+      longitude: venue.longitude,
+    };
+  }
+
+  if (venue.review_count > 0) {
+    jsonLd.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: venue.avg_rating,
+      reviewCount: venue.review_count,
+    };
+  }
+
+  return jsonLd;
 }
 
 export default async function VenueDetailPage({ params }: Props) {
@@ -176,15 +249,26 @@ export default async function VenueDetailPage({ params }: Props) {
     isOwnVenue = await userOwnsVenue(supabase, user.id, dbVenue.id);
   }
 
+  const jsonLd = buildVenueJsonLd(venue, absoluteUrl(`/venues/${slug}`));
+
   return (
-    <VenueDetails
-      venue={venueWithMap}
-      reviews={reviews || []}
-      nearbyVenues={nearbyVenues}
-      initialIsFavorited={initialIsFavorited}
-      currentUser={user}
-      eligibleReviewBooking={eligibleReviewBooking}
-      isOwnVenue={isOwnVenue}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
+      <VenueDetails
+        venue={venueWithMap}
+        reviews={reviews || []}
+        nearbyVenues={nearbyVenues}
+        initialIsFavorited={initialIsFavorited}
+        currentUser={user}
+        eligibleReviewBooking={eligibleReviewBooking}
+        isOwnVenue={isOwnVenue}
+      />
+    </>
   );
 }
