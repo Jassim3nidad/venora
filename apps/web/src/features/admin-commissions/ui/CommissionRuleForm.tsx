@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import * as Dialog from "@radix-ui/react-dialog";
+import { Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import {
   createCommissionRuleSchema,
@@ -80,7 +81,7 @@ export function CreateCommissionRuleForm({ categories }: { categories: VenueCate
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
-            {errors.referenceId ? <p className="mt-1 text-xs text-red-600">{errors.referenceId.message}</p> : null}
+            {errors.referenceId ? <p className="mt-1 text-xs text-red-700">{errors.referenceId.message}</p> : null}
           </div>
         ) : null}
 
@@ -88,13 +89,13 @@ export function CreateCommissionRuleForm({ categories }: { categories: VenueCate
           <div>
             <label htmlFor="referenceId" className={labelClass}>Venue ID</label>
             <input id="referenceId" {...register("referenceId")} placeholder="Paste the venue's UUID" className={inputClass} />
-            <p className="mt-1 text-xs text-[#9ca3af]">Find this in the venue's review page URL.</p>
-            {errors.referenceId ? <p className="mt-1 text-xs text-red-600">{errors.referenceId.message}</p> : null}
+            <p className="mt-1 text-xs text-[#6b7280]">Find this in the venue's review page URL.</p>
+            {errors.referenceId ? <p className="mt-1 text-xs text-red-700">{errors.referenceId.message}</p> : null}
           </div>
         ) : null}
 
         <div>
-          <label htmlFor="label" className={labelClass}>Label <span className="font-normal normal-case text-[#9ca3af]">(optional)</span></label>
+          <label htmlFor="label" className={labelClass}>Label <span className="font-normal normal-case text-[#6b7280]">(optional)</span></label>
           <input id="label" {...register("label")} placeholder="e.g. Summer 2026 promo" className={inputClass} />
         </div>
 
@@ -106,7 +107,7 @@ export function CreateCommissionRuleForm({ categories }: { categories: VenueCate
           <label htmlFor="flatFee" className={labelClass}>Flat fee (₱)</label>
           <input id="flatFee" type="number" step="0.01" {...register("flatFee")} className={inputClass} />
         </div>
-        {errors.percentage ? <p className="text-xs text-red-600 sm:col-span-2 lg:col-span-3">{errors.percentage.message}</p> : null}
+        {errors.percentage ? <p className="text-xs text-red-700 sm:col-span-2 lg:col-span-3">{errors.percentage.message}</p> : null}
 
         <div>
           <label htmlFor="minCommissionAmount" className={labelClass}>Minimum commission (₱)</label>
@@ -122,7 +123,7 @@ export function CreateCommissionRuleForm({ categories }: { categories: VenueCate
           <input id="effectiveFrom" type="date" {...register("effectiveFrom")} className={inputClass} />
         </div>
         <div>
-          <label htmlFor="effectiveTo" className={labelClass}>Effective to <span className="font-normal normal-case text-[#9ca3af]">(optional)</span></label>
+          <label htmlFor="effectiveTo" className={labelClass}>Effective to <span className="font-normal normal-case text-[#6b7280]">(optional)</span></label>
           <input id="effectiveTo" type="date" {...register("effectiveTo")} className={inputClass} />
         </div>
       </div>
@@ -179,21 +180,50 @@ export function EditCommissionRuleDialog({ rule }: { rule: CommissionRule }) {
   }
 
   return (
-    <>
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        className="inline-flex h-8 items-center rounded-lg border border-[#dbe3ef] bg-white px-3 text-xs font-bold text-[#111827] hover:border-[#1d4ed8] hover:text-[#1d4ed8]"
-      >
-        Edit
-      </button>
+    <Dialog.Root
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (isSubmitting) return;
+        setIsOpen(open);
+      }}
+    >
+      <Dialog.Trigger asChild>
+        <button
+          type="button"
+          className="inline-flex h-8 items-center rounded-lg border border-[#dbe3ef] bg-white px-3 text-xs font-bold text-[#111827] hover:border-[#1d4ed8] hover:text-[#1d4ed8]"
+        >
+          Edit
+        </button>
+      </Dialog.Trigger>
 
-      {isOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
-          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
-          <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-[24px] bg-white p-6 shadow-2xl">
-            <h2 className="mb-4 text-lg font-black text-slate-900">Edit commission rule</h2>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm" />
+        <Dialog.Content
+          className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-full max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[24px] bg-white p-6 shadow-2xl"
+          onEscapeKeyDown={(e) => {
+            if (isSubmitting) e.preventDefault();
+          }}
+          onPointerDownOutside={(e) => {
+            if (isSubmitting) e.preventDefault();
+          }}
+        >
+          <div className="mb-4 flex items-center justify-between">
+            <Dialog.Title className="text-lg font-black text-slate-900">Edit commission rule</Dialog.Title>
+            <Dialog.Close asChild>
+              <button
+                type="button"
+                disabled={isSubmitting}
+                className="rounded-full p-2 text-slate-400 hover:bg-slate-100 disabled:opacity-50"
+                aria-label="Close"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </Dialog.Close>
+          </div>
+          <Dialog.Description className="sr-only">
+            Edit the percentage, flat fee, and effective dates for this commission rule.
+          </Dialog.Description>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
                   <label htmlFor="edit-label" className={labelClass}>Label</label>
@@ -207,7 +237,7 @@ export function EditCommissionRuleDialog({ rule }: { rule: CommissionRule }) {
                   <label htmlFor="edit-flatFee" className={labelClass}>Flat fee (₱)</label>
                   <input id="edit-flatFee" type="number" step="0.01" {...register("flatFee")} className={inputClass} />
                 </div>
-                {errors.percentage ? <p className="text-xs text-red-600 sm:col-span-2">{errors.percentage.message}</p> : null}
+                {errors.percentage ? <p className="text-xs text-red-700 sm:col-span-2">{errors.percentage.message}</p> : null}
                 <div>
                   <label htmlFor="edit-min" className={labelClass}>Minimum commission (₱)</label>
                   <input id="edit-min" type="number" step="0.01" {...register("minCommissionAmount")} className={inputClass} />
@@ -231,14 +261,16 @@ export function EditCommissionRuleDialog({ rule }: { rule: CommissionRule }) {
                 <div className="sm:col-span-2">
                   <label htmlFor="edit-reason" className={labelClass}>Reason for this change</label>
                   <textarea id="edit-reason" {...register("reason")} rows={2} className={inputClass} />
-                  {errors.reason ? <p className="mt-1 text-xs text-red-600">{errors.reason.message}</p> : null}
+                  {errors.reason ? <p className="mt-1 text-xs text-red-700">{errors.reason.message}</p> : null}
                 </div>
               </div>
 
               <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
-                <button type="button" onClick={() => setIsOpen(false)} className="rounded-lg px-4 py-2 text-sm font-bold text-[#4b5563] hover:bg-slate-100">
-                  Cancel
-                </button>
+                <Dialog.Close asChild>
+                  <button type="button" disabled={isSubmitting} className="rounded-lg px-4 py-2 text-sm font-bold text-[#4b5563] hover:bg-slate-100 disabled:opacity-50">
+                    Cancel
+                  </button>
+                </Dialog.Close>
                 <button
                   type="submit"
                   disabled={isSubmitting}
@@ -249,9 +281,8 @@ export function EditCommissionRuleDialog({ rule }: { rule: CommissionRule }) {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      ) : null}
-    </>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }

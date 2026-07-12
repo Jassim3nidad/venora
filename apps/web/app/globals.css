@@ -184,6 +184,23 @@ body {
 .animate-slide-up  { animation: slide-up var(--transition-slow)    both; }
 .animate-scale-in  { animation: scale-in var(--transition-fast)    both; }
 
+/* --- Reduced motion --------------------------------------------------------
+   Respect the OS/browser-level request to minimize motion: keep the same
+   start/end state (no flash of unstyled content) but drop the animated
+   transition itself. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* --- Skeleton shimmer ------------------------------------------------------ */
 .skeleton {
   background: linear-gradient(

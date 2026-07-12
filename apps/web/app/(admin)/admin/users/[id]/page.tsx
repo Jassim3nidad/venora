@@ -82,7 +82,7 @@ export default async function AdminUserDetailPage({ params }: Props) {
               <div><dt className="font-bold text-[#64748b]">Registered</dt><dd className="text-[#111827]">{formatDate(user.createdAt)}</dd></div>
               <div><dt className="font-bold text-[#64748b]">Account status</dt><dd className="text-[#111827]"><StatusBadge status={user.status} /></dd></div>
             </dl>
-            <p className="mt-4 text-xs text-[#9ca3af]">
+            <p className="mt-4 text-xs text-[#6b7280]">
               Account status (active/suspended) and email verification are tracked separately — suspending an
               account never changes whether its email is confirmed, and vice versa.
             </p>
@@ -98,7 +98,7 @@ export default async function AdminUserDetailPage({ params }: Props) {
                       <span className="font-bold text-[#111827]">{app.roleAppliedFor.replace(/_/g, " ")} · {app.category}</span>
                       <StatusBadge status={app.status} />
                     </div>
-                    <p className="mt-1 text-xs text-[#9ca3af]">{formatDate(app.createdAt)}</p>
+                    <p className="mt-1 text-xs text-[#6b7280]">{formatDate(app.createdAt)}</p>
                     {app.denialReason ? <p className="mt-2 text-[#4b5563]">{app.denialReason}</p> : null}
                   </li>
                 ))}
@@ -116,7 +116,7 @@ export default async function AdminUserDetailPage({ params }: Props) {
                   <li key={entry.id} className="rounded-xl border border-[#e5e7eb] p-3 text-sm">
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-[#111827]">{entry.action.replace(/_/g, ".").replace(/\./g, " ")}</span>
-                      <span className="text-xs text-[#9ca3af]">{formatDate(entry.createdAt)}</span>
+                      <span className="text-xs text-[#6b7280]">{formatDate(entry.createdAt)}</span>
                     </div>
                     <p className="mt-1 text-xs text-[#6b7280]">by {entry.actorName ?? "Unknown"}</p>
                     {entry.reason ? <p className="mt-2 text-[#4b5563]">{entry.reason}</p> : null}

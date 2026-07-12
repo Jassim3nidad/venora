@@ -84,7 +84,7 @@ export default async function AdminMarketplacePage() {
             header: "Actions",
             cell: (row: MarketplaceFlag) =>
               row.status === "resolved" || row.status === "dismissed" ? (
-                <span className="text-xs text-[#9ca3af]">Closed</span>
+                <span className="text-xs text-[#6b7280]">Closed</span>
               ) : (
                 <ReviewActionBar entityId={row.id} actions={FLAG_ACTIONS} onSubmit={submitFlagStatus} />
               ),

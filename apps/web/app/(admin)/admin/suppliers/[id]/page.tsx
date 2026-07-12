@@ -88,10 +88,10 @@ export default async function AdminSupplierDetailPage({ params }: Props) {
             <PanelHeader title="Business details" />
             <dl className="grid grid-cols-2 gap-4 text-sm">
               <div><dt className="font-bold text-[#64748b]">Owner</dt><dd className="text-[#111827]">{supplier.ownerName ?? "—"}</dd></div>
-              <div><dt className="font-bold text-[#64748b]">Category</dt><dd className="text-[#111827]">{supplier.categoryName ?? <span className="text-red-600">Missing — required before accreditation</span>}</dd></div>
+              <div><dt className="font-bold text-[#64748b]">Category</dt><dd className="text-[#111827]">{supplier.categoryName ?? <span className="text-red-700">Missing — required before accreditation</span>}</dd></div>
               <div><dt className="font-bold text-[#64748b]">Contact email</dt><dd className="text-[#111827]">{supplier.contactEmail || "—"}</dd></div>
               <div><dt className="font-bold text-[#64748b]">Contact phone</dt><dd className="text-[#111827]">{supplier.contactPhone || "—"}</dd></div>
-              <div className="col-span-2"><dt className="font-bold text-[#64748b]">Service areas</dt><dd className="text-[#111827]">{supplier.serviceAreas.length > 0 ? supplier.serviceAreas.join(", ") : <span className="text-red-600">None set — required before accreditation</span>}</dd></div>
+              <div className="col-span-2"><dt className="font-bold text-[#64748b]">Service areas</dt><dd className="text-[#111827]">{supplier.serviceAreas.length > 0 ? supplier.serviceAreas.join(", ") : <span className="text-red-700">None set — required before accreditation</span>}</dd></div>
               {supplier.coverageRadiusKm ? (
                 <div><dt className="font-bold text-[#64748b]">Coverage radius</dt><dd className="text-[#111827]">{supplier.coverageRadiusKm} km</dd></div>
               ) : null}
@@ -144,7 +144,7 @@ export default async function AdminSupplierDetailPage({ params }: Props) {
                   <li key={entry.id} className="rounded-xl border border-[#e5e7eb] p-3 text-sm">
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-[#111827]">{entry.action.replace(/_/g, " ")}</span>
-                      <span className="text-xs text-[#9ca3af]">{formatDate(entry.createdAt)}</span>
+                      <span className="text-xs text-[#6b7280]">{formatDate(entry.createdAt)}</span>
                     </div>
                     <p className="mt-1 text-xs text-[#6b7280]">by {entry.actorName ?? "Unknown"}</p>
                     {entry.reason ? <p className="mt-2 text-[#4b5563]">{entry.reason}</p> : null}

@@ -69,11 +69,11 @@ export default async function AdminReviewsPage({ searchParams }: Props) {
       header: "Flags",
       cell: (row) =>
         row.flagCount > 0 ? (
-          <span className="font-semibold text-red-600">
+          <span className="font-semibold text-red-700">
             {row.flagCount} · {REASON_LABELS[row.topFlagReason ?? "other"]}
           </span>
         ) : (
-          <span className="text-[#9ca3af]">None</span>
+          <span className="text-[#6b7280]">None</span>
         ),
     },
     { key: "status", header: "Status", cell: (row) => <StatusBadge status={row.status} /> },

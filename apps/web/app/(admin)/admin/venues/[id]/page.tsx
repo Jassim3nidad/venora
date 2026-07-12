@@ -94,7 +94,7 @@ export default async function AdminVenueDetailPage({ params }: Props) {
               <div className="col-span-2"><dt className="font-bold text-[#64748b]">Address</dt><dd className="text-[#111827]">{venue.address}</dd></div>
               <div><dt className="font-bold text-[#64748b]">Capacity</dt><dd className="text-[#111827]">{venue.capacityMin ?? "—"}–{venue.capacityMax} guests</dd></div>
               <div><dt className="font-bold text-[#64748b]">Base price</dt><dd className="text-[#111827]">₱{venue.basePrice.toLocaleString()} / {venue.priceUnit.replace(/_/g, " ")}</dd></div>
-              <div className="col-span-2"><dt className="font-bold text-[#64748b]">Cancellation policy</dt><dd className="text-[#111827]">{venue.cancellationPolicy || <span className="text-red-600">Missing — required before approval</span>}</dd></div>
+              <div className="col-span-2"><dt className="font-bold text-[#64748b]">Cancellation policy</dt><dd className="text-[#111827]">{venue.cancellationPolicy || <span className="text-red-700">Missing — required before approval</span>}</dd></div>
               {venue.description ? (
                 <div className="col-span-2"><dt className="font-bold text-[#64748b]">Description</dt><dd className="text-[#111827]">{venue.description}</dd></div>
               ) : null}
@@ -147,7 +147,7 @@ export default async function AdminVenueDetailPage({ params }: Props) {
                   <li key={entry.id} className="rounded-xl border border-[#e5e7eb] p-3 text-sm">
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-[#111827]">{entry.action.replace(/_/g, " ")}</span>
-                      <span className="text-xs text-[#9ca3af]">{formatDate(entry.createdAt)}</span>
+                      <span className="text-xs text-[#6b7280]">{formatDate(entry.createdAt)}</span>
                     </div>
                     <p className="mt-1 text-xs text-[#6b7280]">by {entry.actorName ?? "Unknown"}</p>
                     {entry.reason ? <p className="mt-2 text-[#4b5563]">{entry.reason}</p> : null}

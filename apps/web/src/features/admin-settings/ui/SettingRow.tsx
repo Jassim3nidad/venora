@@ -59,7 +59,7 @@ export function SettingRow({ definition, setting }: { definition: SettingDefinit
         </p>
         <p className="text-xs text-[#6b7280]">{setting.description}</p>
         {setting.updatedAt ? (
-          <p className="mt-1 text-[11px] text-[#9ca3af]">
+          <p className="mt-1 text-[11px] text-[#6b7280]">
             Last changed {new Date(setting.updatedAt).toLocaleDateString("en-PH", { dateStyle: "medium" })}
             {setting.updatedByName ? ` by ${setting.updatedByName}` : ""}
           </p>
@@ -84,6 +84,7 @@ export function SettingRow({ definition, setting }: { definition: SettingDefinit
             onChange={(e) => setValue(e.target.value)}
             disabled={isPending}
             type={definition.valueType === "number" ? "number" : "text"}
+            aria-label={definition.label}
             className="w-full rounded-lg border border-[#dbe3ef] p-2 text-sm sm:w-64"
           />
         )}
@@ -93,6 +94,7 @@ export function SettingRow({ definition, setting }: { definition: SettingDefinit
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="Reason (required)"
+            aria-label={`Reason for changing ${definition.label}`}
             disabled={isPending}
             className="w-full rounded-lg border border-red-200 bg-red-50 p-2 text-sm sm:w-48"
           />

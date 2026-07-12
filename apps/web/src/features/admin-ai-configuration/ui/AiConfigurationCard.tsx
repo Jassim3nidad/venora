@@ -134,7 +134,7 @@ export function AiConfigurationCard({ config }: { config: AiConfiguration }) {
           </div>
 
           <div>
-            <label className={labelClass}>Reason for this change <span className="font-normal normal-case text-[#9ca3af]">(recorded in audit log)</span></label>
+            <label className={labelClass}>Reason for this change <span className="font-normal normal-case text-[#6b7280]">(recorded in audit log)</span></label>
             <input {...register("reason")} className={inputClass} />
           </div>
 

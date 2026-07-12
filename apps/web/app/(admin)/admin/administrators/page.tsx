@@ -50,7 +50,7 @@ export default async function AdminAccountsPage() {
         row.tier ? (
           <StatusBadge status={row.isActive ? "active" : "inactive"} label={ADMIN_TIER_LABELS[row.tier]} />
         ) : (
-          <span className="text-[#9ca3af]">Not yet assigned</span>
+          <span className="text-[#6b7280]">Not yet assigned</span>
         ),
     },
     {

@@ -111,8 +111,8 @@ export default async function AdminReportsPage() {
           <li>• Commission rules &amp; trend — <a href="/admin/commissions" className="font-semibold text-[#1d4ed8] hover:underline">Commissions</a></li>
           <li>• Marketplace cases, cancellations, refunds — <a href="/admin/marketplace" className="font-semibold text-[#1d4ed8] hover:underline">Marketplace</a></li>
           <li>• Administrator &amp; audit activity — <a href="/admin/audit-logs" className="font-semibold text-[#1d4ed8] hover:underline">Audit Logs</a></li>
-          <li className="text-[#9ca3af]">• AI usage reporting — not available yet (no usage tracking exists; planned for AI Configuration)</li>
-          <li className="text-[#9ca3af]">• System error reporting — not available yet (no error-tracking table exists)</li>
+          <li className="text-[#6b7280]">• AI usage reporting — not available yet (no usage tracking exists; planned for AI Configuration)</li>
+          <li className="text-[#6b7280]">• System error reporting — not available yet (no error-tracking table exists)</li>
         </ul>
       </Panel>
     </DashboardSubPage>

@@ -77,7 +77,7 @@ export default async function AdminUsersPage({ searchParams }: Props) {
     {
       key: "role",
       header: "Role",
-      cell: (row) => (row.role ? <StatusBadge status="active" label={ROLE_LABELS[row.role]} /> : <span className="text-[#9ca3af]">No role</span>),
+      cell: (row) => (row.role ? <StatusBadge status="active" label={ROLE_LABELS[row.role]} /> : <span className="text-[#6b7280]">No role</span>),
     },
     { key: "status", header: "Account status", cell: (row) => <StatusBadge status={row.status} /> },
     { key: "joined", header: "Joined", cell: (row) => formatDate(row.createdAt) },

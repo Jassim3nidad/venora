@@ -90,7 +90,7 @@ export default async function AdminAuditLogsPage({ searchParams }: Props) {
       cell: (row) => (
         <span className="text-[#475569]">
           {row.resourceType}
-          {row.resourceId ? <span className="text-[#9ca3af]"> · {row.resourceId.slice(0, 8)}</span> : null}
+          {row.resourceId ? <span className="text-[#6b7280]"> · {row.resourceId.slice(0, 8)}</span> : null}
         </span>
       ),
     },
