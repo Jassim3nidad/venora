@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 
-export type Role = "customer" | "venue" | "coordinator" | "supplier" | "superadmin";
+export type Role = "customer" | "venue" | "coordinator" | "supplier" | "superadmin" | "analystAdmin" | "financeAdmin";
 
 const CREDENTIAL_ENV: Record<Role, { email: string; password: string }> = {
   customer: { email: "E2E_CUSTOMER_EMAIL", password: "E2E_CUSTOMER_PASSWORD" },
@@ -8,6 +8,8 @@ const CREDENTIAL_ENV: Record<Role, { email: string; password: string }> = {
   coordinator: { email: "E2E_COORDINATOR_EMAIL", password: "E2E_COORDINATOR_PASSWORD" },
   supplier: { email: "E2E_SUPPLIER_EMAIL", password: "E2E_SUPPLIER_PASSWORD" },
   superadmin: { email: "E2E_SUPERADMIN_EMAIL", password: "E2E_SUPERADMIN_PASSWORD" },
+  analystAdmin: { email: "E2E_ANALYST_ADMIN_EMAIL", password: "E2E_ANALYST_ADMIN_PASSWORD" },
+  financeAdmin: { email: "E2E_FINANCE_ADMIN_EMAIL", password: "E2E_FINANCE_ADMIN_PASSWORD" },
 };
 
 // Dedicated QA fixtures (see apps/web/.env.local, gitignored) -- never
