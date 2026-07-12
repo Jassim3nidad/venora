@@ -13,7 +13,7 @@ import {
 } from "@/lib/rbac/roles";
 
 /**
- * Middleware — two responsibilities:
+ * Proxy — two responsibilities:
  * 1. Session refresh: keeps the Supabase session cookie alive on every request.
  * 2. Role guard: redirects unauthenticated or unauthorized users.
  */
@@ -28,7 +28,7 @@ function assertPublicSupabaseKey(key: string): string {
   if (key.startsWith("sb_secret_")) {
     throw new Error(
       "NEXT_PUBLIC_SUPABASE_ANON_KEY holds a secret key (sb_secret_...). " +
-        "Middleware must use a public anon or publishable key so RLS remains enforced.",
+        "Proxy must use a public anon or publishable key so RLS remains enforced.",
     );
   }
 
@@ -68,7 +68,7 @@ function redirectWithCookies(url: URL | string, sourceResponse: NextResponse) {
   return redirectResponse;
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient<Database>(
