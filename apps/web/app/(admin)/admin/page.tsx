@@ -15,38 +15,40 @@ export default async function AdminDashboardPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { count: totalUsers } = await supabase
-    .from("profiles")
-    .select("id", { count: "exact", head: true });
-
-  const { count: pendingVenues } = await supabase
-    .from("venues")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "pending_approval");
-
-  const { count: supplierReviews } = await supabase
-    .from("supplier_profiles")
-    .select("id", { count: "exact", head: true })
-    .eq("accreditation_status", "pending");
-
-  const { count: pendingApplications } = await supabase
-    .from("partner_applications")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "pending");
-
-  const { data: recentVenues } = await supabase
-    .from("venues")
-    .select("id, name, status, organizations(name)")
-    .in("status", ["pending_approval", "pending_review"])
-    .order("created_at", { ascending: false })
-    .limit(5);
-
-  const { data: recentSuppliers } = await supabase
-    .from("supplier_profiles")
-    .select("id, business_name, accreditation_status")
-    .eq("accreditation_status", "pending")
-    .order("created_at", { ascending: false })
-    .limit(3);
+  const [
+    { count: totalUsers },
+    { count: pendingVenues },
+    { count: supplierReviews },
+    { count: pendingApplications },
+    { data: recentVenues },
+    { data: recentSuppliers },
+  ] = await Promise.all([
+    supabase.from("profiles").select("id", { count: "exact", head: true }),
+    supabase
+      .from("venues")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "pending_approval"),
+    supabase
+      .from("supplier_profiles")
+      .select("id", { count: "exact", head: true })
+      .eq("accreditation_status", "pending"),
+    supabase
+      .from("partner_applications")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "pending"),
+    supabase
+      .from("venues")
+      .select("id, name, status, organizations(name)")
+      .in("status", ["pending_approval", "pending_review"])
+      .order("created_at", { ascending: false })
+      .limit(5),
+    supabase
+      .from("supplier_profiles")
+      .select("id, business_name, accreditation_status")
+      .eq("accreditation_status", "pending")
+      .order("created_at", { ascending: false })
+      .limit(3),
+  ]);
 
   const pendingReviews = [
     ...(recentVenues ?? []).map(

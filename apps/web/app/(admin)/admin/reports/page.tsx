@@ -33,15 +33,17 @@ export default async function AdminReportsPage() {
   const canExport = await hasPermission("reports.export");
   const supabase = (await createClient()) as any;
 
-  const { count: venueCount } = await supabase
-    .from("venues")
-    .select("id", { count: "exact", head: true });
-  const { count: bookingCount } = await supabase
-    .from("bookings")
-    .select("id", { count: "exact", head: true });
-  const { count: supplierCount } = await supabase
-    .from("supplier_profiles")
-    .select("id", { count: "exact", head: true });
+  const [
+    { count: venueCount },
+    { count: bookingCount },
+    { count: supplierCount },
+  ] = await Promise.all([
+    supabase.from("venues").select("id", { count: "exact", head: true }),
+    supabase.from("bookings").select("id", { count: "exact", head: true }),
+    supabase
+      .from("supplier_profiles")
+      .select("id", { count: "exact", head: true }),
+  ]);
 
   const scope = { kind: "platform" as const };
   const range = lastNMonthsRange(12);

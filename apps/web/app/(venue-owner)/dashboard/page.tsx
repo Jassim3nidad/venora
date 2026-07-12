@@ -31,27 +31,18 @@ export default async function VenueOwnerDashboardPage() {
   const context = await getOwnerDashboardContext();
   const { supabase, user, orgIds, isAdmin } = context;
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name")
-    .eq("id", user.id)
-    .single();
-
-  const { data: orgs } =
-    orgIds.length > 0
-      ? await supabase
-          .from("organizations")
-          .select("name")
-          .in("id", orgIds)
-          .limit(1)
-      : { data: [] };
-
   let venuesQuery = supabase
     .from("venues")
     .select("id, name, avg_rating, status");
   if (!isAdmin) venuesQuery = venuesQuery.in("organization_id", orgIds);
-  const { data: venues } =
-    isAdmin || orgIds.length > 0 ? await venuesQuery : { data: [] };
+
+  const [{ data: profile }, { data: orgs }, { data: venues }] = await Promise.all([
+    supabase.from("profiles").select("full_name").eq("id", user.id).single(),
+    orgIds.length > 0
+      ? supabase.from("organizations").select("name").in("id", orgIds).limit(1)
+      : Promise.resolve({ data: [] }),
+    isAdmin || orgIds.length > 0 ? venuesQuery : Promise.resolve({ data: [] }),
+  ]);
 
   const venueIds = await getOwnerVenueIds(context);
   const revenueTrend = await getRevenueTrend(

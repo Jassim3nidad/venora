@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   // Turbopack is used in dev (--turbopack flag in package.json)
   experimental: {
     // Optimise package imports for large icon/component libraries
-    optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
+    optimizePackageImports: ["lucide-react", "@radix-ui/react-icons", "recharts"],
     // Server Actions
     serverActions: {
       allowedOrigins: [
