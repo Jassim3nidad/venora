@@ -115,6 +115,47 @@ in this engagement; since the user chose to retain both fixtures
 permanently, both passwords should be rotated via the Supabase dashboard
 and `apps/web/.env.local` updated locally (not committed).
 
+## Migration 065 — internal-function grant hardening (full-application audit)
+
+A broader, full-application follow-up audit (beyond the administrator
+platform this document otherwise covers) re-examined every
+`SECURITY DEFINER` function's grants against the pattern migration 047
+established: `REVOKE EXECUTE ... FROM PUBLIC` alone is insufficient on
+this project (this project's default privileges grant execute directly to
+`anon`/`authenticated`, not only via `PUBLIC`), so a revoke must name
+`anon, authenticated` explicitly. Seven functions created after 047 (plus
+two predating it) had never been brought in line with that pattern.
+Migration `065_lock_down_internal_only_functions.sql` closes the gap;
+none of the seven are called directly from application or Edge Function
+client code except one, which already authenticates via the service-role
+key.
+
+Applied to production and verified two ways: `supabase db push --dry-run`
+now reports "Remote database is up to date," and an unauthenticated
+request to one of the seven functions via the anon key now returns
+`401 permission denied for function ... (42501)` where it previously
+would not have been rejected at the grant level.
+
+Also fixed in this same audit pass (all pushed to `main`, commit history
+starting at `a44cf4c`):
+- Migrated the deprecated `middleware.ts` convention to Next 16's `proxy.ts`.
+- Fixed a Turbopack workspace-root ambiguity in the build.
+- Restored map attribution (was disabled, contrary to the tile provider's
+  terms) and added accessible names to both MapLibre map components.
+- Fixed a webhook route (`/api/webhooks/maya`) that called a database
+  function signature migration 046 had already dropped, which would have
+  thrown an unhandled exception on any real invocation. Not currently
+  reachable in production (no active gateway is registered for that
+  provider), but now fails safely instead of leaking a raw error.
+- Documented a missing `OPENROUTER_API_KEY` entry in the Edge Function
+  env example.
+
+OpenRouter/AI integration (all six AI Edge Functions) and the PayMongo
+payment integration were also independently re-verified in this pass:
+provider/model configuration, key handling, rate/spend limits, moderation,
+and usage-log content all matched policy, with the full Deno (20/20) and
+Vitest (payments: 45/45, full suite: 86/86) test suites passing.
+
 ## Remaining risks
 
 - One moderate, transitive `postcss` advisory bundled inside
@@ -128,6 +169,15 @@ and `apps/web/.env.local` updated locally (not committed).
   `audit_logs` row per cancellation) should hold if it's ever run.
 - The two QA fixture passwords should be rotated by the user now that they
   are retained long-term.
-- The Supabase access token used to run the migration checks and repair
-  was shared directly in chat — recommend revoking/rotating it in the
-  Supabase dashboard.
+- Two separate Supabase access tokens (one in the engagement that produced
+  the rest of this document, one in the full-application audit that added
+  the Migration 065 section above) were shared directly in chat — both
+  recommended for revocation/rotation in the Supabase dashboard.
+- The Maya payment webhook route is present but not functionally wired to
+  a real gateway (no `MayaGateway` implementation is registered) and its
+  `confirmBookingPayment` handler now throws a documented, safe error
+  rather than attempting the stale RPC call. If Maya is ever activated,
+  that handler needs a full rebuild to match the checkout-session
+  reconciliation contract PayMongo's webhook already follows.
+- SEO, bundle/image optimization, and broader (non-admin, non-map)
+  accessibility were not in scope for this pass and remain unaudited.
