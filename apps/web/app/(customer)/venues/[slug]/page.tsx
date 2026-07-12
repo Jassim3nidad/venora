@@ -95,6 +95,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       "description" in metadataVenue
         ? (metadataVenue.description ?? undefined)
         : metadataVenue.short_description,
+    alternates: { canonical: `/venues/${slug}` },
   };
 }
 

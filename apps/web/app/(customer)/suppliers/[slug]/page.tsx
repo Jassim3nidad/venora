@@ -29,6 +29,7 @@ export async function generateMetadata({
       supplier.headline ??
       supplier.description ??
       "Accredited Venora supplier profile.",
+    alternates: { canonical: `/suppliers/${slug}` },
   };
 }
 
