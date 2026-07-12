@@ -51,6 +51,23 @@ test.describe("Analyst administrator — allowed", () => {
     expect(navText).not.toMatch(/Marketplace/);
     expect(navText).not.toMatch(/Settings/);
   });
+
+  test("overview quick-link cards match analyst permissions", async ({ page }) => {
+    await page.goto("/admin");
+    const modulesPanel = page.getByTestId("admin-modules-panel");
+    const panelText = (await modulesPanel.textContent()) ?? "";
+    // reports.view is the only ADMIN_MODULES permission analyst holds.
+    expect(panelText).toMatch(/Reports/);
+    expect(panelText).not.toMatch(/Partner Applications/);
+    expect(panelText).not.toMatch(/User Management/);
+    expect(panelText).not.toMatch(/Venue Approval/);
+    expect(panelText).not.toMatch(/Supplier Accreditation/);
+    expect(panelText).not.toMatch(/Commission Tracking/);
+    // users.verify / venues.view -- analyst has neither.
+    await expect(page.getByRole("link", { name: "Review Applications" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Review Venues" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Manage Reviews" })).toHaveCount(0);
+  });
 });
 
 test.describe("Analyst administrator — forbidden mutations and modules", () => {

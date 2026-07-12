@@ -56,6 +56,24 @@ test.describe("Finance administrator — allowed", () => {
     expect(navText).not.toMatch(/^Users$/m);
   });
 
+  test("overview quick-link cards match finance administrator permissions", async ({ page }) => {
+    await page.goto("/admin");
+    const modulesPanel = page.getByTestId("admin-modules-panel");
+    const panelText = (await modulesPanel.textContent()) ?? "";
+    // commissions.view and reports.view are the only ADMIN_MODULES
+    // permissions finance_admin holds.
+    expect(panelText).toMatch(/Commission Tracking/);
+    expect(panelText).toMatch(/Reports/);
+    expect(panelText).not.toMatch(/Partner Applications/);
+    expect(panelText).not.toMatch(/User Management/);
+    expect(panelText).not.toMatch(/Venue Approval/);
+    expect(panelText).not.toMatch(/Supplier Accreditation/);
+    // users.verify / venues.view -- finance_admin has neither.
+    await expect(page.getByRole("link", { name: "Review Applications" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Review Venues" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Manage Reviews" })).toHaveCount(0);
+  });
+
   test("commission values are never accepted from the browser -- calculation stays server-controlled", async ({ page }) => {
     // No client-reachable path accepts a browser-supplied commission
     // snapshot value at all -- confirm the create-rule endpoint ignores

@@ -49,6 +49,25 @@ test.describe("Super administrator", () => {
     }
   });
 
+  test("overview quick-link cards show every module (super_admin holds all permissions)", async ({ page }) => {
+    await page.goto("/admin");
+    const modulesPanel = page.getByTestId("admin-modules-panel");
+    const panelText = (await modulesPanel.textContent()) ?? "";
+    for (const title of [
+      "Partner Applications",
+      "User Management",
+      "Venue Approval",
+      "Supplier Accreditation",
+      "Commission Tracking",
+      "Reports",
+    ]) {
+      expect(panelText).toContain(title);
+    }
+    await expect(page.getByRole("link", { name: "Review Applications" })).toHaveCount(1);
+    await expect(page.getByRole("link", { name: "Review Venues" })).toHaveCount(1);
+    await expect(page.getByRole("link", { name: "Manage Reviews" })).toHaveCount(1);
+  });
+
   test("AI configuration page never renders a provider API key", async ({ page }) => {
     await page.goto("/admin/ai-configuration");
     const bodyText = await page.textContent("body");
