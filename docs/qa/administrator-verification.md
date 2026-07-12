@@ -56,14 +56,29 @@ Violations found and fixed:
 
 Result: 36/36 accessibility tests passing.
 
-## Supabase migration verification — BLOCKED
+## Supabase migration verification
 
-No `SUPABASE_ACCESS_TOKEN` is available in this environment (checked
-process env, `apps/web/.env.local`, `apps/web/.env`). `supabase migration
-list --linked` / `db push --dry-run` could not be run. Local
-`supabase/migrations/` is the source of truth; applying migrations still
-requires the user to run them manually via the Supabase Dashboard SQL
-editor, as established earlier in this engagement.
+No `SUPABASE_ACCESS_TOKEN` was available in this environment initially
+(checked process env, `apps/web/.env.local`, `apps/web/.env`), so this
+phase was first reported blocked. The user then supplied a token directly
+and `supabase migration list --linked` ran: 63 of 64 migrations matched;
+`064_fix_duplicate_cancellation_history.sql` was pending on the remote.
+
+This migration fixes two real issues in `cancel_booking_request()`, both
+live in production until applied: (1) a duplicate `booking_status_history`
+row per cancellation plus a missing `audit_logs` entry, and (2) a
+permission-check bug that could let a cancellation request bypass its
+authorization check under certain conditions. See the migration file's own
+comments for the exact mechanism.
+
+`db push --dry-run` confirmed only migration 064 was pending — no real
+push was run. The user applied the migration's SQL manually via the
+Supabase Dashboard SQL editor (the established pattern throughout this
+engagement). The CLI's own migration-history bookkeeping table didn't
+reflect this until `supabase migration repair --status applied 064
+--linked` was run (metadata-only — no schema/data change), with the user's
+explicit authorization after the initial classifier block on that write.
+Final `db push --dry-run`: **"Remote database is up to date."**
 
 ## Production smoke tests
 
@@ -102,15 +117,17 @@ and `apps/web/.env.local` updated locally (not committed).
 
 ## Remaining risks
 
-- No `SUPABASE_ACCESS_TOKEN` — migration-history drift between
-  `supabase/migrations/` and the live database cannot be automatically
-  verified from this machine.
 - One moderate, transitive `postcss` advisory bundled inside
   `next@16.2.10`'s own dependency tree (GHSA-qx2v-qp2m-jg93) — not a
   direct dependency, not introduced by this work, not independently
   patchable without a Next.js upstream release.
 - Production cancellation-flow and notification-deduplication checks were
   not run (see above) — pending explicit authorization or dedicated
-  non-production fixtures.
+  non-production fixtures. Migration 064's fix to this same function is
+  now live, so the cancellation-flow test's assertions (exactly one
+  `audit_logs` row per cancellation) should hold if it's ever run.
 - The two QA fixture passwords should be rotated by the user now that they
   are retained long-term.
+- The Supabase access token used to run the migration checks and repair
+  was shared directly in chat — recommend revoking/rotating it in the
+  Supabase dashboard.
