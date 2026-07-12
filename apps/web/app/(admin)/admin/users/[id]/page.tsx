@@ -7,7 +7,7 @@ import {
   PanelHeader,
   StatusBadge,
 } from "@/components/dashboard/enterprise";
-import { requirePermission, hasPermission } from "@/lib/rbac/admin-context";
+import { requirePermissionOrRedirect, hasPermission } from "@/lib/rbac/admin-context";
 import { ROLE_LABELS, type RoleName } from "@/lib/rbac/roles";
 import {
   getUserDetailForAdmin,
@@ -38,7 +38,7 @@ function actionsForStatus(status: string, canSuspend: boolean, canReactivate: bo
 type Props = { params: Promise<{ id: string }> };
 
 export default async function AdminUserDetailPage({ params }: Props) {
-  await requirePermission("users.view");
+  await requirePermissionOrRedirect("users.view");
   const { id } = await params;
 
   const [{ user, error }, { history }, { applications }, canSuspend, canReactivate] = await Promise.all([

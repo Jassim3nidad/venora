@@ -8,7 +8,7 @@ import {
   StatusBadge,
   type DataTableColumn,
 } from "@/components/dashboard/enterprise";
-import { requirePermission } from "@/lib/rbac/admin-context";
+import { requirePermissionOrRedirect } from "@/lib/rbac/admin-context";
 import { auditLogFiltersSchema } from "@/features/admin-audit-logs/schemas/audit-log-filters.schema";
 import { getAuditLogs } from "@/features/admin-audit-logs/application/queries";
 import type { AuditLogEntry } from "@/features/admin-audit-logs/types/audit-log.types";
@@ -40,7 +40,7 @@ export default async function AdminAuditLogsPage({ searchParams }: Props) {
   // Page-level check: audit_logs.view is stricter than plain "is admin" —
   // RLS would otherwise just return an empty list, which reads as "no
   // events" rather than "you're not permitted," so we surface it clearly.
-  await requirePermission("audit_logs.view");
+  await requirePermissionOrRedirect("audit_logs.view");
 
   const rawParams = await searchParams;
   const parsed = auditLogFiltersSchema.safeParse(rawParams);

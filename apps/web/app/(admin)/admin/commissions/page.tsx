@@ -12,7 +12,7 @@ import {
 } from "@/components/dashboard/enterprise";
 import { createClient } from "@/lib/supabase/server";
 import { getCommissionTrend, lastNMonthsRange } from "@/features/analytics/application/queries";
-import { requirePermission, hasPermission } from "@/lib/rbac/admin-context";
+import { requirePermissionOrRedirect, hasPermission } from "@/lib/rbac/admin-context";
 import { getCommissionRules, getVenueCategoryOptions } from "@/features/admin-commissions/application/queries";
 import { CreateCommissionRuleForm, EditCommissionRuleDialog } from "@/features/admin-commissions/ui/CommissionRuleForm";
 import type { CommissionRule } from "@/features/admin-commissions/types/commission-rule.types";
@@ -49,7 +49,7 @@ type PayoutDisplayRow = {
 };
 
 export default async function AdminCommissionsPage() {
-  await requirePermission("commissions.view");
+  await requirePermissionOrRedirect("commissions.view");
   const canManage = await hasPermission("commissions.manage");
   const canOverride = await hasPermission("commissions.override");
 

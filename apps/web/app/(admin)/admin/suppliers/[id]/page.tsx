@@ -7,7 +7,7 @@ import {
   PanelHeader,
   StatusBadge,
 } from "@/components/dashboard/enterprise";
-import { requirePermission, hasPermission } from "@/lib/rbac/admin-context";
+import { requirePermissionOrRedirect, hasPermission } from "@/lib/rbac/admin-context";
 import {
   getSupplierForAdminReview,
   getSupplierReviewHistory,
@@ -47,7 +47,7 @@ function actionsForStatus(status: string, canApprove: boolean, canReject: boolea
 type Props = { params: Promise<{ id: string }> };
 
 export default async function AdminSupplierDetailPage({ params }: Props) {
-  await requirePermission("suppliers.view");
+  await requirePermissionOrRedirect("suppliers.view");
   const { id } = await params;
 
   const [{ supplier, error }, { history }, canApprove, canReject, canReview, canSuspend] = await Promise.all([

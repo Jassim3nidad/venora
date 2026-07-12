@@ -23,6 +23,7 @@
  */
 
 import { cache } from "react";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { UnauthorizedError, ForbiddenError } from "@/lib/errors";
 import { ROLES } from "./roles";
@@ -128,4 +129,27 @@ export async function requirePermission(permission: AdminPermission): Promise<Ad
   }
 
   return ctx;
+}
+
+/**
+ * Server Component variant of requirePermission() — catches the thrown
+ * Unauthorized/ForbiddenError and redirects to /unauthorized instead of
+ * letting it bubble up as an uncaught render error (which Next.js would
+ * otherwise turn into an HTTP 500 with no error boundary in this route
+ * group to catch it). Mirrors the try/catch-and-redirect pattern documented
+ * in guards.ts for requireRole().
+ *
+ * Use this in page.tsx/layout.tsx components. Server Actions and Route
+ * Handlers should keep using requirePermission() directly so the thrown
+ * error maps to a proper 401/403 response instead of a redirect.
+ */
+export async function requirePermissionOrRedirect(permission: AdminPermission): Promise<AdminContext> {
+  try {
+    return await requirePermission(permission);
+  } catch (error) {
+    if (error instanceof UnauthorizedError || error instanceof ForbiddenError) {
+      redirect("/unauthorized");
+    }
+    throw error;
+  }
 }

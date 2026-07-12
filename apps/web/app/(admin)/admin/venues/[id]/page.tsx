@@ -7,7 +7,7 @@ import {
   PanelHeader,
   StatusBadge,
 } from "@/components/dashboard/enterprise";
-import { requirePermission, hasPermission } from "@/lib/rbac/admin-context";
+import { requirePermissionOrRedirect, hasPermission } from "@/lib/rbac/admin-context";
 import {
   getVenueForAdminReview,
   getVenueReviewHistory,
@@ -49,7 +49,7 @@ function actionsForStatus(status: string, canApprove: boolean, canReject: boolea
 type Props = { params: Promise<{ id: string }> };
 
 export default async function AdminVenueDetailPage({ params }: Props) {
-  await requirePermission("venues.view");
+  await requirePermissionOrRedirect("venues.view");
   const { id } = await params;
 
   const [{ venue, error }, { history }, canApprove, canReject, canReview, canSuspend] = await Promise.all([

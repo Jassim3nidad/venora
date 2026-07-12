@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { DashboardSubPage, EmptyState, Panel, PanelHeader } from "@/components/dashboard/enterprise";
-import { requirePermission, hasPermission } from "@/lib/rbac/admin-context";
+import { requirePermissionOrRedirect, hasPermission } from "@/lib/rbac/admin-context";
 import { getSystemSettings } from "@/features/admin-settings/application/queries";
 import { SETTING_DEFINITIONS, type SettingCategory } from "@/features/admin-settings/types/system-setting.types";
 import { SettingRow } from "@/features/admin-settings/ui/SettingRow";
@@ -16,7 +16,7 @@ const CATEGORY_LABELS: Record<SettingCategory, { title: string; description: str
 };
 
 export default async function AdminSettingsPage() {
-  await requirePermission("system_settings.view");
+  await requirePermissionOrRedirect("system_settings.view");
   const canManage = await hasPermission("system_settings.manage");
 
   const { settings, error } = await getSystemSettings();

@@ -8,7 +8,7 @@ import {
   StatusBadge,
   type DataTableColumn,
 } from "@/components/dashboard/enterprise";
-import { requirePermission } from "@/lib/rbac/admin-context";
+import { requirePermissionOrRedirect } from "@/lib/rbac/admin-context";
 import {
   getSuppliersForAdminReview,
   type SupplierQueueFilter,
@@ -35,7 +35,7 @@ type Props = {
 };
 
 export default async function AdminSuppliersPage({ searchParams }: Props) {
-  await requirePermission("suppliers.view");
+  await requirePermissionOrRedirect("suppliers.view");
 
   const { filter: rawFilter } = await searchParams;
   const filter: SupplierQueueFilter = FILTER_TABS.some((t) => t.key === rawFilter)

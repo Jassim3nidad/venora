@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { DashboardSubPage, EmptyState, Panel, PanelHeader, DataTable, type DataTableColumn } from "@/components/dashboard/enterprise";
-import { requirePermission, hasPermission } from "@/lib/rbac/admin-context";
+import { requirePermissionOrRedirect, hasPermission } from "@/lib/rbac/admin-context";
 import { getAiConfigurations, getAiUsageSummary } from "@/features/admin-ai-configuration/application/queries";
 import { AiConfigurationCard } from "@/features/admin-ai-configuration/ui/AiConfigurationCard";
 import { AI_FEATURE_LABELS, type AiUsageSummary } from "@/features/admin-ai-configuration/types/ai-configuration.types";
@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "AI Configuration - Admin" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminAiConfigurationPage() {
-  await requirePermission("ai_config.view");
+  await requirePermissionOrRedirect("ai_config.view");
   const canManage = await hasPermission("ai_config.manage");
 
   const [{ configurations, error }, usage] = await Promise.all([

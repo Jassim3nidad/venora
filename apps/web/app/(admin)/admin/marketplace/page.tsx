@@ -8,7 +8,7 @@ import {
   StatusBadge,
   type DataTableColumn,
 } from "@/components/dashboard/enterprise";
-import { requirePermission, hasPermission } from "@/lib/rbac/admin-context";
+import { requirePermissionOrRedirect, hasPermission } from "@/lib/rbac/admin-context";
 import {
   getMarketplaceFlags,
   getRepeatedRejectionSignals,
@@ -46,7 +46,7 @@ const FLAG_ACTIONS: ReviewActionDef[] = [
 ];
 
 export default async function AdminMarketplacePage() {
-  await requirePermission("marketplace.view");
+  await requirePermissionOrRedirect("marketplace.view");
   const canModerate = await hasPermission("marketplace.moderate");
 
   const [

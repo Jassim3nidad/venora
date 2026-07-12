@@ -19,7 +19,7 @@ import {
   lastNMonthsRange,
 } from "@/features/analytics/application/queries";
 import { AnalyticsExportActions } from "@/features/analytics/ui/AnalyticsExportActions";
-import { requirePermission, hasPermission } from "@/lib/rbac/admin-context";
+import { requirePermissionOrRedirect, hasPermission } from "@/lib/rbac/admin-context";
 
 export const metadata: Metadata = { title: "Reports - Admin" };
 export const dynamic = "force-dynamic";
@@ -29,7 +29,7 @@ function formatPeso(amount: number) {
 }
 
 export default async function AdminReportsPage() {
-  await requirePermission("reports.view");
+  await requirePermissionOrRedirect("reports.view");
   const canExport = await hasPermission("reports.export");
   const supabase = (await createClient()) as any;
 

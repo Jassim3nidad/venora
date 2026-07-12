@@ -8,7 +8,7 @@ import {
   StatusBadge,
   type DataTableColumn,
 } from "@/components/dashboard/enterprise";
-import { requirePermission } from "@/lib/rbac/admin-context";
+import { requirePermissionOrRedirect } from "@/lib/rbac/admin-context";
 import { ROLE_LABELS, ROLES, type RoleName } from "@/lib/rbac/roles";
 import {
   getUsersForAdmin,
@@ -43,7 +43,7 @@ type Props = {
 };
 
 export default async function AdminUsersPage({ searchParams }: Props) {
-  await requirePermission("users.view");
+  await requirePermissionOrRedirect("users.view");
 
   const params = await searchParams;
   const role = (ROLE_OPTIONS.some((o) => o.value === params.role) ? params.role : "all") as RoleFilter;

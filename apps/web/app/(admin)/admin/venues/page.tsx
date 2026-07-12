@@ -8,7 +8,7 @@ import {
   StatusBadge,
   type DataTableColumn,
 } from "@/components/dashboard/enterprise";
-import { requirePermission } from "@/lib/rbac/admin-context";
+import { requirePermissionOrRedirect } from "@/lib/rbac/admin-context";
 import {
   getVenuesForAdminReview,
   type VenueQueueFilter,
@@ -34,7 +34,7 @@ type Props = {
 };
 
 export default async function AdminVenuesPage({ searchParams }: Props) {
-  await requirePermission("venues.view");
+  await requirePermissionOrRedirect("venues.view");
 
   const { filter: rawFilter } = await searchParams;
   const filter: VenueQueueFilter = FILTER_TABS.some((t) => t.key === rawFilter)

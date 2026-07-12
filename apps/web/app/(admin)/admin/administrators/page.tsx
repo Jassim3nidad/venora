@@ -8,7 +8,7 @@ import {
   StatusBadge,
   type DataTableColumn,
 } from "@/components/dashboard/enterprise";
-import { requirePermission, getCurrentAdminContext } from "@/lib/rbac/admin-context";
+import { requirePermissionOrRedirect, getCurrentAdminContext } from "@/lib/rbac/admin-context";
 import { ADMIN_TIER_LABELS } from "@/lib/rbac/permissions";
 import { getAdminAccounts } from "@/features/admin-access-control/application/queries";
 import { AssignTierDialog } from "@/features/admin-access-control/ui/AssignTierDialog";
@@ -25,7 +25,7 @@ export default async function AdminAccountsPage() {
   // Page-level check: middleware only confirms "is an admin"; viewing/
   // managing OTHER admins' tiers is gated by admin_accounts.view /
   // admin_roles.manage specifically.
-  await requirePermission("admin_accounts.view");
+  await requirePermissionOrRedirect("admin_accounts.view");
 
   const ctx = await getCurrentAdminContext();
   const canManageRoles = ctx?.permissions.has("admin_roles.manage") ?? false;
