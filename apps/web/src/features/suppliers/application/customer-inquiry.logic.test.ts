@@ -24,16 +24,14 @@ const baseInquiry = {
 
 describe("customer supplier inquiry logic", () => {
   it("links supplier inquiries to the canonical account inquiry route", () => {
-    expect(getCustomerActivityHref("venue-bookings")).toBe("/bookings");
-    expect(getCustomerActivityHref("supplier-inquiries")).toBe(
-      "/account/inquiries",
+    expect(getCustomerActivityHref("venues")).toBe("/bookings?view=venues");
+    expect(getCustomerActivityHref("suppliers")).toBe(
+      "/bookings?view=suppliers",
     );
-    expect(parseCustomerActivityView("supplier-inquiries")).toBe(
-      "supplier-inquiries",
+    expect(parseCustomerActivityView("suppliers")).toBe(
+      "suppliers",
     );
-    expect(parseCustomerActivityView("/account/inquiries")).toBe(
-      "supplier-inquiries",
-    );
+    expect(parseCustomerActivityView("anything-else")).toBe("venues");
   });
 
   it("uses proposal status to show customer-friendly inquiry progress", () => {

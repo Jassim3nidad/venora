@@ -11,9 +11,9 @@ export type CustomerInquirySort =
   | "event_date"
   | "last_activity";
 
-export type CustomerActivityView = "venue-bookings" | "supplier-inquiries";
+export type CustomerActivityView = "venues" | "suppliers";
 
-export const SUPPLIER_INQUIRIES_ACTIVITY = "supplier-inquiries";
+export const SUPPLIER_INQUIRIES_ACTIVITY = "suppliers";
 
 export type CustomerInquiryFilters = {
   q?: string;
@@ -76,15 +76,15 @@ const quotePriority = [
 export function parseCustomerActivityView(
   value?: string | null,
 ): CustomerActivityView {
-  return value === SUPPLIER_INQUIRIES_ACTIVITY || value === "/account/inquiries"
-    ? "supplier-inquiries"
-    : "venue-bookings";
+  return value === "suppliers" || value === SUPPLIER_INQUIRIES_ACTIVITY
+    ? "suppliers"
+    : "venues";
 }
 
 export function getCustomerActivityHref(view: CustomerActivityView) {
-  return view === "supplier-inquiries"
-    ? "/account/inquiries"
-    : "/bookings";
+  return view === "suppliers"
+    ? "/bookings?view=suppliers"
+    : "/bookings?view=venues";
 }
 
 function normalize(value?: string | null) {

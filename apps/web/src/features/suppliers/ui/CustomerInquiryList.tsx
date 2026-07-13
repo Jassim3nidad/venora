@@ -162,7 +162,9 @@ function buildInquiryHref(
   }
 
   const suffix = params.toString();
-  return suffix ? `/account/inquiries?${suffix}` : "/account/inquiries";
+  return suffix
+    ? `/bookings?view=suppliers&${suffix}`
+    : "/bookings?view=suppliers";
 }
 
 function StatusBadge({

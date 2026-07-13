@@ -5,21 +5,21 @@ import { getCustomerActivityHref } from "@/src/features/suppliers/application/cu
 type ActivityTab = {
   label: string;
   href: string;
-  value: "bookings" | "inquiries";
+  value: "venues" | "suppliers";
   icon: typeof CalendarDays;
 };
 
 const tabs: ActivityTab[] = [
   {
     label: "Venue Bookings",
-    href: getCustomerActivityHref("venue-bookings"),
-    value: "bookings",
+    href: getCustomerActivityHref("venues"),
+    value: "venues",
     icon: CalendarDays,
   },
   {
     label: "Supplier Inquiries",
-    href: getCustomerActivityHref("supplier-inquiries"),
-    value: "inquiries",
+    href: getCustomerActivityHref("suppliers"),
+    value: "suppliers",
     icon: Mail,
   },
 ];

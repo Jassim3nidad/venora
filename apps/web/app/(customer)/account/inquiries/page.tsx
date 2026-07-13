@@ -53,7 +53,7 @@ export default async function CustomerInquiriesPage({
           }
         />
 
-        <CustomerActivityTabs active="inquiries" />
+        <CustomerActivityTabs active="suppliers" />
 
         <CustomerInquiryList inquiries={inquiries} query={query} />
       </div>

@@ -29,6 +29,9 @@ import { BookingStatusBadge } from "@/src/features/booking/ui/booking-status-bad
 import { CustomerCancelBookingButton } from "@/src/features/booking/ui/booking-action-controls";
 import { BookingStatusFilterBar } from "@/src/features/booking/ui/BookingStatusFilterBar";
 import { CustomerActivityTabs } from "@/src/components/customer/CustomerActivityTabs";
+import { CustomerInquiryList } from "@/src/features/suppliers/ui/CustomerInquiryList";
+import { getCustomerInquiries } from "@/src/features/suppliers/application/customer-queries";
+import { Mail } from "lucide-react";
 import {
   bookingMatchesStatusFilter,
   CUSTOMER_BOOKING_STATUS_FILTERS,
@@ -251,12 +254,17 @@ export default async function CustomerBookingsPage({
   searchParams,
 }: {
   searchParams?: Promise<{
+    view?: string;
+    q?: string;
+    proposal?: string;
+    sort?: string;
     created?: string;
     cancelled?: string;
     status?: string;
   }>;
 }) {
   const query = (await searchParams) ?? {};
+  const view = query.view === "suppliers" ? "suppliers" : "venues";
   const statusFilter = parseCustomerBookingStatusFilter(query.status);
   const supabase = await createClient();
 
@@ -268,8 +276,16 @@ export default async function CustomerBookingsPage({
     redirect("/login?redirectTo=/bookings");
   }
 
-  const profile = await getNavbarProfile(supabase, user.id);
-  const bookings = await getCustomerBookings(user.id);
+  // Load inquiries OR bookings depending on view
+  let inquiries: any[] = [];
+  let bookings: BookingRecord[] = [];
+  
+  if (view === "suppliers") {
+    inquiries = await getCustomerInquiries(supabase as any, user.id);
+  } else {
+    bookings = await getCustomerBookings(user.id);
+  }
+
   const filterCounts = getFilterCounts(bookings);
   const filteredBookings = bookings.filter((booking) =>
     bookingMatchesStatusFilter(booking.status, statusFilter),
@@ -317,35 +333,70 @@ export default async function CustomerBookingsPage({
           </div>
         ) : null}
 
-        <CustomerPageHeader
-          eyebrow="Booking center"
-          icon={Sparkles}
-          title="Track every booking request."
-          description="Follow each venue from inquiry to approval, deposit payment, confirmation, completion, and review."
-          action={
-            <CustomerLinkButton href="/venues" tone="secondary">
-              <Search className="h-4 w-4" />
-              Browse Venues
-            </CustomerLinkButton>
-          }
-        />
+        {view === "suppliers" ? (
+          <CustomerPageHeader
+            eyebrow="Supplier Inquiries"
+            icon={Mail}
+            title="Supplier Inquiries"
+            description="Track your supplier requests, conversations, and service proposals."
+            action={
+              <CustomerLinkButton href="/suppliers" tone="secondary">
+                <Search className="h-4 w-4" />
+                Browse Suppliers
+              </CustomerLinkButton>
+            }
+          />
+        ) : (
+          <CustomerPageHeader
+            eyebrow="Booking center"
+            icon={Sparkles}
+            title="Track every booking request."
+            description="Follow each venue from inquiry to approval, deposit payment, confirmation, completion, and review."
+            action={
+              <CustomerLinkButton href="/venues" tone="secondary">
+                <Search className="h-4 w-4" />
+                Browse Venues
+              </CustomerLinkButton>
+            }
+          />
+        )}
 
-        <CustomerActivityTabs active="bookings" />
+        <CustomerActivityTabs active={view} />
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          {stats.map(({ label, value }) => (
-            <CustomerCard key={label} className="p-4">
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#6B7280]">
-                {label}
-              </p>
-              <p className="mt-2 text-3xl font-black tracking-[-0.04em] text-[#111827]">
-                {value}
-              </p>
-            </CustomerCard>
-          ))}
-        </div>
+        {view === "suppliers" ? (
+          <>
+            {inquiries.length === 0 ? (
+              <CustomerEmptyState
+                icon={Mail}
+                eyebrow="No supplier inquiries yet"
+                title="No supplier inquiries yet"
+                description="Your supplier inquiries and service proposal requests will appear here."
+                action={
+                  <CustomerLinkButton href="/suppliers">
+                    Browse Suppliers
+                  </CustomerLinkButton>
+                }
+              />
+            ) : (
+              <CustomerInquiryList inquiries={inquiries} query={query} />
+            )}
+          </>
+        ) : (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              {stats.map(({ label, value }) => (
+                <CustomerCard key={label} className="p-4">
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#6B7280]">
+                    {label}
+                  </p>
+                  <p className="mt-2 text-3xl font-black tracking-[-0.04em] text-[#111827]">
+                    {value}
+                  </p>
+                </CustomerCard>
+              ))}
+            </div>
 
-        {bookings.length > 0 ? (
+            {bookings.length > 0 ? (
           <BookingStatusFilterBar
             activeFilter={statusFilter}
             counts={filterCounts}
@@ -472,6 +523,8 @@ export default async function CustomerBookingsPage({
             })}
           </div>
         )}
+        </>
+      )}
       </div>
     </div>
   );
