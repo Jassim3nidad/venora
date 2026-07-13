@@ -93,7 +93,10 @@ export async function upsertSupplierProfileAction(rawInput: unknown) {
           .single()
       : await supabase
           .from("supplier_profiles")
-          .insert(payload)
+          .insert({
+            ...payload,
+            slug: `${input.businessName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}-${Math.random().toString(36).substring(2, 10).padEnd(8, "0")}`,
+          })
           .select("id")
           .single();
 

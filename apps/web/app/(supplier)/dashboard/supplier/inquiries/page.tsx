@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import {
   DashboardSubPage,
   DashButton,
@@ -55,7 +56,12 @@ type BookingInquiryRow = {
   } | null;
 };
 
-export default async function SupplierInquiriesPage() {
+export default async function SupplierInquiriesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; status?: string; sort?: string }>;
+}) {
+  const filters = await searchParams;
   const { supabase, profile } = await getRequiredSupplierDashboardContext();
 
   if (!profile) {
@@ -78,15 +84,23 @@ export default async function SupplierInquiriesPage() {
     );
   }
 
+  const q = filters.q?.trim() ?? "";
+  const status = ["new", "responded", "closed"].includes(filters.status ?? "")
+    ? filters.status
+    : undefined;
+  const sort = filters.sort === "event_date" ? "event_date" : "created_at";
+  let directQuery = (supabase as any)
+    .from("supplier_contact_requests")
+    .select(
+      "id, contact_name, event_date, event_location, guest_count, status, created_at, supplier_services(name), venue_name_snapshot, event_start_time_snapshot, location_snapshot",
+    )
+    .eq("supplier_id", profile.id);
+  if (q) directQuery = directQuery.ilike("contact_name", `%${q}%`);
+  if (status) directQuery = directQuery.eq("status", status);
+  directQuery = directQuery.order(sort, { ascending: false }).limit(50);
+
   const [directResult, bookingResult] = await Promise.all([
-    (supabase as any)
-      .from("supplier_contact_requests")
-      .select(
-        "id, contact_name, event_date, event_location, guest_count, status, created_at, supplier_services(name), venue_name_snapshot, event_start_time_snapshot, location_snapshot, event_date_snapshot, guest_count_snapshot",
-      )
-      .eq("supplier_id", profile.id)
-      .order("created_at", { ascending: false })
-      .limit(50),
+    directQuery,
     (supabase as any)
       .from("booking_suppliers")
       .select(
@@ -156,6 +170,18 @@ export default async function SupplierInquiriesPage() {
       header: "Status",
       cell: (row) => <StatusBadge status={row.status} />,
     },
+    {
+      key: "actions",
+      header: "",
+      cell: (row) => (
+        <Link
+          href={`/dashboard/supplier/inquiries/${row.id}`}
+          className="font-bold text-[#1d4ed8] hover:underline"
+        >
+          View details
+        </Link>
+      ),
+    },
   ];
 
   const bookingRows = (bookingResult.data ?? []) as BookingInquiryRow[];
@@ -165,6 +191,14 @@ export default async function SupplierInquiriesPage() {
       title="Inquiries"
       description="Review direct marketplace requests and venue coordination requests."
     >
+      <Panel>
+        <form className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_180px_180px_auto]">
+          <input name="q" defaultValue={q} placeholder="Search customer" className="min-h-11 rounded-2xl border border-[#dbe3ef] px-4 text-sm" />
+          <select name="status" defaultValue={status ?? ""} className="min-h-11 rounded-2xl border border-[#dbe3ef] px-4 text-sm"><option value="">All statuses</option><option value="new">New</option><option value="responded">Responded</option><option value="closed">Closed</option></select>
+          <select name="sort" defaultValue={sort === "event_date" ? "event_date" : "newest"} className="min-h-11 rounded-2xl border border-[#dbe3ef] px-4 text-sm"><option value="newest">Newest first</option><option value="event_date">Event date</option></select>
+          <button type="submit" className="min-h-11 rounded-2xl bg-[#1d4ed8] px-5 text-sm font-bold text-white">Apply</button>
+        </form>
+      </Panel>
       <Panel>
         <PanelHeader
           title="Direct Marketplace Requests"

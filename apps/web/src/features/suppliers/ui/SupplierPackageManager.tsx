@@ -143,13 +143,14 @@ export function SupplierPackageManager({
           </h2>
         </div>
 
-        <div className="grid gap-4">
+        <div className="grid gap-5">
           <input type="hidden" {...register("id")} />
           <label className="grid gap-1.5">
-            <span className="text-sm font-bold text-slate-700">Name</span>
+            <span className="text-sm font-bold text-slate-700">Package Name</span>
             <input
               {...register("name")}
-              className="h-11 rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+              placeholder="e.g., Premium Photography Package"
+              className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
             />
             {errors.name?.message ? (
               <p className="text-xs font-semibold text-red-600">{errors.name.message}</p>
@@ -161,25 +162,30 @@ export function SupplierPackageManager({
             <textarea
               {...register("description")}
               rows={3}
-              className="resize-none rounded-lg border border-slate-200 px-3 py-3 text-sm font-semibold outline-none focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+              placeholder="Briefly describe what this package includes..."
+              className="w-full resize-none rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold outline-none transition-all placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
             />
           </label>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-5 sm:grid-cols-2">
             <label className="grid gap-1.5">
-              <span className="text-sm font-bold text-slate-700">Price</span>
-              <input
-                {...register("price")}
-                type="number"
-                min="0"
-                className="h-11 rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
-              />
+              <span className="text-sm font-bold text-slate-700">Price (Optional)</span>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">₱</span>
+                <input
+                  {...register("price")}
+                  type="number"
+                  min="0"
+                  placeholder="0.00"
+                  className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 pl-8 pr-3 text-sm font-semibold outline-none transition-all placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
+                />
+              </div>
             </label>
             <label className="grid gap-1.5">
-              <span className="text-sm font-bold text-slate-700">Unit</span>
+              <span className="text-sm font-bold text-slate-700">Pricing Unit</span>
               <select
                 {...register("priceUnit")}
-                className="h-11 rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
               >
                 <option value="per_event">Per event</option>
                 <option value="per_hour">Per hour</option>
@@ -189,52 +195,57 @@ export function SupplierPackageManager({
             </label>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-5 sm:grid-cols-2">
             <label className="grid gap-1.5">
-              <span className="text-sm font-bold text-slate-700">Type</span>
+              <span className="text-sm font-bold text-slate-700">Package Type</span>
               <input
                 {...register("packageType")}
-                className="h-11 rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                placeholder="e.g., standard, premium"
+                className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
               />
             </label>
             <label className="grid gap-1.5">
-              <span className="text-sm font-bold text-slate-700">Sort</span>
+              <span className="text-sm font-bold text-slate-700">Display Order</span>
               <input
                 {...register("sortOrder")}
                 type="number"
                 min="0"
-                className="h-11 rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                placeholder="0"
+                className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
               />
             </label>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-5 sm:grid-cols-2">
             <label className="grid gap-1.5">
-              <span className="text-sm font-bold text-slate-700">Min guests</span>
+              <span className="text-sm font-bold text-slate-700">Minimum Guests</span>
               <input
                 {...register("minGuests")}
                 type="number"
                 min="1"
-                className="h-11 rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                placeholder="1"
+                className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
               />
             </label>
             <label className="grid gap-1.5">
-              <span className="text-sm font-bold text-slate-700">Max guests</span>
+              <span className="text-sm font-bold text-slate-700">Maximum Guests</span>
               <input
                 {...register("maxGuests")}
                 type="number"
                 min="1"
-                className="h-11 rounded-lg border border-slate-200 px-3 text-sm font-semibold outline-none focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                placeholder="No limit"
+                className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
               />
             </label>
           </div>
 
           <label className="grid gap-1.5">
-            <span className="text-sm font-bold text-slate-700">Inclusions</span>
+            <span className="text-sm font-bold text-slate-700">Inclusions (one per line)</span>
             <textarea
               {...register("inclusionsText")}
               rows={4}
-              className="resize-none rounded-lg border border-slate-200 px-3 py-3 text-sm font-semibold outline-none focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+              placeholder="4 hours of coverage&#10;High-res edited photos&#10;Online gallery"
+              className="w-full resize-none rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold outline-none transition-all placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
             />
           </label>
 
@@ -242,9 +253,9 @@ export function SupplierPackageManager({
             <input
               type="checkbox"
               {...register("isActive")}
-              className="h-4 w-4 rounded border-slate-300 text-[#2563EB]"
+              className="h-4 w-4 rounded border-slate-300 text-[#2563EB] focus:ring-[#2563EB]"
             />
-            Active
+            Make this package active
           </label>
         </div>
 
