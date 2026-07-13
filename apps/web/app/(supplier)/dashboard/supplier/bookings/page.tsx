@@ -14,7 +14,7 @@ import {
   getSupplierDashboardContext,
 } from "../_lib/supplier-dashboard-data";
 
-export const metadata: Metadata = { title: "Bookings - Supplier Dashboard" };
+export const metadata: Metadata = { title: "Jobs - Supplier Dashboard" };
 export const dynamic = "force-dynamic";
 
 type BookingSupplierRow = {
@@ -44,7 +44,7 @@ export default async function SupplierBookingsPage() {
 
   if (!supplierProfile) {
     return (
-      <DashboardSubPage title="Bookings" description="Set up your supplier profile first.">
+      <DashboardSubPage title="Jobs" description="Set up your supplier profile first.">
         <EmptyState
           icon="event_available"
           title="Profile setup pending"
@@ -106,13 +106,13 @@ export default async function SupplierBookingsPage() {
 
   return (
     <DashboardSubPage
-      title="Bookings"
+      title="Jobs"
       description="Confirmed events you're providing services for."
     >
       {rows.length > 0 ? (
         <Panel>
           <PanelHeader
-            title="Confirmed Bookings"
+            title="Confirmed Jobs"
             description="These are inquiries you've accepted."
           />
           <DataTable rows={rows} keyFn={(row) => row.id} columns={columns} />
@@ -120,7 +120,7 @@ export default async function SupplierBookingsPage() {
       ) : (
         <EmptyState
           icon="event_available"
-          title="No confirmed bookings yet"
+          title="No confirmed jobs yet"
           description="Accept a pending inquiry to see it appear here."
         />
       )}

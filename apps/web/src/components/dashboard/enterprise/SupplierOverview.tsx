@@ -17,7 +17,9 @@ export type SupplierOverviewProps = {
   accreditationStatus: string;
   activeServices: number;
   clientInquiries: number;
-  confirmedBookings: number;
+  pendingQuotes: number;
+  acceptedJobs: number;
+  averageRating: number;
   monthlyRevenue: number;
   services: Array<{
     id: string;
@@ -41,7 +43,9 @@ export function SupplierOverview({
   accreditationStatus,
   activeServices,
   clientInquiries,
-  confirmedBookings,
+  pendingQuotes,
+  acceptedJobs,
+  averageRating,
   monthlyRevenue,
   services,
   inquiries,
@@ -49,32 +53,39 @@ export function SupplierOverview({
 }: SupplierOverviewProps) {
   const kpis = [
     {
-      label: "Active Services",
-      value: String(activeServices),
-      icon: "design_services",
+      label: "New Inquiries",
+      value: String(clientInquiries),
+      icon: "mail",
       highlight: true,
     },
     {
-      label: "Client Inquiries",
-      value: String(clientInquiries),
-      icon: "mail",
+      label: "Pending Quotes",
+      value: String(pendingQuotes),
+      icon: "request_quote",
     },
     {
-      label: "Confirmed Bookings",
-      value: String(confirmedBookings),
+      label: "Accepted Jobs",
+      value: String(acceptedJobs),
       icon: "event_available",
     },
     {
-      label: "Monthly Revenue",
-      value: formatCurrency(monthlyRevenue),
-      icon: "payments",
+      label: "Average Rating",
+      value: averageRating > 0 ? averageRating.toFixed(1) : "-",
+      icon: "star",
+    },
+    {
+      label: "Active Services",
+      value: String(activeServices),
+      icon: "design_services",
     },
   ];
 
   const quickActions = [
     { label: "Add New Service", href: "/dashboard/supplier/services" },
     { label: "Review Inquiries", href: "/dashboard/supplier/inquiries" },
-    { label: "View Confirmed Bookings", href: "/dashboard/supplier/bookings" },
+    { label: "Manage Quotes", href: "/dashboard/supplier/quotes" },
+    { label: "Update Availability", href: "/dashboard/supplier/calendar" },
+    { label: "View Jobs", href: "/dashboard/supplier/bookings" },
     { label: "View Analytics", href: "/dashboard/supplier/analytics" },
     { label: "Update Profile", href: "/dashboard/supplier/profile" },
     { label: "Add Portfolio Work", href: "/dashboard/supplier/portfolio" },
@@ -100,7 +111,7 @@ export function SupplierOverview({
         </DashButton>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {kpis.map((kpi) => (
           <KpiCard key={kpi.label} {...kpi} />
         ))}
@@ -110,7 +121,7 @@ export function SupplierOverview({
         <Panel>
           <PanelHeader
             title="Revenue Performance"
-            description="Revenue from confirmed bookings over time."
+            description={`Confirmed supplier revenue: ${formatCurrency(monthlyRevenue)}.`}
             action={
               <span className="rounded-full bg-[#eff6ff] px-3 py-1 text-xs font-bold text-[#1d4ed8]">
                 This Year

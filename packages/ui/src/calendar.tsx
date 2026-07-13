@@ -196,33 +196,33 @@ export function Calendar({
               className={cn(
                 "w-full aspect-square rounded-full text-xs font-semibold flex flex-col items-center justify-center transition-all relative outline-none",
                 isPast &&
-                  "cursor-not-allowed bg-[var(--bg-muted)] text-[var(--text-muted)] opacity-50",
+                "cursor-not-allowed bg-[var(--bg-muted)] text-[var(--text-muted)] opacity-50",
                 // Available
                 !isPast &&
-                  status === "available" &&
-                  "hover:bg-[var(--bg-subtle)] text-[var(--text-primary)] cursor-pointer",
+                status === "available" &&
+                "hover:bg-[var(--bg-subtle)] text-[var(--text-primary)] cursor-pointer",
                 // Reserved
                 !isPast &&
-                  status === "reserved" &&
-                  "cursor-not-allowed bg-[var(--color-brand-600)] text-white shadow-sm",
+                status === "reserved" &&
+                "cursor-not-allowed bg-[var(--color-brand-600)] text-white shadow-sm",
                 // Tentative
                 !isPast &&
-                  status === "tentative" &&
-                  "cursor-not-allowed border-2 border-dashed border-orange-400 text-orange-700 bg-orange-50",
+                status === "tentative" &&
+                "cursor-not-allowed border-2 border-dashed border-orange-400 text-orange-700 bg-orange-50",
                 // Maintenance
                 !isPast &&
-                  status === "maintenance" &&
-                  "cursor-not-allowed bg-slate-200 text-slate-500",
+                status === "maintenance" &&
+                "cursor-not-allowed bg-slate-200 text-slate-500",
                 // Blackout
                 !isPast &&
-                  status === "blackout" &&
-                  "cursor-not-allowed bg-red-50 text-red-500 border border-red-100",
+                status === "blackout" &&
+                "cursor-not-allowed bg-red-50 text-red-500 border border-red-100",
                 // Selected override
                 isSelected &&
-                  "ring-2 ring-[var(--color-brand-600)] ring-offset-2",
+                "ring-2 ring-[var(--color-brand-600)] ring-offset-2",
                 // Today indicator
                 isTodayDate && !isSelected &&
-                  "ring-1 ring-[var(--border-default)] ring-offset-1 font-bold"
+                "ring-1 ring-[var(--border-default)] ring-offset-1 font-bold"
               )}
             >
               <span>{day}</span>

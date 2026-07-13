@@ -131,6 +131,16 @@ function Sidebar({
       </nav>
 
       <div className="mt-6 border-t border-[#dbe3ef] pt-4">
+        {role === "supplier" ? (
+          <Link
+            href="/suppliers"
+            {...(onNavigate ? { onClick: onNavigate } : {})}
+            className="mb-1 flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold text-[#475569] transition hover:bg-white hover:text-[#1d4ed8]"
+          >
+            <MaterialIcon name="storefront" className="text-xl" />
+            Browse Marketplace
+          </Link>
+        ) : null}
         <button
           type="button"
           onClick={() => {

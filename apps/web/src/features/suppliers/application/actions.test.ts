@@ -1,56 +1,65 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createSupplierContactRequestAction } from "./actions";
-import * as auth from "@/features/auth/application/get-server-user";
-import { createClient } from "@supabase/supabase-js";
-
-// Mocking dependencies
-vi.mock("@/features/auth/application/get-server-user", () => ({
-  getServerUserOrThrow: vi.fn(),
-}));
+import { createClient } from "@/lib/supabase/server";
 
 vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(),
 }));
 
+vi.mock("next/cache", () => ({
+  revalidatePath: vi.fn(),
+}));
+
 describe("createSupplierContactRequestAction", () => {
+  const userId = "00000000-0000-4000-8000-000000000001";
+  const supplierId = "00000000-0000-4000-8000-000000000002";
+  const bookingId = "00000000-0000-4000-8000-000000000003";
+  const venueId = "00000000-0000-4000-8000-000000000004";
   let mockSupabase: any;
   let mockUser: any;
   let singleMock: any;
   let maybeSingleMock: any;
+  let insertMock: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockUser = { id: "user-123" };
-    (auth.getServerUserOrThrow as any).mockResolvedValue(mockUser);
+    mockUser = { id: userId };
 
-    maybeSingleMock = vi.fn();
+    maybeSingleMock = vi.fn().mockResolvedValue({ data: null, error: null });
     singleMock = vi.fn();
-    const selectMock = vi.fn().mockReturnValue({ maybeSingle: maybeSingleMock, single: singleMock });
-    const inMock = vi.fn().mockReturnValue({ maybeSingle: maybeSingleMock, single: singleMock });
-    const eqMock = vi.fn().mockReturnValue({ in: inMock, select: selectMock, eq: vi.fn().mockReturnValue({ in: inMock, single: singleMock }) });
-    const insertMock = vi.fn().mockReturnValue({ select: selectMock });
+    const query: any = {};
+    const selectMock = vi.fn(() => query);
+    const inMock = vi.fn(() => query);
+    const eqMock = vi.fn(() => query);
+    insertMock = vi.fn(() => query);
+    Object.assign(query, {
+      select: selectMock,
+      insert: insertMock,
+      eq: eqMock,
+      in: inMock,
+      single: singleMock,
+      maybeSingle: maybeSingleMock,
+    });
 
     mockSupabase = {
-      from: vi.fn().mockReturnValue({
-        select: selectMock,
-        insert: insertMock,
-        eq: eqMock,
-      }),
+      auth: {
+        getUser: vi.fn().mockResolvedValue({ data: { user: mockUser } }),
+      },
+      from: vi.fn(() => query),
     };
 
-    const { createClient: createClientMock } = require("@/lib/supabase/server");
-    createClientMock.mockResolvedValue(mockSupabase);
+    vi.mocked(createClient).mockResolvedValue(mockSupabase);
   });
 
   it("should fail if the supplier does not exist", async () => {
     singleMock.mockResolvedValueOnce({ data: null, error: null });
 
     const result = await createSupplierContactRequestAction({
-      supplierId: "sup-123",
+      supplierId,
       contactName: "John Doe",
       contactEmail: "john@example.com",
-      message: "Hello",
+      message: "Hello supplier",
     });
 
     expect(result.error).toBeDefined();
@@ -59,16 +68,16 @@ describe("createSupplierContactRequestAction", () => {
 
   it("should fail if booking is invalid or does not belong to user", async () => {
     // Supplier exists
-    singleMock.mockResolvedValueOnce({ data: { id: "sup-123", accreditation_status: "accredited" }, error: null });
+    singleMock.mockResolvedValueOnce({ data: { id: supplierId, accreditation_status: "accredited" }, error: null });
     // Booking doesn't exist or is not approved
     maybeSingleMock.mockResolvedValueOnce({ data: null, error: null });
 
     const result = await createSupplierContactRequestAction({
-      supplierId: "sup-123",
-      bookingId: "book-123",
+      supplierId,
+      bookingId,
       contactName: "John Doe",
       contactEmail: "john@example.com",
-      message: "Hello",
+      message: "Hello supplier",
     });
 
     expect(result.error).toBeDefined();
@@ -77,44 +86,68 @@ describe("createSupplierContactRequestAction", () => {
 
   it("should populate snapshot fields when valid booking is provided", async () => {
     // Supplier exists
-    singleMock.mockResolvedValueOnce({ data: { id: "sup-123", accreditation_status: "accredited" }, error: null });
+    singleMock.mockResolvedValueOnce({ data: { id: supplierId, accreditation_status: "accredited" }, error: null });
     // Booking is valid
     maybeSingleMock.mockResolvedValueOnce({
       data: {
-        id: "book-123",
+        id: bookingId,
         status: "approved",
         event_date: "2026-12-01",
         event_start_time: "18:00:00",
         guest_count: 100,
-        venue_id: "venue-456",
+        venue_id: venueId,
         venues: { name: "Grand Hall", city: "Makati", province: "Metro Manila" },
       },
       error: null,
     });
     // Insert succeeds
-    singleMock.mockResolvedValueOnce({ data: { id: "req-1", status: "pending" }, error: null });
+    singleMock.mockResolvedValueOnce({ data: { id: "00000000-0000-4000-8000-000000000005", status: "new" }, error: null });
 
     const result = await createSupplierContactRequestAction({
-      supplierId: "sup-123",
-      bookingId: "book-123",
+      supplierId,
+      bookingId,
       contactName: "John Doe",
       contactEmail: "john@example.com",
-      message: "Hello",
+      message: "Hello supplier",
     });
 
-    expect(result.error).toBeUndefined();
+    expect(result.error).toBeNull();
     expect(mockSupabase.from).toHaveBeenCalledWith("supplier_contact_requests");
-    const insertCallArgs = mockSupabase.from().insert.mock.calls[0][0];
+    const insertCallArgs = insertMock.mock.calls[0][0];
     expect(insertCallArgs).toMatchObject({
-      supplier_id: "sup-123",
-      customer_id: "user-123",
-      booking_id: "book-123",
-      venue_id: "venue-456",
+      supplier_id: supplierId,
+      customer_id: userId,
+      booking_id: bookingId,
+      venue_id: venueId,
       venue_name_snapshot: "Grand Hall",
       event_start_time_snapshot: "18:00:00",
       event_date_snapshot: "2026-12-01",
       guest_count_snapshot: 100,
       location_snapshot: "Grand Hall — Makati, Metro Manila"
     });
+  });
+
+  it("rejects an inquiry when the supplier blocked the event date", async () => {
+    singleMock.mockResolvedValueOnce({
+      data: { id: supplierId, accreditation_status: "accredited" },
+      error: null,
+    });
+    maybeSingleMock.mockResolvedValueOnce({
+      data: { status: "blocked" },
+      error: null,
+    });
+
+    const result = await createSupplierContactRequestAction({
+      supplierId,
+      contactName: "John Doe",
+      contactEmail: "john@example.com",
+      eventDate: "2026-12-01",
+      message: "Please confirm your availability.",
+    });
+
+    expect(result.error?.message).toBe(
+      "This supplier is unavailable on the selected date. Please choose another date.",
+    );
+    expect(insertMock).not.toHaveBeenCalled();
   });
 });

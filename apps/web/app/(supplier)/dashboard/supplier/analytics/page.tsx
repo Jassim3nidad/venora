@@ -34,7 +34,7 @@ type BookingSupplierRow = {
 };
 
 export default async function SupplierAnalyticsPage() {
-  const { supabase, supplierProfile } = await getSupplierDashboardContext();
+  const { supabase, supplierProfile, profile } = await getSupplierDashboardContext();
 
   if (!supplierProfile) {
     return (
@@ -57,6 +57,17 @@ export default async function SupplierAnalyticsPage() {
     .from("supplier_services")
     .select("id", { count: "exact", head: true })
     .eq("supplier_id", supplierProfile.id);
+
+  const [{ count: quoteCount }, { count: inquiryCount }] = await Promise.all([
+    supabase
+      .from("supplier_quotes")
+      .select("id", { count: "exact", head: true })
+      .eq("supplier_id", supplierProfile.id),
+    supabase
+      .from("supplier_contact_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("supplier_id", supplierProfile.id),
+  ]);
 
   const scope = { kind: "supplier" as const, supplierId: supplierProfile.id };
   const range = lastNMonthsRange(12);
@@ -83,11 +94,14 @@ export default async function SupplierAnalyticsPage() {
       title="Analytics"
       description="Track your inquiry performance and revenue over time."
     >
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <KpiCard label="Total Revenue" value={formatPeso(totalRevenue)} icon="payments" highlight />
         <KpiCard label="Confirmed Bookings" value={String(confirmed.length)} icon="event_available" />
         <KpiCard label="Pending Inquiries" value={String(pending.length)} icon="mail" />
         <KpiCard label="Active Services" value={String(servicesCount ?? 0)} icon="design_services" />
+        <KpiCard label="Total Inquiries" value={String(inquiryCount ?? 0)} icon="mail" />
+        <KpiCard label="Quotes Created" value={String(quoteCount ?? 0)} icon="request_quote" />
+        <KpiCard label="Average Rating" value={profile?.avgRating ? profile.avgRating.toFixed(1) : "-"} icon="star" />
         <KpiCard
           label="Conversion Rate"
           value={conversion ? `${conversion.rate}%` : "-"}

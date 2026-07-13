@@ -61,6 +61,7 @@ export default async function SupplierDashboardPage() {
     bookingSupsResult,
     contactResult,
     bookingInquiryResult,
+    pendingQuoteResult,
   ] = await Promise.all([
     (supabase as any)
       .from("supplier_contact_requests")
@@ -105,6 +106,11 @@ export default async function SupplierDashboardPage() {
       .eq("status", "pending")
       .order("id", { ascending: false })
       .limit(3),
+    (supabase as any)
+      .from("supplier_quotes")
+      .select("id", { count: "exact", head: true })
+      .eq("supplier_id", supplierId)
+      .in("status", ["draft", "sent"]),
   ]);
 
   const revenueTrend = await getRevenueTrend(
@@ -156,7 +162,9 @@ export default async function SupplierDashboardPage() {
         (directInquiryCountResult.count ?? 0) +
         (bookingInquiryCountResult.count ?? 0)
       }
-      confirmedBookings={confirmedBookingsResult.count ?? 0}
+      pendingQuotes={pendingQuoteResult.count ?? 0}
+      acceptedJobs={confirmedBookingsResult.count ?? 0}
+      averageRating={profile.avgRating}
       monthlyRevenue={monthlyRevenue}
       services={services}
       inquiries={[...directInquiries, ...bookingInquiries]}
