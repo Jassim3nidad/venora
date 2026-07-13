@@ -40,7 +40,10 @@ export async function getVerificationDocumentUrlAction(path: string) {
 
 export async function approveApplicationAction(applicationId: string) {
   try {
-    const supabase = await createClient();
+    // admin_approve_partner_application isn't in the hand-maintained
+    // generated types yet (see packages/database/types/generated.ts header)
+    // — cast, matching the same pattern used by other admin RPC call sites.
+    const supabase = (await createClient()) as any;
 
     // Verify admin
     const { data: isAdmin } = await supabase.rpc("is_admin");
@@ -73,7 +76,10 @@ export async function denyApplicationAction(applicationId: string, reason: strin
   }
 
   try {
-    const supabase = await createClient();
+    // admin_deny_partner_application isn't in the hand-maintained generated
+    // types yet (see packages/database/types/generated.ts header) — cast,
+    // matching the same pattern used by other admin RPC call sites.
+    const supabase = (await createClient()) as any;
 
     // Verify admin
     const { data: isAdmin } = await supabase.rpc("is_admin");

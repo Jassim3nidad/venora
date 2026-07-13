@@ -73,6 +73,11 @@ const nextConfig: NextConfig = {
   // previously forced every role (including venue owners) to
   // /dashboard/bookings, which is why coordinators ended up on the
   // venue-owner shell instead of /dashboard/coordinator.
+  // Only affects `next dev` — production builds explicitly pass --webpack
+  // (see package.json) because Turbopack's `next build` was not emitting
+  // .next/server/middleware.js.nft.json, which crashes Vercel's build step
+  // with ENOENT even though the local build otherwise completes. Safe to
+  // try dropping --webpack again on a future Next.js upgrade.
   turbopack: {
     root: path.join(__dirname, "../.."),
   },

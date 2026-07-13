@@ -18,7 +18,6 @@ import {
   registerUserUseCase,
   authenticateUserUseCase,
   resendVerificationEmailUseCase,
-  signInWithOAuthUseCase,
   signOutUseCase,
   requestPasswordResetUseCase,
   resetPasswordUseCase,
@@ -185,24 +184,6 @@ export async function resendVerificationEmailAction(
 
   try {
     await resendVerificationEmailUseCase(parsed.data.email);
-  } catch (error) {
-    return {
-      success: false,
-      error: toErrorMessage(error),
-    };
-  }
-
-  return {
-    success: true,
-    data: undefined,
-  };
-}
-
-export async function signInWithOAuthAction(
-  provider: "google",
-): Promise<ActionResult> {
-  try {
-    await signInWithOAuthUseCase(provider);
   } catch (error) {
     return {
       success: false,
