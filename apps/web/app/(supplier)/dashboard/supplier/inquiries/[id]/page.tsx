@@ -73,7 +73,13 @@ export default async function SupplierInquiryDetailPage({
           </Panel>
           <Panel>
             <PanelHeader title="Conversation" description="Messages are visible only to you and this customer." />
-            <InquiryMessageThread inquiryId={id} messages={messages ?? []} supplierUserId={user.id} />
+            <InquiryMessageThread 
+              inquiryId={id} 
+              messages={messages ?? []} 
+              supplierUserId={user.id} 
+              customerName={inquiry.contact_name}
+              supplierName={profile.businessName}
+            />
           </Panel>
         </div>
         <div className="space-y-6">
@@ -86,15 +92,15 @@ export default async function SupplierInquiryDetailPage({
             </div>
           </Panel>
           <Panel>
-            <PanelHeader title="Quote" />
+            <PanelHeader title="Service Proposal" />
             {quote ? (
               <div className="space-y-4">
                 <StatusBadge status={quote.status} />
                 <p className="text-2xl font-black text-[#0f172a]">₱{Number(quote.total).toLocaleString("en-PH")}</p>
-                <DashButton href={`/dashboard/supplier/quotes/${quote.id}`} variant="secondary">View quote</DashButton>
+                <DashButton href={`/dashboard/supplier/quotes/${quote.id}`} variant="secondary">View proposal</DashButton>
               </div>
             ) : (
-              <DashButton href={`/dashboard/supplier/quotes/new?inquiryId=${id}`} icon="request_quote">Create quote</DashButton>
+              <DashButton href={`/dashboard/supplier/quotes/new?inquiryId=${id}`} icon="request_quote">Create service proposal</DashButton>
             )}
           </Panel>
         </div>

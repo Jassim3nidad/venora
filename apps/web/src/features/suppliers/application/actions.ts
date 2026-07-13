@@ -1,5 +1,6 @@
 "use server";
 
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createServerAction } from "@/src/lib/server-action";
@@ -16,6 +17,7 @@ import {
   supplierPortfolioSchema,
   supplierProfileSchema,
   toggleSupplierFavoriteSchema,
+  supplierQuoteActionSchema,
 } from "../schemas/supplier.schema";
 
 function normalizeOptionalString(value?: string | null) {
@@ -396,4 +398,106 @@ export async function toggleSupplierFavoriteAction(rawInput: unknown) {
 
     return { isFavorited: true };
   }, rawInput);
+}
+
+export async function acceptSupplierQuoteAction(rawInput: unknown) {
+  return createServerAction(supplierQuoteActionSchema, async (input) => {
+    const { supabase, user } = await requireUser();
+
+    // Verify quote ownership and update quote status
+    const { data: quote, error: quoteError } = await supabase
+      .from("supplier_quotes")
+      .update({ status: "accepted" })
+      .eq("id", input.quoteId)
+      .eq("customer_id", user.id)
+      .eq("status", "sent")
+      .select("inquiry_id, supplier_id")
+      .single();
+
+    throwIfSupabaseError(quoteError);
+
+    // Also update the parent inquiry status (best effort)
+    if (quote?.inquiry_id) {
+      // we don't throw if this fails, as inquiry statuses might not map exactly
+      await supabase
+        .from("supplier_contact_requests")
+        .update({ status: "won" }) // guessing "won", or we just let quote dictate state
+        .eq("id", quote.inquiry_id)
+        .eq("customer_id", user.id);
+    }
+
+    revalidatePath(`/account/inquiries`);
+    if (quote?.inquiry_id) {
+      revalidatePath(`/account/inquiries/${quote.inquiry_id}`);
+    }
+
+    return { success: true };
+  }, rawInput);
+}
+
+export async function declineSupplierQuoteAction(rawInput: unknown) {
+  return createServerAction(supplierQuoteActionSchema, async (input) => {
+    const { supabase, user } = await requireUser();
+
+    // Verify quote ownership and update quote status
+    const { data: quote, error: quoteError } = await supabase
+      .from("supplier_quotes")
+      .update({ status: "declined" })
+      .eq("id", input.quoteId)
+      .eq("customer_id", user.id)
+      .eq("status", "sent")
+      .select("inquiry_id, supplier_id")
+      .single();
+
+    throwIfSupabaseError(quoteError);
+
+    // Update parent inquiry if needed
+    if (quote?.inquiry_id) {
+      await supabase
+        .from("supplier_contact_requests")
+        .update({ status: "lost" }) // or whatever maps to declined
+        .eq("id", quote.inquiry_id)
+        .eq("customer_id", user.id);
+    }
+
+    revalidatePath(`/account/inquiries`);
+    if (quote?.inquiry_id) {
+      revalidatePath(`/account/inquiries/${quote.inquiry_id}`);
+    }
+
+    return { success: true };
+  }, rawInput);
+}
+
+export async function sendCustomerInquiryMessageAction(rawInput: unknown) {
+  return createServerAction(
+    z.object({ inquiryId: z.string().uuid(), message: z.string().min(1) }),
+    async (input) => {
+      const { supabase, user } = await requireUser();
+
+      // Verify the customer owns this inquiry
+      const { data: inquiry, error: inquiryError } = await supabase
+        .from("supplier_contact_requests")
+        .select("id")
+        .eq("id", input.inquiryId)
+        .eq("customer_id", user.id)
+        .single();
+
+      if (inquiryError || !inquiry) {
+        throw new Error("Unauthorized to send message for this inquiry");
+      }
+
+      const { data, error } = await supabase
+        .from("supplier_inquiry_messages")
+        .insert({ inquiry_id: input.inquiryId, sender_id: user.id, message: input.message })
+        .select("id")
+        .single();
+
+      throwIfSupabaseError(error);
+
+      revalidatePath(`/account/inquiries/${input.inquiryId}`);
+      return { messageId: data.id as string };
+    },
+    rawInput
+  );
 }

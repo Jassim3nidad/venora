@@ -82,6 +82,8 @@ export function SupplierDetail({ supplier, currentUser, bookings = [], isFavorit
   const featuredPortfolio = supplier.portfolio.slice(0, 6);
   const serviceAreas = supplier.serviceAreas.slice(0, 4);
 
+  const isOwner = currentUser?.id === supplier.profileId;
+
   return (
     <main className="overflow-x-hidden bg-[#F8FAFC]">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-5 sm:gap-6 sm:px-6 sm:py-8 lg:px-8">
@@ -142,12 +144,21 @@ export function SupplierDetail({ supplier, currentUser, bookings = [], isFavorit
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row">
-                <a
-                  href="#contact-supplier"
-                  className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-[#2563EB] px-5 text-sm font-extrabold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8] sm:w-auto"
-                >
-                  Send Inquiry
-                </a>
+                {!isOwner ? (
+                  <a
+                    href="#contact-supplier"
+                    className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-[#2563EB] px-5 text-sm font-extrabold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8] sm:w-auto"
+                  >
+                    Send Inquiry
+                  </a>
+                ) : (
+                  <Link
+                    href="/dashboard/supplier"
+                    className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-indigo-600 px-5 text-sm font-extrabold text-white shadow-sm transition hover:bg-indigo-700 sm:w-auto"
+                  >
+                    Manage Profile
+                  </Link>
+                )}
                 <Link
                   href="/suppliers"
                   className="inline-flex h-12 w-full items-center justify-center rounded-2xl border border-[#E5E7EB] bg-white px-5 text-sm font-extrabold text-[#111827] shadow-sm transition hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] sm:w-auto"
@@ -398,12 +409,29 @@ export function SupplierDetail({ supplier, currentUser, bookings = [], isFavorit
             id="contact-supplier"
             className="grid min-w-0 gap-4 lg:sticky lg:top-24 lg:self-start"
           >
-            <SupplierContactForm
-              supplier={supplier}
-              supplierSlug={supplier.slug}
-              userEmail={currentUser?.email ?? null}
-              bookings={bookings}
-            />
+            {isOwner ? (
+              <section className="min-w-0 rounded-[28px] border border-indigo-200 bg-indigo-50 p-4 shadow-sm shadow-slate-200/70 sm:p-5">
+                <h2 className="text-lg font-black text-indigo-900">
+                  This is your listing
+                </h2>
+                <p className="mt-2 text-sm font-medium leading-6 text-indigo-700">
+                  You are viewing your business as customers see it.
+                </p>
+                <Link
+                  href="/dashboard/supplier"
+                  className="mt-4 flex h-11 w-full items-center justify-center rounded-2xl bg-indigo-600 px-4 text-sm font-bold text-white transition hover:bg-indigo-700"
+                >
+                  Manage Profile
+                </Link>
+              </section>
+            ) : (
+              <SupplierContactForm
+                supplier={supplier}
+                supplierSlug={supplier.slug}
+                userEmail={currentUser?.email ?? null}
+                bookings={bookings}
+              />
+            )}
 
             <section className="min-w-0 rounded-[28px] border border-[#E5E7EB] bg-white p-4 shadow-sm shadow-slate-200/70 sm:p-5">
               <h2 className="text-lg font-black text-[#111827]">

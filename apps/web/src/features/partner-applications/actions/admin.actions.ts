@@ -49,7 +49,7 @@ export async function approveApplicationAction(applicationId: string) {
     }
 
     // Call RPC
-    const { error: rpcError } = await supabase.rpc("admin_approve_partner_application", {
+    const { error: rpcError } = await (supabase as any).rpc("admin_approve_partner_application", {
       p_application_id: applicationId,
     });
 
@@ -82,7 +82,7 @@ export async function denyApplicationAction(applicationId: string, reason: strin
     }
 
     // Call RPC
-    const { error: rpcError } = await supabase.rpc("admin_deny_partner_application", {
+    const { error: rpcError } = await (supabase as any).rpc("admin_deny_partner_application", {
       p_application_id: applicationId,
       p_reason: reason.trim(),
     });

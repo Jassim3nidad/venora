@@ -9,9 +9,9 @@ export default async function SupplierQuotesPage() {
   const { supabase, profile } = await getRequiredSupplierDashboardContext();
   const quotes = profile ? await listSupplierQuotes(supabase, profile.id) : [];
   return (
-    <DashboardSubPage title="Quotes" description="Create, send, and track quotes connected to customer inquiries.">
+    <DashboardSubPage title="Proposals" description="Create, send, and track proposals connected to customer inquiries.">
       {quotes.length === 0 ? (
-        <EmptyState icon="request_quote" title="No quotes yet" description="Open an inquiry to prepare your first customer quote." />
+        <EmptyState icon="request_quote" title="No proposals yet" description="Open an inquiry to prepare your first service proposal." />
       ) : (
         <Panel padding={false}>
           <div className="divide-y divide-[#e5e7eb]">

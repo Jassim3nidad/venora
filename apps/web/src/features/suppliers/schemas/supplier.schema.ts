@@ -157,9 +157,14 @@ export const toggleSupplierFavoriteSchema = z.object({
   supplierId: z.string().uuid(),
 });
 
+export const supplierQuoteActionSchema = z.object({
+  quoteId: z.string().uuid(),
+});
+
 export type SupplierSearchInput = z.infer<typeof supplierSearchSchema>;
 export type SupplierProfileInput = z.infer<typeof supplierProfileSchema>;
 export type SupplierPackageInput = z.infer<typeof supplierPackageSchema>;
 export type ArchiveSupplierPackageInput = z.infer<typeof archiveSupplierPackageSchema>;
 export type SupplierPortfolioInput = z.infer<typeof supplierPortfolioSchema>;
 export type SupplierContactRequestInput = z.infer<typeof supplierContactRequestSchema>;
+export type SupplierQuoteActionInput = z.infer<typeof supplierQuoteActionSchema>;
