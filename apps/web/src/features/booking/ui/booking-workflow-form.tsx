@@ -215,6 +215,11 @@ export function BookingWorkflowForm({
             <button
               type="button"
               onClick={() => setShowCalendar((value) => !value)}
+              onKeyDown={(event) => {
+                if (event.key !== "Enter" && event.key !== " ") return;
+                event.preventDefault();
+                setShowCalendar((value) => !value);
+              }}
               className="flex h-12 w-full items-center justify-between rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 text-left text-sm font-semibold text-slate-900 outline-none transition hover:border-[#BFDBFE] hover:bg-white focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
               aria-expanded={showCalendar}
               aria-controls="booking-date-calendar"
