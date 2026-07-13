@@ -17,6 +17,12 @@ import {
   Loader2,
 } from "lucide-react";
 import { acceptSupplierQuoteAction, declineSupplierQuoteAction, sendCustomerInquiryMessageAction } from "../application/actions";
+import {
+  buildInquiryTimeline,
+  canCustomerActOnQuote,
+  getInquiryDisplayStatus,
+} from "../application/customer-inquiry.logic";
+import { formatResponseTime } from "../utils/supplier-format";
 
 function formatCurrency(value?: number | null) {
   if (value === null || value === undefined || !Number.isFinite(Number(value))) {
@@ -47,10 +53,29 @@ export function CustomerInquiryDetail({ inquiry, messages, quote, isPreviewMode 
   const [error, setError] = useState<string | null>(null);
 
   const supplier = inquiry.supplier_profiles;
+  const service = inquiry.supplier_services;
+  const booking = inquiry.bookings;
+  const venue = booking?.venues;
   const supplierImage = supplier?.profile_image_url || "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=800&q=80";
+  const displayStatus = getInquiryDisplayStatus(inquiry.status, quote?.status);
+  const proposalStatus = quote ? getInquiryDisplayStatus(null, quote.status) : null;
+  const timeline = buildInquiryTimeline(inquiry, messages, quote);
+  const canActOnQuote = canCustomerActOnQuote(quote);
+  const conversationClosed =
+    inquiry.status === "closed" || ["accepted", "declined", "withdrawn", "expired"].includes(quote?.status);
 
-  const handleAction = (actionFn: typeof acceptSupplierQuoteAction | typeof declineSupplierQuoteAction) => {
+  const handleAction = (
+    actionFn: typeof acceptSupplierQuoteAction | typeof declineSupplierQuoteAction,
+    label: "accept" | "decline",
+  ) => {
     if (!quote?.id || isPreviewMode) return;
+    const confirmed = window.confirm(
+      label === "accept"
+        ? `Accept this Service Proposal from ${supplier?.business_name ?? "this supplier"} for ${formatCurrency(quote.total)}?`
+        : `Decline this Service Proposal from ${supplier?.business_name ?? "this supplier"}?`,
+    );
+    if (!confirmed) return;
+
     setError(null);
     startTransition(async () => {
       const result = await actionFn({ quoteId: quote.id });
@@ -64,7 +89,7 @@ export function CustomerInquiryDetail({ inquiry, messages, quote, isPreviewMode 
 
   const handleSendMessage = (formData: FormData) => {
     const message = formData.get("message") as string;
-    if (!message?.trim()) return;
+    if (!message?.trim() || conversationClosed) return;
     
     startTransition(async () => {
       const result = await sendCustomerInquiryMessageAction({ inquiryId: inquiry.id, message: message.trim() });
@@ -104,15 +129,20 @@ export function CustomerInquiryDetail({ inquiry, messages, quote, isPreviewMode 
                 Supplier
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#2563EB]">
-                {inquiry.status}
+                Inquiry: {displayStatus.label}
               </span>
+              {proposalStatus ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.12em] text-violet-700">
+                  Proposal: {proposalStatus.label}
+                </span>
+              ) : null}
             </div>
 
             <h1 className="mt-3 text-2xl font-black text-[#111827] sm:text-3xl">
               {supplier?.business_name ?? "Supplier"}
             </h1>
             <p className="mt-1 text-sm font-bold text-[#6B7280]">
-              Inquiry for: {inquiry.supplier_services?.name ?? "General Inquiry"}
+              Inquiry for: {service?.name ?? "General Inquiry"}
             </p>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -133,11 +163,111 @@ export function CustomerInquiryDetail({ inquiry, messages, quote, isPreviewMode 
                 Sent {formatDate(inquiry.created_at)}
               </span>
             </div>
+
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              {supplier?.slug ? (
+                <Link
+                  href={`/suppliers/${supplier.slug}`}
+                  className="inline-flex h-12 items-center justify-center rounded-2xl bg-[#2563EB] px-5 text-sm font-extrabold text-white transition hover:bg-[#1D4ED8]"
+                >
+                  View Supplier Profile
+                </Link>
+              ) : null}
+              {booking?.id ? (
+                <Link
+                  href={`/bookings/${booking.id}`}
+                  className="inline-flex h-12 items-center justify-center rounded-2xl border border-[#E5E7EB] bg-white px-5 text-sm font-extrabold text-[#111827] transition hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
+                >
+                  View Venue Booking
+                </Link>
+              ) : null}
+            </div>
           </div>
         </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+        <section className="rounded-[28px] border border-[#E5E7EB] bg-white p-6 shadow-sm shadow-slate-200/70">
+          <h2 className="flex items-center gap-2 text-lg font-black text-[#111827]">
+            <CalendarDays className="h-5 w-5 text-[#2563EB]" />
+            Linked Event
+          </h2>
+          <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+            {[
+              ["Venue", inquiry.venue_name_snapshot || venue?.name || "Not linked"],
+              ["Location", inquiry.location_snapshot || inquiry.event_location || [venue?.city, venue?.province].filter(Boolean).join(", ") || "Not provided"],
+              ["Event date", formatDate(inquiry.event_date_snapshot || inquiry.event_date || booking?.event_date)],
+              ["Guest count", (inquiry.guest_count_snapshot || inquiry.guest_count || booking?.guest_count)?.toLocaleString("en-PH") ?? "Not provided"],
+              ["Booking status", booking?.status ?? "Not linked"],
+              ["Booking reference", booking?.id ? `#${booking.id.slice(0, 8).toUpperCase()}` : "Not linked"],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-2xl bg-[#F8FAFC] p-4">
+                <dt className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#64748B]">
+                  {label}
+                </dt>
+                <dd className="mt-1 break-words text-sm font-bold text-[#111827]">
+                  {value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+
+        <section className="rounded-[28px] border border-[#E5E7EB] bg-white p-6 shadow-sm shadow-slate-200/70">
+          <h2 className="flex items-center gap-2 text-lg font-black text-[#111827]">
+            <ShieldCheck className="h-5 w-5 text-[#2563EB]" />
+            Supplier Information
+          </h2>
+          <div className="mt-4 space-y-3 text-sm font-semibold text-[#475569]">
+            <p className="text-lg font-black text-[#111827]">
+              {supplier?.business_name ?? "Supplier"}
+            </p>
+            <p>{supplier?.supplier_categories?.name ?? "Supplier"}</p>
+            <p>
+              Accreditation:{" "}
+              <span className="font-black text-emerald-700">
+                {supplier?.accreditation_status ?? "Not verified"}
+              </span>
+            </p>
+            <p>
+              Typical response:{" "}
+              {formatResponseTime(Number(supplier?.response_time_hours ?? 24))}
+            </p>
+          </div>
+        </section>
+
+        <section className="rounded-[28px] border border-[#E5E7EB] bg-white p-6 shadow-sm shadow-slate-200/70">
+          <h2 className="flex items-center gap-2 text-lg font-black text-[#111827]">
+            <FileText className="h-5 w-5 text-[#2563EB]" />
+            Request Details
+          </h2>
+          <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+            {[
+              ["Selected service", service?.name ?? "General inquiry"],
+              ["Package type", service?.package_type ?? "Not specified"],
+              ["Estimated package price", service?.price ? formatCurrency(service.price) : "Quote on request"],
+              ["Date submitted", formatDate(inquiry.created_at)],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-2xl bg-[#F8FAFC] p-4">
+                <dt className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#64748B]">
+                  {label}
+                </dt>
+                <dd className="mt-1 break-words text-sm font-bold text-[#111827]">
+                  {value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+          <div className="mt-4 rounded-2xl border border-[#E5E7EB] bg-white p-4">
+            <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#64748B]">
+              Your message
+            </p>
+            <p className="mt-2 whitespace-pre-wrap text-sm font-medium leading-7 text-[#334155]">
+              {inquiry.message || "No message provided."}
+            </p>
+          </div>
+        </section>
+
         {/* Service Proposal Section */}
         {quote && (
           <section className="rounded-[28px] border border-[#E5E7EB] bg-white p-6 shadow-sm shadow-slate-200/70">
@@ -205,12 +335,12 @@ export function CustomerInquiryDetail({ inquiry, messages, quote, isPreviewMode 
               </div>
             )}
 
-            {quote.status === "sent" && !isPreviewMode && (
+            {canActOnQuote && !isPreviewMode && (
               <div className="mt-6">
                 {error && <p className="mb-3 text-sm font-semibold text-red-600">{error}</p>}
                 <div className="flex gap-3">
                   <button
-                    onClick={() => handleAction(acceptSupplierQuoteAction)}
+                    onClick={() => handleAction(acceptSupplierQuoteAction, "accept")}
                     disabled={isPending}
                     className="flex h-11 flex-1 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] text-sm font-extrabold text-white transition hover:bg-[#1D4ED8] disabled:opacity-50"
                   >
@@ -218,7 +348,7 @@ export function CustomerInquiryDetail({ inquiry, messages, quote, isPreviewMode 
                     Accept Proposal
                   </button>
                   <button
-                    onClick={() => handleAction(declineSupplierQuoteAction)}
+                    onClick={() => handleAction(declineSupplierQuoteAction, "decline")}
                     disabled={isPending}
                     className="flex h-11 flex-1 items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white text-sm font-extrabold text-[#111827] transition hover:border-red-200 hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
                   >
@@ -236,9 +366,9 @@ export function CustomerInquiryDetail({ inquiry, messages, quote, isPreviewMode 
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-sm">
               <FileText className="h-6 w-6 text-[#9CA3AF]" />
             </div>
-            <h3 className="mt-4 text-lg font-bold text-[#111827]">No Proposal Yet</h3>
+            <h3 className="mt-4 text-lg font-bold text-[#111827]">No service proposal yet</h3>
             <p className="mt-1 text-sm font-medium text-[#6B7280]">
-              The supplier will review your request and send a service proposal if they are available.
+              The supplier may send a detailed service proposal after reviewing your request.
             </p>
           </section>
         )}
@@ -283,27 +413,62 @@ export function CustomerInquiryDetail({ inquiry, messages, quote, isPreviewMode 
             )}
           </div>
           <div className="rounded-b-[28px] border-t border-[#E5E7EB] bg-[#F9FAFB] p-4">
-            <form 
-              action={handleSendMessage}
-              id="chat-form"
-              className="flex gap-2"
-            >
-              <input
-                type="text"
-                name="message"
-                placeholder="Type your message..."
-                required
-                className="flex-1 rounded-2xl border border-[#E5E7EB] bg-white px-4 py-3 text-sm font-medium focus:border-[#2563EB] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
-              />
-              <button
-                type="submit"
-                disabled={isPending}
-                className="flex h-[46px] items-center justify-center rounded-2xl bg-[#2563EB] px-6 text-sm font-extrabold text-white transition hover:bg-[#1D4ED8] disabled:opacity-50"
+            {conversationClosed ? (
+              <p className="rounded-2xl border border-[#E5E7EB] bg-white px-4 py-3 text-sm font-semibold text-[#6B7280]">
+                This conversation is closed.
+              </p>
+            ) : (
+              <form
+                action={handleSendMessage}
+                id="chat-form"
+                className="flex flex-col gap-2 sm:flex-row"
               >
-                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send"}
-              </button>
-            </form>
+                <input
+                  type="text"
+                  name="message"
+                  placeholder="Type your message..."
+                  required
+                  disabled={isPending}
+                  className="flex-1 rounded-2xl border border-[#E5E7EB] bg-white px-4 py-3 text-sm font-medium focus:border-[#2563EB] focus:outline-none focus:ring-1 focus:ring-[#2563EB] disabled:bg-[#F3F4F6]"
+                />
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="flex h-[46px] items-center justify-center rounded-2xl bg-[#2563EB] px-6 text-sm font-extrabold text-white transition hover:bg-[#1D4ED8] disabled:opacity-50"
+                >
+                  {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send"}
+                </button>
+              </form>
+            )}
           </div>
+        </section>
+
+        <section className="rounded-[28px] border border-[#E5E7EB] bg-white p-6 shadow-sm shadow-slate-200/70">
+          <h2 className="flex items-center gap-2 text-lg font-black text-[#111827]">
+            <Clock3 className="h-5 w-5 text-[#2563EB]" />
+            Activity Timeline
+          </h2>
+          {timeline.length === 0 ? (
+            <p className="mt-4 text-sm font-semibold text-[#6B7280]">
+              No activity has been recorded yet.
+            </p>
+          ) : (
+            <ol className="mt-4 space-y-4">
+              {timeline.map((item) => (
+                <li key={`${item.label}-${item.at}`} className="flex gap-3">
+                  <div className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[#2563EB]" />
+                  <div>
+                    <p className="text-sm font-black text-[#111827]">
+                      {item.label}
+                    </p>
+                    <p className="mt-1 text-xs font-semibold uppercase tracking-[0.1em] text-[#9CA3AF]">
+                      {item.actor} - {formatDate(item.at)}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )}
         </section>
       </div>
     </div>

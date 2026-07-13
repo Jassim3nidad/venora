@@ -343,7 +343,7 @@ export function SupplierContactForm({
       </div>
 
       {status ? (
-        <p
+        <div
           role={status.type === "error" ? "alert" : "status"}
           className={[
             "mt-4 rounded-2xl border px-3 py-2 text-sm font-semibold",
@@ -352,8 +352,16 @@ export function SupplierContactForm({
               : "border-emerald-200 bg-emerald-50 text-emerald-700",
           ].join(" ")}
         >
-          {status.message}
-        </p>
+          <p>{status.message}</p>
+          {status.type === "success" ? (
+            <Link
+              href="/account/inquiries"
+              className="mt-2 inline-flex font-black text-emerald-800 underline-offset-4 hover:underline"
+            >
+              View Supplier Inquiries
+            </Link>
+          ) : null}
+        </div>
       ) : null}
 
       <button

@@ -28,6 +28,7 @@ import {
 import { BookingStatusBadge } from "@/src/features/booking/ui/booking-status-badge";
 import { CustomerCancelBookingButton } from "@/src/features/booking/ui/booking-action-controls";
 import { BookingStatusFilterBar } from "@/src/features/booking/ui/BookingStatusFilterBar";
+import { CustomerActivityTabs } from "@/src/components/customer/CustomerActivityTabs";
 import {
   bookingMatchesStatusFilter,
   CUSTOMER_BOOKING_STATUS_FILTERS,
@@ -328,6 +329,8 @@ export default async function CustomerBookingsPage({
             </CustomerLinkButton>
           }
         />
+
+        <CustomerActivityTabs active="bookings" />
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {stats.map(({ label, value }) => (

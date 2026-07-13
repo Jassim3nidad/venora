@@ -325,6 +325,24 @@ export async function createSupplierContactRequestAction(rawInput: unknown) {
       guestCountSnapshot = typeof booking.guest_count === "number" ? booking.guest_count : undefined;
     }
 
+    if (eventDate) {
+      const { data: availability, error: availabilityError } = await supabase
+        .from("supplier_availability")
+        .select("status")
+        .eq("supplier_id", input.supplierId)
+        .eq("date", eventDate)
+        .in("status", ["blocked", "unavailable"])
+        .maybeSingle();
+
+      throwIfSupabaseError(availabilityError);
+
+      if (availability) {
+        throw new ValidationError(
+          "This supplier is unavailable on the selected date. Please choose another date.",
+        );
+      }
+    }
+
     const { data, error } = await supabase
       .from("supplier_contact_requests")
       .insert({
@@ -354,6 +372,7 @@ export async function createSupplierContactRequestAction(rawInput: unknown) {
     revalidatePath(`/suppliers/${supplier.id}`);
     revalidatePath("/dashboard/supplier");
     revalidatePath("/dashboard/supplier/inquiries");
+    revalidatePath("/account/inquiries");
 
     return {
       requestId: data.id as string,
@@ -402,33 +421,20 @@ export async function toggleSupplierFavoriteAction(rawInput: unknown) {
 
 export async function acceptSupplierQuoteAction(rawInput: unknown) {
   return createServerAction(supplierQuoteActionSchema, async (input) => {
-    const { supabase, user } = await requireUser();
+    const { supabase } = await requireUser();
 
-    // Verify quote ownership and update quote status
-    const { data: quote, error: quoteError } = await supabase
-      .from("supplier_quotes")
-      .update({ status: "accepted" })
-      .eq("id", input.quoteId)
-      .eq("customer_id", user.id)
-      .eq("status", "sent")
-      .select("inquiry_id, supplier_id")
-      .single();
+    const { data, error } = await supabase.rpc("respond_supplier_quote_customer", {
+      p_quote_id: input.quoteId,
+      p_status: "accepted",
+    });
 
-    throwIfSupabaseError(quoteError);
+    throwIfSupabaseError(error);
 
-    // Also update the parent inquiry status (best effort)
-    if (quote?.inquiry_id) {
-      // we don't throw if this fails, as inquiry statuses might not map exactly
-      await supabase
-        .from("supplier_contact_requests")
-        .update({ status: "won" }) // guessing "won", or we just let quote dictate state
-        .eq("id", quote.inquiry_id)
-        .eq("customer_id", user.id);
-    }
-
-    revalidatePath(`/account/inquiries`);
-    if (quote?.inquiry_id) {
-      revalidatePath(`/account/inquiries/${quote.inquiry_id}`);
+    revalidatePath("/account/inquiries");
+    revalidatePath("/dashboard/supplier/inquiries");
+    if (data?.inquiry_id) {
+      revalidatePath(`/account/inquiries/${data.inquiry_id}`);
+      revalidatePath(`/dashboard/supplier/inquiries/${data.inquiry_id}`);
     }
 
     return { success: true };
@@ -437,32 +443,20 @@ export async function acceptSupplierQuoteAction(rawInput: unknown) {
 
 export async function declineSupplierQuoteAction(rawInput: unknown) {
   return createServerAction(supplierQuoteActionSchema, async (input) => {
-    const { supabase, user } = await requireUser();
+    const { supabase } = await requireUser();
 
-    // Verify quote ownership and update quote status
-    const { data: quote, error: quoteError } = await supabase
-      .from("supplier_quotes")
-      .update({ status: "declined" })
-      .eq("id", input.quoteId)
-      .eq("customer_id", user.id)
-      .eq("status", "sent")
-      .select("inquiry_id, supplier_id")
-      .single();
+    const { data, error } = await supabase.rpc("respond_supplier_quote_customer", {
+      p_quote_id: input.quoteId,
+      p_status: "declined",
+    });
 
-    throwIfSupabaseError(quoteError);
+    throwIfSupabaseError(error);
 
-    // Update parent inquiry if needed
-    if (quote?.inquiry_id) {
-      await supabase
-        .from("supplier_contact_requests")
-        .update({ status: "lost" }) // or whatever maps to declined
-        .eq("id", quote.inquiry_id)
-        .eq("customer_id", user.id);
-    }
-
-    revalidatePath(`/account/inquiries`);
-    if (quote?.inquiry_id) {
-      revalidatePath(`/account/inquiries/${quote.inquiry_id}`);
+    revalidatePath("/account/inquiries");
+    revalidatePath("/dashboard/supplier/inquiries");
+    if (data?.inquiry_id) {
+      revalidatePath(`/account/inquiries/${data.inquiry_id}`);
+      revalidatePath(`/dashboard/supplier/inquiries/${data.inquiry_id}`);
     }
 
     return { success: true };
@@ -495,7 +489,9 @@ export async function sendCustomerInquiryMessageAction(rawInput: unknown) {
 
       throwIfSupabaseError(error);
 
+      revalidatePath("/account/inquiries");
       revalidatePath(`/account/inquiries/${input.inquiryId}`);
+      revalidatePath(`/dashboard/supplier/inquiries/${input.inquiryId}`);
       return { messageId: data.id as string };
     },
     rawInput

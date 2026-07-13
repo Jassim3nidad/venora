@@ -1,5 +1,9 @@
 ﻿import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createSupplierContactRequestAction } from "./actions";
+import {
+  acceptSupplierQuoteAction,
+  createSupplierContactRequestAction,
+  declineSupplierQuoteAction,
+} from "./actions";
 import { createClient } from "@/lib/supabase/server";
 
 vi.mock("@/lib/supabase/server", () => ({
@@ -47,6 +51,7 @@ describe("createSupplierContactRequestAction", () => {
         getUser: vi.fn().mockResolvedValue({ data: { user: mockUser } }),
       },
       from: vi.fn(() => query),
+      rpc: vi.fn(),
     };
 
     vi.mocked(createClient).mockResolvedValue(mockSupabase);
@@ -149,5 +154,55 @@ describe("createSupplierContactRequestAction", () => {
       "This supplier is unavailable on the selected date. Please choose another date.",
     );
     expect(insertMock).not.toHaveBeenCalled();
+  });
+
+  it("responds to customer proposal actions through the safe RPC", async () => {
+    mockSupabase.rpc.mockResolvedValueOnce({
+      data: {
+        quote_id: "00000000-0000-4000-8000-000000000006",
+        inquiry_id: "00000000-0000-4000-8000-000000000007",
+        status: "accepted",
+      },
+      error: null,
+    });
+
+    const result = await acceptSupplierQuoteAction({
+      quoteId: "00000000-0000-4000-8000-000000000006",
+    });
+
+    expect(result.error).toBeNull();
+    expect(mockSupabase.rpc).toHaveBeenCalledWith(
+      "respond_supplier_quote_customer",
+      {
+        p_quote_id: "00000000-0000-4000-8000-000000000006",
+        p_status: "accepted",
+      },
+    );
+    expect(mockSupabase.from).not.toHaveBeenCalledWith("supplier_quotes");
+    expect(mockSupabase.from).not.toHaveBeenCalledWith("supplier_contact_requests");
+  });
+
+  it("declines proposals through the safe RPC", async () => {
+    mockSupabase.rpc.mockResolvedValueOnce({
+      data: {
+        quote_id: "00000000-0000-4000-8000-000000000006",
+        inquiry_id: "00000000-0000-4000-8000-000000000007",
+        status: "declined",
+      },
+      error: null,
+    });
+
+    const result = await declineSupplierQuoteAction({
+      quoteId: "00000000-0000-4000-8000-000000000006",
+    });
+
+    expect(result.error).toBeNull();
+    expect(mockSupabase.rpc).toHaveBeenCalledWith(
+      "respond_supplier_quote_customer",
+      {
+        p_quote_id: "00000000-0000-4000-8000-000000000006",
+        p_status: "declined",
+      },
+    );
   });
 });

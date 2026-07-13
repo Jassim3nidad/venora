@@ -1,8 +1,10 @@
 import {
   Building2,
+  CalendarDays,
   CreditCard,
   LayoutDashboard,
   Lock,
+  Mail,
   Receipt,
   UserRound,
   type LucideIcon,
@@ -27,6 +29,18 @@ export const ACCOUNT_NAV_ITEMS: AccountNavItem[] = [
     label: "Customer Dashboard",
     description: "Bookings, spending, and activity overview",
     icon: LayoutDashboard,
+  },
+  {
+    href: "/bookings",
+    label: "Venue Bookings",
+    description: "Track venue requests and payments",
+    icon: CalendarDays,
+  },
+  {
+    href: "/account/inquiries",
+    label: "Supplier Inquiries",
+    description: "Messages and service proposals",
+    icon: Mail,
   },
   {
     href: "/account/payments",

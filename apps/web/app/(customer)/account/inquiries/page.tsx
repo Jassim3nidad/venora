@@ -6,6 +6,7 @@ import { CustomerInquiryList } from "@/src/features/suppliers/ui/CustomerInquiry
 import { CustomerPageHeader } from "@/src/components/customer/CustomerUI";
 import { Mail, Search } from "lucide-react";
 import { CustomerLinkButton } from "@/src/components/customer/CustomerUI";
+import { CustomerActivityTabs } from "@/src/components/customer/CustomerActivityTabs";
 
 export const metadata: Metadata = {
   title: "My Inquiries | Venora",
@@ -13,7 +14,17 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function CustomerInquiriesPage() {
+export default async function CustomerInquiriesPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{
+    q?: string;
+    status?: string;
+    proposal?: string;
+    sort?: string;
+  }>;
+}) {
+  const query = (await searchParams) ?? {};
   const supabase = await createClient();
 
   const {
@@ -32,8 +43,8 @@ export default async function CustomerInquiriesPage() {
         <CustomerPageHeader
           eyebrow="Supplier Inquiries"
           icon={Mail}
-          title="Track your supplier requests."
-          description="View responses, review service proposals, and manage your communication with suppliers."
+          title="Supplier Inquiries"
+          description="Track your supplier requests, conversations, and service proposals."
           action={
             <CustomerLinkButton href="/suppliers" tone="secondary">
               <Search className="h-4 w-4" />
@@ -42,7 +53,9 @@ export default async function CustomerInquiriesPage() {
           }
         />
 
-        <CustomerInquiryList inquiries={inquiries} />
+        <CustomerActivityTabs active="inquiries" />
+
+        <CustomerInquiryList inquiries={inquiries} query={query} />
       </div>
     </div>
   );
