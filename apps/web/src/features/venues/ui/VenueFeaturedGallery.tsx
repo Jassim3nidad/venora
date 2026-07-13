@@ -216,10 +216,13 @@ export default function VenueFeaturedGallery({
                   className="max-h-full max-w-full rounded-2xl shadow-2xl"
                 />
               ) : (
-                <img
+                <Image
                   src={getVenueMediaUrl(activeMedia.storage_path)}
                   alt={activeMedia.alt_text || "Venue media"}
-                  className="max-h-[70vh] max-w-full rounded-2xl object-contain shadow-2xl"
+                  fill
+                  unoptimized={!isOptimizableImageSrc(getVenueMediaUrl(activeMedia.storage_path))}
+                  sizes="100vw"
+                  className="rounded-2xl object-contain shadow-2xl"
                 />
               )}
             </div>
@@ -245,10 +248,13 @@ export default function VenueFeaturedGallery({
                     : "border-transparent opacity-60 hover:opacity-100"
                 }`}
               >
-                <img
+                <Image
                   src={getVenueMediaUrl(item.storage_path)}
                   alt="Thumbnail"
-                  className="h-full w-full object-cover"
+                  fill
+                  unoptimized={!isOptimizableImageSrc(getVenueMediaUrl(item.storage_path))}
+                  sizes="80px"
+                  className="object-cover"
                 />
                 {item.media_type === "video" && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/20">

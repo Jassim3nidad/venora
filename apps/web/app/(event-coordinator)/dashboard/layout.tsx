@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentAuthUser } from "@/lib/supabase/current-user";
 import { getNavbarProfile } from "@/lib/get-navbar-profile";
 import { EnterpriseShell } from "@/components/dashboard/enterprise";
 
@@ -9,11 +9,7 @@ export default async function CoordinatorDashboardLayout({
 }: {
   children: ReactNode;
 }) {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getCurrentAuthUser();
 
   if (!user) redirect("/login?redirectTo=/dashboard/coordinator");
 

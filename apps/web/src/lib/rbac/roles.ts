@@ -1,6 +1,6 @@
 /**
  * Single source of truth for all role definitions, route-role mappings,
- * and post-login redirects. Both middleware.ts and the server-side guard
+ * and post-login redirects. Both proxy.ts and the server-side guard
  * utility import from here — never define role lists anywhere else.
  */
 
@@ -28,7 +28,7 @@ export const ROLE_LABELS: Record<RoleName, string> = {
 
 // ── Route-role map ────────────────────────────────────────────────────────────
 //
-// Evaluated top-down in middleware.ts; the FIRST prefix that matches the
+// Evaluated top-down in proxy.ts; the FIRST prefix that matches the
 // current pathname wins (most-specific routes must come before catch-alls).
 // A pathname that matches NO prefix here is treated as a public route.
 //

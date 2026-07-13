@@ -25,24 +25,29 @@ export async function POST(request: NextRequest) {
   const bookingId = payload.metadata?.booking_id;
   if (!bookingId) return NextResponse.json({ received: true });
 
-  switch (payload.status) {
-    case "PAYMENT_SUCCESS":
-      await confirmBookingPayment(
-        bookingId,
-        payload.requestReferenceNumber ?? payload.id,
-      );
-      break;
-    case "PAYMENT_FAILED":
-    case "PAYMENT_EXPIRED":
-    case "PAYMENT_CANCELLED":
-      await failBookingPayment(
-        bookingId,
-        payload.requestReferenceNumber ?? payload.id,
-        payload.status,
-      );
-      break;
-    default:
-      console.log(`[Maya] Unhandled status: ${payload.status}`);
+  try {
+    switch (payload.status) {
+      case "PAYMENT_SUCCESS":
+        await confirmBookingPayment(
+          bookingId,
+          payload.requestReferenceNumber ?? payload.id,
+        );
+        break;
+      case "PAYMENT_FAILED":
+      case "PAYMENT_EXPIRED":
+      case "PAYMENT_CANCELLED":
+        await failBookingPayment(
+          bookingId,
+          payload.requestReferenceNumber ?? payload.id,
+          payload.status,
+        );
+        break;
+      default:
+        console.log(`[Maya] Unhandled status: ${payload.status}`);
+    }
+  } catch (error) {
+    console.error("[Maya] Webhook processing failed:", error);
+    return NextResponse.json({ error: "Processing failed" }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });
@@ -60,20 +65,27 @@ function verifyMayaSignature(body: string, signature: string | null): boolean {
 
 async function confirmBookingPayment(
   bookingId: string,
-  providerReference: string,
+  _providerReference: string,
 ): Promise<void> {
-  const { createClient } = await import("@supabase/supabase-js");
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  // NOT WIRED UP: `confirm_booking_payment`'s signature was hardened in
+  // migrations/046_payment_confirmation_reconciliation.sql to reconcile
+  // against a checkout session this app itself created (p_checkout_reference,
+  // p_payment_reference, p_amount_minor, p_currency) instead of trusting a
+  // webhook-supplied booking_id directly — the old 4-arg (uuid, provider,
+  // reference, amount) form this function used to call no longer exists in
+  // the database. Maya has no registered PaymentGateway (see
+  // register-gateways.ts) and no checkout session is ever created through
+  // it, so this call is currently unreachable via real traffic (and
+  // MAYA_WEBHOOK_SECRET is unset in prod, so verifyMayaSignature() already
+  // rejects every request before this point). Before enabling Maya, rebuild
+  // this to mirror process-webhook-event.usecase.ts's PayMongo flow: claim
+  // the event via claim_payment_webhook_event for idempotency, then call the
+  // current 5-arg confirm_booking_payment with a real checkout-session
+  // reference, amount (minor units), and currency parsed from Maya's actual
+  // webhook payload.
+  throw new Error(
+    `Maya payment confirmation is not implemented against the current confirm_booking_payment schema (booking ${bookingId})`,
   );
-  const { error } = await supabase.rpc("confirm_booking_payment", {
-    p_booking_id: bookingId,
-    p_payment_provider: "maya",
-    p_provider_reference: providerReference,
-    p_amount: null,
-  });
-  if (error) throw error;
 }
 
 async function failBookingPayment(

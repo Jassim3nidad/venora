@@ -12,7 +12,24 @@ import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { cleanString, looksVenueRelated } from "../_shared/text.ts";
 import { toVenuePayload } from "../_shared/venues.ts";
-import { OPENROUTER_BASE_URL, DEFAULT_CHAT_MODEL, openRouterHeaders } from "../_shared/openrouter.ts";
+import { OPENROUTER_BASE_URL, openRouterHeaders } from "../_shared/openrouter.ts";
+import {
+  loadAiConfig,
+  validateProviderModel,
+  checkAiUsageLimits,
+  logAiUsage,
+  fetchWithTimeout,
+  estimateCostCents,
+  moderateInputText,
+} from "../_shared/ai-config.ts";
+
+/** Rough token estimate for streaming responses, where the provider
+ * doesn't return a `usage` object the way non-streaming calls do. This is
+ * for the estimated_cost_cents/token *logging* columns only — never used
+ * for anything enforcement-critical. */
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / 4);
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -67,6 +84,23 @@ serve(async (req) => {
     if (!supabaseUrl || !serviceRoleKey) {
       return errorResponse("CONFIGURATION_ERROR", "Missing Supabase configuration.", 500);
     }
+
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+    // Fail closed: an admin-disabled feature (or an unsupported
+    // provider/model) never reaches the AI provider at all.
+    const config = await loadAiConfig(supabase, "assistant");
+    if (!config) {
+      return errorResponse("AI_CONFIG_MISSING", "AI configuration for this feature is missing.", 500);
+    }
+    if (!config.enabled) {
+      return errorResponse("AI_FEATURE_DISABLED", "The assistant is currently disabled.", 403);
+    }
+    const providerCheck = validateProviderModel(config);
+    if (!providerCheck.ok) {
+      return errorResponse("AI_PROVIDER_UNSUPPORTED", providerCheck.reason!, 500);
+    }
+
     if (!openRouterApiKey) {
       return errorResponse("OPENROUTER_NOT_CONFIGURED", "OPENROUTER_API_KEY is not configured.", 500);
     }
@@ -80,7 +114,18 @@ serve(async (req) => {
       return errorResponse("VALIDATION_ERROR", "Provide a sessionId and a message.", 400);
     }
 
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
+    if (config.moderationEnabled) {
+      const moderation = moderateInputText(message);
+      if (!moderation.allowed) {
+        return errorResponse("AI_MODERATION_BLOCKED", moderation.reason!, 400);
+      }
+    }
+
+    const limitCheck = await checkAiUsageLimits(supabase, "assistant", config);
+    if (!limitCheck.allowed) {
+      return errorResponse("AI_LIMIT_EXCEEDED", limitCheck.reason!, 429);
+    }
+
     const user = await getAuthenticatedUser(req, supabaseUrl);
 
     // Resolve or create the conversation.
@@ -202,23 +247,37 @@ serve(async (req) => {
       console.error("[ai-assistant] Failed to persist user message:", userMessageError);
     }
 
-    const upstream = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
-      method: "POST",
-      headers: openRouterHeaders(openRouterApiKey),
-      body: JSON.stringify({
-        model: Deno.env.get("OPENROUTER_ASSISTANT_MODEL") ?? DEFAULT_CHAT_MODEL,
-        temperature: 0.4,
-        // Generous budget — the default free model reasons before writing
-        // content; too low a cap truncates it mid-thought.
-        max_tokens: 4000,
-        stream: true,
-        messages,
-      }),
-    });
+    const assistantRequestStartedAt = Date.now();
+    const upstream = await fetchWithTimeout(
+      `${OPENROUTER_BASE_URL}/chat/completions`,
+      {
+        method: "POST",
+        headers: openRouterHeaders(openRouterApiKey),
+        body: JSON.stringify({
+          model: config.model,
+          temperature: config.temperature ?? 0.4,
+          // Generous budget — the default free model reasons before writing
+          // content; too low a cap truncates it mid-thought.
+          max_tokens: config.maxTokens,
+          stream: true,
+          messages,
+        }),
+      },
+      config.timeoutSeconds,
+    );
 
     if (!upstream.ok || !upstream.body) {
       const errorText = await upstream.text().catch(() => "");
       console.error("[ai-assistant] OpenRouter stream request failed:", errorText);
+      await logAiUsage(supabase, {
+        feature: "assistant",
+        provider: config.provider,
+        model: config.model,
+        actorId: user?.id ?? null,
+        durationMs: Date.now() - assistantRequestStartedAt,
+        success: false,
+        errorCategory: "provider_error",
+      });
       return errorResponse("ASSISTANT_FAILED", "The assistant is temporarily unavailable.", 502);
     }
 
@@ -281,6 +340,26 @@ serve(async (req) => {
               );
             }
           }
+
+          // Streaming responses don't return a `usage` object the way
+          // non-streaming calls do — token counts here are a character-based
+          // estimate (see estimateTokens), used only for the usage-log
+          // budgeting columns, never for enforcement.
+          const inputTokens = estimateTokens(messages.map((m) => m.content).join("\n"));
+          const outputTokens = estimateTokens(fullText);
+          await logAiUsage(supabase, {
+            feature: "assistant",
+            provider: config.provider,
+            model: config.model,
+            actorId: user?.id ?? null,
+            inputTokens,
+            outputTokens,
+            estimatedCostCents: estimateCostCents(config.model, inputTokens + outputTokens),
+            durationMs: Date.now() - assistantRequestStartedAt,
+            success: fullText.trim().length > 0,
+            errorCategory: fullText.trim().length > 0 ? null : "empty_response",
+          });
+
           controller.close();
         }
       },

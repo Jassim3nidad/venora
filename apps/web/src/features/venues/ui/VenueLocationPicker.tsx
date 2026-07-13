@@ -92,7 +92,7 @@ export default function VenueLocationPicker({
       style: "https://tiles.openfreemap.org/styles/liberty",
       center: [center.longitude, center.latitude],
       zoom: initialPoint ? 14 : 11,
-      attributionControl: false,
+      attributionControl: { compact: true },
     });
 
     mapRef.current = map;
@@ -188,7 +188,12 @@ export default function VenueLocationPicker({
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-[#BFDBFE] bg-white shadow-sm">
-        <div ref={mapContainerRef} className="h-[320px] w-full" />
+        <div
+          ref={mapContainerRef}
+          role="region"
+          aria-label="Venue location picker map — click or drag the marker to set coordinates"
+          className="h-[320px] w-full"
+        />
       </div>
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2">

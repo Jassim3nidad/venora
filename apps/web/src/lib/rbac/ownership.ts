@@ -1,4 +1,4 @@
-import { ROLES } from "@/lib/rbac/roles";
+import { isAdminUser } from "@/lib/rbac/guards";
 
 /**
  * App-level ownership check mirroring the RLS `is_org_member_for_venue`
@@ -7,9 +7,7 @@ import { ROLES } from "@/lib/rbac/roles";
 export async function userOwnsVenue(supabase: any, userId: string, venueId: string): Promise<boolean> {
   if (!userId || !venueId) return false;
 
-  const { data: roleRows } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-  const roles = (roleRows ?? []).map((row: { role: string }) => row.role);
-  if (roles.includes(ROLES.ADMIN)) return true;
+  if (await isAdminUser(supabase, userId)) return true;
 
   // We should check organizations where owner_id = userId
   const { data: orgs } = await supabase

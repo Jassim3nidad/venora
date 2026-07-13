@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
 import MarketingNavbar from "@/components/layout/MarketingNavbar";
-import { createClient } from "@/lib/supabase/server";
-import { getNavbarProfile } from "@/lib/get-navbar-profile";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 
 type InfoPageCard = {
@@ -23,7 +21,7 @@ type InfoPageShellProps = {
   includeFooter?: boolean;
 };
 
-export async function InfoPageShell({
+export function InfoPageShell({
   eyebrow,
   title,
   description,
@@ -35,15 +33,9 @@ export async function InfoPageShell({
   note,
   includeFooter = false,
 }: InfoPageShellProps) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const profile = await getNavbarProfile(supabase, user?.id);
-
   return (
     <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-[#F9FAFB] text-[#111827] antialiased">
-      <MarketingNavbar user={user ?? null} profile={profile ?? null} />
+      <MarketingNavbar />
 
       <main className="w-full flex-grow">
         <section className="relative overflow-hidden border-b border-[#E5E7EB] bg-gradient-to-br from-white via-[#EFF6FF] to-white py-16 sm:py-20 lg:py-24">

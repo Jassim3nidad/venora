@@ -22,12 +22,8 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import MarketingNavbar from "@/components/layout/MarketingNavbar";
-import { createClient } from "@/lib/supabase/server";
-import { getNavbarProfile } from "@/lib/get-navbar-profile";
 
 export const metadata: Metadata = { title: "About Venora" };
-
-export const dynamic = "force-dynamic";
 
 type Card = {
   title: string;
@@ -234,16 +230,10 @@ function FeatureCard({ item }: { item: Card }) {
   );
 }
 
-export default async function AboutPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const profile = await getNavbarProfile(supabase, user?.id);
-
+export default function AboutPage() {
   return (
     <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-[#F9FAFB] text-[#111827] antialiased">
-      <MarketingNavbar user={user ?? null} profile={profile ?? null} />
+      <MarketingNavbar />
 
       <main className="w-full flex-grow">
         <section className="relative overflow-hidden border-b border-[#E5E7EB] bg-gradient-to-br from-white via-[#EFF6FF] to-white py-16 sm:py-20 lg:py-24">

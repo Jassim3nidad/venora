@@ -207,7 +207,12 @@ export function DataTable<T>({
 
   return (
     <div className="overflow-hidden rounded-[22px] border border-[#e5e7eb] bg-white">
-      <div className="overflow-x-auto">
+      <div
+        className="overflow-x-auto"
+        role="region"
+        aria-label="Table data, scroll horizontally to see more columns"
+        tabIndex={0}
+      >
         <table className="w-full min-w-[640px] border-collapse text-left">
           <thead className="bg-[#f8fafc]">
             <tr>

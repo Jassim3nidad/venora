@@ -9,15 +9,11 @@ import {
   Users,
 } from "lucide-react";
 import MarketingNavbar from "@/components/layout/MarketingNavbar";
-import { createClient } from "@/lib/supabase/server";
-import { getNavbarProfile } from "@/lib/get-navbar-profile";
 import {
   getMarketplaceResearchVenues,
   researchVenueImageCount,
   researchVenues,
 } from "@/src/features/venues/data/research-venues";
-
-export const dynamic = "force-dynamic";
 
 const featuredVenues = getMarketplaceResearchVenues()
   .slice(0, 3)
@@ -46,16 +42,10 @@ const stats = [
   { value: "100%", label: "Source Checked" },
 ];
 
-export default async function MarketingHomePage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const profile = await getNavbarProfile(supabase, user?.id);
-
+export default function MarketingHomePage() {
   return (
     <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-[#F9FAFB] text-[#111827] antialiased">
-      <MarketingNavbar user={user} profile={profile} />
+      <MarketingNavbar />
 
       <main className="w-full flex-grow">
         {/* Hero Section */}

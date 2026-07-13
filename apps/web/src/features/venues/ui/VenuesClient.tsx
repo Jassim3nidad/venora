@@ -8,11 +8,14 @@ import {
   useMemo,
   useState,
 } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { isOptimizableImageSrc } from "@/src/lib/image-host";
 import {
   Heart,
   ChevronDown,
+  Image as ImageIcon,
   Loader2,
   MapPin,
   PanelLeftClose,
@@ -725,11 +728,20 @@ const VenueCard = memo(function VenueCard({
         className="flex min-w-0 flex-1 flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
       >
         <div className="relative aspect-[4/3] overflow-hidden bg-[#EFF6FF]">
-          <img
-            src={venue.image}
-            alt={venue.name}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
-          />
+          {venue.image ? (
+            <Image
+              src={venue.image}
+              alt={venue.name}
+              fill
+              unoptimized={!isOptimizableImageSrc(venue.image)}
+              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+              className="object-cover transition duration-500 group-hover:scale-[1.03]"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center">
+              <ImageIcon className="h-8 w-8 text-[#93C5FD]" />
+            </div>
+          )}
 
           <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#111827]/55 to-transparent" />
         </div>

@@ -12,6 +12,8 @@ export { SupplierOverview } from "./SupplierOverview";
 export type { SupplierOverviewProps } from "./SupplierOverview";
 export { AdminOverview } from "./AdminOverview";
 export type { AdminOverviewProps } from "./AdminOverview";
+export { ADMIN_MODULES } from "./admin-modules";
+export type { AdminModule } from "./admin-modules";
 export {
   DashboardPage,
   DashboardSubPage,
@@ -30,14 +32,25 @@ export {
   ROLE_LABELS,
 } from "./nav-config";
 export type { EnterpriseRole, NavItem } from "./nav-config";
-export {
-  RevenueTrendChart,
-  StatusDistributionChart,
-  TopItemsBarChart,
-  DemographicsBarChart,
-  CHART_COLORS,
-  CATEGORICAL_PALETTE,
-} from "./charts";
+import dynamic from "next/dynamic";
+
+// recharts is one of the largest client dependencies in the app; these
+// four chart components are only used on 5 of ~90 routes, so defer their
+// (and recharts') JS out of those routes' main bundle instead of eagerly
+// bundling it into every page that imports from this barrel.
+export const RevenueTrendChart = dynamic(() =>
+  import("./charts").then((m) => m.RevenueTrendChart),
+);
+export const StatusDistributionChart = dynamic(() =>
+  import("./charts").then((m) => m.StatusDistributionChart),
+);
+export const TopItemsBarChart = dynamic(() =>
+  import("./charts").then((m) => m.TopItemsBarChart),
+);
+export const DemographicsBarChart = dynamic(() =>
+  import("./charts").then((m) => m.DemographicsBarChart),
+);
+export { CHART_COLORS, CATEGORICAL_PALETTE } from "./charts";
 export type {
   RevenueTrendPoint,
   StatusDistributionPoint,

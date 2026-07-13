@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import {
   Heart,
   Share2,
@@ -33,7 +34,12 @@ import VenueGallery from "./VenueGallery";
 import VenuePromotionalVideo from "./VenuePromotionalVideo";
 import BookingSidebar from "./BookingSidebar";
 import ReviewsSection from "./ReviewsSection";
-import VenueMap from "@/src/components/VenueMap";
+const VenueMap = dynamic(() => import("@/src/components/VenueMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[350px] md:h-[450px] w-full rounded-3xl bg-slate-100 animate-pulse" />
+  ),
+});
 import { toggleFavoriteAction } from "../application/actions";
 import { isOptimizableImageSrc } from "@/src/lib/image-host";
 import CostEstimatorPanel from "@/features/ai/ui/CostEstimatorPanel";

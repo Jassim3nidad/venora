@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import nextDynamic from "next/dynamic";
 import {
+  DashButton,
   DashboardSubPage,
   DemographicsBarChart,
+  EmptyState,
   KpiCard,
   Panel,
   PanelHeader,
@@ -17,14 +20,30 @@ import {
 } from "../_lib/owner-dashboard-data";
 import {
   getBookingDemographics,
+  getBookingDemandHeatmap,
   getConversionRate,
+  getCustomerGrowth,
+  getMonthlyReports,
   getOccupancyRate,
+  getPopularVenues,
   getRevenueTrend,
   getTopPackages,
   lastNMonthsRange,
 } from "@/features/analytics/application/queries";
+import { AnalyticsExportActions } from "@/features/analytics/ui/AnalyticsExportActions";
+import { BookingDemandHeatmap } from "@/features/analytics/ui/BookingDemandHeatmap";
+import { MonthlyReportsTable } from "@/features/analytics/ui/MonthlyReportsTable";
+
+const BookingsTrendChart = nextDynamic(() =>
+  import("@/features/analytics/ui/BookingsTrendChart").then((m) => m.BookingsTrendChart),
+);
+const CustomerGrowthChart = nextDynamic(() =>
+  import("@/features/analytics/ui/CustomerGrowthChart").then((m) => m.CustomerGrowthChart),
+);
+import { PopularVenuesTable } from "@/features/analytics/ui/PopularVenuesTable";
 
 export const metadata: Metadata = { title: "Analytics - Dashboard" };
+export const dynamic = "force-dynamic";
 
 type AnalyticsBooking = {
   id: string;
@@ -42,17 +61,18 @@ type AnalyticsVenue = {
 
 export default async function AnalyticsPage() {
   const context = await getOwnerDashboardContext();
-  const { supabase, orgIds, isAdmin } = context;
+  const { supabase, orgIds } = context;
+  const orgScopedContext = { ...context, isAdmin: false };
 
-  let venuesQuery = supabase
+  const venuesQuery = supabase
     .from("venues")
-    .select("id, status, avg_rating, review_count");
-  if (!isAdmin) venuesQuery = venuesQuery.in("organization_id", orgIds);
+    .select("id, status, avg_rating, review_count")
+    .in("organization_id", orgIds);
 
   const { data: venues } =
-    isAdmin || orgIds.length > 0 ? await venuesQuery : { data: [] };
+    orgIds.length > 0 ? await venuesQuery : { data: [] };
 
-  const venueIds = await getOwnerVenueIds(context);
+  const venueIds = await getOwnerVenueIds(orgScopedContext);
   const { data: bookings } =
     venueIds.length > 0
       ? await supabase
@@ -64,14 +84,27 @@ export default async function AnalyticsPage() {
 
   const scope = { kind: "venues" as const, venueIds };
   const range = lastNMonthsRange(12);
-  const [revenueTrend, occupancy, conversion, topPackages, demographics] =
-    await Promise.all([
-      getRevenueTrend(supabase, scope, range),
-      getOccupancyRate(supabase, scope),
-      getConversionRate(supabase, scope, range),
-      getTopPackages(supabase, scope, range),
-      getBookingDemographics(supabase, scope, range),
-    ]);
+  const [
+    revenueTrend,
+    occupancy,
+    conversion,
+    topPackages,
+    demographics,
+    customerGrowth,
+    popularVenues,
+    bookingHeatmap,
+    monthlyReports,
+  ] = await Promise.all([
+    getRevenueTrend(supabase, scope, range),
+    getOccupancyRate(supabase, scope),
+    getConversionRate(supabase, scope, range),
+    getTopPackages(supabase, scope, range),
+    getBookingDemographics(supabase, scope, range),
+    getCustomerGrowth(supabase, scope, range),
+    getPopularVenues(supabase, scope, range),
+    getBookingDemandHeatmap(supabase, scope, range),
+    getMonthlyReports(supabase, scope, range),
+  ]);
 
   const venueRows = (venues ?? []) as AnalyticsVenue[];
   const bookingRows = (bookings ?? []) as AnalyticsBooking[];
@@ -96,13 +129,16 @@ export default async function AnalyticsPage() {
       ? ratedVenues.reduce((sum, venue) => sum + Number(venue.avg_rating), 0) /
         ratedVenues.length
       : null;
+  const latestCustomerGrowth = customerGrowth[customerGrowth.length - 1];
+  const totalCustomers = latestCustomerGrowth?.totalCustomers ?? 0;
 
   return (
     <DashboardSubPage
       title="Analytics"
-      description="Track revenue, bookings, listing readiness, and venue reputation."
+      description="Venue performance, revenue, bookings, customer growth, conversion, demand heatmaps, and monthly reports."
+      action={<AnalyticsExportActions range={range} />}
     >
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-7">
         <KpiCard
           label="Total Revenue"
           value={formatPeso(totalRevenue)}
@@ -113,6 +149,11 @@ export default async function AnalyticsPage() {
           label="Total Bookings"
           value={String(bookingRows.length)}
           icon="event_available"
+        />
+        <KpiCard
+          label="Customers"
+          value={String(totalCustomers)}
+          icon="group"
         />
         <KpiCard
           label="Pending Requests"
@@ -136,7 +177,20 @@ export default async function AnalyticsPage() {
         />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+      {venueIds.length === 0 ? (
+        <EmptyState
+          icon="analytics"
+          title="No venues to analyze yet"
+          description="Analytics will populate once your organization has venues and booking activity."
+          action={
+            <DashButton href="/dashboard/venues/new" icon="add_business">
+              Add Venue
+            </DashButton>
+          }
+        />
+      ) : null}
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
         <Panel>
           <PanelHeader
             title="Revenue Overview"
@@ -196,6 +250,42 @@ export default async function AnalyticsPage() {
       <div className="grid gap-6 xl:grid-cols-2">
         <Panel>
           <PanelHeader
+            title="Bookings by Month"
+            description="Monthly booking volume across your venue portfolio."
+          />
+          <BookingsTrendChart data={revenueTrend} />
+        </Panel>
+
+        <Panel>
+          <PanelHeader
+            title="Customer Growth"
+            description="New and cumulative customers based on accepted bookings."
+          />
+          <CustomerGrowthChart data={customerGrowth} />
+        </Panel>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+        <Panel>
+          <PanelHeader
+            title="Booking Demand Heatmap"
+            description="Accepted booking concentration by month and day of week."
+          />
+          <BookingDemandHeatmap data={bookingHeatmap} />
+        </Panel>
+
+        <Panel>
+          <PanelHeader
+            title="Popular Venues"
+            description="Venues ranked by accepted booking demand."
+          />
+          <PopularVenuesTable venues={popularVenues} />
+        </Panel>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-2">
+        <Panel>
+          <PanelHeader
             title="Top Packages"
             description="Your most-booked packages across all venues."
           />
@@ -215,6 +305,14 @@ export default async function AnalyticsPage() {
           </div>
         </Panel>
       </div>
+
+      <Panel>
+        <PanelHeader
+          title="Monthly Reports"
+          description="Revenue, booking volume, customer count, conversion, average booking value, and top venue by month."
+        />
+        <MonthlyReportsTable rows={monthlyReports} />
+      </Panel>
     </DashboardSubPage>
   );
 }

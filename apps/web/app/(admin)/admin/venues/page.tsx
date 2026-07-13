@@ -8,101 +8,101 @@ import {
   StatusBadge,
   type DataTableColumn,
 } from "@/components/dashboard/enterprise";
-import { createClient } from "@/lib/supabase/server";
+import { requirePermissionOrRedirect } from "@/lib/rbac/admin-context";
+import {
+  getVenuesForAdminReview,
+  type VenueQueueFilter,
+  type VenueQueueRow,
+} from "@/features/venues/application/admin-queries";
 
 export const metadata: Metadata = { title: "Venue Approval - Admin" };
+export const dynamic = "force-dynamic";
 
-type PendingVenueRow = {
-  id: string;
-  name: string;
-  city: string | null;
-  province: string | null;
-  status: string;
-  created_at: string;
-  organizations: { name: string | null } | null;
-};
-
-type VenueDisplayRow = {
-  id: string;
-  name: string;
-  organization: string;
-  location: string;
-  submitted: string;
-  status: string;
-};
+const FILTER_TABS: { key: VenueQueueFilter; label: string }[] = [
+  { key: "pending", label: "Pending approval" },
+  { key: "published", label: "Published" },
+  { key: "suspended", label: "Suspended" },
+  { key: "all", label: "All" },
+];
 
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString("en-PH", { dateStyle: "medium" });
 }
 
-export default async function AdminVenuesPage() {
-  const supabase = (await createClient()) as any;
-  const { data: pending } = await supabase
-    .from("venues")
-    .select(
-      `
-      id,
-      name,
-      city,
-      province,
-      status,
-      created_at,
-      organizations (
-        name
-      )
-    `,
-    )
-    .in("status", ["pending_approval", "pending_review"])
-    .order("created_at", { ascending: false });
+type Props = {
+  searchParams: Promise<{ filter?: string }>;
+};
 
-  const rows: VenueDisplayRow[] = ((pending ?? []) as PendingVenueRow[]).map(
-    (venue) => ({
-      id: venue.id,
-      name: venue.name,
-      organization: venue.organizations?.name ?? "Venue owner",
-      location: [venue.city, venue.province].filter(Boolean).join(", ") || "-",
-      submitted: formatDate(venue.created_at),
-      status: venue.status,
-    }),
-  );
+export default async function AdminVenuesPage({ searchParams }: Props) {
+  await requirePermissionOrRedirect("venues.view");
 
-  const columns: DataTableColumn<VenueDisplayRow>[] = [
+  const { filter: rawFilter } = await searchParams;
+  const filter: VenueQueueFilter = FILTER_TABS.some((t) => t.key === rawFilter)
+    ? (rawFilter as VenueQueueFilter)
+    : "pending";
+
+  const { venues, error } = await getVenuesForAdminReview(filter);
+
+  const columns: DataTableColumn<VenueQueueRow>[] = [
     {
       key: "venue",
       header: "Venue",
       cell: (row) => (
-        <div>
-          <p className="font-semibold text-[#111827]">{row.name}</p>
-          <p className="text-xs text-[#6b7280]">{row.location}</p>
-        </div>
+        <a href={`/admin/venues/${row.id}`} className="font-semibold text-[#111827] hover:text-[#1d4ed8] hover:underline">
+          {row.name}
+        </a>
       ),
     },
-    { key: "organization", header: "Organization", cell: (row) => row.organization },
-    { key: "submitted", header: "Submitted", cell: (row) => row.submitted },
+    { key: "organization", header: "Organization", cell: (row) => row.organizationName ?? "—" },
+    {
+      key: "location",
+      header: "Location",
+      cell: (row) => [row.city, row.province].filter(Boolean).join(", ") || "—",
+    },
+    { key: "submitted", header: "Submitted", cell: (row) => formatDate(row.createdAt) },
     {
       key: "status",
       header: "Status",
-      cell: (row) => <StatusBadge status="pending" label={row.status.replace(/_/g, " ")} />,
+      cell: (row) => <StatusBadge status={row.status} />,
     },
   ];
 
   return (
     <DashboardSubPage
-      title="Venue Approval Queue"
-      description="Review venue listings that are waiting for admin approval."
+      title="Venue Approval"
+      description="Review venue listings and manage publication status."
+      action={
+        <div className="flex flex-wrap gap-2">
+          {FILTER_TABS.map((tab) => (
+            <a
+              key={tab.key}
+              href={`/admin/venues?filter=${tab.key}`}
+              className={`inline-flex h-9 items-center rounded-lg px-3 text-sm font-bold transition ${
+                filter === tab.key
+                  ? "bg-[#1d4ed8] text-white"
+                  : "border border-[#dbe3ef] bg-white text-[#111827] hover:border-[#1d4ed8] hover:text-[#1d4ed8]"
+              }`}
+            >
+              {tab.label}
+            </a>
+          ))}
+        </div>
+      }
     >
-      {rows.length > 0 ? (
+      {error ? (
+        <EmptyState icon="error" title="Could not load venues" description={error} />
+      ) : venues && venues.length > 0 ? (
         <Panel>
           <PanelHeader
-            title="Pending Venues"
-            description="Approval actions are intentionally hidden until the venue review action is fully wired."
+            title={FILTER_TABS.find((t) => t.key === filter)?.label ?? "Venues"}
+            description="Select a venue to review details and take action."
           />
-          <DataTable rows={rows} columns={columns} keyFn={(row) => row.id} />
+          <DataTable rows={venues} columns={columns} keyFn={(row) => row.id} />
         </Panel>
       ) : (
         <EmptyState
           icon="verified"
-          title="No pending venues"
+          title="No venues match this filter"
           description="Venue submissions that need admin review will appear here."
         />
       )}

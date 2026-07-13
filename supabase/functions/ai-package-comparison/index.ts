@@ -9,7 +9,16 @@
  */
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { OPENROUTER_BASE_URL, DEFAULT_CHAT_MODEL, openRouterHeaders } from "../_shared/openrouter.ts";
+import {
+  loadAiConfig,
+  validateProviderModel,
+  checkAiUsageLimits,
+  logAiUsage,
+  postChatCompletion,
+  estimateCostCents,
+  extractTokenUsage,
+  type AiConfiguration,
+} from "../_shared/ai-config.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -108,18 +117,19 @@ function isValidSummary(value: any, validPackageIds: Set<string>): value is AiSu
 
 async function requestSummary(
   openRouterApiKey: string,
+  openAiApiKey: string | null,
   table: ComparisonRow[],
-): Promise<AiSummary | null> {
+  config: AiConfiguration,
+): Promise<{ summary: AiSummary | null; inputTokens: number | null; outputTokens: number | null; providerUsed: string; modelUsed: string }> {
   try {
-    const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
-      method: "POST",
-      headers: openRouterHeaders(openRouterApiKey),
-      body: JSON.stringify({
-        model: Deno.env.get("OPENROUTER_COMPARISON_MODEL") ?? DEFAULT_CHAT_MODEL,
-        temperature: 0.3,
+    const { response, providerUsed, modelUsed } = await postChatCompletion(
+      config,
+      { openrouter: openRouterApiKey, openai: openAiApiKey },
+      {
+        temperature: config.temperature ?? 0.3,
         // Generous budget — the default free model reasons before writing
         // content; too low a cap truncates it mid-thought.
-        max_tokens: 4000,
+        max_tokens: config.maxTokens,
         messages: [
           {
             role: "system",
@@ -159,24 +169,25 @@ async function requestSummary(
             },
           },
         },
-      }),
-    });
+      },
+    );
 
     if (!response.ok) {
-      console.error("[ai-package-comparison] OpenRouter request failed:", await response.text());
-      return null;
+      console.error("[ai-package-comparison] AI provider request failed:", await response.text());
+      return { summary: null, inputTokens: null, outputTokens: null, providerUsed, modelUsed };
     }
 
     const payload = await response.json();
     const content = payload?.choices?.[0]?.message?.content;
-    if (typeof content !== "string") return null;
+    const tokens = extractTokenUsage(payload);
+    if (typeof content !== "string") return { summary: null, ...tokens, providerUsed, modelUsed };
 
     const parsed = JSON.parse(content);
     const validIds = new Set(table.map((row) => row.id));
-    return isValidSummary(parsed, validIds) ? parsed : null;
+    return { summary: isValidSummary(parsed, validIds) ? parsed : null, ...tokens, providerUsed, modelUsed };
   } catch (error) {
     console.error("[ai-package-comparison] Summary generation failed:", error);
-    return null;
+    return { summary: null, inputTokens: null, outputTokens: null, providerUsed: config.provider, modelUsed: config.model };
   }
 }
 
@@ -193,10 +204,27 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const openRouterApiKey = Deno.env.get("OPENROUTER_API_KEY");
+    // Optional — only used as a fallback provider if configured and OpenRouter fails.
+    const openAiApiKey = Deno.env.get("OPENAI_API_KEY") ?? null;
 
     if (!supabaseUrl || !serviceRoleKey) {
       return errorResponse("CONFIGURATION_ERROR", "Missing Supabase configuration.", 500);
     }
+
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+    // This endpoint's deterministic comparison table doesn't require AI at
+    // all (see file header) — only the narrative summary does. So
+    // "disabled"/misconfigured/rate-limited here means "skip the AI
+    // summary, still return the table," matching this function's existing
+    // graceful-degrade design, rather than failing the whole request.
+    const config = await loadAiConfig(supabase, "package_comparison");
+    const providerCheck = config ? validateProviderModel(config) : { ok: false as const };
+    let limitCheck: { allowed: boolean; reason?: string } = { allowed: true };
+    if (config?.enabled && providerCheck.ok) {
+      limitCheck = await checkAiUsageLimits(supabase, "package_comparison", config);
+    }
+    const aiSummaryAllowed = !!config?.enabled && providerCheck.ok && limitCheck.allowed;
 
     const rawBody = await req.json().catch(() => null);
     const packageIds = parsePackageIds(rawBody);
@@ -208,8 +236,6 @@ serve(async (req) => {
         400,
       );
     }
-
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const { data: packageRows, error: packagesError } = await supabase
       .from("venue_packages")
@@ -237,9 +263,24 @@ serve(async (req) => {
     }
 
     const comparisonTable = buildComparisonTable(publishedRows);
-    const aiSummary = openRouterApiKey
-      ? await requestSummary(openRouterApiKey, comparisonTable)
-      : null;
+
+    let aiSummary: AiSummary | null = null;
+    if (aiSummaryAllowed && openRouterApiKey && config) {
+      const requestStartedAt = Date.now();
+      const result = await requestSummary(openRouterApiKey, openAiApiKey, comparisonTable, config);
+      aiSummary = result.summary;
+      await logAiUsage(supabase, {
+        feature: "package_comparison",
+        provider: result.providerUsed,
+        model: result.modelUsed,
+        inputTokens: result.inputTokens,
+        outputTokens: result.outputTokens,
+        estimatedCostCents: estimateCostCents(result.modelUsed, (result.inputTokens ?? 0) + (result.outputTokens ?? 0)),
+        durationMs: Date.now() - requestStartedAt,
+        success: aiSummary !== null,
+        errorCategory: aiSummary === null ? "provider_error_or_invalid" : null,
+      });
+    }
 
     const userId = await getAuthenticatedUserId(req, supabaseUrl);
     const { error: logError } = await supabase.from("ai_package_comparisons").insert({

@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import MarketingNavbar from "@/components/layout/MarketingNavbar";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { createClient } from "@/lib/supabase/server";
 import AccountNav from "./_components/AccountNav";

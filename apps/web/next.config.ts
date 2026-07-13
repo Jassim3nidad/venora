@@ -1,10 +1,16 @@
+import path from "node:path";
 import type { NextConfig } from "next";
+import withBundleAnalyzerInit from "@next/bundle-analyzer";
+
+const withBundleAnalyzer = withBundleAnalyzerInit({
+  enabled: process.env.ANALYZE === "true",
+});
 
 const nextConfig: NextConfig = {
   // Turbopack is used in dev (--turbopack flag in package.json)
   experimental: {
     // Optimise package imports for large icon/component libraries
-    optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
+    optimizePackageImports: ["lucide-react", "@radix-ui/react-icons", "recharts"],
     // Server Actions
     serverActions: {
       allowedOrigins: [
@@ -62,11 +68,14 @@ const nextConfig: NextConfig = {
     ],
   },
   // NOTE: role-specific redirection for bare /dashboard is handled in
-  // middleware.ts, since it needs the signed-in user's roles to pick the
+  // proxy.ts, since it needs the signed-in user's roles to pick the
   // right destination. A static redirect here can't be role-aware and
   // previously forced every role (including venue owners) to
   // /dashboard/bookings, which is why coordinators ended up on the
   // venue-owner shell instead of /dashboard/coordinator.
+  turbopack: {
+    root: path.join(__dirname, "../.."),
+  },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);

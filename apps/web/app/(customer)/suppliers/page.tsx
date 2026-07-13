@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Supplier Marketplace - Venora",
   description:
     "Browse accredited event suppliers, packages, portfolio work, pricing, reviews, and contact information.",
+  alternates: { canonical: "/suppliers" },
 };
 
 export default async function SuppliersMarketplacePage() {

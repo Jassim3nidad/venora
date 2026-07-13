@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import ProfileMenu from "@/components/layout/ProfileMenu";
 import { NotificationBell } from "@/features/notifications/ui/NotificationBell";
+import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 
 interface MarketingNavbarProfile {
   full_name?: string | null;
@@ -72,18 +73,32 @@ function isActive(pathname: string, href: string, label?: string) {
  * Public landing-page navbar. Unlike CustomerNavbar (used inside the
  * marketplace shell), this renders on "/" for both signed-in and anonymous
  * visitors, so it needs its own Log In/Sign Up <-> profile-menu switch.
+ *
+ * Auth state is fetched client-side (useCurrentUser) rather than passed in
+ * as server-fetched props: the marketing/info pages this renders on have no
+ * other reason to be dynamic, and a per-request cookies()-based auth fetch
+ * was the only thing forcing all of them off static generation. Signed-in
+ * visitors briefly see the logged-out state until the client fetch
+ * resolves — an acceptable tradeoff since these are primarily
+ * logged-out-visitor pages.
  */
 export default function MarketingNavbar({
-  user,
-  profile,
   embedded = false,
 }: {
-  user?: { email?: string | null } | null;
-  profile?: MarketingNavbarProfile | null;
   embedded?: boolean;
 }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user: currentUser } = useCurrentUser();
+
+  const user = currentUser ? { email: currentUser.email } : null;
+  const profile: MarketingNavbarProfile | null = currentUser
+    ? {
+        full_name: currentUser.fullName,
+        avatar_url: currentUser.avatarUrl,
+        isVenueOwner: currentUser.roles.includes("venue_owner"),
+      }
+    : null;
 
   const displayName =
     profile?.full_name || user?.email?.split("@")[0] || "Venora User";

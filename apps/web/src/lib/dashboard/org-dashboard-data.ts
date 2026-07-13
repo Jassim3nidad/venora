@@ -1,5 +1,6 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
-import { createClient } from "@/src/lib/supabase/server";
+import { getCurrentAuthUser } from "@/src/lib/supabase/current-user";
 
 /**
  * Shared across every dashboard route group that operates on
@@ -19,12 +20,8 @@ export type OwnerDashboardContext = {
   isAdmin: boolean;
 };
 
-export async function getOwnerDashboardContext(): Promise<OwnerDashboardContext> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = (await createClient()) as any;
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export const getOwnerDashboardContext = cache(async (): Promise<OwnerDashboardContext> => {
+  const { supabase, user } = await getCurrentAuthUser();
 
   if (!user) redirect("/login");
 
@@ -55,7 +52,7 @@ export async function getOwnerDashboardContext(): Promise<OwnerDashboardContext>
     roles,
     isAdmin: roles.includes("admin"),
   };
-}
+});
 
 export async function getOwnerVenueIds(context: OwnerDashboardContext) {
   const { supabase, orgIds, isAdmin } = context;

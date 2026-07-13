@@ -31,6 +31,8 @@ type DirectInquiryRow = {
   venue_name_snapshot: string | null;
   event_start_time_snapshot: string | null;
   location_snapshot: string | null;
+  event_date_snapshot: string | null;
+  guest_count_snapshot: number | null;
 };
 
 type DirectInquiryDisplayRow = {
@@ -98,7 +100,18 @@ export default async function SupplierInquiriesPage({
   directQuery = directQuery.order(sort, { ascending: false }).limit(50);
 
   const [directResult, bookingResult] = await Promise.all([
+<<<<<<< HEAD
     directQuery,
+=======
+    (supabase as any)
+      .from("supplier_contact_requests")
+      .select(
+        "id, contact_name, event_date, event_location, guest_count, status, created_at, supplier_services(name), venue_name_snapshot, event_start_time_snapshot, location_snapshot, event_date_snapshot, guest_count_snapshot",
+      )
+      .eq("supplier_id", profile.id)
+      .order("created_at", { ascending: false })
+      .limit(50),
+>>>>>>> ea7dd351f43be0a99fc02a64bca165752f733bb1
     (supabase as any)
       .from("booking_suppliers")
       .select(
@@ -130,7 +143,7 @@ export default async function SupplierInquiriesPage({
         ? new Date(`1970-01-01T${row.event_start_time_snapshot}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
         : null;
         
-      const eventDateTimeParts = [formatDate(row.event_date), timeStr].filter(Boolean);
+      const eventDateTimeParts = [formatDate(row.event_date_snapshot || row.event_date), timeStr].filter(Boolean);
       const eventDateTime = eventDateTimeParts.length > 0 ? eventDateTimeParts.join(" at ") : null;
       
       return {
@@ -140,8 +153,8 @@ export default async function SupplierInquiriesPage({
         event: [eventDateTime, eventLocation]
           .filter((value) => value && value !== "-")
           .join(" / ") || "-",
-        guests: row.guest_count
-          ? `${row.guest_count.toLocaleString("en-PH")} guests`
+        guests: (row.guest_count_snapshot || row.guest_count)
+          ? `${(row.guest_count_snapshot || row.guest_count)!.toLocaleString("en-PH")} guests`
           : "-",
         received: formatDate(row.created_at),
         status: row.status,
