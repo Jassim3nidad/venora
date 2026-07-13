@@ -85,6 +85,8 @@ export type NormalizedWebhookEvent = {
       currency: string | null;
       /** Informational only — never trusted as the source of correlation. */
       bookingId: string | null;
+      /** Internal transaction id copied from Venora-created provider metadata. */
+      transactionId?: string | null;
     }
   | {
       kind: "payment.failed";

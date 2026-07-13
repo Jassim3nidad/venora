@@ -131,6 +131,60 @@ describe("processWebhookEvent", () => {
     expect(confirmArgs).not.toHaveProperty("p_booking_id");
   });
 
+  it("reconciles a direct payment.paid event through validated transaction metadata", async () => {
+    const gateway = makeFakeGateway({
+      parseWebhookEvent: vi.fn().mockReturnValue({
+        eventId: "evt_direct",
+        eventType: "payment.paid",
+        kind: "payment.succeeded",
+        bookingId: "booking-1",
+        transactionId: "transaction-1",
+        checkoutSessionReference: null,
+        paymentReference: "pay_direct",
+        amountMinor: 150000,
+        currency: "PHP",
+      }),
+    });
+    let confirmArgs: unknown = null;
+    const supabase = {
+      rpc: vi.fn((fn: string, args: unknown) => {
+        if (fn === "claim_payment_webhook_event") return Promise.resolve({ data: true, error: null });
+        if (fn === "confirm_booking_payment") {
+          confirmArgs = args;
+          return Promise.resolve({ data: {}, error: null });
+        }
+        if (fn === "finish_payment_webhook_event") return Promise.resolve({ data: null, error: null });
+        throw new Error(`unexpected call to ${fn}`);
+      }),
+      from: vi.fn(() => ({
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        maybeSingle: vi.fn().mockResolvedValue({
+          data: {
+            id: "transaction-1",
+            booking_id: "booking-1",
+            provider_reference: "cs_created_by_venora",
+            amount: 1500,
+            currency: "PHP",
+            status: "pending",
+            payment_kind: "deposit",
+          },
+        }),
+      })),
+    };
+
+    const result = await processWebhookEvent(supabase as any, gateway, "{}", "sig");
+
+    expect(result).toEqual({ ok: true, result: "processed" });
+    expect(confirmArgs).toMatchObject({
+      p_payment_provider: "paymongo",
+      p_checkout_reference: "cs_created_by_venora",
+      p_payment_reference: "pay_direct",
+      p_amount_minor: 150000,
+      p_currency: "PHP",
+    });
+  });
+
   it("marks the event failed (not processed) when confirm_booking_payment returns an error", async () => {
     const gateway = makeFakeGateway({
       parseWebhookEvent: vi.fn().mockReturnValue({

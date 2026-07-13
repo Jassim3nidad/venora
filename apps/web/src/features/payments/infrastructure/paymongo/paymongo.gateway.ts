@@ -33,6 +33,31 @@ interface PayMongoErrorBody {
   errors?: Array<{ code?: string; detail?: string }>;
 }
 
+function metadataValue(metadata: Record<string, unknown> | null | undefined, key: string): string | null {
+  const value = metadata?.[key];
+  return typeof value === "string" && value.trim() ? value : null;
+}
+
+function lineItemAmountMinor(
+  lineItems: Array<{ amount?: number; quantity?: number }> | undefined,
+): number | null {
+  if (!lineItems || lineItems.length === 0) return null;
+
+  const total = lineItems.reduce((sum, item) => {
+    if (typeof item.amount !== "number") return sum;
+    return sum + item.amount * (typeof item.quantity === "number" ? item.quantity : 1);
+  }, 0);
+
+  return total > 0 ? total : null;
+}
+
+function lineItemCurrency(
+  lineItems: Array<{ currency?: string }> | undefined,
+): string | null {
+  const currency = lineItems?.find((item) => typeof item.currency === "string")?.currency;
+  return currency ?? null;
+}
+
 /**
  * PayMongo implementation of the PaymentGateway port.
  *
@@ -223,10 +248,26 @@ export class PayMongoGateway implements PaymentGateway {
               amount?: number;
               currency?: string;
               metadata?: Record<string, string> | null;
+              line_items?: Array<{
+                amount?: number;
+                currency?: string;
+                quantity?: number;
+              }>;
               payments?: Array<{
                 id: string;
                 attributes?: { amount?: number; currency?: string };
               }>;
+              payment_intent?: {
+                id?: string;
+                attributes?: {
+                  amount?: number;
+                  currency?: string;
+                  payments?: Array<{
+                    id: string;
+                    attributes?: { amount?: number; currency?: string };
+                  }>;
+                };
+              };
               failed_message?: string;
               failed_code?: string;
             };
@@ -249,16 +290,23 @@ export class PayMongoGateway implements PaymentGateway {
       // transaction. That equality is what confirm_booking_payment
       // reconciles against.
       case "checkout_session.payment.paid": {
-        const payment = attrs.payments?.[0];
+        const payment = attrs.payments?.[0] ?? attrs.payment_intent?.attributes?.payments?.[0];
         return {
           eventId,
           eventType,
           kind: "payment.succeeded",
           bookingId,
           checkoutSessionReference: resource.id,
-          paymentReference: payment?.id ?? resource.id,
-          amountMinor: payment?.attributes?.amount ?? null,
-          currency: payment?.attributes?.currency ?? null,
+          paymentReference: payment?.id ?? attrs.payment_intent?.id ?? resource.id,
+          amountMinor:
+            payment?.attributes?.amount ??
+            attrs.payment_intent?.attributes?.amount ??
+            lineItemAmountMinor(attrs.line_items),
+          currency:
+            payment?.attributes?.currency ??
+            attrs.payment_intent?.attributes?.currency ??
+            lineItemCurrency(attrs.line_items),
+          transactionId: metadataValue(metadata, "transaction_id"),
         };
       }
 
@@ -277,6 +325,7 @@ export class PayMongoGateway implements PaymentGateway {
           paymentReference: resource.id,
           amountMinor: typeof attrs.amount === "number" ? attrs.amount : null,
           currency: attrs.currency ?? null,
+          transactionId: metadataValue(metadata, "transaction_id"),
         };
 
       case "payment.failed":
