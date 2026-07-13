@@ -51,7 +51,7 @@ export function bookingMatchesStatusFilter(
 
 export function buildBookingsPageHref(
   filter: CustomerBookingStatusFilter,
-  query?: { created?: string; cancelled?: string },
+  query?: { created?: string; cancelled?: string; q?: string; sort?: string },
 ) {
   const params = new URLSearchParams();
 
@@ -65,6 +65,14 @@ export function buildBookingsPageHref(
 
   if (query?.cancelled) {
     params.set("cancelled", query.cancelled);
+  }
+
+  if (query?.q) {
+    params.set("q", query.q);
+  }
+
+  if (query?.sort && query.sort !== "newest") {
+    params.set("sort", query.sort);
   }
 
   const search = params.toString();

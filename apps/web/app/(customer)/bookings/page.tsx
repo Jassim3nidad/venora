@@ -287,9 +287,50 @@ export default async function CustomerBookingsPage({
   }
 
   const filterCounts = getFilterCounts(bookings);
-  const filteredBookings = bookings.filter((booking) =>
-    bookingMatchesStatusFilter(booking.status, statusFilter),
-  );
+  
+  function normalize(val?: string | null) {
+    return (val || "").trim().toLowerCase();
+  }
+
+  const q = normalize(query.q);
+  const sort = query.sort ?? "newest";
+
+  let filteredBookings = bookings.filter((booking) => {
+    if (!bookingMatchesStatusFilter(booking.status, statusFilter)) return false;
+
+    if (q) {
+      const venue = Array.isArray(booking.venues) ? booking.venues[0] : booking.venues;
+      const venueName = normalize(venue?.name);
+      const venueCity = normalize(venue?.city);
+      const venueProvince = normalize(venue?.province);
+      
+      const matchesQ =
+        venueName.includes(q) ||
+        venueCity.includes(q) ||
+        venueProvince.includes(q);
+
+      if (!matchesQ) return false;
+    }
+
+    return true;
+  });
+
+  if (sort === "event_date") {
+    filteredBookings.sort((a, b) => {
+      if (!a.event_date && !b.event_date) return 0;
+      if (!a.event_date) return 1;
+      if (!b.event_date) return -1;
+      return new Date(a.event_date).getTime() - new Date(b.event_date).getTime();
+    });
+  } else {
+    // newest first
+    filteredBookings.sort((a, b) => {
+      if (!a.created_at && !b.created_at) return 0;
+      if (!a.created_at) return 1;
+      if (!b.created_at) return -1;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+  }
 
   const pendingCount = bookings.filter(
     (booking) => booking.status === "pending",
@@ -400,10 +441,9 @@ export default async function CustomerBookingsPage({
           <BookingStatusFilterBar
             activeFilter={statusFilter}
             counts={filterCounts}
-            query={{
-              ...(query.created ? { created: query.created } : {}),
-              ...(query.cancelled ? { cancelled: query.cancelled } : {}),
-            }}
+            query={query}
+            filteredCount={filteredBookings.length}
+            totalCount={bookings.length}
           />
         ) : null}
 
