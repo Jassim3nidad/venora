@@ -14,6 +14,14 @@ import type { PaymentGateway } from "../../domain/gateways/payment-gateway.port"
 function makeFakeSupabase(rpcImpl: (fn: string, args: unknown) => { data: unknown; error: unknown }) {
   return {
     rpc: vi.fn((fn: string, args: unknown) => Promise.resolve(rpcImpl(fn, args))),
+    from: vi.fn(() => ({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      contains: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+    })),
   };
 }
 
@@ -182,6 +190,63 @@ describe("processWebhookEvent", () => {
       p_payment_reference: "pay_direct",
       p_amount_minor: 150000,
       p_currency: "PHP",
+    });
+  });
+
+  it("skips a late checkout-session paid event when the transaction is already paid", async () => {
+    const gateway = makeFakeGateway({
+      parseWebhookEvent: vi.fn().mockReturnValue({
+        eventId: "evt_late_checkout",
+        eventType: "checkout_session.payment.paid",
+        kind: "payment.succeeded",
+        bookingId: "booking-1",
+        transactionId: null,
+        checkoutSessionReference: "cs_created_by_venora",
+        paymentReference: "pay_late",
+        amountMinor: 150000,
+        currency: "PHP",
+      }),
+    });
+    const rpcCalls: string[] = [];
+    const maybeSingle = vi
+      .fn()
+      .mockResolvedValueOnce({ data: null, error: null })
+      .mockResolvedValueOnce({
+        data: {
+          id: "transaction-1",
+          booking_id: "booking-1",
+          provider_reference: "pay_direct",
+          amount: 1500,
+          currency: "PHP",
+          status: "paid",
+          payment_kind: "deposit",
+        },
+        error: null,
+      });
+    const query = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      contains: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      maybeSingle,
+    };
+    const supabase = {
+      rpc: vi.fn((fn: string, args: unknown) => {
+        rpcCalls.push(fn);
+        if (fn === "claim_payment_webhook_event") return Promise.resolve({ data: true, error: null });
+        if (fn === "finish_payment_webhook_event") return Promise.resolve({ data: null, error: null });
+        throw new Error(`confirm_booking_payment must not be called: ${fn}`);
+      }),
+      from: vi.fn(() => query),
+    };
+
+    const result = await processWebhookEvent(supabase as any, gateway, "{}", "sig");
+
+    expect(result).toEqual({ ok: true, result: "skipped" });
+    expect(rpcCalls).not.toContain("confirm_booking_payment");
+    expect(query.contains).toHaveBeenCalledWith("metadata", {
+      checkout_session_reference: "cs_created_by_venora",
     });
   });
 
