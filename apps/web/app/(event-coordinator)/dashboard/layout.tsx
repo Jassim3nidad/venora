@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { getCurrentAuthUser } from "@/lib/supabase/current-user";
 import { getNavbarProfile } from "@/lib/get-navbar-profile";
 import { EnterpriseShell } from "@/components/dashboard/enterprise";
+import { hasRole } from "@/lib/rbac/guards";
+import { ROLES } from "@/lib/rbac/roles";
 
 export default async function CoordinatorDashboardLayout({
   children,
@@ -12,6 +14,9 @@ export default async function CoordinatorDashboardLayout({
   const { supabase, user } = await getCurrentAuthUser();
 
   if (!user) redirect("/login?redirectTo=/dashboard/coordinator");
+  if (!(await hasRole(ROLES.EVENT_COORDINATOR, ROLES.ADMIN))) {
+    redirect("/unauthorized");
+  }
 
   const profile = await getNavbarProfile(supabase, user.id);
   const userName =

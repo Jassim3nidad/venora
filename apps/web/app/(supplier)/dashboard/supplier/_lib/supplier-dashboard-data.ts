@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   getSupplierDashboardContext as getMarketplaceSupplierDashboardContext,
 } from "@/features/suppliers/application/queries";
+import { ROLES } from "@/lib/rbac/roles";
 import type {
   SupplierCategory,
   SupplierMarketplaceProfile,
@@ -31,6 +32,15 @@ export async function getRequiredSupplierDashboardContext(): Promise<SupplierDas
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
+
+  const { data: roleRows } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", user.id);
+  const roles = (roleRows ?? []).map((row: { role: string }) => row.role);
+  if (!roles.includes(ROLES.SUPPLIER) && !roles.includes(ROLES.ADMIN)) {
+    redirect("/unauthorized");
+  }
 
   const context = await getMarketplaceSupplierDashboardContext(supabase, user.id);
   const supplierProfile = context.profile

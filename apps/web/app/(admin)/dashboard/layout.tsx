@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getNavbarProfile } from "@/lib/get-navbar-profile";
 import { EnterpriseShell } from "@/components/dashboard/enterprise";
+import { hasRole } from "@/lib/rbac/guards";
+import { ROLES } from "@/lib/rbac/roles";
 
 /**
  * Covers legacy /dashboard/admin URLs (a re-export shim of /admin outside
@@ -21,6 +23,7 @@ export default async function AdminDashboardLayout({
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/login?redirectTo=/dashboard/admin");
+  if (!(await hasRole(ROLES.ADMIN))) redirect("/unauthorized");
 
   const profile = await getNavbarProfile(supabase, user.id);
   const userName = profile?.full_name || user.email?.split("@")[0] || "Administrator";
