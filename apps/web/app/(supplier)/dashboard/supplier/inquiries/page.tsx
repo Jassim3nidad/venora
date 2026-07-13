@@ -100,18 +100,7 @@ export default async function SupplierInquiriesPage({
   directQuery = directQuery.order(sort, { ascending: false }).limit(50);
 
   const [directResult, bookingResult] = await Promise.all([
-<<<<<<< HEAD
     directQuery,
-=======
-    (supabase as any)
-      .from("supplier_contact_requests")
-      .select(
-        "id, contact_name, event_date, event_location, guest_count, status, created_at, supplier_services(name), venue_name_snapshot, event_start_time_snapshot, location_snapshot, event_date_snapshot, guest_count_snapshot",
-      )
-      .eq("supplier_id", profile.id)
-      .order("created_at", { ascending: false })
-      .limit(50),
->>>>>>> ea7dd351f43be0a99fc02a64bca165752f733bb1
     (supabase as any)
       .from("booking_suppliers")
       .select(
