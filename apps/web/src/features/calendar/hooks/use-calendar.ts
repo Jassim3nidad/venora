@@ -32,7 +32,6 @@ export interface Booking {
   customer: {
     id: string;
     full_name: string;
-    email: string;
     phone: string | null;
   };
   package: {
@@ -61,7 +60,11 @@ export function useCalendar(venueId: string, currentMonth: Date) {
   const startDate = format(startOfMonth(currentMonth), "yyyy-MM-dd");
   const endDate = format(endOfMonth(currentMonth), "yyyy-MM-dd");
 
-  const { data: bookings = [], isLoading: loadingBookings } = useQuery({
+  const {
+    data: bookings = [],
+    isLoading: loadingBookings,
+    error: bookingsError,
+  } = useQuery({
     queryKey: queryKeys.calendar.bookings(venueId, monthStr),
     queryFn: async () => {
       if (!venueId) return [];
@@ -72,7 +75,7 @@ export function useCalendar(venueId: string, currentMonth: Date) {
           id, event_date, status, guest_count, total_amount, deposit_amount,
           special_requests, created_at,
           venue:venues!bookings_venue_id_fkey(id, name),
-          customer:profiles!bookings_customer_id_fkey(id, full_name, email, phone),
+          customer:profiles!bookings_customer_id_fkey(id, full_name, phone),
           package:venue_packages!bookings_package_id_fkey(id, name, price)
         `,
         )
@@ -87,7 +90,11 @@ export function useCalendar(venueId: string, currentMonth: Date) {
     enabled: !!venueId,
   });
 
-  const { data: availability = [], isLoading: loadingAvailability } = useQuery({
+  const {
+    data: availability = [],
+    isLoading: loadingAvailability,
+    error: availabilityError,
+  } = useQuery({
     queryKey: queryKeys.calendar.availability(venueId, monthStr),
     queryFn: async () => {
       if (!venueId) return [];
@@ -156,6 +163,7 @@ export function useCalendar(venueId: string, currentMonth: Date) {
     bookings,
     availability,
     isLoading: loadingBookings || loadingAvailability,
+    error: bookingsError ?? availabilityError,
     getBookingsForDay,
     getAvailabilityForDay,
   };

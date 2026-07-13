@@ -4,10 +4,18 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarDays, Check, Clock3, Loader2, MessageSquareText, PackageCheck, TicketCheck, Users } from "lucide-react";
+import { format, startOfMonth } from "date-fns";
 import { useForm } from "react-hook-form";
+import { Calendar } from "@venora/ui";
 import { createBookingSchema, type CreateBookingInput } from "../schemas/booking.schema";
-import { getLocalDateInputValue } from "@/src/lib/date-only";
+import { getLocalDateInputValue, isPastDate, parseLocalDateOnly, PAST_DATE_MESSAGE } from "@/src/lib/date-only";
 import { CustomerButton, CustomerStatusBadge } from "@/src/components/customer/CustomerUI";
+import { useCalendar } from "@/src/features/calendar/hooks/use-calendar";
+import {
+  buildCustomerAvailabilityMap,
+  getCustomerAvailabilityMessage,
+  isCustomerSelectableAvailabilityStatus,
+} from "@/src/features/calendar/utils/availability";
 
 type BookingPackage = {
   id: string;
@@ -76,6 +84,10 @@ export function BookingWorkflowForm({
 }: BookingWorkflowFormProps) {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(() =>
+    startOfMonth(parseLocalDateOnly(initialDate ?? "") ?? new Date()),
+  );
 
   const defaultPackageId =
     initialPackageId && packages.some((item) => item.id === initialPackageId)
@@ -102,8 +114,15 @@ export function BookingWorkflowForm({
   });
 
   const selectedPackageId = watch("packageId") ?? "";
+  const selectedDateValue = watch("eventDate");
+  const selectedDate = parseLocalDateOnly(selectedDateValue);
   const guestCount = Number(watch("guestCount") ?? capacityMin);
   const selectedPackage = packages.find((item) => item.id === selectedPackageId);
+  const {
+    availability,
+    isLoading: isLoadingAvailability,
+    error: availabilityError,
+  } = useCalendar(venueId, calendarMonth);
 
   const price = selectedPackage?.price ?? basePrice ?? 0;
   const unit = selectedPackage?.price_unit ?? priceUnit;
@@ -132,9 +151,28 @@ export function BookingWorkflowForm({
     ],
     [basePrice, capacityMax, capacityMin, packages, priceUnit],
   );
+  const calendarAvailability = useMemo(
+    () => buildCustomerAvailabilityMap(availability),
+    [availability],
+  );
+  const selectedAvailabilityStatus = selectedDateValue
+    ? calendarAvailability[selectedDateValue]
+    : undefined;
+  const selectedDateIsPast = selectedDate ? isPastDate(selectedDate) : false;
+  const selectedDateIsBlocked =
+    selectedDateIsPast ||
+    !isCustomerSelectableAvailabilityStatus(selectedAvailabilityStatus);
+  const dateFeedback = selectedDateIsPast
+    ? PAST_DATE_MESSAGE
+    : getCustomerAvailabilityMessage(selectedAvailabilityStatus);
 
   async function onSubmit(input: CreateBookingInput) {
     setFormError(null);
+
+    if (selectedDateIsBlocked) {
+      setFormError(dateFeedback);
+      return;
+    }
 
     const response = await fetch("/api/bookings", {
       method: "POST",
@@ -171,21 +209,81 @@ export function BookingWorkflowForm({
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
-          <label className="grid gap-2 text-sm font-bold text-slate-700">
+          <div className="relative grid gap-2 text-sm font-bold text-slate-700 sm:col-span-3">
             Event date
-            <span className="relative">
-              <CalendarDays className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#2563EB]" />
-              <input
-                type="date"
-                min={getLocalDateInputValue()}
-                className="h-12 w-full rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] pl-11 pr-4 text-sm font-semibold outline-none transition focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
-                {...register("eventDate")}
-              />
-            </span>
+            <input type="hidden" {...register("eventDate")} />
+            <button
+              type="button"
+              onClick={() => setShowCalendar((value) => !value)}
+              onKeyDown={(event) => {
+                if (event.key !== "Enter" && event.key !== " ") return;
+                event.preventDefault();
+                setShowCalendar((value) => !value);
+              }}
+              className="flex h-12 w-full items-center justify-between rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 text-left text-sm font-semibold text-slate-900 outline-none transition hover:border-[#BFDBFE] hover:bg-white focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
+              aria-expanded={showCalendar}
+              aria-controls="booking-date-calendar"
+            >
+              <span className="flex items-center gap-3">
+                <CalendarDays className="h-4 w-4 text-[#2563EB]" />
+                {selectedDate
+                  ? format(selectedDate, "MMMM d, yyyy")
+                  : "Select an event date"}
+              </span>
+              {isLoadingAvailability ? (
+                <Loader2 className="h-4 w-4 animate-spin text-[#2563EB]" />
+              ) : null}
+            </button>
+            {showCalendar ? (
+              <div
+                id="booking-date-calendar"
+                className="absolute left-0 right-0 top-[5.75rem] z-40 rounded-3xl border border-[#E5E7EB] bg-white p-3 shadow-2xl sm:left-auto sm:w-[360px]"
+              >
+                {availabilityError ? (
+                  <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">
+                    Availability could not load. Refresh and try again.
+                  </div>
+                ) : (
+                  <>
+                    <Calendar
+                      {...(selectedDate ? { selectedDate } : {})}
+                      disablePastDates
+                      currentMonth={calendarMonth}
+                      onMonthChange={setCalendarMonth}
+                      availability={calendarAvailability}
+                      onDateSelect={(date) => {
+                        if (isPastDate(date)) return;
+                        setValue("eventDate", format(date, "yyyy-MM-dd"), {
+                          shouldValidate: true,
+                        });
+                        setShowCalendar(false);
+                      }}
+                    />
+                    {!isLoadingAvailability && availability.length === 0 ? (
+                      <p className="mt-3 rounded-2xl bg-[#F8FAFC] px-3 py-2 text-xs font-semibold text-slate-500">
+                        No blocked dates listed for this month.
+                      </p>
+                    ) : null}
+                  </>
+                )}
+              </div>
+            ) : null}
+            {selectedDate ? (
+              <span
+                className={[
+                  "rounded-2xl px-3 py-2 text-xs font-bold",
+                  selectedDateIsBlocked
+                    ? "bg-red-50 text-red-700"
+                    : "bg-emerald-50 text-emerald-700",
+                ].join(" ")}
+              >
+                {dateFeedback}
+              </span>
+            ) : null}
             {errors.eventDate ? (
               <span className="text-xs font-semibold text-red-600">{errors.eventDate.message}</span>
             ) : null}
-          </label>
+          </div>
 
           <label className="grid gap-2 text-sm font-bold text-slate-700">
             Start time
@@ -357,7 +455,17 @@ export function BookingWorkflowForm({
       ) : null}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <CustomerButton type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
+        <CustomerButton
+          type="submit"
+          disabled={
+            isSubmitting ||
+            isLoadingAvailability ||
+            Boolean(availabilityError) ||
+            !selectedDate ||
+            selectedDateIsBlocked
+          }
+          className="w-full sm:w-auto"
+        >
           {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <TicketCheck className="h-4 w-4" />}
           {isSubmitting ? "Submitting" : "Submit Inquiry"}
         </CustomerButton>
