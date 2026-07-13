@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getNavbarProfile } from "@/lib/get-navbar-profile";
 import { EnterpriseShell, NAV_BY_ROLE } from "@/components/dashboard/enterprise";
 import { hasPermission } from "@/lib/rbac/admin-context";
+import { hasRole } from "@/lib/rbac/guards";
+import { ROLES } from "@/lib/rbac/roles";
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient();
@@ -13,6 +15,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/login?redirectTo=/admin");
+  if (!(await hasRole(ROLES.ADMIN))) redirect("/unauthorized");
 
   const profile = await getNavbarProfile(supabase, user.id);
   const userName = profile?.full_name || user.email?.split("@")[0] || "Administrator";

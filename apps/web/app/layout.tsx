@@ -28,6 +28,11 @@ export const metadata: Metadata = {
   authors: [{ name: "Venora" }],
   creator: "Venora",
   metadataBase: new URL(SITE_URL),
+  icons: {
+    icon: "/venora-logo.png",
+    shortcut: "/venora-logo.png",
+    apple: "/venora-logo.png",
+  },
   openGraph: {
     type: "website",
     locale: "en_PH",

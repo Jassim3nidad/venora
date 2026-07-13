@@ -64,7 +64,7 @@ export async function searchMarketplaceVenues(
   if (params.location) {
     const loc = params.location.replace(/[,()"]/g, '').trim();
     if (loc) {
-      query = query.or(`location.ilike.%${loc}%,city.ilike.%${loc}%,municipality.ilike.%${loc}%,province.ilike.%${loc}%`);
+      query = query.or(`city.ilike.%${loc}%,municipality.ilike.%${loc}%,province.ilike.%${loc}%`);
     }
   }
 

@@ -45,7 +45,7 @@ export const ACCOUNT_NAV_ITEMS: AccountNavItem[] = [
   {
     href: "/account/payments",
     label: "Payments and Payouts",
-    description: "Saved payment methods",
+    description: "Hosted checkout options",
     icon: CreditCard,
   },
   {

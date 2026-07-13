@@ -4,6 +4,7 @@ import type {
   NormalizedWebhookEvent,
   PaymentGateway,
 } from "../../domain/gateways/payment-gateway.port";
+import type { TransactionRow } from "../../types/payment.types";
 
 export type WebhookProcessOutcome =
   | { ok: true; result: "processed" | "duplicate" | "skipped" }
@@ -65,12 +66,17 @@ export async function processWebhookEvent(
   try {
     switch (event.kind) {
       case "payment.succeeded": {
-        // Only checkout-session-scoped events carry a reference we can
-        // reconcile against a transaction we ourselves created. Direct
-        // payment events (no session context) are NOT auto-confirmed —
-        // trusting webhook-supplied metadata alone for correlation would
-        // reopen the reconciliation gap this hardening closes.
-        if (!event.checkoutSessionReference) {
+        const paymentContext = await resolvePaymentContext(serviceClient, event);
+
+        if (paymentContext.alreadySettled) {
+          await finish("skipped", "Payment already settled");
+          return { ok: true, result: "skipped" };
+        }
+        // Direct payment.paid events do not carry the checkout-session id,
+        // but PayMongo copies our Venora-created transaction metadata onto
+        // the payment. Use it only after loading the transaction and
+        // rechecking amount, currency, booking, status, and stored session.
+        if (!paymentContext.checkoutSessionReference) {
           console.error(
             `[payments] Unreconcilable payment.succeeded event ${event.eventId}: ` +
               `no checkout session reference for payment ${event.paymentReference}. ` +
@@ -82,13 +88,13 @@ export async function processWebhookEvent(
 
         if (event.amountMinor === null || event.currency === null) {
           throw new Error(
-            `Reconciliation failed: missing amount/currency on checkout session ${event.checkoutSessionReference}`,
+            `Reconciliation failed: missing amount/currency on checkout session ${paymentContext.checkoutSessionReference}`,
           );
         }
 
         const { error } = await serviceClient.rpc("confirm_booking_payment", {
           p_payment_provider: gateway.id,
-          p_checkout_reference: event.checkoutSessionReference,
+          p_checkout_reference: paymentContext.checkoutSessionReference,
           p_payment_reference: event.paymentReference,
           p_amount_minor: event.amountMinor,
           p_currency: event.currency,
@@ -164,4 +170,101 @@ async function lookupBookingByReference(
     .maybeSingle<{ booking_id: string }>();
 
   return data?.booking_id ?? null;
+}
+
+type PaymentContext = {
+  checkoutSessionReference: string | null;
+  alreadySettled: boolean;
+};
+
+type TransactionSnapshot = Pick<
+  TransactionRow,
+  "id" | "booking_id" | "provider_reference" | "amount" | "currency" | "status" | "payment_kind"
+>;
+
+async function resolvePaymentContext(
+  serviceClient: SupabaseClient,
+  event: Extract<NormalizedWebhookEvent, { kind: "payment.succeeded" }>,
+): Promise<PaymentContext> {
+  const transaction = event.transactionId
+    ? await lookupTransactionById(serviceClient, event.transactionId)
+    : event.checkoutSessionReference
+      ? await lookupTransactionByCheckoutReference(serviceClient, event.checkoutSessionReference)
+    : null;
+
+  if (transaction?.status === "paid") {
+    return { checkoutSessionReference: null, alreadySettled: true };
+  }
+
+  if (event.checkoutSessionReference) {
+    return {
+      checkoutSessionReference: event.checkoutSessionReference,
+      alreadySettled: false,
+    };
+  }
+
+  if (!transaction) {
+    return { checkoutSessionReference: null, alreadySettled: false };
+  }
+
+  const expectedAmountMinor = Math.round(Number(transaction.amount) * 100);
+  const amountMatches = event.amountMinor !== null && expectedAmountMinor === event.amountMinor;
+  const currencyMatches =
+    event.currency !== null &&
+    String(transaction.currency).toUpperCase() === String(event.currency).toUpperCase();
+  const bookingMatches = !event.bookingId || transaction.booking_id === event.bookingId;
+
+  if (
+    transaction.status !== "pending" ||
+    transaction.payment_kind !== "deposit" ||
+    !transaction.provider_reference ||
+    !amountMatches ||
+    !currencyMatches ||
+    !bookingMatches
+  ) {
+    return { checkoutSessionReference: null, alreadySettled: false };
+  }
+
+  return {
+    checkoutSessionReference: transaction.provider_reference,
+    alreadySettled: false,
+  };
+}
+
+async function lookupTransactionById(
+  serviceClient: SupabaseClient,
+  transactionId: string,
+): Promise<TransactionSnapshot | null> {
+  const { data } = await serviceClient
+    .from("transactions")
+    .select("id, booking_id, provider_reference, amount, currency, status, payment_kind")
+    .eq("id", transactionId)
+    .maybeSingle<TransactionSnapshot>();
+
+  return data ?? null;
+}
+
+async function lookupTransactionByCheckoutReference(
+  serviceClient: SupabaseClient,
+  checkoutSessionReference: string,
+): Promise<TransactionSnapshot | null> {
+  const select = "id, booking_id, provider_reference, amount, currency, status, payment_kind";
+  const { data: directMatch } = await serviceClient
+    .from("transactions")
+    .select(select)
+    .eq("provider_reference", checkoutSessionReference)
+    .limit(1)
+    .maybeSingle<TransactionSnapshot>();
+
+  if (directMatch) return directMatch;
+
+  const { data: metadataMatch } = await serviceClient
+    .from("transactions")
+    .select(select)
+    .contains("metadata", { checkout_session_reference: checkoutSessionReference })
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle<TransactionSnapshot>();
+
+  return metadataMatch ?? null;
 }

@@ -4,13 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Bell,
-  CalendarDays,
-  Heart,
   type LucideIcon,
   LogOut,
   Menu,
-  Search,
   Store,
   UserRound,
   X,
@@ -46,14 +42,6 @@ function getNavLinks(user?: { email?: string | null } | null): MobileLink[] {
     },
   ];
 }
-
-const customerMobileLinks: MobileLink[] = [
-  { label: "Browse", href: "/venues", icon: Search },
-  { label: "Suppliers", href: "/suppliers", icon: Store },
-  { label: "Bookings", href: "/bookings", icon: CalendarDays },
-  { label: "Favorites", href: "/favorites", icon: Heart },
-  { label: "Notifications", href: "/notifications", icon: Bell },
-];
 
 function isActive(pathname: string, href: string, label?: string) {
   if (label === "Host a Venue") {
@@ -106,7 +94,7 @@ export default function MarketingNavbar({
 
   const closeMenu = () => setMenuOpen(false);
   const navLinksForUser = getNavLinks(user);
-  const mobileLinks = embedded && user ? customerMobileLinks : navLinksForUser;
+  const mobileLinks = navLinksForUser;
   const mobilePanelPosition = embedded
     ? "top-[8.75rem] max-h-[calc(100dvh-9.25rem)]"
     : "top-24 max-h-[calc(100dvh-6.5rem)]";
@@ -133,7 +121,7 @@ export default function MarketingNavbar({
           aria-label="Main navigation"
         >
           {navLinksForUser.map(({ label, href }) => {
-            const active = isActive(pathname, href);
+            const active = isActive(pathname, href, label);
 
             return (
               <Link

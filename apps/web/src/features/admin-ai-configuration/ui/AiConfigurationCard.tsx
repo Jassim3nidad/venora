@@ -44,6 +44,19 @@ export function AiConfigurationCard({ config }: { config: AiConfiguration }) {
   });
 
   async function onSubmit(values: UpdateAiConfigurationInput) {
+    if (config.enabled && !values.enabled) {
+      if (!values.reason?.trim()) {
+        toast.error("Add a reason before disabling an AI feature.");
+        return;
+      }
+
+      const confirmed = window.confirm(
+        `Disable ${AI_FEATURE_LABELS[config.feature]} for all users? New AI requests for this feature will stop until it is enabled again.`,
+      );
+
+      if (!confirmed) return;
+    }
+
     const result = await updateAiConfigurationAction(values);
     if (result.error) {
       toast.error(result.error.message);

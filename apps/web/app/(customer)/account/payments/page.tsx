@@ -1,17 +1,84 @@
 import type { Metadata } from "next";
-import { Clock, CreditCard, Plus, ShieldCheck, Wallet } from "lucide-react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { CreditCard, ShieldCheck, Wallet } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import "@/src/features/payments/infrastructure/register-gateways";
+import { listAvailableProviders } from "@/src/features/payments/application/gateway-registry";
+import type { PaymentProviderId } from "@/src/features/payments/types/payment.types";
 
 export const metadata: Metadata = {
   title: "Payments and Payouts",
 };
 
-const SUPPORTED_PROVIDERS = [
-  { name: "PayMongo", note: "Cards, GCash, and e-wallets" },
-  { name: "Maya", note: "Cards and Maya wallet" },
-  { name: "Stripe", note: "International cards" },
-];
+export const dynamic = "force-dynamic";
 
-export default function PaymentsPage() {
+const PROVIDER_DETAILS: Record<
+  PaymentProviderId,
+  { name: string; methods: string[]; note: string }
+> = {
+  paymongo: {
+    name: "PayMongo",
+    methods: ["Cards", "GCash", "Maya", "GrabPay"],
+    note: "Methods are selected on PayMongo's hosted checkout page.",
+  },
+  maya: {
+    name: "Maya",
+    methods: ["Maya wallet", "Cards"],
+    note: "Not enabled unless a Maya gateway is registered.",
+  },
+  stripe: {
+    name: "Stripe",
+    methods: ["Cards"],
+    note: "Not enabled unless a Stripe gateway is registered.",
+  },
+};
+
+function formatCurrency(value: number | null | undefined) {
+  if (value === null || value === undefined || !Number.isFinite(Number(value))) {
+    return "Pending";
+  }
+
+  return new Intl.NumberFormat("en-PH", {
+    style: "currency",
+    currency: "PHP",
+    maximumFractionDigits: 0,
+  }).format(Number(value));
+}
+
+function formatDate(value: string | null | undefined) {
+  if (!value) return "Date pending";
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return "Date pending";
+  return date.toLocaleDateString("en-PH", { dateStyle: "medium" });
+}
+
+export default async function PaymentsPage() {
+  const supabase = (await createClient()) as any;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) redirect("/login");
+
+  const providers = listAvailableProviders();
+  const activeProviderDetails = providers.map((provider) => ({
+    id: provider,
+    ...PROVIDER_DETAILS[provider],
+  }));
+
+  const { data: payableBookings, error: payableError } = await supabase
+    .from("bookings")
+    .select("id, event_date, deposit_amount, status, venues(name)")
+    .eq("customer_id", user.id)
+    .in("status", ["approved", "payment_pending"])
+    .order("event_date", { ascending: true })
+    .limit(5);
+
+  if (payableError) {
+    console.error("[account/payments] Payable bookings fetch error:", payableError.message);
+  }
+
   return (
     <div className="space-y-8">
       <div className="overflow-hidden rounded-[28px] border border-[#E5E7EB]/80 bg-white shadow-xl shadow-slate-200/60">
@@ -21,7 +88,7 @@ export default function PaymentsPage() {
           </div>
 
           <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
-            Payments and payouts
+            Checkout options
           </p>
 
           <h1 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-950">
@@ -29,76 +96,104 @@ export default function PaymentsPage() {
           </h1>
 
           <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-500">
-            Saved payment methods aren&apos;t available yet. When this
-            launches, you&apos;ll be able to store a card or e-wallet here to
-            speed up booking checkout.
+            Venora does not store saved cards or wallet credentials. Booking
+            payments use secure hosted checkout from the enabled provider.
           </p>
         </div>
 
-        <div className="p-6 sm:p-8">
-          <div className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-6 py-10 text-center sm:flex-row sm:justify-between sm:text-left">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-slate-400 shadow-sm">
-                <CreditCard className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm font-extrabold text-slate-800">
-                  No payment methods saved
+        <div className="grid gap-4 p-6 sm:p-8 md:grid-cols-2 xl:grid-cols-3">
+          {activeProviderDetails.length > 0 ? (
+            activeProviderDetails.map((provider) => (
+              <div
+                key={provider.id}
+                className="rounded-3xl border border-slate-200 bg-[#F9FAFB] p-5"
+              >
+                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[#2563EB] shadow-sm">
+                  <CreditCard className="h-5 w-5" />
+                </div>
+                <h2 className="text-sm font-extrabold text-slate-950">
+                  {provider.name}
+                </h2>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {provider.methods.map((method) => (
+                    <span
+                      key={method}
+                      className="rounded-full border border-[#DBEAFE] bg-white px-3 py-1 text-xs font-extrabold text-[#1D4ED8]"
+                    >
+                      {method}
+                    </span>
+                  ))}
+                </div>
+                <p className="mt-4 text-xs font-medium leading-5 text-slate-500">
+                  {provider.note}
                 </p>
-                <p className="mt-1 text-sm font-medium text-slate-500">
-                  You&apos;ll be able to add a card or e-wallet here soon.
-                </p>
               </div>
+            ))
+          ) : (
+            <div className="rounded-3xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-6 md:col-span-2 xl:col-span-3">
+              <p className="text-sm font-extrabold text-slate-800">
+                No checkout provider enabled
+              </p>
+              <p className="mt-1 text-sm font-medium leading-6 text-slate-500">
+                A payment provider secret must be configured before customers
+                can start hosted checkout.
+              </p>
             </div>
-
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              className="inline-flex w-fit shrink-0 cursor-not-allowed items-center gap-2 rounded-full bg-slate-200 px-5 py-2.5 text-sm font-extrabold text-slate-500"
-            >
-              <Plus className="h-4 w-4" />
-              Add payment method
-            </button>
-          </div>
+          )}
         </div>
       </div>
 
       <div className="overflow-hidden rounded-[28px] border border-[#E5E7EB]/80 bg-white shadow-xl shadow-slate-200/60">
         <div className="border-b border-[#E5E7EB]/80 p-6 sm:p-8">
           <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
-            Coming soon
+            Ready for checkout
           </p>
           <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950">
-            Supported payment providers
+            Payable bookings
           </h2>
           <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-500">
-            Once saved payment methods launch, Venora will support these
-            providers at checkout.
+            Choose a booking to start or resume its secure deposit checkout.
           </p>
         </div>
 
-        <div className="grid gap-4 p-6 sm:p-8 md:grid-cols-3">
-          {SUPPORTED_PROVIDERS.map((provider) => (
-            <div
-              key={provider.name}
-              className="rounded-3xl border border-slate-200 bg-[#F9FAFB] p-5"
-            >
-              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[#2563EB] shadow-sm">
-                <CreditCard className="h-5 w-5" />
+        <div className="grid gap-3 p-6 sm:p-8">
+          {payableError ? (
+            <p className="rounded-2xl border border-red-100 bg-red-50 p-4 text-sm font-bold text-red-700">
+              Could not load payable bookings.
+            </p>
+          ) : (payableBookings ?? []).length > 0 ? (
+            payableBookings.map((booking: any) => (
+              <div
+                key={booking.id}
+                className="flex flex-col gap-4 rounded-3xl border border-slate-200 bg-[#F9FAFB] p-5 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div>
+                  <p className="text-sm font-extrabold text-slate-950">
+                    {booking.venues?.name ?? "Venue booking"}
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-slate-500">
+                    {formatDate(booking.event_date)} - Deposit{" "}
+                    {formatCurrency(booking.deposit_amount)}
+                  </p>
+                </div>
+                <Link
+                  href={`/bookings/${booking.id}/payment`}
+                  className="inline-flex h-11 w-fit items-center justify-center rounded-full bg-[#2563EB] px-5 text-sm font-extrabold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1d4ed8]"
+                >
+                  Pay deposit
+                </Link>
               </div>
-              <h3 className="text-sm font-extrabold text-slate-950">
-                {provider.name}
-              </h3>
-              <p className="mt-1.5 text-xs font-medium leading-5 text-slate-500">
-                {provider.note}
+            ))
+          ) : (
+            <div className="rounded-3xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-6 py-10 text-center">
+              <p className="text-sm font-extrabold text-slate-800">
+                No payable bookings
               </p>
-              <span className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.08em] text-slate-400 shadow-sm">
-                <Clock className="h-3 w-3" />
-                Coming soon
-              </span>
+              <p className="mt-1 text-sm font-medium leading-6 text-slate-500">
+                Approved bookings that require a deposit will appear here.
+              </p>
             </div>
-          ))}
+          )}
         </div>
       </div>
 
@@ -109,13 +204,11 @@ export default function PaymentsPage() {
           </div>
           <div>
             <h3 className="text-sm font-extrabold text-slate-800">
-              Booking payments today
+              No saved credential storage
             </h3>
             <p className="mt-1 text-sm font-medium leading-6 text-slate-500">
-              You can still pay for bookings directly during checkout — this
-              section only covers saving a payment method for future use. You
-              can review completed and pending payments under{" "}
-              <span className="font-bold text-slate-700">Transactions</span>.
+              Venora never stores raw card numbers, CVVs, or wallet credentials.
+              Payment details are entered only through the active provider.
             </p>
           </div>
         </div>
