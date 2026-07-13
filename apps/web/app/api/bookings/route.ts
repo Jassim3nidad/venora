@@ -3,10 +3,6 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/src/lib/supabase/server";
 import { createBookingSchema } from "@/src/features/booking/schemas/booking.schema";
 import { VenoraError } from "@/src/lib/errors";
-import {
-  ACTIVE_BOOKING_STATUSES,
-  isBlockingAvailabilityStatus,
-} from "@/src/features/calendar/utils/availability";
 
 function apiError(
   code: string,
@@ -26,7 +22,18 @@ function mapUnknownError(error: unknown) {
   }
 
   if (error && typeof error === "object" && "message" in error) {
-    return apiError("BOOKING_ACTION_FAILED", String(error.message), 400);
+    const message = String(error.message);
+    const normalized = message.toLowerCase();
+
+    if (
+      normalized.includes("already has an active booking") ||
+      normalized.includes("unavailable on the selected date") ||
+      normalized.includes("not available for booking")
+    ) {
+      return apiError("BOOKING_CONFLICT", message, 409);
+    }
+
+    return apiError("BOOKING_ACTION_FAILED", message, 400);
   }
 
   return apiError("INTERNAL_ERROR", "Something went wrong.", 500);
@@ -135,116 +142,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (isMissingRpcError(error)) {
-      const { data: venue, error: venueError } = await supabase
-        .from("venues")
-        .select("id, status, capacity_min, capacity_max")
-        .eq("id", input.venueId)
-        .eq("status", "published")
-        .single();
-
-      if (venueError) throw venueError;
-
-      const capacityMin = venue.capacity_min ?? 1;
-      const capacityMax = venue.capacity_max ?? capacityMin;
-
-      if (input.guestCount < capacityMin || input.guestCount > capacityMax) {
-        return apiError(
-          "VALIDATION_ERROR",
-          "Guest count is outside this venue capacity.",
-          400,
-        );
-      }
-
-      if (input.packageId) {
-        const { data: selectedPackage, error: packageError } = await supabase
-          .from("venue_packages")
-          .select("id, min_guests, max_guests")
-          .eq("id", input.packageId)
-          .eq("venue_id", input.venueId)
-          .eq("is_active", true)
-          .single();
-
-        if (packageError) throw packageError;
-
-        if (
-          (selectedPackage.min_guests !== null &&
-            input.guestCount < selectedPackage.min_guests) ||
-          (selectedPackage.max_guests !== null &&
-            input.guestCount > selectedPackage.max_guests)
-        ) {
-          return apiError(
-            "VALIDATION_ERROR",
-            "Guest count is outside the selected package limits.",
-            400,
-          );
-        }
-      }
-
-      const { data: availability, error: availabilityError } = await supabase
-        .from("venue_availability")
-        .select("status")
-        .eq("venue_id", input.venueId)
-        .eq("date", input.eventDate)
-        .maybeSingle();
-
-      if (availabilityError) throw availabilityError;
-
-      if (availability && isBlockingAvailabilityStatus(availability.status)) {
-        return apiError(
-          "BOOKING_CONFLICT",
-          "This venue is unavailable on the selected date.",
-          409,
-        );
-      }
-
-      const { data: conflicts, error: conflictsError } = await supabase
-        .from("bookings")
-        .select("id")
-        .eq("venue_id", input.venueId)
-        .eq("event_date", input.eventDate)
-        .in("status", ACTIVE_BOOKING_STATUSES)
-        .limit(1);
-
-      if (conflictsError) throw conflictsError;
-
-      if ((conflicts ?? []).length > 0) {
-        return apiError(
-          "BOOKING_CONFLICT",
-          "This venue already has an active booking for the selected date.",
-          409,
-        );
-      }
-
-      const fallbackInsert = {
-        venue_id: input.venueId,
-        customer_id: user.id,
-        package_id: input.packageId || null,
-        event_date: input.eventDate,
-        guest_count: input.guestCount,
-        status: "pending",
-        special_requests: input.specialRequests?.trim() || null,
-      };
-
-      const { data: insertedBooking, error: insertError } = await supabase
-        .from("bookings")
-        .insert(fallbackInsert)
-        .select("id, status, event_date")
-        .single();
-
-      if (insertError) throw insertError;
-
-      revalidateBookingCreateViews(await getVenueSlug(supabase, input.venueId));
-
-      return NextResponse.json(
-        {
-          data: {
-            bookingId: insertedBooking.id,
-            status: insertedBooking.status,
-            eventDate: insertedBooking.event_date,
-          },
-          error: null,
-        },
-        { status: 201 },
+      return apiError(
+        "BOOKING_WORKFLOW_UNAVAILABLE",
+        "Booking workflow is not available. Please try again later.",
+        503,
       );
     }
 

@@ -61,7 +61,11 @@ export function useCalendar(venueId: string, currentMonth: Date) {
   const startDate = format(startOfMonth(currentMonth), "yyyy-MM-dd");
   const endDate = format(endOfMonth(currentMonth), "yyyy-MM-dd");
 
-  const { data: bookings = [], isLoading: loadingBookings } = useQuery({
+  const {
+    data: bookings = [],
+    isLoading: loadingBookings,
+    error: bookingsError,
+  } = useQuery({
     queryKey: queryKeys.calendar.bookings(venueId, monthStr),
     queryFn: async () => {
       if (!venueId) return [];
@@ -87,7 +91,11 @@ export function useCalendar(venueId: string, currentMonth: Date) {
     enabled: !!venueId,
   });
 
-  const { data: availability = [], isLoading: loadingAvailability } = useQuery({
+  const {
+    data: availability = [],
+    isLoading: loadingAvailability,
+    error: availabilityError,
+  } = useQuery({
     queryKey: queryKeys.calendar.availability(venueId, monthStr),
     queryFn: async () => {
       if (!venueId) return [];
@@ -156,6 +164,7 @@ export function useCalendar(venueId: string, currentMonth: Date) {
     bookings,
     availability,
     isLoading: loadingBookings || loadingAvailability,
+    error: bookingsError ?? availabilityError,
     getBookingsForDay,
     getAvailabilityForDay,
   };

@@ -325,6 +325,27 @@ export async function createSupplierContactRequestAction(rawInput: unknown) {
       guestCountSnapshot = typeof booking.guest_count === "number" ? booking.guest_count : undefined;
     }
 
+    if (eventDate) {
+      const { data: supplierAvailability, error: availabilityError } =
+        await supabase
+          .from("supplier_availability")
+          .select("status")
+          .eq("supplier_id", input.supplierId)
+          .eq("date", eventDate)
+          .maybeSingle();
+
+      throwIfSupabaseError(availabilityError);
+
+      if (
+        supplierAvailability &&
+        supplierAvailability.status !== "available"
+      ) {
+        throw new ValidationError(
+          "This supplier is unavailable on the selected date. Please choose another date.",
+        );
+      }
+    }
+
     const { data, error } = await supabase
       .from("supplier_contact_requests")
       .insert({

@@ -40,29 +40,27 @@ export async function updateAvailability(input: UpdateAvailabilityInput) {
       return { success: false, error: "Venue not found or access denied" };
     }
 
-    if (data.status === "available") {
-      const { data: activeBookings, error: bookingsError } = await (
-        supabase as any
-      )
-        .from("bookings")
-        .select("id")
-        .eq("venue_id", data.venueId)
-        .eq("event_date", data.date)
-        .in("status", ACTIVE_BOOKING_STATUSES)
-        .limit(1);
+    const { data: activeBookings, error: bookingsError } = await (
+      supabase as any
+    )
+      .from("bookings")
+      .select("id")
+      .eq("venue_id", data.venueId)
+      .eq("event_date", data.date)
+      .in("status", ACTIVE_BOOKING_STATUSES)
+      .limit(1);
 
-      if (bookingsError) {
-        console.error("updateAvailability bookings error:", bookingsError);
-        return { success: false, error: "Failed to verify date bookings" };
-      }
+    if (bookingsError) {
+      console.error("updateAvailability bookings error:", bookingsError);
+      return { success: false, error: "Failed to verify date bookings" };
+    }
 
-      if ((activeBookings ?? []).length > 0) {
-        return {
-          success: false,
-          error:
-            "This date has an active booking request. Decline or cancel the booking before making the date available.",
-        };
-      }
+    if ((activeBookings ?? []).length > 0) {
+      return {
+        success: false,
+        error:
+          "This date has active booking activity. Manage the booking before changing availability.",
+      };
     }
 
     const { error } = await (supabase as any).from("venue_availability").upsert(

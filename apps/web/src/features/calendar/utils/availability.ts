@@ -74,3 +74,41 @@ export function isBlockingAvailabilityStatus(status?: string | null) {
 export function isActiveBookingStatus(status?: string | null) {
   return (ACTIVE_BOOKING_STATUSES as readonly string[]).includes(status ?? "");
 }
+
+export function isAvailabilityStatus(value?: string | null): value is AvailabilityStatusValue {
+  return (AVAILABILITY_STATUSES as readonly string[]).includes(value ?? "");
+}
+
+export function isCustomerSelectableAvailabilityStatus(status?: string | null) {
+  return !isBlockingAvailabilityStatus(status);
+}
+
+export function getCustomerAvailabilityLabel(status?: string | null) {
+  return isAvailabilityStatus(status) ? AVAILABILITY_LABELS[status] : AVAILABILITY_LABELS.available;
+}
+
+export function buildCustomerAvailabilityMap(
+  rows: Array<{ date: string; status: string | null | undefined }>,
+) {
+  return rows.reduce<Record<string, AvailabilityStatusValue>>((acc, row) => {
+    if (isAvailabilityStatus(row.status)) {
+      acc[row.date] = row.status;
+    }
+    return acc;
+  }, {});
+}
+
+export function getCustomerAvailabilityMessage(status?: string | null) {
+  switch (status) {
+    case "tentative":
+      return "This date has a pending request and cannot be booked yet.";
+    case "reserved":
+      return "This date is already booked. Please choose another date.";
+    case "maintenance":
+      return "This date is unavailable due to maintenance.";
+    case "blackout":
+      return "This date is unavailable. Please choose another date.";
+    default:
+      return "This date is available for booking.";
+  }
+}

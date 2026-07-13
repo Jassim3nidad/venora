@@ -174,9 +174,9 @@ export function DateEditorModal({
                 ))}
               </div>
               <p className="mt-3 text-xs font-semibold text-amber-800">
-                Clear/unblock is disabled until active booking requests are
-                declined, cancelled, expired, or completed according to the
-                workflow.
+                Manual availability changes are disabled until active booking
+                requests are declined, cancelled, expired, or otherwise leave
+                the active workflow.
               </p>
             </div>
           ) : null}
@@ -288,7 +288,7 @@ export function DateEditorModal({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !canClear}
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-[#1d4ed8] px-4 text-sm font-bold text-white shadow-sm shadow-blue-200/70 transition hover:bg-[#1e40af] disabled:opacity-60"
             >
               {isSubmitting ? (
