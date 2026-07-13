@@ -6,7 +6,6 @@ import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import {
   Check,
-  Chrome,
   Eye,
   EyeOff,
   LockKeyhole,
@@ -16,10 +15,10 @@ import {
 import {
   loginAction,
   resendVerificationEmailAction,
-  signInWithOAuthAction,
 } from "@/features/auth/actions/auth.actions";
 import { loginSchema } from "@/features/auth/schemas/auth.schema";
 import { researchVenues } from "@/src/features/venues/data/research-venues";
+import { createClient } from "@/lib/supabase/client";
 
 const brandPoints = [
   "Curated, high-quality spaces.",
@@ -27,6 +26,44 @@ const brandPoints = [
   "Seamless booking management.",
 ];
 const heroVenue = researchVenues[0]!;
+
+// Official Google "G" logomark — required by Google's brand guidelines for
+// sign-in buttons (a generic browser icon does not satisfy them).
+function GoogleLogo() {
+  return (
+    <svg viewBox="0 0 18 18" className="h-4 w-4 shrink-0" aria-hidden="true">
+      <path
+        fill="#4285F4"
+        d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.62Z"
+      />
+      <path
+        fill="#34A853"
+        d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.9v2.33A9 9 0 0 0 9 18Z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.9A9 9 0 0 0 0 9c0 1.45.35 2.83.9 4.03l3.05-2.33Z"
+      />
+      <path
+        fill="#EA4335"
+        d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .9 4.97L3.95 7.3C4.66 5.17 6.65 3.58 9 3.58Z"
+      />
+    </svg>
+  );
+}
+
+const OAUTH_ERROR_MESSAGES: Record<string, string> = {
+  oauth_cancelled: "Google sign-in was cancelled. Please try again.",
+  oauth_provider_error:
+    "Google sign-in is temporarily unavailable. Please try again.",
+  account_restricted: "Your account cannot access Venora at this time.",
+  oauth_callback_failed:
+    "We could not sign you in with Google. Please try again.",
+};
+
+function toOAuthErrorMessage(code: string) {
+  return OAUTH_ERROR_MESSAGES[code] ?? code;
+}
 
 function LoginForm() {
   const searchParams = useSearchParams();
@@ -41,12 +78,52 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
-  const [generalError, setGeneralError] = useState<string | null>(
-    searchParams.get("error") || null
-  );
+  const [generalError, setGeneralError] = useState<string | null>(() => {
+    const errorParam = searchParams.get("error");
+    return errorParam ? toOAuthErrorMessage(errorParam) : null;
+  });
   const [showResendVerification, setShowResendVerification] = useState(false);
   const [resendMessage, setResendMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  const handleGoogleSignIn = () => {
+    if (isPending || isGoogleLoading) return; // guard against duplicate clicks
+
+    setGeneralError(null);
+    setShowResendVerification(false);
+    setResendMessage(null);
+    setIsGoogleLoading(true);
+
+    const supabase = createClient();
+    const callbackUrl = new URL("/auth/callback", window.location.origin);
+    if (redirectTo) callbackUrl.searchParams.set("next", redirectTo);
+
+    supabase.auth
+      .signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: callbackUrl.toString(),
+          scopes: "openid email profile",
+        },
+      })
+      .then(({ error }) => {
+        if (error) {
+          setGeneralError(
+            "We could not sign you in with Google. Please try again.",
+          );
+          setIsGoogleLoading(false);
+        }
+        // On success the SDK navigates the browser to Google — nothing left
+        // to update here, and this component is about to unmount.
+      })
+      .catch(() => {
+        setGeneralError(
+          "We could not sign you in with Google. Please try again.",
+        );
+        setIsGoogleLoading(false);
+      });
+  };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -372,22 +449,21 @@ function LoginForm() {
             <button
               id="google-signin-btn"
               type="button"
-              disabled={isPending}
-              onClick={() => {
-                setGeneralError(null);
-
-                startTransition(async () => {
-                  const res = await signInWithOAuthAction("google");
-
-                  if (res && !res.success) {
-                    setGeneralError(res.error);
-                  }
-                });
-              }}
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white text-sm font-extrabold text-[#111827] shadow-sm transition hover:border-[#2563EB]/60 hover:bg-[#EFF6FF] disabled:cursor-not-allowed disabled:opacity-70"
+              disabled={isPending || isGoogleLoading}
+              aria-label="Continue with Google"
+              aria-busy={isGoogleLoading}
+              onClick={handleGoogleSignIn}
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white text-sm font-extrabold text-[#111827] shadow-sm transition hover:border-[#2563EB]/60 hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 disabled:cursor-not-allowed disabled:opacity-70"
             >
-              <Chrome className="h-4 w-4 text-[#2563EB]" />
-              Continue with Google
+              {isGoogleLoading ? (
+                <span
+                  className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-[#E5E7EB] border-t-[#2563EB]"
+                  aria-hidden="true"
+                />
+              ) : (
+                <GoogleLogo />
+              )}
+              {isGoogleLoading ? "Connecting to Google..." : "Continue with Google"}
             </button>
           </div>
 

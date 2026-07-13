@@ -3,6 +3,14 @@ import { createClient } from "@/lib/supabase/server";
 import { type RoleName } from "@/lib/rbac/roles";
 import { resolvePostAuthRedirect } from "@/lib/profile-setup";
 
+// Account-restriction errors get their own message; everything else about
+// a failed exchange collapses into the generic oauth_callback_failed code so
+// we never leak provider/Supabase error internals to the client.
+function isRestrictedAccountError(message: string) {
+  const normalized = message.toLowerCase();
+  return normalized.includes("banned") || normalized.includes("suspended");
+}
+
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
 
@@ -10,6 +18,7 @@ export async function GET(request: NextRequest) {
   const tokenHash = requestUrl.searchParams.get("token_hash");
   const type = requestUrl.searchParams.get("type");
   const next = requestUrl.searchParams.get("next");
+  const providerError = requestUrl.searchParams.get("error");
 
   // ── Token-based verification (email confirmation links) ────────────
   // Redirect token_hash to the /confirm route to prevent email scanners
@@ -19,14 +28,27 @@ export async function GET(request: NextRequest) {
     confirmUrl.searchParams.set("token_hash", tokenHash);
     confirmUrl.searchParams.set("type", type);
     if (next) confirmUrl.searchParams.set("next", next);
-    
+
     return NextResponse.redirect(confirmUrl);
+  }
+
+  // ── Provider-side failure (user cancelled Google, provider/config error) ──
+  // Google/Supabase report these via `error` on the redirect instead of a
+  // code — never forward the raw provider `error_description` to the client.
+  if (!code && providerError) {
+    const redirectUrl = new URL("/login", request.url);
+    redirectUrl.searchParams.set(
+      "error",
+      providerError === "access_denied" ? "oauth_cancelled" : "oauth_provider_error",
+    );
+
+    return NextResponse.redirect(redirectUrl);
   }
 
   // ── PKCE / OAuth code exchange ─────────────────────────────────────
   if (!code) {
     const redirectUrl = new URL("/login", request.url);
-    redirectUrl.searchParams.set("error", "missing_auth_code");
+    redirectUrl.searchParams.set("error", "oauth_callback_failed");
 
     return NextResponse.redirect(redirectUrl);
   }
@@ -37,7 +59,10 @@ export async function GET(request: NextRequest) {
 
   if (error) {
     const redirectUrl = new URL("/login", request.url);
-    redirectUrl.searchParams.set("error", "auth_callback_failed");
+    redirectUrl.searchParams.set(
+      "error",
+      isRestrictedAccountError(error.message) ? "account_restricted" : "oauth_callback_failed",
+    );
 
     return NextResponse.redirect(redirectUrl);
   }

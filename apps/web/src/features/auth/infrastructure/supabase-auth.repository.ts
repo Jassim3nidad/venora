@@ -83,18 +83,6 @@ export class SupabaseAuthRepository implements AuthRepository {
     if (error) throw new AuthError(error.message);
   }
 
-  async signInWithOAuth(provider: "google") {
-    const supabase = await createClient();
-    const siteUrl = this.getSiteUrl();
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: `${siteUrl}/auth/callback`,
-      },
-    });
-    if (error) throw new AuthError(error.message);
-  }
-
   async signOut() {
     const supabase = await createClient();
     const { error } = await supabase.auth.signOut();
