@@ -132,63 +132,65 @@ function buildVenueImageUrl(storagePath?: string | null) {
 }
 
 function actionForBooking(booking: BookingRecord, venue?: VenueRecord | null) {
+  const viewDetailsBtn = (
+    <CustomerLinkButton href={`/bookings/${booking.id}`} tone="secondary">
+      View Details
+    </CustomerLinkButton>
+  );
+
   if (booking.status === "pending") {
-    return (
-      <CustomerLinkButton href={`/bookings/${booking.id}`} tone="secondary">
-        View Request
-      </CustomerLinkButton>
-    );
+    return viewDetailsBtn;
   }
 
   if (booking.status === "approved" || booking.status === "payment_pending") {
     return (
-      <CustomerLinkButton href={`/bookings/${booking.id}/payment`}>
-        <CreditCard className="h-4 w-4" />
-        Pay Deposit
-      </CustomerLinkButton>
+      <>
+        <CustomerLinkButton href={`/bookings/${booking.id}/payment`}>
+          <CreditCard className="h-4 w-4" />
+          Pay Deposit
+        </CustomerLinkButton>
+        {viewDetailsBtn}
+      </>
     );
   }
 
   if (booking.status === "confirmed") {
     return (
-      <CustomerLinkButton href={`/bookings/${booking.id}/confirmation`}>
-        <CheckCircle2 className="h-4 w-4" />
-        View Confirmation
-      </CustomerLinkButton>
+      <>
+        <CustomerLinkButton href={`/bookings/${booking.id}/confirmation`}>
+          <CheckCircle2 className="h-4 w-4" />
+          View Confirmation
+        </CustomerLinkButton>
+        {viewDetailsBtn}
+      </>
     );
   }
 
   if (booking.status === "completed" && !booking.reviews?.length) {
     return (
-      <CustomerLinkButton href={`/bookings/${booking.id}/review`}>
-        <Star className="h-4 w-4" />
-        Review Venue
-      </CustomerLinkButton>
+      <>
+        <CustomerLinkButton href={`/bookings/${booking.id}/review`}>
+          <Star className="h-4 w-4" />
+          Review Venue
+        </CustomerLinkButton>
+        {viewDetailsBtn}
+      </>
     );
   }
 
   if (booking.reviews?.length || booking.status === "reviewed") {
     return (
-      <CustomerLinkButton href={`/bookings/${booking.id}/review`}>
-        <Star className="h-4 w-4" />
-        View Review
-      </CustomerLinkButton>
+      <>
+        <CustomerLinkButton href={`/bookings/${booking.id}/review`}>
+          <Star className="h-4 w-4" />
+          View Review
+        </CustomerLinkButton>
+        {viewDetailsBtn}
+      </>
     );
   }
 
-  if (venue?.slug) {
-    return (
-      <CustomerLinkButton href={`/venues/${venue.slug}`} tone="secondary">
-        View Details
-      </CustomerLinkButton>
-    );
-  }
-
-  return (
-    <span className="inline-flex h-12 items-center justify-center rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-5 text-sm font-extrabold text-[#6B7280]">
-      Venue unavailable
-    </span>
-  );
+  return viewDetailsBtn;
 }
 
 async function getCustomerBookings(userId: string) {
