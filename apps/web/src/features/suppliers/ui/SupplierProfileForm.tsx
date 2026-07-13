@@ -4,6 +4,7 @@ import { useState, useTransition, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Save, CheckCircle2, AlertCircle, Image as ImageIcon, MapPin, Building2, Phone, Mail, Globe, Instagram, Clock, Users, ArrowUpRight } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { upsertSupplierProfileAction } from "../application/actions";
@@ -11,6 +12,7 @@ import type {
   SupplierCategory,
   SupplierMarketplaceProfile,
 } from "../types/supplier.types";
+import { SupplierImageUpload } from "./SupplierImageUpload";
 
 const profileFormSchema = z.object({
   businessName: z.string().trim().min(2, "Business name is required").max(120),
@@ -119,7 +121,8 @@ export function SupplierProfileForm({
     formState: { errors, isDirty, isSubmitting },
     setError,
     watch,
-    reset
+    reset,
+    setValue
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues,
@@ -489,17 +492,25 @@ export function SupplierProfileForm({
               <div className="grid gap-8">
                 {/* Profile Image URL */}
                 <div className="grid gap-4 sm:grid-cols-[1fr,120px] items-start">
-                  <label className="grid gap-1.5">
-                    <span className="text-sm font-bold text-slate-700">Business Logo or Profile Image URL</span>
-                    <input
-                      {...register("profileImageUrl")}
-                      type="url"
-                      placeholder="https://example.com/logo.jpg"
-                      className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
-                    />
-                    <p className="text-xs text-slate-500">Provide a direct link to a square JPG, PNG, or WebP image.</p>
+                  <div className="grid gap-1.5">
+                    <label className="grid gap-1.5">
+                      <span className="text-sm font-bold text-slate-700">Business Logo or Profile Image URL</span>
+                      <input
+                        {...register("profileImageUrl")}
+                        type="url"
+                        placeholder="https://example.com/logo.jpg"
+                        className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
+                      />
+                    </label>
+                    <div className="flex items-center justify-between mt-1">
+                      <p className="text-xs text-slate-500">Provide a direct link or upload an image.</p>
+                      <SupplierImageUpload 
+                        onUploadSuccess={(url) => setValue("profileImageUrl", url, { shouldDirty: true, shouldValidate: true })} 
+                        label="Upload file" 
+                      />
+                    </div>
                     <FieldError message={errors.profileImageUrl?.message} />
-                  </label>
+                  </div>
                   <div className="flex justify-end">
                     <div className="h-24 w-24 sm:h-[120px] sm:w-[120px] overflow-hidden rounded-xl border border-slate-200 bg-slate-100 flex items-center justify-center shrink-0">
                       {formValues.profileImageUrl ? (
@@ -520,17 +531,25 @@ export function SupplierProfileForm({
 
                 {/* Hero Image URL */}
                 <div className="grid gap-4 items-start">
-                  <label className="grid gap-1.5">
-                    <span className="text-sm font-bold text-slate-700">Cover Photo URL</span>
-                    <input
-                      {...register("heroImageUrl")}
-                      type="url"
-                      placeholder="https://example.com/cover.jpg"
-                      className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
-                    />
-                    <p className="text-xs text-slate-500">Use a high-quality image that represents your services (Recommended: 1600 × 900 px).</p>
+                  <div className="grid gap-1.5">
+                    <label className="grid gap-1.5">
+                      <span className="text-sm font-bold text-slate-700">Cover Photo URL</span>
+                      <input
+                        {...register("heroImageUrl")}
+                        type="url"
+                        placeholder="https://example.com/cover.jpg"
+                        className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
+                      />
+                    </label>
+                    <div className="flex items-center justify-between mt-1">
+                      <p className="text-xs text-slate-500">Use a high-quality image that represents your services (Recommended: 1600 × 900 px).</p>
+                      <SupplierImageUpload 
+                        onUploadSuccess={(url) => setValue("heroImageUrl", url, { shouldDirty: true, shouldValidate: true })} 
+                        label="Upload file" 
+                      />
+                    </div>
                     <FieldError message={errors.heroImageUrl?.message} />
-                  </label>
+                  </div>
                   
                   <div className="w-full aspect-[21/9] sm:aspect-[16/9] lg:aspect-[21/9] overflow-hidden rounded-xl border border-slate-200 bg-slate-100 flex items-center justify-center shrink-0">
                     {formValues.heroImageUrl ? (
@@ -621,11 +640,21 @@ export function SupplierProfileForm({
                 </div>
               </div>
 
-              {/* View Profile Button fake */}
-              <div className="p-4 bg-slate-50 border-t border-slate-100">
-                <div className="w-full h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-700 shadow-sm">
-                  View Full Profile
-                </div>
+              {/* View Profile Button */}
+              <div className="p-4 bg-slate-50 border-t border-slate-100 pointer-events-auto">
+                {profile?.slug ? (
+                  <Link 
+                    href={`/suppliers/${profile.slug}`}
+                    target="_blank"
+                    className="w-full h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition"
+                  >
+                    View Full Profile
+                  </Link>
+                ) : (
+                  <div className="w-full h-10 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-400 shadow-sm cursor-not-allowed">
+                    Save profile to preview
+                  </div>
+                )}
               </div>
             </div>
             <p className="text-xs text-slate-400 mt-3 text-center">Customers will see this card when searching the marketplace.</p>

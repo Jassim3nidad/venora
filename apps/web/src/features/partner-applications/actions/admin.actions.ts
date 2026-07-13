@@ -48,46 +48,13 @@ export async function approveApplicationAction(applicationId: string) {
       return { success: false, error: "Unauthorized" };
     }
 
-    // Get the application
-    const { data: application, error: fetchError } = await (supabase.from("partner_applications") as any)
-      .select("user_id, role_applied_for, status")
-      .eq("id", applicationId)
-      .single();
+    // Call RPC
+    const { error: rpcError } = await supabase.rpc("admin_approve_partner_application", {
+      p_application_id: applicationId,
+    });
 
-    if (fetchError || !application) {
-      return { success: false, error: "Application not found" };
-    }
-
-    if (application.status !== "pending") {
-      return { success: false, error: "Application is not pending" };
-    }
-
-    // Venora accounts hold exactly one role at a time (user_roles.user_id is
-    // UNIQUE — see migration 022). Every user already has a "customer" role
-    // from signup, so a plain INSERT here always violates that constraint and
-    // silently fails, leaving the application marked "approved" without the
-    // applicant ever receiving their new role. Upsert on user_id instead so
-    // it replaces their existing role.
-    const { error: roleError } = await (supabase.from("user_roles") as any).upsert(
-      { user_id: application.user_id, role: application.role_applied_for },
-      { onConflict: "user_id" },
-    );
-
-    if (roleError) {
-      console.error("[approveApplicationAction] Role assignment error:", roleError);
-      return {
-        success: false,
-        error: "Failed to assign the new role. Please try again.",
-      };
-    }
-
-    // Only mark the application approved once the role has actually been granted.
-    const { error: updateError } = await (supabase.from("partner_applications") as any)
-      .update({ status: "approved", updated_at: new Date().toISOString() })
-      .eq("id", applicationId);
-
-    if (updateError) {
-      return { success: false, error: updateError.message };
+    if (rpcError) {
+      return { success: false, error: rpcError.message };
     }
 
     revalidatePath("/admin/applications");
@@ -114,17 +81,14 @@ export async function denyApplicationAction(applicationId: string, reason: strin
       return { success: false, error: "Unauthorized" };
     }
 
-    // Update status to denied
-    const { error: updateError } = await (supabase.from("partner_applications") as any)
-      .update({ 
-        status: "denied", 
-        denial_reason: reason.trim(),
-        updated_at: new Date().toISOString() 
-      })
-      .eq("id", applicationId);
+    // Call RPC
+    const { error: rpcError } = await supabase.rpc("admin_deny_partner_application", {
+      p_application_id: applicationId,
+      p_reason: reason.trim(),
+    });
 
-    if (updateError) {
-      return { success: false, error: updateError.message };
+    if (rpcError) {
+      return { success: false, error: rpcError.message };
     }
 
     revalidatePath("/admin/applications");

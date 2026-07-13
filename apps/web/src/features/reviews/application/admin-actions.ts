@@ -35,6 +35,14 @@ async function updateReviewStatus(reviewId: string, status: "published" | "remov
   const venue = Array.isArray(data.venues) ? data.venues[0] : data.venues;
   if (venue?.slug) revalidatePath(`/venues/${venue.slug}`);
 
+  await supabase.rpc("admin_log_action", {
+    p_action: status === "published" ? "review.restored" : "review.removed",
+    p_entity_type: "reviews",
+    p_entity_id: reviewId,
+    p_reason: `Review status changed to ${status}`,
+    p_metadata: { new_status: status }
+  });
+
   return { reviewId, status: data.status as string };
 }
 

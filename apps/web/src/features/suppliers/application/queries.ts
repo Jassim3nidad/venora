@@ -23,12 +23,29 @@ const SUPPLIER_PROFILE_SELECT = `
   id,
   profile_id,
   business_name,
+  slug,
   category_id,
+  headline,
   description,
   base_price,
   price_unit,
+  service_areas,
+  coverage_radius_km,
+  contact_email,
+  contact_phone,
+  website_url,
+  instagram_url,
+  profile_image_url,
+  hero_image_url,
+  response_time_hours,
+  years_in_business,
+  team_size,
+  minimum_booking_notice_days,
+  is_featured,
   accreditation_status,
-  avg_rating
+  avg_rating,
+  review_count,
+  created_at
 `;
 
 const SUPPLIER_SERVICE_SELECT = `
@@ -346,34 +363,38 @@ export async function getPublicSupplierBySlug(
 ): Promise<SupplierMarketplaceProfile | null> {
   const categories = await getSupplierCategories(supabase);
 
+  let query = supabase
+    .from("supplier_profiles")
+    .select(SUPPLIER_PROFILE_SELECT)
+    .eq("accreditation_status", "accredited");
+
   if (isUuid(identifier)) {
-    const { data, error } = await supabase
-      .from("supplier_profiles")
-      .select(SUPPLIER_PROFILE_SELECT)
-      .eq("accreditation_status", "accredited")
-      .eq("id", identifier)
-      .maybeSingle();
+    query = query.eq("id", identifier);
+  } else {
+    query = query.eq("slug", identifier);
+  }
 
-    if (!error && data) {
-      const { services, portfolioItems, reviews } = await getSupplierRelations(
-        supabase,
-        [String(data.id)],
-      );
+  const { data, error } = await query.maybeSingle();
 
-      const [supplierWithRelations] = attachSupplierRelations(
-        [data],
-        categories,
-        services,
-        portfolioItems,
-        reviews,
-      );
+  if (!error && data) {
+    const { services, portfolioItems, reviews } = await getSupplierRelations(
+      supabase,
+      [String(data.id)],
+    );
 
-      return mapDbSupplier(supplierWithRelations);
-    }
+    const [supplierWithRelations] = attachSupplierRelations(
+      [data],
+      categories,
+      services,
+      portfolioItems,
+      reviews,
+    );
 
-    if (error) {
-      console.error("[suppliers] detail fetch failed:", error.message);
-    }
+    return mapDbSupplier(supplierWithRelations);
+  }
+
+  if (error) {
+    console.error("[suppliers] detail fetch failed:", error.message);
   }
 
   return (

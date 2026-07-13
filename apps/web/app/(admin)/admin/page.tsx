@@ -22,6 +22,7 @@ export default async function AdminDashboardPage() {
     { count: pendingApplications },
     { data: recentVenues },
     { data: recentSuppliers },
+    { data: recentActivityData },
   ] = await Promise.all([
     supabase.from("profiles").select("id", { count: "exact", head: true }),
     supabase
@@ -48,6 +49,11 @@ export default async function AdminDashboardPage() {
       .eq("accreditation_status", "pending")
       .order("created_at", { ascending: false })
       .limit(3),
+    supabase
+      .from("audit_logs")
+      .select("id, action, entity_type, created_at, actor_id")
+      .order("created_at", { ascending: false })
+      .limit(5),
   ]);
 
   const pendingReviews = [
@@ -104,6 +110,7 @@ export default async function AdminDashboardPage() {
       supplierReviews={supplierReviews ?? 0}
       pendingApplications={pendingApplications ?? 0}
       pendingReviews={pendingReviews}
+      recentActivity={recentActivityData ?? []}
       visibleModuleHrefs={visibleModuleHrefs}
       canReviewApplications={canReviewApplications}
       canReviewVenues={canReviewVenues}

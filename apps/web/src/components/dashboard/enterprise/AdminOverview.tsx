@@ -26,6 +26,13 @@ export type AdminOverviewProps = {
     submittedBy: string;
     status: string;
   }>;
+  recentActivity: Array<{
+    id: string;
+    action: string;
+    entity_type: string;
+    created_at: string;
+    actor_id: string;
+  }>;
   /**
    * hrefs from ADMIN_MODULES the current admin is permitted to see, computed
    * server-side against the same NAV_BY_ROLE.admin permission mapping the
@@ -50,6 +57,7 @@ export function AdminOverview({
   supplierReviews,
   pendingApplications,
   pendingReviews,
+  recentActivity,
   visibleModuleHrefs,
   canReviewApplications,
   canReviewVenues,
@@ -214,6 +222,42 @@ export function AdminOverview({
                 key: "status",
                 header: "Status",
                 cell: (r) => <StatusBadge status="pending" label={r.status} />,
+              },
+            ]}
+          />
+        </div>
+      </Panel>
+      
+      <Panel padding={false} className="overflow-hidden">
+        <div className="border-b border-[#e5e7eb] p-5 sm:p-6">
+          <PanelHeader
+            title="Recent Activity"
+            description="Latest administrative and platform actions."
+            action={
+              <DashButton href="/admin/audit-logs" variant="secondary">
+                View All Logs
+              </DashButton>
+            }
+          />
+        </div>
+        <div className="p-5 sm:p-6">
+          <DataTable
+            rows={recentActivity}
+            keyFn={(r) => r.id}
+            emptyMessage="No recent activity found."
+            columns={[
+              {
+                key: "action",
+                header: "Action",
+                cell: (r) => (
+                  <span className="font-semibold text-[#111827]">{r.action}</span>
+                ),
+              },
+              { key: "entity", header: "Target", cell: (r) => r.entity_type },
+              {
+                key: "date",
+                header: "Date",
+                cell: (r) => new Date(r.created_at).toLocaleString(),
               },
             ]}
           />

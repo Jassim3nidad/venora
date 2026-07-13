@@ -1,3 +1,4 @@
+import { DashboardPage } from "@/components/dashboard/enterprise";
 import { getPendingPartnerApplicationsForAdmin } from "@/features/partner-applications/application/get-pending-partner-applications";
 import { ApplicationReviewModal } from "@/features/partner-applications/ui/ApplicationReviewModal";
 import { formatDistanceToNow } from "date-fns";
@@ -9,14 +10,16 @@ export default async function AdminApplicationsPage() {
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
-        Error loading applications: {error}
-      </div>
+      <DashboardPage>
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
+          Error loading applications: {error}
+        </div>
+      </DashboardPage>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <DashboardPage>
       <div>
         <h1 className="text-3xl font-black text-slate-900">Partner Applications</h1>
         <p className="mt-2 text-slate-500">
@@ -69,6 +72,6 @@ export default async function AdminApplicationsPage() {
           <p className="text-sm text-slate-500">There are no pending partner applications to review.</p>
         </div>
       )}
-    </div>
+    </DashboardPage>
   );
 }

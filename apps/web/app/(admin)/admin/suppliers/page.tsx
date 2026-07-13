@@ -61,6 +61,19 @@ export default async function AdminSuppliersPage({ searchParams }: Props) {
       cell: (row) => (row.reviewCount > 0 ? `${row.avgRating.toFixed(1)} (${row.reviewCount})` : "No reviews"),
     },
     { key: "added", header: "Added", cell: (row) => formatDate(row.createdAt) },
+    {
+      key: "actions",
+      header: "",
+      className: "text-right",
+      cell: (row) => (
+        <a
+          href={`/admin/suppliers/${row.id}`}
+          className="inline-flex h-8 items-center rounded-lg border border-[#dbe3ef] bg-white px-3 text-xs font-bold text-[#0f172a] shadow-sm transition hover:border-[#93c5fd] hover:text-[#1d4ed8]"
+        >
+          Review Details
+        </a>
+      ),
+    },
   ];
 
   return (
