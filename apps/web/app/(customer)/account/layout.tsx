@@ -44,14 +44,14 @@ export default async function AccountLayout({
     "?";
 
   return (
-    <div className="flex flex-col">
+    <div className="flex min-w-0 flex-col overflow-x-hidden">
 
-      <main>
-        <section className="relative border-b border-[#E5E7EB]/70 bg-[#F9FAFB]">
+      <main className="min-w-0">
+        <section className="relative overflow-hidden border-b border-[#E5E7EB]/70 bg-[#F9FAFB]">
           <div className="absolute left-[-120px] top-[-120px] -z-10 h-[320px] w-[320px] rounded-full bg-[#2563EB]/20 blur-3xl" />
           <div className="absolute right-[-140px] top-[40px] -z-10 h-[300px] w-[300px] rounded-full bg-[#DBEAFE]/20 blur-3xl" />
 
-          <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="relative mx-auto max-w-7xl min-w-0 px-4 py-8 sm:px-6 lg:px-8">
             <div className="mb-8">
               <Link
                 href="/venues"
@@ -62,8 +62,8 @@ export default async function AccountLayout({
               </Link>
             </div>
 
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              <div>
+            <div className="flex min-w-0 flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="min-w-0">
                 <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#2563EB]">
                   Venora account center
                 </div>
@@ -105,7 +105,7 @@ export default async function AccountLayout({
           </div>
         </section>
 
-        <section className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <section className="relative mx-auto max-w-7xl min-w-0 px-4 py-8 sm:px-6 lg:px-8">
           <div className="mb-6 lg:hidden">
             <AccountMobileMenu />
           </div>

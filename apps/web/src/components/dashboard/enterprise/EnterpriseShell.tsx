@@ -33,7 +33,9 @@ type EnterpriseShellProps = {
 
 function matchesRoute(href: string, pathname: string) {
   if (href === "/dashboard") return pathname === "/dashboard";
-  if (href === "/admin") return pathname === "/admin";
+  if (href === "/admin") {
+    return pathname === "/admin" || pathname === "/dashboard/admin";
+  }
   if (href === "/dashboard/coordinator")
     return pathname === "/dashboard/coordinator";
   if (href === "/dashboard/supplier") return pathname === "/dashboard/supplier";

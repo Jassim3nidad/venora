@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 
 import { CustomerNavbar } from "@/components/layout/CustomerNavbar";
+import MarketingNavbar from "@/components/layout/MarketingNavbar";
 import { isMarketplaceRoute } from "@/src/lib/is-marketplace-route";
 
 interface MarketplaceLayoutProps {
@@ -28,7 +29,14 @@ export function MarketplaceLayout({
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-[#F8FAFC] text-[#111827]">
-      <CustomerNavbar user={user ?? null} profile={profile ?? null} />
+      <MarketingNavbar embedded={Boolean(user)} />
+      {user ? (
+        <CustomerNavbar
+          user={user}
+          profile={profile ?? null}
+          variant="subnav"
+        />
+      ) : null}
 
       <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">
         {children}

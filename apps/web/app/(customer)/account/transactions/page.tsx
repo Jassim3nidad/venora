@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Receipt } from "lucide-react";
+import { AlertCircle, Receipt } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -13,9 +13,12 @@ export const dynamic = "force-dynamic";
 const STATUS_STYLES: Record<string, string> = {
   paid: "bg-emerald-50 text-emerald-700 border-emerald-200",
   pending: "bg-amber-50 text-amber-700 border-amber-200",
+  processing: "bg-amber-50 text-amber-700 border-amber-200",
   failed: "bg-red-50 text-red-700 border-red-200",
   refunded: "bg-slate-100 text-slate-600 border-slate-200",
   partially_refunded: "bg-amber-50 text-amber-700 border-amber-200",
+  succeeded: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  cancelled: "bg-slate-100 text-slate-600 border-slate-200",
 };
 
 const PROVIDER_LABELS: Record<string, string> = {
@@ -24,15 +27,57 @@ const PROVIDER_LABELS: Record<string, string> = {
   stripe: "Stripe",
 };
 
-function formatCurrency(value: number | null | undefined) {
-  if (value === null || value === undefined || !Number.isFinite(value)) {
-    return "—";
+type BookingRow = {
+  id: string;
+  event_date: string | null;
+  venues: { name: string | null; slug: string | null } | null;
+};
+
+type HistoryRow = {
+  id: string;
+  bookingId: string;
+  venueName: string;
+  venueSlug: string | null;
+  eventDate: string | null;
+  recordedAt: string;
+  amount: number | null;
+  currency: string | null;
+  provider: string;
+  reference: string | null;
+  status: string;
+  type: string;
+  receiptNumber: string | null;
+  invoiceNumber: string | null;
+};
+
+function formatCurrency(value: number | null | undefined, currency = "PHP") {
+  if (value === null || value === undefined || !Number.isFinite(Number(value))) {
+    return "-";
   }
-  return `\u20b1${Number(value).toLocaleString("en-PH")}`;
+
+  return new Intl.NumberFormat("en-PH", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 2,
+  }).format(Number(value));
+}
+
+function formatDate(value: string | null | undefined) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleDateString("en-PH", { dateStyle: "medium" });
 }
 
 function formatStatusLabel(status: string) {
   return status
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+function formatType(value: string) {
+  return value
     .split("_")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
@@ -53,34 +98,137 @@ export default async function TransactionsPage() {
     .eq("customer_id", user.id);
 
   if (bookingsError) {
-    console.error("[account/transactions] Bookings fetch error:", bookingsError.message);
+    console.error(
+      "[account/transactions] Bookings fetch error:",
+      bookingsError.message,
+    );
   }
 
-  const bookingIds = (bookings ?? []).map((booking: any) => booking.id);
-  const bookingById = new Map<string, any>(
-    (bookings ?? []).map((booking: any) => [booking.id, booking]),
-  );
+  const bookingRows = (bookings ?? []) as BookingRow[];
+  const bookingIds = bookingRows.map((booking) => booking.id);
+  const bookingById = new Map(bookingRows.map((booking) => [booking.id, booking]));
 
   let transactions: any[] = [];
+  let refunds: any[] = [];
+  let receipts: any[] = [];
+  let invoices: any[] = [];
+  let historyError: string | null = bookingsError?.message ?? null;
 
   if (bookingIds.length > 0) {
-    const { data: transactionRows, error: transactionsError } = await supabase
-      .from("transactions")
-      .select(
-        "id, booking_id, amount, commission_amount, payment_provider, provider_reference, status, created_at",
-      )
-      .in("booking_id", bookingIds)
-      .order("created_at", { ascending: false });
+    const [
+      transactionsResult,
+      refundsResult,
+      receiptsResult,
+      invoicesResult,
+    ] = await Promise.all([
+      supabase
+        .from("transactions")
+        .select(
+          "id, booking_id, amount, currency, commission_amount, payment_provider, provider_reference, status, payment_kind, checkout_url, paid_at, failed_at, failure_reason, created_at",
+        )
+        .in("booking_id", bookingIds)
+        .order("created_at", { ascending: false })
+        .limit(100),
+      supabase
+        .from("refunds")
+        .select(
+          "id, booking_id, transaction_id, amount, currency, status, reason, payment_provider, provider_reference, processed_at, created_at",
+        )
+        .in("booking_id", bookingIds)
+        .order("created_at", { ascending: false })
+        .limit(100),
+      supabase
+        .from("receipts")
+        .select("id, receipt_number, transaction_id, booking_id")
+        .eq("customer_id", user.id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("invoices")
+        .select("id, invoice_number, booking_id, issued_at")
+        .eq("customer_id", user.id)
+        .order("issued_at", { ascending: false }),
+    ]);
 
-    if (transactionsError) {
-      console.error(
-        "[account/transactions] Transactions fetch error:",
-        transactionsError.message,
-      );
-    } else {
-      transactions = transactionRows ?? [];
+    for (const result of [
+      transactionsResult,
+      refundsResult,
+      receiptsResult,
+      invoicesResult,
+    ]) {
+      if (result.error) {
+        historyError = result.error.message;
+        console.error("[account/transactions] History fetch error:", result.error.message);
+      }
+    }
+
+    transactions = transactionsResult.data ?? [];
+    refunds = refundsResult.data ?? [];
+    receipts = receiptsResult.data ?? [];
+    invoices = invoicesResult.data ?? [];
+  }
+
+  const receiptByTransactionId = new Map(
+    receipts.map((receipt) => [receipt.transaction_id, receipt]),
+  );
+  const invoiceByBookingId = new Map<string, any>();
+  for (const invoice of invoices) {
+    if (!invoiceByBookingId.has(invoice.booking_id)) {
+      invoiceByBookingId.set(invoice.booking_id, invoice);
     }
   }
+
+  const transactionRows: HistoryRow[] = transactions.map((transaction) => {
+    const booking = bookingById.get(transaction.booking_id);
+    const receipt = receiptByTransactionId.get(transaction.id);
+    const invoice = invoiceByBookingId.get(transaction.booking_id);
+
+    return {
+      id: transaction.id,
+      bookingId: transaction.booking_id,
+      venueName: booking?.venues?.name ?? "Venue booking",
+      venueSlug: booking?.venues?.slug ?? null,
+      eventDate: booking?.event_date ?? null,
+      recordedAt:
+        transaction.paid_at ??
+        transaction.failed_at ??
+        transaction.created_at,
+      amount: Number(transaction.amount),
+      currency: transaction.currency ?? "PHP",
+      provider: transaction.payment_provider,
+      reference: transaction.provider_reference ?? transaction.id,
+      status: transaction.status,
+      type: transaction.payment_kind ?? "payment",
+      receiptNumber: receipt?.receipt_number ?? null,
+      invoiceNumber: invoice?.invoice_number ?? null,
+    };
+  });
+
+  const refundRows: HistoryRow[] = refunds.map((refund) => {
+    const booking = bookingById.get(refund.booking_id);
+    const invoice = invoiceByBookingId.get(refund.booking_id);
+
+    return {
+      id: refund.id,
+      bookingId: refund.booking_id,
+      venueName: booking?.venues?.name ?? "Venue booking",
+      venueSlug: booking?.venues?.slug ?? null,
+      eventDate: booking?.event_date ?? null,
+      recordedAt: refund.processed_at ?? refund.created_at,
+      amount: Number(refund.amount),
+      currency: refund.currency ?? "PHP",
+      provider: refund.payment_provider,
+      reference: refund.provider_reference ?? refund.transaction_id,
+      status: refund.status,
+      type: "refund",
+      receiptNumber: null,
+      invoiceNumber: invoice?.invoice_number ?? null,
+    };
+  });
+
+  const historyRows = [...transactionRows, ...refundRows].sort(
+    (a, b) =>
+      new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime(),
+  );
 
   return (
     <div className="overflow-hidden rounded-[28px] border border-[#E5E7EB]/80 bg-white shadow-xl shadow-slate-200/60">
@@ -98,12 +246,23 @@ export default async function TransactionsPage() {
         </h1>
 
         <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-500">
-          A record of deposits and payments made toward your venue bookings.
+          Deposits, checkout attempts, receipts, invoices, and refunds tied to
+          your venue bookings.
         </p>
       </div>
 
       <div className="p-6 sm:p-8">
-        {transactions.length === 0 ? (
+        {historyError ? (
+          <div className="rounded-3xl border border-red-100 bg-red-50 p-5 text-red-700">
+            <div className="flex gap-3">
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+              <div>
+                <p className="text-sm font-extrabold">Could not load transactions</p>
+                <p className="mt-1 text-sm font-semibold">{historyError}</p>
+              </div>
+            </div>
+          </div>
+        ) : historyRows.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-6 py-14 text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-slate-400 shadow-sm">
               <Receipt className="h-6 w-6" />
@@ -112,7 +271,8 @@ export default async function TransactionsPage() {
               No transactions yet
             </p>
             <p className="mt-1.5 max-w-sm text-sm font-medium text-slate-500">
-              Book a venue to see your payment history here.
+              Approved booking payments and refunds will appear here after
+              checkout starts.
             </p>
             <Link
               href="/venues"
@@ -122,77 +282,84 @@ export default async function TransactionsPage() {
             </Link>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-[#E5E7EB]/80">
-            <table className="w-full border-collapse bg-white text-left">
+          <div className="overflow-x-auto rounded-2xl border border-[#E5E7EB]/80">
+            <table className="min-w-[920px] border-collapse bg-white text-left">
               <thead className="bg-[#F9FAFB]">
                 <tr>
-                  <th className="px-5 py-3 text-[11px] font-extrabold uppercase tracking-[0.08em] text-slate-400">
-                    Venue
-                  </th>
-                  <th className="px-5 py-3 text-[11px] font-extrabold uppercase tracking-[0.08em] text-slate-400">
-                    Date
-                  </th>
-                  <th className="px-5 py-3 text-[11px] font-extrabold uppercase tracking-[0.08em] text-slate-400">
-                    Provider
-                  </th>
-                  <th className="px-5 py-3 text-[11px] font-extrabold uppercase tracking-[0.08em] text-slate-400">
-                    Amount
-                  </th>
-                  <th className="px-5 py-3 text-[11px] font-extrabold uppercase tracking-[0.08em] text-slate-400">
-                    Status
-                  </th>
+                  {[
+                    "Venue / booking",
+                    "Date",
+                    "Type",
+                    "Method",
+                    "Reference",
+                    "Amount",
+                    "Status",
+                    "Documents",
+                  ].map((heading) => (
+                    <th
+                      key={heading}
+                      className="px-5 py-3 text-[11px] font-extrabold uppercase tracking-[0.08em] text-slate-400"
+                    >
+                      {heading}
+                    </th>
+                  ))}
                 </tr>
               </thead>
 
               <tbody>
-                {transactions.map((transaction) => {
-                  const booking = bookingById.get(transaction.booking_id);
-                  const venue = booking?.venues;
+                {historyRows.map((row) => {
                   const statusStyle =
-                    STATUS_STYLES[transaction.status] ??
+                    STATUS_STYLES[row.status] ??
                     "bg-slate-100 text-slate-600 border-slate-200";
+                  const venueContent = row.venueSlug ? (
+                    <Link
+                      href={`/venues/${row.venueSlug}`}
+                      className="hover:text-[#2563EB]"
+                    >
+                      {row.venueName}
+                    </Link>
+                  ) : (
+                    row.venueName
+                  );
 
                   return (
-                    <tr
-                      key={transaction.id}
-                      className="border-t border-[#E5E7EB]/80"
-                    >
+                    <tr key={`${row.type}-${row.id}`} className="border-t border-[#E5E7EB]/80">
                       <td className="px-5 py-4 text-sm font-bold text-slate-950">
-                        {venue ? (
-                          <Link
-                            href={`/venues/${venue.slug ?? ""}`}
-                            className="hover:text-[#2563EB]"
-                          >
-                            {venue.name}
-                          </Link>
-                        ) : (
-                          "Venue"
-                        )}
+                        {venueContent}
+                        <p className="mt-1 text-xs font-semibold text-slate-400">
+                          Event {formatDate(row.eventDate)}
+                        </p>
                       </td>
                       <td className="px-5 py-4 text-sm font-medium text-slate-500">
-                        {booking?.event_date
-                          ? new Date(booking.event_date).toLocaleDateString(
-                              "en-PH",
-                              { dateStyle: "medium" },
-                            )
-                          : new Date(transaction.created_at).toLocaleDateString(
-                              "en-PH",
-                              { dateStyle: "medium" },
-                            )}
+                        {formatDate(row.recordedAt)}
+                      </td>
+                      <td className="px-5 py-4 text-sm font-bold text-slate-700">
+                        {formatType(row.type)}
                       </td>
                       <td className="px-5 py-4 text-sm font-medium text-slate-500">
-                        {PROVIDER_LABELS[transaction.payment_provider] ??
-                          transaction.payment_provider}
+                        {PROVIDER_LABELS[row.provider] ?? row.provider}
+                      </td>
+                      <td className="max-w-[180px] px-5 py-4 text-xs font-semibold text-slate-500">
+                        <span className="block truncate">{row.reference ?? "-"}</span>
                       </td>
                       <td className="px-5 py-4 text-sm font-black text-slate-950">
-                        {formatCurrency(transaction.amount)}
+                        {formatCurrency(row.amount, row.currency ?? "PHP")}
                       </td>
                       <td className="px-5 py-4">
                         <span
                           className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-extrabold ${statusStyle}`}
                         >
-                          {formatStatusLabel(transaction.status)}
+                          {formatStatusLabel(row.status)}
                         </span>
+                      </td>
+                      <td className="px-5 py-4 text-xs font-semibold text-slate-500">
+                        {row.receiptNumber ? (
+                          <p>Receipt {row.receiptNumber}</p>
+                        ) : null}
+                        {row.invoiceNumber ? (
+                          <p>Invoice {row.invoiceNumber}</p>
+                        ) : null}
+                        {!row.receiptNumber && !row.invoiceNumber ? "-" : null}
                       </td>
                     </tr>
                   );

@@ -74,14 +74,18 @@ export default function MarketingHomePage() {
                 </Link>
                 <Link
                   className="inline-flex h-12 items-center justify-center rounded-2xl border border-[#E5E7EB] bg-white px-7 text-sm font-extrabold text-[#1D4ED8] shadow-sm transition hover:bg-[#EFF6FF]"
-                  href="/register"
+                  href="/account/become-partner"
                 >
                   List Your Venue
                 </Link>
               </div>
 
               {/* Search Bar */}
-              <div className="mt-8 w-full max-w-2xl rounded-[24px] border border-[#E5E7EB] bg-white p-2 shadow-xl shadow-slate-200/60">
+              <form
+                action="/venues"
+                method="GET"
+                className="mt-8 w-full max-w-2xl rounded-[24px] border border-[#E5E7EB] bg-white p-2 shadow-xl shadow-slate-200/60"
+              >
                 <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] md:items-stretch">
                   <div className="min-w-0 border-b border-[#E5E7EB] px-4 py-3 md:border-b-0 md:border-r">
                     <label
@@ -92,9 +96,11 @@ export default function MarketingHomePage() {
                     </label>
                     <input
                       id="hero-search-location"
+                      name="location"
                       className="mt-1 w-full min-w-0 border-none bg-transparent p-0 text-sm font-semibold text-[#111827] outline-none placeholder:text-slate-400"
                       placeholder="Where to?"
                       type="text"
+                      autoComplete="off"
                     />
                   </div>
                   <div className="min-w-0 border-b border-[#E5E7EB] px-4 py-3 md:border-b-0 md:border-r">
@@ -106,20 +112,22 @@ export default function MarketingHomePage() {
                     </label>
                     <input
                       id="hero-search-event-type"
+                      name="event"
                       className="mt-1 w-full min-w-0 border-none bg-transparent p-0 text-sm font-semibold text-[#111827] outline-none placeholder:text-slate-400"
                       placeholder="Wedding, Corporate..."
                       type="text"
+                      autoComplete="off"
                     />
                   </div>
-                  <Link
+                  <button
+                    type="submit"
                     className="m-2 inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-6 text-sm font-extrabold text-white transition hover:bg-[#1d4ed8] md:self-center"
-                    href="/venues"
                   >
                     <Search className="h-4 w-4" />
                     Search
-                  </Link>
+                  </button>
                 </div>
-              </div>
+              </form>
             </div>
 
             {/* Hero Visual Card */}
@@ -207,7 +215,7 @@ export default function MarketingHomePage() {
                 <Link
                   key={venue.name}
                   className="group block overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1 hover:border-[#2563EB]/50 hover:shadow-xl hover:shadow-slate-200/80"
-                  href="/venues"
+                  href={`/venues/${venue.slug}`}
                 >
                   <div className="relative h-52 w-full overflow-hidden">
                     <img
@@ -221,7 +229,7 @@ export default function MarketingHomePage() {
                     </div>
                     <span
                       className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-500 shadow-sm backdrop-blur transition group-hover:text-red-500"
-                      aria-label="Save venue"
+                      aria-hidden="true"
                     >
                       <Heart
                         className={[
