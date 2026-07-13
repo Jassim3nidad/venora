@@ -1,4 +1,8 @@
-"use client";
+import sys
+
+file_path = r"c:\venora\apps\web\src\features\suppliers\ui\CustomerInquiryDetail.tsx"
+
+new_content = """"use client";
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
@@ -464,3 +468,9 @@ export function CustomerInquiryDetail({ inquiry, messages, quote, isPreviewMode 
     </div>
   );
 }
+"""
+
+with open(file_path, "w", encoding="utf-8") as f:
+    f.write(new_content)
+
+print("Replaced CustomerInquiryDetail.tsx")

@@ -37,7 +37,7 @@ export const ACCOUNT_NAV_ITEMS: AccountNavItem[] = [
     icon: CalendarDays,
   },
   {
-    href: "/account/inquiries",
+    href: "/bookings?view=suppliers",
     label: "Supplier Inquiries",
     description: "Messages and service proposals",
     icon: Mail,

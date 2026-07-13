@@ -343,7 +343,7 @@ export function CustomerInquiryList({
             </button>
             {hasFilters ? (
               <Link
-                href="/account/inquiries"
+                href="/bookings?view=suppliers"
                 aria-label="Clear filters"
                 className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-[#E5E7EB] bg-white text-[#6B7280] transition hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
               >
@@ -365,7 +365,7 @@ export function CustomerInquiryList({
           title="No supplier inquiries match these filters."
           description="Try another status, proposal state, or search term."
           action={
-            <CustomerLinkButton href="/account/inquiries" tone="secondary">
+            <CustomerLinkButton href="/bookings?view=suppliers" tone="secondary">
               Clear filters
             </CustomerLinkButton>
           }
@@ -445,7 +445,7 @@ export function CustomerInquiryList({
 
                   <div>
                     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-                      <CustomerLinkButton href={`/account/inquiries/${inquiry.id}`} tone="secondary">
+                      <CustomerLinkButton href={`/inquiries/${inquiry.id}`} tone="secondary">
                         View Details
                       </CustomerLinkButton>
 

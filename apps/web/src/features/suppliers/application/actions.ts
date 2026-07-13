@@ -372,7 +372,8 @@ export async function createSupplierContactRequestAction(rawInput: unknown) {
     revalidatePath(`/suppliers/${supplier.id}`);
     revalidatePath("/dashboard/supplier");
     revalidatePath("/dashboard/supplier/inquiries");
-    revalidatePath("/account/inquiries");
+    revalidatePath("/bookings");
+    revalidatePath("/inquiries");
 
     return {
       requestId: data.id as string,
@@ -430,10 +431,11 @@ export async function acceptSupplierQuoteAction(rawInput: unknown) {
 
     throwIfSupabaseError(error);
 
-    revalidatePath("/account/inquiries");
+    revalidatePath("/bookings");
+    revalidatePath("/inquiries");
     revalidatePath("/dashboard/supplier/inquiries");
     if (data?.inquiry_id) {
-      revalidatePath(`/account/inquiries/${data.inquiry_id}`);
+      revalidatePath(`/inquiries/${data.inquiry_id}`);
       revalidatePath(`/dashboard/supplier/inquiries/${data.inquiry_id}`);
     }
 
@@ -452,10 +454,11 @@ export async function declineSupplierQuoteAction(rawInput: unknown) {
 
     throwIfSupabaseError(error);
 
-    revalidatePath("/account/inquiries");
+    revalidatePath("/bookings");
+    revalidatePath("/inquiries");
     revalidatePath("/dashboard/supplier/inquiries");
     if (data?.inquiry_id) {
-      revalidatePath(`/account/inquiries/${data.inquiry_id}`);
+      revalidatePath(`/inquiries/${data.inquiry_id}`);
       revalidatePath(`/dashboard/supplier/inquiries/${data.inquiry_id}`);
     }
 
@@ -489,8 +492,9 @@ export async function sendCustomerInquiryMessageAction(rawInput: unknown) {
 
       throwIfSupabaseError(error);
 
-      revalidatePath("/account/inquiries");
-      revalidatePath(`/account/inquiries/${input.inquiryId}`);
+      revalidatePath("/bookings");
+    revalidatePath("/inquiries");
+      revalidatePath(`/inquiries/${input.inquiryId}`);
       revalidatePath(`/dashboard/supplier/inquiries/${input.inquiryId}`);
       return { messageId: data.id as string };
     },

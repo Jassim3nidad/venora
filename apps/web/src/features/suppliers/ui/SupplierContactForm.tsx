@@ -51,6 +51,7 @@ export function SupplierContactForm({
   const [status, setStatus] = useState<{
     type: "success" | "error";
     message: string;
+    requestId?: string;
   } | null>(null);
   const activePackages = useMemo(
     () => supplier.packages.filter((pkg) => pkg.isActive),
@@ -117,6 +118,7 @@ export function SupplierContactForm({
         type: "success",
         message:
           "Inquiry sent. The supplier can now follow up from their dashboard.",
+        requestId: result.data?.requestId,
       });
     });
   };
@@ -355,10 +357,10 @@ export function SupplierContactForm({
           <p>{status.message}</p>
           {status.type === "success" ? (
             <Link
-              href="/account/inquiries"
+              href={status.requestId ? `/inquiries/${status.requestId}` : "/bookings?view=suppliers"}
               className="mt-2 inline-flex font-black text-emerald-800 underline-offset-4 hover:underline"
             >
-              View Supplier Inquiries
+              View Inquiry
             </Link>
           ) : null}
         </div>

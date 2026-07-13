@@ -5,6 +5,7 @@ const MARKETPLACE_ROUTE_PREFIXES = [
   "/favorites",
   "/notifications",
   "/account",
+  "/inquiries",
 ] as const;
 
 export function isMarketplaceRoute(pathname: string): boolean {
