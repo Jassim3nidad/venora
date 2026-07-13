@@ -49,6 +49,7 @@ interface BookingSidebarProps {
   capacityMin: number;
   capacityMax: number;
   packages: Package[];
+  children?: React.ReactNode;
 }
 
 function formatCurrency(value: number) {
@@ -68,6 +69,7 @@ export default function BookingSidebar({
   capacityMin,
   capacityMax,
   packages = [],
+  children,
 }: BookingSidebarProps) {
   const router = useRouter();
 
@@ -427,6 +429,7 @@ export default function BookingSidebar({
         >
           Book This Venue
         </Button>
+        {children}
       </div>
 
       <div className="mt-4 flex items-center gap-2 justify-center text-xs text-[var(--text-muted)] font-medium">

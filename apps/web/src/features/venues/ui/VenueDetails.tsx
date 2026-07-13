@@ -557,13 +557,14 @@ export default function VenueDetails({
                 capacityMin={venue.capacity_min ?? 1}
                 capacityMax={venue.capacity_max}
                 packages={activePackages}
-              />
-              <CostEstimatorPanel
-                venueId={venue.id}
-                venueName={venue.name}
-                capacityMin={venue.capacity_min}
-                capacityMax={venue.capacity_max}
-              />
+              >
+                <CostEstimatorPanel
+                  venueId={venue.id}
+                  venueName={venue.name}
+                  capacityMin={venue.capacity_min}
+                  capacityMax={venue.capacity_max}
+                />
+              </BookingSidebar>
             </>
           )}
         </div>
