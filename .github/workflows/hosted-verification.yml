@@ -129,6 +129,28 @@ jobs:
             THEN
               RAISE EXCEPTION 'venue-media ownership predicates are incomplete';
             END IF;
+
+            IF (
+              SELECT count(*)
+              FROM information_schema.columns
+              WHERE table_schema = 'public'
+                AND table_name = 'supplier_profiles'
+                AND column_name IN (
+                  'business_location_type',
+                  'location_visibility',
+                  'latitude',
+                  'longitude',
+                  'city',
+                  'province',
+                  'country',
+                  'business_address',
+                  'public_location_label',
+                  'travel_available',
+                  'travel_fee_note'
+                )
+            ) <> 11 THEN
+              RAISE EXCEPTION 'supplier location migration contract is incomplete';
+            END IF;
           END
           $verify$;
           SELECT 'hosted_database_contracts=PASS' AS result;
@@ -143,6 +165,23 @@ jobs:
             AND tablename = 'objects'
             AND policyname LIKE 'venue-images.%.venue-owner'
           ORDER BY policyname;
+          SELECT count(*) AS supplier_location_columns
+          FROM information_schema.columns
+          WHERE table_schema = 'public'
+            AND table_name = 'supplier_profiles'
+            AND column_name IN (
+              'business_location_type',
+              'location_visibility',
+              'latitude',
+              'longitude',
+              'city',
+              'province',
+              'country',
+              'business_address',
+              'public_location_label',
+              'travel_available',
+              'travel_fee_note'
+            );
           SQL
       - name: Verify Vercel commit binding and smoke routes
         run: pnpm deployment:verify

@@ -4,11 +4,15 @@ import { join, resolve } from "node:path";
 import { check, resolveConfig } from "prettier";
 
 const root = resolve(import.meta.dirname, "..");
+const allowlistPath = join(root, ".github", "ci", "format-allowlist.json");
+const allowlist = existsSync(allowlistPath)
+  ? JSON.parse(readFileSync(allowlistPath, "utf8"))
+  : { exactFiles: [] };
 const baseSha = process.env.CI_BASE_SHA?.trim();
-const diffRange =
-  baseSha && /^[0-9a-f]{40}$/i.test(baseSha) && !/^0+$/.test(baseSha)
-    ? [baseSha, "HEAD"]
-    : ["HEAD"];
+const hasUsableBase =
+  baseSha && /^[0-9a-f]{40}$/i.test(baseSha) && !/^0+$/.test(baseSha);
+const diffRange = hasUsableBase ? [baseSha, "HEAD"] : ["HEAD"];
+const baselineRef = hasUsableBase ? baseSha : "HEAD";
 
 function git(args) {
   return execFileSync("git", args, { cwd: root, encoding: "utf8" });
@@ -42,6 +46,7 @@ if (files.length === 0) {
 }
 
 const unformatted = [];
+const grandfathered = [];
 for (const file of files) {
   const path = join(root, file);
   const configuration = (await resolveConfig(path)) ?? {};
@@ -49,7 +54,26 @@ for (const file of files) {
     ...configuration,
     filepath: path,
   });
-  if (!formatted) unformatted.push(file);
+  if (!formatted) {
+    const exception = allowlist.exactFiles?.find((item) => item.file === file);
+    let baselineWasUnformatted = false;
+    if (exception) {
+      try {
+        const baselineSource = git(["show", `${baselineRef}:${file}`]);
+        baselineWasUnformatted = !(await check(baselineSource, {
+          ...configuration,
+          filepath: path,
+        }));
+      } catch {
+        baselineWasUnformatted = false;
+      }
+    }
+    if (exception && baselineWasUnformatted) {
+      grandfathered.push(exception);
+    } else {
+      unformatted.push(file);
+    }
+  }
 }
 if (unformatted.length > 0) {
   console.error(
@@ -57,5 +81,10 @@ if (unformatted.length > 0) {
   );
   unformatted.forEach((file) => console.error(`- ${file}`));
   process.exit(1);
+}
+for (const exception of grandfathered) {
+  console.warn(
+    `WARN: exact baseline format debt: ${exception.file} (${exception.removalCondition})`,
+  );
 }
 console.log(`Changed-file formatting check passed: ${files.length} files.`);

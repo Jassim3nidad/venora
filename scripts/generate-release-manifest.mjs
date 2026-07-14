@@ -86,7 +86,8 @@ const manifest = {
     localIdentifiers: migrationFiles,
     appliedIdentifiers: "NOT_RECORDED_BY_LOCAL_MANIFEST",
     latestFiles: migrationFiles.slice(-5),
-    duplicateVersion068: "ALLOWLISTED_PENDING_HOSTED_HISTORY_RECONCILIATION",
+    legacyVersion068Rename: "TRACKED_PENDING_HOSTED_HISTORY_RECONCILIATION",
+    duplicateVersion071: "ALLOWLISTED_PENDING_HOSTED_HISTORY_RECONCILIATION",
   },
   edgeFunctionsDeployed:
     process.env.OPERATION === "edge-deploy" && process.env.FUNCTION_NAME
@@ -95,7 +96,7 @@ const manifest = {
   blockedChecks: [...new Set(blockedChecks)],
   knownLimitations: [
     "Hosted migration history and migration 071 require protected verification evidence.",
-    "Duplicate migration 068 remains pending hosted reconciliation.",
+    "The upstream 068-to-0680 rename and duplicate migration 071 remain pending hosted reconciliation.",
     "Full Edge Function Deno format/type checks have recorded legacy debt.",
   ],
   workflowInitiator: process.env.GITHUB_ACTOR ?? null,
@@ -107,7 +108,7 @@ writeFileSync(
   join(outputRoot, "release-manifest.json"),
   `${JSON.stringify(manifest, null, 2)}\n`,
 );
-const markdown = `# Release manifest\n\n| Field | Value |\n| --- | --- |\n| Commit | \`${manifest.releaseCommit}\` |\n| Branch | ${manifest.branch} |\n| Build | ${manifest.buildIdentifier} |\n| Tier | ${manifest.tier} |\n| Protected operation | ${manifest.protectedOperation?.operation ?? "None"} |\n| Repository checks | ${manifest.repositoryChecks} |\n| Deployment verification | ${manifest.deploymentVerification} |\n| Hosted environment | ${manifest.hostedEnvironment} |\n| Hosted Storage RLS | ${manifest.hostedStorageRls} |\n| Migration count | ${manifest.migrations.count} |\n| Edge Functions deployed | ${manifest.edgeFunctionsDeployed.join(", ") || "None"} |\n| Blocked checks | ${manifest.blockedChecks.join(", ") || "None"} |\n| Rollback target | ${manifest.rollbackTarget ?? "NOT_RECORDED"} |\n\nDuplicate migration 068 remains explicitly allowlisted pending hosted-history reconciliation.\n`;
+const markdown = `# Release manifest\n\n| Field | Value |\n| --- | --- |\n| Commit | \`${manifest.releaseCommit}\` |\n| Branch | ${manifest.branch} |\n| Build | ${manifest.buildIdentifier} |\n| Tier | ${manifest.tier} |\n| Protected operation | ${manifest.protectedOperation?.operation ?? "None"} |\n| Repository checks | ${manifest.repositoryChecks} |\n| Deployment verification | ${manifest.deploymentVerification} |\n| Hosted environment | ${manifest.hostedEnvironment} |\n| Hosted Storage RLS | ${manifest.hostedStorageRls} |\n| Migration count | ${manifest.migrations.count} |\n| Edge Functions deployed | ${manifest.edgeFunctionsDeployed.join(", ") || "None"} |\n| Blocked checks | ${manifest.blockedChecks.join(", ") || "None"} |\n| Rollback target | ${manifest.rollbackTarget ?? "NOT_RECORDED"} |\n\nThe upstream 068-to-0680 rename and duplicate migration 071 remain tracked pending hosted-history reconciliation.\n`;
 writeFileSync(join(outputRoot, "release-manifest.md"), markdown);
 if (process.env.GITHUB_STEP_SUMMARY) {
   appendFileSync(process.env.GITHUB_STEP_SUMMARY, markdown);

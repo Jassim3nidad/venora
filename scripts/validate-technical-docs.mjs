@@ -305,11 +305,12 @@ for (const file of scanFiles) {
 
 const migrations = readFileSync(join(docsRoot, "migrations.md"), "utf8");
 for (const file of [
-  "068_customer_supplier_inquiry_tracking.sql",
-  "068_enforce_booking_availability_integrity.sql",
+  "0680_enforce_booking_availability_integrity.sql",
+  "071_supplier_location_coverage.sql",
+  "071_tighten_venue_media_storage_ownership.sql",
 ]) {
   if (!migrations.includes(file))
-    errors.push(`known duplicate migration not documented: ${file}`);
+    errors.push(`known migration history conflict not documented: ${file}`);
 }
 
 if (errors.length > 0) {

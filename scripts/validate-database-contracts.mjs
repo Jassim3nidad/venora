@@ -30,6 +30,33 @@ function validateGeneratedTypes() {
       errors.push(`migration 070 nullable field drift: ${field}`);
     }
   }
+
+  const supplierTypes = generatedTypes.match(
+    /supplier_profiles:\s*\{[\s\S]*?\n\s{6}\};/,
+  )?.[0];
+  if (!supplierTypes) {
+    errors.push("generated supplier_profiles type missing");
+    return;
+  }
+  for (const field of [
+    "business_location_type",
+    "location_visibility",
+    "latitude",
+    "longitude",
+    "city",
+    "province",
+    "country",
+    "business_address",
+    "public_location_label",
+    "travel_available",
+    "travel_fee_note",
+  ]) {
+    if (!new RegExp(`\\b${field}:`).test(supplierTypes)) {
+      errors.push(
+        `supplier location field absent from generated types: ${field}`,
+      );
+    }
+  }
 }
 
 validateGeneratedTypes();
@@ -42,7 +69,7 @@ if (typesOnly) {
     process.exit(1);
   }
   console.log(
-    "Generated database types valid: migration 070 contract fields and nullability present.",
+    "Generated database types valid: migration 070 and supplier location contract fields present.",
   );
   process.exit(0);
 }
@@ -94,6 +121,18 @@ for (const [version, names] of byNumber) {
     );
   } else {
     errors.push(`duplicate migration ${version}: ${names.join(", ")}`);
+  }
+}
+
+for (const rename of allowlist.legacyRenames ?? []) {
+  if (!migrationFiles.includes(rename.current)) {
+    errors.push(
+      `tracked legacy migration rename is missing: ${rename.current}`,
+    );
+  } else {
+    warnings.push(
+      `tracked legacy migration rename: ${rename.original} -> ${rename.current} (${rename.reason})`,
+    );
   }
 }
 
@@ -237,8 +276,9 @@ const requiredMigrations = [
   "054_admin_access_control.sql",
   "065_lock_down_internal_only_functions.sql",
   "068_customer_supplier_inquiry_tracking.sql",
-  "068_enforce_booking_availability_integrity.sql",
+  "0680_enforce_booking_availability_integrity.sql",
   "070_supplier_portfolio_enhancements.sql",
+  "071_supplier_location_coverage.sql",
   "071_tighten_venue_media_storage_ownership.sql",
 ];
 for (const name of requiredMigrations) {
@@ -288,7 +328,9 @@ for (const name of [
 }
 
 const venueStorageMigration =
-  migrations.find(({ number }) => number === 71)?.source ?? "";
+  migrations.find(
+    ({ name }) => name === "071_tighten_venue_media_storage_ownership.sql",
+  )?.source ?? "";
 for (const token of [
   "v.id::text = (storage.foldername(name))[2]",
   "v.organization_id::text = (storage.foldername(name))[1]",
@@ -314,5 +356,5 @@ if (errors.length > 0) {
 
 console.log(
   `Database contracts valid: ${migrationFiles.length} migrations; ` +
-    "required functions, triggers, policies, grants, and migration 070 types present.",
+    "required functions, triggers, policies, grants, and generated type contracts present.",
 );

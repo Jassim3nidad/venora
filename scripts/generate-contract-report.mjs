@@ -20,7 +20,10 @@ const report = {
   documentationValidation: "PASS",
   workflowValidation: "PASS",
   secretAndLocalPathScan: "PASS",
-  legacyDuplicate068: "ALLOWLISTED_PENDING_HOSTED_RECONCILIATION",
+  migrationHistoryRisks: {
+    legacy068Rename: "TRACKED_PENDING_HOSTED_RECONCILIATION",
+    duplicate071: "ALLOWLISTED_PENDING_HOSTED_RECONCILIATION",
+  },
   deploymentStatus: "NOT_EXECUTED_IN_REPOSITORY_CI",
   hostedVerificationStatus: "BLOCKED_PENDING_PROTECTED_WORKFLOW",
   releaseDecision: "REPOSITORY_GATES_ONLY",
@@ -30,7 +33,7 @@ writeFileSync(
   join(outputRoot, "contract-validation.json"),
   `${JSON.stringify(report, null, 2)}\n`,
 );
-const markdown = `# Contract validation\n\n| Field | Value |\n| --- | --- |\n| Commit | ${report.commit ?? "local"} |\n| Branch | ${report.branch ?? "local"} |\n| Trigger | ${report.trigger} |\n| Migrations | PASS (${report.migrationCount}) |\n| Generated database types | PASS |\n| OpenAPI coverage | PASS (${report.openApiCoverage}) |\n| Documentation | PASS |\n| Workflow security/YAML | PASS |\n| Secret/local-path scan | PASS |\n| Deployment | ${report.deploymentStatus} |\n| Hosted verification | ${report.hostedVerificationStatus} |\n| Release decision | ${report.releaseDecision} |\n\nDuplicate migration 068 remains explicitly allowlisted pending hosted-history reconciliation.\n`;
+const markdown = `# Contract validation\n\n| Field | Value |\n| --- | --- |\n| Commit | ${report.commit ?? "local"} |\n| Branch | ${report.branch ?? "local"} |\n| Trigger | ${report.trigger} |\n| Migrations | PASS (${report.migrationCount}) |\n| Generated database types | PASS |\n| OpenAPI coverage | PASS (${report.openApiCoverage}) |\n| Documentation | PASS |\n| Workflow security/YAML | PASS |\n| Secret/local-path scan | PASS |\n| Deployment | ${report.deploymentStatus} |\n| Hosted verification | ${report.hostedVerificationStatus} |\n| Release decision | ${report.releaseDecision} |\n\nThe upstream 068-to-0680 rename and duplicate migration 071 remain explicitly tracked pending hosted-history reconciliation.\n`;
 writeFileSync(join(outputRoot, "contract-validation.md"), markdown);
 if (process.env.GITHUB_STEP_SUMMARY)
   appendFileSync(process.env.GITHUB_STEP_SUMMARY, markdown);

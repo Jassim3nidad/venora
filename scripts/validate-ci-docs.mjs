@@ -50,6 +50,7 @@ for (const file of [
   ".github/pull_request_template.md",
   ".github/dependabot.yml",
   ".github/ci/migration-allowlist.json",
+  ".github/ci/format-allowlist.json",
 ]) {
   if (!existsSync(join(root, file)))
     errors.push(`required automation file missing: ${file}`);
