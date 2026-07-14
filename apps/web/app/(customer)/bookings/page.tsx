@@ -297,7 +297,7 @@ export default async function CustomerBookingsPage({
   const q = normalize(query.q);
   const sort = query.sort ?? "newest";
 
-  let filteredBookings = bookings.filter((booking) => {
+  const filteredBookings = bookings.filter((booking) => {
     if (!bookingMatchesStatusFilter(booking.status, statusFilter)) return false;
 
     if (q) {
