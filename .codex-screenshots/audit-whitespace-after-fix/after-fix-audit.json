@@ -1,0 +1,221 @@
+[
+  {
+    "viewport": {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900
+    },
+    "metrics": {
+      "scroller": {
+        "scrollHeight": 3268,
+        "clientHeight": 819,
+        "maxScroll": 2449
+      },
+      "overflowX": 0,
+      "avatar": {
+        "cls": "relative h-24 w-24 sm:h-32 sm:w-32 shrink-0 overflow-hidden rounded-full border-4 border-white bg-slate-100 shadow-md sm:shadow-lg -mt-16 sm:-mt-24",
+        "rect": {
+          "top": 522,
+          "bottom": 650,
+          "height": 128,
+          "left": 112,
+          "width": 128
+        },
+        "text": "S"
+      },
+      "portfolioArticle": {
+        "cls": "group overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70 md:grid md:grid-cols-[minmax(220px,320px)_minmax(0,1fr)]",
+        "rect": {
+          "top": 1716,
+          "bottom": 2318,
+          "height": 602,
+          "left": 112,
+          "width": 796
+        }
+      },
+      "mapOuter": {
+        "cls": null,
+        "rect": null
+      },
+      "businessSection": {
+        "cls": "space-y-3",
+        "rect": {
+          "top": 2923,
+          "bottom": 3009,
+          "height": 86,
+          "left": 112,
+          "width": 796
+        },
+        "text": "Find This Business OnlineExplore the supplier’s official website and social profiles.WebsiteInstagram"
+      },
+      "reviewsSection": {
+        "cls": "space-y-5",
+        "rect": {
+          "top": 3074,
+          "bottom": 3188,
+          "height": 114,
+          "left": 112,
+          "width": 796
+        }
+      },
+      "request": {
+        "rect": {
+          "top": 618,
+          "bottom": 860,
+          "height": 242,
+          "left": 948,
+          "width": 380
+        },
+        "text": "Starting at₱500per eventRequest a Service ProposalSign in to request a Service Proposal and connect it to your event bookings.Sign in to Request Proposal"
+      },
+      "mailtoCount": 0,
+      "telCount": 0
+    }
+  },
+  {
+    "viewport": {
+      "name": "tablet",
+      "width": 768,
+      "height": 1024
+    },
+    "metrics": {
+      "scroller": {
+        "scrollHeight": 3332,
+        "clientHeight": 943,
+        "maxScroll": 2389
+      },
+      "overflowX": 0,
+      "avatar": {
+        "cls": "relative h-24 w-24 sm:h-32 sm:w-32 shrink-0 overflow-hidden rounded-full border-4 border-white bg-slate-100 shadow-md sm:shadow-lg -mt-16 sm:-mt-24",
+        "rect": {
+          "top": 522,
+          "bottom": 650,
+          "height": 128,
+          "left": 24,
+          "width": 128
+        },
+        "text": "S"
+      },
+      "portfolioArticle": {
+        "cls": "group overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70 md:grid md:grid-cols-[minmax(220px,320px)_minmax(0,1fr)]",
+        "rect": {
+          "top": 1716,
+          "bottom": 2318,
+          "height": 602,
+          "left": 24,
+          "width": 720
+        }
+      },
+      "mapOuter": {
+        "cls": null,
+        "rect": null
+      },
+      "businessSection": {
+        "cls": "space-y-3",
+        "rect": {
+          "top": 2923,
+          "bottom": 3009,
+          "height": 86,
+          "left": 24,
+          "width": 720
+        },
+        "text": "Find This Business OnlineExplore the supplier’s official website and social profiles.WebsiteInstagram"
+      },
+      "reviewsSection": {
+        "cls": "space-y-5",
+        "rect": {
+          "top": 3074,
+          "bottom": 3188,
+          "height": 114,
+          "left": 24,
+          "width": 720
+        }
+      },
+      "request": {
+        "rect": {
+          "top": -81,
+          "bottom": -81,
+          "height": 0,
+          "left": 0,
+          "width": 0
+        },
+        "text": "Starting at₱500per eventRequest a Service ProposalSign in to request a Service Proposal and connect it to your event bookings.Sign in to Request Proposal"
+      },
+      "mailtoCount": 0,
+      "telCount": 0
+    }
+  },
+  {
+    "viewport": {
+      "name": "mobile",
+      "width": 390,
+      "height": 844
+    },
+    "metrics": {
+      "scroller": {
+        "scrollHeight": 3307,
+        "clientHeight": 763,
+        "maxScroll": 2544
+      },
+      "overflowX": 0,
+      "avatar": {
+        "cls": "relative h-24 w-24 sm:h-32 sm:w-32 shrink-0 overflow-hidden rounded-full border-4 border-white bg-slate-100 shadow-md sm:shadow-lg -mt-16 sm:-mt-24",
+        "rect": {
+          "top": 380,
+          "bottom": 476,
+          "height": 96,
+          "left": 16,
+          "width": 96
+        },
+        "text": "S"
+      },
+      "portfolioArticle": {
+        "cls": "group overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70 md:grid md:grid-cols-[minmax(220px,320px)_minmax(0,1fr)]",
+        "rect": {
+          "top": 1795,
+          "bottom": 2193,
+          "height": 399,
+          "left": 16,
+          "width": 358
+        }
+      },
+      "mapOuter": {
+        "cls": null,
+        "rect": null
+      },
+      "businessSection": {
+        "cls": "space-y-3",
+        "rect": {
+          "top": 2886,
+          "bottom": 2972,
+          "height": 86,
+          "left": 16,
+          "width": 358
+        },
+        "text": "Find This Business OnlineExplore the supplier’s official website and social profiles.WebsiteInstagram"
+      },
+      "reviewsSection": {
+        "cls": "space-y-5",
+        "rect": {
+          "top": 3037,
+          "bottom": 3163,
+          "height": 126,
+          "left": 16,
+          "width": 358
+        }
+      },
+      "request": {
+        "rect": {
+          "top": -81,
+          "bottom": -81,
+          "height": 0,
+          "left": 0,
+          "width": 0
+        },
+        "text": "Starting at₱500per eventRequest a Service ProposalSign in to request a Service Proposal and connect it to your event bookings.Sign in to Request Proposal"
+      },
+      "mailtoCount": 0,
+      "telCount": 0
+    }
+  }
+]

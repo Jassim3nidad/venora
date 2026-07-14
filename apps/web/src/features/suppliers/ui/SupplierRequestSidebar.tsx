@@ -206,25 +206,33 @@ export function SupplierRequestSidebar({
 
     return (
       <div
-        className="w-full min-w-0 rounded-3xl border border-[#E5E7EB] bg-white p-6 shadow-xl shadow-slate-200/40"
+        className="w-full min-w-0 rounded-[24px] border border-[#E5E7EB] bg-white p-5 shadow-lg shadow-slate-200/40"
         id="supplier-request-card"
       >
-        <div className="mb-6 flex flex-col gap-1">
+        <div className="mb-4 flex flex-col gap-0.5">
+          <span className="text-xs font-extrabold uppercase tracking-[0.1em] text-[#6B7280]">
+            Starting at
+          </span>
           {formattedStartingPrice ? (
-            <p className="text-2xl font-black text-[#111827]">
+            <p className="text-xl font-black tracking-tight text-[#111827]">
               {formattedStartingPrice}
-              <span className="ml-1 text-sm font-semibold text-[#6B7280]">
-                starting price
+              <span className="ml-1.5 text-sm font-semibold tracking-normal text-[#6B7280]">
+                per event
               </span>
             </p>
           ) : (
-            <p className="text-2xl font-black text-[#111827]">Price on request</p>
+            <p className="text-xl font-bold text-[#4B5563]">Contact supplier for pricing</p>
           )}
         </div>
-        <p className="mb-6 break-words text-sm font-medium leading-6 text-[#6B7280]">
-          Sign in to request a Service Proposal and connect it to your event bookings.
-        </p>
-        <Button asChild className="h-12 w-full rounded-2xl font-bold bg-[#2563EB] hover:bg-[#1D4ED8]">
+
+        <div className="mb-4">
+          <h2 className="text-lg font-bold text-[#111827]">Request a Service Proposal</h2>
+          <p className="mt-1 break-words text-sm font-medium leading-relaxed text-[#4B5563]">
+            Sign in to request a Service Proposal and connect it to your event bookings.
+          </p>
+        </div>
+
+        <Button asChild className="h-11 w-full rounded-2xl font-bold bg-[#2563EB] hover:bg-[#1D4ED8]">
           <Link href={redirectTo}>Sign in to Request Proposal</Link>
         </Button>
       </div>
@@ -235,7 +243,7 @@ export function SupplierRequestSidebar({
   if (isOwner) {
     return (
       <div
-        className="w-full min-w-0 rounded-3xl border border-indigo-200 bg-indigo-50/50 p-6 shadow-xl shadow-indigo-100/40"
+        className="w-full min-w-0 rounded-[24px] border border-indigo-200 bg-indigo-50/50 p-5 shadow-lg shadow-indigo-100/40"
         id="supplier-request-card"
       >
         <div className="flex items-center gap-2 mb-2">
@@ -244,14 +252,14 @@ export function SupplierRequestSidebar({
             This is your supplier listing
           </h2>
         </div>
-        <p className="mb-6 break-words text-sm font-medium leading-6 text-indigo-800">
+        <p className="mb-5 break-words text-sm font-medium leading-6 text-indigo-800">
           You are viewing your business as customers see it. Customers will use this card to request a service proposal.
         </p>
         <div className="flex flex-col gap-3">
-          <Button asChild className="h-12 w-full rounded-2xl font-bold bg-indigo-600 hover:bg-indigo-700">
+          <Button asChild className="h-11 w-full rounded-2xl font-bold bg-indigo-600 hover:bg-indigo-700">
             <Link href="/dashboard/supplier">Enter Supplier Dashboard</Link>
           </Button>
-          <Button asChild variant="outline" className="h-12 w-full rounded-2xl font-bold border-indigo-200 text-indigo-700 hover:bg-indigo-100 hover:text-indigo-800">
+          <Button asChild variant="outline" className="h-11 w-full rounded-2xl font-bold border-indigo-200 text-indigo-700 hover:bg-indigo-100 hover:text-indigo-800">
             <Link href="/dashboard/supplier/inquiries">View Inquiries</Link>
           </Button>
         </div>
@@ -263,34 +271,41 @@ export function SupplierRequestSidebar({
   if (!isExpanded) {
     return (
       <div
-        className="w-full min-w-0 rounded-3xl border border-[#E5E7EB] bg-white p-6 shadow-xl shadow-slate-200/40 transition-all"
+        className="w-full min-w-0 rounded-[24px] border border-[#E5E7EB] bg-white p-5 shadow-lg shadow-slate-200/40 transition-all"
         id="supplier-request-card"
       >
-        <div className="mb-6 flex flex-col gap-1">
+        <div className="mb-4 flex flex-col gap-0.5">
+          <span className="text-xs font-extrabold uppercase tracking-[0.1em] text-[#6B7280]">
+            Starting at
+          </span>
           {formattedStartingPrice ? (
-            <p className="text-2xl font-black tracking-tight text-[#111827]">
+            <p className="text-xl font-black tracking-tight text-[#111827]">
               {formattedStartingPrice}
-              <span className="ml-1 text-sm font-semibold tracking-normal text-[#6B7280]">
-                starting price
+              <span className="ml-1.5 text-sm font-semibold tracking-normal text-[#6B7280]">
+                per event
               </span>
             </p>
           ) : (
-            <p className="text-2xl font-black text-[#111827]">Price on request</p>
+            <p className="text-xl font-bold text-[#4B5563]">Contact supplier for pricing</p>
           )}
         </div>
-        <p className="mb-6 break-words text-sm font-medium leading-6 text-[#4B5563]">
-          Choose a service, connect it to an approved venue booking, and tell the supplier what you need.
-        </p>
 
-        <div className="mb-6 space-y-3">
+        <div className="mb-4">
+          <h2 className="text-lg font-bold text-[#111827]">Request a Service Proposal</h2>
+          <p className="mt-1 break-words text-sm font-medium leading-relaxed text-[#4B5563]">
+            Choose a service and connect it to your approved event booking.
+          </p>
+        </div>
+
+        <div className="mb-5 flex flex-col gap-2">
           {supplier.responseTimeHours ? (
-            <div className="flex items-center gap-2 text-sm font-medium text-[#4B5563]">
+            <div className="flex items-center gap-2.5 text-sm font-medium text-[#4B5563]">
               <MessageSquare className="h-4 w-4 text-[#2563EB]" />
               Responds within {supplier.responseTimeHours} {supplier.responseTimeHours === 1 ? 'hour' : 'hours'}
             </div>
           ) : null}
           {supplier.minimumBookingNoticeDays ? (
-            <div className="flex items-center gap-2 text-sm font-medium text-[#4B5563]">
+            <div className="flex items-center gap-2.5 text-sm font-medium text-[#4B5563]">
               <CalendarDays className="h-4 w-4 text-[#2563EB]" />
               {supplier.minimumBookingNoticeDays}-day minimum notice
             </div>
@@ -299,9 +314,9 @@ export function SupplierRequestSidebar({
 
         <Button
           onClick={() => setIsExpanded(true)}
-          className="h-12 w-full rounded-2xl bg-[#2563EB] text-base font-bold text-white shadow-sm shadow-[#2563EB]/20 transition-all hover:-translate-y-0.5 hover:bg-[#1D4ED8] hover:shadow-md hover:shadow-[#2563EB]/30"
+          className="h-11 w-full rounded-2xl bg-[#2563EB] text-sm font-bold text-white shadow-sm shadow-[#2563EB]/20 transition-all hover:-translate-y-0.5 hover:bg-[#1D4ED8] hover:shadow-md hover:shadow-[#2563EB]/30"
         >
-          Request Service Proposal
+          Request Proposal
         </Button>
         
         {toastOpen && (
@@ -326,7 +341,7 @@ export function SupplierRequestSidebar({
   if (!hasApprovedBookings) {
     return (
       <div
-        className="w-full min-w-0 rounded-3xl border border-[#E5E7EB] bg-white p-6 shadow-xl shadow-slate-200/40"
+        className="w-full min-w-0 rounded-[24px] border border-[#E5E7EB] bg-white p-5 shadow-lg shadow-slate-200/40"
         id="supplier-request-card"
       >
         <div className="mb-5 flex items-center justify-between">
@@ -363,10 +378,10 @@ export function SupplierRequestSidebar({
         </div>
 
         <div className="mt-6 flex flex-col gap-3">
-          <Button asChild className="h-12 w-full rounded-2xl bg-[#111827] font-bold text-white hover:bg-[#374151]">
+          <Button asChild className="h-11 w-full rounded-2xl bg-[#111827] font-bold text-white hover:bg-[#374151]">
             <Link href="/venues">Browse Venues</Link>
           </Button>
-          <Button asChild variant="outline" className="h-12 w-full rounded-2xl font-bold">
+          <Button asChild variant="outline" className="h-11 w-full rounded-2xl font-bold">
             <Link href="/bookings?view=venues">View My Bookings</Link>
           </Button>
         </div>
@@ -377,7 +392,7 @@ export function SupplierRequestSidebar({
   // 5. Logged in, expanded state, ready to fill request
   return (
     <div
-      className="w-full min-w-0 rounded-3xl border border-[#E5E7EB] bg-white p-6 shadow-xl shadow-slate-200/40"
+      className="w-full min-w-0 rounded-[24px] border border-[#E5E7EB] bg-white p-5 shadow-lg shadow-slate-200/40"
       id="supplier-request-card"
     >
       <div className="mb-5 flex items-center justify-between">
@@ -488,7 +503,7 @@ export function SupplierRequestSidebar({
         <Button
           type="submit"
           disabled={isPending || !selectedBookingId || !selectedPackageId}
-          className="h-12 w-full rounded-2xl bg-[#2563EB] font-bold text-white shadow-sm transition hover:bg-[#1D4ED8] hover:shadow-md"
+          className="h-11 w-full rounded-2xl bg-[#2563EB] font-bold text-white shadow-sm transition hover:bg-[#1D4ED8] hover:shadow-md"
         >
           {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isPending ? "Sending Request..." : "Submit Request"}

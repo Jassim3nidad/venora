@@ -16,9 +16,7 @@ import {
   ShieldCheck,
   Star,
   Users,
-  Image as ImageIcon,
 } from "lucide-react";
-import Image from "next/image";
 import type { User } from "@supabase/supabase-js";
 import type { CustomerBookingOption } from "../application/get-customer-bookings-for-contact";
 import type { SupplierMarketplaceProfile } from "../types/supplier.types";
@@ -77,7 +75,7 @@ function InfoCard({
 
 function EmptyPanel({ message }: { message: string }) {
   return (
-    <div className="rounded-[24px] border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-8 text-center text-sm font-semibold text-[#6B7280]">
+    <div className="rounded-[18px] border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-semibold text-[#6B7280] sm:p-5">
       {message}
     </div>
   );
@@ -101,7 +99,7 @@ export function SupplierDetail({
   // Transform supplier images to VenueGallery format
   const galleryMedia = [];
   let displayOrder = 1;
-  
+
   if (supplier.heroImageUrl) {
     galleryMedia.push({
       id: "cover-image",
@@ -139,7 +137,7 @@ export function SupplierDetail({
   });
 
   return (
-    <main className="mx-auto max-w-7xl space-y-8 px-4 pb-28 pt-6 font-sans sm:px-6 sm:pt-8 lg:px-8 lg:pb-12 bg-white">
+    <main className="mx-auto max-w-7xl space-y-8 bg-white px-4 pb-28 pt-6 font-sans sm:px-6 sm:pt-8 lg:px-8 lg:pb-12">
       {/* Top Header info (matching VenueDetails) */}
       <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
@@ -165,7 +163,7 @@ export function SupplierDetail({
             </Link>
           </Button>
         </div>
-        
+
         {/* Action Controls */}
         <div className="hidden items-center gap-3 md:flex">
           {!isOwner && (
@@ -181,72 +179,77 @@ export function SupplierDetail({
       {/* Gallery Section */}
       <VenueGallery media={galleryMedia} venueName={supplier.businessName} />
 
-      {/* Identity Header */}
-      <div className="relative -mt-10 sm:-mt-12 flex flex-col items-start px-2 sm:px-4 mb-4 z-10">
-        <div className="h-24 w-24 sm:h-32 sm:w-32 shrink-0 overflow-hidden rounded-full border-4 border-white bg-slate-100 shadow-md sm:shadow-lg">
-          {supplier.profileImageUrl ? (
-            <img
-              src={supplier.profileImageUrl}
-              alt={`${supplier.businessName} logo`}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-slate-200 text-2xl font-bold text-slate-400">
-              {supplier.businessName.charAt(0).toUpperCase()}
-            </div>
-          )}
-        </div>
-        <div className="mt-4 flex w-full flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge
-              variant="outline"
-              className="border-emerald-200 bg-emerald-50 text-[10px] font-extrabold uppercase tracking-[0.12em] text-emerald-700"
-            >
-              <BadgeCheck className="mr-1 h-3 w-3" />
-              Accredited
-            </Badge>
-            {supplier.category ? (
-              <Badge
-                variant="outline"
-                className="border-[#DBEAFE] bg-[#EFF6FF] text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#2563EB]"
-              >
-                {supplier.category.name}
-              </Badge>
-            ) : null}
-          </div>
-          <h1 className="mt-1 text-3xl font-black leading-tight tracking-[-0.04em] text-slate-950 md:text-4xl">
-            {supplier.businessName}
-          </h1>
-          {supplier.headline ? (
-            <p className="mt-1 max-w-2xl text-base font-semibold leading-relaxed text-[#4B5563]">
-              {supplier.headline}
-            </p>
-          ) : null}
-          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium text-[#6B7280]">
-            {supplier.reviewCount > 0 ? (
-              <span className="flex items-center gap-1.5 font-bold text-[#111827]">
-                <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                {formatRating(supplier.avgRating, supplier.reviewCount)}
-              </span>
-            ) : (
-              <span className="flex items-center gap-1.5 font-bold text-[#111827]">
-                <Star className="h-4 w-4 text-slate-300" />
-                New on Venora
-              </span>
-            )}
-            <span className="flex items-center gap-1.5">
-              <MapPin className="h-4 w-4 text-[#2563EB]" />
-              {serviceAreas.slice(0, 2).join(", ") || "Location on request"}
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* Main Details Grid */}
-      <div className="grid grid-cols-1 gap-10 items-start lg:grid-cols-3">
+      <div className="grid grid-cols-1 items-start gap-8 pt-4 sm:pt-8 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_380px] xl:gap-10">
         {/* Left Column */}
-        <div className="space-y-10 lg:col-span-2">
-          
+        <div className="min-w-0 space-y-8">
+
+          {/* Identity Header */}
+          <div className="relative flex flex-col items-start mb-4 z-10">
+            <div
+              className="relative h-24 w-24 sm:h-32 sm:w-32 shrink-0 overflow-hidden rounded-full border-4 border-white bg-slate-100 shadow-md sm:shadow-lg -mt-16 sm:-mt-24"
+              aria-label={`${supplier.businessName} logo`}
+            >
+              <div className="flex h-full w-full items-center justify-center bg-slate-200 text-2xl font-bold text-slate-400">
+                {supplier.businessName.charAt(0).toUpperCase()}
+              </div>
+              {supplier.profileImageUrl ? (
+                <img
+                  src={supplier.profileImageUrl}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover"
+                  onError={(event) => {
+                    event.currentTarget.style.display = "none";
+                  }}
+                />
+              ) : null}
+            </div>
+            <div className="mt-4 flex w-full flex-col gap-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge
+                  variant="outline"
+                  className="border-emerald-200 bg-emerald-50 text-[10px] font-extrabold uppercase tracking-[0.12em] text-emerald-700"
+                >
+                  <BadgeCheck className="mr-1 h-3 w-3" />
+                  Accredited
+                </Badge>
+                {supplier.category ? (
+                  <Badge
+                    variant="outline"
+                    className="border-[#DBEAFE] bg-[#EFF6FF] text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#2563EB]"
+                  >
+                    {supplier.category.name}
+                  </Badge>
+                ) : null}
+              </div>
+              <h1 className="mt-1 text-3xl font-black leading-tight tracking-[-0.04em] text-slate-950 md:text-4xl">
+                {supplier.businessName}
+              </h1>
+              {supplier.headline ? (
+                <p className="mt-1 max-w-2xl text-base font-semibold leading-relaxed text-[#4B5563]">
+                  {supplier.headline}
+                </p>
+              ) : null}
+              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium text-[#6B7280]">
+                {supplier.reviewCount > 0 ? (
+                  <span className="flex items-center gap-1.5 font-bold text-[#111827]">
+                    <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                    {formatRating(supplier.avgRating, supplier.reviewCount)}
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5 font-bold text-[#111827]">
+                    <Star className="h-4 w-4 text-slate-300" />
+                    New on Venora
+                  </span>
+                )}
+                <span className="flex items-center gap-1.5">
+                  <MapPin className="h-4 w-4 text-[#2563EB]" />
+                  {serviceAreas.slice(0, 2).join(", ") || "Location on request"}
+                </span>
+              </div>
+            </div>
+          </div>
+
           {/* About Section */}
           <section className="space-y-4">
             <h2 className="text-2xl font-black tracking-[-0.04em] text-[#111827]">
@@ -287,7 +290,7 @@ export function SupplierDetail({
           <Separator className="bg-slate-200/60" />
 
           {/* Services and Pricing */}
-          <section className="space-y-6">
+          <section className="space-y-5">
             <div className="flex flex-col justify-between sm:flex-row sm:items-end">
               <div>
                 <h2 className="text-2xl font-black tracking-[-0.04em] text-[#111827]">
@@ -302,7 +305,7 @@ export function SupplierDetail({
             {activePackages.length === 0 ? (
               <EmptyPanel message="This supplier has not published any services yet." />
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className={activePackages.length === 1 ? "grid gap-4" : "grid gap-4 sm:grid-cols-2"}>
                 {activePackages.map((pkg) => (
                   <article
                     key={pkg.id}
@@ -329,7 +332,7 @@ export function SupplierDetail({
                           {pkg.description}
                         </p>
                       ) : null}
-                      
+
                       {pkg.inclusions.length > 0 ? (
                         <ul className="mt-4 space-y-2">
                           {pkg.inclusions.slice(0, 4).map((item) => (
@@ -349,7 +352,7 @@ export function SupplierDetail({
                         </ul>
                       ) : null}
                     </div>
-                    
+
                     {!isOwner && (
                       <Button
                         variant="outline"
@@ -368,7 +371,7 @@ export function SupplierDetail({
           <Separator className="bg-slate-200/60" />
 
           {/* Portfolio Section */}
-          <section className="space-y-6">
+          <section className="space-y-5">
             <div>
               <h2 className="text-2xl font-black tracking-[-0.04em] text-[#111827]">
                 Portfolio
@@ -381,13 +384,17 @@ export function SupplierDetail({
             {featuredPortfolio.length === 0 ? (
               <EmptyPanel message="No portfolio projects have been published yet." />
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className={featuredPortfolio.length === 1 ? "grid gap-4" : "grid gap-4 sm:grid-cols-2"}>
                 {featuredPortfolio.map((item) => (
                   <article
                     key={item.id}
-                    className="group overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70"
+                    className={
+                      featuredPortfolio.length === 1
+                        ? "group overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70 md:grid md:grid-cols-[minmax(220px,320px)_minmax(0,1fr)]"
+                        : "group overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70"
+                    }
                   >
-                    <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
+                    <div className={featuredPortfolio.length === 1 ? "relative h-[220px] overflow-hidden bg-slate-100 sm:h-[240px] md:h-[220px]" : "relative aspect-[4/3] overflow-hidden bg-slate-100"}>
                       {item.imageUrls && item.imageUrls.length > 1 ? (
                         <div className="flex h-full w-full snap-x snap-mandatory overflow-x-auto scroll-smooth no-scrollbar">
                           {item.imageUrls.map((url, idx) => (
@@ -441,13 +448,13 @@ export function SupplierDetail({
           <Separator className="bg-slate-200/60" />
 
           {/* Service Location & Coverage Section */}
-          <section className="space-y-6">
+          <section className="space-y-5">
             <div>
               <h2 className="text-2xl font-black tracking-[-0.04em] text-[#111827]">
                 Service Location & Coverage
               </h2>
             </div>
-            
+
             <div className="overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70">
               <div className="p-5 sm:p-6 border-b border-[#E5E7EB]">
                 <div className="mb-4 grid gap-4 sm:grid-cols-2">
@@ -501,27 +508,92 @@ export function SupplierDetail({
               </div>
 
               {supplier.locationVisibility !== "service_area_only" && supplier.latitude && supplier.longitude && (
-                <div className="h-[320px] w-full bg-slate-50 relative">
+                <div className="w-full bg-slate-50 relative">
                   {supplier.locationVisibility === "approximate" && (
                     <div className="absolute top-4 left-4 z-10 rounded-full bg-white/90 px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm backdrop-blur">
                       Approximate Location
                     </div>
                   )}
-                  <VenueMap 
-                    latitude={supplier.latitude} 
+                  <VenueMap
+                    latitude={supplier.latitude}
                     longitude={supplier.longitude}
                     markerLabel={supplier.businessName}
-                    height="320px"
+                    height="260px"
                   />
                 </div>
               )}
             </div>
           </section>
 
+          {/* Find This Business Online */}
+          {(supplier.websiteUrl || supplier.instagramUrl) && (
+            <>
+              <Separator className="bg-slate-200/60" />
+              <section className="space-y-3">
+                <div className="flex flex-col">
+                  <h2 className="text-2xl font-black tracking-[-0.04em] text-[#111827]">
+                    Find This Business Online
+                  </h2>
+                  <p className="hidden">
+                    Explore the supplier’s official website and social profiles.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2.5">
+                  {supplier.websiteUrl && (
+                    <a
+                      href={supplier.websiteUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 py-2.5 text-sm font-bold text-[#4B5563] transition hover:border-[#2563EB] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
+                      aria-label={`Visit ${supplier.businessName} website`}
+                    >
+                      <Globe className="h-4 w-4 text-[#2563EB]" />
+                      Website
+                      <ExternalLink className="h-3.5 w-3.5 text-[#9CA3AF]" />
+                    </a>
+                  )}
+                  {supplier.instagramUrl && (
+                    <a
+                      href={supplier.instagramUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 py-2.5 text-sm font-bold text-[#4B5563] transition hover:border-[#2563EB] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
+                      aria-label={`Open ${supplier.businessName} Instagram profile`}
+                    >
+                      <Instagram className="h-4 w-4 text-[#2563EB]" />
+                      Instagram
+                      <ExternalLink className="h-3.5 w-3.5 text-[#9CA3AF]" />
+                    </a>
+                  )}
+                  {false && supplier.contactEmail && (
+                    <a
+                      href={`mailto:${supplier.contactEmail}`}
+                      className="inline-flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 py-2.5 text-sm font-bold text-[#4B5563] transition hover:border-[#2563EB] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
+                      aria-label={`Email ${supplier.businessName} at ${supplier.contactEmail}`}
+                    >
+                      <Mail className="h-4 w-4 shrink-0 text-[#2563EB]" />
+                      <span className="min-w-0 break-all">{supplier.contactEmail}</span>
+                    </a>
+                  )}
+                  {false && supplier.contactPhone && (
+                    <a
+                      href={`tel:${supplier.contactPhone}`}
+                      className="inline-flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 py-2.5 text-sm font-bold text-[#4B5563] transition hover:border-[#2563EB] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
+                      aria-label={`Call ${supplier.businessName} at ${supplier.contactPhone}`}
+                    >
+                      <Phone className="h-4 w-4 shrink-0 text-[#2563EB]" />
+                      <span className="min-w-0 break-all">{supplier.contactPhone}</span>
+                    </a>
+                  )}
+                </div>
+              </section>
+            </>
+          )}
+
           <Separator className="bg-slate-200/60" />
 
           {/* Reviews Section */}
-          <section className="space-y-6">
+          <section className="space-y-5">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-black tracking-[-0.04em] text-[#111827]">
@@ -577,76 +649,19 @@ export function SupplierDetail({
         </div>
 
         {/* Right Column - Sidebar (sticky container) */}
-        <div className="sticky top-24 self-start space-y-6">
-          <SupplierRequestSidebar 
-            supplier={supplier}
-            supplierSlug={supplier.slug}
-            userEmail={currentUser?.email}
-            bookings={bookings}
-            isOwner={isOwner}
-          />
-
-          {/* Privacy-friendly Business Links */}
-          <div className="mt-6 rounded-3xl border border-[#E5E7EB] bg-[#F9FAFB] p-6 shadow-sm">
-            <h3 className="mb-4 text-base font-black text-[#111827]">
-              Business Links
-            </h3>
-            <div className="grid gap-3">
-              {supplier.websiteUrl ? (
-                <a
-                  href={supplier.websiteUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-3 rounded-2xl border border-[#E5E7EB] bg-white px-4 py-3 text-sm font-bold text-[#4B5563] transition hover:border-[#2563EB] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
-                >
-                  <Globe className="h-4 w-4 text-[#2563EB]" />
-                  Website
-                  <ExternalLink className="ml-auto h-3.5 w-3.5 text-[#9CA3AF]" />
-                </a>
-              ) : null}
-              {supplier.instagramUrl ? (
-                <a
-                  href={supplier.instagramUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-3 rounded-2xl border border-[#E5E7EB] bg-white px-4 py-3 text-sm font-bold text-[#4B5563] transition hover:border-[#2563EB] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
-                >
-                  <Instagram className="h-4 w-4 text-[#2563EB]" />
-                  Instagram
-                  <ExternalLink className="ml-auto h-3.5 w-3.5 text-[#9CA3AF]" />
-                </a>
-              ) : null}
-              
-              {/* Only show email/phone if explicitly populated as public fields, Venora focuses on on-platform inquiries */}
-              {supplier.contactEmail && (
-                 <a
-                 href={`mailto:${supplier.contactEmail}`}
-                 className="flex items-center gap-3 rounded-2xl border border-[#E5E7EB] bg-white px-4 py-3 text-sm font-bold text-[#4B5563] transition hover:border-[#2563EB] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
-               >
-                 <Mail className="h-4 w-4 shrink-0 text-[#2563EB]" />
-                 <span className="min-w-0 break-all">{supplier.contactEmail}</span>
-               </a>
-              )}
-              {supplier.contactPhone && (
-                 <a
-                 href={`tel:${supplier.contactPhone}`}
-                 className="flex items-center gap-3 rounded-2xl border border-[#E5E7EB] bg-white px-4 py-3 text-sm font-bold text-[#4B5563] transition hover:border-[#2563EB] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
-               >
-                 <Phone className="h-4 w-4 shrink-0 text-[#2563EB]" />
-                 <span className="min-w-0 break-all">{supplier.contactPhone}</span>
-               </a>
-              )}
-
-              {!supplier.websiteUrl && !supplier.instagramUrl && !supplier.contactEmail && !supplier.contactPhone && (
-                <p className="text-sm font-medium text-[#6B7280]">
-                  No external links available.
-                </p>
-              )}
-            </div>
+        <aside className="hidden lg:self-stretch lg:block">
+          <div className="sticky top-24 self-start">
+            <SupplierRequestSidebar
+              supplier={supplier}
+              supplierSlug={supplier.slug}
+              userEmail={currentUser?.email}
+              bookings={bookings}
+              isOwner={isOwner}
+            />
           </div>
-        </div>
+        </aside>
       </div>
-      
+
       {/* Mobile sticky action */}
       {!isOwner && (
         <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white p-4 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] lg:hidden">

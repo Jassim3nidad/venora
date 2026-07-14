@@ -1,0 +1,689 @@
+[
+  {
+    "viewport": {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900
+    },
+    "positions": [
+      0,
+      591,
+      1181,
+      1772,
+      2362
+    ],
+    "metrics": {
+      "scroller": {
+        "cls": "flex min-h-0 flex-1 flex-col overflow-y-auto",
+        "scrollHeight": 3181,
+        "clientHeight": 819,
+        "maxScroll": 2362
+      },
+      "bodyOverflowX": 0,
+      "gallery": {
+        "cls": "grid grid-cols-1 md:grid-cols-4 gap-3 h-[300px] md:h-[450px] w-full rounded-3xl overflow-hidden border border-[var(--border-default)] relative group",
+        "rect": {
+          "top": 104,
+          "bottom": 554,
+          "height": 450,
+          "left": 112,
+          "width": 1216
+        }
+      },
+      "grid": {
+        "cls": "grid grid-cols-1 items-start gap-8 pt-4 sm:pt-8 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_380px] xl:gap-10",
+        "rect": {
+          "top": 586,
+          "bottom": 3101,
+          "height": 2515,
+          "left": 112,
+          "width": 1216
+        }
+      },
+      "mainContent": {
+        "cls": "min-w-0 space-y-8",
+        "rect": {
+          "top": 618,
+          "bottom": 3101,
+          "height": 2483,
+          "left": 112,
+          "width": 796
+        }
+      },
+      "aside": {
+        "cls": "hidden lg:self-stretch lg:block",
+        "rect": {
+          "top": 618,
+          "bottom": 3101,
+          "height": 2483,
+          "left": 948,
+          "width": 380
+        }
+      },
+      "stickyWrap": {
+        "cls": "sticky top-24 self-start",
+        "computed": {
+          "position": "sticky",
+          "top": "96px"
+        },
+        "rect": {
+          "top": 618,
+          "bottom": 860,
+          "height": 242,
+          "left": 948,
+          "width": 380
+        }
+      },
+      "request": {
+        "cls": "w-full min-w-0 rounded-[24px] border border-[#E5E7EB] bg-white p-5 shadow-lg shadow-slate-200/40",
+        "rect": {
+          "top": 618,
+          "bottom": 860,
+          "height": 242,
+          "left": 948,
+          "width": 380
+        },
+        "text": "Starting at₱500per eventRequest a Service ProposalSign in to request a Service Proposal and connect it to your event bookings.Sign in to Request Proposal"
+      },
+      "mobileCta": {
+        "cls": "fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white p-4 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] lg:hidden",
+        "rect": {
+          "top": 0,
+          "bottom": 0,
+          "height": 0,
+          "width": 0
+        }
+      },
+      "sections": [
+        {
+          "text": "Sai's Photography",
+          "tag": "DIV",
+          "cls": "mt-4 flex w-full flex-col gap-1",
+          "rect": {
+            "top": 666,
+            "bottom": 804,
+            "height": 138,
+            "left": 112,
+            "width": 796
+          },
+          "headingCls": "mt-1 text-3xl font-black leading-tight tracking-[-0.04em] text-slate-950 md:text-4xl",
+          "headingText": "Sai's Photography"
+        },
+        {
+          "text": "About the supplier",
+          "tag": "SECTION",
+          "cls": "space-y-4",
+          "rect": {
+            "top": 820,
+            "bottom": 1172,
+            "height": 352,
+            "left": 112,
+            "width": 796
+          },
+          "headingCls": "text-2xl font-black tracking-[-0.04em] text-[#111827]",
+          "headingText": "About the supplier"
+        },
+        {
+          "text": "Services and Pricing",
+          "tag": "DIV",
+          "cls": "",
+          "rect": {
+            "top": 1237,
+            "bottom": 1293,
+            "height": 56,
+            "left": 112,
+            "width": 228
+          },
+          "headingCls": "text-2xl font-black tracking-[-0.04em] text-[#111827]",
+          "headingText": "Services and Pricing"
+        },
+        {
+          "text": "Portfolio",
+          "tag": "DIV",
+          "cls": "",
+          "rect": {
+            "top": 1640,
+            "bottom": 1696,
+            "height": 56,
+            "left": 112,
+            "width": 796
+          },
+          "headingCls": "text-2xl font-black tracking-[-0.04em] text-[#111827]",
+          "headingText": "Portfolio"
+        },
+        {
+          "text": "Service Location",
+          "tag": "DIV",
+          "cls": "",
+          "rect": {
+            "top": 2212,
+            "bottom": 2244,
+            "height": 32,
+            "left": 112,
+            "width": 796
+          },
+          "headingCls": "text-2xl font-black tracking-[-0.04em] text-[#111827]",
+          "headingText": "Service Location & Coverage"
+        },
+        {
+          "text": "Find This Business Online",
+          "tag": "DIV",
+          "cls": "flex flex-col",
+          "rect": {
+            "top": 2812,
+            "bottom": 2868,
+            "height": 56,
+            "left": 112,
+            "width": 796
+          },
+          "headingCls": "text-2xl font-black tracking-[-0.04em] text-[#111827]",
+          "headingText": "Find This Business Online"
+        },
+        {
+          "text": "Reviews",
+          "tag": "DIV",
+          "cls": "",
+          "rect": {
+            "top": 2987,
+            "bottom": 3019,
+            "height": 32,
+            "left": 112,
+            "width": 95
+          },
+          "headingCls": "text-2xl font-black tracking-[-0.04em] text-[#111827]",
+          "headingText": "Reviews"
+        }
+      ],
+      "gaps": [
+        {
+          "from": "Sai's Photography",
+          "to": "About the supplier",
+          "gap": 16
+        },
+        {
+          "from": "About the supplier",
+          "to": "Services and Pricing",
+          "gap": 65
+        },
+        {
+          "from": "Services and Pricing",
+          "to": "Portfolio",
+          "gap": 347
+        },
+        {
+          "from": "Portfolio",
+          "to": "Service Location",
+          "gap": 516
+        },
+        {
+          "from": "Service Location",
+          "to": "Find This Business Online",
+          "gap": 568
+        },
+        {
+          "from": "Find This Business Online",
+          "to": "Reviews",
+          "gap": 119
+        }
+      ]
+    }
+  },
+  {
+    "viewport": {
+      "name": "tablet",
+      "width": 768,
+      "height": 1024
+    },
+    "positions": [
+      0,
+      568,
+      1137,
+      1705,
+      2273
+    ],
+    "metrics": {
+      "scroller": {
+        "cls": "flex min-h-0 flex-1 flex-col overflow-y-auto",
+        "scrollHeight": 3216,
+        "clientHeight": 943,
+        "maxScroll": 2273
+      },
+      "bodyOverflowX": 0,
+      "gallery": {
+        "cls": "grid grid-cols-1 md:grid-cols-4 gap-3 h-[300px] md:h-[450px] w-full rounded-3xl overflow-hidden border border-[var(--border-default)] relative group",
+        "rect": {
+          "top": 104,
+          "bottom": 554,
+          "height": 450,
+          "left": 24,
+          "width": 720
+        }
+      },
+      "grid": {
+        "cls": "grid grid-cols-1 items-start gap-8 pt-4 sm:pt-8 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_380px] xl:gap-10",
+        "rect": {
+          "top": 586,
+          "bottom": 3072,
+          "height": 2486,
+          "left": 24,
+          "width": 720
+        }
+      },
+      "mainContent": {
+        "cls": "min-w-0 space-y-8",
+        "rect": {
+          "top": 618,
+          "bottom": 3072,
+          "height": 2454,
+          "left": 24,
+          "width": 720
+        }
+      },
+      "aside": {
+        "cls": "hidden lg:self-stretch lg:block",
+        "rect": {
+          "top": -81,
+          "bottom": -81,
+          "height": 0,
+          "left": 0,
+          "width": 0
+        }
+      },
+      "stickyWrap": {
+        "cls": "sticky top-24 self-start",
+        "computed": {
+          "position": "sticky",
+          "top": "96px"
+        },
+        "rect": {
+          "top": -81,
+          "bottom": -81,
+          "height": 0,
+          "left": 0,
+          "width": 0
+        }
+      },
+      "request": {
+        "cls": "w-full min-w-0 rounded-[24px] border border-[#E5E7EB] bg-white p-5 shadow-lg shadow-slate-200/40",
+        "rect": {
+          "top": -81,
+          "bottom": -81,
+          "height": 0,
+          "left": 0,
+          "width": 0
+        },
+        "text": "Starting at₱500per eventRequest a Service ProposalSign in to request a Service Proposal and connect it to your event bookings.Sign in to Request Proposal"
+      },
+      "mobileCta": {
+        "cls": "fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white p-4 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] lg:hidden",
+        "rect": {
+          "top": 943,
+          "bottom": 1024,
+          "height": 81,
+          "width": 768
+        }
+      },
+      "sections": [
+        {
+          "text": "Sai's Photography",
+          "tag": "DIV",
+          "cls": "mt-4 flex w-full flex-col gap-1",
+          "rect": {
+            "top": 666,
+            "bottom": 804,
+            "height": 138,
+            "left": 24,
+            "width": 720
+          },
+          "headingCls": "mt-1 text-3xl font-black leading-tight tracking-[-0.04em] text-slate-950 md:text-4xl",
+          "headingText": "Sai's Photography"
+        },
+        {
+          "text": "About the supplier",
+          "tag": "SECTION",
+          "cls": "space-y-4",
+          "rect": {
+            "top": 820,
+            "bottom": 1172,
+            "height": 352,
+            "left": 24,
+            "width": 720
+          },
+          "headingCls": "text-2xl font-black tracking-[-0.04em] text-[#111827]",
+          "headingText": "About the supplier"
+        },
+        {
+          "text": "Services and Pricing",
+          "tag": "DIV",
+          "cls": "",
+          "rect": {
+            "top": 1237,
+            "bottom": 1293,
+            "height": 56,
+            "left": 24,
+            "width": 228
+          },
+          "headingCls": "text-2xl font-black tracking-[-0.04em] text-[#111827]",
+          "headingText": "Services and Pricing"
+        },
+        {
+          "text": "Portfolio",
+          "tag": "DIV",
+          "cls": "",
+          "rect": {
+            "top": 1640,
+            "bottom": 1696,
+            "height": 56,
+            "left": 24,
+            "width": 720
+          },
+          "headingCls": "text-2xl font-black tracking-[-0.04em] text-[#111827]",
+          "headingText": "Portfolio"
+        },
+        {
+          "text": "Service Location",
+          "tag": "DIV",
+          "cls": "",
+          "rect": {
+            "top": 2183,
+            "bottom": 2215,
+            "height": 32,
+            "left": 24,
+            "width": 720
+          },
+          "headingCls": "text-2xl font-black tracking-[-0.04em] text-[#111827]",
+          "headingText": "Service Location & Coverage"
+        },
+        {
+          "text": "Find This Business Online",
+          "tag": "DIV",
+          "cls": "flex flex-col",
+          "rect": {
+            "top": 2783,
+            "bottom": 2839,
+            "height": 56,
+            "left": 24,
+            "width": 720
+          },
+          "headingCls": "text-2xl font-black tracking-[-0.04em] text-[#111827]",
+          "headingText": "Find This Business Online"
+        },
+        {
+          "text": "Reviews",
+          "tag": "DIV",
+          "cls": "",
+          "rect": {
+            "top": 2958,
+            "bottom": 2990,
+            "height": 32,
+            "left": 24,
+            "width": 95
+          },
+          "headingCls": "text-2xl font-black tracking-[-0.04em] text-[#111827]",
+          "headingText": "Reviews"
+        }
+      ],
+      "gaps": [
+        {
+          "from": "Sai's Photography",
+          "to": "About the supplier",
+          "gap": 16
+        },
+        {
+          "from": "About the supplier",
+          "to": "Services and Pricing",
+          "gap": 65
+        },
+        {
+          "from": "Services and Pricing",
+          "to": "Portfolio",
+          "gap": 347
+        },
+        {
+          "from": "Portfolio",
+          "to": "Service Location",
+          "gap": 487
+        },
+        {
+          "from": "Service Location",
+          "to": "Find This Business Online",
+          "gap": 568
+        },
+        {
+          "from": "Find This Business Online",
+          "to": "Reviews",
+          "gap": 119
+        }
+      ]
+    }
+  },
+  {
+    "viewport": {
+      "name": "mobile",
+      "width": 390,
+      "height": 844
+    },
+    "positions": [
+      0,
+      662,
+      1324,
+      1986,
+      2648
+    ],
+    "metrics": {
+      "scroller": {
+        "cls": "flex min-h-0 flex-1 flex-col overflow-y-auto",
+        "scrollHeight": 3411,
+        "clientHeight": 763,
+        "maxScroll": 2648
+      },
+      "bodyOverflowX": 0,
+      "gallery": {
+        "cls": "grid grid-cols-1 md:grid-cols-4 gap-3 h-[300px] md:h-[450px] w-full rounded-3xl overflow-hidden border border-[var(--border-default)] relative group",
+        "rect": {
+          "top": 96,
+          "bottom": 396,
+          "height": 300,
+          "left": 16,
+          "width": 358
+        }
+      },
+      "grid": {
+        "cls": "grid grid-cols-1 items-start gap-8 pt-4 sm:pt-8 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_380px] xl:gap-10",
+        "rect": {
+          "top": 428,
+          "bottom": 3267,
+          "height": 2839,
+          "left": 16,
+          "width": 358
+        }
+      },
+      "mainContent": {
+        "cls": "min-w-0 space-y-8",
+        "rect": {
+          "top": 444,
+          "bottom": 3267,
+          "height": 2823,
+          "left": 16,
+          "width": 358
+        }
+      },
+      "aside": {
+        "cls": "hidden lg:self-stretch lg:block",
+        "rect": {
+          "top": -81,
+          "bottom": -81,
+          "height": 0,
+          "left": 0,
+          "width": 0
+        }
+      },
+      "stickyWrap": {
+        "cls": "sticky top-24 self-start",
+        "computed": {
+          "position": "sticky",
+          "top": "96px"
+        },
+        "rect": {
+          "top": -81,
+          "bottom": -81,
+          "height": 0,
+          "left": 0,
+          "width": 0
+        }
+      },
+      "request": {
+        "cls": "w-full min-w-0 rounded-[24px] border border-[#E5E7EB] bg-white p-5 shadow-lg shadow-slate-200/40",
+        "rect": {
+          "top": -81,
+          "bottom": -81,
+          "height": 0,
+          "left": 0,
+          "width": 0
+        },
+        "text": "Starting at₱500per eventRequest a Service ProposalSign in to request a Service Proposal and connect it to your event bookings.Sign in to Request Proposal"
+      },
+      "mobileCta": {
+        "cls": "fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white p-4 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] lg:hidden",
+        "rect": {
+          "top": 763,
+          "bottom": 844,
+          "height": 81,
+          "width": 390
+        }
+      },
+      "sections": [
+        {
+          "text": "Sai's Photography",
+          "tag": "DIV",
+          "cls": "mt-4 flex w-full flex-col gap-1",
+          "rect": {
+            "top": 492,
+            "bottom": 623,
+            "height": 131,
+            "left": 16,
+            "width": 358
+          },
+          "headingCls": "mt-1 text-3xl font-black leading-tight tracking-[-0.04em] text-slate-950 md:text-4xl",
+          "headingText": "Sai's Photography"
+        },
+        {
+          "text": "About the supplier",
+          "tag": "SECTION",
+          "cls": "space-y-4",
+          "rect": {
+            "top": 639,
+            "bottom": 1251,
+            "height": 612,
+            "left": 16,
+            "width": 358
+          },
+          "headingCls": "text-2xl font-black tracking-[-0.04em] text-[#111827]",
+          "headingText": "About the supplier"
+        },
+        {
+          "text": "Services and Pricing",
+          "tag": "DIV",
+          "cls": "",
+          "rect": {
+            "top": 1316,
+            "bottom": 1372,
+            "height": 56,
+            "left": 16,
+            "width": 358
+          },
+          "headingCls": "text-2xl font-black tracking-[-0.04em] text-[#111827]",
+          "headingText": "Services and Pricing"
+        },
+        {
+          "text": "Portfolio",
+          "tag": "DIV",
+          "cls": "",
+          "rect": {
+            "top": 1719,
+            "bottom": 1775,
+            "height": 56,
+            "left": 16,
+            "width": 358
+          },
+          "headingCls": "text-2xl font-black tracking-[-0.04em] text-[#111827]",
+          "headingText": "Portfolio"
+        },
+        {
+          "text": "Service Location",
+          "tag": "DIV",
+          "cls": "",
+          "rect": {
+            "top": 2258,
+            "bottom": 2290,
+            "height": 32,
+            "left": 16,
+            "width": 358
+          },
+          "headingCls": "text-2xl font-black tracking-[-0.04em] text-[#111827]",
+          "headingText": "Service Location & Coverage"
+        },
+        {
+          "text": "Find This Business Online",
+          "tag": "DIV",
+          "cls": "flex flex-col",
+          "rect": {
+            "top": 2946,
+            "bottom": 3022,
+            "height": 76,
+            "left": 16,
+            "width": 358
+          },
+          "headingCls": "text-2xl font-black tracking-[-0.04em] text-[#111827]",
+          "headingText": "Find This Business Online"
+        },
+        {
+          "text": "Reviews",
+          "tag": "DIV",
+          "cls": "",
+          "rect": {
+            "top": 3141,
+            "bottom": 3173,
+            "height": 32,
+            "left": 16,
+            "width": 95
+          },
+          "headingCls": "text-2xl font-black tracking-[-0.04em] text-[#111827]",
+          "headingText": "Reviews"
+        }
+      ],
+      "gaps": [
+        {
+          "from": "Sai's Photography",
+          "to": "About the supplier",
+          "gap": 16
+        },
+        {
+          "from": "About the supplier",
+          "to": "Services and Pricing",
+          "gap": 65
+        },
+        {
+          "from": "Services and Pricing",
+          "to": "Portfolio",
+          "gap": 347
+        },
+        {
+          "from": "Portfolio",
+          "to": "Service Location",
+          "gap": 483
+        },
+        {
+          "from": "Service Location",
+          "to": "Find This Business Online",
+          "gap": 656
+        },
+        {
+          "from": "Find This Business Online",
+          "to": "Reviews",
+          "gap": 119
+        }
+      ]
+    }
+  }
+]

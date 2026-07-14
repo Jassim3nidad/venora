@@ -14,7 +14,7 @@ export const sampleSupplierCategories: SupplierCategory[] = [
   { id: "sample-cat-makeup", name: "Hair & Makeup", slug: "hair-makeup" },
 ];
 
-export const sampleSuppliers: SupplierMarketplaceProfile[] = [
+export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
   {
     id: "sample-aurora-table",
     profileId: "sample-profile-aurora-table",
@@ -401,4 +401,4 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = [
       },
     ],
   },
-];
+] as any[]) as SupplierMarketplaceProfile[];

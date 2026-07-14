@@ -1,0 +1,200 @@
+[
+  {
+    "viewport": {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900
+    },
+    "metrics": {
+      "scroller": {
+        "scrollHeight": 2888,
+        "clientHeight": 819,
+        "maxScroll": 2069
+      },
+      "overflowX": 0,
+      "avatar": {
+        "rect": {
+          "top": 522,
+          "bottom": 650,
+          "height": 128,
+          "left": 112,
+          "width": 128
+        },
+        "text": "S"
+      },
+      "portfolioArticle": {
+        "cls": "group overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70 md:grid md:grid-cols-[minmax(220px,320px)_minmax(0,1fr)]",
+        "rect": {
+          "top": 1716,
+          "bottom": 1938,
+          "height": 222,
+          "left": 112,
+          "width": 796
+        }
+      },
+      "mapCanvas": {
+        "rect": {
+          "top": 2218,
+          "bottom": 2476,
+          "height": 258,
+          "left": 114,
+          "width": 792
+        }
+      },
+      "businessSection": {
+        "rect": {
+          "top": 2543,
+          "bottom": 2629,
+          "height": 86,
+          "left": 112,
+          "width": 796
+        },
+        "visibleText": "Find This Business Online Explore the supplier’s official website and social profiles. Website Instagram",
+        "textContent": "Find This Business OnlineExplore the supplier’s official website and social profiles.WebsiteInstagram"
+      },
+      "reviewsSection": {
+        "rect": {
+          "top": 2694,
+          "bottom": 2808,
+          "height": 114,
+          "left": 112,
+          "width": 796
+        }
+      },
+      "mailtoCount": 0,
+      "telCount": 0
+    }
+  },
+  {
+    "viewport": {
+      "name": "tablet",
+      "width": 768,
+      "height": 1024
+    },
+    "metrics": {
+      "scroller": {
+        "scrollHeight": 2952,
+        "clientHeight": 943,
+        "maxScroll": 2009
+      },
+      "overflowX": 0,
+      "avatar": {
+        "rect": {
+          "top": 522,
+          "bottom": 650,
+          "height": 128,
+          "left": 24,
+          "width": 128
+        },
+        "text": "S"
+      },
+      "portfolioArticle": {
+        "cls": "group overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70 md:grid md:grid-cols-[minmax(220px,320px)_minmax(0,1fr)]",
+        "rect": {
+          "top": 1716,
+          "bottom": 1938,
+          "height": 222,
+          "left": 24,
+          "width": 720
+        }
+      },
+      "mapCanvas": {
+        "rect": {
+          "top": 2218,
+          "bottom": 2476,
+          "height": 258,
+          "left": 26,
+          "width": 716
+        }
+      },
+      "businessSection": {
+        "rect": {
+          "top": 2543,
+          "bottom": 2629,
+          "height": 86,
+          "left": 24,
+          "width": 720
+        },
+        "visibleText": "Find This Business Online Explore the supplier’s official website and social profiles. Website Instagram",
+        "textContent": "Find This Business OnlineExplore the supplier’s official website and social profiles.WebsiteInstagram"
+      },
+      "reviewsSection": {
+        "rect": {
+          "top": 2694,
+          "bottom": 2808,
+          "height": 114,
+          "left": 24,
+          "width": 720
+        }
+      },
+      "mailtoCount": 0,
+      "telCount": 0
+    }
+  },
+  {
+    "viewport": {
+      "name": "mobile",
+      "width": 390,
+      "height": 844
+    },
+    "metrics": {
+      "scroller": {
+        "scrollHeight": 3260,
+        "clientHeight": 763,
+        "maxScroll": 2497
+      },
+      "overflowX": 0,
+      "avatar": {
+        "rect": {
+          "top": 380,
+          "bottom": 476,
+          "height": 96,
+          "left": 16,
+          "width": 96
+        },
+        "text": "S"
+      },
+      "portfolioArticle": {
+        "cls": "group overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70 md:grid md:grid-cols-[minmax(220px,320px)_minmax(0,1fr)]",
+        "rect": {
+          "top": 1795,
+          "bottom": 2146,
+          "height": 352,
+          "left": 16,
+          "width": 358
+        }
+      },
+      "mapCanvas": {
+        "rect": {
+          "top": 2514,
+          "bottom": 2772,
+          "height": 258,
+          "left": 18,
+          "width": 354
+        }
+      },
+      "businessSection": {
+        "rect": {
+          "top": 2839,
+          "bottom": 2925,
+          "height": 86,
+          "left": 16,
+          "width": 358
+        },
+        "visibleText": "Find This Business Online Explore the supplier’s official website and social profiles. Website Instagram",
+        "textContent": "Find This Business OnlineExplore the supplier’s official website and social profiles.WebsiteInstagram"
+      },
+      "reviewsSection": {
+        "rect": {
+          "top": 2990,
+          "bottom": 3116,
+          "height": 126,
+          "left": 16,
+          "width": 358
+        }
+      },
+      "mailtoCount": 0,
+      "telCount": 0
+    }
+  }
+]

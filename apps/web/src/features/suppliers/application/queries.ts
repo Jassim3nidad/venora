@@ -295,6 +295,7 @@ export function mapDbSupplier(row: any): SupplierMarketplaceProfile {
     instagramUrl: row.instagram_url ?? null,
     profileImageUrl: row.profile_image_url ?? null,
     heroImageUrl: row.hero_image_url ?? null,
+
     responseTimeHours: row.response_time_hours ?? 24,
     yearsInBusiness: row.years_in_business ?? null,
     teamSize: row.team_size ?? null,
@@ -314,6 +315,8 @@ export function mapDbSupplier(row: any): SupplierMarketplaceProfile {
     travelFeeNote: row.travel_fee_note ?? null,
     city: row.city ?? null,
     province: row.province ?? null,
+    country: row.country ?? null,
+    businessAddress: row.business_address ?? null,
     packages: normalizePackages(row.supplier_services),
     portfolio: normalizePortfolio(row.supplier_portfolio_items),
     reviews: normalizeReviews(row.supplier_reviews),

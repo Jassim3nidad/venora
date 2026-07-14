@@ -1,0 +1,1387 @@
+[
+  {
+    "title": "Sai's Photography - Supplier Profile | Venora",
+    "url": "http://localhost:3000/suppliers/sai-s-photography",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "body": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "scrollHeight": 900
+    },
+    "top": {
+      "request": {
+        "top": 699,
+        "bottom": 941,
+        "left": 948,
+        "right": 1328,
+        "width": 380,
+        "height": 242
+      },
+      "aside": {
+        "top": 699,
+        "bottom": 941,
+        "left": 948,
+        "right": 1328,
+        "width": 380,
+        "height": 242
+      },
+      "grid": {
+        "top": 667,
+        "bottom": 3182,
+        "left": 112,
+        "right": 1328,
+        "width": 1216,
+        "height": 2515
+      },
+      "left": {
+        "top": 699,
+        "bottom": 3182,
+        "left": 112,
+        "right": 908,
+        "width": 796,
+        "height": 2483
+      },
+      "services": {
+        "top": 1318,
+        "bottom": 1656,
+        "left": 112,
+        "right": 908,
+        "width": 796,
+        "height": 338
+      },
+      "business": {
+        "top": 2893,
+        "bottom": 3003,
+        "left": 112,
+        "right": 908,
+        "width": 796,
+        "height": 110
+      },
+      "portfolio": {
+        "top": 1721,
+        "bottom": 2228,
+        "left": 112,
+        "right": 908,
+        "width": 796,
+        "height": 507
+      },
+      "reviews": {
+        "top": 3068,
+        "bottom": 3182,
+        "left": 112,
+        "right": 908,
+        "width": 796,
+        "height": 114
+      },
+      "fixedMobile": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0,
+        "width": 0,
+        "height": 0
+      }
+    },
+    "stickyCount": 2,
+    "stickyLabels": [
+      {
+        "tag": "HEADER",
+        "id": "",
+        "cls": "w-full bg-white/90 backdrop-blur-xl sticky top-0 z-50 border-b border-[#E5E7EB]/80",
+        "text": "VenoraHomeVenuesAboutHost a VenueLog InSign Up",
+        "rect": {
+          "top": 0,
+          "bottom": 81,
+          "left": 0,
+          "right": 1440,
+          "width": 1440,
+          "height": 81
+        }
+      },
+      {
+        "tag": "DIV",
+        "id": "",
+        "cls": "sticky top-24 self-start",
+        "text": "Starting at₱500per eventRequest a Service ProposalSign in to request a Service Proposal an",
+        "rect": {
+          "top": 699,
+          "bottom": 941,
+          "left": 948,
+          "right": 1328,
+          "width": 380,
+          "height": 242
+        }
+      }
+    ],
+    "fixedCount": 3,
+    "fixedLabels": [
+      {
+        "tag": "OL",
+        "id": "",
+        "cls": "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
+        "text": "",
+        "rect": {
+          "top": 868,
+          "bottom": 900,
+          "left": 1020,
+          "right": 1440,
+          "width": 420,
+          "height": 32
+        }
+      },
+      {
+        "tag": "DIV",
+        "id": "",
+        "cls": "fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3",
+        "text": "",
+        "rect": {
+          "top": 824,
+          "bottom": 880,
+          "left": 1364,
+          "right": 1420,
+          "width": 56,
+          "height": 56
+        }
+      },
+      {
+        "tag": "DIV",
+        "id": "",
+        "cls": "go1434192219 go1754112896 tsqd-open-btn-container",
+        "text": "",
+        "rect": {
+          "top": 840,
+          "bottom": 888,
+          "left": 1380,
+          "right": 1428,
+          "width": 48,
+          "height": 48
+        }
+      }
+    ],
+    "scrollSamples": [
+      {
+        "scrollY": 0,
+        "request": {
+          "top": 699,
+          "bottom": 941,
+          "left": 948,
+          "right": 1328,
+          "width": 380,
+          "height": 242
+        },
+        "fixedMobile": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "business": {
+          "top": 2893,
+          "bottom": 3003,
+          "left": 112,
+          "right": 908,
+          "width": 796,
+          "height": 110
+        }
+      },
+      {
+        "scrollY": 0,
+        "request": {
+          "top": 699,
+          "bottom": 941,
+          "left": 948,
+          "right": 1328,
+          "width": 380,
+          "height": 242
+        },
+        "fixedMobile": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "business": {
+          "top": 2893,
+          "bottom": 3003,
+          "left": 112,
+          "right": 908,
+          "width": 796,
+          "height": 110
+        }
+      },
+      {
+        "scrollY": 0,
+        "request": {
+          "top": 699,
+          "bottom": 941,
+          "left": 948,
+          "right": 1328,
+          "width": 380,
+          "height": 242
+        },
+        "fixedMobile": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "business": {
+          "top": 2893,
+          "bottom": 3003,
+          "left": 112,
+          "right": 908,
+          "width": 796,
+          "height": 110
+        }
+      }
+    ]
+  },
+  {
+    "title": "Sai's Photography - Supplier Profile | Venora",
+    "url": "http://localhost:3000/suppliers/sai-s-photography",
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "body": {
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "scrollHeight": 800
+    },
+    "top": {
+      "request": {
+        "top": 699,
+        "bottom": 941,
+        "left": 868,
+        "right": 1248,
+        "width": 380,
+        "height": 242
+      },
+      "aside": {
+        "top": 699,
+        "bottom": 941,
+        "left": 868,
+        "right": 1248,
+        "width": 380,
+        "height": 242
+      },
+      "grid": {
+        "top": 667,
+        "bottom": 3182,
+        "left": 32,
+        "right": 1248,
+        "width": 1216,
+        "height": 2515
+      },
+      "left": {
+        "top": 699,
+        "bottom": 3182,
+        "left": 32,
+        "right": 828,
+        "width": 796,
+        "height": 2483
+      },
+      "services": {
+        "top": 1318,
+        "bottom": 1656,
+        "left": 32,
+        "right": 828,
+        "width": 796,
+        "height": 338
+      },
+      "business": {
+        "top": 2893,
+        "bottom": 3003,
+        "left": 32,
+        "right": 828,
+        "width": 796,
+        "height": 110
+      },
+      "portfolio": {
+        "top": 1721,
+        "bottom": 2228,
+        "left": 32,
+        "right": 828,
+        "width": 796,
+        "height": 507
+      },
+      "reviews": {
+        "top": 3068,
+        "bottom": 3182,
+        "left": 32,
+        "right": 828,
+        "width": 796,
+        "height": 114
+      },
+      "fixedMobile": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0,
+        "width": 0,
+        "height": 0
+      }
+    },
+    "stickyCount": 2,
+    "stickyLabels": [
+      {
+        "tag": "HEADER",
+        "id": "",
+        "cls": "w-full bg-white/90 backdrop-blur-xl sticky top-0 z-50 border-b border-[#E5E7EB]/80",
+        "text": "VenoraHomeVenuesAboutHost a VenueLog InSign Up",
+        "rect": {
+          "top": 0,
+          "bottom": 81,
+          "left": 0,
+          "right": 1280,
+          "width": 1280,
+          "height": 81
+        }
+      },
+      {
+        "tag": "DIV",
+        "id": "",
+        "cls": "sticky top-24 self-start",
+        "text": "Starting at₱500per eventRequest a Service ProposalSign in to request a Service Proposal an",
+        "rect": {
+          "top": 699,
+          "bottom": 941,
+          "left": 868,
+          "right": 1248,
+          "width": 380,
+          "height": 242
+        }
+      }
+    ],
+    "fixedCount": 3,
+    "fixedLabels": [
+      {
+        "tag": "OL",
+        "id": "",
+        "cls": "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
+        "text": "",
+        "rect": {
+          "top": 768,
+          "bottom": 800,
+          "left": 860,
+          "right": 1280,
+          "width": 420,
+          "height": 32
+        }
+      },
+      {
+        "tag": "DIV",
+        "id": "",
+        "cls": "fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3",
+        "text": "",
+        "rect": {
+          "top": 724,
+          "bottom": 780,
+          "left": 1204,
+          "right": 1260,
+          "width": 56,
+          "height": 56
+        }
+      },
+      {
+        "tag": "DIV",
+        "id": "",
+        "cls": "go1434192219 go1754112896 tsqd-open-btn-container",
+        "text": "",
+        "rect": {
+          "top": 740,
+          "bottom": 788,
+          "left": 1220,
+          "right": 1268,
+          "width": 48,
+          "height": 48
+        }
+      }
+    ],
+    "scrollSamples": [
+      {
+        "scrollY": 0,
+        "request": {
+          "top": 699,
+          "bottom": 941,
+          "left": 868,
+          "right": 1248,
+          "width": 380,
+          "height": 242
+        },
+        "fixedMobile": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "business": {
+          "top": 2893,
+          "bottom": 3003,
+          "left": 32,
+          "right": 828,
+          "width": 796,
+          "height": 110
+        }
+      },
+      {
+        "scrollY": 0,
+        "request": {
+          "top": 699,
+          "bottom": 941,
+          "left": 868,
+          "right": 1248,
+          "width": 380,
+          "height": 242
+        },
+        "fixedMobile": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "business": {
+          "top": 2893,
+          "bottom": 3003,
+          "left": 32,
+          "right": 828,
+          "width": 796,
+          "height": 110
+        }
+      },
+      {
+        "scrollY": 0,
+        "request": {
+          "top": 699,
+          "bottom": 941,
+          "left": 868,
+          "right": 1248,
+          "width": 380,
+          "height": 242
+        },
+        "fixedMobile": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "business": {
+          "top": 2893,
+          "bottom": 3003,
+          "left": 32,
+          "right": 828,
+          "width": 796,
+          "height": 110
+        }
+      }
+    ]
+  },
+  {
+    "title": "Sai's Photography - Supplier Profile | Venora",
+    "url": "http://localhost:3000/suppliers/sai-s-photography",
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "body": {
+      "scrollWidth": 1024,
+      "clientWidth": 1024,
+      "scrollHeight": 768
+    },
+    "top": {
+      "request": {
+        "top": 699,
+        "bottom": 941,
+        "left": 632,
+        "right": 992,
+        "width": 360,
+        "height": 242
+      },
+      "aside": {
+        "top": 699,
+        "bottom": 941,
+        "left": 632,
+        "right": 992,
+        "width": 360,
+        "height": 242
+      },
+      "grid": {
+        "top": 667,
+        "bottom": 3138,
+        "left": 32,
+        "right": 992,
+        "width": 960,
+        "height": 2471
+      },
+      "left": {
+        "top": 699,
+        "bottom": 3138,
+        "left": 32,
+        "right": 600,
+        "width": 568,
+        "height": 2439
+      },
+      "services": {
+        "top": 1344,
+        "bottom": 1682,
+        "left": 32,
+        "right": 600,
+        "width": 568,
+        "height": 338
+      },
+      "business": {
+        "top": 2849,
+        "bottom": 2959,
+        "left": 32,
+        "right": 600,
+        "width": 568,
+        "height": 110
+      },
+      "portfolio": {
+        "top": 1747,
+        "bottom": 2184,
+        "left": 32,
+        "right": 600,
+        "width": 568,
+        "height": 437
+      },
+      "reviews": {
+        "top": 3024,
+        "bottom": 3138,
+        "left": 32,
+        "right": 600,
+        "width": 568,
+        "height": 114
+      },
+      "fixedMobile": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0,
+        "width": 0,
+        "height": 0
+      }
+    },
+    "stickyCount": 2,
+    "stickyLabels": [
+      {
+        "tag": "HEADER",
+        "id": "",
+        "cls": "w-full bg-white/90 backdrop-blur-xl sticky top-0 z-50 border-b border-[#E5E7EB]/80",
+        "text": "VenoraHomeVenuesAboutHost a VenueLog InSign Up",
+        "rect": {
+          "top": 0,
+          "bottom": 81,
+          "left": 0,
+          "right": 1024,
+          "width": 1024,
+          "height": 81
+        }
+      },
+      {
+        "tag": "DIV",
+        "id": "",
+        "cls": "sticky top-24 self-start",
+        "text": "Starting at₱500per eventRequest a Service ProposalSign in to request a Service Proposal an",
+        "rect": {
+          "top": 699,
+          "bottom": 941,
+          "left": 632,
+          "right": 992,
+          "width": 360,
+          "height": 242
+        }
+      }
+    ],
+    "fixedCount": 3,
+    "fixedLabels": [
+      {
+        "tag": "OL",
+        "id": "",
+        "cls": "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
+        "text": "",
+        "rect": {
+          "top": 736,
+          "bottom": 768,
+          "left": 604,
+          "right": 1024,
+          "width": 420,
+          "height": 32
+        }
+      },
+      {
+        "tag": "DIV",
+        "id": "",
+        "cls": "fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3",
+        "text": "",
+        "rect": {
+          "top": 692,
+          "bottom": 748,
+          "left": 948,
+          "right": 1004,
+          "width": 56,
+          "height": 56
+        }
+      },
+      {
+        "tag": "DIV",
+        "id": "",
+        "cls": "go1434192219 go1754112896 tsqd-open-btn-container",
+        "text": "",
+        "rect": {
+          "top": 708,
+          "bottom": 756,
+          "left": 964,
+          "right": 1012,
+          "width": 48,
+          "height": 48
+        }
+      }
+    ],
+    "scrollSamples": [
+      {
+        "scrollY": 0,
+        "request": {
+          "top": 699,
+          "bottom": 941,
+          "left": 632,
+          "right": 992,
+          "width": 360,
+          "height": 242
+        },
+        "fixedMobile": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "business": {
+          "top": 2849,
+          "bottom": 2959,
+          "left": 32,
+          "right": 600,
+          "width": 568,
+          "height": 110
+        }
+      },
+      {
+        "scrollY": 0,
+        "request": {
+          "top": 699,
+          "bottom": 941,
+          "left": 632,
+          "right": 992,
+          "width": 360,
+          "height": 242
+        },
+        "fixedMobile": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "business": {
+          "top": 2849,
+          "bottom": 2959,
+          "left": 32,
+          "right": 600,
+          "width": 568,
+          "height": 110
+        }
+      },
+      {
+        "scrollY": 0,
+        "request": {
+          "top": 699,
+          "bottom": 941,
+          "left": 632,
+          "right": 992,
+          "width": 360,
+          "height": 242
+        },
+        "fixedMobile": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "business": {
+          "top": 2849,
+          "bottom": 2959,
+          "left": 32,
+          "right": 600,
+          "width": 568,
+          "height": 110
+        }
+      }
+    ]
+  },
+  {
+    "title": "Sai's Photography - Supplier Profile | Venora",
+    "url": "http://localhost:3000/suppliers/sai-s-photography",
+    "viewport": {
+      "width": 768,
+      "height": 1024
+    },
+    "body": {
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "scrollHeight": 1024
+    },
+    "top": {
+      "request": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0,
+        "width": 0,
+        "height": 0
+      },
+      "aside": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0,
+        "width": 0,
+        "height": 0
+      },
+      "grid": {
+        "top": 667,
+        "bottom": 3153,
+        "left": 24,
+        "right": 744,
+        "width": 720,
+        "height": 2486
+      },
+      "left": {
+        "top": 699,
+        "bottom": 3153,
+        "left": 24,
+        "right": 744,
+        "width": 720,
+        "height": 2454
+      },
+      "services": {
+        "top": 1318,
+        "bottom": 1656,
+        "left": 24,
+        "right": 744,
+        "width": 720,
+        "height": 338
+      },
+      "business": {
+        "top": 2864,
+        "bottom": 2974,
+        "left": 24,
+        "right": 744,
+        "width": 720,
+        "height": 110
+      },
+      "portfolio": {
+        "top": 1721,
+        "bottom": 2199,
+        "left": 24,
+        "right": 744,
+        "width": 720,
+        "height": 478
+      },
+      "reviews": {
+        "top": 3039,
+        "bottom": 3153,
+        "left": 24,
+        "right": 744,
+        "width": 720,
+        "height": 114
+      },
+      "fixedMobile": {
+        "top": 943,
+        "bottom": 1024,
+        "left": 0,
+        "right": 768,
+        "width": 768,
+        "height": 81
+      }
+    },
+    "stickyCount": 1,
+    "stickyLabels": [
+      {
+        "tag": "HEADER",
+        "id": "",
+        "cls": "w-full bg-white/90 backdrop-blur-xl sticky top-0 z-50 border-b border-[#E5E7EB]/80",
+        "text": "VenoraHomeVenuesAboutHost a VenueLog InSign Up",
+        "rect": {
+          "top": 0,
+          "bottom": 81,
+          "left": 0,
+          "right": 768,
+          "width": 768,
+          "height": 81
+        }
+      }
+    ],
+    "fixedCount": 4,
+    "fixedLabels": [
+      {
+        "tag": "DIV",
+        "id": "",
+        "cls": "fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white p-4 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] lg:hidden",
+        "text": "Starting at₱500Request Proposal",
+        "rect": {
+          "top": 943,
+          "bottom": 1024,
+          "left": 0,
+          "right": 768,
+          "width": 768,
+          "height": 81
+        }
+      },
+      {
+        "tag": "OL",
+        "id": "",
+        "cls": "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
+        "text": "",
+        "rect": {
+          "top": 992,
+          "bottom": 1024,
+          "left": 348,
+          "right": 768,
+          "width": 420,
+          "height": 32
+        }
+      },
+      {
+        "tag": "DIV",
+        "id": "",
+        "cls": "fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3",
+        "text": "",
+        "rect": {
+          "top": 948,
+          "bottom": 1004,
+          "left": 692,
+          "right": 748,
+          "width": 56,
+          "height": 56
+        }
+      },
+      {
+        "tag": "DIV",
+        "id": "",
+        "cls": "go1434192219 go1754112896 tsqd-open-btn-container",
+        "text": "",
+        "rect": {
+          "top": 964,
+          "bottom": 1012,
+          "left": 708,
+          "right": 756,
+          "width": 48,
+          "height": 48
+        }
+      }
+    ],
+    "scrollSamples": [
+      {
+        "scrollY": 0,
+        "request": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "fixedMobile": {
+          "top": 943,
+          "bottom": 1024,
+          "left": 0,
+          "right": 768,
+          "width": 768,
+          "height": 81
+        },
+        "business": {
+          "top": 2864,
+          "bottom": 2974,
+          "left": 24,
+          "right": 744,
+          "width": 720,
+          "height": 110
+        }
+      },
+      {
+        "scrollY": 0,
+        "request": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "fixedMobile": {
+          "top": 943,
+          "bottom": 1024,
+          "left": 0,
+          "right": 768,
+          "width": 768,
+          "height": 81
+        },
+        "business": {
+          "top": 2864,
+          "bottom": 2974,
+          "left": 24,
+          "right": 744,
+          "width": 720,
+          "height": 110
+        }
+      },
+      {
+        "scrollY": 0,
+        "request": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "fixedMobile": {
+          "top": 943,
+          "bottom": 1024,
+          "left": 0,
+          "right": 768,
+          "width": 768,
+          "height": 81
+        },
+        "business": {
+          "top": 2864,
+          "bottom": 2974,
+          "left": 24,
+          "right": 744,
+          "width": 720,
+          "height": 110
+        }
+      }
+    ]
+  },
+  {
+    "title": "Sai's Photography - Supplier Profile | Venora",
+    "url": "http://localhost:3000/suppliers/sai-s-photography",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "body": {
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "scrollHeight": 844
+    },
+    "top": {
+      "request": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0,
+        "width": 0,
+        "height": 0
+      },
+      "aside": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0,
+        "width": 0,
+        "height": 0
+      },
+      "grid": {
+        "top": 509,
+        "bottom": 3348,
+        "left": 16,
+        "right": 374,
+        "width": 358,
+        "height": 2839
+      },
+      "left": {
+        "top": 525,
+        "bottom": 3348,
+        "left": 16,
+        "right": 374,
+        "width": 358,
+        "height": 2823
+      },
+      "services": {
+        "top": 1397,
+        "bottom": 1735,
+        "left": 16,
+        "right": 374,
+        "width": 358,
+        "height": 338
+      },
+      "business": {
+        "top": 3027,
+        "bottom": 3157,
+        "left": 16,
+        "right": 374,
+        "width": 358,
+        "height": 130
+      },
+      "portfolio": {
+        "top": 1800,
+        "bottom": 2274,
+        "left": 16,
+        "right": 374,
+        "width": 358,
+        "height": 475
+      },
+      "reviews": {
+        "top": 3222,
+        "bottom": 3348,
+        "left": 16,
+        "right": 374,
+        "width": 358,
+        "height": 126
+      },
+      "fixedMobile": {
+        "top": 763,
+        "bottom": 844,
+        "left": 0,
+        "right": 390,
+        "width": 390,
+        "height": 81
+      }
+    },
+    "stickyCount": 1,
+    "stickyLabels": [
+      {
+        "tag": "HEADER",
+        "id": "",
+        "cls": "w-full bg-white/90 backdrop-blur-xl sticky top-0 z-50 border-b border-[#E5E7EB]/80",
+        "text": "VenoraHomeVenuesAboutHost a VenueLog InSign Up",
+        "rect": {
+          "top": 0,
+          "bottom": 81,
+          "left": 0,
+          "right": 390,
+          "width": 390,
+          "height": 81
+        }
+      }
+    ],
+    "fixedCount": 4,
+    "fixedLabels": [
+      {
+        "tag": "DIV",
+        "id": "",
+        "cls": "fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white p-4 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] lg:hidden",
+        "text": "Starting at₱500Request Proposal",
+        "rect": {
+          "top": 763,
+          "bottom": 844,
+          "left": 0,
+          "right": 390,
+          "width": 390,
+          "height": 81
+        }
+      },
+      {
+        "tag": "OL",
+        "id": "",
+        "cls": "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
+        "text": "",
+        "rect": {
+          "top": 0,
+          "bottom": 32,
+          "left": 0,
+          "right": 390,
+          "width": 390,
+          "height": 32
+        }
+      },
+      {
+        "tag": "DIV",
+        "id": "",
+        "cls": "fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3",
+        "text": "",
+        "rect": {
+          "top": 768,
+          "bottom": 824,
+          "left": 314,
+          "right": 370,
+          "width": 56,
+          "height": 56
+        }
+      },
+      {
+        "tag": "DIV",
+        "id": "",
+        "cls": "go1434192219 go1754112896 tsqd-open-btn-container",
+        "text": "",
+        "rect": {
+          "top": 784,
+          "bottom": 832,
+          "left": 330,
+          "right": 378,
+          "width": 48,
+          "height": 48
+        }
+      }
+    ],
+    "scrollSamples": [
+      {
+        "scrollY": 0,
+        "request": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "fixedMobile": {
+          "top": 763,
+          "bottom": 844,
+          "left": 0,
+          "right": 390,
+          "width": 390,
+          "height": 81
+        },
+        "business": {
+          "top": 3027,
+          "bottom": 3157,
+          "left": 16,
+          "right": 374,
+          "width": 358,
+          "height": 130
+        }
+      },
+      {
+        "scrollY": 0,
+        "request": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "fixedMobile": {
+          "top": 763,
+          "bottom": 844,
+          "left": 0,
+          "right": 390,
+          "width": 390,
+          "height": 81
+        },
+        "business": {
+          "top": 3027,
+          "bottom": 3157,
+          "left": 16,
+          "right": 374,
+          "width": 358,
+          "height": 130
+        }
+      },
+      {
+        "scrollY": 0,
+        "request": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "fixedMobile": {
+          "top": 763,
+          "bottom": 844,
+          "left": 0,
+          "right": 390,
+          "width": 390,
+          "height": 81
+        },
+        "business": {
+          "top": 3027,
+          "bottom": 3157,
+          "left": 16,
+          "right": 374,
+          "width": 358,
+          "height": 130
+        }
+      }
+    ]
+  },
+  {
+    "title": "Astoria Palawan | Venora",
+    "url": "http://localhost:3000/venues/astoria-palawan",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "body": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "scrollHeight": 900
+    },
+    "top": {
+      "request": null,
+      "aside": null,
+      "grid": null,
+      "left": null,
+      "services": null,
+      "business": null,
+      "portfolio": null,
+      "reviews": {
+        "top": 3628,
+        "bottom": 3911,
+        "left": 112,
+        "right": 909,
+        "width": 797,
+        "height": 283
+      },
+      "fixedMobile": {
+        "top": 0,
+        "bottom": 0,
+        "left": 0,
+        "right": 0,
+        "width": 0,
+        "height": 0
+      }
+    },
+    "stickyCount": 2,
+    "stickyLabels": [
+      {
+        "tag": "HEADER",
+        "id": "",
+        "cls": "w-full bg-white/90 backdrop-blur-xl sticky top-0 z-50 border-b border-[#E5E7EB]/80",
+        "text": "VenoraHomeVenuesAboutHost a VenueLog InSign Up",
+        "rect": {
+          "top": 0,
+          "bottom": 81,
+          "left": 0,
+          "right": 1440,
+          "width": 1440,
+          "height": 81
+        }
+      },
+      {
+        "tag": "DIV",
+        "id": "",
+        "cls": "sticky top-24 hidden w-full rounded-[24px] border border-[#E5E7EB] bg-white p-6 shadow-sm shadow-slate-200/60 lg:block",
+        "text": "₱80,000/ eventEvent DateSelect dateSelect PackageCustom (Base Price)Guests countLimit: 30-",
+        "rect": {
+          "top": 805,
+          "bottom": 1433,
+          "left": 949,
+          "right": 1328,
+          "width": 379,
+          "height": 628
+        }
+      }
+    ],
+    "fixedCount": 3,
+    "fixedLabels": [
+      {
+        "tag": "OL",
+        "id": "",
+        "cls": "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
+        "text": "",
+        "rect": {
+          "top": 868,
+          "bottom": 900,
+          "left": 1020,
+          "right": 1440,
+          "width": 420,
+          "height": 32
+        }
+      },
+      {
+        "tag": "DIV",
+        "id": "",
+        "cls": "fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3",
+        "text": "",
+        "rect": {
+          "top": 824,
+          "bottom": 880,
+          "left": 1364,
+          "right": 1420,
+          "width": 56,
+          "height": 56
+        }
+      },
+      {
+        "tag": "DIV",
+        "id": "",
+        "cls": "go1434192219 go1754112896 tsqd-open-btn-container",
+        "text": "",
+        "rect": {
+          "top": 840,
+          "bottom": 888,
+          "left": 1380,
+          "right": 1428,
+          "width": 48,
+          "height": 48
+        }
+      }
+    ],
+    "scrollSamples": [
+      {
+        "scrollY": 0,
+        "request": null,
+        "fixedMobile": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "business": null
+      },
+      {
+        "scrollY": 0,
+        "request": null,
+        "fixedMobile": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "business": null
+      },
+      {
+        "scrollY": 0,
+        "request": null,
+        "fixedMobile": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "business": null
+      }
+    ]
+  }
+]

@@ -505,9 +505,9 @@ export function SupplierProfileForm({
                 </div>
 
                 <SupplierLocationPicker
-                  initialLatitude={formValues.latitude}
-                  initialLongitude={formValues.longitude}
-                  radiusKm={numberOrUndefined(formValues.coverageRadiusKm)}
+                  initialLatitude={formValues.latitude ?? null}
+                  initialLongitude={formValues.longitude ?? null}
+                  radiusKm={numberOrUndefined(formValues.coverageRadiusKm) ?? null}
                   onLocationChange={(lat, lng) => {
                     setValue("latitude", lat, { shouldDirty: true });
                     setValue("longitude", lng, { shouldDirty: true });

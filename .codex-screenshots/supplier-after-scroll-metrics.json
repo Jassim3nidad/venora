@@ -1,0 +1,482 @@
+[
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "scroller": {
+      "tag": "MAIN",
+      "cls": "flex min-h-0 flex-1 flex-col overflow-y-auto",
+      "scrollHeight": 3181,
+      "clientHeight": 819,
+      "maxScroll": 2362
+    },
+    "body": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440
+    },
+    "samples": [
+      {
+        "scrollTop": 0,
+        "request": {
+          "top": 699,
+          "bottom": 941,
+          "left": 948,
+          "right": 1328,
+          "width": 380,
+          "height": 242
+        },
+        "business": {
+          "top": 2893,
+          "bottom": 3003,
+          "left": 112,
+          "right": 908,
+          "width": 796,
+          "height": 110
+        },
+        "footer": null
+      },
+      {
+        "scrollTop": 1181,
+        "request": {
+          "top": -482,
+          "bottom": -240,
+          "left": 948,
+          "right": 1328,
+          "width": 380,
+          "height": 242
+        },
+        "business": {
+          "top": 1712,
+          "bottom": 1822,
+          "left": 112,
+          "right": 908,
+          "width": 796,
+          "height": 110
+        },
+        "footer": null
+      },
+      {
+        "scrollTop": 2362,
+        "request": {
+          "top": -1663,
+          "bottom": -1421,
+          "left": 948,
+          "right": 1328,
+          "width": 380,
+          "height": 242
+        },
+        "business": {
+          "top": 531,
+          "bottom": 641,
+          "left": 112,
+          "right": 908,
+          "width": 796,
+          "height": 110
+        },
+        "footer": null
+      }
+    ],
+    "links": [
+      {
+        "text": "Website",
+        "href": "https://www.facebook.com/jared.baquirin",
+        "target": "_blank",
+        "rel": "noopener noreferrer"
+      },
+      {
+        "text": "Instagram",
+        "href": "https://www.facebook.com/jared.baquirin",
+        "target": "_blank",
+        "rel": "noopener noreferrer"
+      }
+    ],
+    "hasEmailLink": false,
+    "hasPhoneLink": false,
+    "requestText": "Starting at₱500per eventRequest a Service ProposalSign in to request a Service Proposal and connect it to your event bookings.Sign in to Request Proposal"
+  },
+  {
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "scroller": {
+      "tag": "MAIN",
+      "cls": "flex min-h-0 flex-1 flex-col overflow-y-auto",
+      "scrollHeight": 3181,
+      "clientHeight": 719,
+      "maxScroll": 2462
+    },
+    "body": {
+      "scrollWidth": 1280,
+      "clientWidth": 1280
+    },
+    "samples": [
+      {
+        "scrollTop": 0,
+        "request": {
+          "top": 699,
+          "bottom": 941,
+          "left": 868,
+          "right": 1248,
+          "width": 380,
+          "height": 242
+        },
+        "business": {
+          "top": 2893,
+          "bottom": 3003,
+          "left": 32,
+          "right": 828,
+          "width": 796,
+          "height": 110
+        },
+        "footer": null
+      },
+      {
+        "scrollTop": 1231,
+        "request": {
+          "top": -532,
+          "bottom": -290,
+          "left": 868,
+          "right": 1248,
+          "width": 380,
+          "height": 242
+        },
+        "business": {
+          "top": 1662,
+          "bottom": 1772,
+          "left": 32,
+          "right": 828,
+          "width": 796,
+          "height": 110
+        },
+        "footer": null
+      },
+      {
+        "scrollTop": 2462,
+        "request": {
+          "top": -1763,
+          "bottom": -1521,
+          "left": 868,
+          "right": 1248,
+          "width": 380,
+          "height": 242
+        },
+        "business": {
+          "top": 431,
+          "bottom": 541,
+          "left": 32,
+          "right": 828,
+          "width": 796,
+          "height": 110
+        },
+        "footer": null
+      }
+    ],
+    "links": [
+      {
+        "text": "Website",
+        "href": "https://www.facebook.com/jared.baquirin",
+        "target": "_blank",
+        "rel": "noopener noreferrer"
+      },
+      {
+        "text": "Instagram",
+        "href": "https://www.facebook.com/jared.baquirin",
+        "target": "_blank",
+        "rel": "noopener noreferrer"
+      }
+    ],
+    "hasEmailLink": false,
+    "hasPhoneLink": false,
+    "requestText": "Starting at₱500per eventRequest a Service ProposalSign in to request a Service Proposal and connect it to your event bookings.Sign in to Request Proposal"
+  },
+  {
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "scroller": {
+      "tag": "MAIN",
+      "cls": "flex min-h-0 flex-1 flex-col overflow-y-auto",
+      "scrollHeight": 3137,
+      "clientHeight": 687,
+      "maxScroll": 2450
+    },
+    "body": {
+      "scrollWidth": 1024,
+      "clientWidth": 1024
+    },
+    "samples": [
+      {
+        "scrollTop": 0,
+        "request": {
+          "top": 699,
+          "bottom": 941,
+          "left": 632,
+          "right": 992,
+          "width": 360,
+          "height": 242
+        },
+        "business": {
+          "top": 2849,
+          "bottom": 2959,
+          "left": 32,
+          "right": 600,
+          "width": 568,
+          "height": 110
+        },
+        "footer": null
+      },
+      {
+        "scrollTop": 1225,
+        "request": {
+          "top": -526,
+          "bottom": -284,
+          "left": 632,
+          "right": 992,
+          "width": 360,
+          "height": 242
+        },
+        "business": {
+          "top": 1624,
+          "bottom": 1734,
+          "left": 32,
+          "right": 600,
+          "width": 568,
+          "height": 110
+        },
+        "footer": null
+      },
+      {
+        "scrollTop": 2450,
+        "request": {
+          "top": -1751,
+          "bottom": -1509,
+          "left": 632,
+          "right": 992,
+          "width": 360,
+          "height": 242
+        },
+        "business": {
+          "top": 399,
+          "bottom": 509,
+          "left": 32,
+          "right": 600,
+          "width": 568,
+          "height": 110
+        },
+        "footer": null
+      }
+    ],
+    "links": [
+      {
+        "text": "Website",
+        "href": "https://www.facebook.com/jared.baquirin",
+        "target": "_blank",
+        "rel": "noopener noreferrer"
+      },
+      {
+        "text": "Instagram",
+        "href": "https://www.facebook.com/jared.baquirin",
+        "target": "_blank",
+        "rel": "noopener noreferrer"
+      }
+    ],
+    "hasEmailLink": false,
+    "hasPhoneLink": false,
+    "requestText": "Starting at₱500per eventRequest a Service ProposalSign in to request a Service Proposal and connect it to your event bookings.Sign in to Request Proposal"
+  },
+  {
+    "viewport": {
+      "width": 768,
+      "height": 1024
+    },
+    "scroller": {
+      "tag": "MAIN",
+      "cls": "flex min-h-0 flex-1 flex-col overflow-y-auto",
+      "scrollHeight": 3216,
+      "clientHeight": 943,
+      "maxScroll": 2273
+    },
+    "body": {
+      "scrollWidth": 768,
+      "clientWidth": 768
+    },
+    "samples": [
+      {
+        "scrollTop": 0,
+        "request": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "business": {
+          "top": 2864,
+          "bottom": 2974,
+          "left": 24,
+          "right": 744,
+          "width": 720,
+          "height": 110
+        },
+        "footer": null
+      },
+      {
+        "scrollTop": 1137,
+        "request": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "business": {
+          "top": 1727,
+          "bottom": 1837,
+          "left": 24,
+          "right": 744,
+          "width": 720,
+          "height": 110
+        },
+        "footer": null
+      },
+      {
+        "scrollTop": 2273,
+        "request": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "business": {
+          "top": 591,
+          "bottom": 701,
+          "left": 24,
+          "right": 744,
+          "width": 720,
+          "height": 110
+        },
+        "footer": null
+      }
+    ],
+    "links": [
+      {
+        "text": "Website",
+        "href": "https://www.facebook.com/jared.baquirin",
+        "target": "_blank",
+        "rel": "noopener noreferrer"
+      },
+      {
+        "text": "Instagram",
+        "href": "https://www.facebook.com/jared.baquirin",
+        "target": "_blank",
+        "rel": "noopener noreferrer"
+      }
+    ],
+    "hasEmailLink": false,
+    "hasPhoneLink": false,
+    "requestText": "Starting at₱500per eventRequest a Service ProposalSign in to request a Service Proposal and connect it to your event bookings.Sign in to Request Proposal"
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "scroller": {
+      "tag": "MAIN",
+      "cls": "flex min-h-0 flex-1 flex-col overflow-y-auto",
+      "scrollHeight": 3411,
+      "clientHeight": 763,
+      "maxScroll": 2648
+    },
+    "body": {
+      "scrollWidth": 390,
+      "clientWidth": 390
+    },
+    "samples": [
+      {
+        "scrollTop": 0,
+        "request": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "business": {
+          "top": 3027,
+          "bottom": 3157,
+          "left": 16,
+          "right": 374,
+          "width": 358,
+          "height": 130
+        },
+        "footer": null
+      },
+      {
+        "scrollTop": 1324,
+        "request": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "business": {
+          "top": 1703,
+          "bottom": 1833,
+          "left": 16,
+          "right": 374,
+          "width": 358,
+          "height": 130
+        },
+        "footer": null
+      },
+      {
+        "scrollTop": 2648,
+        "request": {
+          "top": 0,
+          "bottom": 0,
+          "left": 0,
+          "right": 0,
+          "width": 0,
+          "height": 0
+        },
+        "business": {
+          "top": 379,
+          "bottom": 509,
+          "left": 16,
+          "right": 374,
+          "width": 358,
+          "height": 130
+        },
+        "footer": null
+      }
+    ],
+    "links": [
+      {
+        "text": "Website",
+        "href": "https://www.facebook.com/jared.baquirin",
+        "target": "_blank",
+        "rel": "noopener noreferrer"
+      },
+      {
+        "text": "Instagram",
+        "href": "https://www.facebook.com/jared.baquirin",
+        "target": "_blank",
+        "rel": "noopener noreferrer"
+      }
+    ],
+    "hasEmailLink": false,
+    "hasPhoneLink": false,
+    "requestText": "Starting at₱500per eventRequest a Service ProposalSign in to request a Service Proposal and connect it to your event bookings.Sign in to Request Proposal"
+  }
+]

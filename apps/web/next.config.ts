@@ -56,6 +56,7 @@ const nextConfig: NextConfig = {
         hostname: "images.squarespace-cdn.com",
         pathname: "/**",
       },
+      { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },
       { protocol: "https", hostname: "astoriapalawan.com", pathname: "/**" },
       { protocol: "https", hostname: "pearlfarmresort.com", pathname: "/**" },
       { protocol: "https", hostname: "johnhayhotels.com", pathname: "/**" },
