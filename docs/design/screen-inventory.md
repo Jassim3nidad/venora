@@ -15,17 +15,17 @@ The authoritative file-by-file list is the [route matrix](route-screen-matrix.md
 
 ## Shared shells and global states
 
-| Surface           | Source                                                              | Behavior                                             | State coverage                                         | Audit status                                              |
-| ----------------- | ------------------------------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------- |
-| Root shell        | `apps/web/app/layout.tsx`                                           | Global metadata, fonts, providers, toasts            | Framework fallback only; no custom global error or 404 | Source-verified                                           |
-| Marketing shell   | `apps/web/app/(marketing)/layout.tsx`                               | Marketing navigation, page content, footer           | No group loading/error state                           | Partially sound; runtime revealed nested `main` landmarks |
-| Marketplace shell | `apps/web/src/components/layout/MarketplaceLayout.tsx`              | Marketing header, customer navigation, scroll region | No shared error boundary                               | Partially sound; mobile/desktop checked                   |
-| Account shell     | `apps/web/app/(customer)/account/layout.tsx`                        | Auth guard and account navigation                    | Safe login redirect                                    | Source-verified                                           |
-| Enterprise shell  | `apps/web/src/components/dashboard/enterprise/EnterpriseShell.tsx`  | Role sidebar, top bar, mobile drawer                 | No shared loading/error boundary                       | Source-verified                                           |
-| Admin shell       | `apps/web/app/(admin)/admin/layout.tsx`                             | Admin role check and permission-filtered navigation  | Safe `/unauthorized` redirect                          | Source-verified                                           |
-| Venue-owner shell | `apps/web/app/(venue-owner)/dashboard/layout.tsx`                   | Venue-owner/admin role guard                         | Safe denial                                            | Source-verified                                           |
-| Supplier shell    | `apps/web/app/(supplier)/dashboard/supplier/layout.tsx`             | Supplier/admin role guard                            | Safe denial                                            | Source-verified                                           |
-| Coordinator shell | `apps/web/app/(event-coordinator)/dashboard/coordinator/layout.tsx` | Coordinator/admin role guard                         | Safe denial                                            | Source-verified                                           |
+| Surface           | Source                                                             | Behavior                                             | State coverage                                         | Audit status                                              |
+| ----------------- | ------------------------------------------------------------------ | ---------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------- |
+| Root shell        | `apps/web/app/layout.tsx`                                          | Global metadata, fonts, providers, toasts            | Framework fallback only; no custom global error or 404 | Source-verified                                           |
+| Marketing shell   | `apps/web/app/(marketing)/layout.tsx`                              | Marketing navigation, page content, footer           | No group loading/error state                           | Partially sound; runtime revealed nested `main` landmarks |
+| Marketplace shell | `apps/web/src/components/layout/MarketplaceLayout.tsx`             | Marketing header, customer navigation, scroll region | No shared error boundary                               | Partially sound; mobile/desktop checked                   |
+| Account shell     | `apps/web/app/(customer)/account/layout.tsx`                       | Auth guard and account navigation                    | Safe login redirect                                    | Source-verified                                           |
+| Enterprise shell  | `apps/web/src/components/dashboard/enterprise/EnterpriseShell.tsx` | Role sidebar, top bar, mobile drawer                 | No shared loading/error boundary                       | Source-verified                                           |
+| Admin shell       | `apps/web/app/(admin)/admin/layout.tsx`                            | Admin role check and permission-filtered navigation  | Safe `/unauthorized` redirect                          | Source-verified                                           |
+| Venue-owner shell | `apps/web/app/(venue-owner)/dashboard/layout.tsx`                  | Venue-owner/admin role guard                         | Safe denial                                            | Source-verified                                           |
+| Supplier shell    | `apps/web/app/(supplier)/dashboard/layout.tsx`                     | Supplier/admin role guard                            | Safe denial                                            | Source-verified                                           |
+| Coordinator shell | `apps/web/app/(event-coordinator)/dashboard/layout.tsx`            | Coordinator/admin role guard                         | Safe denial                                            | Source-verified                                           |
 
 Six route loading files exist: customer bookings, customer dashboard, favorites,
 suppliers, venues, and venue-owner analytics. Other screens rely on inline pending
@@ -45,7 +45,7 @@ or custom not-found files.
 | Safe denial        | `/unauthorized`                                                                           | Explain insufficient access                                  | Return to appropriate surface                            | No `main` landmark                                                                              | IMPLEMENTED AND VERIFIED                             |
 | Missing page       | Framework default                                                                         | Handle unknown URL                                           | Browser back only                                        | No custom branded recovery route                                                                | MISSING custom experience                            |
 
-SEO metadata is exported by 81 of 98 pages. Root metadata enables indexing for all
+SEO metadata is exported directly by 80 of 100 pages. Root metadata enables indexing for all
 routes; protected and auth pages do not define a consistent `noindex` policy.
 
 ## Customer experience
@@ -84,13 +84,13 @@ require authenticated QA.
 
 ## Supplier experience
 
-| Family               | Routes                                 | Main content/actions                                                                       | Protected information behavior                               | Status                               |
-| -------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------ |
-| Overview/analytics   | `/dashboard/supplier`, `/analytics`    | KPIs, workload, performance                                                                | Supplier/admin layout guard and supplier-scoped queries      | IMPLEMENTED BUT NOT RUNTIME-VERIFIED |
-| Profile/services     | `/profile`, `/services`, `/portfolio`  | Categories, services, packages/pricing, areas, accreditation, media with image crop dialog | Mutations are supplier-scoped                                | IMPLEMENTED BUT NOT RUNTIME-VERIFIED |
-| Inquiries            | `/inquiries`, `/inquiries/[id]`        | Event inquiry, snapshots, communication and response                                       | Server query controls eligible booking/supplier relationship | IMPLEMENTED BUT NOT RUNTIME-VERIFIED |
-| Quotes/jobs          | `/quotes`, `/quotes/[id]`, `/bookings` | Prepare quote and track accepted work                                                      | Supplier-scoped access                                       | IMPLEMENTED BUT NOT RUNTIME-VERIFIED |
-| Availability/reviews | `/calendar`, `/reviews`                | Availability and reputation                                                                | Supplier-scoped actions                                      | IMPLEMENTED BUT NOT RUNTIME-VERIFIED |
+| Family               | Routes                                                                          | Main content/actions                                                                                      | Protected information behavior                               | Status                               |
+| -------------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------ |
+| Overview/analytics   | `/dashboard/supplier`, `/analytics`                                             | KPIs, workload, performance                                                                               | Supplier/admin layout guard and supplier-scoped queries      | IMPLEMENTED BUT NOT RUNTIME-VERIFIED |
+| Profile/services     | `/profile`, `/services`, `/portfolio`, `/portfolio/new`, `/portfolio/[id]/edit` | Categories, services, packages/pricing, areas, accreditation, portfolio creation/editing and media upload | Mutations are supplier-scoped                                | IMPLEMENTED BUT NOT RUNTIME-VERIFIED |
+| Inquiries            | `/inquiries`, `/inquiries/[id]`                                                 | Event inquiry, snapshots, communication and response                                                      | Server query controls eligible booking/supplier relationship | IMPLEMENTED BUT NOT RUNTIME-VERIFIED |
+| Quotes/jobs          | `/quotes`, `/quotes/[id]`, `/bookings`                                          | Prepare quote and track accepted work                                                                     | Supplier-scoped access                                       | IMPLEMENTED BUT NOT RUNTIME-VERIFIED |
+| Availability/reviews | `/calendar`, `/reviews`                                                         | Availability and reputation                                                                               | Supplier-scoped actions                                      | IMPLEMENTED BUT NOT RUNTIME-VERIFIED |
 
 Event date, start time, guest count, venue name, and event-location snapshots are
 rendered as event information when returned by the eligible inquiry query. Source

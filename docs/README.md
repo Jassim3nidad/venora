@@ -1,42 +1,42 @@
 # Venora Documentation
 
-## UI/UX documentation
+This index separates current, code-backed guidance from historical planning.
+Start with [Getting started](getting-started.md), then use the focused guide for
+the system you are changing.
 
-- [UI/UX overview](design/README.md)
-- [Screen inventory](design/screen-inventory.md)
-- [Route-to-screen matrix](design/route-screen-matrix.md)
-- [Navigation map](design/navigation-map.md)
-- [Role experience matrix](design/role-experience-matrix.md)
-- [User flows](design/user-flows.md)
-- [Low-fidelity wireframes](design/wireframes.md)
-- [Responsive behavior](design/responsive-behavior.md)
-- [Accessibility requirements](design/accessibility-requirements.md)
-- [Accessibility audit](design/accessibility-audit.md)
-- [Component inventory](design/component-inventory.md)
-- [UI gap analysis](design/ui-gap-analysis.md)
-- [UX remediation backlog](design/ux-remediation-backlog.md)
+## Engineering
 
-## API documentation
+- [Getting started](getting-started.md)
+- [Environment variables](environment-variables.md)
+- [Repository structure](repository-structure.md)
+- [System architecture](architecture.md)
+- [Authentication](authentication.md) and [authorization](authorization.md)
+- [Database](database.md), [migrations](migrations.md), and [Storage](storage.md)
+- [Bookings](bookings.md), [payments](payments.md), and
+  [notifications](notifications.md)
+- [Analytics](analytics.md) and [AI](ai.md)
+- [Testing](testing.md), [deployment](deployment.md), and
+  [troubleshooting](troubleshooting.md)
+- [Known limitations](known-limitations.md)
+- [Operational runbooks](runbooks/README.md)
+- [Documentation inventory](documentation-inventory.md)
 
-- [API overview and Route Handler contracts](api/README.md)
-- [Authentication and authorization](api/authentication.md)
-- [Error handling](api/error-handling.md)
-- [Webhooks and payment processing](api/webhooks.md)
-- [Server Actions](api/server-actions.md)
-- [Supabase RPC functions](api/supabase-rpc.md)
-- [Storage workflows](api/storage.md)
-- [Endpoint inventory](api/endpoint-inventory.md)
-- [OpenAPI 3.1 JSON](api/openapi.json)
+## Contract and product references
 
-The files under `docs/api/` are code-backed and authoritative for implemented API surfaces at commit `15e6173b6f695f6d9f5f4a29517badf0b3a3a016`. Older planning material such as [api-contracts.md](api-contracts.md) may describe proposed contracts that do not exist in code.
-
-## Existing module documentation
-
-- [Architecture](architecture.md)
+- [API documentation](api/README.md) and [OpenAPI 3.1](api/openapi.json)
+- [UI/UX documentation](design/README.md)
 - [API conventions](conventions/api-conventions.md)
 - [Error conventions](conventions/error-handling.md)
-- [AI features](modules/ai-features.md)
-- [Analytics](modules/analytics.md)
-- [Booking workflow](modules/booking-workflow.md)
-- [Notifications](modules/notifications.md)
-- [Payments](modules/payments.md)
+
+The code-backed `docs/api/` and `docs/design/` suites remain authoritative for
+their inventories. `api-contracts.md`, `modules/`, and `deployment/vercel.md`
+are compatibility locations that now point to canonical guides. Historical QA,
+bug, feature, and planning documents are retained as snapshots; they must not be
+used as current operational truth without revalidation.
+
+## Maintaining documentation
+
+Run `pnpm docs:all:validate` from the repository root. Update API docs for
+contract changes, design docs for route/flow changes, and technical docs for
+architecture or operational changes. Never place real credentials, personal
+data, production URLs, or machine-local absolute paths in documentation.
