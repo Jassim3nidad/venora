@@ -54,7 +54,9 @@ const SUPPLIER_PROFILE_SELECT = `
   travel_available,
   travel_fee_note,
   city,
-  province
+  province,
+  country,
+  business_address
 `;
 
 const SUPPLIER_SERVICE_SELECT = `
@@ -314,6 +316,8 @@ export function mapDbSupplier(row: any): SupplierMarketplaceProfile {
     travelFeeNote: row.travel_fee_note ?? null,
     city: row.city ?? null,
     province: row.province ?? null,
+    country: row.country ?? null,
+    businessAddress: row.business_address ?? null,
     packages: normalizePackages(row.supplier_services),
     portfolio: normalizePortfolio(row.supplier_portfolio_items),
     reviews: normalizeReviews(row.supplier_reviews),

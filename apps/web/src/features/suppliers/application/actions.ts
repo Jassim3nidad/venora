@@ -234,7 +234,7 @@ export async function upsertSupplierPortfolioAction(rawInput: unknown) {
     }
 
     // Map sort_order based on status
-    let finalSortOrder = input.sortOrder ?? 0;
+    const finalSortOrder = input.sortOrder ?? 0;
 
     const payload = {
       supplier_id: supplier.id,
