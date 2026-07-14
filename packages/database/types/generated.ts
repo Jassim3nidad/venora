@@ -357,6 +357,17 @@ export interface Database {
           instagram_url:        string | null;
           profile_image_url:    string | null;
           hero_image_url:       string | null;
+          business_location_type: string;
+          location_visibility:  string;
+          latitude:             number | null;
+          longitude:            number | null;
+          city:                 string | null;
+          province:             string | null;
+          country:              string | null;
+          business_address:     string | null;
+          public_location_label: string | null;
+          travel_available:     boolean;
+          travel_fee_note:      string | null;
           response_time_hours:  number;
           years_in_business:    number | null;
           team_size:            number | null;
@@ -378,6 +389,17 @@ export interface Database {
           | "response_time_hours"
           | "minimum_booking_notice_days"
           | "is_featured"
+          | "business_location_type"
+          | "location_visibility"
+          | "latitude"
+          | "longitude"
+          | "city"
+          | "province"
+          | "country"
+          | "business_address"
+          | "public_location_label"
+          | "travel_available"
+          | "travel_fee_note"
           | "created_at"
           | "updated_at"
         > & {
@@ -386,6 +408,17 @@ export interface Database {
           response_time_hours?: number;
           minimum_booking_notice_days?: number;
           is_featured?: boolean;
+          business_location_type?: string;
+          location_visibility?: string;
+          latitude?: number | null;
+          longitude?: number | null;
+          city?: string | null;
+          province?: string | null;
+          country?: string | null;
+          business_address?: string | null;
+          public_location_label?: string | null;
+          travel_available?: boolean;
+          travel_fee_note?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["supplier_profiles"]["Insert"]>;
       };

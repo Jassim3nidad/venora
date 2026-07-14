@@ -57,6 +57,7 @@ coverage/
 playwright/.auth/
 playwright-report/
 test-results/
+artifacts/ci/
 **/e2e/**/*.png
 **/e2e/**/*.webm
 **/e2e/**/*.zip

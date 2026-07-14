@@ -1,21 +1,100 @@
+import { execFileSync } from "node:child_process";
 import { readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
 const migrationsRoot = join(root, "supabase", "migrations");
 const typeFile = join(root, "packages", "database", "types", "generated.ts");
+const allowlistFile = join(root, ".github", "ci", "migration-allowlist.json");
 const errors = [];
 const warnings = [];
+const typesOnly = process.argv.includes("--types-only");
+const allowlist = JSON.parse(readFileSync(allowlistFile, "utf8"));
 
-const migrationFiles = readdirSync(migrationsRoot)
-  .filter((name) => /^\d+_.+\.sql$/.test(name))
+function validateGeneratedTypes() {
+  const generatedTypes = readFileSync(typeFile, "utf8");
+  const portfolioTypes = generatedTypes.match(
+    /supplier_portfolio_items:\s*\{[\s\S]*?\n\s{6}\};/,
+  )?.[0];
+  if (!portfolioTypes) {
+    errors.push("generated supplier_portfolio_items type missing");
+    return;
+  }
+  for (const field of ["image_urls", "status", "service_id", "venue_name"]) {
+    if (!new RegExp(`\\b${field}:`).test(portfolioTypes)) {
+      errors.push(`migration 070 field absent from generated types: ${field}`);
+    }
+  }
+  for (const field of ["image_url", "title"]) {
+    if (!new RegExp(`\\b${field}:\\s+string \\| null`).test(portfolioTypes)) {
+      errors.push(`migration 070 nullable field drift: ${field}`);
+    }
+  }
+
+  const supplierTypes = generatedTypes.match(
+    /supplier_profiles:\s*\{[\s\S]*?\n\s{6}\};/,
+  )?.[0];
+  if (!supplierTypes) {
+    errors.push("generated supplier_profiles type missing");
+    return;
+  }
+  for (const field of [
+    "business_location_type",
+    "location_visibility",
+    "latitude",
+    "longitude",
+    "city",
+    "province",
+    "country",
+    "business_address",
+    "public_location_label",
+    "travel_available",
+    "travel_fee_note",
+  ]) {
+    if (!new RegExp(`\\b${field}:`).test(supplierTypes)) {
+      errors.push(
+        `supplier location field absent from generated types: ${field}`,
+      );
+    }
+  }
+}
+
+validateGeneratedTypes();
+if (typesOnly) {
+  if (errors.length > 0) {
+    console.error(
+      `Generated database type validation failed (${errors.length}):`,
+    );
+    errors.forEach((error) => console.error(`- ${error}`));
+    process.exit(1);
+  }
+  console.log(
+    "Generated database types valid: migration 070 and supplier location contract fields present.",
+  );
+  process.exit(0);
+}
+
+const allMigrationSqlFiles = readdirSync(migrationsRoot)
+  .filter((name) => name.endsWith(".sql"))
   .sort();
+const migrationFiles = allMigrationSqlFiles.filter((name) =>
+  /^\d+_[a-z0-9][a-z0-9_]*\.sql$/.test(name),
+);
+for (const name of allMigrationSqlFiles) {
+  if (!migrationFiles.includes(name)) {
+    errors.push(`invalid migration filename: ${name}`);
+  }
+}
 const migrations = migrationFiles.map((name) => ({
   name,
   version: name.match(/^(\d+)_/)?.[1] ?? "",
   number: Number(name.match(/^(\d+)_/)?.[1]),
   source: readFileSync(join(migrationsRoot, name), "utf8"),
 }));
+for (const migration of migrations) {
+  if (!migration.source.trim())
+    errors.push(`empty migration file: ${migration.name}`);
+}
 const allSql = migrations.map(({ source }) => source).join("\n");
 const activeSql = allSql
   .split(/\r?\n/)
@@ -31,16 +110,29 @@ for (const migration of migrations) {
 
 for (const [version, names] of byNumber) {
   if (names.length < 2) continue;
-  if (
-    version === "068" &&
-    names.join(",") ===
-      "068_customer_supplier_inquiry_tracking.sql,068_enforce_booking_availability_integrity.sql"
-  ) {
+  const exception = allowlist.duplicateVersions?.find(
+    (item) =>
+      item.version === version &&
+      [...item.files].sort().join(",") === [...names].sort().join(","),
+  );
+  if (exception) {
     warnings.push(
-      `known duplicate migration 068 detected: ${names.join(", ")}`,
+      `allowlisted duplicate migration ${version}: ${names.join(", ")} (${exception.removalCondition})`,
     );
   } else {
     errors.push(`duplicate migration ${version}: ${names.join(", ")}`);
+  }
+}
+
+for (const rename of allowlist.legacyRenames ?? []) {
+  if (!migrationFiles.includes(rename.current)) {
+    errors.push(
+      `tracked legacy migration rename is missing: ${rename.current}`,
+    );
+  } else {
+    warnings.push(
+      `tracked legacy migration rename: ${rename.original} -> ${rename.current} (${rename.reason})`,
+    );
   }
 }
 
@@ -48,14 +140,126 @@ for (let index = 1; index < migrations.length; index += 1) {
   const previous = migrations[index - 1];
   const current = migrations[index];
   if (current.number >= previous.number) continue;
-  if (previous.number === 45 && current.number === 5) {
+  const orderingException = allowlist.orderingExceptions?.find(
+    (item) => item.before === previous.name && item.after === current.name,
+  );
+  if (orderingException) {
     warnings.push(
-      "legacy padded migrations 0040/0045 sort before 005; renaming requires hosted-history review",
+      `allowlisted migration ordering exception: ${previous.name} before ${current.name}`,
     );
   } else {
     errors.push(
       `out-of-order migration filenames: ${previous.name} before ${current.name}`,
     );
+  }
+}
+
+for (const table of [
+  "profiles",
+  "user_roles",
+  "organizations",
+  "organization_members",
+  "venues",
+  "bookings",
+  "supplier_profiles",
+  "supplier_contact_requests",
+  "supplier_quotes",
+  "reviews",
+  "notifications",
+  "audit_logs",
+]) {
+  const pattern = new RegExp(
+    `ALTER\\s+TABLE\\s+public\\.${table}\\s+ENABLE\\s+ROW\\s+LEVEL\\s+SECURITY`,
+    "i",
+  );
+  if (!pattern.test(activeSql))
+    errors.push(`critical table lacks RLS enablement: public.${table}`);
+}
+
+function git(args) {
+  try {
+    return execFileSync("git", args, { cwd: root, encoding: "utf8" });
+  } catch {
+    return "";
+  }
+}
+
+const baseSha = process.env.CI_BASE_SHA?.trim();
+const range =
+  baseSha && /^[0-9a-f]{40}$/i.test(baseSha) ? [baseSha, "HEAD"] : ["HEAD"];
+const changedMigrationPaths = new Set([
+  ...git(["diff", "--name-only", ...range, "--", "supabase/migrations/*.sql"])
+    .split(/\r?\n/)
+    .filter(Boolean),
+  ...git(["diff", "--name-only", "--", "supabase/migrations/*.sql"])
+    .split(/\r?\n/)
+    .filter(Boolean),
+  ...git([
+    "ls-files",
+    "--others",
+    "--exclude-standard",
+    "supabase/migrations/*.sql",
+  ])
+    .split(/\r?\n/)
+    .filter(Boolean),
+]);
+const modifiedMigrations = git([
+  "diff",
+  "--name-only",
+  "--diff-filter=M",
+  ...range,
+  "--",
+  "supabase/migrations/*.sql",
+])
+  .split(/\r?\n/)
+  .filter(Boolean);
+for (const path of modifiedMigrations) {
+  if (!allowlist.mutableMigrationFiles?.includes(path)) {
+    errors.push(
+      `existing migration modified without exact allowlist entry: ${path}`,
+    );
+  }
+}
+
+const destructivePatterns = [
+  ["DROP_TABLE", /\bDROP\s+TABLE\b/i],
+  ["DROP_COLUMN", /\bDROP\s+COLUMN\b/i],
+  ["TRUNCATE", /\bTRUNCATE\b/i],
+  ["DELETE_WITHOUT_WHERE", /\bDELETE\s+FROM\s+[\w.]+\s*;/i],
+  ["ALTER_COLUMN_TYPE", /\bALTER\s+(?:COLUMN\s+)?[\w\"]+\s+TYPE\b/i],
+];
+const sensitivePatterns = [
+  ["SECURITY_DEFINER", /\bSECURITY\s+DEFINER\b/i],
+  [
+    "STORAGE_POLICY",
+    /(?:\b(?:CREATE|ALTER|DROP)\s+POLICY\b[\s\S]*?\bON\s+storage\.objects\b|\bALTER\s+TABLE\s+storage\.objects\b)/i,
+  ],
+  ["PUBLIC_GRANT", /\bGRANT\b[\s\S]*?\bTO\s+PUBLIC\b/i],
+];
+for (const path of changedMigrationPaths) {
+  const name = path.replace(/^supabase\/migrations\//, "");
+  const migration = migrations.find((item) => item.name === name);
+  if (!migration) continue;
+  for (const [kind, pattern] of destructivePatterns) {
+    if (!pattern.test(migration.source)) continue;
+    const allowed = allowlist.destructiveStatements?.some(
+      (item) => item.file === path && item.kind === kind,
+    );
+    if (!allowed)
+      errors.push(
+        `destructive migration statement requires exact allowlist review: ${path} (${kind})`,
+      );
+  }
+  for (const [kind, pattern] of sensitivePatterns) {
+    if (!pattern.test(migration.source)) continue;
+    const allowed = allowlist.sensitiveStatements?.some(
+      (item) => item.file === path && item.kind === kind,
+    );
+    if (!allowed) {
+      errors.push(
+        `security-sensitive migration change requires exact allowlist review: ${path} (${kind})`,
+      );
+    }
   }
 }
 
@@ -72,8 +276,9 @@ const requiredMigrations = [
   "054_admin_access_control.sql",
   "065_lock_down_internal_only_functions.sql",
   "068_customer_supplier_inquiry_tracking.sql",
-  "068_enforce_booking_availability_integrity.sql",
+  "0680_enforce_booking_availability_integrity.sql",
   "070_supplier_portfolio_enhancements.sql",
+  "071_supplier_location_coverage.sql",
   "071_tighten_venue_media_storage_ownership.sql",
 ];
 for (const name of requiredMigrations) {
@@ -123,7 +328,9 @@ for (const name of [
 }
 
 const venueStorageMigration =
-  migrations.find(({ number }) => number === 71)?.source ?? "";
+  migrations.find(
+    ({ name }) => name === "071_tighten_venue_media_storage_ownership.sql",
+  )?.source ?? "";
 for (const token of [
   "v.id::text = (storage.foldername(name))[2]",
   "v.organization_id::text = (storage.foldername(name))[1]",
@@ -140,25 +347,6 @@ if (
   errors.push("unsafe active GRANT to PUBLIC detected");
 }
 
-const generatedTypes = readFileSync(typeFile, "utf8");
-const portfolioTypes = generatedTypes.match(
-  /supplier_portfolio_items:\s*\{[\s\S]*?\n\s{6}\};/,
-)?.[0];
-if (!portfolioTypes) {
-  errors.push("generated supplier_portfolio_items type missing");
-} else {
-  for (const field of ["image_urls", "status", "service_id", "venue_name"]) {
-    if (!new RegExp(`\\b${field}:`).test(portfolioTypes)) {
-      errors.push(`migration 070 field absent from generated types: ${field}`);
-    }
-  }
-  for (const field of ["image_url", "title"]) {
-    if (!new RegExp(`\\b${field}:\\s+string \\| null`).test(portfolioTypes)) {
-      errors.push(`migration 070 nullable field drift: ${field}`);
-    }
-  }
-}
-
 for (const warning of [...new Set(warnings)]) console.warn(`WARN: ${warning}`);
 if (errors.length > 0) {
   console.error(`Database contract validation failed (${errors.length}):`);
@@ -168,5 +356,5 @@ if (errors.length > 0) {
 
 console.log(
   `Database contracts valid: ${migrationFiles.length} migrations; ` +
-    "required functions, triggers, policies, grants, and migration 070 types present.",
+    "required functions, triggers, policies, grants, and generated type contracts present.",
 );

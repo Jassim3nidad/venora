@@ -6,6 +6,7 @@ const docsRoot = join(root, "docs");
 const runbooksRoot = join(docsRoot, "runbooks");
 const errors = [];
 let historicalSourceExceptions = 0;
+let localConfigurationExceptions = 0;
 
 const allowedHistoricalMissingSources = new Set([
   "supabase/migrations/053_supplier_dashboard_domains.sql",
@@ -13,6 +14,10 @@ const allowedHistoricalMissingSources = new Set([
   "apps/web/app/(supplier)/dashboard/supplier/_components/inquiry-filters.tsx",
   "apps/web/app/(supplier)/dashboard/supplier/_components/quote-actions.tsx",
   "apps/web/src/features/suppliers/ui/SupplierAvailabilityEditor.tsx",
+]);
+const allowedLocalConfigurationSources = new Set([
+  "apps/web/.env",
+  "apps/web/.env.local",
 ]);
 
 const requiredDocs = [
@@ -208,6 +213,8 @@ for (const file of markdownFiles) {
         allowedHistoricalMissingSources.has(candidate)
       ) {
         historicalSourceExceptions += 1;
+      } else if (allowedLocalConfigurationSources.has(candidate)) {
+        localConfigurationExceptions += 1;
       } else {
         errors.push(
           `referenced source path missing in ${display(file)}: ${candidate}`,
@@ -305,11 +312,12 @@ for (const file of scanFiles) {
 
 const migrations = readFileSync(join(docsRoot, "migrations.md"), "utf8");
 for (const file of [
-  "068_customer_supplier_inquiry_tracking.sql",
-  "068_enforce_booking_availability_integrity.sql",
+  "0680_enforce_booking_availability_integrity.sql",
+  "071_supplier_location_coverage.sql",
+  "071_tighten_venue_media_storage_ownership.sql",
 ]) {
   if (!migrations.includes(file))
-    errors.push(`known duplicate migration not documented: ${file}`);
+    errors.push(`known migration history conflict not documented: ${file}`);
 }
 
 if (errors.length > 0) {
@@ -324,5 +332,6 @@ console.log(
   `Technical documentation valid: ${requiredDocs.length} required files, ` +
     `${runbooks.length} runbooks, ${mermaidCount} Mermaid diagrams, ` +
     `${expectedEnvVariables.length} environment variables documented; ` +
-    `${historicalSourceExceptions} inventoried historical source exceptions.`,
+    `${historicalSourceExceptions} inventoried historical source exceptions and ` +
+    `${localConfigurationExceptions} local configuration references.`,
 );

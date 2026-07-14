@@ -19,7 +19,8 @@ All approved migrations must apply successfully to disposable/local Supabase.
 ## Safety warnings
 
 `pnpm db:types` overwrites a generated file. Do not hand-edit it or generate from
-an incomplete/production schema. Resolve duplicate `068` history first.
+an incomplete/production schema. Resolve the `0680` rename and duplicate `071`
+history first.
 
 ## Investigation steps
 

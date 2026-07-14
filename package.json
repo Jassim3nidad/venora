@@ -9,6 +9,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "format:check": "node scripts/check-changed-format.mjs",
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",
     "test": "turbo run test",
@@ -20,24 +21,37 @@
     "test:booking": "pnpm --filter @venora/web exec vitest run src/features/booking/application/actions.test.ts src/features/calendar/application/calendar-actions.test.ts src/features/calendar/utils/availability.test.ts",
     "test:payment": "pnpm --filter @venora/web exec vitest run src/features/payments",
     "test:analytics": "pnpm --filter @venora/web exec vitest run src/features/analytics/application/export.test.ts",
-    "test:ai": "deno test supabase/functions/_shared/ai-config.test.ts",
+    "test:ai": "deno test --no-config --node-modules-dir=none --frozen --lock=deno.lock supabase/functions/_shared/ai-config.test.ts",
     "test:security": "pnpm --filter @venora/web exec vitest run src/lib/security src/lib/rbac/permissions.test.ts src/lib/admin/review-action.test.ts",
     "test:a11y": "pnpm --filter @venora/web exec playwright test e2e/a11y",
     "test:e2e:smoke": "pnpm --filter @venora/web exec playwright test e2e/auth/customer.spec.ts e2e/auth/venue.spec.ts e2e/auth/supplier.spec.ts",
     "test:e2e": "pnpm --filter @venora/web exec playwright test",
     "test:performance": "node scripts/run-local-performance-smoke.mjs",
     "test:secrets": "node scripts/scan-changed-secrets.mjs",
+    "security:audit": "pnpm audit --prod --audit-level moderate",
+    "test:ci": "node scripts/run-ci-tests.mjs",
     "docs:generate": "node scripts/generate-openapi.mjs",
     "docs:validate": "node scripts/validate-openapi.mjs",
-    "docs:semantic:validate": "pnpm --package=@redocly/cli@2.39.0 dlx redocly lint docs/api/openapi.json",
+    "docs:semantic:validate": "redocly lint docs/api/openapi.json",
     "docs:design:validate": "node scripts/validate-design-docs.mjs",
     "docs:technical:validate": "node scripts/validate-technical-docs.mjs",
     "docs:test:validate": "node scripts/validate-test-suite.mjs",
+    "docs:ci:validate": "node scripts/validate-ci-docs.mjs",
     "docs:all:validate": "pnpm docs:validate && pnpm docs:semantic:validate && pnpm docs:design:validate && pnpm docs:technical:validate && pnpm docs:test:validate",
     "validate:quality": "pnpm lint && pnpm type-check && pnpm test && pnpm test:ai && pnpm test:database && pnpm docs:all:validate && pnpm test:secrets && pnpm build",
+    "validate:ci": "pnpm format:check && pnpm lint && pnpm type-check && pnpm test:ci && pnpm test:database && pnpm db:types:validate && pnpm edge:validate && pnpm docs:generate && pnpm docs:all:validate && pnpm docs:ci:validate && pnpm ci:workflows:validate && pnpm security:audit && pnpm test:secrets && pnpm build",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "db:types": "supabase gen types typescript --local > packages/database/types/generated.ts",
+    "db:types:validate": "node scripts/validate-database-contracts.mjs --types-only",
+    "ci:workflows:validate": "node scripts/validate-workflows.mjs",
+    "edge:validate": "node scripts/validate-edge-functions.mjs",
+    "edge:deployment:verify": "node scripts/verify-edge-deployment.mjs",
+    "ci:contracts:report": "node scripts/generate-contract-report.mjs",
+    "hosted:guard": "node scripts/validate-hosted-environment.mjs",
+    "hosted:rls": "node scripts/verify-hosted-venue-media.mjs",
+    "deployment:verify": "node scripts/verify-deployment.mjs",
+    "release:manifest": "node scripts/generate-release-manifest.mjs",
     "db:fix-cancel": "node scripts/print-booking-cancel-sql.mjs",
     "db:fix-verification-docs": "node scripts/print-verification-docs-sql.mjs",
     "db:fix-partner-notifications": "node scripts/print-partner-application-notifications-sql.mjs",
@@ -51,14 +65,21 @@
     "test:bookings:cancellation-history": "node scripts/validate-cancellation-history.mjs"
   },
   "devDependencies": {
+    "@redocly/cli": "2.39.0",
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
-    "turbo": "^2.3.3"
+    "turbo": "^2.3.3",
+    "yaml": "^2.9.0"
   },
   "packageManager": "pnpm@9.15.0",
   "dependencies": {
     "@supabase/supabase-js": "^2.47.2",
     "dotenv": "^17.4.2",
     "react": "^19.2.7"
+  },
+  "pnpm": {
+    "overrides": {
+      "postcss": "8.5.16"
+    }
   }
 }

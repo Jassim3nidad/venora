@@ -14,6 +14,20 @@ export const sampleSupplierCategories: SupplierCategory[] = [
   { id: "sample-cat-makeup", name: "Hair & Makeup", slug: "hair-makeup" },
 ];
 
+const sampleSupplierLocationDefaults = {
+  businessLocationType: "studio" as const,
+  locationVisibility: "exact" as const,
+  latitude: 14.5995,
+  longitude: 120.9842,
+  city: "Manila",
+  province: "Metro Manila",
+  country: "Philippines",
+  businessAddress: "123 Event Street, Business District",
+  publicLocationLabel: "Metro Manila, Philippines",
+  travelAvailable: true,
+  travelFeeNote: "Travel fees apply outside Metro Manila.",
+};
+
 export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
   {
     id: "sample-aurora-table",
@@ -21,6 +35,7 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
     businessName: "Aurora Table Catering",
     slug: "aurora-table-catering",
     category: sampleSupplierCategories[0] ?? null,
+    ...sampleSupplierLocationDefaults,
     headline: "Modern Filipino catering for weddings, debuts, and corporate celebrations.",
     description:
       "Aurora Table builds plated menus, grazing stations, and cocktail service around seasonal Filipino flavors. Their production team handles tasting, menu planning, service staffing, and venue coordination.",
@@ -131,6 +146,7 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
     businessName: "Stilllight Studios",
     slug: "stilllight-studios",
     category: sampleSupplierCategories[1] ?? null,
+    ...sampleSupplierLocationDefaults,
     headline: "Editorial wedding photography with fast previews and structured shot planning.",
     description:
       "Stilllight Studios specializes in documentary coverage, family formals, and polished editorial portraits. Every booking includes pre-event planning, timeline review, and a curated online gallery.",
@@ -223,6 +239,7 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
     businessName: "Petal & Form Studio",
     slug: "petal-and-form-studio",
     category: sampleSupplierCategories[3] ?? null,
+    ...sampleSupplierLocationDefaults,
     headline: "Floral installations and ceremony styling with calm production management.",
     description:
       "Petal & Form creates ceremony arches, aisle concepts, reception tablescapes, and photo corners. Their team is known for clean logistics, sustainable floral sourcing, and detailed venue turnover.",
@@ -315,6 +332,7 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
     businessName: "Pulse Grid Lights & Sounds",
     slug: "pulse-grid-lights-and-sounds",
     category: sampleSupplierCategories[4] ?? null,
+    ...sampleSupplierLocationDefaults,
     headline: "Reliable audio, intelligent lighting, LED walls, and technical direction.",
     description:
       "Pulse Grid supplies event-grade sound systems, lighting plots, LED walls, rigging plans, and technical operators for weddings, concerts, and corporate events.",

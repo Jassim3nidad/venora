@@ -54,7 +54,9 @@ const SUPPLIER_PROFILE_SELECT = `
   travel_available,
   travel_fee_note,
   city,
-  province
+  province,
+  country,
+  business_address
 `;
 
 const SUPPLIER_SERVICE_SELECT = `

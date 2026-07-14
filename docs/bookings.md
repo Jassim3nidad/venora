@@ -70,7 +70,7 @@ refund workflow, not only status.
 | Failure                        | Integrity response                                              | Recovery                                                              |
 | ------------------------------ | --------------------------------------------------------------- | --------------------------------------------------------------------- |
 | Duplicate submit/race          | Unique/active-date and transaction guards reject one attempt    | Return existing/clear conflict; never create a second active booking  |
-| Date becomes unavailable       | Availability/overlap guard rejects mutation                     | Ask user for another date; inspect duplicate `068` deployment state   |
+| Date becomes unavailable       | Availability/overlap guard rejects mutation                     | Ask user for another date; inspect `0680` migration deployment state  |
 | Invalid approval amounts       | Database constraint/RPC rejects approval                        | Correct quote; rerun approval RPC, not raw update                     |
 | Checkout creation fails        | Attempt records failure and conditionally returns to `approved` | Retry idempotently from approved state                                |
 | Paid webhook delayed/duplicate | Event claim and reconciliation prevent double settlement        | Replay/inspect the same provider event; do not manually confirm first |

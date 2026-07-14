@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "duplicateVersions": [
+    {
+      "version": "071",
+      "files": [
+        "071_supplier_location_coverage.sql",
+        "071_tighten_venue_media_storage_ownership.sql"
+      ],
+      "reason": "The supplier location migration reached main with the same version as the venue-media migration; hosted application state is unknown.",
+      "removalCondition": "Inspect staging and production history/schema, then add an approved forward reconciliation migration or otherwise resolve before removing this exception."
+    }
+  ],
+  "orderingExceptions": [
+    {
+      "before": "0045_venues_core.sql",
+      "after": "005_bookings.sql",
+      "reason": "Legacy padded filenames are immutable until hosted migration history is reconciled."
+    },
+    {
+      "before": "0680_enforce_booking_availability_integrity.sql",
+      "after": "068_customer_supplier_inquiry_tracking.sql",
+      "reason": "Upstream renamed the former duplicate 068 to 0680 without hosted-history evidence; preserve and reconcile before further rename."
+    }
+  ],
+  "legacyRenames": [
+    {
+      "original": "068_enforce_booking_availability_integrity.sql",
+      "current": "0680_enforce_booking_availability_integrity.sql",
+      "reason": "Rename landed upstream while CI/CD work was in progress; hosted migration history and reapplication risk remain unverified."
+    }
+  ],
+  "mutableMigrationFiles": [],
+  "destructiveStatements": [],
+  "sensitiveStatements": []
+}

@@ -55,7 +55,7 @@ reset --local` destroys and recreates the **local** database, applies migrations
 then runs `supabase/seed.sql`; never remove `--local` or use it against a hosted
 project. `pnpm db:types` overwrites the generated database type file from the
 local schema, so run it only after all migrations apply successfully. Duplicate
-migration version `068` is a known history risk; read [Migrations](migrations.md)
+migration versions `0680`/`071` have known history risks; read [Migrations](migrations.md)
 before resetting or pushing.
 
 To compare a deliberately linked hosted project without applying SQL:

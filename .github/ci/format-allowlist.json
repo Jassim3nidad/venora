@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "exactFiles": [
+    {
+      "file": "apps/web/src/features/suppliers/application/actions.ts",
+      "reason": "Upstream supplier-map commit 323d823 introduced repository-wide Prettier drift in this file while CI/CD work was in progress.",
+      "removalCondition": "Format this file in a dedicated reviewed style-only change."
+    },
+    {
+      "file": "apps/web/src/features/suppliers/application/queries.ts",
+      "reason": "Upstream supplier-map commit 323d823 introduced repository-wide Prettier drift in this file while CI/CD work was in progress.",
+      "removalCondition": "Format this file in a dedicated reviewed style-only change."
+    },
+    {
+      "file": "apps/web/src/features/suppliers/data/sample-suppliers.ts",
+      "reason": "Upstream supplier-map commit 323d823 introduced repository-wide Prettier drift in this file while CI/CD work was in progress.",
+      "removalCondition": "Format this file in a dedicated reviewed style-only change."
+    },
+    {
+      "file": "apps/web/src/features/suppliers/ui/SupplierProfileForm.tsx",
+      "reason": "Upstream supplier-map commit 323d823 introduced repository-wide Prettier drift in this file while CI/CD work was in progress.",
+      "removalCondition": "Format this file in a dedicated reviewed style-only change."
+    }
+  ]
+}
