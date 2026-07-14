@@ -19,14 +19,19 @@ const suites = [
   { name: "ai", script: "test:ai", canonical: false },
 ];
 
-function run(args) {
+function run(args, envOverrides = {}) {
   const executable =
     process.platform === "win32" ? `${pnpm} ${args.join(" ")}` : pnpm;
   const executableArgs = process.platform === "win32" ? [] : args;
   const result = spawnSync(executable, executableArgs, {
     cwd: root,
     encoding: "utf8",
-    env: { ...process.env, FORCE_COLOR: "0" },
+    env: {
+      ...process.env,
+      ...envOverrides,
+      FORCE_COLOR: "0",
+      NO_COLOR: "1",
+    },
     shell: process.platform === "win32",
     maxBuffer: 50 * 1024 * 1024,
   });
@@ -35,16 +40,21 @@ function run(args) {
   return { code: result.status ?? 1, output };
 }
 
+function stripAnsi(value) {
+  return value.replace(/\u001B(?:[@-_]|\[[0-?]*[ -/]*[@-~])/g, "");
+}
+
 const results = [];
 for (const suite of suites) {
   console.log(`\n[ci-tests] ${suite.name}`);
   const runResult = run(["run", suite.script]);
-  const vitestMatch = runResult.output.match(/Tests\s+(\d+)\s+passed/i);
-  const vitestFailedMatch = runResult.output.match(/Tests\s+(\d+)\s+failed/i);
-  const vitestSkippedMatch = runResult.output.match(
+  const normalizedOutput = stripAnsi(runResult.output);
+  const vitestMatch = normalizedOutput.match(/Tests\s+(\d+)\s+passed/i);
+  const vitestFailedMatch = normalizedOutput.match(/Tests\s+(\d+)\s+failed/i);
+  const vitestSkippedMatch = normalizedOutput.match(
     /Tests[\s\S]*?(\d+)\s+skipped/i,
   );
-  const denoMatch = runResult.output.match(/(\d+) passed \| 0 failed/i);
+  const denoMatch = normalizedOutput.match(/(\d+) passed \| 0 failed/i);
   const passed = Number(vitestMatch?.[1] ?? denoMatch?.[1] ?? 0);
   const failed = Number(
     vitestFailedMatch?.[1] ?? (runResult.code === 0 ? 0 : 1),
@@ -65,7 +75,10 @@ for (const suite of suites) {
 }
 
 function discover(label, args) {
-  const result = run(args);
+  const result = run(args, {
+    NEXT_PUBLIC_SUPABASE_URL: "https://ci-discovery.invalid",
+    SUPABASE_SERVICE_ROLE_KEY: "ci-discovery-placeholder",
+  });
   const match = result.output.match(/Total:\s+(\d+) tests?/i);
   return {
     category: label,
