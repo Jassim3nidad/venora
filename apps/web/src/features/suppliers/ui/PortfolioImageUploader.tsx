@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useId } from "react";
 import { Loader2, Plus, GripVertical, Trash2, Star, Image as ImageIcon } from "lucide-react";
 import {
   DndContext,
@@ -114,6 +114,7 @@ export function PortfolioImageUploader({
   maxImages = 12,
 }: PortfolioImageUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dndId = useId();
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -214,7 +215,7 @@ export function PortfolioImageUploader({
       )}
 
       {imageUrls.length > 0 ? (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <DndContext id={dndId} sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={imageUrls} strategy={rectSortingStrategy}>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
               {imageUrls.map((url) => (

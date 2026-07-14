@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import {
   DashboardSubPage,
   DashButton,
@@ -18,7 +19,9 @@ export default async function SupplierPortfolioPage() {
       description="Publish work samples that help customers compare event style, scope, and production quality."
     >
       {profile ? (
-        <SupplierPortfolioManager profile={profile} />
+        <Suspense fallback={<div className="h-40 animate-pulse rounded-2xl bg-slate-100" />}>
+          <SupplierPortfolioManager profile={profile} />
+        </Suspense>
       ) : (
         <EmptyState
           icon="photo_library"

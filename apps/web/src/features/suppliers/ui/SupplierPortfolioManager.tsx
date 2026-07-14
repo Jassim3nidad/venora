@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Plus, Edit2, Star, Calendar, MapPin, EyeOff, LayoutGrid } from "lucide-react";
+import { Plus, Edit2, Star, Calendar, MapPin, EyeOff, LayoutGrid, CheckCircle2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import type {
   SupplierMarketplaceProfile,
   SupplierPortfolioItem,
@@ -13,6 +15,24 @@ export function SupplierPortfolioManager({
 }: {
   profile: SupplierMarketplaceProfile;
 }) {
+  const searchParams = useSearchParams();
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (searchParams.get("saved") === "true") {
+      setSuccessMessage("Project saved successfully.");
+      window.history.replaceState(null, "", "/dashboard/supplier/portfolio");
+    } else if (searchParams.get("published") === "true") {
+      setSuccessMessage("Project published to your live profile.");
+      window.history.replaceState(null, "", "/dashboard/supplier/portfolio");
+    }
+    
+    if (successMessage) {
+      const timer = setTimeout(() => setSuccessMessage(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams, successMessage]);
+
   const sortedPortfolio = [...profile.portfolio].sort((a, b) => {
     if (a.isFeatured !== b.isFeatured) return a.isFeatured ? -1 : 1;
     return a.sortOrder - b.sortOrder || (a.title || "").localeCompare(b.title || "");
@@ -20,6 +40,12 @@ export function SupplierPortfolioManager({
 
   return (
     <div className="space-y-6">
+      {successMessage && (
+        <div className="flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800">
+          <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+          <span className="text-sm font-semibold">{successMessage}</span>
+        </div>
+      )}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-xl font-bold text-slate-800">Portfolio Projects</h2>

@@ -60,6 +60,21 @@ async function getOwnedSupplierProfile(supabase: any, userId: string) {
   return data as { id: string; business_name: string; profile_id: string } | null;
 }
 
+async function generateUniqueSlug(supabase: any, baseSlug: string, excludeId?: string) {
+  let slug = baseSlug || "supplier";
+  let counter = 1;
+  while (true) {
+    let query = supabase.from("supplier_profiles").select("id").eq("slug", slug);
+    if (excludeId) query = query.neq("id", excludeId);
+    
+    const { data } = await query.maybeSingle();
+    if (!data) return slug;
+    
+    slug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+}
+
 export async function upsertSupplierProfileAction(rawInput: unknown) {
   return createServerAction(supplierProfileSchema, async (input) => {
     const { supabase, user } = await requireUser();
@@ -86,20 +101,20 @@ export async function upsertSupplierProfileAction(rawInput: unknown) {
       minimum_booking_notice_days: input.minimumBookingNoticeDays,
     };
 
+    const baseSlug = input.businessName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const slug = await generateUniqueSlug(supabase, baseSlug, existing?.id);
+
     const { data, error } = existing
       ? await supabase
           .from("supplier_profiles")
-          .update(payload)
+          .update({ ...payload, slug })
           .eq("id", existing.id)
-          .select("id")
+          .select("id, slug")
           .single()
       : await supabase
           .from("supplier_profiles")
-          .insert({
-            ...payload,
-            slug: `${input.businessName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}-${Math.random().toString(36).substring(2, 10).padEnd(8, "0")}`,
-          })
-          .select("id")
+          .insert({ ...payload, slug })
+          .select("id, slug")
           .single();
 
     throwIfSupabaseError(error);
@@ -112,7 +127,7 @@ export async function upsertSupplierProfileAction(rawInput: unknown) {
 
     return {
       supplierId: data.id as string,
-      slug: data.id as string,
+      slug: data.slug as string,
     };
   }, rawInput);
 }

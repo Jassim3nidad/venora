@@ -3,7 +3,7 @@ import { z } from "zod";
 const priceUnitSchema = z.enum(["per_event", "per_hour", "per_pax", "per_day"]);
 
 const emptyToUndefined = (value: unknown) =>
-  typeof value === "string" && value.trim() === "" ? undefined : value;
+  value === null || (typeof value === "string" && value.trim() === "") ? undefined : value;
 
 const optionalText = (max = 1000) =>
   z.preprocess(

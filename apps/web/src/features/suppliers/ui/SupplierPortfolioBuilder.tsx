@@ -80,9 +80,18 @@ export function SupplierPortfolioBuilder({
           return;
         }
 
-        await upsertSupplierPortfolioAction(payload);
-        router.push("/dashboard/supplier/portfolio");
-        router.refresh();
+        const response = await upsertSupplierPortfolioAction(payload);
+        
+        if (response?.error) {
+          setError(response.error.message);
+          return;
+        }
+
+        if (payload.status === "published") {
+          router.push("/dashboard/supplier/portfolio?published=true");
+        } else {
+          router.push("/dashboard/supplier/portfolio?saved=true");
+        }
       } catch (err: any) {
         setError(err.message || "Failed to save portfolio project");
       }
