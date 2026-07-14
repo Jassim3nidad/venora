@@ -1716,45 +1716,14 @@
     },
     "/api/debug": {
       "get": {
-        "summary": "Run diagnostic inquiry lookup",
-        "description": "Unsupported diagnostic route with no explicit environment/auth/permission guard. It attempts auth.admin.listUsers using the normal server client and returns first-user inquiry data if privileged access exists. Do not expose as supported production API.",
+        "summary": "Return not found for the disabled diagnostic route",
+        "description": "The former diagnostic implementation is disabled. Every request receives an empty 404 response and no user, inquiry, environment, stack, or configuration data.",
         "operationId": "getApiDebug",
         "tags": ["Internal"],
         "x-venora-surface": "next-route-handler",
         "security": [],
         "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "type": "object",
-                      "required": ["error"],
-                      "properties": { "error": { "type": "string" } }
-                    },
-                    {
-                      "type": "object",
-                      "required": ["customerId", "count", "inquiries"],
-                      "properties": {
-                        "customerId": { "type": "string", "format": "uuid" },
-                        "count": { "type": "integer" },
-                        "inquiries": {
-                          "type": "array",
-                          "items": {
-                            "$ref": "#/components/schemas/GenericObject"
-                          }
-                        }
-                      }
-                    }
-                  ]
-                },
-                "example": { "error": "User not allowed" }
-              }
-            }
-          },
-          "500": { "$ref": "#/components/responses/InternalError" }
+          "404": { "description": "Not found; diagnostic endpoint is disabled" }
         },
         "deprecated": true
       }
