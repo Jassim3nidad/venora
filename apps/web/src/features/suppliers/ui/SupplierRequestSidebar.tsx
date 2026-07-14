@@ -161,7 +161,7 @@ export function SupplierRequestSidebar({
 
     return (
       <div
-        className="sticky top-28 w-full min-w-0 rounded-3xl border border-[#E5E7EB] bg-white p-6 shadow-xl shadow-slate-200/40"
+        className="w-full min-w-0 rounded-3xl border border-[#E5E7EB] bg-white p-6 shadow-xl shadow-slate-200/40"
         id="supplier-request-card"
       >
         <div className="mb-6 flex flex-col gap-1">
@@ -190,7 +190,7 @@ export function SupplierRequestSidebar({
   if (isOwner) {
     return (
       <div
-        className="sticky top-28 w-full min-w-0 rounded-3xl border border-indigo-200 bg-indigo-50/50 p-6 shadow-xl shadow-indigo-100/40"
+        className="w-full min-w-0 rounded-3xl border border-indigo-200 bg-indigo-50/50 p-6 shadow-xl shadow-indigo-100/40"
         id="supplier-request-card"
       >
         <div className="flex items-center gap-2 mb-2">
@@ -218,7 +218,7 @@ export function SupplierRequestSidebar({
   if (!isExpanded) {
     return (
       <div
-        className="sticky top-28 w-full min-w-0 rounded-3xl border border-[#E5E7EB] bg-white p-6 shadow-xl shadow-slate-200/40 transition-all"
+        className="w-full min-w-0 rounded-3xl border border-[#E5E7EB] bg-white p-6 shadow-xl shadow-slate-200/40 transition-all"
         id="supplier-request-card"
       >
         <div className="mb-6 flex flex-col gap-1">
@@ -332,7 +332,7 @@ export function SupplierRequestSidebar({
   // 5. Logged in, expanded state, ready to fill request
   return (
     <div
-      className="sticky top-28 w-full min-w-0 rounded-3xl border border-[#E5E7EB] bg-white p-6 shadow-xl shadow-slate-200/40"
+      className="w-full min-w-0 rounded-3xl border border-[#E5E7EB] bg-white p-6 shadow-xl shadow-slate-200/40"
       id="supplier-request-card"
     >
       <div className="mb-5 flex items-center justify-between">
