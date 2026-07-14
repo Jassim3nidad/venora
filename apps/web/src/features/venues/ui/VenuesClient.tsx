@@ -39,6 +39,7 @@ import {
   toggleFavoriteAction,
   loadMoreVenuesAction,
 } from "../application/actions";
+import { getRemainingVenueCount } from "../utils/venue-pagination";
 
 export interface Venue {
   id: string | number;
@@ -1106,7 +1107,7 @@ export default function VenuesClient({
 
   const visibleVenues = filtered.slice(0, visibleCount);
   const hasMoreVenues = visibleCount < filtered.length || hasMoreDbVenues;
-  const remainingVenues = filtered.length - visibleCount;
+  const remainingVenues = getRemainingVenueCount(filtered.length, visibleCount);
 
   const handleLoadMore = async () => {
     if (visibleCount < filtered.length) {
