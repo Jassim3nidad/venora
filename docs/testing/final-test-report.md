@@ -142,17 +142,47 @@ Docker. Hosted history requires `SUPABASE_ACCESS_TOKEN`.
 
 Created:
 
-- Six focused application/component/security test or utility files under
-  `apps/web/src/`
-- Fifteen documents under `docs/testing/`
-- Four focused validation/performance scripts under `scripts/`
+- `apps/web/src/components/dashboard/enterprise/ui.component.test.ts`
+- `apps/web/src/features/venues/utils/venue-pagination.test.ts`
+- `apps/web/src/features/venues/utils/venue-pagination.ts`
+- `apps/web/src/lib/security/debug-route.test.ts`
+- `apps/web/src/lib/security/file-signatures.test.ts`
+- `apps/web/src/lib/security/file-signatures.ts`
+- `docs/testing/accessibility-tests.md`
+- `docs/testing/coverage-matrix.md`
+- `docs/testing/database-and-rls.md`
+- `docs/testing/e2e-scenarios.md`
+- `docs/testing/execution-guide.md`
+- `docs/testing/final-test-report.md`
+- `docs/testing/flakiness.md`
+- `docs/testing/integration-tests.md`
+- `docs/testing/payment-tests.md`
+- `docs/testing/performance-tests.md`
+- `docs/testing/security-tests.md`
+- `docs/testing/test-data.md`
+- `docs/testing/test-inventory.md`
+- `docs/testing/test-strategy.md`
+- `docs/testing/unit-tests.md`
+- `scripts/run-local-performance-smoke.mjs`
+- `scripts/scan-changed-secrets.mjs`
+- `scripts/validate-database-contracts.mjs`
+- `scripts/validate-test-suite.mjs`
 - `supabase/migrations/071_tighten_venue_media_storage_ownership.sql`
 
 Modified:
 
-- Debug route, upload finalization, venue count UI, notification E2E, and Vitest
-  configuration
-- `package.json`, documentation indexes, OpenAPI generator/output/inventory
+- `apps/web/app/api/debug/route.ts`
+- `apps/web/e2e/notifications.spec.ts`
+- `apps/web/src/features/partner-applications/application/upload-actions.ts`
+- `apps/web/src/features/venues/ui/VenuesClient.tsx`
+- `apps/web/vitest.config.ts`
+- `docs/README.md`
+- `docs/api/README.md`
+- `docs/api/endpoint-inventory.md`
+- `docs/api/openapi.json`
+- `docs/testing.md`
+- `package.json`
+- `scripts/generate-openapi.mjs`
 
 The Git handoff records exact commit hashes because a commit cannot reliably
 self-embed its own final hash.
