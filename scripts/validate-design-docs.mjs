@@ -41,9 +41,9 @@ for (const file of requiredDocs) {
 if (existsSync(routeMatrixPath)) {
   const matrix = readFileSync(routeMatrixPath, "utf8");
   const pages = walk(appRoot, (file) => file.endsWith(`${sep}page.tsx`));
-  if (pages.length !== 98) {
+  if (pages.length !== 100) {
     errors.push(
-      `route baseline changed: expected 98 page files, found ${pages.length}`,
+      `route baseline changed: expected 100 page files, found ${pages.length}`,
     );
   }
   for (const page of pages) {
@@ -110,5 +110,5 @@ if (errors.length > 0) {
 }
 
 console.log(
-  `Design documentation valid: ${requiredDocs.length} files, 98 routes, 32 flows, ${mermaidCount} Mermaid diagrams.`,
+  `Design documentation valid: ${requiredDocs.length} files, 100 routes, 32 flows, ${mermaidCount} Mermaid diagrams.`,
 );

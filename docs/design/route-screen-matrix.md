@@ -108,20 +108,22 @@ but not runtime-verified, **P** partially implemented, **PH** placeholder,
 
 ## Supplier
 
-| Route                                | Source                                                               | Screen               | Access                  | Status | Runtime     |
-| ------------------------------------ | -------------------------------------------------------------------- | -------------------- | ----------------------- | ------ | ----------- |
-| `/dashboard/supplier`                | `apps/web/app/(supplier)/dashboard/supplier/page.tsx`                | Supplier overview    | Supplier/admin          | U      | Source-only |
-| `/dashboard/supplier/analytics`      | `apps/web/app/(supplier)/dashboard/supplier/analytics/page.tsx`      | Supplier analytics   | Supplier/admin          | U      | Source-only |
-| `/dashboard/supplier/bookings`       | `apps/web/app/(supplier)/dashboard/supplier/bookings/page.tsx`       | Supplier jobs        | Supplier/admin          | U      | Source-only |
-| `/dashboard/supplier/calendar`       | `apps/web/app/(supplier)/dashboard/supplier/calendar/page.tsx`       | Availability         | Supplier/admin          | U      | Source-only |
-| `/dashboard/supplier/inquiries`      | `apps/web/app/(supplier)/dashboard/supplier/inquiries/page.tsx`      | Supplier inquiries   | Supplier/admin          | U      | Source-only |
-| `/dashboard/supplier/inquiries/[id]` | `apps/web/app/(supplier)/dashboard/supplier/inquiries/[id]/page.tsx` | Inquiry/event detail | Eligible supplier/admin | U      | Source-only |
-| `/dashboard/supplier/portfolio`      | `apps/web/app/(supplier)/dashboard/supplier/portfolio/page.tsx`      | Portfolio            | Supplier/admin          | U      | Source-only |
-| `/dashboard/supplier/profile`        | `apps/web/app/(supplier)/dashboard/supplier/profile/page.tsx`        | Business profile     | Supplier/admin          | U      | Source-only |
-| `/dashboard/supplier/quotes`         | `apps/web/app/(supplier)/dashboard/supplier/quotes/page.tsx`         | Quotes               | Supplier/admin          | U      | Source-only |
-| `/dashboard/supplier/quotes/[id]`    | `apps/web/app/(supplier)/dashboard/supplier/quotes/[id]/page.tsx`    | Quote detail         | Eligible supplier/admin | U      | Source-only |
-| `/dashboard/supplier/reviews`        | `apps/web/app/(supplier)/dashboard/supplier/reviews/page.tsx`        | Supplier reviews     | Supplier/admin          | U      | Source-only |
-| `/dashboard/supplier/services`       | `apps/web/app/(supplier)/dashboard/supplier/services/page.tsx`       | Services/packages    | Supplier/admin          | U      | Source-only |
+| Route                                     | Source                                                                    | Screen                 | Access                  | Status | Runtime     |
+| ----------------------------------------- | ------------------------------------------------------------------------- | ---------------------- | ----------------------- | ------ | ----------- |
+| `/dashboard/supplier`                     | `apps/web/app/(supplier)/dashboard/supplier/page.tsx`                     | Supplier overview      | Supplier/admin          | U      | Source-only |
+| `/dashboard/supplier/analytics`           | `apps/web/app/(supplier)/dashboard/supplier/analytics/page.tsx`           | Supplier analytics     | Supplier/admin          | U      | Source-only |
+| `/dashboard/supplier/bookings`            | `apps/web/app/(supplier)/dashboard/supplier/bookings/page.tsx`            | Supplier jobs          | Supplier/admin          | U      | Source-only |
+| `/dashboard/supplier/calendar`            | `apps/web/app/(supplier)/dashboard/supplier/calendar/page.tsx`            | Availability           | Supplier/admin          | U      | Source-only |
+| `/dashboard/supplier/inquiries`           | `apps/web/app/(supplier)/dashboard/supplier/inquiries/page.tsx`           | Supplier inquiries     | Supplier/admin          | U      | Source-only |
+| `/dashboard/supplier/inquiries/[id]`      | `apps/web/app/(supplier)/dashboard/supplier/inquiries/[id]/page.tsx`      | Inquiry/event detail   | Eligible supplier/admin | U      | Source-only |
+| `/dashboard/supplier/portfolio`           | `apps/web/app/(supplier)/dashboard/supplier/portfolio/page.tsx`           | Portfolio              | Supplier/admin          | U      | Source-only |
+| `/dashboard/supplier/portfolio/new`       | `apps/web/app/(supplier)/dashboard/supplier/portfolio/new/page.tsx`       | Add portfolio project  | Supplier/admin          | U      | Source-only |
+| `/dashboard/supplier/portfolio/[id]/edit` | `apps/web/app/(supplier)/dashboard/supplier/portfolio/[id]/edit/page.tsx` | Edit portfolio project | Supplier/admin          | U      | Source-only |
+| `/dashboard/supplier/profile`             | `apps/web/app/(supplier)/dashboard/supplier/profile/page.tsx`             | Business profile       | Supplier/admin          | U      | Source-only |
+| `/dashboard/supplier/quotes`              | `apps/web/app/(supplier)/dashboard/supplier/quotes/page.tsx`              | Quotes                 | Supplier/admin          | U      | Source-only |
+| `/dashboard/supplier/quotes/[id]`         | `apps/web/app/(supplier)/dashboard/supplier/quotes/[id]/page.tsx`         | Quote detail           | Eligible supplier/admin | U      | Source-only |
+| `/dashboard/supplier/reviews`             | `apps/web/app/(supplier)/dashboard/supplier/reviews/page.tsx`             | Supplier reviews       | Supplier/admin          | U      | Source-only |
+| `/dashboard/supplier/services`            | `apps/web/app/(supplier)/dashboard/supplier/services/page.tsx`            | Services/packages      | Supplier/admin          | U      | Source-only |
 
 ## Venue owner
 
