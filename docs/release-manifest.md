@@ -17,7 +17,7 @@ Artifacts are runtime evidence and are not committed.
 | `deploymentVerification`     | Vercel state/commit/route verification                       |
 | `hostedEnvironment`          | Non-production guard result                                  |
 | `hostedStorageRls`           | Behavioral venue-media RLS result                            |
-| `migrations`                 | Count, latest files, and duplicate-068 reconciliation state  |
+| `migrations`                 | Count, latest files, 0680 rename, and duplicate-071 state    |
 | `edgeFunctionsDeployed`      | Exact functions operated on in this run                      |
 | `vercelDeploymentIdentifier` | Vercel deployment evidence when verified                     |
 | `productionUrl`              | Verified production origin, production tier only             |

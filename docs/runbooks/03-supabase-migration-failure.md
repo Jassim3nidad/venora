@@ -19,7 +19,8 @@ Confirm project/environment, failing file/version, operator, and exact command.
 ## Safety warnings
 
 Stop. Never reset production, rerun blindly, delete/rename applied files, or
-repair history without database-owner approval. Duplicate `068` is known.
+repair history without database-owner approval. The `0680` rename and duplicate
+`071` are known.
 
 ## Investigation steps
 

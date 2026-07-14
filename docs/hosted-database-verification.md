@@ -39,21 +39,24 @@ The check validates behavior, not only SQL text. Migration
 ## Migration history
 
 Before any production apply, compare `supabase migration list --linked` against
-the repository. Version `068` has two historical files:
+the repository. While this CI/CD work was being rebased, upstream commit
+`323d823` renamed `068_enforce_booking_availability_integrity.sql` (originally
+added at `b88fbd5d556dcc213bbdcd3f9d5051afd639cd9b`) to
+`0680_enforce_booking_availability_integrity.sql`. The local duplicate `068` is
+gone, but hosted history was not available to prove that renaming was safe or
+that the SQL will not be treated as a new `0680` migration. CI tracks the exact
+rename and ordering exception; it does not declare reconciliation complete.
 
-- `068_customer_supplier_inquiry_tracking.sql` added at
-  `7308f7c55d02e7eaa455b8cd8b8309c411650a77`; it adds customer quote-response
-  and inquiry notification behavior, including a security-definer RPC.
-- `068_enforce_booking_availability_integrity.sql` added at
-  `b88fbd5d556dcc213bbdcd3f9d5051afd639cd9b`; it adds booking-availability
-  functions and trigger enforcement.
+The same upstream change introduced `071_supplier_location_coverage.sql`, which
+now duplicates `071_tighten_venue_media_storage_ownership.sql`. Both exact files
+are allowlisted only to preserve current `main`; any third duplicate fails. The
+hosted workflow requires both the supplier-location columns and venue-media
+policy definitions, because a `071` history row alone cannot prove which SQL
+contract ran.
 
-Both are exactly allowlisted for static validation. Local Git history and SQL
-cannot prove which identifier/content hosted Supabase recorded or whether both
-contracts exist in staging/production. Renaming either file is therefore unsafe.
-After an authorized hosted history/schema comparison, prefer an explicit
-forward reconciliation migration if any object is missing. Until then, do not
-rename, delete, or repair either entry; new duplicates still fail CI.
+Do not rename, delete, repair, or mark these entries applied without authorized
+staging/production history and schema evidence. Prefer an approved forward
+reconciliation migration if either contract is missing.
 
 ## Commands
 

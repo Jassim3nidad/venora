@@ -39,6 +39,12 @@ then domain-specific booking, payment, analytics, security, and AI gates. It
 requires at least 124 canonical Vitest tests and writes machine-readable and
 Markdown summaries to `artifacts/ci/`.
 
+Four supplier files that arrived unformatted in upstream commit `323d823` are
+exactly listed in `.github/ci/format-allowlist.json`. The formatter verifies each
+was already unformatted at the comparison base and emits visible warnings; new
+files or newly formatted baselines cannot use the exception. Remove entries in
+a dedicated style-only change rather than mixing broad formatting into fixes.
+
 `pnpm edge:validate` inventories every Edge Function and checks entrypoints,
 environment access, CORS/preflight, error handling, authentication assumptions,
 service-role use, and obvious secret literals. Full Deno formatting/type/import

@@ -23,7 +23,8 @@ from the reviewed release.
 6. Run protected staging verification for release-relevant hosted behavior.
 7. Merge. Confirm local `main`, `origin/main`, and the approved SHA match.
 8. Run `database-plan` in the protected target environment. Review pending
-   migrations and the known duplicate `068` history before any apply.
+   migrations, the upstream `068`-to-`0680` rename, and duplicate `071` before
+   any apply.
 9. Apply migrations only with exact `APPLY production` confirmation and required
    reviewer approval. Deploy Edge Functions individually with an explicit,
    verified JWT mode.

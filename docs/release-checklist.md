@@ -16,7 +16,8 @@
 - [ ] Exact full SHA and change ticket are recorded.
 - [ ] Correct GitHub environment and Supabase project ref are confirmed.
 - [ ] `database-plan` output is reviewed.
-- [ ] Hosted migration history is reconciled for duplicate version `068`.
+- [ ] Hosted history is reconciled for the upstream `068`-to-`0680` rename and
+      duplicate version `071`.
 - [ ] Migration `071_tighten_venue_media_storage_ownership.sql` is present where
       venue-media RLS verification is required.
 - [ ] Edge Function name and existing/intended `verify_jwt` mode are verified.
