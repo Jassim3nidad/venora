@@ -1,10 +1,11 @@
 # Deployment
 
-Venora is structured for GitHub source control, Vercel Next.js hosting, and a
-hosted Supabase project. The repository contains no `.github` workflows,
-`vercel.json`, or repository-verifiable Git-to-Vercel automation. Vercel project
-settings, Git integration, production branch, deployed commit, Supabase link,
-function settings, and provider dashboards must be checked externally.
+Venora uses GitHub Actions for deterministic CI, security analysis, protected
+hosted verification, and manual Supabase operations. Vercel Git integration
+remains the application deployment authority; no repository workflow calls the
+Vercel CLI. Dashboard settings, environment protection, deployed commit,
+Supabase link/history, function settings, and provider dashboards remain
+external state that must be checked explicitly. See [CI/CD](ci-cd.md).
 
 ## Environments
 
@@ -26,14 +27,14 @@ without a preview build. Confirm install uses pnpm 9/lockfile, framework is
 Next.js, output is `.next`, production branch is intended, and every environment
 has the correct variables.
 
-No automatic production deployment or preview behavior is claimed until the
-Vercel/GitHub dashboards prove it. Record the source commit shown by Vercel and
-compare it to approved Git history.
+No automatic production/preview behavior is claimed until Vercel/GitHub
+dashboards prove it. Use the protected [deployment verification](production-verification.md)
+workflow to compare Vercel metadata with the approved full commit SHA.
 
 ## Supabase and integrations
 
-- Review and rehearse SQL; apply production migrations only through an approved
-  privileged workflow. There is no verified automatic migration pipeline.
+- Review and rehearse SQL; plan/apply production migrations only through the
+  manual protected workflow after required reviewer approval.
 - Deploy Edge Functions and set secrets for the confirmed Supabase project;
   verify JWT/auth configuration per function in the dashboard/CLI.
 - Verify four Storage buckets and policies rather than recreating them manually.
@@ -48,12 +49,12 @@ compare it to approved Git history.
 
 1. Confirm approved commit, clean diff, release scope, operator, and recovery
    plan; review migration and secret changes.
-2. Run lint, type-check, tests, build, and all documentation validators locally
-   or in a trusted CI environment.
+2. Run `pnpm validate:ci` and the production dependency audit locally or in a
+   trusted CI environment.
 3. Rehearse pending migrations against isolated data and verify generated types.
 4. Push the reviewed application commit. Confirm the exact remote commit.
-5. Apply only approved production migrations to the confirmed project and
-   capture evidence.
+5. Run the protected database plan; apply only approved migrations to the
+   confirmed project and capture evidence.
 6. Deploy/update Edge Functions, then set/verify server secrets without logging
    values.
 7. Trigger or verify Vercel deployment through the externally configured flow.
@@ -61,7 +62,8 @@ compare it to approved Git history.
 9. Run safe public/authenticated smoke tests using dedicated accounts.
 10. Verify PayMongo webhook/test evidence as appropriate, Resend, push, Storage,
     analytics, and AI status.
-11. Record release result, known warnings, dashboard checks, and follow-up.
+11. Generate the [release manifest](release-manifest.md) and record warnings,
+    dashboard checks, and follow-up.
 
 Application-first versus database-first ordering can differ for a backwards-
 compatible migration. Every release must be designed so old and new app versions

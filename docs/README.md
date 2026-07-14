@@ -16,7 +16,7 @@ the system you are changing.
   [notifications](notifications.md)
 - [Analytics](analytics.md) and [AI](ai.md)
 - [Testing](testing.md), [quality strategy](testing/test-strategy.md),
-  [deployment](deployment.md), and
+  [CI/CD](ci-cd.md), [deployment](deployment.md), and
   [troubleshooting](troubleshooting.md)
 - [Known limitations](known-limitations.md)
 - [Operational runbooks](runbooks/README.md)
@@ -37,7 +37,7 @@ used as current operational truth without revalidation.
 
 ## Maintaining documentation
 
-Run `pnpm docs:all:validate` from the repository root. Update API docs for
+Run `pnpm docs:all:validate` and `pnpm docs:ci:validate` from the repository root. Update API docs for
 contract changes, design docs for route/flow changes, and technical docs for
 architecture or operational changes. Never place real credentials, personal
 data, production URLs, or machine-local absolute paths in documentation.
