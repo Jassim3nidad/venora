@@ -507,6 +507,7 @@ export function SupplierProfileForm({
                       <SupplierImageUpload 
                         onUploadSuccess={(url) => setValue("profileImageUrl", url, { shouldDirty: true, shouldValidate: true })} 
                         label="Upload file" 
+                        aspectRatio={1}
                       />
                     </div>
                     <FieldError message={errors.profileImageUrl?.message} />
@@ -546,6 +547,7 @@ export function SupplierProfileForm({
                       <SupplierImageUpload 
                         onUploadSuccess={(url) => setValue("heroImageUrl", url, { shouldDirty: true, shouldValidate: true })} 
                         label="Upload file" 
+                        aspectRatio={16/9}
                       />
                     </div>
                     <FieldError message={errors.heroImageUrl?.message} />

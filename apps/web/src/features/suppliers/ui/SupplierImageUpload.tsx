@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { Loader2, UploadCloud } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { ImageCropperModal } from "./ImageCropperModal";
 
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
@@ -11,18 +12,23 @@ type SupplierImageUploadProps = {
   onUploadSuccess: (url: string) => void;
   label?: string;
   className?: string;
+  aspectRatio?: number;
 };
 
 export function SupplierImageUpload({
   onUploadSuccess,
   label = "Upload Image",
   className = "",
+  aspectRatio = 1,
 }: SupplierImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  const [cropImageUrl, setCropImageUrl] = useState<string | null>(null);
+  const [originalFileName, setOriginalFileName] = useState<string>("");
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = ""; // reset
 
@@ -39,7 +45,14 @@ export function SupplierImageUpload({
       return;
     }
 
+    setOriginalFileName(file.name);
+    setCropImageUrl(URL.createObjectURL(file));
+  };
+
+  const handleCropSubmit = async (croppedBlob: Blob) => {
+    setCropImageUrl(null); // Close modal
     setIsUploading(true);
+    setError(null);
 
     try {
       const supabase = createClient();
@@ -49,12 +62,16 @@ export function SupplierImageUpload({
         throw new Error("You must be logged in to upload images.");
       }
       
-      const storagePath = `${user.id}/supplier-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "")}`;
+      const safeName = originalFileName.replace(/[^a-zA-Z0-9.-]/g, "") || "image.jpg";
+      const storagePath = `${user.id}/supplier-${Date.now()}-${safeName}`;
+
+      // Create a new File from the blob
+      const fileToUpload = new File([croppedBlob], safeName, { type: "image/jpeg" });
 
       // We use the avatars bucket because it's public and allows authenticated self-upload
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(storagePath, file, {
+        .upload(storagePath, fileToUpload, {
           cacheControl: "3600",
           upsert: false,
         });
@@ -74,6 +91,10 @@ export function SupplierImageUpload({
     } finally {
       setIsUploading(false);
     }
+  };
+
+  const handleCloseCrop = () => {
+    setCropImageUrl(null);
   };
 
   return (
@@ -101,6 +122,16 @@ export function SupplierImageUpload({
       />
 
       {error && <p className="text-xs font-semibold text-red-600">{error}</p>}
+
+      {cropImageUrl && (
+        <ImageCropperModal
+          isOpen={!!cropImageUrl}
+          onClose={handleCloseCrop}
+          imageUrl={cropImageUrl}
+          aspectRatio={aspectRatio}
+          onCropSubmit={handleCropSubmit}
+        />
+      )}
     </div>
   );
 }
