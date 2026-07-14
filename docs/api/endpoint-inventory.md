@@ -19,32 +19,32 @@ Generated from repository scan at branch `main`, commit `15e6173b6f695f6d9f5f4a2
 
 ## Next.js operations
 
-| Operation                                      | Source                                                       | OpenAPI                          | Detailed guide                                      |
-| ---------------------------------------------- | ------------------------------------------------------------ | -------------------------------- | --------------------------------------------------- |
-| `GET /api/admin/reports/export`                | `apps/web/app/api/admin/reports/export/route.ts`             | Documented                       | [Overview](README.md)                               |
-| `GET /api/analytics/venue-owner/export`        | `apps/web/app/api/analytics/venue-owner/export/route.ts`     | Documented                       | [Overview](README.md)                               |
-| `GET /api/bookings`                            | `apps/web/app/api/bookings/route.ts`                         | Documented                       | [Overview](README.md)                               |
-| `POST /api/bookings`                           | same                                                         | Documented                       | [Overview](README.md)                               |
-| `POST /api/bookings/{id}/payment`              | `apps/web/app/api/bookings/[id]/payment/route.ts`            | Documented                       | [Webhooks/payments](webhooks.md)                    |
-| `POST /api/bookings/{id}/refund`               | `apps/web/app/api/bookings/[id]/refund/route.ts`             | Documented                       | [Webhooks/payments](webhooks.md)                    |
-| `PATCH /api/bookings/{id}/status`              | `apps/web/app/api/bookings/[id]/status/route.ts`             | Documented                       | [Overview](README.md)                               |
-| `GET /api/debug`                               | `apps/web/app/api/debug/route.ts`                            | Documented, deprecated warning   | [Overview gaps](README.md#confirmed-gaps-and-risks) |
-| `GET /api/notification-preferences`            | `apps/web/app/api/notification-preferences/route.ts`         | Documented                       | [Overview](README.md)                               |
-| `PATCH /api/notification-preferences`          | same                                                         | Documented                       | [Overview](README.md)                               |
-| `GET /api/notifications`                       | `apps/web/app/api/notifications/route.ts`                    | Documented                       | [Overview](README.md)                               |
-| `POST /api/notifications/{id}/read`            | `apps/web/app/api/notifications/[id]/read/route.ts`          | Documented                       | [Overview](README.md)                               |
-| `GET /api/notifications/push-public-key`       | `apps/web/app/api/notifications/push-public-key/route.ts`    | Documented                       | [Overview](README.md)                               |
-| `POST /api/notifications/push-subscriptions`   | `apps/web/app/api/notifications/push-subscriptions/route.ts` | Documented                       | [Overview](README.md)                               |
-| `DELETE /api/notifications/push-subscriptions` | same                                                         | Documented                       | [Overview](README.md)                               |
-| `POST /api/notifications/read-all`             | `apps/web/app/api/notifications/read-all/route.ts`           | Documented                       | [Overview](README.md)                               |
-| `GET /api/suppliers`                           | `apps/web/app/api/suppliers/route.ts`                        | Documented                       | [Overview](README.md)                               |
-| `GET /api/suppliers/{id}`                      | `apps/web/app/api/suppliers/[id]/route.ts`                   | Documented                       | [Overview](README.md)                               |
-| `POST /api/suppliers/{id}/contact`             | `apps/web/app/api/suppliers/[id]/contact/route.ts`           | Documented                       | [Overview](README.md)                               |
-| `POST /api/venues`                             | `apps/web/app/api/venues/route.ts`                           | Documented                       | [Overview](README.md)                               |
-| `POST /api/webhooks/maya`                      | `apps/web/app/api/webhooks/maya/route.ts`                    | Documented, not production-ready | [Webhooks](webhooks.md)                             |
-| `POST /api/webhooks/paymongo`                  | `apps/web/app/api/webhooks/paymongo/route.ts`                | Documented                       | [Webhooks](webhooks.md)                             |
-| `GET /auth/callback`                           | `apps/web/app/auth/callback/route.ts`                        | Documented                       | [Authentication](authentication.md)                 |
-| `GET /logout`                                  | `apps/web/app/logout/route.ts`                               | Documented                       | [Authentication](authentication.md)                 |
+| Operation                                      | Source                                                       | OpenAPI                          | Detailed guide                      |
+| ---------------------------------------------- | ------------------------------------------------------------ | -------------------------------- | ----------------------------------- |
+| `GET /api/admin/reports/export`                | `apps/web/app/api/admin/reports/export/route.ts`             | Documented                       | [Overview](README.md)               |
+| `GET /api/analytics/venue-owner/export`        | `apps/web/app/api/analytics/venue-owner/export/route.ts`     | Documented                       | [Overview](README.md)               |
+| `GET /api/bookings`                            | `apps/web/app/api/bookings/route.ts`                         | Documented                       | [Overview](README.md)               |
+| `POST /api/bookings`                           | same                                                         | Documented                       | [Overview](README.md)               |
+| `POST /api/bookings/{id}/payment`              | `apps/web/app/api/bookings/[id]/payment/route.ts`            | Documented                       | [Webhooks/payments](webhooks.md)    |
+| `POST /api/bookings/{id}/refund`               | `apps/web/app/api/bookings/[id]/refund/route.ts`             | Documented                       | [Webhooks/payments](webhooks.md)    |
+| `PATCH /api/bookings/{id}/status`              | `apps/web/app/api/bookings/[id]/status/route.ts`             | Documented                       | [Overview](README.md)               |
+| `GET /api/debug`                               | `apps/web/app/api/debug/route.ts`                            | Documented, disabled with `404`  | [Overview](README.md)               |
+| `GET /api/notification-preferences`            | `apps/web/app/api/notification-preferences/route.ts`         | Documented                       | [Overview](README.md)               |
+| `PATCH /api/notification-preferences`          | same                                                         | Documented                       | [Overview](README.md)               |
+| `GET /api/notifications`                       | `apps/web/app/api/notifications/route.ts`                    | Documented                       | [Overview](README.md)               |
+| `POST /api/notifications/{id}/read`            | `apps/web/app/api/notifications/[id]/read/route.ts`          | Documented                       | [Overview](README.md)               |
+| `GET /api/notifications/push-public-key`       | `apps/web/app/api/notifications/push-public-key/route.ts`    | Documented                       | [Overview](README.md)               |
+| `POST /api/notifications/push-subscriptions`   | `apps/web/app/api/notifications/push-subscriptions/route.ts` | Documented                       | [Overview](README.md)               |
+| `DELETE /api/notifications/push-subscriptions` | same                                                         | Documented                       | [Overview](README.md)               |
+| `POST /api/notifications/read-all`             | `apps/web/app/api/notifications/read-all/route.ts`           | Documented                       | [Overview](README.md)               |
+| `GET /api/suppliers`                           | `apps/web/app/api/suppliers/route.ts`                        | Documented                       | [Overview](README.md)               |
+| `GET /api/suppliers/{id}`                      | `apps/web/app/api/suppliers/[id]/route.ts`                   | Documented                       | [Overview](README.md)               |
+| `POST /api/suppliers/{id}/contact`             | `apps/web/app/api/suppliers/[id]/contact/route.ts`           | Documented                       | [Overview](README.md)               |
+| `POST /api/venues`                             | `apps/web/app/api/venues/route.ts`                           | Documented                       | [Overview](README.md)               |
+| `POST /api/webhooks/maya`                      | `apps/web/app/api/webhooks/maya/route.ts`                    | Documented, not production-ready | [Webhooks](webhooks.md)             |
+| `POST /api/webhooks/paymongo`                  | `apps/web/app/api/webhooks/paymongo/route.ts`                | Documented                       | [Webhooks](webhooks.md)             |
+| `GET /auth/callback`                           | `apps/web/app/auth/callback/route.ts`                        | Documented                       | [Authentication](authentication.md) |
+| `GET /logout`                                  | `apps/web/app/logout/route.ts`                               | Documented                       | [Authentication](authentication.md) |
 
 ## Supabase Edge Functions
 
@@ -81,4 +81,4 @@ These are requirements or advertised options without a confirmed usable API. The
 - Live Supabase grants, RLS policies, buckets, Edge deployment flags, and function environment values were not queried.
 - Runtime response examples for authenticated routes were not captured because no test credentials were supplied.
 - Complex supplier and AI result objects can evolve with database selects; OpenAPI captures current mapped fields but TypeScript does not enforce every database response at runtime.
-- `/api/debug` is documented because it exists, but should not be treated as supported API.
+- `/api/debug` is documented because the compatibility route exists, but it is disabled and always returns an empty `404`.

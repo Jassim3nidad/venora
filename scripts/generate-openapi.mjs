@@ -1472,32 +1472,17 @@ const definitions = [
   {
     method: "get",
     path: "/api/debug",
-    summary: "Run diagnostic inquiry lookup",
+    summary: "Return not found for the disabled diagnostic route",
     tags: ["Internal"],
     security: [],
     deprecated: true,
     description:
-      "Unsupported diagnostic route with no explicit environment/auth/permission guard. It attempts auth.admin.listUsers using the normal server client and returns first-user inquiry data if privileged access exists. Do not expose as supported production API.",
-    successSchema: {
-      oneOf: [
-        {
-          type: "object",
-          required: ["error"],
-          properties: { error: { type: "string" } },
-        },
-        {
-          type: "object",
-          required: ["customerId", "count", "inquiries"],
-          properties: {
-            customerId: uuid,
-            count: { type: "integer" },
-            inquiries: { type: "array", items: schemaRef("GenericObject") },
-          },
-        },
-      ],
+      "The former diagnostic implementation is disabled. Every request receives an empty 404 response and no user, inquiry, environment, stack, or configuration data.",
+    responses: {
+      404: {
+        description: "Not found; diagnostic endpoint is disabled",
+      },
     },
-    successExample: { error: "User not allowed" },
-    errors: [500],
   },
   {
     method: "post",
@@ -1799,7 +1784,9 @@ function webhookResponses(provider) {
 const paths = {};
 for (const item of definitions) {
   let responses;
-  if (item.redirect) {
+  if (item.responses) {
+    responses = item.responses;
+  } else if (item.redirect) {
     responses = {
       302: {
         description: "Redirect",
