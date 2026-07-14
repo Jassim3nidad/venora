@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "duplicateVersions": [
+    {
+      "version": "068",
+      "files": [
+        "068_customer_supplier_inquiry_tracking.sql",
+        "068_enforce_booking_availability_integrity.sql"
+      ],
+      "reason": "Both migrations predate CI migration ordering enforcement and may already exist in hosted history.",
+      "removalCondition": "Reconcile exact staging and production migration history before assigning new immutable versions."
+    }
+  ],
+  "orderingExceptions": [
+    {
+      "before": "0045_venues_core.sql",
+      "after": "005_bookings.sql",
+      "reason": "Legacy padded filenames are immutable until hosted migration history is reconciled."
+    }
+  ],
+  "mutableMigrationFiles": [],
+  "destructiveStatements": [],
+  "sensitiveStatements": []
+}

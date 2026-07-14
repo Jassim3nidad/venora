@@ -28,11 +28,16 @@ function runGit(args) {
   });
 }
 
+const baseSha = process.env.CI_BASE_SHA?.trim();
+const diffRange =
+  baseSha && /^[0-9a-f]{40}$/i.test(baseSha) && !/^0+$/.test(baseSha)
+    ? [baseSha, "HEAD"]
+    : ["HEAD"];
 const diff = runGit([
   "diff",
   "--no-ext-diff",
   "--unified=0",
-  "HEAD",
+  ...diffRange,
   "--",
   ".",
 ]);
