@@ -1,0 +1,3133 @@
+{
+  "openapi": "3.1.0",
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+  "info": {
+    "title": "Venora API",
+    "version": "2026-07-14",
+    "license": {
+      "name": "Proprietary",
+      "identifier": "LicenseRef-Proprietary"
+    },
+    "summary": "Code-backed HTTP API for Venora",
+    "description": "Next.js Route Handlers and Supabase Edge Functions confirmed at commit 15e6173b6f695f6d9f5f4a29517badf0b3a3a016. Server Actions and PostgreSQL RPCs are documented separately and are not represented as fake REST routes."
+  },
+  "servers": [
+    {
+      "url": "{appUrl}",
+      "description": "Venora Next.js application",
+      "variables": {
+        "appUrl": {
+          "default": "http://localhost:3000",
+          "description": "NEXT_PUBLIC_APP_URL"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "Supabase auth callback and session termination"
+    },
+    { "name": "Bookings", "description": "Booking inquiry and lifecycle" },
+    { "name": "Payments", "description": "Checkout and refund orchestration" },
+    { "name": "Venues", "description": "Venue management" },
+    {
+      "name": "Suppliers",
+      "description": "Supplier marketplace and inquiries"
+    },
+    { "name": "Notifications", "description": "In-app and web-push state" },
+    { "name": "Analytics", "description": "CSV/PDF exports" },
+    { "name": "Admin", "description": "Permission-gated administrator APIs" },
+    { "name": "Webhooks", "description": "Provider-signed payment events" },
+    { "name": "AI", "description": "Supabase AI Edge Functions" },
+    { "name": "Internal", "description": "Unsupported or operational surfaces" }
+  ],
+  "paths": {
+    "/api/bookings": {
+      "get": {
+        "summary": "List customer bookings",
+        "description": "Returns bookings owned by the current user, newest first. Reads bookings and venue summaries. Safe and not application-rate-limited.",
+        "operationId": "getApiBookings",
+        "tags": ["Bookings"],
+        "x-venora-surface": "next-route-handler",
+        "security": [{ "supabaseSession": [] }],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "error"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Booking" }
+                    },
+                    "error": { "type": "null" }
+                  }
+                },
+                "example": { "data": [], "error": null }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      },
+      "post": {
+        "summary": "Create booking inquiry",
+        "description": "Creates a booking through create_booking_inquiry. Database checks publication, capacity, date conflicts, caller, and state; writes history/notifications and synchronizes availability. Duplicate active slots conflict. Not application-rate-limited.",
+        "operationId": "postApiBookings",
+        "tags": ["Bookings"],
+        "x-venora-surface": "next-route-handler",
+        "security": [{ "supabaseSession": [] }],
+        "requestBody": {
+          "required": true,
+          "description": "JSON request body",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/BookingCreateRequest" },
+              "example": {
+                "venueId": "00000000-0000-4000-8000-000000000001",
+                "packageId": null,
+                "eventDate": "2027-02-20",
+                "guestCount": 120,
+                "specialRequests": "Wheelchair-accessible entrance"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "error"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": ["bookingId", "status", "eventDate"],
+                      "properties": {
+                        "bookingId": { "type": "string", "format": "uuid" },
+                        "status": {
+                          "$ref": "#/components/schemas/BookingStatus"
+                        },
+                        "eventDate": { "type": "string", "format": "date" }
+                      }
+                    },
+                    "error": { "type": "null" }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "bookingId": "00000000-0000-4000-8000-000000000001",
+                    "status": "pending",
+                    "eventDate": "2027-02-20"
+                  },
+                  "error": null
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "409": { "$ref": "#/components/responses/Conflict" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "503": { "$ref": "#/components/responses/ServiceUnavailable" }
+        }
+      }
+    },
+    "/api/bookings/{id}/status": {
+      "patch": {
+        "summary": "Transition booking status",
+        "description": "Approves, declines, cancels, or completes through workflow RPCs. Approve/decline require venue organization management or admin; RPCs recheck authorization and state. Side effects include history, invoice, notifications, availability, and cache revalidation.",
+        "operationId": "patchApiBookingsIdStatus",
+        "tags": ["Bookings"],
+        "x-venora-surface": "next-route-handler",
+        "security": [{ "supabaseSession": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Booking ID",
+            "schema": { "type": "string", "format": "uuid" },
+            "example": "00000000-0000-4000-8000-000000000001"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "JSON request body",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/BookingStatusRequest" },
+              "example": {
+                "action": "approve",
+                "totalAmount": 100000,
+                "depositAmount": 30000,
+                "note": "Pay within 48 hours"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "error"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": ["bookingId", "status"],
+                      "properties": {
+                        "bookingId": { "type": "string", "format": "uuid" },
+                        "status": {
+                          "$ref": "#/components/schemas/BookingStatus"
+                        }
+                      }
+                    },
+                    "error": { "type": "null" }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "bookingId": "00000000-0000-4000-8000-000000000001",
+                    "status": "approved"
+                  },
+                  "error": null
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/bookings/{id}/payment": {
+      "post": {
+        "summary": "Start booking checkout",
+        "description": "Starts or resumes the deposit checkout. The RPC locks/reuses one pending transaction; hosted sessions younger than 55 minutes are reused; first-attach-wins persistence converges races. Only PayMongo is registered when configured.",
+        "operationId": "postApiBookingsIdPayment",
+        "tags": ["Bookings", "Payments"],
+        "x-venora-surface": "next-route-handler",
+        "security": [{ "supabaseSession": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Booking ID",
+            "schema": { "type": "string", "format": "uuid" },
+            "example": "00000000-0000-4000-8000-000000000001"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "JSON request body",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PaymentStartRequest" },
+              "example": { "provider": "paymongo" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "error"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Payment" },
+                    "error": { "type": "null" }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "bookingId": "00000000-0000-4000-8000-000000000001",
+                    "transactionId": "00000000-0000-4000-8000-000000000002",
+                    "amount": 30000,
+                    "provider": "paymongo",
+                    "checkoutUrl": "https://checkout.paymongo.com/example",
+                    "status": "pending"
+                  },
+                  "error": null
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "503": { "$ref": "#/components/responses/ServiceUnavailable" }
+        }
+      }
+    },
+    "/api/bookings/{id}/refund": {
+      "post": {
+        "summary": "Request booking refund",
+        "description": "Creates an eligible refund, invokes the provider, records correlation, and may complete synchronously. Customer, venue participant, or admin permission is enforced by RPC; later webhooks reconcile.",
+        "operationId": "postApiBookingsIdRefund",
+        "tags": ["Bookings", "Payments"],
+        "x-venora-surface": "next-route-handler",
+        "security": [{ "supabaseSession": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Booking ID",
+            "schema": { "type": "string", "format": "uuid" },
+            "example": "00000000-0000-4000-8000-000000000001"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "JSON request body",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RefundRequest" },
+              "example": { "reason": "Event cancelled by customer" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "error"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/Refund" },
+                    "error": { "type": "null" }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "refundId": "00000000-0000-4000-8000-000000000003",
+                    "bookingId": "00000000-0000-4000-8000-000000000001",
+                    "amount": 30000,
+                    "status": "processing"
+                  },
+                  "error": null
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "503": { "$ref": "#/components/responses/ServiceUnavailable" }
+        }
+      }
+    },
+    "/api/venues": {
+      "post": {
+        "summary": "Create venue transaction",
+        "description": "Atomically creates venue, packages, and amenities through create_venue_transaction. Requires venue_owner, event_coordinator, or admin and valid organization access. Not idempotent.",
+        "operationId": "postApiVenues",
+        "tags": ["Venues"],
+        "x-venora-surface": "next-route-handler",
+        "security": [{ "supabaseSession": [] }],
+        "requestBody": {
+          "required": true,
+          "description": "JSON request body",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/VenueCreateRequest" },
+              "example": {
+                "venue": {
+                  "organization_id": "00000000-0000-4000-8000-000000000001",
+                  "name": "Harbor Garden Events",
+                  "province": "Cebu",
+                  "city": "Cebu City",
+                  "address": "1 Example Street",
+                  "capacity_max": 200,
+                  "base_price": 85000,
+                  "price_unit": "per_event",
+                  "indoor_outdoor": "both"
+                },
+                "packages": [],
+                "amenities": ["Parking"],
+                "simulate_error": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "type": "object", "additionalProperties": true }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": { "venue_id": "00000000-0000-4000-8000-000000000010" }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegacyErrorEnvelope"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "SERVER_ERROR",
+                    "message": "Request failed."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegacyErrorEnvelope"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "AUTH_REQUIRED",
+                    "message": "Authentication required."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegacyErrorEnvelope"
+                },
+                "example": {
+                  "success": false,
+                  "error": { "code": "FORBIDDEN", "message": "Request failed." }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegacyErrorEnvelope"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "SERVER_ERROR",
+                    "message": "Request failed."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/suppliers": {
+      "get": {
+        "summary": "List public suppliers",
+        "description": "Filters and paginates accredited supplier profiles in application memory. Database errors or empty results fall back to bundled sample suppliers. Safe and not application-rate-limited.",
+        "operationId": "getApiSuppliers",
+        "tags": ["Suppliers"],
+        "x-venora-surface": "next-route-handler",
+        "security": [],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "description": "Search text",
+            "schema": { "type": "string", "maxLength": 120 },
+            "example": "catering"
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "description": "Category slug",
+            "schema": { "type": "string", "maxLength": 80 },
+            "example": "catering"
+          },
+          {
+            "name": "location",
+            "in": "query",
+            "required": false,
+            "description": "Service-area substring",
+            "schema": { "type": "string", "maxLength": 120 },
+            "example": "Cebu"
+          },
+          {
+            "name": "minPrice",
+            "in": "query",
+            "required": false,
+            "description": "Minimum starting price",
+            "schema": { "type": "number" },
+            "example": 10000
+          },
+          {
+            "name": "maxPrice",
+            "in": "query",
+            "required": false,
+            "description": "Maximum starting price",
+            "schema": { "type": "number" },
+            "example": 100000
+          },
+          {
+            "name": "minRating",
+            "in": "query",
+            "required": false,
+            "description": "Minimum average rating",
+            "schema": { "type": "number" },
+            "example": 4
+          },
+          {
+            "name": "accreditedOnly",
+            "in": "query",
+            "required": false,
+            "description": "Accepted but public query already requires accreditation",
+            "schema": { "type": "boolean", "default": true },
+            "example": true
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "Sort order",
+            "schema": {
+              "type": "string",
+              "enum": ["recommended", "rating", "price", "newest"],
+              "default": "recommended"
+            },
+            "example": "recommended"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Page",
+            "schema": { "type": "integer", "minimum": 1, "default": 1 },
+            "example": 1
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Page size",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 24
+            },
+            "example": 24
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "success": { "const": true },
+                    "data": {
+                      "allOf": [{ "$ref": "#/components/schemas/Pagination" }],
+                      "type": "object",
+                      "required": ["items", "categories"],
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/Supplier" }
+                        },
+                        "categories": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/SupplierCategory"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "items": [],
+                    "categories": [],
+                    "page": 1,
+                    "limit": 24,
+                    "totalItems": 0,
+                    "totalPages": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegacyErrorEnvelope"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "SERVER_ERROR",
+                    "message": "Request failed."
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegacyErrorEnvelope"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "SERVER_ERROR",
+                    "message": "Request failed."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/suppliers/{id}": {
+      "get": {
+        "summary": "Get public supplier",
+        "description": "Returns one accredited supplier by UUID or slug with services, portfolio, and reviews. May return a matching bundled sample supplier.",
+        "operationId": "getApiSuppliersId",
+        "tags": ["Suppliers"],
+        "x-venora-surface": "next-route-handler",
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Supplier UUID or slug",
+            "schema": { "type": "string" },
+            "example": "sample-supplier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "success": { "const": true },
+                    "data": { "$ref": "#/components/schemas/Supplier" }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "00000000-0000-4000-8000-000000000001",
+                    "profileId": "00000000-0000-4000-8000-000000000002",
+                    "businessName": "Example Catering",
+                    "slug": "example-catering",
+                    "serviceAreas": ["Cebu"],
+                    "isFeatured": false,
+                    "accreditationStatus": "accredited",
+                    "avgRating": 4.8,
+                    "reviewCount": 12,
+                    "packages": [],
+                    "portfolio": [],
+                    "reviews": []
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegacyErrorEnvelope"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "SERVER_ERROR",
+                    "message": "Request failed."
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegacyErrorEnvelope"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "SERVER_ERROR",
+                    "message": "Request failed."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/suppliers/{id}/contact": {
+      "post": {
+        "summary": "Contact accredited supplier",
+        "description": "Creates a contact request for an accredited supplier. Not idempotent; repeat submissions create multiple inquiries.",
+        "operationId": "postApiSuppliersIdContact",
+        "tags": ["Suppliers"],
+        "x-venora-surface": "next-route-handler",
+        "security": [{ "supabaseSession": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Supplier profile ID",
+            "schema": { "type": "string", "format": "uuid" },
+            "example": "00000000-0000-4000-8000-000000000001"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "JSON request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupplierContactRequest"
+              },
+              "example": {
+                "contactName": "Alex Customer",
+                "contactEmail": "alex@example.test",
+                "eventDate": "2027-02-20",
+                "eventLocation": "Cebu City",
+                "guestCount": 120,
+                "message": "Please send package availability for our event."
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "data"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "success": { "const": true },
+                    "data": {
+                      "type": "object",
+                      "required": ["id", "status", "created_at"],
+                      "properties": {
+                        "id": { "type": "string", "format": "uuid" },
+                        "status": { "type": "string" },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "00000000-0000-4000-8000-000000000003",
+                    "status": "new",
+                    "created_at": "2026-07-14T00:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegacyErrorEnvelope"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "SERVER_ERROR",
+                    "message": "Request failed."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegacyErrorEnvelope"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "AUTH_REQUIRED",
+                    "message": "Authentication required."
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegacyErrorEnvelope"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "SERVER_ERROR",
+                    "message": "Request failed."
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Request failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegacyErrorEnvelope"
+                },
+                "example": {
+                  "success": false,
+                  "error": {
+                    "code": "SERVER_ERROR",
+                    "message": "Request failed."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notifications": {
+      "get": {
+        "summary": "List user notifications",
+        "description": "Bootstraps preferences, then returns current user's non-expired notifications and unread count. Safe except for idempotent preference creation.",
+        "operationId": "getApiNotifications",
+        "tags": ["Notifications"],
+        "x-venora-surface": "next-route-handler",
+        "security": [{ "supabaseSession": [] }],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum results",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "example": 20
+          },
+          {
+            "name": "read",
+            "in": "query",
+            "required": false,
+            "description": "Read-state filter",
+            "schema": {
+              "type": "string",
+              "enum": ["all", "unread", "read"],
+              "default": "all"
+            },
+            "example": "all"
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "description": "Notification kind",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "booking_update",
+                "payment_update",
+                "review_request",
+                "admin_alert",
+                "supplier_inquiry",
+                "system"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "error"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": ["notifications", "unreadCount"],
+                      "properties": {
+                        "notifications": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Notification"
+                          }
+                        },
+                        "unreadCount": { "type": "integer", "minimum": 0 }
+                      }
+                    },
+                    "error": { "type": "null" }
+                  }
+                },
+                "example": {
+                  "data": { "notifications": [], "unreadCount": 0 },
+                  "error": null
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/notifications/{id}/read": {
+      "post": {
+        "summary": "Mark notification read",
+        "description": "Marks one current-user notification read through mark_notification_read. Idempotent.",
+        "operationId": "postApiNotificationsIdRead",
+        "tags": ["Notifications"],
+        "x-venora-surface": "next-route-handler",
+        "security": [{ "supabaseSession": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Notification ID",
+            "schema": { "type": "string", "format": "uuid" },
+            "example": "00000000-0000-4000-8000-000000000001"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "error"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": ["id"],
+                      "properties": {
+                        "id": { "type": "string", "format": "uuid" }
+                      }
+                    },
+                    "error": { "type": "null" }
+                  }
+                },
+                "example": {
+                  "data": { "id": "00000000-0000-4000-8000-000000000001" },
+                  "error": null
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/notifications/read-all": {
+      "post": {
+        "summary": "Mark all notifications read",
+        "description": "Marks all current-user notifications read and returns count. Idempotent after first call.",
+        "operationId": "postApiNotificationsReadAll",
+        "tags": ["Notifications"],
+        "x-venora-surface": "next-route-handler",
+        "security": [{ "supabaseSession": [] }],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "error"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": ["markedCount"],
+                      "properties": {
+                        "markedCount": { "type": "integer", "minimum": 0 }
+                      }
+                    },
+                    "error": { "type": "null" }
+                  }
+                },
+                "example": { "data": { "markedCount": 3 }, "error": null }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/notification-preferences": {
+      "get": {
+        "summary": "Get notification preferences",
+        "description": "Returns current-user preferences and idempotently inserts defaults when absent.",
+        "operationId": "getApiNotificationPreferences",
+        "tags": ["Notifications"],
+        "x-venora-surface": "next-route-handler",
+        "security": [{ "supabaseSession": [] }],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "error"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/NotificationPreferences"
+                    },
+                    "error": { "type": "null" }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "emailEnabled": true,
+                    "smsEnabled": false,
+                    "pushEnabled": true,
+                    "inAppEnabled": true,
+                    "bookingUpdates": true,
+                    "paymentUpdates": true,
+                    "reviewRequests": true,
+                    "adminAlerts": true,
+                    "quietHoursStart": null,
+                    "quietHoursEnd": null,
+                    "timezone": "Asia/Manila"
+                  },
+                  "error": null
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      },
+      "patch": {
+        "summary": "Update notification preferences",
+        "description": "Upserts current-user preferences. SMS is always persisted disabled. Idempotent last-write-wins update.",
+        "operationId": "patchApiNotificationPreferences",
+        "tags": ["Notifications"],
+        "x-venora-surface": "next-route-handler",
+        "security": [{ "supabaseSession": [] }],
+        "requestBody": {
+          "required": true,
+          "description": "JSON request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationPreferences"
+              },
+              "example": {
+                "emailEnabled": true,
+                "smsEnabled": false,
+                "pushEnabled": true,
+                "inAppEnabled": true,
+                "bookingUpdates": true,
+                "paymentUpdates": true,
+                "reviewRequests": true,
+                "adminAlerts": false,
+                "quietHoursStart": "22:00",
+                "quietHoursEnd": "07:00",
+                "timezone": "Asia/Manila"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "error"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/NotificationPreferences"
+                    },
+                    "error": { "type": "null" }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "emailEnabled": true,
+                    "smsEnabled": false,
+                    "pushEnabled": true,
+                    "inAppEnabled": true,
+                    "bookingUpdates": true,
+                    "paymentUpdates": true,
+                    "reviewRequests": true,
+                    "adminAlerts": false,
+                    "quietHoursStart": "22:00",
+                    "quietHoursEnd": "07:00",
+                    "timezone": "Asia/Manila"
+                  },
+                  "error": null
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/notifications/push-public-key": {
+      "get": {
+        "summary": "Get VAPID public key",
+        "description": "Returns the intentionally public Web Push VAPID key. The private key remains server-only.",
+        "operationId": "getApiNotificationsPushPublicKey",
+        "tags": ["Notifications"],
+        "x-venora-surface": "next-route-handler",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "error"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": ["publicKey"],
+                      "properties": { "publicKey": { "type": "string" } }
+                    },
+                    "error": { "type": "null" }
+                  }
+                },
+                "example": {
+                  "data": { "publicKey": "<vapid-public-key>" },
+                  "error": null
+                }
+              }
+            }
+          },
+          "503": { "$ref": "#/components/responses/ServiceUnavailable" }
+        }
+      }
+    },
+    "/api/notifications/push-subscriptions": {
+      "post": {
+        "summary": "Register push subscription",
+        "description": "Upserts current-user push subscription by user and endpoint and clears disabled_at. Idempotent for the same endpoint.",
+        "operationId": "postApiNotificationsPushSubscriptions",
+        "tags": ["Notifications"],
+        "x-venora-surface": "next-route-handler",
+        "security": [{ "supabaseSession": [] }],
+        "requestBody": {
+          "required": true,
+          "description": "JSON request body",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PushSubscription" },
+              "example": {
+                "endpoint": "https://push.example.test/subscription",
+                "keys": {
+                  "p256dh": "example-p256dh-key-material",
+                  "auth": "example-auth-key"
+                },
+                "userAgent": "Example Browser"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "error"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": ["subscriptionId"],
+                      "properties": {
+                        "subscriptionId": { "type": "string", "format": "uuid" }
+                      }
+                    },
+                    "error": { "type": "null" }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "subscriptionId": "00000000-0000-4000-8000-000000000001"
+                  },
+                  "error": null
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      },
+      "delete": {
+        "summary": "Disable push subscription",
+        "description": "Sets disabled_at for the current user's endpoint. Repeating is harmless.",
+        "operationId": "deleteApiNotificationsPushSubscriptions",
+        "tags": ["Notifications"],
+        "x-venora-surface": "next-route-handler",
+        "security": [{ "supabaseSession": [] }],
+        "requestBody": {
+          "required": true,
+          "description": "JSON request body",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PushDeleteRequest" },
+              "example": {
+                "endpoint": "https://push.example.test/subscription"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "error"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": ["disabled"],
+                      "properties": { "disabled": { "const": true } }
+                    },
+                    "error": { "type": "null" }
+                  }
+                },
+                "example": { "data": { "disabled": true }, "error": null }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        }
+      }
+    },
+    "/api/analytics/venue-owner/export": {
+      "get": {
+        "summary": "Export venue owner analytics",
+        "description": "Returns private/no-store CSV or PDF scoped to venues belonging to organizations the venue_owner, event_coordinator, or admin owns or belongs to. Read-only.",
+        "operationId": "getApiAnalyticsVenueOwnerExport",
+        "tags": ["Analytics"],
+        "x-venora-surface": "next-route-handler",
+        "security": [{ "supabaseSession": [] }],
+        "responses": {
+          "200": {
+            "description": "CSV or PDF export",
+            "headers": {
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string",
+                  "example": "attachment; filename=\"venora-analytics.csv\""
+                }
+              },
+              "Cache-Control": {
+                "schema": { "type": "string", "example": "private, no-store" }
+              }
+            },
+            "content": {
+              "text/csv": {
+                "schema": { "type": "string" },
+                "example": "period,revenue,bookings\n2026-01,250000,4"
+              },
+              "application/pdf": {
+                "schema": { "type": "string", "contentEncoding": "base64" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        },
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "description": "Export format",
+            "schema": {
+              "type": "string",
+              "enum": ["csv", "pdf"],
+              "default": "csv"
+            },
+            "example": "csv"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "description": "Start date; defaults to a 12-month range",
+            "schema": { "type": "string", "format": "date" },
+            "example": "2026-01-01"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "description": "End date; must be on/after from",
+            "schema": { "type": "string", "format": "date" },
+            "example": "2026-12-31"
+          }
+        ]
+      }
+    },
+    "/api/admin/reports/export": {
+      "get": {
+        "summary": "Export platform admin report",
+        "description": "Returns platform-wide CSV or PDF. Requires reports.export and writes report_exports plus audit_logs, so GET has an audit side effect.",
+        "operationId": "getApiAdminReportsExport",
+        "tags": ["Admin", "Analytics"],
+        "x-venora-surface": "next-route-handler",
+        "security": [{ "supabaseSession": [] }],
+        "responses": {
+          "200": {
+            "description": "CSV or PDF export",
+            "headers": {
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string",
+                  "example": "attachment; filename=\"venora-analytics.csv\""
+                }
+              },
+              "Cache-Control": {
+                "schema": { "type": "string", "example": "private, no-store" }
+              }
+            },
+            "content": {
+              "text/csv": {
+                "schema": { "type": "string" },
+                "example": "period,revenue,bookings\n2026-01,250000,4"
+              },
+              "application/pdf": {
+                "schema": { "type": "string", "contentEncoding": "base64" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        },
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "description": "Export format",
+            "schema": {
+              "type": "string",
+              "enum": ["csv", "pdf"],
+              "default": "csv"
+            },
+            "example": "csv"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "description": "Start date; defaults to a 12-month range",
+            "schema": { "type": "string", "format": "date" },
+            "example": "2026-01-01"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "description": "End date; must be on/after from",
+            "schema": { "type": "string", "format": "date" },
+            "example": "2026-12-31"
+          }
+        ]
+      }
+    },
+    "/api/webhooks/paymongo": {
+      "post": {
+        "summary": "Receive PayMongo webhook",
+        "description": "Verifies timestamped HMAC over the raw body, atomically claims provider event ID, reconciles stored checkout/payment/refund context, and records outcome. Duplicate/skipped events return 200; 500 asks PayMongo to retry.",
+        "operationId": "postApiWebhooksPaymongo",
+        "tags": ["Webhooks", "Payments"],
+        "x-venora-surface": "next-route-handler",
+        "security": [{ "paymongoSignature": [] }],
+        "requestBody": {
+          "required": true,
+          "description": "JSON request body",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PayMongoWebhook" },
+              "example": {
+                "data": {
+                  "id": "evt_test_example",
+                  "type": "event",
+                  "attributes": {
+                    "type": "checkout_session.payment.paid",
+                    "data": {
+                      "id": "cs_test_example",
+                      "type": "checkout_session",
+                      "attributes": {}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["received", "result"],
+                  "properties": {
+                    "received": { "const": true },
+                    "result": {
+                      "type": "string",
+                      "enum": ["processed", "duplicate", "skipped"]
+                    }
+                  }
+                },
+                "example": { "received": true, "result": "processed" }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid signature",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "error": { "type": "string" } }
+                },
+                "example": { "error": "Invalid signature" }
+              }
+            }
+          },
+          "500": {
+            "description": "Processing failed; provider should retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "error": { "type": "string" } }
+                },
+                "example": { "error": "Processing failed" }
+              }
+            }
+          },
+          "503": {
+            "description": "Gateway not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "error": { "type": "string" } }
+                },
+                "example": { "error": "Provider not configured" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/webhooks/maya": {
+      "post": {
+        "summary": "Receive Maya webhook",
+        "description": "Placeholder receiver. Verifies HMAC-SHA512; failure statuses can fail a payment, but success reconciliation deliberately throws because no current Maya gateway/correlation exists. No event claim/idempotency. Do not enable in production.",
+        "operationId": "postApiWebhooksMaya",
+        "tags": ["Webhooks", "Payments"],
+        "x-venora-surface": "next-route-handler",
+        "security": [{ "mayaSignature": [] }],
+        "requestBody": {
+          "required": true,
+          "description": "JSON request body",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/MayaWebhook" },
+              "example": {
+                "id": "maya-event-example",
+                "status": "PAYMENT_FAILED",
+                "requestReferenceNumber": "maya-reference",
+                "metadata": {
+                  "booking_id": "00000000-0000-4000-8000-000000000001"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["received"],
+                  "properties": { "received": { "const": true } }
+                },
+                "example": { "received": true }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid signature",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "error": { "type": "string" } }
+                },
+                "example": { "error": "Invalid signature" }
+              }
+            }
+          },
+          "500": {
+            "description": "Processing failed or success path not implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "error": { "type": "string" } }
+                },
+                "example": { "error": "Processing failed" }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/auth/callback": {
+      "get": {
+        "summary": "Complete Supabase auth callback",
+        "description": "Handles PKCE/OAuth code exchange, provider errors, and email-token handoff. Returns redirects only and maps raw provider details to stable login error codes.",
+        "operationId": "getAuthCallback",
+        "tags": ["Authentication"],
+        "x-venora-surface": "next-route-handler",
+        "security": [],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "description": "One-time PKCE/OAuth code",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "token_hash",
+            "in": "query",
+            "required": false,
+            "description": "Email verification token hash",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "Supabase verification type",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "next",
+            "in": "query",
+            "required": false,
+            "description": "Requested application destination",
+            "schema": { "type": "string" },
+            "example": "/account"
+          },
+          {
+            "name": "error",
+            "in": "query",
+            "required": false,
+            "description": "Provider error code",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect",
+            "headers": {
+              "Location": {
+                "required": true,
+                "schema": { "type": "string", "format": "uri-reference" },
+                "example": "/account"
+              }
+            }
+          },
+          "307": {
+            "description": "Temporary redirect variant emitted by Next.js",
+            "headers": {
+              "Location": {
+                "required": true,
+                "schema": { "type": "string", "format": "uri-reference" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/logout": {
+      "get": {
+        "summary": "Log out current session",
+        "description": "Calls Supabase signOut, clears auth cookies, and redirects home. Safe to repeat.",
+        "operationId": "getLogout",
+        "tags": ["Authentication"],
+        "x-venora-surface": "next-route-handler",
+        "security": [{ "supabaseSession": [] }, {}],
+        "responses": {
+          "302": {
+            "description": "Redirect",
+            "headers": {
+              "Location": {
+                "required": true,
+                "schema": { "type": "string", "format": "uri-reference" },
+                "example": "/"
+              }
+            }
+          },
+          "307": {
+            "description": "Temporary redirect variant emitted by Next.js",
+            "headers": {
+              "Location": {
+                "required": true,
+                "schema": { "type": "string", "format": "uri-reference" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/debug": {
+      "get": {
+        "summary": "Run diagnostic inquiry lookup",
+        "description": "Unsupported diagnostic route with no explicit environment/auth/permission guard. It attempts auth.admin.listUsers using the normal server client and returns first-user inquiry data if privileged access exists. Do not expose as supported production API.",
+        "operationId": "getApiDebug",
+        "tags": ["Internal"],
+        "x-venora-surface": "next-route-handler",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "required": ["error"],
+                      "properties": { "error": { "type": "string" } }
+                    },
+                    {
+                      "type": "object",
+                      "required": ["customerId", "count", "inquiries"],
+                      "properties": {
+                        "customerId": { "type": "string", "format": "uuid" },
+                        "count": { "type": "integer" },
+                        "inquiries": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/GenericObject"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "example": { "error": "User not allowed" }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        },
+        "deprecated": true
+      }
+    },
+    "/ai-search": {
+      "post": {
+        "summary": "Search venues with AI parsing",
+        "description": "Parses natural language and filters, optionally warms embeddings, invokes search_venues, and writes search/usage logs. AI parsing degrades to deterministic extraction. Each call writes a search log.",
+        "operationId": "postAiSearch",
+        "tags": ["AI", "Venues"],
+        "x-venora-surface": "supabase-edge-function",
+        "security": [{ "bearerAuth": [] }, {}],
+        "requestBody": {
+          "required": true,
+          "description": "JSON request body",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AISearchRequest" },
+              "example": {
+                "query": "garden venue in Cebu under 100000",
+                "filters": { "guests": 120, "parking": true, "per_page": 24 }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "error"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/GenericObject" },
+                    "error": { "type": "null" }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "venues": [],
+                    "parsedFilters": {},
+                    "searchParameters": {},
+                    "fallbackReason": null,
+                    "embeddedVenueCount": 0
+                  },
+                  "error": null
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "502": { "$ref": "#/components/responses/InternalError" }
+        },
+        "servers": [
+          {
+            "url": "{supabaseUrl}/functions/v1",
+            "description": "Supabase Edge Functions",
+            "variables": {
+              "supabaseUrl": { "default": "http://localhost:54321" }
+            }
+          }
+        ]
+      }
+    },
+    "/ai-recommendation": {
+      "post": {
+        "summary": "Recommend venues for customer",
+        "description": "Requires authenticated customer context. Ranks cold-start/personalized venues and writes recommendation impression events and usage logs. Repeat calls create new impressions.",
+        "operationId": "postAiRecommendation",
+        "tags": ["AI", "Venues"],
+        "x-venora-surface": "supabase-edge-function",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "description": "JSON request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AIRecommendationRequest"
+              },
+              "example": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "error"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/GenericObject" },
+                    "error": { "type": "null" }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "venues": [],
+                    "recommendationEventIds": {},
+                    "mode": "cold_start",
+                    "preferenceQuery": null
+                  },
+                  "error": null
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "502": { "$ref": "#/components/responses/InternalError" }
+        },
+        "servers": [
+          {
+            "url": "{supabaseUrl}/functions/v1",
+            "description": "Supabase Edge Functions",
+            "variables": {
+              "supabaseUrl": { "default": "http://localhost:54321" }
+            }
+          }
+        ]
+      }
+    },
+    "/ai-venue-description": {
+      "post": {
+        "summary": "Generate venue copy draft",
+        "description": "Requires venue organization membership or admin. Applies moderation/usage limits, generates bounded copy, logs usage, and inserts a draft. Never publishes automatically and is not idempotent.",
+        "operationId": "postAiVenueDescription",
+        "tags": ["AI", "Venues"],
+        "x-venora-surface": "supabase-edge-function",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "description": "JSON request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AIVenueDescriptionRequest"
+              },
+              "example": {
+                "venueId": "00000000-0000-4000-8000-000000000001",
+                "contentType": "description",
+                "tone": "elegant"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "error"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/GenericObject" },
+                    "error": { "type": "null" }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "content": {
+                      "id": "00000000-0000-4000-8000-000000000002",
+                      "venueId": "00000000-0000-4000-8000-000000000001",
+                      "contentType": "description",
+                      "generatedText": "Generated venue description.",
+                      "status": "draft",
+                      "createdAt": "2026-07-14T00:00:00Z"
+                    }
+                  },
+                  "error": null
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "502": { "$ref": "#/components/responses/InternalError" }
+        },
+        "servers": [
+          {
+            "url": "{supabaseUrl}/functions/v1",
+            "description": "Supabase Edge Functions",
+            "variables": {
+              "supabaseUrl": { "default": "http://localhost:54321" }
+            }
+          }
+        ]
+      }
+    },
+    "/ai-package-comparison": {
+      "post": {
+        "summary": "Compare venue packages",
+        "description": "Returns deterministic comparison for 2-4 active packages and optional AI narrative. AI failure/disable/limits degrade to a null summary. Writes a comparison log.",
+        "operationId": "postAiPackageComparison",
+        "tags": ["AI", "Venues"],
+        "x-venora-surface": "supabase-edge-function",
+        "security": [{ "bearerAuth": [] }, {}],
+        "requestBody": {
+          "required": true,
+          "description": "JSON request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AIPackageComparisonRequest"
+              },
+              "example": {
+                "packageIds": [
+                  "00000000-0000-4000-8000-000000000001",
+                  "00000000-0000-4000-8000-000000000002"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "error"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/GenericObject" },
+                    "error": { "type": "null" }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "comparisonTable": [
+                      {
+                        "id": "00000000-0000-4000-8000-000000000001",
+                        "name": "Example Package",
+                        "price": 50000
+                      }
+                    ],
+                    "aiSummary": null
+                  },
+                  "error": null
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "502": { "$ref": "#/components/responses/InternalError" }
+        },
+        "servers": [
+          {
+            "url": "{supabaseUrl}/functions/v1",
+            "description": "Supabase Edge Functions",
+            "variables": {
+              "supabaseUrl": { "default": "http://localhost:54321" }
+            }
+          }
+        ]
+      }
+    },
+    "/ai-cost-estimator": {
+      "post": {
+        "summary": "Estimate event cost",
+        "description": "Loads a published venue/packages, generates and validates a PHP itemized estimate with one retry, logs usage, and stores generated content. Not idempotent.",
+        "operationId": "postAiCostEstimator",
+        "tags": ["AI", "Payments"],
+        "x-venora-surface": "supabase-edge-function",
+        "security": [{ "bearerAuth": [] }, {}],
+        "requestBody": {
+          "required": true,
+          "description": "JSON request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AICostEstimatorRequest"
+              },
+              "example": {
+                "venueId": "00000000-0000-4000-8000-000000000001",
+                "guestCount": 120,
+                "eventType": "wedding",
+                "durationHours": 6,
+                "includesCatering": true,
+                "includesAV": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "error"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/GenericObject" },
+                    "error": { "type": "null" }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "estimate": {
+                      "baseVenue": 85000,
+                      "packages": 0,
+                      "catering": 60000,
+                      "av": 0,
+                      "total": 145000,
+                      "breakdown": [
+                        "Venue base: PHP 85,000",
+                        "Catering: PHP 60,000"
+                      ]
+                    },
+                    "venue": {
+                      "id": "00000000-0000-4000-8000-000000000001",
+                      "name": "Harbor Garden Events",
+                      "basePrice": 85000
+                    }
+                  },
+                  "error": null
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "502": { "$ref": "#/components/responses/InternalError" }
+        },
+        "servers": [
+          {
+            "url": "{supabaseUrl}/functions/v1",
+            "description": "Supabase Edge Functions",
+            "variables": {
+              "supabaseUrl": { "default": "http://localhost:54321" }
+            }
+          }
+        ]
+      }
+    },
+    "/ai-assistant": {
+      "post": {
+        "summary": "Stream customer assistant response",
+        "description": "Creates/resumes a conversation, optionally adds authenticated user's booking context, persists messages/usage, and streams SSE. First event carries conversationId. Maximum 100 messages per conversation.",
+        "operationId": "postAiAssistant",
+        "tags": ["AI"],
+        "x-venora-surface": "supabase-edge-function",
+        "security": [{ "bearerAuth": [] }, {}],
+        "requestBody": {
+          "required": true,
+          "description": "JSON request body",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AIAssistantRequest" },
+              "example": {
+                "sessionId": "browser-session-example",
+                "message": "Show venues for 120 guests in Cebu."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "SSE stream; first event contains conversationId, followed by OpenAI-compatible chunks",
+            "content": {
+              "text/event-stream": {
+                "schema": { "type": "string" },
+                "example": "data: {\"conversationId\":\"00000000-0000-4000-8000-000000000001\"}\n\ndata: {\"choices\":[{\"delta\":{\"content\":\"Here are\"}}]}\n\n"
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "502": { "$ref": "#/components/responses/InternalError" }
+        },
+        "servers": [
+          {
+            "url": "{supabaseUrl}/functions/v1",
+            "description": "Supabase Edge Functions",
+            "variables": {
+              "supabaseUrl": { "default": "http://localhost:54321" }
+            }
+          }
+        ]
+      }
+    },
+    "/booking-notifications": {
+      "post": {
+        "summary": "Dispatch notification delivery",
+        "description": "Internal queue endpoint expected behind platform JWT/service invocation. Dispatches one delivery or a batch, updates attempts/status, retries failed rows, and skips SMS. Do not expose publicly.",
+        "operationId": "postBookingNotifications",
+        "tags": ["Notifications", "Internal"],
+        "x-venora-surface": "supabase-edge-function",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "description": "JSON request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationDeliveryRequest"
+              },
+              "example": {
+                "record": {
+                  "id": "00000000-0000-4000-8000-000000000001",
+                  "notification_id": "00000000-0000-4000-8000-000000000002",
+                  "user_id": "00000000-0000-4000-8000-000000000003",
+                  "channel": "email"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GenericObject" },
+                "example": { "success": true }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" }
+        },
+        "servers": [
+          {
+            "url": "{supabaseUrl}/functions/v1",
+            "description": "Supabase Edge Functions",
+            "variables": {
+              "supabaseUrl": { "default": "http://localhost:54321" }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "Supabase JWT",
+        "description": "Supabase access token. Never use a service-role token in browser code."
+      },
+      "supabaseSession": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "sb-<project-ref>-auth-token",
+        "description": "Supabase SSR session cookie; the actual value can be chunked."
+      },
+      "paymongoSignature": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Paymongo-Signature",
+        "description": "Timestamped PayMongo HMAC over the raw body."
+      },
+      "mayaSignature": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-maya-signature",
+        "description": "Maya HMAC-SHA512 over the raw body."
+      }
+    },
+    "schemas": {
+      "ErrorDetail": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Safe structured validation details, often from Zod flatten() or format()."
+      },
+      "StandardError": {
+        "type": "object",
+        "required": ["code", "message"],
+        "additionalProperties": false,
+        "properties": {
+          "code": { "type": "string", "example": "VALIDATION_ERROR" },
+          "message": { "type": "string", "example": "Invalid input." },
+          "details": {
+            "oneOf": [
+              { "$ref": "#/components/schemas/ErrorDetail" },
+              { "type": "null" }
+            ]
+          }
+        }
+      },
+      "ErrorEnvelope": {
+        "type": "object",
+        "required": ["data", "error"],
+        "additionalProperties": false,
+        "properties": {
+          "data": { "type": "null" },
+          "error": { "$ref": "#/components/schemas/StandardError" }
+        }
+      },
+      "LegacyErrorEnvelope": {
+        "type": "object",
+        "required": ["success", "error"],
+        "additionalProperties": false,
+        "properties": {
+          "success": { "const": false },
+          "error": { "$ref": "#/components/schemas/StandardError" }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "required": ["page", "limit", "totalItems", "totalPages"],
+        "properties": {
+          "page": { "type": "integer", "minimum": 1, "example": 1 },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "example": 24
+          },
+          "totalItems": { "type": "integer", "minimum": 0, "example": 48 },
+          "totalPages": { "type": "integer", "minimum": 1, "example": 2 }
+        }
+      },
+      "BookingStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "approved",
+          "payment_pending",
+          "confirmed",
+          "declined",
+          "cancelled",
+          "completed",
+          "reviewed",
+          "expired",
+          "refunded"
+        ]
+      },
+      "VenueSummary": {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "slug": { "type": "string" },
+          "city": { "oneOf": [{ "type": "string" }, { "type": "null" }] },
+          "province": { "oneOf": [{ "type": "string" }, { "type": "null" }] }
+        }
+      },
+      "Booking": {
+        "type": "object",
+        "required": ["id", "status", "eventDate", "guestCount"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "status": { "$ref": "#/components/schemas/BookingStatus" },
+          "eventDate": { "type": "string", "format": "date" },
+          "guestCount": { "type": "integer", "minimum": 1 },
+          "totalAmount": {
+            "oneOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "depositAmount": {
+            "oneOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "paymentDueAt": {
+            "oneOf": [
+              { "type": "string", "format": "date-time" },
+              { "type": "null" }
+            ]
+          },
+          "venue": {
+            "oneOf": [
+              { "$ref": "#/components/schemas/VenueSummary" },
+              { "type": "null" }
+            ]
+          }
+        }
+      },
+      "BookingCreateRequest": {
+        "type": "object",
+        "required": ["venueId", "eventDate", "guestCount"],
+        "additionalProperties": false,
+        "properties": {
+          "venueId": { "type": "string", "format": "uuid" },
+          "packageId": {
+            "oneOf": [
+              { "type": "string", "format": "uuid" },
+              { "type": "null" }
+            ]
+          },
+          "eventDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Today or a future date."
+          },
+          "eventStartTime": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+          },
+          "eventEndTime": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+          },
+          "guestCount": { "type": "integer", "minimum": 1 },
+          "specialRequests": { "type": "string", "maxLength": 1000 }
+        }
+      },
+      "BookingStatusRequest": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["action", "totalAmount", "depositAmount"],
+            "properties": {
+              "action": { "const": "approve" },
+              "totalAmount": { "type": "number", "exclusiveMinimum": 0 },
+              "depositAmount": { "type": "number", "exclusiveMinimum": 0 },
+              "note": { "type": "string", "maxLength": 1000 }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["action", "reason"],
+            "properties": {
+              "action": { "const": "decline" },
+              "reason": { "type": "string", "minLength": 5, "maxLength": 500 }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["action"],
+            "properties": {
+              "action": { "const": "cancel" },
+              "reason": { "type": "string", "maxLength": 500 }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["action"],
+            "properties": { "action": { "const": "complete" } }
+          }
+        ],
+        "discriminator": { "propertyName": "action" }
+      },
+      "PaymentProvider": {
+        "type": "string",
+        "enum": ["paymongo", "maya", "stripe"],
+        "default": "paymongo",
+        "description": "Only PayMongo currently has a registered gateway when configured."
+      },
+      "PaymentStartRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "provider": { "$ref": "#/components/schemas/PaymentProvider" }
+        }
+      },
+      "Payment": {
+        "type": "object",
+        "required": [
+          "bookingId",
+          "transactionId",
+          "amount",
+          "provider",
+          "checkoutUrl",
+          "status"
+        ],
+        "properties": {
+          "bookingId": { "type": "string", "format": "uuid" },
+          "transactionId": { "type": "string", "format": "uuid" },
+          "amount": { "type": "number", "minimum": 0 },
+          "provider": { "$ref": "#/components/schemas/PaymentProvider" },
+          "checkoutUrl": { "type": "string", "format": "uri" },
+          "status": { "type": "string", "example": "pending" }
+        }
+      },
+      "RefundRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": { "reason": { "type": "string", "maxLength": 500 } }
+      },
+      "Refund": {
+        "type": "object",
+        "required": ["refundId", "bookingId", "amount", "status"],
+        "properties": {
+          "refundId": { "type": "string", "format": "uuid" },
+          "bookingId": { "type": "string", "format": "uuid" },
+          "amount": { "type": "number", "minimum": 0 },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "processing", "succeeded", "failed"]
+          }
+        }
+      },
+      "VenuePackage": {
+        "type": "object",
+        "required": ["name", "price"],
+        "properties": {
+          "name": { "type": "string", "minLength": 3 },
+          "description": {
+            "oneOf": [{ "type": "string" }, { "type": "null" }]
+          },
+          "price": { "type": "number", "exclusiveMinimum": 0 },
+          "price_unit": {
+            "type": "string",
+            "enum": ["per_event", "per_hour", "per_pax", "per_day"],
+            "default": "per_event"
+          },
+          "min_guests": {
+            "oneOf": [{ "type": "integer", "minimum": 1 }, { "type": "null" }]
+          },
+          "max_guests": {
+            "oneOf": [{ "type": "integer", "minimum": 1 }, { "type": "null" }]
+          },
+          "inclusions": {
+            "type": "array",
+            "items": { "type": "string" },
+            "default": []
+          },
+          "is_active": { "type": "boolean", "default": true }
+        }
+      },
+      "Venue": {
+        "type": "object",
+        "required": [
+          "organization_id",
+          "name",
+          "province",
+          "city",
+          "address",
+          "capacity_max",
+          "base_price"
+        ],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "organization_id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string", "minLength": 3 },
+          "description": {
+            "oneOf": [{ "type": "string" }, { "type": "null" }]
+          },
+          "province": { "type": "string", "minLength": 2 },
+          "city": { "type": "string", "minLength": 2 },
+          "municipality": {
+            "oneOf": [{ "type": "string" }, { "type": "null" }]
+          },
+          "address": { "type": "string", "minLength": 5 },
+          "capacity_min": {
+            "oneOf": [{ "type": "integer", "minimum": 1 }, { "type": "null" }]
+          },
+          "capacity_max": { "type": "integer", "minimum": 1 },
+          "base_price": { "type": "number", "exclusiveMinimum": 0 },
+          "price_unit": {
+            "type": "string",
+            "enum": ["per_event", "per_hour", "per_pax", "per_day"],
+            "default": "per_event"
+          },
+          "indoor_outdoor": {
+            "type": "string",
+            "enum": ["indoor", "outdoor", "both"]
+          },
+          "air_conditioned": { "type": "boolean", "default": false },
+          "parking_available": { "type": "boolean", "default": false },
+          "overnight_accommodation": { "type": "boolean", "default": false },
+          "pet_friendly": { "type": "boolean", "default": false },
+          "wheelchair_accessible": { "type": "boolean", "default": false },
+          "has_pool": { "type": "boolean", "default": false },
+          "ceremony_venue": { "type": "boolean", "default": false },
+          "reception_venue": { "type": "boolean", "default": false }
+        }
+      },
+      "VenueCreateRequest": {
+        "type": "object",
+        "required": ["venue"],
+        "additionalProperties": false,
+        "properties": {
+          "venue": { "$ref": "#/components/schemas/Venue" },
+          "packages": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/VenuePackage" },
+            "default": []
+          },
+          "amenities": {
+            "type": "array",
+            "items": { "type": "string" },
+            "default": []
+          },
+          "simulate_error": {
+            "type": "boolean",
+            "default": false,
+            "description": "Rollback test flag present in implementation. Production clients should omit it."
+          }
+        }
+      },
+      "SupplierCategory": {
+        "type": "object",
+        "required": ["id", "name", "slug"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "slug": { "type": "string" }
+        }
+      },
+      "SupplierPackage": {
+        "type": "object",
+        "required": ["id", "supplierId", "name", "isActive"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "supplierId": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "description": {
+            "oneOf": [{ "type": "string" }, { "type": "null" }]
+          },
+          "price": {
+            "oneOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "priceUnit": { "oneOf": [{ "type": "string" }, { "type": "null" }] },
+          "inclusions": { "type": "array", "items": { "type": "string" } },
+          "minGuests": { "oneOf": [{ "type": "integer" }, { "type": "null" }] },
+          "maxGuests": { "oneOf": [{ "type": "integer" }, { "type": "null" }] },
+          "isActive": { "type": "boolean" }
+        }
+      },
+      "Review": {
+        "type": "object",
+        "required": ["id", "overallRating"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "supplierId": { "type": "string", "format": "uuid" },
+          "venueId": { "type": "string", "format": "uuid" },
+          "bookingId": { "type": "string", "format": "uuid" },
+          "overallRating": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "comment": {
+            "oneOf": [
+              { "type": "string", "maxLength": 1000 },
+              { "type": "null" }
+            ]
+          },
+          "customerName": { "type": "string" },
+          "customerAvatarUrl": {
+            "oneOf": [{ "type": "string", "format": "uri" }, { "type": "null" }]
+          },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Supplier": {
+        "type": "object",
+        "required": [
+          "id",
+          "profileId",
+          "businessName",
+          "slug",
+          "serviceAreas",
+          "isFeatured",
+          "accreditationStatus",
+          "avgRating",
+          "reviewCount",
+          "packages",
+          "portfolio",
+          "reviews"
+        ],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "profileId": { "type": "string", "format": "uuid" },
+          "businessName": { "type": "string" },
+          "slug": { "type": "string" },
+          "category": {
+            "oneOf": [
+              { "$ref": "#/components/schemas/SupplierCategory" },
+              { "type": "null" }
+            ]
+          },
+          "headline": { "oneOf": [{ "type": "string" }, { "type": "null" }] },
+          "description": {
+            "oneOf": [{ "type": "string" }, { "type": "null" }]
+          },
+          "basePrice": {
+            "oneOf": [{ "type": "number", "minimum": 0 }, { "type": "null" }]
+          },
+          "priceUnit": { "oneOf": [{ "type": "string" }, { "type": "null" }] },
+          "serviceAreas": { "type": "array", "items": { "type": "string" } },
+          "contactEmail": {
+            "oneOf": [
+              { "type": "string", "format": "email" },
+              { "type": "null" }
+            ]
+          },
+          "contactPhone": {
+            "oneOf": [{ "type": "string" }, { "type": "null" }]
+          },
+          "profileImageUrl": {
+            "oneOf": [{ "type": "string", "format": "uri" }, { "type": "null" }]
+          },
+          "heroImageUrl": {
+            "oneOf": [{ "type": "string", "format": "uri" }, { "type": "null" }]
+          },
+          "isFeatured": { "type": "boolean" },
+          "accreditationStatus": { "type": "string" },
+          "avgRating": { "type": "number", "minimum": 0, "maximum": 5 },
+          "reviewCount": { "type": "integer", "minimum": 0 },
+          "packages": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/SupplierPackage" }
+          },
+          "portfolio": {
+            "type": "array",
+            "items": { "type": "object", "additionalProperties": true }
+          },
+          "reviews": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Review" }
+          },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "SupplierContactRequest": {
+        "type": "object",
+        "required": ["contactName", "contactEmail", "message"],
+        "additionalProperties": false,
+        "properties": {
+          "serviceId": { "type": "string", "format": "uuid" },
+          "bookingId": { "type": "string", "format": "uuid" },
+          "contactName": { "type": "string", "minLength": 2, "maxLength": 120 },
+          "contactEmail": { "type": "string", "format": "email" },
+          "contactPhone": { "type": "string", "minLength": 7, "maxLength": 32 },
+          "eventDate": { "type": "string", "format": "date" },
+          "eventLocation": { "type": "string", "maxLength": 160 },
+          "guestCount": { "type": "number", "exclusiveMinimum": 0 },
+          "message": { "type": "string", "minLength": 10, "maxLength": 1500 }
+        }
+      },
+      "Notification": {
+        "type": "object",
+        "required": ["id", "kind", "title", "priority", "isRead", "createdAt"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "channel": {
+            "type": "string",
+            "enum": ["in_app", "email", "push", "sms"]
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "booking_update",
+              "payment_update",
+              "review_request",
+              "admin_alert",
+              "supplier_inquiry",
+              "system"
+            ]
+          },
+          "title": { "type": "string" },
+          "body": { "oneOf": [{ "type": "string" }, { "type": "null" }] },
+          "link": { "oneOf": [{ "type": "string" }, { "type": "null" }] },
+          "metadata": {
+            "oneOf": [
+              { "type": "object", "additionalProperties": true },
+              { "type": "null" }
+            ]
+          },
+          "priority": { "type": "string" },
+          "isRead": { "type": "boolean" },
+          "readAt": {
+            "oneOf": [
+              { "type": "string", "format": "date-time" },
+              { "type": "null" }
+            ]
+          },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "NotificationPreferences": {
+        "type": "object",
+        "required": [
+          "emailEnabled",
+          "pushEnabled",
+          "inAppEnabled",
+          "bookingUpdates",
+          "paymentUpdates",
+          "reviewRequests",
+          "adminAlerts",
+          "quietHoursStart",
+          "quietHoursEnd",
+          "timezone"
+        ],
+        "properties": {
+          "emailEnabled": { "type": "boolean" },
+          "smsEnabled": { "type": "boolean", "default": false },
+          "pushEnabled": { "type": "boolean" },
+          "inAppEnabled": { "type": "boolean" },
+          "bookingUpdates": { "type": "boolean" },
+          "paymentUpdates": { "type": "boolean" },
+          "reviewRequests": { "type": "boolean" },
+          "adminAlerts": { "type": "boolean" },
+          "quietHoursStart": {
+            "oneOf": [
+              { "type": "string", "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$" },
+              { "type": "null" }
+            ]
+          },
+          "quietHoursEnd": {
+            "oneOf": [
+              { "type": "string", "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$" },
+              { "type": "null" }
+            ]
+          },
+          "timezone": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "default": "Asia/Manila"
+          }
+        }
+      },
+      "PushSubscription": {
+        "type": "object",
+        "required": ["endpoint", "keys"],
+        "additionalProperties": false,
+        "properties": {
+          "endpoint": { "type": "string", "format": "uri" },
+          "keys": {
+            "type": "object",
+            "required": ["p256dh", "auth"],
+            "properties": {
+              "p256dh": { "type": "string", "minLength": 16 },
+              "auth": { "type": "string", "minLength": 8 }
+            }
+          },
+          "userAgent": { "type": "string", "maxLength": 500 }
+        }
+      },
+      "PushDeleteRequest": {
+        "type": "object",
+        "required": ["endpoint"],
+        "additionalProperties": false,
+        "properties": { "endpoint": { "type": "string", "format": "uri" } }
+      },
+      "AdminAudit": {
+        "type": "object",
+        "required": ["id", "action", "createdAt"],
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "actorId": {
+            "oneOf": [
+              { "type": "string", "format": "uuid" },
+              { "type": "null" }
+            ]
+          },
+          "action": { "type": "string" },
+          "resourceType": {
+            "oneOf": [{ "type": "string" }, { "type": "null" }]
+          },
+          "resourceId": {
+            "oneOf": [
+              { "type": "string", "format": "uuid" },
+              { "type": "null" }
+            ]
+          },
+          "metadata": { "type": "object", "additionalProperties": true },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "PayMongoWebhook": {
+        "type": "object",
+        "required": ["data"],
+        "additionalProperties": true,
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": ["id", "type", "attributes"],
+            "additionalProperties": true,
+            "properties": {
+              "id": { "type": "string", "example": "evt_test_example" },
+              "type": { "type": "string", "example": "event" },
+              "attributes": {
+                "type": "object",
+                "required": ["type", "data"],
+                "additionalProperties": true,
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "checkout_session.payment.paid"
+                  },
+                  "data": { "type": "object", "additionalProperties": true }
+                }
+              }
+            }
+          }
+        }
+      },
+      "MayaWebhook": {
+        "type": "object",
+        "required": ["id", "status"],
+        "additionalProperties": true,
+        "properties": {
+          "id": { "type": "string" },
+          "status": { "type": "string" },
+          "requestReferenceNumber": { "type": "string" },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "booking_id": { "type": "string", "format": "uuid" }
+            }
+          }
+        }
+      },
+      "AISearchRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "query": { "type": "string", "maxLength": 500 },
+          "filters": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "q": { "type": "string" },
+              "keyword": { "type": "string" },
+              "province": { "type": "string" },
+              "city": { "type": "string" },
+              "municipality": { "type": "string" },
+              "min_budget": { "type": "number", "exclusiveMinimum": 0 },
+              "max_budget": { "type": "number", "exclusiveMinimum": 0 },
+              "guests": { "type": "number", "exclusiveMinimum": 0 },
+              "capacity": { "type": "number", "exclusiveMinimum": 0 },
+              "venue_types": { "type": "array", "items": { "type": "string" } },
+              "indoor_outdoor": {
+                "type": "string",
+                "enum": ["indoor", "outdoor", "both"]
+              },
+              "parking": { "type": "boolean" },
+              "pet_friendly": { "type": "boolean" },
+              "wheelchair_accessible": { "type": "boolean" },
+              "page": { "type": "integer", "minimum": 1 },
+              "per_page": { "type": "integer", "minimum": 1, "maximum": 50 },
+              "sort_by": { "type": "string" }
+            }
+          }
+        },
+        "anyOf": [{ "required": ["query"] }, { "required": ["filters"] }]
+      },
+      "AIRecommendationRequest": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "AIVenueDescriptionRequest": {
+        "type": "object",
+        "required": ["venueId", "contentType"],
+        "additionalProperties": false,
+        "properties": {
+          "venueId": { "type": "string", "format": "uuid" },
+          "contentType": {
+            "type": "string",
+            "enum": ["description", "seo_meta", "package_description"]
+          },
+          "packageId": { "type": "string", "format": "uuid" },
+          "tone": {
+            "type": "string",
+            "enum": ["elegant", "casual", "luxury"],
+            "default": "elegant"
+          }
+        }
+      },
+      "AIPackageComparisonRequest": {
+        "type": "object",
+        "required": ["packageIds"],
+        "additionalProperties": false,
+        "properties": {
+          "packageIds": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 4,
+            "uniqueItems": true,
+            "items": { "type": "string", "format": "uuid" }
+          }
+        }
+      },
+      "AICostEstimatorRequest": {
+        "type": "object",
+        "required": ["venueId", "guestCount", "eventType", "durationHours"],
+        "additionalProperties": false,
+        "properties": {
+          "venueId": { "type": "string", "format": "uuid" },
+          "guestCount": { "type": "number", "minimum": 1 },
+          "eventType": { "type": "string", "minLength": 1, "maxLength": 60 },
+          "durationHours": { "type": "number", "exclusiveMinimum": 0 },
+          "includesCatering": { "type": "boolean", "default": false },
+          "includesAV": { "type": "boolean", "default": false }
+        }
+      },
+      "AIAssistantRequest": {
+        "type": "object",
+        "required": ["sessionId", "message"],
+        "additionalProperties": false,
+        "properties": {
+          "sessionId": { "type": "string", "minLength": 1, "maxLength": 100 },
+          "message": { "type": "string", "minLength": 1, "maxLength": 2000 },
+          "conversationId": { "type": "string", "maxLength": 100 }
+        }
+      },
+      "NotificationDeliveryRequest": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["record"],
+            "additionalProperties": false,
+            "properties": {
+              "record": {
+                "type": "object",
+                "required": ["id", "notification_id", "user_id", "channel"],
+                "additionalProperties": false,
+                "properties": {
+                  "id": { "type": "string", "format": "uuid" },
+                  "notification_id": { "type": "string", "format": "uuid" },
+                  "user_id": { "type": "string", "format": "uuid" },
+                  "channel": {
+                    "type": "string",
+                    "enum": ["email", "sms", "push", "in_app"]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "limit": { "type": "integer", "minimum": 1, "default": 25 }
+            }
+          }
+        ]
+      },
+      "GenericObject": { "type": "object", "additionalProperties": true }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Invalid request or workflow state",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
+            "example": {
+              "data": null,
+              "error": {
+                "code": "VALIDATION_ERROR",
+                "message": "Invalid input.",
+                "details": {}
+              }
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Authentication missing or invalid",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
+            "example": {
+              "data": null,
+              "error": {
+                "code": "UNAUTHORIZED",
+                "message": "Please sign in to continue."
+              }
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Caller lacks role, permission, or ownership",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
+            "example": {
+              "data": null,
+              "error": {
+                "code": "FORBIDDEN",
+                "message": "You do not have permission."
+              }
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
+            "example": {
+              "data": null,
+              "error": { "code": "NOT_FOUND", "message": "Resource not found." }
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Booking/date/state conflict",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
+            "example": {
+              "data": null,
+              "error": {
+                "code": "BOOKING_CONFLICT",
+                "message": "Venue is unavailable on the selected date."
+              }
+            }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "Configured usage limit exceeded",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
+            "example": {
+              "data": null,
+              "error": {
+                "code": "AI_LIMIT_EXCEEDED",
+                "message": "Usage limit reached."
+              }
+            }
+          }
+        }
+      },
+      "InternalError": {
+        "description": "Unexpected server or upstream failure",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
+            "example": {
+              "data": null,
+              "error": {
+                "code": "INTERNAL_ERROR",
+                "message": "Something went wrong."
+              }
+            }
+          }
+        }
+      },
+      "ServiceUnavailable": {
+        "description": "Required provider, workflow, or configuration unavailable",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorEnvelope" },
+            "example": {
+              "data": null,
+              "error": {
+                "code": "SERVICE_UNAVAILABLE",
+                "message": "Service is not configured."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
