@@ -12,6 +12,8 @@
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",
     "test": "turbo run test",
+    "docs:generate": "node scripts/generate-openapi.mjs",
+    "docs:validate": "node scripts/validate-openapi.mjs",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "db:types": "supabase gen types typescript --local > packages/database/types/generated.ts",
