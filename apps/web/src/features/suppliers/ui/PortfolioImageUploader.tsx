@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useId } from "react";
+import { useState, useRef, useId, useEffect } from "react";
 import { Loader2, Plus, GripVertical, Trash2, Star, Image as ImageIcon } from "lucide-react";
 import {
   DndContext,
@@ -114,9 +114,15 @@ export function PortfolioImageUploader({
   maxImages = 12,
 }: PortfolioImageUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const dndId = useId();
+  const generatedId = useId();
+  const [dndId, setDndId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Only set the DnD context ID on the client to prevent hydration mismatch
+  useEffect(() => {
+    setDndId(generatedId);
+  }, [generatedId]);
 
   const [cropImageUrl, setCropImageUrl] = useState<string | null>(null);
   const [originalFileName, setOriginalFileName] = useState<string>("");
@@ -215,39 +221,51 @@ export function PortfolioImageUploader({
       )}
 
       {imageUrls.length > 0 ? (
-        <DndContext id={dndId} sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={imageUrls} strategy={rectSortingStrategy}>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-              {imageUrls.map((url) => (
-                <SortableImageItem
-                  key={url}
-                  url={url}
-                  isCover={coverImageUrl === url}
-                  onSetCover={() => onChangeCoverImageUrl(url ?? null)}
-                  onRemove={() => handleRemove(url)}
-                />
-              ))}
+        dndId ? (
+          <DndContext id={dndId} sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={imageUrls} strategy={rectSortingStrategy}>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                {imageUrls.map((url) => (
+                  <SortableImageItem
+                    key={url}
+                    url={url}
+                    isCover={coverImageUrl === url}
+                    onSetCover={() => onChangeCoverImageUrl(url ?? null)}
+                    onRemove={() => handleRemove(url)}
+                  />
+                ))}
 
-              {imageUrls.length < maxImages && (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploading}
-                  className="group flex aspect-[4/3] flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 text-slate-500 transition hover:border-[#2563EB]/40 hover:bg-[#EFF6FF] hover:text-[#2563EB] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isUploading ? (
-                    <Loader2 className="h-6 w-6 animate-spin text-[#2563EB]" />
-                  ) : (
-                    <Plus className="h-6 w-6" />
-                  )}
-                  <span className="text-xs font-semibold">
-                    {isUploading ? "Uploading..." : "Add Photo"}
-                  </span>
-                </button>
-              )}
-            </div>
-          </SortableContext>
-        </DndContext>
+                {imageUrls.length < maxImages && (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="group flex aspect-[4/3] flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 text-slate-500 transition hover:border-[#2563EB]/40 hover:bg-[#EFF6FF] hover:text-[#2563EB] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {isUploading ? (
+                      <Loader2 className="h-6 w-6 animate-spin text-[#2563EB]" />
+                    ) : (
+                      <Plus className="h-6 w-6" />
+                    )}
+                    <span className="text-xs font-semibold">
+                      {isUploading ? "Uploading..." : "Add Photo"}
+                    </span>
+                  </button>
+                )}
+              </div>
+            </SortableContext>
+          </DndContext>
+        ) : (
+          // Client hasn't mounted yet — show static grid without DnD
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+            {imageUrls.map((url) => (
+              <div key={url} className="relative aspect-[4/3] overflow-hidden rounded-xl border-2 border-slate-200 bg-slate-50">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={url} alt="Portfolio image" className="h-full w-full object-cover" />
+              </div>
+            ))}
+          </div>
+        )
       ) : (
         <button
           type="button"

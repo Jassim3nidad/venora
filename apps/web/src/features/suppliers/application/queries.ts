@@ -45,7 +45,16 @@ const SUPPLIER_PROFILE_SELECT = `
   accreditation_status,
   avg_rating,
   review_count,
-  created_at
+  created_at,
+  latitude,
+  longitude,
+  business_location_type,
+  location_visibility,
+  public_location_label,
+  travel_available,
+  travel_fee_note,
+  city,
+  province
 `;
 
 const SUPPLIER_SERVICE_SELECT = `
@@ -69,12 +78,16 @@ export const SUPPLIER_PORTFOLIO_SELECT = `
   title,
   description,
   image_url,
+  image_urls,
   event_type,
   city,
   province,
+  venue_name,
   event_date,
   is_featured,
-  sort_order
+  sort_order,
+  status,
+  service_id
 `;
 
 const SUPPLIER_REVIEW_SELECT = `
@@ -123,8 +136,12 @@ function normalizePackages(rows: any[] | null | undefined): SupplierPackage[] {
 function normalizePortfolio(rows: any[] | null | undefined): SupplierPortfolioItem[] {
   return (rows ?? [])
     .map((item) => {
-      // Determine imageUrls based on parsing image_url as a comma-separated string
-      const imageUrls = item.image_url ? String(item.image_url).split(",").map((s) => s.trim()) : [];
+      // Prefer the proper image_urls array column (migration 070), fall back to parsing image_url
+      const imageUrls: string[] = Array.isArray(item.image_urls) && item.image_urls.length > 0
+        ? item.image_urls
+        : item.image_url
+          ? String(item.image_url).split(",").map((s: string) => s.trim()).filter(Boolean)
+          : [];
       const mainImageUrl = imageUrls.length > 0 ? imageUrls[0] : null;
 
       return {
@@ -137,12 +154,12 @@ function normalizePortfolio(rows: any[] | null | undefined): SupplierPortfolioIt
         eventType: item.event_type ?? null,
         city: item.city ?? null,
         province: item.province ?? null,
-        venueName: null,
+        venueName: item.venue_name ?? null,
         eventDate: item.event_date ?? null,
         isFeatured: item.is_featured ?? false,
         sortOrder: item.sort_order ?? 0,
-        status: (item.sort_order === -1 ? "draft" : item.sort_order === -2 ? "hidden" : "published") as "draft" | "hidden" | "published",
-        serviceId: null,
+        status: (item.status ?? "published") as "draft" | "hidden" | "published",
+        serviceId: item.service_id ?? null,
       };
     })
     .sort((a, b) => {
@@ -287,6 +304,16 @@ export function mapDbSupplier(row: any): SupplierMarketplaceProfile {
     avgRating: Number(row.avg_rating) || 0,
     reviewCount: Number(row.review_count) || 0,
     createdAt: row.created_at ? String(row.created_at) : new Date().toISOString(),
+    // Location fields (migration 071)
+    latitude: row.latitude != null ? Number(row.latitude) : null,
+    longitude: row.longitude != null ? Number(row.longitude) : null,
+    businessLocationType: row.business_location_type ?? null,
+    locationVisibility: row.location_visibility ?? null,
+    publicLocationLabel: row.public_location_label ?? null,
+    travelAvailable: row.travel_available ?? false,
+    travelFeeNote: row.travel_fee_note ?? null,
+    city: row.city ?? null,
+    province: row.province ?? null,
     packages: normalizePackages(row.supplier_services),
     portfolio: normalizePortfolio(row.supplier_portfolio_items),
     reviews: normalizeReviews(row.supplier_reviews),

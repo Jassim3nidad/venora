@@ -52,12 +52,12 @@ async function requireUser() {
 async function getOwnedSupplierProfile(supabase: any, userId: string) {
   const { data, error } = await supabase
     .from("supplier_profiles")
-    .select("id, business_name, profile_id")
+    .select("id, business_name, profile_id, slug")
     .eq("profile_id", userId)
     .maybeSingle();
 
   throwIfSupabaseError(error);
-  return data as { id: string; business_name: string; profile_id: string } | null;
+  return data as { id: string; business_name: string; profile_id: string; slug: string | null } | null;
 }
 
 async function generateUniqueSlug(supabase: any, baseSlug: string, excludeId?: string) {
@@ -99,6 +99,17 @@ export async function upsertSupplierProfileAction(rawInput: unknown) {
       years_in_business: normalizeOptionalNumber(input.yearsInBusiness),
       team_size: normalizeOptionalNumber(input.teamSize),
       minimum_booking_notice_days: input.minimumBookingNoticeDays,
+      business_location_type: input.businessLocationType,
+      location_visibility: input.locationVisibility,
+      latitude: normalizeOptionalNumber(input.latitude),
+      longitude: normalizeOptionalNumber(input.longitude),
+      city: normalizeOptionalString(input.city),
+      province: normalizeOptionalString(input.province),
+      country: normalizeOptionalString(input.country),
+      business_address: normalizeOptionalString(input.businessAddress),
+      public_location_label: normalizeOptionalString(input.publicLocationLabel),
+      travel_available: input.travelAvailable,
+      travel_fee_note: normalizeOptionalString(input.travelFeeNote),
     };
 
     const baseSlug = input.businessName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -222,25 +233,26 @@ export async function upsertSupplierPortfolioAction(rawInput: unknown) {
       throw new ForbiddenError("You can only manage your own supplier portfolio.");
     }
 
-    // Map pseudo-status to sort_order since we cannot use a new status column
+    // Map sort_order based on status
     let finalSortOrder = input.sortOrder ?? 0;
-    if (input.status === "draft") {
-      finalSortOrder = -1;
-    } else if (input.status === "hidden") {
-      finalSortOrder = -2;
-    }
 
     const payload = {
       supplier_id: supplier.id,
       title: input.title ?? "Untitled Project",
       description: normalizeOptionalString(input.description),
-      image_url: input.imageUrls.length > 0 ? input.imageUrls.join(",") : (input.imageUrl ?? ""),
+      // Use the proper image_urls array column (migration 070)
+      image_urls: input.imageUrls,
+      // Cover image for backwards compat
+      image_url: input.imageUrls.length > 0 ? input.imageUrls[0] : normalizeOptionalString(input.imageUrl) ?? null,
       event_type: normalizeOptionalString(input.eventType),
       city: normalizeOptionalString(input.city),
       province: normalizeOptionalString(input.province),
+      venue_name: normalizeOptionalString(input.venueName),
       event_date: normalizeOptionalString(input.eventDate),
       is_featured: input.isFeatured,
       sort_order: finalSortOrder,
+      status: input.status,
+      service_id: input.serviceId ?? null,
     };
 
     const { data, error } = input.id
@@ -260,7 +272,7 @@ export async function upsertSupplierPortfolioAction(rawInput: unknown) {
     throwIfSupabaseError(error);
 
     revalidatePath("/suppliers");
-    revalidatePath(`/suppliers/${supplier.id}`);
+    if (supplier.slug) revalidatePath(`/suppliers/${supplier.slug}`);
     revalidatePath("/dashboard/supplier");
     revalidatePath("/dashboard/supplier/portfolio");
 

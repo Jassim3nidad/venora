@@ -8,12 +8,16 @@ export type CustomerBookingOption = {
   venueName: string;
   locationLabel: string;
   label: string;
+  latitude: number | null;
+  longitude: number | null;
 };
 
 type VenueRecord = {
   name?: string | null;
   city?: string | null;
   province?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 };
 
 function getVenueLocation(venue?: VenueRecord | null) {
@@ -57,7 +61,9 @@ export async function getCustomerBookingsForContact(
         venues (
           name,
           city,
-          province
+          province,
+          latitude,
+          longitude
         )
       `,
     )
@@ -89,6 +95,8 @@ export async function getCustomerBookingsForContact(
         venueName,
         locationLabel,
         label: formatBookingLabel(venueName, locationLabel, row.event_date),
+        latitude: typeof venue?.latitude === "number" ? venue.latitude : null,
+        longitude: typeof venue?.longitude === "number" ? venue.longitude : null,
       };
     });
 }

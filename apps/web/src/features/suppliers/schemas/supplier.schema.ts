@@ -80,6 +80,17 @@ export const supplierProfileSchema = z.object({
     "Team size must be greater than zero",
   ),
   minimumBookingNoticeDays: z.coerce.number().int().min(0).max(365).default(14),
+  businessLocationType: z.enum(["mobile", "home_based", "studio", "storefront"]).default("mobile"),
+  locationVisibility: z.enum(["exact", "approximate", "service_area_only"]).default("exact"),
+  latitude: optionalNumber,
+  longitude: optionalNumber,
+  city: optionalText(120),
+  province: optionalText(120),
+  country: optionalText(120),
+  businessAddress: optionalText(250),
+  publicLocationLabel: optionalText(120),
+  travelAvailable: z.coerce.boolean().default(false),
+  travelFeeNote: optionalText(500),
 });
 
 export const supplierPackageSchema = z

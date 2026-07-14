@@ -42,12 +42,14 @@ export async function createServerAction<
   const parsed = schema.safeParse(rawInput);
 
   if (!parsed.success) {
+    console.error("[Server Action Validation Error]", parsed.error.issues);
+    const issuesMsg = parsed.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join(', ');
     return {
-      data:  null,
+      data: null,
       error: {
-        code:    "VALIDATION_ERROR",
-        message: "Invalid input. Please check the highlighted fields.",
-        details: parsed.error.flatten(),
+        code: "VALIDATION_ERROR",
+        message: `Invalid input. Please check the highlighted fields. Details: ${issuesMsg}`,
+        details: parsed.error.issues,
       },
     };
   }

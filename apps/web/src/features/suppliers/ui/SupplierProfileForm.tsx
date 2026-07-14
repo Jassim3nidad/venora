@@ -13,6 +13,12 @@ import type {
   SupplierMarketplaceProfile,
 } from "../types/supplier.types";
 import { SupplierImageUpload } from "./SupplierImageUpload";
+import dynamic from "next/dynamic";
+
+const SupplierLocationPicker = dynamic(
+  () => import("./SupplierLocationPicker"),
+  { ssr: false }
+);
 
 const profileFormSchema = z.object({
   businessName: z.string().trim().min(2, "Business name is required").max(120),
@@ -33,6 +39,17 @@ const profileFormSchema = z.object({
   yearsInBusiness: z.string().optional(),
   teamSize: z.string().optional(),
   minimumBookingNoticeDays: z.string().optional(),
+  businessLocationType: z.enum(["mobile", "home_based", "studio", "storefront"]).default("mobile"),
+  locationVisibility: z.enum(["exact", "approximate", "service_area_only"]).default("exact"),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
+  city: z.string().trim().max(120).optional(),
+  province: z.string().trim().max(120).optional(),
+  country: z.string().trim().max(120).optional(),
+  businessAddress: z.string().trim().max(250).optional(),
+  publicLocationLabel: z.string().trim().max(120).optional(),
+  travelAvailable: z.boolean().default(false),
+  travelFeeNote: z.string().trim().max(500).optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -113,6 +130,17 @@ export function SupplierProfileForm({
     yearsInBusiness: profile?.yearsInBusiness ? String(profile.yearsInBusiness) : "",
     teamSize: profile?.teamSize ? String(profile.teamSize) : "",
     minimumBookingNoticeDays: String(profile?.minimumBookingNoticeDays ?? 14),
+    businessLocationType: profile?.businessLocationType ?? "mobile",
+    locationVisibility: profile?.locationVisibility ?? "exact",
+    latitude: profile?.latitude ?? null,
+    longitude: profile?.longitude ?? null,
+    city: profile?.city ?? "",
+    province: profile?.province ?? "",
+    country: profile?.country ?? "",
+    businessAddress: profile?.businessAddress ?? "",
+    publicLocationLabel: profile?.publicLocationLabel ?? "",
+    travelAvailable: profile?.travelAvailable ?? false,
+    travelFeeNote: profile?.travelFeeNote ?? "",
   };
 
   const {
@@ -170,6 +198,17 @@ export function SupplierProfileForm({
         yearsInBusiness: numberOrUndefined(values.yearsInBusiness),
         teamSize: numberOrUndefined(values.teamSize),
         minimumBookingNoticeDays: numberOrUndefined(values.minimumBookingNoticeDays) ?? 14,
+        businessLocationType: values.businessLocationType,
+        locationVisibility: values.locationVisibility,
+        latitude: values.latitude,
+        longitude: values.longitude,
+        city: values.city,
+        province: values.province,
+        country: values.country,
+        businessAddress: values.businessAddress,
+        publicLocationLabel: values.publicLocationLabel,
+        travelAvailable: values.travelAvailable,
+        travelFeeNote: values.travelFeeNote,
       });
 
       if (result.error) {
@@ -404,34 +443,126 @@ export function SupplierProfileForm({
             </SectionCard>
 
             <SectionCard 
-              title="Service Coverage" 
-              description="Tell customers where your services are available."
+              title="Service Location and Coverage" 
+              description="Configure your business location and control how it appears to customers."
             >
               <div className="grid gap-6">
-                <label className="grid gap-1.5">
-                  <span className="text-sm font-bold text-slate-700">Service Areas</span>
-                  <textarea
-                    {...register("serviceAreasText")}
-                    rows={3}
-                    placeholder="e.g., Metro Manila, Tagaytay, Cavite"
-                    className="w-full resize-y rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold outline-none transition-all placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
-                  />
-                  <p className="text-xs text-slate-500">Enter service areas separated by commas or new lines.</p>
-                  <FieldError message={errors.serviceAreasText?.message} />
-                </label>
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <label className="grid gap-1.5">
+                    <span className="text-sm font-bold text-slate-700">Business Location Type</span>
+                    <select
+                      {...register("businessLocationType")}
+                      className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
+                    >
+                      <option value="mobile">Mobile / We come to you</option>
+                      <option value="home_based">Home-based Business</option>
+                      <option value="studio">Private Studio</option>
+                      <option value="storefront">Retail Storefront</option>
+                    </select>
+                  </label>
 
-                <label className="grid gap-1.5 sm:w-1/2">
-                  <span className="text-sm font-bold text-slate-700">Coverage Distance / Radius</span>
-                  <div className="relative">
+                  <label className="grid gap-1.5">
+                    <span className="text-sm font-bold text-slate-700">Location Visibility on Profile</span>
+                    <select
+                      {...register("locationVisibility")}
+                      className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
+                    >
+                      <option value="exact">Show exact map pin</option>
+                      <option value="approximate">Show approximate map area</option>
+                      <option value="service_area_only">Hide map (Service areas only)</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <label className="grid gap-1.5 sm:col-span-2">
+                    <span className="text-sm font-bold text-slate-700">Business Address</span>
                     <input
-                      {...register("coverageRadiusKm")}
-                      type="number"
-                      min="0"
-                      className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 pr-12 text-sm font-semibold outline-none transition-all focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
+                      {...register("businessAddress")}
+                      type="text"
+                      placeholder="e.g., 123 Event Street, Makati City"
+                      className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-500">km</span>
+                  </label>
+
+                  <label className="grid gap-1.5">
+                    <span className="text-sm font-bold text-slate-700">City</span>
+                    <input
+                      {...register("city")}
+                      type="text"
+                      className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
+                    />
+                  </label>
+
+                  <label className="grid gap-1.5">
+                    <span className="text-sm font-bold text-slate-700">Province</span>
+                    <input
+                      {...register("province")}
+                      type="text"
+                      className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
+                    />
+                  </label>
+                </div>
+
+                <SupplierLocationPicker
+                  initialLatitude={formValues.latitude}
+                  initialLongitude={formValues.longitude}
+                  radiusKm={numberOrUndefined(formValues.coverageRadiusKm)}
+                  onLocationChange={(lat, lng) => {
+                    setValue("latitude", lat, { shouldDirty: true });
+                    setValue("longitude", lng, { shouldDirty: true });
+                  }}
+                />
+
+                <div className="grid gap-6 sm:grid-cols-2 pt-4 border-t border-slate-100">
+                  <label className="grid gap-1.5">
+                    <span className="text-sm font-bold text-slate-700">Service Areas</span>
+                    <textarea
+                      {...register("serviceAreasText")}
+                      rows={3}
+                      placeholder="e.g., Metro Manila, Tagaytay, Cavite"
+                      className="w-full resize-y rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold outline-none transition-all placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
+                    />
+                    <p className="text-xs text-slate-500">Enter service areas separated by commas or new lines.</p>
+                    <FieldError message={errors.serviceAreasText?.message} />
+                  </label>
+
+                  <div className="grid gap-4">
+                    <label className="grid gap-1.5">
+                      <span className="text-sm font-bold text-slate-700">Coverage Distance / Radius</span>
+                      <div className="relative">
+                        <input
+                          {...register("coverageRadiusKm")}
+                          type="number"
+                          min="0"
+                          className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 pr-12 text-sm font-semibold outline-none transition-all focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-500">km</span>
+                      </div>
+                    </label>
+
+                    <label className="flex items-center gap-3 mt-2">
+                      <input 
+                        {...register("travelAvailable")}
+                        type="checkbox"
+                        className="h-5 w-5 rounded border-slate-300 text-[#2563EB] focus:ring-[#2563EB]"
+                      />
+                      <span className="text-sm font-bold text-slate-700">Available to travel to event location</span>
+                    </label>
                   </div>
-                </label>
+                </div>
+
+                {formValues.travelAvailable && (
+                  <label className="grid gap-1.5">
+                    <span className="text-sm font-bold text-slate-700">Travel Fee Note</span>
+                    <textarea
+                      {...register("travelFeeNote")}
+                      rows={2}
+                      placeholder="e.g., Free travel within 20km. PHP 1,000 flat fee for out of town."
+                      className="w-full resize-y rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm font-semibold outline-none transition-all placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
+                    />
+                  </label>
+                )}
               </div>
             </SectionCard>
 

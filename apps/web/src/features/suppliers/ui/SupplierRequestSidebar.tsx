@@ -9,6 +9,7 @@ import {
   TicketCheck,
   Users,
   MessageSquare,
+  MapPin,
 } from "lucide-react";
 import {
   Button,
@@ -31,6 +32,22 @@ import {
   formatSupplierPrice,
 } from "../utils/supplier-format";
 import { getSupplierStartingPrice } from "../utils/supplier-derive";
+
+function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Radius of the earth in km
+  const dLat = deg2rad(lat2 - lat1);
+  const dLon = deg2rad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c * 10) / 10; // Round to 1 decimal place
+}
+
+function deg2rad(deg: number) {
+  return deg * (Math.PI / 180);
+}
 
 type SupplierRequestSidebarProps = {
   supplier: SupplierMarketplaceProfile;
@@ -90,6 +107,34 @@ export function SupplierRequestSidebar({
   const formattedStartingPrice = startingPrice
     ? formatSupplierPrice(startingPrice)
     : null;
+
+  const selectedBooking = useMemo(
+    () => approvedBookings.find((b) => b.id === selectedBookingId),
+    [approvedBookings, selectedBookingId]
+  );
+
+  const eventDistanceKm = useMemo(() => {
+    if (
+      !selectedBooking ||
+      selectedBooking.latitude == null ||
+      selectedBooking.longitude == null ||
+      supplier.latitude == null ||
+      supplier.longitude == null
+    ) {
+      return null;
+    }
+    return calculateDistanceKm(
+      supplier.latitude,
+      supplier.longitude,
+      selectedBooking.latitude,
+      selectedBooking.longitude
+    );
+  }, [selectedBooking, supplier]);
+
+  const isOutsideCoverage =
+    eventDistanceKm != null &&
+    supplier.coverageRadiusKm != null &&
+    eventDistanceKm > supplier.coverageRadiusKm;
 
   const triggerToast = (
     title: string,
@@ -281,7 +326,7 @@ export function SupplierRequestSidebar({
   if (!hasApprovedBookings) {
     return (
       <div
-        className="sticky top-28 w-full min-w-0 rounded-3xl border border-[#E5E7EB] bg-white p-6 shadow-xl shadow-slate-200/40"
+        className="w-full min-w-0 rounded-3xl border border-[#E5E7EB] bg-white p-6 shadow-xl shadow-slate-200/40"
         id="supplier-request-card"
       >
         <div className="mb-5 flex items-center justify-between">
@@ -402,6 +447,21 @@ export function SupplierRequestSidebar({
               <div className="mt-2 flex items-center gap-2 text-[#4B5563]">
                 <Users className="h-4 w-4 shrink-0" />
                 <span className="font-semibold">{guestCount} guests</span>
+              </div>
+            )}
+            {eventDistanceKm != null && (
+              <div className={`mt-3 flex flex-col gap-1 rounded-lg p-3 ${isOutsideCoverage ? 'bg-amber-50 text-amber-900 border border-amber-200' : 'bg-slate-100 text-[#4B5563]'}`}>
+                <div className="flex items-start gap-2">
+                  <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
+                  <span className="font-semibold text-sm">
+                    {eventDistanceKm} km from supplier base
+                  </span>
+                </div>
+                {isOutsideCoverage && (
+                  <p className="text-xs font-semibold ml-6 text-amber-700">
+                    This venue is outside the {supplier.coverageRadiusKm} km coverage radius. Travel fees may apply.
+                  </p>
+                )}
               </div>
             )}
             <input type="hidden" name="eventDate" value={eventDate} />

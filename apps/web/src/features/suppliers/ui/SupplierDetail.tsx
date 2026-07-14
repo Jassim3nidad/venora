@@ -36,6 +36,11 @@ import { SupplierRequestSidebar } from "./SupplierRequestSidebar";
 import { SupplierFavoriteButton } from "./SupplierFavoriteButton";
 import { Button, Badge, Separator } from "@venora/ui";
 import VenueGallery from "@/src/features/venues/ui/VenueGallery";
+import dynamic from "next/dynamic";
+
+const VenueMap = dynamic(() => import("@/src/components/VenueMap"), {
+  ssr: false,
+});
 
 type SupplierDetailProps = {
   supplier: SupplierMarketplaceProfile;
@@ -435,32 +440,82 @@ export function SupplierDetail({
 
           <Separator className="bg-slate-200/60" />
 
-          {/* Service Coverage Section */}
+          {/* Service Location & Coverage Section */}
           <section className="space-y-6">
             <div>
               <h2 className="text-2xl font-black tracking-[-0.04em] text-[#111827]">
-                Service Coverage
+                Service Location & Coverage
               </h2>
             </div>
             
-            {serviceAreas.length > 0 ? (
-              <div className="rounded-[24px] border border-[#E5E7EB] bg-white p-5 sm:p-6 shadow-sm shadow-slate-200/70">
-                <div className="flex flex-wrap gap-2">
-                  {serviceAreas.map((area) => (
-                    <Badge
-                      key={area}
-                      variant="secondary"
-                      className="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-700 hover:bg-slate-200"
-                    >
-                      <MapPin className="mr-1.5 h-3.5 w-3.5" />
-                      {area}
-                    </Badge>
-                  ))}
+            <div className="overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70">
+              <div className="p-5 sm:p-6 border-b border-[#E5E7EB]">
+                <div className="mb-4 grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <h3 className="text-xs font-extrabold uppercase tracking-widest text-[#6B7280]">
+                      Location Type
+                    </h3>
+                    <p className="mt-1 text-sm font-bold text-[#111827] capitalize">
+                      {supplier.businessLocationType?.replace(/_/g, ' ') || "Mobile / We come to you"}
+                    </p>
+                  </div>
+                  {supplier.coverageRadiusKm != null && supplier.coverageRadiusKm > 0 && (
+                    <div>
+                      <h3 className="text-xs font-extrabold uppercase tracking-widest text-[#6B7280]">
+                        Coverage Radius
+                      </h3>
+                      <p className="mt-1 text-sm font-bold text-[#111827]">
+                        {supplier.coverageRadiusKm} km
+                      </p>
+                    </div>
+                  )}
                 </div>
+
+                {supplier.travelAvailable && supplier.travelFeeNote && (
+                  <div className="mb-4 rounded-xl bg-purple-50 p-4 border border-purple-100">
+                    <p className="text-sm font-bold text-purple-900">
+                      Travel available: {supplier.travelFeeNote}
+                    </p>
+                  </div>
+                )}
+
+                {serviceAreas.length > 0 && (
+                  <div>
+                    <h3 className="text-xs font-extrabold uppercase tracking-widest text-[#6B7280] mb-2">
+                      Service Areas
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {serviceAreas.map((area) => (
+                        <Badge
+                          key={area}
+                          variant="secondary"
+                          className="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-700 hover:bg-slate-200"
+                        >
+                          <MapPin className="mr-1.5 h-3.5 w-3.5" />
+                          {area}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            ) : (
-              <EmptyPanel message="Service coverage areas are not specified." />
-            )}
+
+              {supplier.locationVisibility !== "service_area_only" && supplier.latitude && supplier.longitude && (
+                <div className="h-[320px] w-full bg-slate-50 relative">
+                  {supplier.locationVisibility === "approximate" && (
+                    <div className="absolute top-4 left-4 z-10 rounded-full bg-white/90 px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm backdrop-blur">
+                      Approximate Location
+                    </div>
+                  )}
+                  <VenueMap 
+                    latitude={supplier.latitude} 
+                    longitude={supplier.longitude}
+                    markerLabel={supplier.businessName}
+                    height="320px"
+                  />
+                </div>
+              )}
+            </div>
           </section>
 
           <Separator className="bg-slate-200/60" />
@@ -521,8 +576,8 @@ export function SupplierDetail({
           </section>
         </div>
 
-        {/* Right Column - Sidebar */}
-        <div className="relative">
+        {/* Right Column - Sidebar (sticky container) */}
+        <div className="sticky top-24 self-start space-y-6">
           <SupplierRequestSidebar 
             supplier={supplier}
             supplierSlug={supplier.slug}

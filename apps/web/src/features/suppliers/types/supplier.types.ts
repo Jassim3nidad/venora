@@ -67,6 +67,17 @@ export type SupplierMarketplaceProfile = {
   instagramUrl: string | null;
   profileImageUrl: string | null;
   heroImageUrl: string | null;
+  businessLocationType: "mobile" | "home_based" | "studio" | "storefront" | null;
+  locationVisibility: "exact" | "approximate" | "service_area_only" | null;
+  latitude: number | null;
+  longitude: number | null;
+  city: string | null;
+  province: string | null;
+  country: string | null;
+  businessAddress: string | null;
+  publicLocationLabel: string | null;
+  travelAvailable: boolean;
+  travelFeeNote: string | null;
   responseTimeHours: number;
   yearsInBusiness: number | null;
   teamSize: number | null;
