@@ -339,14 +339,35 @@ export function SupplierDetail({ supplier, currentUser, bookings = [], isFavorit
                       key={item.id}
                       className="overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70"
                     >
-                      <div className="aspect-[4/3] overflow-hidden bg-[#EFF6FF]">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={item.imageUrl}
-                          alt={`${item.title} portfolio image`}
-                          className="h-full w-full object-cover"
-                          loading="lazy"
-                        />
+                      <div className="group relative aspect-[4/3] overflow-hidden bg-[#EFF6FF]">
+                        {item.imageUrls && item.imageUrls.length > 1 ? (
+                          <div className="flex h-full w-full snap-x snap-mandatory overflow-x-auto scroll-smooth no-scrollbar">
+                            {item.imageUrls.map((url, idx) => (
+                              <div key={idx} className="h-full min-w-full shrink-0 snap-center">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={url}
+                                  alt={`${item.title} portfolio image ${idx + 1}`}
+                                  className="h-full w-full object-cover transition duration-500 hover:scale-105"
+                                  loading="lazy"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            src={item.imageUrl || undefined}
+                            alt={`${item.title} portfolio image`}
+                            className="h-full w-full object-cover transition duration-500 hover:scale-105"
+                            loading="lazy"
+                          />
+                        )}
+                        {item.imageUrls && item.imageUrls.length > 1 && (
+                          <div className="pointer-events-none absolute bottom-3 right-3 rounded-md bg-black/60 px-2 py-1 text-[10px] font-bold text-white backdrop-blur-md">
+                            1 / {item.imageUrls.length}
+                          </div>
+                        )}
                       </div>
                       <div className="min-w-0 p-4">
                         <h3 className="break-words font-black text-[#111827]">

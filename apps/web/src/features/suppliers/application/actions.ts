@@ -207,17 +207,25 @@ export async function upsertSupplierPortfolioAction(rawInput: unknown) {
       throw new ForbiddenError("You can only manage your own supplier portfolio.");
     }
 
+    // Map pseudo-status to sort_order since we cannot use a new status column
+    let finalSortOrder = input.sortOrder ?? 0;
+    if (input.status === "draft") {
+      finalSortOrder = -1;
+    } else if (input.status === "hidden") {
+      finalSortOrder = -2;
+    }
+
     const payload = {
       supplier_id: supplier.id,
-      title: input.title,
+      title: input.title ?? "Untitled Project",
       description: normalizeOptionalString(input.description),
-      image_url: input.imageUrl,
+      image_url: input.imageUrls.length > 0 ? input.imageUrls.join(",") : (input.imageUrl ?? ""),
       event_type: normalizeOptionalString(input.eventType),
       city: normalizeOptionalString(input.city),
       province: normalizeOptionalString(input.province),
       event_date: normalizeOptionalString(input.eventDate),
       is_featured: input.isFeatured,
-      sort_order: input.sortOrder,
+      sort_order: finalSortOrder,
     };
 
     const { data, error } = input.id

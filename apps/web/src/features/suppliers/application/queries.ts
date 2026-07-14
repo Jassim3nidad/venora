@@ -63,7 +63,7 @@ const SUPPLIER_SERVICE_SELECT = `
   sort_order
 `;
 
-const SUPPLIER_PORTFOLIO_SELECT = `
+export const SUPPLIER_PORTFOLIO_SELECT = `
   id,
   supplier_id,
   title,
@@ -122,22 +122,32 @@ function normalizePackages(rows: any[] | null | undefined): SupplierPackage[] {
 
 function normalizePortfolio(rows: any[] | null | undefined): SupplierPortfolioItem[] {
   return (rows ?? [])
-    .map((item) => ({
-      id: String(item.id),
-      supplierId: String(item.supplier_id),
-      title: String(item.title),
-      description: item.description ?? null,
-      imageUrl: String(item.image_url),
-      eventType: item.event_type ?? null,
-      city: item.city ?? null,
-      province: item.province ?? null,
-      eventDate: item.event_date ?? null,
-      isFeatured: item.is_featured ?? false,
-      sortOrder: item.sort_order ?? 0,
-    }))
+    .map((item) => {
+      // Determine imageUrls based on parsing image_url as a comma-separated string
+      const imageUrls = item.image_url ? String(item.image_url).split(",").map((s) => s.trim()) : [];
+      const mainImageUrl = imageUrls.length > 0 ? imageUrls[0] : null;
+
+      return {
+        id: String(item.id),
+        supplierId: String(item.supplier_id),
+        title: item.title ? String(item.title) : null,
+        description: item.description ?? null,
+        imageUrl: mainImageUrl ?? null,
+        imageUrls: imageUrls,
+        eventType: item.event_type ?? null,
+        city: item.city ?? null,
+        province: item.province ?? null,
+        venueName: null,
+        eventDate: item.event_date ?? null,
+        isFeatured: item.is_featured ?? false,
+        sortOrder: item.sort_order ?? 0,
+        status: (item.sort_order === -1 ? "draft" : item.sort_order === -2 ? "hidden" : "published") as "draft" | "hidden" | "published",
+        serviceId: null,
+      };
+    })
     .sort((a, b) => {
       if (a.isFeatured !== b.isFeatured) return a.isFeatured ? -1 : 1;
-      return a.sortOrder - b.sortOrder || a.title.localeCompare(b.title);
+      return a.sortOrder - b.sortOrder || (a.title || "").localeCompare(b.title || "");
     });
 }
 

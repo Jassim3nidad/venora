@@ -124,16 +124,20 @@ export const archiveSupplierPackageSchema = z.object({
 export const supplierPortfolioSchema = z.object({
   id: z.string().uuid().optional(),
   supplierId: z.string().uuid().optional(),
-  title: z.string().trim().min(2, "Title is required").max(120),
-  description: optionalText(600),
-  imageUrl: z.string().trim().url("Enter a valid image URL"),
+  title: optionalText(120), // Now optional for drafts
+  description: optionalText(1000),
+  imageUrls: z.array(z.string().trim().url("Enter a valid image URL")).default([]),
+  imageUrl: optionalUrl,
   eventType: optionalText(80),
   city: optionalText(80),
   province: optionalText(80),
+  venueName: optionalText(100),
   eventDate: z
     .preprocess(emptyToUndefined, z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional()),
   isFeatured: z.coerce.boolean().default(false),
   sortOrder: z.coerce.number().int().min(0).max(999).default(0),
+  status: z.enum(["draft", "published", "hidden"]).default("draft"),
+  serviceId: z.preprocess(emptyToUndefined, z.string().uuid().optional()),
 });
 
 export const supplierContactRequestSchema = z.object({

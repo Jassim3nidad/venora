@@ -430,25 +430,31 @@ export interface Database {
         Row: {
           id:          string;
           supplier_id: string;
-          title:       string;
+          title:       string | null;
           description: string | null;
-          image_url:   string;
+          image_url:   string | null;
+          image_urls:  string[];
           event_type:  string | null;
           city:        string | null;
           province:    string | null;
           event_date:  string | null;
           is_featured: boolean;
           sort_order:  number;
+          status:      string;
+          service_id:  string | null;
+          venue_name:  string | null;
           created_at:  string;
           updated_at:  string;
         };
         Insert: Omit<
           Database["public"]["Tables"]["supplier_portfolio_items"]["Row"],
-          "id" | "is_featured" | "sort_order" | "created_at" | "updated_at"
+          "id" | "is_featured" | "sort_order" | "status" | "image_urls" | "created_at" | "updated_at"
         > & {
           id?: string;
           is_featured?: boolean;
           sort_order?: number;
+          status?: string;
+          image_urls?: string[];
         };
         Update: Partial<Database["public"]["Tables"]["supplier_portfolio_items"]["Insert"]>;
       };

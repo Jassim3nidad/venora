@@ -24,15 +24,19 @@ export type SupplierPackage = {
 export type SupplierPortfolioItem = {
   id: string;
   supplierId: string;
-  title: string;
+  title: string | null;
   description: string | null;
-  imageUrl: string;
+  imageUrl: string | null;
+  imageUrls: string[];
   eventType: string | null;
   city: string | null;
   province: string | null;
   eventDate: string | null;
   isFeatured: boolean;
   sortOrder: number;
+  status: "draft" | "published" | "hidden";
+  serviceId: string | null;
+  venueName: string | null;
 };
 
 export type SupplierReview = {
