@@ -120,7 +120,7 @@ or production latency.
 | Check                          | Result                                                       |
 | ------------------------------ | ------------------------------------------------------------ |
 | Formatting and diff whitespace | PASS                                                         |
-| Lint                           | PASS, 0 errors; 460 existing warnings                        |
+| Lint                           | PASS, 0 errors; 464 current warnings                         |
 | Type-check                     | PASS                                                         |
 | Build                          | PASS, Next.js production build                               |
 | OpenAPI generation/coverage    | PASS, 31/31 operations                                       |
