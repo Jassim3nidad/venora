@@ -15,7 +15,8 @@ the system you are changing.
 - [Bookings](bookings.md), [payments](payments.md), and
   [notifications](notifications.md)
 - [Analytics](analytics.md) and [AI](ai.md)
-- [Testing](testing.md), [deployment](deployment.md), and
+- [Testing](testing.md), [quality strategy](testing/test-strategy.md),
+  [deployment](deployment.md), and
   [troubleshooting](troubleshooting.md)
 - [Known limitations](known-limitations.md)
 - [Operational runbooks](runbooks/README.md)
