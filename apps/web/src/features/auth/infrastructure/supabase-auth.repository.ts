@@ -6,8 +6,9 @@ import type { AuthUser } from "../types/auth.types";
 
 export class SupabaseAuthRepository implements AuthRepository {
   private getSiteUrl() {
-    let url = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL;
-    
+    let url =
+      process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL;
+
     // Fallback to Vercel system environment variables if explicit ones aren't set
     if (!url && process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL) {
       url = `https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`;
@@ -18,7 +19,7 @@ export class SupabaseAuthRepository implements AuthRepository {
     }
 
     url = url || "http://localhost:3000";
-    
+
     // Ensure it starts with http/https and has no trailing slash
     url = url.startsWith("http") ? url : `https://${url}`;
     return url.replace(/\/$/, "");
@@ -64,7 +65,10 @@ export class SupabaseAuthRepository implements AuthRepository {
 
   async signIn({ email, password }: { email: string; password: string }) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
     if (error) throw new AuthError(error.message);
   }
 
@@ -119,22 +123,26 @@ export class SupabaseAuthRepository implements AuthRepository {
 
     if (!user) return null;
 
-    const { data: profile } = await supabase
+    const { data: profile } = (await supabase
       .from("profiles")
       .select("full_name, avatar_url, phone, status")
       .eq("id", user.id)
-      .single() as any;
+      .single()) as any;
 
     let profileStatus = (profile?.status as any) ?? "pending_verification";
 
     if (profileStatus === "pending_verification" && user.email_confirmed_at) {
-      const { error: profileStatusError } = await (supabase
-        .from("profiles") as any)
+      const { error: profileStatusError } = await (
+        supabase.from("profiles") as any
+      )
         .update({ status: "active" })
         .eq("id", user.id);
 
       if (profileStatusError) {
-        console.error("[auth] Failed to sync confirmed profile status:", profileStatusError);
+        console.error(
+          "[auth] Failed to sync confirmed profile status:",
+          profileStatusError,
+        );
       } else {
         profileStatus = "active";
       }
@@ -160,10 +168,12 @@ export class SupabaseAuthRepository implements AuthRepository {
     };
   }
 
-  async updateProfile(userId: string, data: { fullName: string; phone?: string | null }) {
+  async updateProfile(
+    userId: string,
+    data: { fullName: string; phone?: string | null },
+  ) {
     const supabase = await createClient();
-    const { error } = await (supabase
-      .from("profiles") as any)
+    const { error } = await (supabase.from("profiles") as any)
       .update({ full_name: data.fullName, phone: data.phone || null })
       .eq("id", userId);
 
@@ -172,7 +182,10 @@ export class SupabaseAuthRepository implements AuthRepository {
 
   async verifyOtp(tokenHash: string, type: "signup" | "email") {
     const supabase = await createClient();
-    const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
+    const { error } = await supabase.auth.verifyOtp({
+      token_hash: tokenHash,
+      type,
+    });
     if (error) throw new AuthError(error.message);
   }
 }

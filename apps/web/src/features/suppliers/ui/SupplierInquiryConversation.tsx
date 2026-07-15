@@ -17,8 +17,14 @@ function formatMessageTime(iso: string): string {
   }).format(date);
 }
 
-function RoleLabel({ role, name }: { role: "customer" | "supplier", name?: string | null | undefined }) {
-  const label = role === "customer" ? (name || "Customer") : (name || "Supplier");
+function RoleLabel({
+  role,
+  name,
+}: {
+  role: "customer" | "supplier";
+  name?: string | null | undefined;
+}) {
+  const label = role === "customer" ? name || "Customer" : name || "Supplier";
   return (
     <span
       className={[
@@ -100,7 +106,8 @@ export function SupplierInquiryConversation({
           </div>
           <p className="text-sm font-black text-[#111827]">No messages yet</p>
           <p className="max-w-xs text-sm font-medium leading-6 text-[#6B7280]">
-            Use this conversation to ask questions or clarify details with {counterpartLabel}.
+            Use this conversation to ask questions or clarify details with{" "}
+            {counterpartLabel}.
           </p>
         </div>
       ) : (
@@ -108,7 +115,11 @@ export function SupplierInquiryConversation({
           {initialMessages.map((msg) => {
             const isOwn = msg.sender_id === currentUserId;
             // The sender_role is implicit for supplier messages
-            const role = isOwn ? currentRole : (currentRole === "customer" ? "supplier" : "customer");
+            const role = isOwn
+              ? currentRole
+              : currentRole === "customer"
+                ? "supplier"
+                : "customer";
             return (
               <div
                 key={msg.id}

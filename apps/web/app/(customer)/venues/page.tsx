@@ -5,7 +5,10 @@ import {
   toMarketplaceVenue,
   type ResearchVenue,
 } from "@/src/features/venues/data/research-venues";
-import { searchMarketplaceVenues, type VenueSearchParams } from "@/src/features/venues/application/queries";
+import {
+  searchMarketplaceVenues,
+  type VenueSearchParams,
+} from "@/src/features/venues/application/queries";
 
 import {
   Venue,
@@ -37,14 +40,17 @@ export default async function VenuesMarketplacePage({
   };
 
   if (params.venueTypes) {
-    filters.venueTypes = String(params.venueTypes).split(',');
+    filters.venueTypes = String(params.venueTypes).split(",");
   }
 
   if (params.amenities) {
-    filters.amenities = String(params.amenities).split(',');
+    filters.amenities = String(params.amenities).split(",");
   }
 
-  const { data: dbVenues, error } = await searchMarketplaceVenues(supabase, filters);
+  const { data: dbVenues, error } = await searchMarketplaceVenues(
+    supabase,
+    filters,
+  );
 
   if (error) {
     console.error("[venues/page] Supabase fetch error:", error.message);
@@ -97,7 +103,9 @@ export default async function VenuesMarketplacePage({
   const venues: Venue[] =
     dbRows.length > 0
       ? [...livePublishedVenues, ...fallbackVenues]
-      : researchVenues.map((venue) => toMarketplaceVenue(venue, favoriteVenueIds));
+      : researchVenues.map((venue) =>
+          toMarketplaceVenue(venue, favoriteVenueIds),
+        );
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-[#F9FAFB] text-[#111827]">

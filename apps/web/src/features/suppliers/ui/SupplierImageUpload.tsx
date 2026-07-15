@@ -24,7 +24,7 @@ export function SupplierImageUpload({
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [cropImageUrl, setCropImageUrl] = useState<string | null>(null);
   const [originalFileName, setOriginalFileName] = useState<string>("");
 
@@ -56,17 +56,22 @@ export function SupplierImageUpload({
 
     try {
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
         throw new Error("You must be logged in to upload images.");
       }
-      
-      const safeName = originalFileName.replace(/[^a-zA-Z0-9.-]/g, "") || "image.jpg";
+
+      const safeName =
+        originalFileName.replace(/[^a-zA-Z0-9.-]/g, "") || "image.jpg";
       const storagePath = `${user.id}/supplier-${Date.now()}-${safeName}`;
 
       // Create a new File from the blob
-      const fileToUpload = new File([croppedBlob], safeName, { type: "image/jpeg" });
+      const fileToUpload = new File([croppedBlob], safeName, {
+        type: "image/jpeg",
+      });
 
       // We use the avatars bucket because it's public and allows authenticated self-upload
       const { error: uploadError } = await supabase.storage
@@ -80,13 +85,15 @@ export function SupplierImageUpload({
         throw new Error(uploadError.message);
       }
 
-      const { data } = supabase.storage.from("avatars").getPublicUrl(storagePath);
+      const { data } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(storagePath);
       onUploadSuccess(data.publicUrl);
     } catch (uploadError) {
       setError(
         uploadError instanceof Error
           ? uploadError.message
-          : "Could not upload image."
+          : "Could not upload image.",
       );
     } finally {
       setIsUploading(false);

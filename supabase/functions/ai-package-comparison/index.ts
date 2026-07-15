@@ -10,14 +10,14 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
-  loadAiConfig,
-  validateProviderModel,
+  type AiConfiguration,
   checkAiUsageLimits,
-  logAiUsage,
-  postChatCompletion,
   estimateCostCents,
   extractTokenUsage,
-  type AiConfiguration,
+  loadAiConfig,
+  logAiUsage,
+  postChatCompletion,
+  validateProviderModel,
 } from "../_shared/ai-config.ts";
 
 const corsHeaders = {
@@ -99,12 +99,21 @@ type AiSummary = {
   bestFor: { packageId: string; note: string }[];
 };
 
-function isValidSummary(value: any, validPackageIds: Set<string>): value is AiSummary {
+function isValidSummary(
+  value: any,
+  validPackageIds: Set<string>,
+): value is AiSummary {
   if (!value || typeof value !== "object") return false;
-  if (!Array.isArray(value.highlights) || !Array.isArray(value.tradeoffs)) return false;
+  if (!Array.isArray(value.highlights) || !Array.isArray(value.tradeoffs)) {
+    return false;
+  }
   if (!Array.isArray(value.bestFor)) return false;
-  if (!value.highlights.every((item: unknown) => typeof item === "string")) return false;
-  if (!value.tradeoffs.every((item: unknown) => typeof item === "string")) return false;
+  if (!value.highlights.every((item: unknown) => typeof item === "string")) {
+    return false;
+  }
+  if (!value.tradeoffs.every((item: unknown) => typeof item === "string")) {
+    return false;
+  }
 
   return value.bestFor.every(
     (item: any) =>
@@ -117,14 +126,19 @@ function isValidSummary(value: any, validPackageIds: Set<string>): value is AiSu
 
 async function requestSummary(
   openRouterApiKey: string,
-  openAiApiKey: string | null,
   table: ComparisonRow[],
   config: AiConfiguration,
-): Promise<{ summary: AiSummary | null; inputTokens: number | null; outputTokens: number | null; providerUsed: string; modelUsed: string }> {
+): Promise<{
+  summary: AiSummary | null;
+  inputTokens: number | null;
+  outputTokens: number | null;
+  providerUsed: string;
+  modelUsed: string;
+}> {
   try {
     const { response, providerUsed, modelUsed } = await postChatCompletion(
       config,
-      { openrouter: openRouterApiKey, openai: openAiApiKey },
+      openRouterApiKey,
       {
         temperature: config.temperature ?? 0.3,
         // Generous budget — the default free model reasons before writing
@@ -173,21 +187,43 @@ async function requestSummary(
     );
 
     if (!response.ok) {
-      console.error("[ai-package-comparison] AI provider request failed:", await response.text());
-      return { summary: null, inputTokens: null, outputTokens: null, providerUsed, modelUsed };
+      console.error(
+        "[ai-package-comparison] AI provider request failed:",
+        await response.text(),
+      );
+      return {
+        summary: null,
+        inputTokens: null,
+        outputTokens: null,
+        providerUsed,
+        modelUsed,
+      };
     }
 
     const payload = await response.json();
     const content = payload?.choices?.[0]?.message?.content;
     const tokens = extractTokenUsage(payload);
-    if (typeof content !== "string") return { summary: null, ...tokens, providerUsed, modelUsed };
+    if (typeof content !== "string") {
+      return { summary: null, ...tokens, providerUsed, modelUsed };
+    }
 
     const parsed = JSON.parse(content);
     const validIds = new Set(table.map((row) => row.id));
-    return { summary: isValidSummary(parsed, validIds) ? parsed : null, ...tokens, providerUsed, modelUsed };
+    return {
+      summary: isValidSummary(parsed, validIds) ? parsed : null,
+      ...tokens,
+      providerUsed,
+      modelUsed,
+    };
   } catch (error) {
     console.error("[ai-package-comparison] Summary generation failed:", error);
-    return { summary: null, inputTokens: null, outputTokens: null, providerUsed: config.provider, modelUsed: config.model };
+    return {
+      summary: null,
+      inputTokens: null,
+      outputTokens: null,
+      providerUsed: config.provider,
+      modelUsed: config.model,
+    };
   }
 }
 
@@ -197,18 +233,24 @@ serve(async (req) => {
   }
 
   if (req.method !== "POST") {
-    return errorResponse("METHOD_NOT_ALLOWED", "Use POST to compare packages.", 405);
+    return errorResponse(
+      "METHOD_NOT_ALLOWED",
+      "Use POST to compare packages.",
+      405,
+    );
   }
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const openRouterApiKey = Deno.env.get("OPENROUTER_API_KEY");
-    // Optional — only used as a fallback provider if configured and OpenRouter fails.
-    const openAiApiKey = Deno.env.get("OPENAI_API_KEY") ?? null;
 
     if (!supabaseUrl || !serviceRoleKey) {
-      return errorResponse("CONFIGURATION_ERROR", "Missing Supabase configuration.", 500);
+      return errorResponse(
+        "CONFIGURATION_ERROR",
+        "Missing Supabase configuration.",
+        500,
+      );
     }
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
@@ -219,12 +261,19 @@ serve(async (req) => {
     // summary, still return the table," matching this function's existing
     // graceful-degrade design, rather than failing the whole request.
     const config = await loadAiConfig(supabase, "package_comparison");
-    const providerCheck = config ? validateProviderModel(config) : { ok: false as const };
+    const providerCheck = config
+      ? validateProviderModel(config)
+      : { ok: false as const };
     let limitCheck: { allowed: boolean; reason?: string } = { allowed: true };
     if (config?.enabled && providerCheck.ok) {
-      limitCheck = await checkAiUsageLimits(supabase, "package_comparison", config);
+      limitCheck = await checkAiUsageLimits(
+        supabase,
+        "package_comparison",
+        config,
+      );
     }
-    const aiSummaryAllowed = !!config?.enabled && providerCheck.ok && limitCheck.allowed;
+    const aiSummaryAllowed =
+      !!config?.enabled && providerCheck.ok && limitCheck.allowed;
 
     const rawBody = await req.json().catch(() => null);
     const packageIds = parsePackageIds(rawBody);
@@ -246,8 +295,15 @@ serve(async (req) => {
       .eq("is_active", true);
 
     if (packagesError) {
-      console.error("[ai-package-comparison] Package lookup failed:", packagesError);
-      return errorResponse("PACKAGE_LOOKUP_FAILED", "Could not look up the packages.", 500);
+      console.error(
+        "[ai-package-comparison] Package lookup failed:",
+        packagesError,
+      );
+      return errorResponse(
+        "PACKAGE_LOOKUP_FAILED",
+        "Could not look up the packages.",
+        500,
+      );
     }
 
     const publishedRows = (packageRows ?? []).filter(
@@ -267,7 +323,11 @@ serve(async (req) => {
     let aiSummary: AiSummary | null = null;
     if (aiSummaryAllowed && openRouterApiKey && config) {
       const requestStartedAt = Date.now();
-      const result = await requestSummary(openRouterApiKey, openAiApiKey, comparisonTable, config);
+      const result = await requestSummary(
+        openRouterApiKey,
+        comparisonTable,
+        config,
+      );
       aiSummary = result.summary;
       await logAiUsage(supabase, {
         feature: "package_comparison",
@@ -275,7 +335,10 @@ serve(async (req) => {
         model: result.modelUsed,
         inputTokens: result.inputTokens,
         outputTokens: result.outputTokens,
-        estimatedCostCents: estimateCostCents(result.modelUsed, (result.inputTokens ?? 0) + (result.outputTokens ?? 0)),
+        estimatedCostCents: estimateCostCents(
+          result.modelUsed,
+          (result.inputTokens ?? 0) + (result.outputTokens ?? 0),
+        ),
         durationMs: Date.now() - requestStartedAt,
         success: aiSummary !== null,
         errorCategory: aiSummary === null ? "provider_error_or_invalid" : null,
@@ -283,14 +346,19 @@ serve(async (req) => {
     }
 
     const userId = await getAuthenticatedUserId(req, supabaseUrl);
-    const { error: logError } = await supabase.from("ai_package_comparisons").insert({
-      user_id: userId,
-      package_ids: comparisonTable.map((row) => row.id),
-      summary: aiSummary ?? { highlights: [], tradeoffs: [], bestFor: [] },
-    });
+    const { error: logError } = await supabase
+      .from("ai_package_comparisons")
+      .insert({
+        user_id: userId,
+        package_ids: comparisonTable.map((row) => row.id),
+        summary: aiSummary ?? { highlights: [], tradeoffs: [], bestFor: [] },
+      });
 
     if (logError) {
-      console.error("[ai-package-comparison] Failed to log comparison:", logError);
+      console.error(
+        "[ai-package-comparison] Failed to log comparison:",
+        logError,
+      );
     }
 
     return jsonResponse({
@@ -301,7 +369,9 @@ serve(async (req) => {
     console.error("[ai-package-comparison] Unexpected error:", error);
     return errorResponse(
       "INTERNAL_ERROR",
-      error instanceof Error ? error.message : "Package comparison is temporarily unavailable.",
+      error instanceof Error
+        ? error.message
+        : "Package comparison is temporarily unavailable.",
       500,
     );
   }

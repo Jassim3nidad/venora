@@ -4,7 +4,10 @@
 // that boundary. All formatting logic stays internal to the (client) chart components.
 export type ChartValueFormat = "currency" | "number";
 
-export function formatChartValue(value: number, format: ChartValueFormat = "number"): string {
+export function formatChartValue(
+  value: number,
+  format: ChartValueFormat = "number",
+): string {
   if (format === "currency") return `₱${value.toLocaleString()}`;
   return value.toLocaleString();
 }

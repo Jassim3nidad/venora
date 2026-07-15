@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import {
-  DashboardSubPage,
-} from "@/components/dashboard/enterprise";
+import { DashboardSubPage } from "@/components/dashboard/enterprise";
 import { SupplierProfileForm } from "@/features/suppliers/ui/SupplierProfileForm";
 import { getRequiredSupplierDashboardContext } from "../_lib/supplier-dashboard-data";
 

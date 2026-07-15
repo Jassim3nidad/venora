@@ -6,7 +6,9 @@ import { queryKeys } from "@/lib/query-keys";
 
 export function useVenueRecommendations(userId: string | null) {
   return useQuery({
-    queryKey: userId ? queryKeys.ai.recommendations(userId) : ["ai", "recommendations", "anonymous"],
+    queryKey: userId
+      ? queryKeys.ai.recommendations(userId)
+      : ["ai", "recommendations", "anonymous"],
     queryFn: fetchVenueRecommendations,
     enabled: Boolean(userId),
     staleTime: 5 * 60 * 1000,

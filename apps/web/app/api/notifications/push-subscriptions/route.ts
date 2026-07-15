@@ -5,7 +5,12 @@ import {
   pushSubscriptionSchema,
 } from "@/features/notifications/schemas/notification.schema";
 
-function apiError(code: string, message: string, status: number, details?: unknown) {
+function apiError(
+  code: string,
+  message: string,
+  status: number,
+  details?: unknown,
+) {
   return NextResponse.json(
     { data: null, error: { code, message, details } },
     { status },

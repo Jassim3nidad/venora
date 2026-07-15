@@ -35,7 +35,11 @@ const PROVIDER_DETAILS: Record<
 };
 
 function formatCurrency(value: number | null | undefined) {
-  if (value === null || value === undefined || !Number.isFinite(Number(value))) {
+  if (
+    value === null ||
+    value === undefined ||
+    !Number.isFinite(Number(value))
+  ) {
     return "Pending";
   }
 
@@ -76,7 +80,10 @@ export default async function PaymentsPage() {
     .limit(5);
 
   if (payableError) {
-    console.error("[account/payments] Payable bookings fetch error:", payableError.message);
+    console.error(
+      "[account/payments] Payable bookings fetch error:",
+      payableError.message,
+    );
   }
 
   return (

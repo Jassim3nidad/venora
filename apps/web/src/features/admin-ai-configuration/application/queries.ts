@@ -1,5 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
-import type { AiConfiguration, AiFeature, AiUsageSummary } from "../types/ai-configuration.types";
+import type {
+  AiConfiguration,
+  AiFeature,
+  AiUsageSummary,
+} from "../types/ai-configuration.types";
 import { AI_FEATURES } from "../types/ai-configuration.types";
 
 export async function getAiConfigurations(): Promise<{
@@ -30,7 +34,10 @@ export async function getAiConfigurations(): Promise<{
       systemInstruction: row?.system_instruction ?? null,
       maxTokens: row?.max_tokens ?? 1024,
       timeoutSeconds: row?.timeout_seconds ?? 30,
-      temperature: row?.temperature !== undefined && row?.temperature !== null ? Number(row.temperature) : null,
+      temperature:
+        row?.temperature !== undefined && row?.temperature !== null
+          ? Number(row.temperature)
+          : null,
       moderationEnabled: row?.moderation_enabled ?? true,
       rateLimitPerMinute: row?.rate_limit_per_minute ?? null,
       dailyUsageLimit: row?.daily_usage_limit ?? null,
@@ -54,8 +61,13 @@ export async function getAiUsageSummary(): Promise<AiUsageSummary[]> {
 
   const { data } = await supabase
     .from("ai_usage_logs")
-    .select("feature, success, input_tokens, output_tokens, estimated_cost_cents")
-    .gte("created_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+    .select(
+      "feature, success, input_tokens, output_tokens, estimated_cost_cents",
+    )
+    .gte(
+      "created_at",
+      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+    );
 
   const byFeature = new Map<AiFeature, AiUsageSummary>();
   for (const row of (data ?? []) as any[]) {

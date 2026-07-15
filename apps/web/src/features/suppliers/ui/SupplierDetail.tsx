@@ -93,7 +93,13 @@ function InfoCard({
   );
 }
 
-function EmptyPanel({ message, icon }: { message: string; icon?: React.ReactNode }) {
+function EmptyPanel({
+  message,
+  icon,
+}: {
+  message: string;
+  icon?: React.ReactNode;
+}) {
   return (
     <div className="flex flex-col items-center justify-center rounded-[18px] border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-8 text-center sm:p-10">
       {icon && <div className="mb-3 text-slate-400">{icon}</div>}
@@ -105,7 +111,7 @@ function EmptyPanel({ message, icon }: { message: string; icon?: React.ReactNode
 function PortfolioProjectModal({
   project,
   isOpen,
-  onOpenChange
+  onOpenChange,
 }: {
   project: any; // using any temporarily to avoid circular types if needed, or import type
   isOpen: boolean;
@@ -113,12 +119,17 @@ function PortfolioProjectModal({
 }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const images = project.imageUrls && project.imageUrls.length > 0
-    ? project.imageUrls
-    : (project.imageUrl ? [project.imageUrl] : []);
+  const images =
+    project.imageUrls && project.imageUrls.length > 0
+      ? project.imageUrls
+      : project.imageUrl
+        ? [project.imageUrl]
+        : [];
 
-  const handleNext = () => setCurrentImageIndex((prev) => (prev + 1) % images.length);
-  const handlePrev = () => setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  const handleNext = () =>
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  const handlePrev = () =>
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -130,7 +141,10 @@ function PortfolioProjectModal({
               {project.title || "Portfolio Project"}
             </DialogTitle>
             <DialogClose asChild>
-              <button className="rounded-full p-2 hover:bg-slate-100 transition-colors" aria-label="Close">
+              <button
+                className="rounded-full p-2 hover:bg-slate-100 transition-colors"
+                aria-label="Close"
+              >
                 <X className="h-5 w-5 text-slate-500" />
               </button>
             </DialogClose>
@@ -188,26 +202,36 @@ function PortfolioProjectModal({
                 {(project.city || project.province) && (
                   <div className="flex items-center gap-2 text-sm font-semibold text-slate-600">
                     <MapPin className="h-4 w-4" />
-                    {[project.city, project.province].filter(Boolean).join(", ")}
+                    {[project.city, project.province]
+                      .filter(Boolean)
+                      .join(", ")}
                   </div>
                 )}
                 {project.eventDate && (
                   <div className="flex items-center gap-2 text-sm font-semibold text-slate-600">
                     <CalendarDays className="h-4 w-4" />
-                    Completed {new Date(project.eventDate).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+                    Completed{" "}
+                    {new Date(project.eventDate).toLocaleDateString(undefined, {
+                      month: "long",
+                      year: "numeric",
+                    })}
                   </div>
                 )}
               </div>
 
               {/* Story */}
               <div>
-                <h3 className="text-sm font-extrabold uppercase tracking-widest text-slate-500 mb-2">About this project</h3>
+                <h3 className="text-sm font-extrabold uppercase tracking-widest text-slate-500 mb-2">
+                  About this project
+                </h3>
                 {project.description ? (
                   <p className="text-base text-slate-700 leading-relaxed whitespace-pre-wrap">
                     {project.description}
                   </p>
                 ) : (
-                  <p className="text-sm italic text-slate-400">Project details have not been added yet.</p>
+                  <p className="text-sm italic text-slate-400">
+                    Project details have not been added yet.
+                  </p>
                 )}
               </div>
             </div>
@@ -220,8 +244,14 @@ function PortfolioProjectModal({
                 className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 rounded-xl"
                 onClick={() => {
                   onOpenChange(false);
-                  window.dispatchEvent(new CustomEvent('venora:select-service', { detail: { serviceId: project.serviceId } }));
-                  document.getElementById('supplier-request-card')?.scrollIntoView({ behavior: 'smooth' });
+                  window.dispatchEvent(
+                    new CustomEvent("venora:select-service", {
+                      detail: { serviceId: project.serviceId },
+                    }),
+                  );
+                  document
+                    .getElementById("supplier-request-card")
+                    ?.scrollIntoView({ behavior: "smooth" });
                 }}
               >
                 <Send className="mr-2 h-4 w-4" />
@@ -341,7 +371,6 @@ export function SupplierDetail({
       <div className="grid grid-cols-1 items-start gap-8 pt-4 sm:pt-8 lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_380px] xl:gap-10">
         {/* Left Column */}
         <div className="min-w-0 space-y-8">
-
           {/* Identity Header */}
           <div className="relative flex flex-col items-start mb-4 z-10">
             <div
@@ -434,7 +463,9 @@ export function SupplierDetail({
                 icon={Users}
                 label="Team Size"
                 value={
-                  supplier.teamSize ? `${supplier.teamSize} people` : "On request"
+                  supplier.teamSize
+                    ? `${supplier.teamSize} people`
+                    : "On request"
                 }
               />
               <InfoCard
@@ -455,7 +486,8 @@ export function SupplierDetail({
                   Services and Pricing
                 </h2>
                 <p className="mt-1 text-sm font-medium text-[#6B7280]">
-                  {activePackages.length} active service{activePackages.length === 1 ? "" : "s"} available
+                  {activePackages.length} active service
+                  {activePackages.length === 1 ? "" : "s"} available
                 </p>
               </div>
             </div>
@@ -463,7 +495,13 @@ export function SupplierDetail({
             {activePackages.length === 0 ? (
               <EmptyPanel message="This supplier has not published any services yet." />
             ) : (
-              <div className={activePackages.length === 1 ? "grid gap-4" : "grid gap-4 sm:grid-cols-2"}>
+              <div
+                className={
+                  activePackages.length === 1
+                    ? "grid gap-4"
+                    : "grid gap-4 sm:grid-cols-2"
+                }
+              >
                 {activePackages.map((pkg) => (
                   <article
                     key={pkg.id}
@@ -482,8 +520,13 @@ export function SupplierDetail({
                         {pkg.name}
                       </h3>
                       <div className="mt-2 text-sm font-bold text-[#6B7280]">
-                        Starting at <span className="text-base text-[#111827]">{formatSupplierPrice(pkg.price)}</span>{" "}
-                        <span className="font-medium">{formatPriceUnit(pkg.priceUnit)}</span>
+                        Starting at{" "}
+                        <span className="text-base text-[#111827]">
+                          {formatSupplierPrice(pkg.price)}
+                        </span>{" "}
+                        <span className="font-medium">
+                          {formatPriceUnit(pkg.priceUnit)}
+                        </span>
                       </div>
                       {pkg.description ? (
                         <p className="mt-3 break-words text-sm font-medium leading-relaxed text-[#4B5563]">
@@ -499,7 +542,9 @@ export function SupplierDetail({
                               className="flex items-start gap-2 text-sm font-semibold text-[#4B5563]"
                             >
                               <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                              <span className="min-w-0 break-words">{item}</span>
+                              <span className="min-w-0 break-words">
+                                {item}
+                              </span>
                             </li>
                           ))}
                           {pkg.inclusions.length > 4 && (
@@ -545,15 +590,22 @@ export function SupplierDetail({
                 icon={<Images className="h-8 w-8 text-slate-300" />}
               />
             ) : (
-              <div className={
-                publicPortfolio.length === 1 ? "grid gap-4" :
-                publicPortfolio.length === 2 ? "grid gap-4 sm:grid-cols-2" :
-                "grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-              }>
+              <div
+                className={
+                  publicPortfolio.length === 1
+                    ? "grid gap-4"
+                    : publicPortfolio.length === 2
+                      ? "grid gap-4 sm:grid-cols-2"
+                      : "grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+                }
+              >
                 {publicPortfolio.map((item) => {
-                  const images = item.imageUrls && item.imageUrls.length > 0
-                    ? item.imageUrls
-                    : (item.imageUrl ? [item.imageUrl] : []);
+                  const images =
+                    item.imageUrls && item.imageUrls.length > 0
+                      ? item.imageUrls
+                      : item.imageUrl
+                        ? [item.imageUrl]
+                        : [];
                   const hasImages = images.length > 0;
                   const isFeaturedLayout = publicPortfolio.length === 1;
 
@@ -578,7 +630,7 @@ export function SupplierDetail({
                         {hasImages ? (
                           <img
                             src={images[0]}
-                            alt={`${item.title || 'Project'} cover`}
+                            alt={`${item.title || "Project"} cover`}
                             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                             loading="lazy"
                           />
@@ -604,7 +656,8 @@ export function SupplierDetail({
                         {hasImages && (
                           <div className="absolute bottom-3 right-3 rounded-md bg-black/70 px-2 py-1 text-[11px] font-bold text-white shadow-sm backdrop-blur flex items-center gap-1.5">
                             <Images className="h-3 w-3" />
-                            {images.length} photo{images.length !== 1 ? 's' : ''}
+                            {images.length} photo
+                            {images.length !== 1 ? "s" : ""}
                           </div>
                         )}
                       </button>
@@ -627,22 +680,30 @@ export function SupplierDetail({
                             )}
                             {(item.city || item.province) && (
                               <p className="text-xs font-semibold text-slate-600 line-clamp-1">
-                                {[item.city, item.province].filter(Boolean).join(", ")}
+                                {[item.city, item.province]
+                                  .filter(Boolean)
+                                  .join(", ")}
                               </p>
                             )}
                             {item.eventDate && (
                               <p className="text-xs font-semibold text-slate-600 line-clamp-1">
-                                Completed {new Date(item.eventDate).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+                                Completed{" "}
+                                {new Date(item.eventDate).toLocaleDateString(
+                                  undefined,
+                                  { month: "long", year: "numeric" },
+                                )}
                               </p>
                             )}
                           </div>
 
                           {item.description && (
-                            <p className={
-                              isFeaturedLayout
-                                ? "mt-4 line-clamp-3 text-sm font-medium leading-relaxed text-[#4B5563]"
-                                : "mt-4 line-clamp-2 text-sm font-medium leading-relaxed text-[#4B5563]"
-                            }>
+                            <p
+                              className={
+                                isFeaturedLayout
+                                  ? "mt-4 line-clamp-3 text-sm font-medium leading-relaxed text-[#4B5563]"
+                                  : "mt-4 line-clamp-2 text-sm font-medium leading-relaxed text-[#4B5563]"
+                              }
+                            >
                               {item.description}
                             </p>
                           )}
@@ -653,7 +714,9 @@ export function SupplierDetail({
                             {item.serviceId ? (
                               <p className="text-xs font-semibold text-slate-500 truncate flex items-center gap-1.5">
                                 <BriefcaseBusiness className="h-3.5 w-3.5 shrink-0" />
-                                <span className="truncate">Linked to a service</span>
+                                <span className="truncate">
+                                  Linked to a service
+                                </span>
                               </p>
                             ) : null}
                           </div>
@@ -702,19 +765,21 @@ export function SupplierDetail({
                       Location Type
                     </h3>
                     <p className="mt-1 text-sm font-bold text-[#111827] capitalize">
-                      {supplier.businessLocationType?.replace(/_/g, ' ') || "Mobile / We come to you"}
+                      {supplier.businessLocationType?.replace(/_/g, " ") ||
+                        "Mobile / We come to you"}
                     </p>
                   </div>
-                  {supplier.coverageRadiusKm != null && supplier.coverageRadiusKm > 0 && (
-                    <div>
-                      <h3 className="text-xs font-extrabold uppercase tracking-widest text-[#6B7280]">
-                        Coverage Radius
-                      </h3>
-                      <p className="mt-1 text-sm font-bold text-[#111827]">
-                        {supplier.coverageRadiusKm} km
-                      </p>
-                    </div>
-                  )}
+                  {supplier.coverageRadiusKm != null &&
+                    supplier.coverageRadiusKm > 0 && (
+                      <div>
+                        <h3 className="text-xs font-extrabold uppercase tracking-widest text-[#6B7280]">
+                          Coverage Radius
+                        </h3>
+                        <p className="mt-1 text-sm font-bold text-[#111827]">
+                          {supplier.coverageRadiusKm} km
+                        </p>
+                      </div>
+                    )}
                 </div>
 
                 {supplier.travelAvailable && supplier.travelFeeNote && (
@@ -746,21 +811,23 @@ export function SupplierDetail({
                 )}
               </div>
 
-              {supplier.locationVisibility !== "service_area_only" && supplier.latitude && supplier.longitude && (
-                <div className="w-full bg-slate-50 relative">
-                  {supplier.locationVisibility === "approximate" && (
-                    <div className="absolute top-4 left-4 z-10 rounded-full bg-white/90 px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm backdrop-blur">
-                      Approximate Location
-                    </div>
-                  )}
-                  <VenueMap
-                    latitude={supplier.latitude}
-                    longitude={supplier.longitude}
-                    markerLabel={supplier.businessName}
-                    height="260px"
-                  />
-                </div>
-              )}
+              {supplier.locationVisibility !== "service_area_only" &&
+                supplier.latitude &&
+                supplier.longitude && (
+                  <div className="w-full bg-slate-50 relative">
+                    {supplier.locationVisibility === "approximate" && (
+                      <div className="absolute top-4 left-4 z-10 rounded-full bg-white/90 px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm backdrop-blur">
+                        Approximate Location
+                      </div>
+                    )}
+                    <VenueMap
+                      latitude={supplier.latitude}
+                      longitude={supplier.longitude}
+                      markerLabel={supplier.businessName}
+                      height="260px"
+                    />
+                  </div>
+                )}
             </div>
           </section>
 
@@ -811,7 +878,9 @@ export function SupplierDetail({
                       aria-label={`Email ${supplier.businessName} at ${supplier.contactEmail}`}
                     >
                       <Mail className="h-4 w-4 shrink-0 text-[#2563EB]" />
-                      <span className="min-w-0 break-all">{supplier.contactEmail}</span>
+                      <span className="min-w-0 break-all">
+                        {supplier.contactEmail}
+                      </span>
                     </a>
                   )}
                   {false && supplier.contactPhone && (
@@ -821,7 +890,9 @@ export function SupplierDetail({
                       aria-label={`Call ${supplier.businessName} at ${supplier.contactPhone}`}
                     >
                       <Phone className="h-4 w-4 shrink-0 text-[#2563EB]" />
-                      <span className="min-w-0 break-all">{supplier.contactPhone}</span>
+                      <span className="min-w-0 break-all">
+                        {supplier.contactPhone}
+                      </span>
                     </a>
                   )}
                 </div>
@@ -841,7 +912,8 @@ export function SupplierDetail({
                 {supplier.reviewCount > 0 && (
                   <p className="mt-1 flex items-center gap-1 text-sm font-bold text-[#111827]">
                     <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                    {supplier.avgRating.toFixed(1)} · {supplier.reviewCount} verified reviews
+                    {supplier.avgRating.toFixed(1)} · {supplier.reviewCount}{" "}
+                    verified reviews
                   </p>
                 )}
               </div>
@@ -865,7 +937,8 @@ export function SupplierDetail({
                       ))}
                     </div>
                     <p className="break-words text-sm font-medium leading-relaxed text-[#4B5563]">
-                      &quot;{review.comment ?? "Verified supplier booking."}&quot;
+                      &quot;{review.comment ?? "Verified supplier booking."}
+                      &quot;
                     </p>
                     <div className="mt-4 flex items-center gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-500">

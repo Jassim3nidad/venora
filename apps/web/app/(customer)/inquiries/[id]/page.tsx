@@ -38,7 +38,11 @@ export default async function CustomerInquiryDetailPage({
     }
 
     return (
-      <CustomerInquiryDetail inquiry={inquiry} messages={messages} quote={quote} />
+      <CustomerInquiryDetail
+        inquiry={inquiry}
+        messages={messages}
+        quote={quote}
+      />
     );
   } catch (error) {
     console.error("[CustomerInquiryDetailPage] Error:", error);

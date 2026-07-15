@@ -28,25 +28,27 @@ function parseMoney(value: string | undefined): number {
 // We use any here since the query result is processed dynamically anyway.
 export async function searchMarketplaceVenues(
   supabase: any,
-  params: VenueSearchParams
+  params: VenueSearchParams,
 ) {
   let query = supabase
     .from("venues")
-    .select(`
+    .select(
+      `
       *,
       venue_images(storage_path, is_featured, display_order),
-      venue_category_assignments${params.venueTypes?.length ? '!inner' : ''}(venue_categories${params.venueTypes?.length ? '!inner' : ''}(name, slug)),
-      venue_event_types${params.event ? '!inner' : ''}(event_types${params.event ? '!inner' : ''}(name, slug)),
-      venue_amenities${params.amenities?.length ? '!inner' : ''}(amenities${params.amenities?.length ? '!inner' : ''}(name))
-    `)
+      venue_category_assignments${params.venueTypes?.length ? "!inner" : ""}(venue_categories${params.venueTypes?.length ? "!inner" : ""}(name, slug)),
+      venue_event_types${params.event ? "!inner" : ""}(event_types${params.event ? "!inner" : ""}(name, slug)),
+      venue_amenities${params.amenities?.length ? "!inner" : ""}(amenities${params.amenities?.length ? "!inner" : ""}(name))
+    `,
+    )
     .eq("status", "published");
 
   if (params.q) {
     // Sanitize to prevent PostgREST syntax errors (commas, quotes, parentheses break .or)
-    const q = params.q.replace(/[,()"]/g, '').trim();
+    const q = params.q.replace(/[,()"]/g, "").trim();
     if (q) {
       query = query.or(
-        `name.ilike.%${q}%,city.ilike.%${q}%,province.ilike.%${q}%,municipality.ilike.%${q}%`
+        `name.ilike.%${q}%,city.ilike.%${q}%,province.ilike.%${q}%,municipality.ilike.%${q}%`,
       );
     }
   }
@@ -60,11 +62,13 @@ export async function searchMarketplaceVenues(
   if (params.municipality) {
     query = query.ilike("municipality", `%${params.municipality}%`);
   }
-  
+
   if (params.location) {
-    const loc = params.location.replace(/[,()"]/g, '').trim();
+    const loc = params.location.replace(/[,()"]/g, "").trim();
     if (loc) {
-      query = query.or(`city.ilike.%${loc}%,municipality.ilike.%${loc}%,province.ilike.%${loc}%`);
+      query = query.or(
+        `city.ilike.%${loc}%,municipality.ilike.%${loc}%,province.ilike.%${loc}%`,
+      );
     }
   }
 
@@ -76,7 +80,10 @@ export async function searchMarketplaceVenues(
   }
 
   if (params.indoorOutdoor) {
-    if (params.indoorOutdoor === "indoor" || params.indoorOutdoor === "outdoor") {
+    if (
+      params.indoorOutdoor === "indoor" ||
+      params.indoorOutdoor === "outdoor"
+    ) {
       query = query.in("indoor_outdoor", [params.indoorOutdoor, "both"]);
     } else if (params.indoorOutdoor === "both") {
       query = query.eq("indoor_outdoor", "both");
@@ -101,15 +108,21 @@ export async function searchMarketplaceVenues(
 
   // Filters by related tables
   if (params.event) {
-    query = query.ilike("venue_event_types.event_types.name", `%${params.event}%`);
+    query = query.ilike(
+      "venue_event_types.event_types.name",
+      `%${params.event}%`,
+    );
   }
 
   if (params.venueTypes && params.venueTypes.length > 0) {
     const typesFilters = params.venueTypes
-      .map(t => t.replace(/[,()"]/g, '').trim())
+      .map((t) => t.replace(/[,()"]/g, "").trim())
       .filter(Boolean)
-      .map(safeT => `venue_category_assignments.venue_categories.name.ilike.%${safeT}%`)
-      .join(',');
+      .map(
+        (safeT) =>
+          `venue_category_assignments.venue_categories.name.ilike.%${safeT}%`,
+      )
+      .join(",");
     if (typesFilters) query = query.or(typesFilters);
   }
 
@@ -122,12 +135,18 @@ export async function searchMarketplaceVenues(
   const textAmenities = [];
   for (const am of params.amenities || []) {
     const norm = am.toLowerCase();
-    if (norm.includes("park")) booleanAmenities.push({ col: "parking_available", val: true });
-    else if (norm.includes("air")) booleanAmenities.push({ col: "air_conditioned", val: true });
-    else if (norm.includes("pet")) booleanAmenities.push({ col: "pet_friendly", val: true });
-    else if (norm.includes("wheelchair") || norm.includes("accessible")) booleanAmenities.push({ col: "wheelchair_accessible", val: true });
-    else if (norm.includes("pool")) booleanAmenities.push({ col: "has_pool", val: true });
-    else if (norm.includes("overnight") || norm.includes("accommodation")) booleanAmenities.push({ col: "overnight_accommodation", val: true });
+    if (norm.includes("park"))
+      booleanAmenities.push({ col: "parking_available", val: true });
+    else if (norm.includes("air"))
+      booleanAmenities.push({ col: "air_conditioned", val: true });
+    else if (norm.includes("pet"))
+      booleanAmenities.push({ col: "pet_friendly", val: true });
+    else if (norm.includes("wheelchair") || norm.includes("accessible"))
+      booleanAmenities.push({ col: "wheelchair_accessible", val: true });
+    else if (norm.includes("pool"))
+      booleanAmenities.push({ col: "has_pool", val: true });
+    else if (norm.includes("overnight") || norm.includes("accommodation"))
+      booleanAmenities.push({ col: "overnight_accommodation", val: true });
     else textAmenities.push(am);
   }
 
@@ -137,10 +156,10 @@ export async function searchMarketplaceVenues(
 
   if (textAmenities.length > 0) {
     const amFilters = textAmenities
-      .map(a => a.replace(/[,()"]/g, '').trim())
+      .map((a) => a.replace(/[,()"]/g, "").trim())
       .filter(Boolean)
-      .map(safeA => `venue_amenities.amenities.name.ilike.%${safeA}%`)
-      .join(',');
+      .map((safeA) => `venue_amenities.amenities.name.ilike.%${safeA}%`)
+      .join(",");
     if (amFilters) query = query.or(amFilters);
   }
 

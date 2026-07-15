@@ -51,7 +51,11 @@ type HistoryRow = {
 };
 
 function formatCurrency(value: number | null | undefined, currency = "PHP") {
-  if (value === null || value === undefined || !Number.isFinite(Number(value))) {
+  if (
+    value === null ||
+    value === undefined ||
+    !Number.isFinite(Number(value))
+  ) {
     return "-";
   }
 
@@ -106,7 +110,9 @@ export default async function TransactionsPage() {
 
   const bookingRows = (bookings ?? []) as BookingRow[];
   const bookingIds = bookingRows.map((booking) => booking.id);
-  const bookingById = new Map(bookingRows.map((booking) => [booking.id, booking]));
+  const bookingById = new Map(
+    bookingRows.map((booking) => [booking.id, booking]),
+  );
 
   let transactions: any[] = [];
   let refunds: any[] = [];
@@ -115,39 +121,35 @@ export default async function TransactionsPage() {
   let historyError: string | null = bookingsError?.message ?? null;
 
   if (bookingIds.length > 0) {
-    const [
-      transactionsResult,
-      refundsResult,
-      receiptsResult,
-      invoicesResult,
-    ] = await Promise.all([
-      supabase
-        .from("transactions")
-        .select(
-          "id, booking_id, amount, currency, commission_amount, payment_provider, provider_reference, status, payment_kind, checkout_url, paid_at, failed_at, failure_reason, created_at",
-        )
-        .in("booking_id", bookingIds)
-        .order("created_at", { ascending: false })
-        .limit(100),
-      supabase
-        .from("refunds")
-        .select(
-          "id, booking_id, transaction_id, amount, currency, status, reason, payment_provider, provider_reference, processed_at, created_at",
-        )
-        .in("booking_id", bookingIds)
-        .order("created_at", { ascending: false })
-        .limit(100),
-      supabase
-        .from("receipts")
-        .select("id, receipt_number, transaction_id, booking_id")
-        .eq("customer_id", user.id)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("invoices")
-        .select("id, invoice_number, booking_id, issued_at")
-        .eq("customer_id", user.id)
-        .order("issued_at", { ascending: false }),
-    ]);
+    const [transactionsResult, refundsResult, receiptsResult, invoicesResult] =
+      await Promise.all([
+        supabase
+          .from("transactions")
+          .select(
+            "id, booking_id, amount, currency, commission_amount, payment_provider, provider_reference, status, payment_kind, checkout_url, paid_at, failed_at, failure_reason, created_at",
+          )
+          .in("booking_id", bookingIds)
+          .order("created_at", { ascending: false })
+          .limit(100),
+        supabase
+          .from("refunds")
+          .select(
+            "id, booking_id, transaction_id, amount, currency, status, reason, payment_provider, provider_reference, processed_at, created_at",
+          )
+          .in("booking_id", bookingIds)
+          .order("created_at", { ascending: false })
+          .limit(100),
+        supabase
+          .from("receipts")
+          .select("id, receipt_number, transaction_id, booking_id")
+          .eq("customer_id", user.id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("invoices")
+          .select("id, invoice_number, booking_id, issued_at")
+          .eq("customer_id", user.id)
+          .order("issued_at", { ascending: false }),
+      ]);
 
     for (const result of [
       transactionsResult,
@@ -157,7 +159,10 @@ export default async function TransactionsPage() {
     ]) {
       if (result.error) {
         historyError = result.error.message;
-        console.error("[account/transactions] History fetch error:", result.error.message);
+        console.error(
+          "[account/transactions] History fetch error:",
+          result.error.message,
+        );
       }
     }
 
@@ -189,9 +194,7 @@ export default async function TransactionsPage() {
       venueSlug: booking?.venues?.slug ?? null,
       eventDate: booking?.event_date ?? null,
       recordedAt:
-        transaction.paid_at ??
-        transaction.failed_at ??
-        transaction.created_at,
+        transaction.paid_at ?? transaction.failed_at ?? transaction.created_at,
       amount: Number(transaction.amount),
       currency: transaction.currency ?? "PHP",
       provider: transaction.payment_provider,
@@ -257,7 +260,9 @@ export default async function TransactionsPage() {
             <div className="flex gap-3">
               <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
               <div>
-                <p className="text-sm font-extrabold">Could not load transactions</p>
+                <p className="text-sm font-extrabold">
+                  Could not load transactions
+                </p>
                 <p className="mt-1 text-sm font-semibold">{historyError}</p>
               </div>
             </div>
@@ -323,7 +328,10 @@ export default async function TransactionsPage() {
                   );
 
                   return (
-                    <tr key={`${row.type}-${row.id}`} className="border-t border-[#E5E7EB]/80">
+                    <tr
+                      key={`${row.type}-${row.id}`}
+                      className="border-t border-[#E5E7EB]/80"
+                    >
                       <td className="px-5 py-4 text-sm font-bold text-slate-950">
                         {venueContent}
                         <p className="mt-1 text-xs font-semibold text-slate-400">
@@ -340,7 +348,9 @@ export default async function TransactionsPage() {
                         {PROVIDER_LABELS[row.provider] ?? row.provider}
                       </td>
                       <td className="max-w-[180px] px-5 py-4 text-xs font-semibold text-slate-500">
-                        <span className="block truncate">{row.reference ?? "-"}</span>
+                        <span className="block truncate">
+                          {row.reference ?? "-"}
+                        </span>
                       </td>
                       <td className="px-5 py-4 text-sm font-black text-slate-950">
                         {formatCurrency(row.amount, row.currency ?? "PHP")}

@@ -85,7 +85,10 @@ export async function registerAction(rawInput: unknown): Promise<ActionResult> {
     try {
       await resendVerificationEmailUseCase(parsed.data.email);
     } catch (resendError) {
-      console.error("[registerAction] Verification email resend failed:", resendError);
+      console.error(
+        "[registerAction] Verification email resend failed:",
+        resendError,
+      );
     }
   } catch (error) {
     const message = toErrorMessage(error);
@@ -100,7 +103,8 @@ export async function registerAction(rawInput: unknown): Promise<ActionResult> {
 
     return {
       success: false,
-      error: "Unable to create this account. Please check your details and try again.",
+      error:
+        "Unable to create this account. Please check your details and try again.",
     };
   }
 
@@ -310,9 +314,7 @@ export async function updateProfileAction(
       };
     }
 
-    const { error: updateError } = await (
-      supabase.from("profiles") as any
-    )
+    const { error: updateError } = await (supabase.from("profiles") as any)
       .update({
         full_name: parsed.data.fullName,
         phone: parsed.data.phone?.trim() || null,
@@ -621,7 +623,10 @@ export async function deleteAccountAction(
       .eq("id", user.id);
 
     if (profileError) {
-      console.error("[deleteAccountAction] Profile anonymization failed:", profileError);
+      console.error(
+        "[deleteAccountAction] Profile anonymization failed:",
+        profileError,
+      );
       return {
         success: false,
         error: "Account deletion failed. Please try again.",
@@ -636,7 +641,10 @@ export async function deleteAccountAction(
     );
 
     if (disableError) {
-      console.error("[deleteAccountAction] Auth user disable failed:", disableError);
+      console.error(
+        "[deleteAccountAction] Auth user disable failed:",
+        disableError,
+      );
 
       if (currentProfile) {
         await (admin.from("profiles") as any)
@@ -659,7 +667,10 @@ export async function deleteAccountAction(
     const { error: signOutError } = await supabase.auth.signOut();
 
     if (signOutError) {
-      console.error("[deleteAccountAction] Sign-out after deletion failed:", signOutError);
+      console.error(
+        "[deleteAccountAction] Sign-out after deletion failed:",
+        signOutError,
+      );
     }
   } catch (error) {
     console.error("[deleteAccountAction] Unexpected deletion failure:", error);
@@ -672,18 +683,22 @@ export async function deleteAccountAction(
   redirect("/login");
 }
 
-export async function verifyOtpAction(tokenHash: string, type: "signup" | "email"): Promise<ActionResult> {
+export async function verifyOtpAction(
+  tokenHash: string,
+  type: "signup" | "email",
+): Promise<ActionResult> {
   try {
     await verifyOtpUseCase(tokenHash, type);
     return { success: true, data: undefined };
   } catch (error) {
     let message = toErrorMessage(error);
     const normalized = message.toLowerCase();
-    
+
     if (normalized.includes("expired") || normalized.includes("invalid")) {
-      message = "We could not verify this email. Please request a new verification email or return to login.";
+      message =
+        "We could not verify this email. Please request a new verification email or return to login.";
     }
-    
+
     return { success: false, error: message };
   }
 }

@@ -3,7 +3,9 @@ import { z } from "zod";
 export const comparePackagesRequestSchema = z.object({
   packageIds: z.array(z.string().uuid()).min(2).max(4),
 });
-export type ComparePackagesRequest = z.infer<typeof comparePackagesRequestSchema>;
+export type ComparePackagesRequest = z.infer<
+  typeof comparePackagesRequestSchema
+>;
 
 export const comparisonRowSchema = z.object({
   id: z.string(),
@@ -30,4 +32,6 @@ export const comparePackagesResponseSchema = z.object({
   comparisonTable: z.array(comparisonRowSchema),
   aiSummary: comparisonSummarySchema.nullable(),
 });
-export type ComparePackagesResponse = z.infer<typeof comparePackagesResponseSchema>;
+export type ComparePackagesResponse = z.infer<
+  typeof comparePackagesResponseSchema
+>;

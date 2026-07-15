@@ -1,12 +1,7 @@
 "use client";
 
 import type { FormEvent, ReactNode } from "react";
-import {
-  AlertCircle,
-  CheckCircle2,
-  Eye,
-  EyeOff,
-} from "lucide-react";
+import { AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
 
 export type FieldErrors = Record<string, string[]>;
 
@@ -145,7 +140,9 @@ export function TextField({
         )}
       </div>
 
-      {error && <p className="mt-2 text-xs font-semibold text-red-600">{error}</p>}
+      {error && (
+        <p className="mt-2 text-xs font-semibold text-red-600">{error}</p>
+      )}
     </div>
   );
 }

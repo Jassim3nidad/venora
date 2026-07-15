@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, useRef, useId, useEffect } from "react";
-import { Loader2, Plus, GripVertical, Trash2, Star, Image as ImageIcon } from "lucide-react";
+import {
+  Loader2,
+  Plus,
+  GripVertical,
+  Trash2,
+  Star,
+  Image as ImageIcon,
+} from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -44,8 +51,14 @@ function SortableImageItem({
   onSetCover: () => void;
   onRemove: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: url });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: url });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -129,12 +142,14 @@ export function PortfolioImageUploader({
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (event.target) event.target.value = ""; 
+    if (event.target) event.target.value = "";
 
     if (!file) return;
     setError(null);
@@ -165,23 +180,33 @@ export function PortfolioImageUploader({
 
     try {
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (!user) throw new Error("You must be logged in.");
 
-      const safeName = originalFileName.replace(/[^a-zA-Z0-9.-]/g, "") || "image.jpg";
+      const safeName =
+        originalFileName.replace(/[^a-zA-Z0-9.-]/g, "") || "image.jpg";
       const storagePath = `${user.id}/portfolio-${Date.now()}-${safeName}`;
 
-      const fileToUpload = new File([croppedBlob], safeName, { type: "image/jpeg" });
+      const fileToUpload = new File([croppedBlob], safeName, {
+        type: "image/jpeg",
+      });
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(storagePath, fileToUpload, { cacheControl: "3600", upsert: false });
+        .upload(storagePath, fileToUpload, {
+          cacheControl: "3600",
+          upsert: false,
+        });
 
       if (uploadError) throw new Error(uploadError.message);
 
-      const { data } = supabase.storage.from("avatars").getPublicUrl(storagePath);
-      
+      const { data } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(storagePath);
+
       const newUrls = [...imageUrls, data.publicUrl];
       onChangeImageUrls(newUrls);
 
@@ -189,7 +214,9 @@ export function PortfolioImageUploader({
         onChangeCoverImageUrl(data.publicUrl);
       }
     } catch (uploadError) {
-      setError(uploadError instanceof Error ? uploadError.message : "Upload failed.");
+      setError(
+        uploadError instanceof Error ? uploadError.message : "Upload failed.",
+      );
     } finally {
       setIsUploading(false);
     }
@@ -222,7 +249,12 @@ export function PortfolioImageUploader({
 
       {imageUrls.length > 0 ? (
         dndId ? (
-          <DndContext id={dndId} sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <DndContext
+            id={dndId}
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
             <SortableContext items={imageUrls} strategy={rectSortingStrategy}>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                 {imageUrls.map((url) => (
@@ -259,9 +291,16 @@ export function PortfolioImageUploader({
           // Client hasn't mounted yet — show static grid without DnD
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             {imageUrls.map((url) => (
-              <div key={url} className="relative aspect-[4/3] overflow-hidden rounded-xl border-2 border-slate-200 bg-slate-50">
+              <div
+                key={url}
+                className="relative aspect-[4/3] overflow-hidden rounded-xl border-2 border-slate-200 bg-slate-50"
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={url} alt="Portfolio image" className="h-full w-full object-cover" />
+                <img
+                  src={url}
+                  alt="Portfolio image"
+                  className="h-full w-full object-cover"
+                />
               </div>
             ))}
           </div>

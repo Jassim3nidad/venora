@@ -39,10 +39,26 @@ export type CoordinatorOverviewProps = {
 };
 
 const QUICK_LINKS = [
-  { label: "Manage Events", href: "/dashboard/coordinator/events", icon: "celebration" },
-  { label: "Review Venues", href: "/dashboard/coordinator/venues", icon: "location_city" },
-  { label: "Find Suppliers", href: "/dashboard/coordinator/suppliers", icon: "storefront" },
-  { label: "View Reports", href: "/dashboard/coordinator/reports", icon: "assessment" },
+  {
+    label: "Manage Events",
+    href: "/dashboard/coordinator/events",
+    icon: "celebration",
+  },
+  {
+    label: "Review Venues",
+    href: "/dashboard/coordinator/venues",
+    icon: "location_city",
+  },
+  {
+    label: "Find Suppliers",
+    href: "/dashboard/coordinator/suppliers",
+    icon: "storefront",
+  },
+  {
+    label: "View Reports",
+    href: "/dashboard/coordinator/reports",
+    icon: "assessment",
+  },
 ];
 
 export function CoordinatorOverview({
@@ -56,10 +72,27 @@ export function CoordinatorOverview({
   managedVenues,
 }: CoordinatorOverviewProps) {
   const kpis = [
-    { label: "Active Events", value: String(activeEventCount), icon: "celebration", highlight: true },
-    { label: "Pending Requests", value: String(pendingEventCount), icon: "pending_actions" },
-    { label: "Completed Events", value: String(completedEventCount), icon: "task_alt" },
-    { label: "Venues Managed", value: String(venueCount), icon: "location_city" },
+    {
+      label: "Active Events",
+      value: String(activeEventCount),
+      icon: "celebration",
+      highlight: true,
+    },
+    {
+      label: "Pending Requests",
+      value: String(pendingEventCount),
+      icon: "pending_actions",
+    },
+    {
+      label: "Completed Events",
+      value: String(completedEventCount),
+      icon: "task_alt",
+    },
+    {
+      label: "Venues Managed",
+      value: String(venueCount),
+      icon: "location_city",
+    },
   ];
 
   return (
@@ -102,7 +135,9 @@ export function CoordinatorOverview({
                     key: "event",
                     header: "Venue",
                     cell: (r) => (
-                      <span className="font-semibold text-[#111827]">{r.venue}</span>
+                      <span className="font-semibold text-[#111827]">
+                        {r.venue}
+                      </span>
                     ),
                   },
                   { key: "date", header: "Date", cell: (r) => r.date },
@@ -116,7 +151,8 @@ export function CoordinatorOverview({
               />
             ) : (
               <p className="rounded-xl border border-dashed border-[#e5e7eb] px-6 py-10 text-center text-sm text-[#4b5563]">
-                No upcoming events yet. Events will appear here once your organization's venues receive bookings.
+                No upcoming events yet. Events will appear here once your
+                organization's venues receive bookings.
               </p>
             )}
           </div>
@@ -151,7 +187,11 @@ export function CoordinatorOverview({
           title="Managed Venues"
           description="Venues under your coordination portfolio."
           action={
-            <DashButton href="/dashboard/coordinator/venues" variant="secondary" icon="location_city">
+            <DashButton
+              href="/dashboard/coordinator/venues"
+              variant="secondary"
+              icon="location_city"
+            >
               View All
             </DashButton>
           }
@@ -168,7 +208,8 @@ export function CoordinatorOverview({
                 </div>
                 <p className="font-semibold text-[#111827]">{venue.name}</p>
                 <p className="mt-1 text-sm text-[#4b5563]">
-                  {venue.eventCount} active event{venue.eventCount !== 1 ? "s" : ""}
+                  {venue.eventCount} active event
+                  {venue.eventCount !== 1 ? "s" : ""}
                 </p>
                 <div className="mt-3">
                   <StatusBadge status={venue.status} />

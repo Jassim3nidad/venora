@@ -22,7 +22,6 @@ export default function VerifyEmailPage() {
             className="inline-flex items-center gap-2 text-3xl font-black tracking-[-0.05em] text-[#2563EB] transition hover:text-[#1D4ED8]"
           >
             Venora
-            
           </Link>
         </div>
 

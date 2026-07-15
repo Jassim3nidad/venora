@@ -7,16 +7,24 @@ const isoDateSchema = z
 const optionalText = (max: number) =>
   z.preprocess(
     (value) =>
-      typeof value === "string" && value.trim() === ""
-        ? undefined
-        : value,
+      typeof value === "string" && value.trim() === "" ? undefined : value,
     z.string().trim().max(max).optional(),
   );
 
 export const supplierQuoteItemSchema = z.object({
-  description: z.string().trim().min(2, "Item description is required").max(240),
-  quantity: z.coerce.number().positive("Quantity must be greater than zero").max(10000),
-  unitPrice: z.coerce.number().min(0, "Unit price cannot be negative").max(100000000),
+  description: z
+    .string()
+    .trim()
+    .min(2, "Item description is required")
+    .max(240),
+  quantity: z.coerce
+    .number()
+    .positive("Quantity must be greater than zero")
+    .max(10000),
+  unitPrice: z.coerce
+    .number()
+    .min(0, "Unit price cannot be negative")
+    .max(100000000),
 });
 
 export const supplierQuoteSchema = z.object({
@@ -63,4 +71,3 @@ export type SupplierMessageInput = z.infer<typeof supplierMessageSchema>;
 export type SupplierAvailabilityInput = z.infer<
   typeof supplierAvailabilitySchema
 >;
-

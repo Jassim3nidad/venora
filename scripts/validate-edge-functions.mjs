@@ -5,6 +5,7 @@ import {
   readdirSync,
   writeFileSync,
 } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { join, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
@@ -56,7 +57,9 @@ for (const name of readdirSync(functionsRoot, { withFileTypes: true })
     envNames,
     authentication: /headers\.get\(["']Authorization["']\)/.test(source)
       ? "bearer-token inspected in function"
-      : "deployed JWT setting or trusted caller must be verified",
+      : source.includes("x-notification-secret")
+        ? "shared notification webhook secret enforced"
+        : "deployed JWT setting or trusted caller must be verified",
     usesServiceRole: source.includes("SUPABASE_SERVICE_ROLE_KEY"),
     jwtDeploymentSetting: "UNVERIFIED_HOSTED_SETTING",
   });
@@ -64,14 +67,56 @@ for (const name of readdirSync(functionsRoot, { withFileTypes: true })
 
 if (functions.length === 0) errors.push("no Edge Function entrypoints found");
 
+const staticValidation = errors.length === 0 ? "PASS" : "FAIL";
+
+function runDeno(label, args) {
+  const result = spawnSync("deno", args, {
+    cwd: root,
+    encoding: "utf8",
+    windowsHide: true,
+  });
+  if (result.error) {
+    errors.push(`${label}: ${result.error.message}`);
+    return false;
+  }
+  if (result.status !== 0) {
+    const detail = (result.stderr || result.stdout || "unknown Deno error")
+      .trim()
+      .slice(0, 2_000);
+    errors.push(`${label}: ${detail}`);
+    return false;
+  }
+  return true;
+}
+
+const denoFormatPassed = runDeno("Deno format", [
+  "fmt",
+  "--check",
+  functionsRoot,
+]);
+let denoTypePassed = true;
+for (const item of functions) {
+  const passed = runDeno(`Deno type check (${item.name})`, [
+    "--quiet",
+    "check",
+    "--no-config",
+    "--node-modules-dir=none",
+    "--frozen",
+    "--lock=deno.lock",
+    join(functionsRoot, item.name, "index.ts"),
+  ]);
+  item.typeCheck = passed ? "PASS" : "FAIL";
+  denoTypePassed = denoTypePassed && passed;
+}
+
 const report = {
   schemaVersion: 1,
   generatedAt: new Date().toISOString(),
   status: errors.length === 0 ? "PASS" : "FAIL",
-  staticValidation: errors.length === 0 ? "PASS" : "FAIL",
-  denoRepositoryFormat: "BLOCKED_BY_LEGACY_FORMAT_DEBT",
-  denoRepositoryTypeCheck: "BLOCKED_BY_LEGACY_TYPE_ERRORS",
-  importResolution: "BLOCKED_WITH_FULL_DENO_TYPE_CHECK",
+  staticValidation,
+  denoRepositoryFormat: denoFormatPassed ? "PASS" : "FAIL",
+  denoRepositoryTypeCheck: denoTypePassed ? "PASS" : "FAIL",
+  importResolution: denoTypePassed ? "PASS" : "FAIL",
   functionCount: functions.length,
   functions,
   errors,
@@ -81,28 +126,25 @@ writeFileSync(
   `${JSON.stringify(report, null, 2)}\n`,
 );
 
-const rows = functions
+const markdown = `# Edge Function validation\n\n| Function | Static checks | Type check | Authentication assumption | Hosted JWT |\n| --- | --- | --- | --- | --- |\n${functions
   .map(
     (item) =>
-      `| ${item.name} | ${Object.values(item.checks).every(Boolean) ? "PASS" : "FAIL"} | ${item.authentication} | UNVERIFIED |`,
+      `| ${item.name} | ${Object.values(item.checks).every(Boolean) ? "PASS" : "FAIL"} | ${item.typeCheck} | ${item.authentication} | UNVERIFIED |`,
   )
-  .join("\n");
-const markdown = `# Edge Function validation\n\n| Function | Static checks | Authentication assumption | Hosted JWT |\n| --- | --- | --- | --- |\n${rows}\n\nFull-repository Deno format, type, and import checks remain **BLOCKED** by recorded legacy debt. Protected deployment runs strict Deno checks for the selected function before deployment.\n`;
+  .join(
+    "\n",
+  )}\n\nDeno repository format: **${report.denoRepositoryFormat}**. Deno type/import validation: **${report.denoRepositoryTypeCheck}**. Hosted JWT settings remain independently unverified.\n`;
 writeFileSync(join(outputRoot, "edge-functions.md"), markdown);
 if (process.env.GITHUB_STEP_SUMMARY) {
   appendFileSync(process.env.GITHUB_STEP_SUMMARY, markdown);
-  appendFileSync(
-    process.env.GITHUB_STEP_SUMMARY,
-    "\n> [!WARNING]\n> Full Edge Function Deno format/type validation is blocked; static validation is not a substitute.\n",
-  );
 }
 
 if (errors.length > 0) {
-  console.error(`Edge Function static validation failed (${errors.length}):`);
+  console.error(`Edge Function validation failed (${errors.length}):`);
   errors.forEach((error) => console.error(`- ${error}`));
   process.exit(1);
 }
 
-console.warn(
-  `Edge Function static validation passed for ${functions.length} functions; full Deno format/type checks remain BLOCKED by legacy debt.`,
+console.log(
+  `Edge Function validation passed for ${functions.length} functions; Deno format, type, and import checks passed.`,
 );

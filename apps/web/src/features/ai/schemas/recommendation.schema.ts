@@ -8,4 +8,6 @@ export const aiRecommendationResponseSchema = z.object({
   preferenceQuery: z.string().nullable(),
 });
 
-export type AIRecommendationResponse = z.infer<typeof aiRecommendationResponseSchema>;
+export type AIRecommendationResponse = z.infer<
+  typeof aiRecommendationResponseSchema
+>;

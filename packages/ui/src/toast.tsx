@@ -16,7 +16,7 @@ const ToastViewport = React.forwardRef<
     ref={ref}
     className={cn(
       "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
-      className
+      className,
     )}
     {...props}
   />
@@ -28,21 +28,21 @@ const toastVariants = cva(
   {
     variants: {
       variant: {
-        default: "border-[var(--border-default)] bg-[var(--bg-base)] text-[var(--text-primary)]",
+        default:
+          "border-[var(--border-default)] bg-[var(--bg-base)] text-[var(--text-primary)]",
         destructive:
           "border-[var(--color-danger)]/20 bg-[var(--color-danger-bg)] text-[var(--color-danger)]",
         success:
           "border-[var(--color-success)]/20 bg-[var(--color-success-bg)] text-[var(--color-success)]",
         warning:
           "border-[var(--color-warning)]/20 bg-[var(--color-warning-bg)] text-[var(--color-warning)]",
-        info:
-          "border-[var(--color-info)]/20 bg-[var(--color-info-bg)] text-[var(--color-info)]",
+        info: "border-[var(--color-info)]/20 bg-[var(--color-info-bg)] text-[var(--color-info)]",
       },
     },
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 const Toast = React.forwardRef<
@@ -68,7 +68,7 @@ const ToastAction = React.forwardRef<
     ref={ref}
     className={cn(
       "inline-flex h-8 shrink-0 items-center justify-center rounded-lg border border-[var(--border-default)] bg-transparent px-3 text-xs font-semibold ring-offset-background transition-colors hover:bg-[var(--bg-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-500)] focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive",
-      className
+      className,
     )}
     {...props}
   />
@@ -83,7 +83,7 @@ const ToastClose = React.forwardRef<
     ref={ref}
     className={cn(
       "absolute right-2 top-2 rounded-md p-1 text-[var(--text-muted)] opacity-0 transition-opacity hover:text-[var(--text-primary)] focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100",
-      className
+      className,
     )}
     toast-close=""
     {...props}

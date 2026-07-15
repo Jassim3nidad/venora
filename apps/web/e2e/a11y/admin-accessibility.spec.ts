@@ -58,7 +58,12 @@ const SUPER_ADMIN_ROUTES = [
 ];
 
 const ANALYST_ROUTES = ["/admin", "/admin/reports", "/admin/audit-logs"];
-const FINANCE_ROUTES = ["/admin", "/admin/commissions", "/admin/reports", "/admin/audit-logs"];
+const FINANCE_ROUTES = [
+  "/admin",
+  "/admin/commissions",
+  "/admin/reports",
+  "/admin/audit-logs",
+];
 
 test.describe("Accessibility — super administrator (all routes, desktop)", () => {
   test.beforeEach(async ({ page }) => {
@@ -100,7 +105,9 @@ test.describe("Accessibility — finance administrator (accessible routes, deskt
 });
 
 test.describe("Accessibility — /unauthorized", () => {
-  test("no serious/critical violations (reached via a forbidden route)", async ({ page }) => {
+  test("no serious/critical violations (reached via a forbidden route)", async ({
+    page,
+  }) => {
     await loginAs(page, "analystAdmin");
     await page.goto("/admin/settings");
     expect(page.url()).toContain("/unauthorized");
@@ -109,7 +116,10 @@ test.describe("Accessibility — /unauthorized", () => {
 });
 
 test.describe("Accessibility — responsive (all 4 viewports)", () => {
-  const roleLandingPage: Record<Extract<Role, "analystAdmin" | "financeAdmin" | "superadmin">, string> = {
+  const roleLandingPage: Record<
+    Extract<Role, "analystAdmin" | "financeAdmin" | "superadmin">,
+    string
+  > = {
     analystAdmin: "/admin",
     financeAdmin: "/admin/commissions",
     superadmin: "/admin",
@@ -130,7 +140,9 @@ test.describe("Accessibility — responsive (all 4 viewports)", () => {
 });
 
 test.describe("Keyboard and focus", () => {
-  test("admin sidebar links are reachable and visibly focused via Tab", async ({ page }) => {
+  test("admin sidebar links are reachable and visibly focused via Tab", async ({
+    page,
+  }) => {
     await loginAs(page, "superadmin");
     await page.goto("/admin");
 
@@ -146,17 +158,25 @@ test.describe("Keyboard and focus", () => {
       return { outlineStyle: style.outlineStyle, boxShadow: style.boxShadow };
     });
     const hasVisibleFocus =
-      outlineOrShadow.outlineStyle !== "none" || outlineOrShadow.boxShadow !== "none";
+      outlineOrShadow.outlineStyle !== "none" ||
+      outlineOrShadow.boxShadow !== "none";
     expect(hasVisibleFocus).toBe(true);
   });
 
-  test("tier assignment dialog traps focus and restores it on close", async ({ page }) => {
+  test("tier assignment dialog traps focus and restores it on close", async ({
+    page,
+  }) => {
     await loginAs(page, "superadmin");
     await page.goto("/admin/administrators");
 
-    const changeTierButton = page.getByRole("button", { name: /change tier/i }).first();
+    const changeTierButton = page
+      .getByRole("button", { name: /change tier/i })
+      .first();
     if ((await changeTierButton.count()) === 0) {
-      test.skip(true, "No administrator rows available to open the tier dialog in this environment");
+      test.skip(
+        true,
+        "No administrator rows available to open the tier dialog in this environment",
+      );
     }
 
     await changeTierButton.focus();
@@ -187,7 +207,9 @@ test.describe("Keyboard and focus", () => {
 });
 
 test.describe("Forms and validation", () => {
-  test("commission rule form fields have accessible labels", async ({ page }) => {
+  test("commission rule form fields have accessible labels", async ({
+    page,
+  }) => {
     await loginAs(page, "financeAdmin");
     await page.goto("/admin/commissions");
 
@@ -199,11 +221,20 @@ test.describe("Forms and validation", () => {
         const id = el.getAttribute("id");
         const ariaLabel = el.getAttribute("aria-label");
         const ariaLabelledBy = el.getAttribute("aria-labelledby");
-        const labelledByExplicitFor = id ? document.querySelector(`label[for="${id}"]`) : null;
+        const labelledByExplicitFor = id
+          ? document.querySelector(`label[for="${id}"]`)
+          : null;
         const wrappedByLabel = el.closest("label");
-        return Boolean(ariaLabel || ariaLabelledBy || labelledByExplicitFor || wrappedByLabel);
+        return Boolean(
+          ariaLabel ||
+          ariaLabelledBy ||
+          labelledByExplicitFor ||
+          wrappedByLabel,
+        );
       });
-      expect(accessibleName, `input #${i} lacks an accessible label`).toBe(true);
+      expect(accessibleName, `input #${i} lacks an accessible label`).toBe(
+        true,
+      );
     }
   });
 });
@@ -221,10 +252,16 @@ test.describe("Tables and pagination", () => {
   test("pagination controls have accessible names", async ({ page }) => {
     await loginAs(page, "superadmin");
     await page.goto("/admin/users");
-    const pageLinks = page.locator('a[href*="page="], button[aria-label*="page" i]');
+    const pageLinks = page.locator(
+      'a[href*="page="], button[aria-label*="page" i]',
+    );
     const count = await pageLinks.count();
     for (let i = 0; i < count; i++) {
-      const accessibleName = await pageLinks.nth(i).evaluate((el) => (el.textContent || el.getAttribute("aria-label") || "").trim());
+      const accessibleName = await pageLinks
+        .nth(i)
+        .evaluate((el) =>
+          (el.textContent || el.getAttribute("aria-label") || "").trim(),
+        );
       expect(accessibleName.length).toBeGreaterThan(0);
     }
   });

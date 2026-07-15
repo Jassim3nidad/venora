@@ -3,13 +3,12 @@ import { z } from "zod";
 const priceUnitSchema = z.enum(["per_event", "per_hour", "per_pax", "per_day"]);
 
 const emptyToUndefined = (value: unknown) =>
-  value === null || (typeof value === "string" && value.trim() === "") ? undefined : value;
+  value === null || (typeof value === "string" && value.trim() === "")
+    ? undefined
+    : value;
 
 const optionalText = (max = 1000) =>
-  z.preprocess(
-    emptyToUndefined,
-    z.string().trim().max(max).optional(),
-  );
+  z.preprocess(emptyToUndefined, z.string().trim().max(max).optional());
 
 const optionalUrl = z.preprocess(
   emptyToUndefined,
@@ -80,8 +79,12 @@ export const supplierProfileSchema = z.object({
     "Team size must be greater than zero",
   ),
   minimumBookingNoticeDays: z.coerce.number().int().min(0).max(365).default(14),
-  businessLocationType: z.enum(["mobile", "home_based", "studio", "storefront"]).default("mobile"),
-  locationVisibility: z.enum(["exact", "approximate", "service_area_only"]).default("exact"),
+  businessLocationType: z
+    .enum(["mobile", "home_based", "studio", "storefront"])
+    .default("mobile"),
+  locationVisibility: z
+    .enum(["exact", "approximate", "service_area_only"])
+    .default("exact"),
   latitude: optionalNumber,
   longitude: optionalNumber,
   city: optionalText(120),
@@ -137,14 +140,21 @@ export const supplierPortfolioSchema = z.object({
   supplierId: z.string().uuid().optional(),
   title: optionalText(120), // Now optional for drafts
   description: optionalText(1000),
-  imageUrls: z.array(z.string().trim().url("Enter a valid image URL")).default([]),
+  imageUrls: z
+    .array(z.string().trim().url("Enter a valid image URL"))
+    .default([]),
   imageUrl: optionalUrl,
   eventType: optionalText(80),
   city: optionalText(80),
   province: optionalText(80),
   venueName: optionalText(100),
-  eventDate: z
-    .preprocess(emptyToUndefined, z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional()),
+  eventDate: z.preprocess(
+    emptyToUndefined,
+    z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .optional(),
+  ),
   isFeatured: z.coerce.boolean().default(false),
   sortOrder: z.coerce.number().int().min(0).max(999).default(0),
   status: z.enum(["draft", "published", "hidden"]).default("draft"),
@@ -158,14 +168,23 @@ export const supplierContactRequestSchema = z.object({
   contactName: z.string().trim().min(2, "Name is required").max(120),
   contactEmail: z.string().trim().email("Enter a valid email"),
   contactPhone: optionalPhone,
-  eventDate: z
-    .preprocess(emptyToUndefined, z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional()),
+  eventDate: z.preprocess(
+    emptyToUndefined,
+    z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .optional(),
+  ),
   eventLocation: optionalText(160),
   guestCount: optionalNumber.refine(
     (value) => typeof value === "undefined" || value > 0,
     "Guest count must be greater than zero",
   ),
-  message: z.string().trim().min(10, "Message must be at least 10 characters").max(1500),
+  message: z
+    .string()
+    .trim()
+    .min(10, "Message must be at least 10 characters")
+    .max(1500),
 });
 
 export const toggleSupplierFavoriteSchema = z.object({
@@ -179,7 +198,13 @@ export const supplierQuoteActionSchema = z.object({
 export type SupplierSearchInput = z.infer<typeof supplierSearchSchema>;
 export type SupplierProfileInput = z.infer<typeof supplierProfileSchema>;
 export type SupplierPackageInput = z.infer<typeof supplierPackageSchema>;
-export type ArchiveSupplierPackageInput = z.infer<typeof archiveSupplierPackageSchema>;
+export type ArchiveSupplierPackageInput = z.infer<
+  typeof archiveSupplierPackageSchema
+>;
 export type SupplierPortfolioInput = z.infer<typeof supplierPortfolioSchema>;
-export type SupplierContactRequestInput = z.infer<typeof supplierContactRequestSchema>;
-export type SupplierQuoteActionInput = z.infer<typeof supplierQuoteActionSchema>;
+export type SupplierContactRequestInput = z.infer<
+  typeof supplierContactRequestSchema
+>;
+export type SupplierQuoteActionInput = z.infer<
+  typeof supplierQuoteActionSchema
+>;

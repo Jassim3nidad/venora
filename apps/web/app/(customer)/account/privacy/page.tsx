@@ -42,8 +42,7 @@ const DATA_ROWS = [
   },
   {
     label: "Delete your account",
-    description:
-      "Permanently remove your profile, bookings, and saved venues.",
+    description: "Permanently remove your profile, bookings, and saved venues.",
     icon: Lock,
   },
 ];

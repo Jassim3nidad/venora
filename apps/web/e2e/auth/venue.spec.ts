@@ -12,10 +12,16 @@ test.describe("Venue role", () => {
 
   test("logs in successfully", async ({ page }) => {
     const cookies = await page.context().cookies();
-    expect(cookies.some((c) => c.name.startsWith("sb-") && c.name.endsWith("-auth-token"))).toBe(true);
+    expect(
+      cookies.some(
+        (c) => c.name.startsWith("sb-") && c.name.endsWith("-auth-token"),
+      ),
+    ).toBe(true);
   });
 
-  test("can access the venue-owner dashboard and its own venue/booking routes", async ({ page }) => {
+  test("can access the venue-owner dashboard and its own venue/booking routes", async ({
+    page,
+  }) => {
     await page.goto("/dashboard/venue-owner");
     expect(page.url()).not.toContain("/unauthorized");
     expect(page.url()).not.toContain("/login");
@@ -28,7 +34,12 @@ test.describe("Venue role", () => {
   });
 
   test("cannot access /admin or any admin subroute", async ({ page }) => {
-    for (const path of ["/admin", "/admin/venues", "/admin/commissions", "/admin/administrators"]) {
+    for (const path of [
+      "/admin",
+      "/admin/venues",
+      "/admin/commissions",
+      "/admin/administrators",
+    ]) {
       await page.goto(path);
       await expect(page).toHaveTitle(/Unauthorized/i);
     }
@@ -39,28 +50,47 @@ test.describe("Venue role", () => {
     await expect(page).toHaveTitle(/Unauthorized/i);
   });
 
-  test("cannot approve its own platform application through admin APIs", async ({ page }) => {
-    const res = await page.request.post("/api/admin/venues/approve", { data: {}, failOnStatusCode: false });
+  test("cannot approve its own platform application through admin APIs", async ({
+    page,
+  }) => {
+    const res = await page.request.post("/api/admin/venues/approve", {
+      data: {},
+      failOnStatusCode: false,
+    });
     expect([401, 403, 404, 405]).toContain(res.status());
   });
 
-  test("cannot change administrator roles or commission rules via admin APIs", async ({ page }) => {
-    const roleRes = await page.request.post("/api/admin/administrators/assign-tier", { data: {}, failOnStatusCode: false });
+  test("cannot change administrator roles or commission rules via admin APIs", async ({
+    page,
+  }) => {
+    const roleRes = await page.request.post(
+      "/api/admin/administrators/assign-tier",
+      { data: {}, failOnStatusCode: false },
+    );
     expect([401, 403, 404, 405]).toContain(roleRes.status());
 
-    const commissionRes = await page.request.post("/api/admin/commissions", { data: {}, failOnStatusCode: false });
+    const commissionRes = await page.request.post("/api/admin/commissions", {
+      data: {},
+      failOnStatusCode: false,
+    });
     expect([401, 403, 404, 405]).toContain(commissionRes.status());
   });
 });
 
 test.describe("Venue role — responsive", () => {
   for (const [name, viewport] of Object.entries(VIEWPORTS)) {
-    test(`loads the venue-owner dashboard cleanly at ${name} (${viewport.width}x${viewport.height})`, async ({ page }) => {
+    test(`loads the venue-owner dashboard cleanly at ${name} (${viewport.width}x${viewport.height})`, async ({
+      page,
+    }) => {
       await page.setViewportSize(viewport);
       await loginAs(page, "venue");
       await page.goto("/dashboard/venue-owner");
       expect(page.url()).not.toContain("/unauthorized");
-      const hasOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
+      const hasOverflow = await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth >
+          document.documentElement.clientWidth + 1,
+      );
       expect(hasOverflow).toBe(false);
     });
   }

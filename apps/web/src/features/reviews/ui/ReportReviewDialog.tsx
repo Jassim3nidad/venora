@@ -5,7 +5,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Flag, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
-import { flagReviewSchema, REVIEW_FLAG_REASONS, type FlagReviewInput } from "../schemas/review-flag.schema";
+import {
+  flagReviewSchema,
+  REVIEW_FLAG_REASONS,
+  type FlagReviewInput,
+} from "../schemas/review-flag.schema";
 import { flagReviewAction } from "../application/actions";
 
 const REASON_LABELS: Record<(typeof REVIEW_FLAG_REASONS)[number], string> = {
@@ -65,7 +69,9 @@ export function ReportReviewDialog({ reviewId }: { reviewId: string }) {
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h3 className="font-sora text-base font-bold text-[var(--text-primary)]">Report this review</h3>
+              <h3 className="font-sora text-base font-bold text-[var(--text-primary)]">
+                Report this review
+              </h3>
               <button
                 type="button"
                 onClick={close}
@@ -81,7 +87,10 @@ export function ReportReviewDialog({ reviewId }: { reviewId: string }) {
                 Thanks, we&apos;ll review this.
               </div>
             ) : (
-              <form className="mt-4 grid gap-3" onSubmit={handleSubmit(onSubmit)}>
+              <form
+                className="mt-4 grid gap-3"
+                onSubmit={handleSubmit(onSubmit)}
+              >
                 <input type="hidden" {...register("reviewId")} />
 
                 <label className="grid gap-1.5 text-xs font-semibold text-[var(--text-secondary)]">
@@ -96,7 +105,11 @@ export function ReportReviewDialog({ reviewId }: { reviewId: string }) {
                       </option>
                     ))}
                   </select>
-                  {errors.reason ? <span className="text-red-600">{errors.reason.message}</span> : null}
+                  {errors.reason ? (
+                    <span className="text-red-600">
+                      {errors.reason.message}
+                    </span>
+                  ) : null}
                 </label>
 
                 <label className="grid gap-1.5 text-xs font-semibold text-[var(--text-secondary)]">
@@ -106,7 +119,11 @@ export function ReportReviewDialog({ reviewId }: { reviewId: string }) {
                     {...register("details")}
                     className="resize-none rounded-xl border border-[var(--border-default)] bg-[var(--bg-base)] p-3 text-sm font-medium text-[var(--text-primary)] outline-none focus:border-[var(--color-brand-500)]"
                   />
-                  {errors.details ? <span className="text-red-600">{errors.details.message}</span> : null}
+                  {errors.details ? (
+                    <span className="text-red-600">
+                      {errors.details.message}
+                    </span>
+                  ) : null}
                 </label>
 
                 <button
@@ -114,7 +131,9 @@ export function ReportReviewDialog({ reviewId }: { reviewId: string }) {
                   disabled={isSubmitting}
                   className="mt-1 inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--color-brand-500)] text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-60"
                 >
-                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  {isSubmitting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : null}
                   Submit report
                 </button>
               </form>

@@ -11,7 +11,9 @@
 import { z } from "zod";
 import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/errors";
 
-export function createReviewActionSchema<const T extends readonly [string, ...string[]]>(actions: T) {
+export function createReviewActionSchema<
+  const T extends readonly [string, ...string[]],
+>(actions: T) {
   return z.object({
     id: z.string().uuid(),
     action: z.enum(actions as unknown as [T[number], ...T[number][]]),
@@ -27,7 +29,9 @@ export function createReviewActionSchema<const T extends readonly [string, ...st
  * field, missing reason) — there's no SQLSTATE to branch on, so this
  * pattern-matches the message text.
  */
-export function throwIfReviewActionError(error: { message?: string } | null | undefined): void {
+export function throwIfReviewActionError(
+  error: { message?: string } | null | undefined,
+): void {
   if (!error) return;
 
   const message = error.message ?? "This action could not be completed.";

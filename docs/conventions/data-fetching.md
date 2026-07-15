@@ -6,13 +6,13 @@
 
 ## 1. When to Use What
 
-| Scenario | Pattern | Rationale |
-|---|---|---|
-| SEO page (venue list, venue detail) | Server Component + `createClient()` (server) | First-paint HTML for crawlers, no spinner |
-| Authenticated list (my bookings, account) | Server Component + `createClient()` (server) | Server-side auth check, no layout shift |
-| Interactive / filter-driven (search, calendar) | `useQuery` + `createClient()` (browser) | Needs client-side reactivity |
-| Mutation (create booking, update profile) | Server Action + `useMutation` from TanStack Query | Type-safe, colocated, no separate API route |
-| Real-time (booking status updates) | `supabase.channel().on('postgres_changes', ...)` | Supabase Realtime WebSocket |
+| Scenario                                       | Pattern                                           | Rationale                                   |
+| ---------------------------------------------- | ------------------------------------------------- | ------------------------------------------- |
+| SEO page (venue list, venue detail)            | Server Component + `createClient()` (server)      | First-paint HTML for crawlers, no spinner   |
+| Authenticated list (my bookings, account)      | Server Component + `createClient()` (server)      | Server-side auth check, no layout shift     |
+| Interactive / filter-driven (search, calendar) | `useQuery` + `createClient()` (browser)           | Needs client-side reactivity                |
+| Mutation (create booking, update profile)      | Server Action + `useMutation` from TanStack Query | Type-safe, colocated, no separate API route |
+| Real-time (booking status updates)             | `supabase.channel().on('postgres_changes', ...)`  | Supabase Realtime WebSocket                 |
 
 ---
 
@@ -24,23 +24,23 @@ Set globally in `src/components/providers.tsx`:
 new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime:           60 * 1000,    // 1 minute — tuned per query in hooks
-      refetchOnWindowFocus: false,        // venue data doesn't change that fast
-      retry:               1,
+      staleTime: 60 * 1000, // 1 minute — tuned per query in hooks
+      refetchOnWindowFocus: false, // venue data doesn't change that fast
+      retry: 1,
     },
   },
-})
+});
 ```
 
 ### Per-query staleTime guidance
 
-| Data | `staleTime` | Reasoning |
-|---|---|---|
-| Venue detail | `5 * 60 * 1000` | Changes infrequently |
-| Venue listings | `2 * 60 * 1000` | New venues added regularly |
-| My bookings | `30 * 1000` | Status changes often |
-| Analytics | `10 * 60 * 1000` | Refreshed nightly anyway |
-| User profile | `Infinity` | Updated only by the user |
+| Data           | `staleTime`      | Reasoning                  |
+| -------------- | ---------------- | -------------------------- |
+| Venue detail   | `5 * 60 * 1000`  | Changes infrequently       |
+| Venue listings | `2 * 60 * 1000`  | New venues added regularly |
+| My bookings    | `30 * 1000`      | Status changes often       |
+| Analytics      | `10 * 60 * 1000` | Refreshed nightly anyway   |
+| User profile   | `Infinity`       | Updated only by the user   |
 
 ---
 
@@ -62,7 +62,9 @@ useQuery({ queryKey: ["venue", "the-grand-terrace"] });
 
 ```typescript
 // After creating a booking, invalidate all booking queries for this customer
-queryClient.invalidateQueries({ queryKey: queryKeys.bookings.byCustomer(userId) });
+queryClient.invalidateQueries({
+  queryKey: queryKeys.bookings.byCustomer(userId),
+});
 
 // After admin approves a venue, invalidate all venue lists
 queryClient.invalidateQueries({ queryKey: queryKeys.venues.all });
@@ -78,21 +80,31 @@ Use for high-frequency interactions (favourite toggle):
 useMutation({
   mutationFn: toggleFavourite,
   onMutate: async (venueId) => {
-    await queryClient.cancelQueries({ queryKey: queryKeys.favourites.byCustomer(userId) });
-    const previous = queryClient.getQueryData(queryKeys.favourites.byCustomer(userId));
+    await queryClient.cancelQueries({
+      queryKey: queryKeys.favourites.byCustomer(userId),
+    });
+    const previous = queryClient.getQueryData(
+      queryKeys.favourites.byCustomer(userId),
+    );
     queryClient.setQueryData(
       queryKeys.favourites.byCustomer(userId),
-      (old: string[]) => old.includes(venueId)
-        ? old.filter((id) => id !== venueId)
-        : [...old, venueId]
+      (old: string[]) =>
+        old.includes(venueId)
+          ? old.filter((id) => id !== venueId)
+          : [...old, venueId],
     );
     return { previous };
   },
   onError: (_err, _venueId, context) => {
-    queryClient.setQueryData(queryKeys.favourites.byCustomer(userId), context?.previous);
+    queryClient.setQueryData(
+      queryKeys.favourites.byCustomer(userId),
+      context?.previous,
+    );
   },
   onSettled: () => {
-    queryClient.invalidateQueries({ queryKey: queryKeys.favourites.byCustomer(userId) });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.favourites.byCustomer(userId),
+    });
   },
 });
 ```
@@ -119,16 +131,23 @@ export function useBookingRealtime(customerId: string) {
       .channel(`bookings:customer:${customerId}`)
       .on(
         "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "bookings", filter: `customer_id=eq.${customerId}` },
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "bookings",
+          filter: `customer_id=eq.${customerId}`,
+        },
         () => {
           void queryClient.invalidateQueries({
             queryKey: queryKeys.bookings.byCustomer(customerId),
           });
-        }
+        },
       )
       .subscribe();
 
-    return () => { void supabase.removeChannel(channel); };
+    return () => {
+      void supabase.removeChannel(channel);
+    };
   }, [customerId, queryClient]);
 }
 ```

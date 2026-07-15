@@ -91,7 +91,8 @@ export default function CostEstimatorForm({
                 </FormControl>
                 {(capacityMin || capacityMax) && (
                   <p className="text-[11px] text-[var(--text-muted)]">
-                    Venue capacity: {capacityMin ?? "—"}–{capacityMax ?? "—"} guests
+                    Venue capacity: {capacityMin ?? "—"}–{capacityMax ?? "—"}{" "}
+                    guests
                   </p>
                 )}
                 <FormMessage className="text-xs text-red-500 font-medium" />

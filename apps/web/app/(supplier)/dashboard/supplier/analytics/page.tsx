@@ -34,11 +34,15 @@ type BookingSupplierRow = {
 };
 
 export default async function SupplierAnalyticsPage() {
-  const { supabase, supplierProfile, profile } = await getSupplierDashboardContext();
+  const { supabase, supplierProfile, profile } =
+    await getSupplierDashboardContext();
 
   if (!supplierProfile) {
     return (
-      <DashboardSubPage title="Analytics" description="Set up your supplier profile first.">
+      <DashboardSubPage
+        title="Analytics"
+        description="Set up your supplier profile first."
+      >
         <EmptyState
           icon="trending_up"
           title="Profile setup pending"
@@ -71,22 +75,28 @@ export default async function SupplierAnalyticsPage() {
 
   const scope = { kind: "supplier" as const, supplierId: supplierProfile.id };
   const range = lastNMonthsRange(12);
-  const [revenueTrend, conversion, topPackages, demographics] = await Promise.all([
-    getRevenueTrend(supabase, scope, range),
-    getConversionRate(supabase, scope, range),
-    getTopPackages(supabase, scope, range),
-    getBookingDemographics(supabase, scope, range),
-  ]);
+  const [revenueTrend, conversion, topPackages, demographics] =
+    await Promise.all([
+      getRevenueTrend(supabase, scope, range),
+      getConversionRate(supabase, scope, range),
+      getTopPackages(supabase, scope, range),
+      getBookingDemographics(supabase, scope, range),
+    ]);
 
   const rows = (bookingSupsRaw ?? []) as BookingSupplierRow[];
   const confirmed = rows.filter((r) => r.status === "confirmed");
   const pending = rows.filter((r) => r.status === "pending");
   const cancelled = rows.filter((r) => r.status === "cancelled");
 
-  const totalRevenue = confirmed.reduce((sum, r) => sum + (Number(r.agreed_price) || 0), 0);
+  const totalRevenue = confirmed.reduce(
+    (sum, r) => sum + (Number(r.agreed_price) || 0),
+    0,
+  );
   const acceptanceRate =
     confirmed.length + cancelled.length > 0
-      ? Math.round((confirmed.length / (confirmed.length + cancelled.length)) * 100)
+      ? Math.round(
+          (confirmed.length / (confirmed.length + cancelled.length)) * 100,
+        )
       : null;
 
   return (
@@ -95,13 +105,42 @@ export default async function SupplierAnalyticsPage() {
       description="Track your inquiry performance and revenue over time."
     >
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <KpiCard label="Total Revenue" value={formatPeso(totalRevenue)} icon="payments" highlight />
-        <KpiCard label="Confirmed Bookings" value={String(confirmed.length)} icon="event_available" />
-        <KpiCard label="Pending Inquiries" value={String(pending.length)} icon="mail" />
-        <KpiCard label="Active Services" value={String(servicesCount ?? 0)} icon="design_services" />
-        <KpiCard label="Total Inquiries" value={String(inquiryCount ?? 0)} icon="mail" />
-        <KpiCard label="Quotes Created" value={String(quoteCount ?? 0)} icon="request_quote" />
-        <KpiCard label="Average Rating" value={profile?.avgRating ? profile.avgRating.toFixed(1) : "-"} icon="star" />
+        <KpiCard
+          label="Total Revenue"
+          value={formatPeso(totalRevenue)}
+          icon="payments"
+          highlight
+        />
+        <KpiCard
+          label="Confirmed Bookings"
+          value={String(confirmed.length)}
+          icon="event_available"
+        />
+        <KpiCard
+          label="Pending Inquiries"
+          value={String(pending.length)}
+          icon="mail"
+        />
+        <KpiCard
+          label="Active Services"
+          value={String(servicesCount ?? 0)}
+          icon="design_services"
+        />
+        <KpiCard
+          label="Total Inquiries"
+          value={String(inquiryCount ?? 0)}
+          icon="mail"
+        />
+        <KpiCard
+          label="Quotes Created"
+          value={String(quoteCount ?? 0)}
+          icon="request_quote"
+        />
+        <KpiCard
+          label="Average Rating"
+          value={profile?.avgRating ? profile.avgRating.toFixed(1) : "-"}
+          icon="star"
+        />
         <KpiCard
           label="Conversion Rate"
           value={conversion ? `${conversion.rate}%` : "-"}
@@ -119,7 +158,10 @@ export default async function SupplierAnalyticsPage() {
         </Panel>
 
         <Panel>
-          <PanelHeader title="Inquiry Health" description="How you're responding to requests." />
+          <PanelHeader
+            title="Inquiry Health"
+            description="How you're responding to requests."
+          />
           <div className="space-y-4">
             <div className="rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] p-4">
               <p className="text-xs font-bold uppercase tracking-wider text-[#6b7280]">
@@ -148,7 +190,9 @@ export default async function SupplierAnalyticsPage() {
                   ) : null,
                 )}
                 {rows.length === 0 ? (
-                  <span className="text-sm text-[#6b7280]">No inquiries yet.</span>
+                  <span className="text-sm text-[#6b7280]">
+                    No inquiries yet.
+                  </span>
                 ) : null}
               </div>
             </div>
@@ -172,7 +216,9 @@ export default async function SupplierAnalyticsPage() {
           />
           <div className="grid gap-6 sm:grid-cols-2">
             <StatusDistributionChart data={demographics?.eventTypeMix ?? []} />
-            <DemographicsBarChart data={demographics?.guestCountBuckets ?? []} />
+            <DemographicsBarChart
+              data={demographics?.guestCountBuckets ?? []}
+            />
           </div>
         </Panel>
       </div>

@@ -1,7 +1,10 @@
 import { z } from "zod";
 import { SETTING_DEFINITIONS } from "../types/system-setting.types";
 
-const SETTING_KEYS = SETTING_DEFINITIONS.map((d) => d.key) as [string, ...string[]];
+const SETTING_KEYS = SETTING_DEFINITIONS.map((d) => d.key) as [
+  string,
+  ...string[],
+];
 
 export const updateSystemSettingSchema = z.object({
   key: z.enum(SETTING_KEYS),
@@ -13,4 +16,6 @@ export const updateSystemSettingSchema = z.object({
   reason: z.string().trim().max(500).optional(),
 });
 
-export type UpdateSystemSettingInput = z.infer<typeof updateSystemSettingSchema>;
+export type UpdateSystemSettingInput = z.infer<
+  typeof updateSystemSettingSchema
+>;

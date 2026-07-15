@@ -3,13 +3,33 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CalendarDays, Check, Clock3, Loader2, MessageSquareText, PackageCheck, TicketCheck, Users } from "lucide-react";
+import {
+  CalendarDays,
+  Check,
+  Clock3,
+  Loader2,
+  MessageSquareText,
+  PackageCheck,
+  TicketCheck,
+  Users,
+} from "lucide-react";
 import { format, startOfMonth } from "date-fns";
 import { useForm } from "react-hook-form";
 import { Calendar } from "@venora/ui";
-import { createBookingSchema, type CreateBookingInput } from "../schemas/booking.schema";
-import { getLocalDateInputValue, isPastDate, parseLocalDateOnly, PAST_DATE_MESSAGE } from "@/src/lib/date-only";
-import { CustomerButton, CustomerStatusBadge } from "@/src/components/customer/CustomerUI";
+import {
+  createBookingSchema,
+  type CreateBookingInput,
+} from "../schemas/booking.schema";
+import {
+  getLocalDateInputValue,
+  isPastDate,
+  parseLocalDateOnly,
+  PAST_DATE_MESSAGE,
+} from "@/src/lib/date-only";
+import {
+  CustomerButton,
+  CustomerStatusBadge,
+} from "@/src/components/customer/CustomerUI";
 import { useCalendar } from "@/src/features/calendar/hooks/use-calendar";
 import {
   buildCustomerAvailabilityMap,
@@ -117,7 +137,9 @@ export function BookingWorkflowForm({
   const selectedDateValue = watch("eventDate");
   const selectedDate = parseLocalDateOnly(selectedDateValue);
   const guestCount = Number(watch("guestCount") ?? capacityMin);
-  const selectedPackage = packages.find((item) => item.id === selectedPackageId);
+  const selectedPackage = packages.find(
+    (item) => item.id === selectedPackageId,
+  );
   const {
     availability,
     isLoading: isLoadingAvailability,
@@ -140,7 +162,8 @@ export function BookingWorkflowForm({
       {
         id: "",
         name: "Custom venue quote",
-        description: "Use the venue base rate and let the team tailor the final quote.",
+        description:
+          "Use the venue base rate and let the team tailor the final quote.",
         price: basePrice ?? 0,
         price_unit: priceUnit,
         min_guests: capacityMin,
@@ -184,8 +207,14 @@ export function BookingWorkflowForm({
     });
 
     const result = (await response.json()) as
-      | { data: { bookingId: string; status: string; eventDate: string }; error: null }
-      | { data: null; error: { code: string; message: string; details?: unknown } };
+      | {
+          data: { bookingId: string; status: string; eventDate: string };
+          error: null;
+        }
+      | {
+          data: null;
+          error: { code: string; message: string; details?: unknown };
+        };
 
     if (!response.ok || result.error) {
       setFormError(result.error?.message ?? "Could not submit inquiry.");
@@ -197,7 +226,11 @@ export function BookingWorkflowForm({
   }
 
   return (
-    <form id="booking-form" onSubmit={handleSubmit(onSubmit)} className="grid gap-6">
+    <form
+      id="booking-form"
+      onSubmit={handleSubmit(onSubmit)}
+      className="grid gap-6"
+    >
       <input type="hidden" {...register("venueId")} />
 
       <section className="grid gap-4 rounded-3xl border border-[#E5E7EB] bg-white p-5 shadow-sm sm:p-6">
@@ -281,7 +314,9 @@ export function BookingWorkflowForm({
               </span>
             ) : null}
             {errors.eventDate ? (
-              <span className="text-xs font-semibold text-red-600">{errors.eventDate.message}</span>
+              <span className="text-xs font-semibold text-red-600">
+                {errors.eventDate.message}
+              </span>
             ) : null}
           </div>
 
@@ -336,18 +371,23 @@ export function BookingWorkflowForm({
                   <span
                     className={[
                       "mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border",
-                      checked ? "border-[#2563EB] bg-[#2563EB] text-white" : "border-slate-300 bg-white",
+                      checked
+                        ? "border-[#2563EB] bg-[#2563EB] text-white"
+                        : "border-slate-300 bg-white",
                     ].join(" ")}
                   >
                     {checked ? <Check className="h-3.5 w-3.5" /> : null}
                   </span>
                   <span className="min-w-0">
-                    <span className="block text-base font-black text-slate-950">{option.name}</span>
+                    <span className="block text-base font-black text-slate-950">
+                      {option.name}
+                    </span>
                     <span className="mt-1 block text-sm font-medium leading-6 text-slate-500">
                       {option.description}
                     </span>
                     <span className="mt-2 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
-                      {option.min_guests ?? capacityMin}-{option.max_guests ?? capacityMax} guests
+                      {option.min_guests ?? capacityMin}-
+                      {option.max_guests ?? capacityMax} guests
                     </span>
                   </span>
                 </span>
@@ -367,12 +407,18 @@ export function BookingWorkflowForm({
                   value={option.id}
                   checked={checked}
                   onChange={() => {
-                    setValue("packageId", option.id || null, { shouldValidate: true });
+                    setValue("packageId", option.id || null, {
+                      shouldValidate: true,
+                    });
                     if (guestCount < (option.min_guests ?? capacityMin)) {
-                      setValue("guestCount", option.min_guests ?? capacityMin, { shouldValidate: true });
+                      setValue("guestCount", option.min_guests ?? capacityMin, {
+                        shouldValidate: true,
+                      });
                     }
                     if (guestCount > (option.max_guests ?? capacityMax)) {
-                      setValue("guestCount", option.max_guests ?? capacityMax, { shouldValidate: true });
+                      setValue("guestCount", option.max_guests ?? capacityMax, {
+                        shouldValidate: true,
+                      });
                     }
                   }}
                 />
@@ -403,10 +449,14 @@ export function BookingWorkflowForm({
             />
           </span>
           <span className="text-xs font-semibold text-slate-400">
-            Capacity for this selection: {activeMinGuests.toLocaleString("en-PH")} to {activeMaxGuests.toLocaleString("en-PH")}
+            Capacity for this selection:{" "}
+            {activeMinGuests.toLocaleString("en-PH")} to{" "}
+            {activeMaxGuests.toLocaleString("en-PH")}
           </span>
           {errors.guestCount ? (
-            <span className="text-xs font-semibold text-red-600">{errors.guestCount.message}</span>
+            <span className="text-xs font-semibold text-red-600">
+              {errors.guestCount.message}
+            </span>
           ) : null}
         </label>
 
@@ -422,7 +472,9 @@ export function BookingWorkflowForm({
             />
           </span>
           {errors.specialRequests ? (
-            <span className="text-xs font-semibold text-red-600">{errors.specialRequests.message}</span>
+            <span className="text-xs font-semibold text-red-600">
+              {errors.specialRequests.message}
+            </span>
           ) : null}
         </label>
       </section>
@@ -430,7 +482,10 @@ export function BookingWorkflowForm({
       <section className="rounded-3xl border border-[#DBEAFE] bg-[#EFF6FF] p-5 text-[#1D4ED8] sm:p-6">
         <div className="grid gap-3 text-sm font-bold">
           <div className="flex items-center justify-between gap-4">
-            <span>{formatCurrency(price)} x {chargeUnits} {unitLabel(unit)}{chargeUnits > 1 ? "s" : ""}</span>
+            <span>
+              {formatCurrency(price)} x {chargeUnits} {unitLabel(unit)}
+              {chargeUnits > 1 ? "s" : ""}
+            </span>
             <span>{formatCurrency(subtotal)}</span>
           </div>
           <div className="flex items-center justify-between gap-4 border-t border-[#BFDBFE] pt-3">
@@ -449,7 +504,10 @@ export function BookingWorkflowForm({
       </section>
 
       {formError ? (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700" role="alert">
+        <div
+          className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700"
+          role="alert"
+        >
           {formError}
         </div>
       ) : null}
@@ -466,7 +524,11 @@ export function BookingWorkflowForm({
           }
           className="w-full sm:w-auto"
         >
-          {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <TicketCheck className="h-4 w-4" />}
+          {isSubmitting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <TicketCheck className="h-4 w-4" />
+          )}
           {isSubmitting ? "Submitting" : "Submit Inquiry"}
         </CustomerButton>
         <a

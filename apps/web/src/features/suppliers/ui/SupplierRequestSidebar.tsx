@@ -25,22 +25,25 @@ import {
 } from "@venora/ui";
 import { createSupplierContactRequestAction } from "../application/actions";
 import type { CustomerBookingOption } from "../application/get-customer-bookings-for-contact";
-import type {
-  SupplierMarketplaceProfile,
-} from "../types/supplier.types";
-import {
-  formatSupplierPrice,
-} from "../utils/supplier-format";
+import type { SupplierMarketplaceProfile } from "../types/supplier.types";
+import { formatSupplierPrice } from "../utils/supplier-format";
 import { getSupplierStartingPrice } from "../utils/supplier-derive";
 
-function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+function calculateDistanceKm(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+): number {
   const R = 6371; // Radius of the earth in km
   const dLat = deg2rad(lat2 - lat1);
   const dLon = deg2rad(lon2 - lon1);
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    Math.cos(deg2rad(lat1)) *
+      Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return Math.round(R * c * 10) / 10; // Round to 1 decimal place
 }
@@ -79,7 +82,8 @@ export function SupplierRequestSidebar({
       }
     };
     window.addEventListener("venora:select-service", handleSelectService);
-    return () => window.removeEventListener("venora:select-service", handleSelectService);
+    return () =>
+      window.removeEventListener("venora:select-service", handleSelectService);
   }, []);
   const [selectedBookingId, setSelectedBookingId] = useState("");
   const [eventDate, setEventDate] = useState("");
@@ -100,11 +104,14 @@ export function SupplierRequestSidebar({
   const approvedBookings = useMemo(
     () =>
       bookings.filter(
-        (b) => b.status === "approved" || b.status === "confirmed" || b.status === "paid",
+        (b) =>
+          b.status === "approved" ||
+          b.status === "confirmed" ||
+          b.status === "paid",
       ),
     [bookings],
   );
-  
+
   const pendingBookings = useMemo(
     () => bookings.filter((b) => b.status === "pending"),
     [bookings],
@@ -121,7 +128,7 @@ export function SupplierRequestSidebar({
 
   const selectedBooking = useMemo(
     () => approvedBookings.find((b) => b.id === selectedBookingId),
-    [approvedBookings, selectedBookingId]
+    [approvedBookings, selectedBookingId],
   );
 
   const eventDistanceKm = useMemo(() => {
@@ -138,7 +145,7 @@ export function SupplierRequestSidebar({
       supplier.latitude,
       supplier.longitude,
       selectedBooking.latitude,
-      selectedBooking.longitude
+      selectedBooking.longitude,
     );
   }, [selectedBooking, supplier]);
 
@@ -232,18 +239,26 @@ export function SupplierRequestSidebar({
               </span>
             </p>
           ) : (
-            <p className="text-xl font-bold text-[#4B5563]">Contact supplier for pricing</p>
+            <p className="text-xl font-bold text-[#4B5563]">
+              Contact supplier for pricing
+            </p>
           )}
         </div>
 
         <div className="mb-4">
-          <h2 className="text-lg font-bold text-[#111827]">Request a Service Proposal</h2>
+          <h2 className="text-lg font-bold text-[#111827]">
+            Request a Service Proposal
+          </h2>
           <p className="mt-1 break-words text-sm font-medium leading-relaxed text-[#4B5563]">
-            Sign in to request a Service Proposal and connect it to your event bookings.
+            Sign in to request a Service Proposal and connect it to your event
+            bookings.
           </p>
         </div>
 
-        <Button asChild className="h-11 w-full rounded-2xl font-bold bg-[#2563EB] hover:bg-[#1D4ED8]">
+        <Button
+          asChild
+          className="h-11 w-full rounded-2xl font-bold bg-[#2563EB] hover:bg-[#1D4ED8]"
+        >
           <Link href={redirectTo}>Sign in to Request Proposal</Link>
         </Button>
       </div>
@@ -264,13 +279,21 @@ export function SupplierRequestSidebar({
           </h2>
         </div>
         <p className="mb-5 break-words text-sm font-medium leading-6 text-indigo-800">
-          You are viewing your business as customers see it. Customers will use this card to request a service proposal.
+          You are viewing your business as customers see it. Customers will use
+          this card to request a service proposal.
         </p>
         <div className="flex flex-col gap-3">
-          <Button asChild className="h-11 w-full rounded-2xl font-bold bg-indigo-600 hover:bg-indigo-700">
+          <Button
+            asChild
+            className="h-11 w-full rounded-2xl font-bold bg-indigo-600 hover:bg-indigo-700"
+          >
             <Link href="/dashboard/supplier">Enter Supplier Dashboard</Link>
           </Button>
-          <Button asChild variant="outline" className="h-11 w-full rounded-2xl font-bold border-indigo-200 text-indigo-700 hover:bg-indigo-100 hover:text-indigo-800">
+          <Button
+            asChild
+            variant="outline"
+            className="h-11 w-full rounded-2xl font-bold border-indigo-200 text-indigo-700 hover:bg-indigo-100 hover:text-indigo-800"
+          >
             <Link href="/dashboard/supplier/inquiries">View Inquiries</Link>
           </Button>
         </div>
@@ -297,12 +320,16 @@ export function SupplierRequestSidebar({
               </span>
             </p>
           ) : (
-            <p className="text-xl font-bold text-[#4B5563]">Contact supplier for pricing</p>
+            <p className="text-xl font-bold text-[#4B5563]">
+              Contact supplier for pricing
+            </p>
           )}
         </div>
 
         <div className="mb-4">
-          <h2 className="text-lg font-bold text-[#111827]">Request a Service Proposal</h2>
+          <h2 className="text-lg font-bold text-[#111827]">
+            Request a Service Proposal
+          </h2>
           <p className="mt-1 break-words text-sm font-medium leading-relaxed text-[#4B5563]">
             Choose a service and connect it to your approved event booking.
           </p>
@@ -312,7 +339,8 @@ export function SupplierRequestSidebar({
           {supplier.responseTimeHours ? (
             <div className="flex items-center gap-2.5 text-sm font-medium text-[#4B5563]">
               <MessageSquare className="h-4 w-4 text-[#2563EB]" />
-              Responds within {supplier.responseTimeHours} {supplier.responseTimeHours === 1 ? 'hour' : 'hours'}
+              Responds within {supplier.responseTimeHours}{" "}
+              {supplier.responseTimeHours === 1 ? "hour" : "hours"}
             </div>
           ) : null}
           {supplier.minimumBookingNoticeDays ? (
@@ -329,7 +357,7 @@ export function SupplierRequestSidebar({
         >
           Request Proposal
         </Button>
-        
+
         {toastOpen && (
           <Toast
             open={toastOpen}
@@ -337,7 +365,9 @@ export function SupplierRequestSidebar({
             variant={toastMessage.type === "error" ? "destructive" : "default"}
           >
             <div className="grid gap-1">
-              {toastMessage.title && <ToastTitle>{toastMessage.title}</ToastTitle>}
+              {toastMessage.title && (
+                <ToastTitle>{toastMessage.title}</ToastTitle>
+              )}
               {toastMessage.description && (
                 <ToastDescription>{toastMessage.description}</ToastDescription>
               )}
@@ -356,7 +386,9 @@ export function SupplierRequestSidebar({
         id="supplier-request-card"
       >
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-xl font-black text-[#111827]">Request Proposal</h2>
+          <h2 className="text-xl font-black text-[#111827]">
+            Request Proposal
+          </h2>
           <Button
             variant="ghost"
             size="sm"
@@ -377,11 +409,13 @@ export function SupplierRequestSidebar({
                 An approved venue booking is required
               </p>
               <p className="mt-1 text-xs font-medium text-amber-800">
-                Supplier requests are connected to approved event details so suppliers can prepare an accurate Service Proposal.
+                Supplier requests are connected to approved event details so
+                suppliers can prepare an accurate Service Proposal.
               </p>
               {hasOnlyPendingBookings ? (
                 <p className="mt-2 text-xs font-bold text-amber-900">
-                  You have pending bookings. Please wait for the venue to approve them.
+                  You have pending bookings. Please wait for the venue to
+                  approve them.
                 </p>
               ) : null}
             </div>
@@ -389,10 +423,17 @@ export function SupplierRequestSidebar({
         </div>
 
         <div className="mt-6 flex flex-col gap-3">
-          <Button asChild className="h-11 w-full rounded-2xl bg-[#111827] font-bold text-white hover:bg-[#374151]">
+          <Button
+            asChild
+            className="h-11 w-full rounded-2xl bg-[#111827] font-bold text-white hover:bg-[#374151]"
+          >
             <Link href="/venues">Browse Venues</Link>
           </Button>
-          <Button asChild variant="outline" className="h-11 w-full rounded-2xl font-bold">
+          <Button
+            asChild
+            variant="outline"
+            className="h-11 w-full rounded-2xl font-bold"
+          >
             <Link href="/bookings?view=venues">View My Bookings</Link>
           </Button>
         </div>
@@ -420,7 +461,10 @@ export function SupplierRequestSidebar({
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-2">
-          <label htmlFor="service-select" className="text-xs font-bold text-[#4B5563]">
+          <label
+            htmlFor="service-select"
+            className="text-xs font-bold text-[#4B5563]"
+          >
             Step 1: Choose a Service
           </label>
           <Select
@@ -428,13 +472,17 @@ export function SupplierRequestSidebar({
             onValueChange={setSelectedPackageId}
             required
           >
-            <SelectTrigger id="service-select" className="h-11 rounded-xl bg-white">
+            <SelectTrigger
+              id="service-select"
+              className="h-11 rounded-xl bg-white"
+            >
               <SelectValue placeholder="Select a service" />
             </SelectTrigger>
             <SelectContent>
               {activePackages.map((pkg) => (
                 <SelectItem key={pkg.id} value={pkg.id}>
-                  {pkg.name} {pkg.price ? `— ${formatSupplierPrice(pkg.price)}` : ""}
+                  {pkg.name}{" "}
+                  {pkg.price ? `— ${formatSupplierPrice(pkg.price)}` : ""}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -442,7 +490,10 @@ export function SupplierRequestSidebar({
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="booking-select" className="text-xs font-bold text-[#4B5563]">
+          <label
+            htmlFor="booking-select"
+            className="text-xs font-bold text-[#4B5563]"
+          >
             Step 2: Select Your Event
           </label>
           <Select
@@ -450,13 +501,17 @@ export function SupplierRequestSidebar({
             onValueChange={handleBookingChange}
             required
           >
-            <SelectTrigger id="booking-select" className="h-11 rounded-xl bg-white">
+            <SelectTrigger
+              id="booking-select"
+              className="h-11 rounded-xl bg-white"
+            >
               <SelectValue placeholder="Select an approved booking" />
             </SelectTrigger>
             <SelectContent>
               {approvedBookings.map((booking) => (
                 <SelectItem key={booking.id} value={booking.id}>
-                  {booking.venueName || "Event"} — {booking.eventDate || "Date TBD"}
+                  {booking.venueName || "Event"} —{" "}
+                  {booking.eventDate || "Date TBD"}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -476,7 +531,9 @@ export function SupplierRequestSidebar({
               </div>
             )}
             {eventDistanceKm != null && (
-              <div className={`mt-3 flex flex-col gap-1 rounded-lg p-3 ${isOutsideCoverage ? 'bg-amber-50 text-amber-900 border border-amber-200' : 'bg-slate-100 text-[#4B5563]'}`}>
+              <div
+                className={`mt-3 flex flex-col gap-1 rounded-lg p-3 ${isOutsideCoverage ? "bg-amber-50 text-amber-900 border border-amber-200" : "bg-slate-100 text-[#4B5563]"}`}
+              >
                 <div className="flex items-start gap-2">
                   <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
                   <span className="font-semibold text-sm">
@@ -485,7 +542,8 @@ export function SupplierRequestSidebar({
                 </div>
                 {isOutsideCoverage && (
                   <p className="text-xs font-semibold ml-6 text-amber-700">
-                    This venue is outside the {supplier.coverageRadiusKm} km coverage radius. Travel fees may apply.
+                    This venue is outside the {supplier.coverageRadiusKm} km
+                    coverage radius. Travel fees may apply.
                   </p>
                 )}
               </div>
@@ -496,7 +554,10 @@ export function SupplierRequestSidebar({
         )}
 
         <div className="space-y-2">
-          <label htmlFor="message-input" className="text-xs font-bold text-[#4B5563]">
+          <label
+            htmlFor="message-input"
+            className="text-xs font-bold text-[#4B5563]"
+          >
             Step 3: Tell the supplier what you need
           </label>
           <textarea
@@ -520,7 +581,7 @@ export function SupplierRequestSidebar({
           {isPending ? "Sending Request..." : "Submit Request"}
         </Button>
       </form>
-      
+
       {toastOpen && (
         <Toast
           open={toastOpen}
@@ -528,7 +589,9 @@ export function SupplierRequestSidebar({
           variant={toastMessage.type === "error" ? "destructive" : "default"}
         >
           <div className="grid gap-1">
-            {toastMessage.title && <ToastTitle>{toastMessage.title}</ToastTitle>}
+            {toastMessage.title && (
+              <ToastTitle>{toastMessage.title}</ToastTitle>
+            )}
             {toastMessage.description && (
               <ToastDescription>{toastMessage.description}</ToastDescription>
             )}

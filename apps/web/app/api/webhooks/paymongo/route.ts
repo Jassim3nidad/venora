@@ -24,11 +24,19 @@ export async function POST(request: NextRequest) {
     gateway = getGateway("paymongo");
   } catch {
     console.error("[webhooks/paymongo] Gateway not configured");
-    return NextResponse.json({ error: "Provider not configured" }, { status: 503 });
+    return NextResponse.json(
+      { error: "Provider not configured" },
+      { status: 503 },
+    );
   }
 
   const serviceClient = createServiceClient();
-  const outcome = await processWebhookEvent(serviceClient, gateway, rawBody, signature);
+  const outcome = await processWebhookEvent(
+    serviceClient,
+    gateway,
+    rawBody,
+    signature,
+  );
 
   if (!outcome.ok) {
     if (outcome.result === "invalid_signature") {

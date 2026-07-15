@@ -28,7 +28,11 @@ export default async function CoordinatorDashboardPage() {
 
   const { data: orgs } =
     orgIds.length > 0
-      ? await supabase.from("organizations").select("name").in("id", orgIds).limit(1)
+      ? await supabase
+          .from("organizations")
+          .select("name")
+          .in("id", orgIds)
+          .limit(1)
       : { data: [] };
 
   let venuesQuery = supabase.from("venues").select("id, name, status");
@@ -59,24 +63,37 @@ export default async function CoordinatorDashboardPage() {
   const activeEventCount = bookings.filter((b) =>
     ["approved", "payment_pending", "confirmed"].includes(b.status),
   ).length;
-  const pendingEventCount = bookings.filter((b) => b.status === "pending").length;
-  const completedEventCount = bookings.filter((b) => b.status === "completed").length;
+  const pendingEventCount = bookings.filter(
+    (b) => b.status === "pending",
+  ).length;
+  const completedEventCount = bookings.filter(
+    (b) => b.status === "completed",
+  ).length;
 
   const upcomingEvents = bookings
-    .filter((b) => !["completed", "cancelled", "declined", "expired"].includes(b.status))
+    .filter(
+      (b) =>
+        !["completed", "cancelled", "declined", "expired"].includes(b.status),
+    )
     .slice(0, 6)
     .map((b) => ({
       id: b.id,
       eventName: b.venues?.name ?? "Event",
       venue: b.venues?.name ?? "-",
       date: formatDate(b.event_date),
-      guests: b.guest_count ? `${b.guest_count.toLocaleString("en-PH")} guests` : "-",
+      guests: b.guest_count
+        ? `${b.guest_count.toLocaleString("en-PH")} guests`
+        : "-",
       status: b.status,
     }));
 
   const eventCountByVenue = new Map<string, number>();
   for (const booking of bookings) {
-    if (["pending", "approved", "payment_pending", "confirmed"].includes(booking.status)) {
+    if (
+      ["pending", "approved", "payment_pending", "confirmed"].includes(
+        booking.status,
+      )
+    ) {
       eventCountByVenue.set(
         booking.venue_id,
         (eventCountByVenue.get(booking.venue_id) ?? 0) + 1,

@@ -67,7 +67,8 @@ export type SupplierMarketplaceProfile = {
   instagramUrl: string | null;
   profileImageUrl: string | null;
   heroImageUrl: string | null;
-  businessLocationType: "mobile" | "home_based" | "studio" | "storefront" | null;
+  businessLocationType:
+    "mobile" | "home_based" | "studio" | "storefront" | null;
   locationVisibility: "exact" | "approximate" | "service_area_only" | null;
   latitude: number | null;
   longitude: number | null;

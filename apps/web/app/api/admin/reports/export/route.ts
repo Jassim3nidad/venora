@@ -19,27 +19,57 @@ import { createClient } from "@/lib/supabase/server";
 import { requirePermission } from "@/lib/rbac/admin-context";
 import { UnauthorizedError, ForbiddenError } from "@/lib/errors";
 
-function apiError(code: string, message: string, status: number, details?: unknown) {
-  return NextResponse.json({ data: null, error: { code, message, details } }, { status });
+function apiError(
+  code: string,
+  message: string,
+  status: number,
+  details?: unknown,
+) {
+  return NextResponse.json(
+    { data: null, error: { code, message, details } },
+    { status },
+  );
 }
 
-function resolveRange(queryRange: { from?: string | undefined; to?: string | undefined }): DateRange {
+function resolveRange(queryRange: {
+  from?: string | undefined;
+  to?: string | undefined;
+}): DateRange {
   const fallback = lastNMonthsRange(12);
-  return { from: queryRange.from ?? fallback.from, to: queryRange.to ?? fallback.to };
+  return {
+    from: queryRange.from ?? fallback.from,
+    to: queryRange.to ?? fallback.to,
+  };
 }
 
-function buildSummary(monthlyReports: AnalyticsExportData["monthlyReports"], customerGrowth: CustomerGrowthPoint[]) {
-  const totalRevenue = monthlyReports.reduce((sum, row) => sum + row.revenue, 0);
-  const totalBookings = monthlyReports.reduce((sum, row) => sum + row.bookings, 0);
-  const confirmedBookings = monthlyReports.reduce((sum, row) => sum + row.confirmedBookings, 0);
-  const customers = customerGrowth[customerGrowth.length - 1]?.totalCustomers ?? 0;
+function buildSummary(
+  monthlyReports: AnalyticsExportData["monthlyReports"],
+  customerGrowth: CustomerGrowthPoint[],
+) {
+  const totalRevenue = monthlyReports.reduce(
+    (sum, row) => sum + row.revenue,
+    0,
+  );
+  const totalBookings = monthlyReports.reduce(
+    (sum, row) => sum + row.bookings,
+    0,
+  );
+  const confirmedBookings = monthlyReports.reduce(
+    (sum, row) => sum + row.confirmedBookings,
+    0,
+  );
+  const customers =
+    customerGrowth[customerGrowth.length - 1]?.totalCustomers ?? 0;
 
   return {
     totalRevenue,
     totalBookings,
     confirmedBookings,
     customers,
-    conversionRate: totalBookings > 0 ? Number(((confirmedBookings / totalBookings) * 100).toFixed(1)) : 0,
+    conversionRate:
+      totalBookings > 0
+        ? Number(((confirmedBookings / totalBookings) * 100).toFixed(1))
+        : 0,
   };
 }
 
@@ -52,22 +82,35 @@ function buildSummary(monthlyReports: AnalyticsExportData["monthlyReports"], cus
  * report_exports and audit_logs rows.
  */
 export async function GET(request: NextRequest) {
-  const parsed = analyticsExportQuerySchema.safeParse(Object.fromEntries(request.nextUrl.searchParams));
+  const parsed = analyticsExportQuerySchema.safeParse(
+    Object.fromEntries(request.nextUrl.searchParams),
+  );
 
   if (!parsed.success) {
-    return apiError("VALIDATION_ERROR", "Invalid report export request.", 400, parsed.error.flatten());
+    return apiError(
+      "VALIDATION_ERROR",
+      "Invalid report export request.",
+      400,
+      parsed.error.flatten(),
+    );
   }
 
   const range = resolveRange(parsed.data);
   if (range.from > range.to) {
-    return apiError("VALIDATION_ERROR", "The export start date must be before the end date.", 400);
+    return apiError(
+      "VALIDATION_ERROR",
+      "The export start date must be before the end date.",
+      400,
+    );
   }
 
   try {
     await requirePermission("reports.export");
   } catch (error) {
-    if (error instanceof UnauthorizedError) return apiError("UNAUTHENTICATED", error.message, 401);
-    if (error instanceof ForbiddenError) return apiError("FORBIDDEN", error.message, 403);
+    if (error instanceof UnauthorizedError)
+      return apiError("UNAUTHENTICATED", error.message, 401);
+    if (error instanceof ForbiddenError)
+      return apiError("FORBIDDEN", error.message, 403);
     throw error;
   }
 

@@ -35,8 +35,9 @@ export async function getPendingPartnerApplicationsForAdmin(): Promise<{
     return { applications: null, error: "Unauthorized" };
   }
 
-  const { data: applications, error } = await (supabase
-    .from("partner_applications") as any)
+  const { data: applications, error } = await (
+    supabase.from("partner_applications") as any
+  )
     .select(
       `
       *,
@@ -64,21 +65,26 @@ export async function getPendingPartnerApplicationsForAdmin(): Promise<{
   }
 
   const enriched = await Promise.all(
-    ((applications ?? []) as Array<Record<string, unknown> & { user_id: string; profiles?: { full_name: string | null } | null }>).map(
-      async (application) => {
-        const { data: authUser } = await adminClient.auth.admin.getUserById(
-          application.user_id,
-        );
+    (
+      (applications ?? []) as Array<
+        Record<string, unknown> & {
+          user_id: string;
+          profiles?: { full_name: string | null } | null;
+        }
+      >
+    ).map(async (application) => {
+      const { data: authUser } = await adminClient.auth.admin.getUserById(
+        application.user_id,
+      );
 
-        return {
-          ...application,
-          profiles: {
-            full_name: application.profiles?.full_name ?? null,
-            email: authUser?.user?.email ?? null,
-          },
-        } as PartnerApplicationForReview;
-      },
-    ),
+      return {
+        ...application,
+        profiles: {
+          full_name: application.profiles?.full_name ?? null,
+          email: authUser?.user?.email ?? null,
+        },
+      } as PartnerApplicationForReview;
+    }),
   );
 
   return { applications: enriched, error: null };

@@ -119,7 +119,9 @@ export default function ProfileMenu({
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#EFF6FF] text-[#1D4ED8]">
                 <Store className="h-4 w-4" />
               </div>
-              <span className="font-bold text-[#1D4ED8]">Enter Venue Owner Dashboard</span>
+              <span className="font-bold text-[#1D4ED8]">
+                Enter Venue Owner Dashboard
+              </span>
             </Link>
           </DropdownMenuItem>
         ) : null}

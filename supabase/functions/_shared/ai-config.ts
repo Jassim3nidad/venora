@@ -41,7 +41,8 @@ export type SupabaseLike = {
   from: (table: string) => any;
 };
 
-const SUPPORTED_PROVIDERS = ["openrouter", "openai"];
+export const APPROVED_AI_PROVIDER = "openrouter";
+export const APPROVED_AI_MODEL = "tencent/hy3:free";
 
 /**
  * Loads the stored config for a feature via the service-role client
@@ -83,12 +84,24 @@ export async function loadAiConfig(
   };
 }
 
-export function validateProviderModel(config: AiConfiguration): { ok: boolean; reason?: string } {
-  if (!SUPPORTED_PROVIDERS.includes(config.provider)) {
-    return { ok: false, reason: `Unsupported AI provider "${config.provider}"` };
+export function validateProviderModel(config: AiConfiguration): {
+  ok: boolean;
+  reason?: string;
+} {
+  if (config.provider !== APPROVED_AI_PROVIDER) {
+    return {
+      ok: false,
+      reason: `AI provider must be "${APPROVED_AI_PROVIDER}"`,
+    };
   }
-  if (!config.model || config.model.trim() === "") {
-    return { ok: false, reason: "No model configured for this feature" };
+  if (config.model !== APPROVED_AI_MODEL) {
+    return {
+      ok: false,
+      reason: `AI model must be "${APPROVED_AI_MODEL}"`,
+    };
+  }
+  if (config.fallbackProvider || config.fallbackModel) {
+    return { ok: false, reason: "Fallback AI providers are not supported" };
   }
   return { ok: true };
 }
@@ -112,7 +125,11 @@ export async function checkAiUsageLimits(
       .eq("feature", feature)
       .gte("created_at", since);
     if ((count ?? 0) >= config.rateLimitPerMinute) {
-      return { allowed: false, reason: "This AI feature is receiving too many requests right now. Please try again in a minute." };
+      return {
+        allowed: false,
+        reason:
+          "This AI feature is receiving too many requests right now. Please try again in a minute.",
+      };
     }
   }
 
@@ -125,7 +142,11 @@ export async function checkAiUsageLimits(
       .eq("feature", feature)
       .gte("created_at", startOfDay.toISOString());
     if ((count ?? 0) >= config.dailyUsageLimit) {
-      return { allowed: false, reason: "This AI feature has reached its daily usage limit. Please try again tomorrow." };
+      return {
+        allowed: false,
+        reason:
+          "This AI feature has reached its daily usage limit. Please try again tomorrow.",
+      };
     }
   }
 
@@ -137,12 +158,15 @@ export async function checkAiUsageLimits(
       .select("estimated_cost_cents")
       .eq("feature", feature)
       .gte("created_at", startOfDay.toISOString());
-    const spent = ((data ?? []) as { estimated_cost_cents: number | null }[]).reduce(
-      (sum, row) => sum + (row.estimated_cost_cents ?? 0),
-      0,
-    );
+    const spent = (
+      (data ?? []) as { estimated_cost_cents: number | null }[]
+    ).reduce((sum, row) => sum + (row.estimated_cost_cents ?? 0), 0);
     if (spent >= config.spendingLimitCents) {
-      return { allowed: false, reason: "This AI feature has reached its daily spending limit. Please try again tomorrow." };
+      return {
+        allowed: false,
+        reason:
+          "This AI feature has reached its daily spending limit. Please try again tomorrow.",
+      };
     }
   }
 
@@ -157,12 +181,11 @@ export async function checkAiUsageLimits(
  */
 const COST_PER_1K_TOKENS_CENTS: Record<string, number> = {
   "tencent/hy3:free": 0,
-  "text-embedding-3-small": 0.002,
 };
 
 export function estimateCostCents(model: string, totalTokens: number): number {
   const rate = COST_PER_1K_TOKENS_CENTS[model] ?? 0;
-  return Math.round(((totalTokens / 1000) * rate) * 100) / 100;
+  return Math.round((totalTokens / 1000) * rate * 100) / 100;
 }
 
 export type LogAiUsageEntry = {
@@ -186,7 +209,10 @@ export type LogAiUsageEntry = {
  * (best-effort) so a metrics-write hiccup never breaks the actual AI
  * response the user is waiting on.
  */
-export async function logAiUsage(supabase: SupabaseLike, entry: LogAiUsageEntry): Promise<void> {
+export async function logAiUsage(
+  supabase: SupabaseLike,
+  entry: LogAiUsageEntry,
+): Promise<void> {
   try {
     await supabase.from("ai_usage_logs").insert({
       feature: entry.feature,
@@ -235,17 +261,29 @@ const BLOCKED_INPUT_PATTERNS = [
   /reveal (your|the) (system prompt|instructions)/i,
 ];
 
-export function moderateInputText(text: string): { allowed: boolean; reason?: string } {
+export function moderateInputText(text: string): {
+  allowed: boolean;
+  reason?: string;
+} {
   for (const pattern of BLOCKED_INPUT_PATTERNS) {
     if (pattern.test(text)) {
-      return { allowed: false, reason: "This request could not be processed. Please rephrase and try again." };
+      return {
+        allowed: false,
+        reason:
+          "This request could not be processed. Please rephrase and try again.",
+      };
     }
   }
   return { allowed: true };
 }
 
-/** Extracts real token counts from an OpenAI/OpenRouter-compatible response body. */
-export function extractTokenUsage(body: { usage?: { prompt_tokens?: number; completion_tokens?: number } } | null | undefined): {
+/** Extracts real token counts from an OpenRouter-compatible response body. */
+export function extractTokenUsage(
+  body:
+    | { usage?: { prompt_tokens?: number; completion_tokens?: number } }
+    | null
+    | undefined,
+): {
   inputTokens: number | null;
   outputTokens: number | null;
 } {
@@ -255,83 +293,71 @@ export function extractTokenUsage(body: { usage?: { prompt_tokens?: number; comp
   };
 }
 
-const PROVIDER_CHAT_COMPLETIONS_URL: Record<string, string> = {
-  openrouter: "https://openrouter.ai/api/v1/chat/completions",
-  openai: "https://api.openai.com/v1/chat/completions",
-};
+const OPENROUTER_CHAT_COMPLETIONS_URL =
+  "https://openrouter.ai/api/v1/chat/completions";
 
-function providerHeaders(provider: string, apiKey: string): Record<string, string> {
-  if (provider === "openrouter") {
-    return {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-      "HTTP-Referer": "https://venora.app",
-      "X-Title": "Venora AI",
-    };
-  }
-  // openai (and any other provider added later that speaks the same
-  // OpenAI-compatible wire format) needs no extra attribution headers.
-  return { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" };
+function openRouterHeaders(apiKey: string): Record<string, string> {
+  return {
+    Authorization: `Bearer ${apiKey}`,
+    "Content-Type": "application/json",
+    "HTTP-Referer": "https://venora.app",
+    "X-Title": "Venora AI",
+  };
 }
 
-export type ProviderApiKeys = {
-  openrouter?: string | null;
-  openai?: string | null;
-};
-
 /**
- * Calls the configured provider's chat-completions endpoint (non-streaming
- * only — see ai-assistant/index.ts for why the streaming path doesn't use
- * this) with the given request body (model/messages/response_format are
- * caller-supplied; this function only decides WHICH provider/URL/key to
- * use). On a non-ok response, retries once against config.fallbackProvider/
- * fallbackModel if both are set and a key is available for that provider —
- * this is the actual "fallback provider" enforcement, not just stored
- * config. Throws if neither the primary nor the fallback succeeds.
+ * Calls the approved OpenRouter chat-completions endpoint. Transient 429 and
+ * 5xx responses are retried once against the same approved model; no provider
+ * or model fallback is selected silently.
  */
 export async function postChatCompletion(
   config: AiConfiguration,
-  apiKeys: ProviderApiKeys,
+  openRouterApiKey: string,
   body: Record<string, unknown>,
-): Promise<{ response: Response; providerUsed: string; modelUsed: string; usedFallback: boolean }> {
-  const primaryKey = apiKeys[config.provider as keyof ProviderApiKeys];
-  const primaryUrl = PROVIDER_CHAT_COMPLETIONS_URL[config.provider];
+): Promise<{
+  response: Response;
+  providerUsed: string;
+  modelUsed: string;
+  usedFallback: boolean;
+}> {
+  const validation = validateProviderModel(config);
+  if (!validation.ok) {
+    throw new Error(validation.reason ?? "Invalid AI provider configuration");
+  }
+  if (!openRouterApiKey) {
+    throw new Error("OPENROUTER_API_KEY is not configured");
+  }
 
-  if (primaryKey && primaryUrl) {
+  let lastStatus: number | null = null;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
     const response = await fetchWithTimeout(
-      primaryUrl,
+      OPENROUTER_CHAT_COMPLETIONS_URL,
       {
         method: "POST",
-        headers: providerHeaders(config.provider, primaryKey),
+        headers: openRouterHeaders(openRouterApiKey),
         body: JSON.stringify({ ...body, model: config.model }),
       },
       config.timeoutSeconds,
     );
     if (response.ok) {
-      return { response, providerUsed: config.provider, modelUsed: config.model, usedFallback: false };
+      return {
+        response,
+        providerUsed: APPROVED_AI_PROVIDER,
+        modelUsed: APPROVED_AI_MODEL,
+        usedFallback: false,
+      };
     }
-    console.error(`[ai-config] Primary provider "${config.provider}" failed (${response.status}); trying fallback if configured.`);
+    lastStatus = response.status;
+    const retryable = response.status === 429 || response.status >= 500;
+    if (!retryable || attempt === 1) {
+      break;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 250));
   }
 
-  if (config.fallbackProvider && config.fallbackModel) {
-    const fallbackKey = apiKeys[config.fallbackProvider as keyof ProviderApiKeys];
-    const fallbackUrl = PROVIDER_CHAT_COMPLETIONS_URL[config.fallbackProvider];
-    if (fallbackKey && fallbackUrl) {
-      const response = await fetchWithTimeout(
-        fallbackUrl,
-        {
-          method: "POST",
-          headers: providerHeaders(config.fallbackProvider, fallbackKey),
-          body: JSON.stringify({ ...body, model: config.fallbackModel }),
-        },
-        config.timeoutSeconds,
-      );
-      if (response.ok) {
-        return { response, providerUsed: config.fallbackProvider, modelUsed: config.fallbackModel, usedFallback: true };
-      }
-      throw new Error(`Both primary (${config.provider}) and fallback (${config.fallbackProvider}) providers failed.`);
-    }
-  }
-
-  throw new Error(`Provider "${config.provider}" request failed and no usable fallback is configured.`);
+  throw new Error(
+    `OpenRouter request failed${
+      lastStatus === null ? "" : ` with status ${lastStatus}`
+    }`,
+  );
 }

@@ -51,54 +51,74 @@ type AdminUserRoleRow = {
  * use requirePermission()/requireAdminContext() instead of calling this
  * directly and forgetting the null check.
  */
-export const getCurrentAdminContext = cache(async (): Promise<AdminContext | null> => {
-  const { supabase, user } = await getCurrentAuthUser();
+export const getCurrentAdminContext = cache(
+  async (): Promise<AdminContext | null> => {
+    const { supabase, user } = await getCurrentAuthUser();
 
-  if (!user) return null;
+    if (!user) return null;
 
-  const { data: roleRows } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", user.id);
+    const { data: roleRows } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id);
 
-  const isAdmin = (roleRows ?? []).some((r: { role: string }) => r.role === ROLES.ADMIN);
-  if (!isAdmin) return null;
+    const isAdmin = (roleRows ?? []).some(
+      (r: { role: string }) => r.role === ROLES.ADMIN,
+    );
+    if (!isAdmin) return null;
 
-  const { data: tierRow } = await (supabase.from("admin_user_roles") as any)
-    .select("tier, is_active")
-    .eq("user_id", user.id)
-    .maybeSingle();
+    const { data: tierRow } = await (supabase.from("admin_user_roles") as any)
+      .select("tier, is_active")
+      .eq("user_id", user.id)
+      .maybeSingle();
 
-  const row = tierRow as AdminUserRoleRow | null;
+    const row = tierRow as AdminUserRoleRow | null;
 
-  if (!row) {
-    // Admin account with no tier row yet (shouldn't happen once migration
-    // 054's backfill has run, but a manually-provisioned admin could reach
-    // this before a super_admin assigns them a tier) — treat as no
-    // permissions rather than throwing, so `hasPermission` degrades safely.
-    return { userId: user.id, tier: null, isActive: false, permissions: new Set() };
-  }
+    if (!row) {
+      // Admin account with no tier row yet (shouldn't happen once migration
+      // 054's backfill has run, but a manually-provisioned admin could reach
+      // this before a super_admin assigns them a tier) — treat as no
+      // permissions rather than throwing, so `hasPermission` degrades safely.
+      return {
+        userId: user.id,
+        tier: null,
+        isActive: false,
+        permissions: new Set(),
+      };
+    }
 
-  // admin_user_roles and admin_role_permissions are joined by `tier`, not by
-  // a foreign key (a tier's permission set isn't per-row-unique, so it can't
-  // be one) — PostgREST can't auto-embed this, hence the separate query
-  // rather than a nested select.
-  const { data: permissionRows } = await (supabase.from("admin_role_permissions") as any)
-    .select("permission_key")
-    .eq("tier", row.tier);
+    // admin_user_roles and admin_role_permissions are joined by `tier`, not by
+    // a foreign key (a tier's permission set isn't per-row-unique, so it can't
+    // be one) — PostgREST can't auto-embed this, hence the separate query
+    // rather than a nested select.
+    const { data: permissionRows } = await (
+      supabase.from("admin_role_permissions") as any
+    )
+      .select("permission_key")
+      .eq("tier", row.tier);
 
-  const permissions = new Set(
-    ((permissionRows ?? []) as { permission_key: AdminPermission }[]).map((p) => p.permission_key),
-  );
+    const permissions = new Set(
+      ((permissionRows ?? []) as { permission_key: AdminPermission }[]).map(
+        (p) => p.permission_key,
+      ),
+    );
 
-  return { userId: user.id, tier: row.tier, isActive: row.is_active, permissions };
-});
+    return {
+      userId: user.id,
+      tier: row.tier,
+      isActive: row.is_active,
+      permissions,
+    };
+  },
+);
 
 /**
  * Non-throwing permission check. Use for conditional UI rendering
  * (nav items, buttons) — NOT as the sole guard for a mutation.
  */
-export async function hasPermission(permission: AdminPermission): Promise<boolean> {
+export async function hasPermission(
+  permission: AdminPermission,
+): Promise<boolean> {
   const ctx = await getCurrentAdminContext();
   return !!ctx && ctx.isActive && ctx.permissions.has(permission);
 }
@@ -110,7 +130,9 @@ export async function hasPermission(permission: AdminPermission): Promise<boolea
  * @throws {ForbiddenError}    when signed in but not an admin, inactive, or
  *                              missing the permission.
  */
-export async function requirePermission(permission: AdminPermission): Promise<AdminContext> {
+export async function requirePermission(
+  permission: AdminPermission,
+): Promise<AdminContext> {
   const { user } = await getCurrentAuthUser();
 
   if (!user) throw new UnauthorizedError();
@@ -118,7 +140,9 @@ export async function requirePermission(permission: AdminPermission): Promise<Ad
   const ctx = await getCurrentAdminContext();
 
   if (!ctx || !ctx.isActive || !ctx.permissions.has(permission)) {
-    throw new ForbiddenError(`This action requires the "${permission}" permission.`);
+    throw new ForbiddenError(
+      `This action requires the "${permission}" permission.`,
+    );
   }
 
   return ctx;
@@ -136,7 +160,9 @@ export async function requirePermission(permission: AdminPermission): Promise<Ad
  * Handlers should keep using requirePermission() directly so the thrown
  * error maps to a proper 401/403 response instead of a redirect.
  */
-export async function requirePermissionOrRedirect(permission: AdminPermission): Promise<AdminContext> {
+export async function requirePermissionOrRedirect(
+  permission: AdminPermission,
+): Promise<AdminContext> {
   try {
     return await requirePermission(permission);
   } catch (error) {

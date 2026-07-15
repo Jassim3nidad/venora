@@ -1,18 +1,26 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { 
-  UploadCloud, 
-  X, 
-  Check, 
-  Trash2, 
-  Star, 
-  Loader2, 
-  AlertCircle, 
-  Image as ImageIcon 
+import {
+  UploadCloud,
+  X,
+  Check,
+  Trash2,
+  Star,
+  Loader2,
+  AlertCircle,
+  Image as ImageIcon,
 } from "lucide-react";
 import { createClient } from "@/src/lib/supabase/client";
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Badge } from "@venora/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Badge,
+} from "@venora/ui";
 
 interface VenueMedia {
   id: string;
@@ -51,7 +59,7 @@ const compressImage = (
   file: File,
   maxWidth = 1600,
   maxHeight = 1600,
-  quality = 0.82
+  quality = 0.82,
 ): Promise<CompressionResult> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -101,7 +109,12 @@ const compressImage = (
             });
             const originalSize = file.size;
             const compressedSize = compressedFile.size;
-            const savings = Math.max(0, Math.round(((originalSize - compressedSize) / originalSize) * 100));
+            const savings = Math.max(
+              0,
+              Math.round(
+                ((originalSize - compressedSize) / originalSize) * 100,
+              ),
+            );
 
             resolve({
               file: compressedFile,
@@ -111,7 +124,7 @@ const compressImage = (
             });
           },
           "image/jpeg",
-          quality
+          quality,
         );
       };
       img.onerror = (err) => reject(err);
@@ -120,7 +133,10 @@ const compressImage = (
   });
 };
 
-export default function VenuePhotoUpload({ venueId, organizationId }: VenuePhotoUploadProps) {
+export default function VenuePhotoUpload({
+  venueId,
+  organizationId,
+}: VenuePhotoUploadProps) {
   const [images, setImages] = useState<VenueMedia[]>([]);
   const [uploadQueue, setUploadQueue] = useState<UploadingFile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -129,7 +145,9 @@ export default function VenuePhotoUpload({ venueId, organizationId }: VenuePhoto
 
   // Cast client as any to prevent strict type check mismatches with Supabase generated Database types
   const supabase = createClient() as any;
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://szmjjkywcsnzkgqevinz.supabase.co";
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    "https://szmjjkywcsnzkgqevinz.supabase.co";
 
   const getMediaUrl = (path: string) => {
     if (path.startsWith("http") || path.startsWith("/")) return path;
@@ -203,7 +221,7 @@ export default function VenuePhotoUpload({ venueId, organizationId }: VenuePhoto
       try {
         // Step 1: Compress the Image client-side
         const compressionResult = await compressImage(file);
-        
+
         setUploadQueue((prev) =>
           prev.map((item) =>
             item.id === queueItem.id
@@ -215,8 +233,8 @@ export default function VenuePhotoUpload({ venueId, organizationId }: VenuePhoto
                   compressedSize: compressionResult.compressedSize,
                   savings: compressionResult.savings,
                 }
-              : item
-          )
+              : item,
+          ),
         );
 
         // Step 2: Upload to Supabase Storage
@@ -237,16 +255,17 @@ export default function VenuePhotoUpload({ venueId, organizationId }: VenuePhoto
 
         setUploadQueue((prev) =>
           prev.map((item) =>
-            item.id === queueItem.id ? { ...item, progress: 70 } : item
-          )
+            item.id === queueItem.id ? { ...item, progress: 70 } : item,
+          ),
         );
 
         // Step 3: Insert Row into database
         // Determine display order (max display_order + 1)
-        const nextOrder = images.length > 0 
-          ? Math.max(...images.map((img) => img.display_order)) + 1 
-          : 0;
-        
+        const nextOrder =
+          images.length > 0
+            ? Math.max(...images.map((img) => img.display_order)) + 1
+            : 0;
+
         // If there are no images yet, make this the featured image
         const isFeatured = images.length === 0;
 
@@ -268,31 +287,40 @@ export default function VenuePhotoUpload({ venueId, organizationId }: VenuePhoto
         setImages((prev) => [...prev, dbData as VenueMedia]);
         setUploadQueue((prev) =>
           prev.map((item) =>
-            item.id === queueItem.id ? { ...item, status: "success", progress: 100 } : item
-          )
+            item.id === queueItem.id
+              ? { ...item, status: "success", progress: 100 }
+              : item,
+          ),
         );
       } catch (err: any) {
         console.error("Error uploading file:", file.name, err);
         setUploadQueue((prev) =>
           prev.map((item) =>
             item.id === queueItem.id
-              ? { ...item, status: "error", error: err.message || "Failed to upload" }
-              : item
-          )
+              ? {
+                  ...item,
+                  status: "error",
+                  error: err.message || "Failed to upload",
+                }
+              : item,
+          ),
         );
       }
     }
   };
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragActive(false);
 
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      processAndUploadFiles(e.dataTransfer.files);
-    }
-  }, [images, venueId, organizationId]);
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        processAndUploadFiles(e.dataTransfer.files);
+      }
+    },
+    [images, venueId, organizationId],
+  );
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -323,7 +351,7 @@ export default function VenuePhotoUpload({ venueId, organizationId }: VenuePhoto
         prev.map((img) => ({
           ...img,
           is_featured: img.id === imageId,
-        }))
+        })),
       );
     } catch (err: any) {
       console.error("Error setting featured image:", err);
@@ -343,7 +371,10 @@ export default function VenuePhotoUpload({ venueId, organizationId }: VenuePhoto
 
       if (storageError) {
         // Log storage error, but proceed to check if database record exists or can be removed
-        console.warn("Storage removal warning (might have been missing):", storageError);
+        console.warn(
+          "Storage removal warning (might have been missing):",
+          storageError,
+        );
       }
 
       // 2. Delete from Database
@@ -356,7 +387,7 @@ export default function VenuePhotoUpload({ venueId, organizationId }: VenuePhoto
 
       // 3. Update local state
       setImages((prev) => prev.filter((img) => img.id !== image.id));
-      
+
       // If we deleted the featured image, make the first remaining image featured (if any exist)
       if (image.is_featured && images.length > 1) {
         const remaining = images.filter((img) => img.id !== image.id);
@@ -384,7 +415,8 @@ export default function VenuePhotoUpload({ venueId, organizationId }: VenuePhoto
           Venue Photos
         </CardTitle>
         <CardDescription className="text-sm text-[var(--text-secondary)]">
-          Upload crisp images for your venue. Photos are compressed on the fly to save bandwidth and load faster.
+          Upload crisp images for your venue. Photos are compressed on the fly
+          to save bandwidth and load faster.
         </CardDescription>
       </CardHeader>
 
@@ -424,7 +456,8 @@ export default function VenuePhotoUpload({ venueId, organizationId }: VenuePhoto
             Drag & drop venue photos here
           </h3>
           <p className="mt-1 text-xs text-[var(--text-secondary)]">
-            PNG, JPG, or WEBP up to 50MB (will be compressed to Web-friendly JPEG)
+            PNG, JPG, or WEBP up to 50MB (will be compressed to Web-friendly
+            JPEG)
           </p>
           <Button
             type="button"
@@ -440,9 +473,13 @@ export default function VenuePhotoUpload({ venueId, organizationId }: VenuePhoto
           <div className="p-4 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-default)] space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
-                Upload Queue ({uploadQueue.filter(q => q.status === "success").length}/{uploadQueue.length})
+                Upload Queue (
+                {uploadQueue.filter((q) => q.status === "success").length}/
+                {uploadQueue.length})
               </h4>
-              {uploadQueue.every((q) => q.status === "success" || q.status === "error") && (
+              {uploadQueue.every(
+                (q) => q.status === "success" || q.status === "error",
+              ) && (
                 <button
                   onClick={clearQueue}
                   className="text-xs font-semibold text-[var(--color-brand-600)] hover:underline"
@@ -453,18 +490,25 @@ export default function VenuePhotoUpload({ venueId, organizationId }: VenuePhoto
             </div>
             <div className="divide-y divide-[var(--border-default)] max-h-48 overflow-y-auto">
               {uploadQueue.map((item) => (
-                <div key={item.id} className="py-2.5 flex items-center justify-between text-xs gap-3">
+                <div
+                  key={item.id}
+                  className="py-2.5 flex items-center justify-between text-xs gap-3"
+                >
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate text-[var(--text-primary)]">{item.name}</p>
+                    <p className="font-medium truncate text-[var(--text-primary)]">
+                      {item.name}
+                    </p>
                     <div className="flex items-center gap-2 mt-0.5 text-[var(--text-secondary)] text-[10px]">
                       {item.status === "compressing" && (
                         <span className="flex items-center gap-1 text-[var(--color-warning)] font-medium">
-                          <Loader2 className="h-3 w-3 animate-spin" /> Compressing...
+                          <Loader2 className="h-3 w-3 animate-spin" />{" "}
+                          Compressing...
                         </span>
                       )}
                       {item.status === "uploading" && (
                         <span className="flex items-center gap-1 text-[var(--color-brand-600)] font-medium">
-                          <Loader2 className="h-3 w-3 animate-spin" /> Uploading...
+                          <Loader2 className="h-3 w-3 animate-spin" />{" "}
+                          Uploading...
                         </span>
                       )}
                       {item.status === "success" && (
@@ -481,7 +525,8 @@ export default function VenuePhotoUpload({ venueId, organizationId }: VenuePhoto
                       {/* Savings info */}
                       {item.savings !== undefined && item.savings > 0 && (
                         <span className="bg-[var(--color-brand-50)] text-[var(--color-brand-700)] px-1.5 py-0.5 rounded-md font-semibold">
-                          -{item.savings}% size ({formatBytes(item.compressedSize!)})
+                          -{item.savings}% size (
+                          {formatBytes(item.compressedSize!)})
                         </span>
                       )}
                     </div>
@@ -498,8 +543,10 @@ export default function VenuePhotoUpload({ venueId, organizationId }: VenuePhoto
         {/* Existing Photos Grid */}
         <div>
           <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-3 flex items-center gap-1.5">
-            Uploaded Photos 
-            <span className="text-xs text-[var(--text-secondary)] font-normal">({images.length})</span>
+            Uploaded Photos
+            <span className="text-xs text-[var(--text-secondary)] font-normal">
+              ({images.length})
+            </span>
           </h4>
 
           {loading ? (
@@ -510,17 +557,21 @@ export default function VenuePhotoUpload({ venueId, organizationId }: VenuePhoto
           ) : images.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 border border-dashed border-[var(--border-default)] rounded-2xl bg-[var(--bg-subtle)]/30 text-center px-4">
               <ImageIcon className="h-8 w-8 text-[var(--text-muted)] mb-2" />
-              <p className="text-xs font-semibold text-[var(--text-primary)]">No photos uploaded yet</p>
-              <p className="text-[10px] text-[var(--text-secondary)] mt-0.5">Images will show up here once uploaded</p>
+              <p className="text-xs font-semibold text-[var(--text-primary)]">
+                No photos uploaded yet
+              </p>
+              <p className="text-[10px] text-[var(--text-secondary)] mt-0.5">
+                Images will show up here once uploaded
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               {images.map((img) => (
-                <div 
+                <div
                   key={img.id}
                   className={`group relative aspect-video rounded-2xl overflow-hidden border bg-[var(--bg-subtle)]/50 transition-all duration-300 ${
-                    img.is_featured 
-                      ? "border-2 border-[var(--color-brand-500)] ring-4 ring-[var(--color-brand-50)]/50 shadow-md" 
+                    img.is_featured
+                      ? "border-2 border-[var(--color-brand-500)] ring-4 ring-[var(--color-brand-50)]/50 shadow-md"
                       : "border-[var(--border-default)] hover:border-[var(--border-strong)] hover:shadow-sm"
                   }`}
                 >

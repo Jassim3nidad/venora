@@ -49,7 +49,6 @@ const requiredDocs = [
 ];
 
 const expectedEnvVariables = [
-  "AI_SEARCH_EMBED_REFRESH_LIMIT",
   "ANALYZE",
   "APP_BASE_URL",
   "APP_URL",
@@ -82,8 +81,6 @@ const expectedEnvVariables = [
   "NOTIFICATION_TEST_EMAIL",
   "NOTIFICATION_TEST_PASSWORD",
   "NOTIFICATION_TEST_USER_ID",
-  "OPENAI_API_KEY",
-  "OPENAI_EMBEDDING_MODEL",
   "OPENROUTER_API_KEY",
   "PAYMONGO_SECRET_KEY",
   "PAYMONGO_WEBHOOK_SECRET",

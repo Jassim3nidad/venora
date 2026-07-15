@@ -1,17 +1,39 @@
 import { useState } from "react";
 
 const CATEGORIES = {
-  venue_owner: ["Convention Hall", "Garden Venue", "Hotel Ballroom", "Beachfront", "Restaurant", "Studio", "Other"],
-  event_coordinator: ["Full-Service Planning", "On-the-Day Coordination", "Destination Weddings", "Corporate Events", "Other"],
-  supplier: ["Catering", "Audio/Visual", "Floral/Decor", "Photography/Videography", "Entertainment", "Rentals", "Other"],
+  venue_owner: [
+    "Convention Hall",
+    "Garden Venue",
+    "Hotel Ballroom",
+    "Beachfront",
+    "Restaurant",
+    "Studio",
+    "Other",
+  ],
+  event_coordinator: [
+    "Full-Service Planning",
+    "On-the-Day Coordination",
+    "Destination Weddings",
+    "Corporate Events",
+    "Other",
+  ],
+  supplier: [
+    "Catering",
+    "Audio/Visual",
+    "Floral/Decor",
+    "Photography/Videography",
+    "Entertainment",
+    "Rentals",
+    "Other",
+  ],
 };
 
-export function CategorySelection({ 
-  role, 
-  onNext, 
-  onBack 
-}: { 
-  role: "venue_owner" | "event_coordinator" | "supplier"; 
+export function CategorySelection({
+  role,
+  onNext,
+  onBack,
+}: {
+  role: "venue_owner" | "event_coordinator" | "supplier";
   onNext: (category: string) => void;
   onBack: () => void;
 }) {

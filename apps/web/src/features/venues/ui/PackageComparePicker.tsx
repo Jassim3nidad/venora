@@ -34,7 +34,9 @@ function formatCurrency(value: number) {
   }).format(value);
 }
 
-export default function PackageComparePicker({ packages }: PackageComparePickerProps) {
+export default function PackageComparePicker({
+  packages,
+}: PackageComparePickerProps) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const [limitNotice, setLimitNotice] = useState(false);
@@ -121,7 +123,8 @@ export default function PackageComparePicker({ packages }: PackageComparePickerP
               Package Comparison
             </DialogTitle>
             <DialogDescription className="text-sm text-[var(--text-secondary)] mt-1">
-              Side-by-side pricing, guest range, and inclusions for your selected packages.
+              Side-by-side pricing, guest range, and inclusions for your
+              selected packages.
             </DialogDescription>
           </DialogHeader>
 

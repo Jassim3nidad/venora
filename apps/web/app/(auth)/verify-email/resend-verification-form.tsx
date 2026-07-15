@@ -28,7 +28,9 @@ export function ResendVerificationForm() {
       const response = await resendVerificationEmailAction({ email });
 
       if (response.success) {
-        setMessage("We sent a fresh verification link. Please check your inbox.");
+        setMessage(
+          "We sent a fresh verification link. Please check your inbox.",
+        );
         return;
       }
 

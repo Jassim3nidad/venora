@@ -3,7 +3,11 @@
 const DIACRITIC_RANGE_START = 0x0300;
 const DIACRITIC_RANGE_END = 0x036f;
 const COMBINING_DIACRITICS = new RegExp(
-  "[" + String.fromCharCode(DIACRITIC_RANGE_START) + "-" + String.fromCharCode(DIACRITIC_RANGE_END) + "]",
+  "[" +
+    String.fromCharCode(DIACRITIC_RANGE_START) +
+    "-" +
+    String.fromCharCode(DIACRITIC_RANGE_END) +
+    "]",
   "g",
 );
 
@@ -22,11 +26,35 @@ export function cleanString(value: unknown, maxLength = 120): string | null {
 }
 
 const venueRelatedKeywords = [
-  "venue", "venues", "wedding", "reception", "garden", "beach", "resort",
-  "hotel", "restaurant", "church", "budget", "price", "guest", "guests",
-  "capacity", "book", "booking", "package", "packages", "available",
-  "availability", "location", "city", "province", "indoor", "outdoor",
-  "parking", "pool", "accessible",
+  "venue",
+  "venues",
+  "wedding",
+  "reception",
+  "garden",
+  "beach",
+  "resort",
+  "hotel",
+  "restaurant",
+  "church",
+  "budget",
+  "price",
+  "guest",
+  "guests",
+  "capacity",
+  "book",
+  "booking",
+  "package",
+  "packages",
+  "available",
+  "availability",
+  "location",
+  "city",
+  "province",
+  "indoor",
+  "outdoor",
+  "parking",
+  "pool",
+  "accessible",
 ];
 
 /** Cheap heuristic — does this message look like it's asking about venues? */

@@ -34,20 +34,25 @@ export const createBookingSchema = z.object({
   eventStartTime: timeSchema,
   eventEndTime: timeSchema,
   guestCount: z.coerce.number().int().min(1, "Guest count must be at least 1"),
-  specialRequests: z.string().max(1000, "Keep requests under 1,000 characters").optional(),
+  specialRequests: z
+    .string()
+    .max(1000, "Keep requests under 1,000 characters")
+    .optional(),
 });
 
 export type CreateBookingInput = z.infer<typeof createBookingSchema>;
 
-export const approveBookingSchema = z.object({
-  bookingId: z.string().uuid(),
-  totalAmount: z.coerce.number().positive("Enter a valid total amount"),
-  depositAmount: z.coerce.number().positive("Enter a valid deposit amount"),
-  note: z.string().max(1000).optional(),
-}).refine((input) => input.depositAmount <= input.totalAmount, {
-  message: "Deposit cannot exceed the total amount",
-  path: ["depositAmount"],
-});
+export const approveBookingSchema = z
+  .object({
+    bookingId: z.string().uuid(),
+    totalAmount: z.coerce.number().positive("Enter a valid total amount"),
+    depositAmount: z.coerce.number().positive("Enter a valid deposit amount"),
+    note: z.string().max(1000).optional(),
+  })
+  .refine((input) => input.depositAmount <= input.totalAmount, {
+    message: "Deposit cannot exceed the total amount",
+    path: ["depositAmount"],
+  });
 
 export type ApproveBookingInput = z.infer<typeof approveBookingSchema>;
 
@@ -89,7 +94,9 @@ export const startBookingPaymentSchema = z.object({
   provider: z.enum(["paymongo", "maya", "stripe"]).default("paymongo"),
 });
 
-export type StartBookingPaymentInput = z.infer<typeof startBookingPaymentSchema>;
+export type StartBookingPaymentInput = z.infer<
+  typeof startBookingPaymentSchema
+>;
 
 export const completeBookingSchema = z.object({
   bookingId: z.string().uuid(),

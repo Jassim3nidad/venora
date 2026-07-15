@@ -56,7 +56,10 @@ export const NOTIFICATION_KIND_LABELS: Record<NotificationKind, string> = {
   system: "System",
 };
 
-export const NOTIFICATION_PRIORITY_LABELS: Record<NotificationPriority, string> = {
+export const NOTIFICATION_PRIORITY_LABELS: Record<
+  NotificationPriority,
+  string
+> = {
   low: "Low",
   normal: "Normal",
   high: "High",

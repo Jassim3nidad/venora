@@ -45,7 +45,6 @@ export default async function AccountLayout({
 
   return (
     <div className="flex min-w-0 flex-col overflow-x-hidden">
-
       <main className="min-w-0">
         <section className="relative overflow-hidden border-b border-[#E5E7EB]/70 bg-[#F9FAFB]">
           <div className="absolute left-[-120px] top-[-120px] -z-10 h-[320px] w-[320px] rounded-full bg-[#2563EB]/20 blur-3xl" />

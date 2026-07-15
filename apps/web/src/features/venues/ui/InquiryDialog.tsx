@@ -76,7 +76,10 @@ export default function InquiryDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger ?? (
-          <Button variant="outline" className="w-full h-11 rounded-xl font-medium gap-2">
+          <Button
+            variant="outline"
+            className="w-full h-11 rounded-xl font-medium gap-2"
+          >
             <MessageSquare className="h-4 w-4" />
             Inquire Host
           </Button>
@@ -88,12 +91,16 @@ export default function InquiryDialog({
             Inquire About {venueName}
           </DialogTitle>
           <DialogDescription className="text-sm text-[var(--text-secondary)] mt-1">
-            Send a direct inquiry message to the venue coordinator. They will respond to you via notifications and email.
+            Send a direct inquiry message to the venue coordinator. They will
+            respond to you via notifications and email.
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 mt-4"
+          >
             {error && (
               <div className="p-3.5 rounded-xl border border-red-200/20 bg-red-500/10 text-red-600 text-xs font-medium">
                 ⚠️ {error}

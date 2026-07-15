@@ -45,14 +45,20 @@ export default function CustomerDashboardLoading() {
                 <div
                   key={i}
                   className="flex-1 rounded-t-lg bg-slate-100 animate-pulse"
-                  style={{ height: `${30 + Math.sin(i * 0.7) * 25 + 30}%`, animationDelay: `${i * 40}ms` }}
+                  style={{
+                    height: `${30 + Math.sin(i * 0.7) * 25 + 30}%`,
+                    animationDelay: `${i * 40}ms`,
+                  }}
                 />
               ))}
             </div>
             {/* X-axis labels */}
             <div className="mt-2 flex gap-2">
               {Array.from({ length: 12 }).map((_, i) => (
-                <div key={i} className="flex-1 h-3 rounded bg-slate-100 animate-pulse" />
+                <div
+                  key={i}
+                  className="flex-1 h-3 rounded bg-slate-100 animate-pulse"
+                />
               ))}
             </div>
           </div>
@@ -92,7 +98,10 @@ export default function CustomerDashboardLoading() {
               <div className="h-4 w-28 shrink-0 rounded bg-slate-100 animate-pulse" />
               <div
                 className="h-6 rounded-lg bg-slate-100 animate-pulse"
-                style={{ width: `${80 - i * 15}%`, animationDelay: `${i * 60}ms` }}
+                style={{
+                  width: `${80 - i * 15}%`,
+                  animationDelay: `${i * 60}ms`,
+                }}
               />
             </div>
           ))}

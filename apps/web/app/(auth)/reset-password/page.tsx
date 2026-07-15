@@ -32,8 +32,8 @@ function ExpiredLinkView() {
         </h1>
 
         <p className="mt-[8px] text-[14px] font-medium leading-[22px] text-slate-500 mb-[24px]">
-          This password reset link has already been used or has expired.
-          Please request a fresh link to reset your password.
+          This password reset link has already been used or has expired. Please
+          request a fresh link to reset your password.
         </p>
 
         <Link
@@ -201,7 +201,9 @@ export default function ResetPasswordPage() {
                 autoComplete="new-password"
                 disabled={isPending}
                 className={`h-[46px] w-full rounded-[6px] border bg-white !pl-[42px] pr-[16px] text-[16px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
-                  fieldErrors.confirmPassword ? "border-red-500" : "border-[#E2E8F0]"
+                  fieldErrors.confirmPassword
+                    ? "border-red-500"
+                    : "border-[#E2E8F0]"
                 }`}
               />
             </div>

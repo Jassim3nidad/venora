@@ -1,14 +1,21 @@
 import { PlayCircle, MessageCircleQuestion } from "lucide-react";
 
-export function GuidanceModal({ onStart, onHelp }: { onStart: () => void, onHelp: () => void }) {
+export function GuidanceModal({
+  onStart,
+  onHelp,
+}: {
+  onStart: () => void;
+  onHelp: () => void;
+}) {
   return (
     <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
       <h2 className="text-4xl font-black tracking-tight text-slate-900 sm:text-5xl mb-6">
         Become a Venora Partner
       </h2>
       <p className="max-w-xl text-lg text-slate-500 mb-12">
-        Join our marketplace as a Venue Owner, Event Coordinator, or Supplier. 
-        We require some basic business details and verification documents to ensure a safe and high-quality environment for our customers.
+        Join our marketplace as a Venue Owner, Event Coordinator, or Supplier.
+        We require some basic business details and verification documents to
+        ensure a safe and high-quality environment for our customers.
       </p>
 
       <div className="grid w-full max-w-2xl gap-6 sm:grid-cols-2">
@@ -20,7 +27,9 @@ export function GuidanceModal({ onStart, onHelp }: { onStart: () => void, onHelp
             <PlayCircle className="h-8 w-8" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-slate-900">Start on your own</h3>
+            <h3 className="text-xl font-bold text-slate-900">
+              Start on your own
+            </h3>
             <p className="mt-2 text-sm text-slate-500">
               I have my documents ready and want to apply right now.
             </p>
@@ -35,7 +44,9 @@ export function GuidanceModal({ onStart, onHelp }: { onStart: () => void, onHelp
             <MessageCircleQuestion className="h-8 w-8" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-slate-900">Request Admin Help</h3>
+            <h3 className="text-xl font-bold text-slate-900">
+              Request Admin Help
+            </h3>
             <p className="mt-2 text-sm text-slate-500">
               I need assistance with my application or have questions.
             </p>

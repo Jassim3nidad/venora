@@ -35,10 +35,14 @@ import { BookingDemandHeatmap } from "@/features/analytics/ui/BookingDemandHeatm
 import { MonthlyReportsTable } from "@/features/analytics/ui/MonthlyReportsTable";
 
 const BookingsTrendChart = nextDynamic(() =>
-  import("@/features/analytics/ui/BookingsTrendChart").then((m) => m.BookingsTrendChart),
+  import("@/features/analytics/ui/BookingsTrendChart").then(
+    (m) => m.BookingsTrendChart,
+  ),
 );
 const CustomerGrowthChart = nextDynamic(() =>
-  import("@/features/analytics/ui/CustomerGrowthChart").then((m) => m.CustomerGrowthChart),
+  import("@/features/analytics/ui/CustomerGrowthChart").then(
+    (m) => m.CustomerGrowthChart,
+  ),
 );
 import { PopularVenuesTable } from "@/features/analytics/ui/PopularVenuesTable";
 
@@ -69,8 +73,7 @@ export default async function AnalyticsPage() {
     .select("id, status, avg_rating, review_count")
     .in("organization_id", orgIds);
 
-  const { data: venues } =
-    orgIds.length > 0 ? await venuesQuery : { data: [] };
+  const { data: venues } = orgIds.length > 0 ? await venuesQuery : { data: [] };
 
   const venueIds = await getOwnerVenueIds(orgScopedContext);
   const { data: bookings } =

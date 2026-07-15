@@ -7,18 +7,10 @@ export const PAYMENT_PROVIDERS = ["paymongo", "maya", "stripe"] as const;
 export type PaymentProviderId = (typeof PAYMENT_PROVIDERS)[number];
 
 export type TransactionStatus =
-  | "pending"
-  | "paid"
-  | "failed"
-  | "refunded"
-  | "partially_refunded";
+  "pending" | "paid" | "failed" | "refunded" | "partially_refunded";
 
 export type RefundStatus =
-  | "pending"
-  | "processing"
-  | "succeeded"
-  | "failed"
-  | "cancelled";
+  "pending" | "processing" | "succeeded" | "failed" | "cancelled";
 
 export type InvoiceStatus = "issued" | "paid" | "void" | "refunded";
 

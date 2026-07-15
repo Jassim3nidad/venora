@@ -33,11 +33,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Static research-venue dataset — served at /venues/[slug] as a fallback
   // when no matching DB row exists (see getResearchVenueByIdentifier).
-  const researchEntries: MetadataRoute.Sitemap = researchVenues.map((venue) => ({
-    url: `${SITE_URL}/venues/${venue.slug}`,
-    changeFrequency: "monthly",
-    priority: 0.6,
-  }));
+  const researchEntries: MetadataRoute.Sitemap = researchVenues.map(
+    (venue) => ({
+      url: `${SITE_URL}/venues/${venue.slug}`,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    }),
+  );
 
   let dbEntries: MetadataRoute.Sitemap = [];
   try {
@@ -63,7 +65,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })),
       ...(suppliers ?? []).map((supplier) => ({
         url: `${SITE_URL}/suppliers/${supplier.slug}`,
-        lastModified: supplier.updated_at ? new Date(supplier.updated_at) : undefined,
+        lastModified: supplier.updated_at
+          ? new Date(supplier.updated_at)
+          : undefined,
         changeFrequency: "weekly" as const,
         priority: 0.6,
       })),

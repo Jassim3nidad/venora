@@ -19,7 +19,11 @@ export default async function SupplierPortfolioPage() {
       description="Publish work samples that help customers compare event style, scope, and production quality."
     >
       {profile ? (
-        <Suspense fallback={<div className="h-40 animate-pulse rounded-2xl bg-slate-100" />}>
+        <Suspense
+          fallback={
+            <div className="h-40 animate-pulse rounded-2xl bg-slate-100" />
+          }
+        >
           <SupplierPortfolioManager profile={profile} />
         </Suspense>
       ) : (

@@ -1,6 +1,10 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/src/lib/supabase/server";
-import { AdminOverview, ADMIN_MODULES, NAV_BY_ROLE } from "@/components/dashboard/enterprise";
+import {
+  AdminOverview,
+  ADMIN_MODULES,
+  NAV_BY_ROLE,
+} from "@/components/dashboard/enterprise";
 import { hasPermission } from "@/lib/rbac/admin-context";
 
 export const metadata = {
@@ -63,24 +67,25 @@ export default async function AdminDashboardPage() {
         name: string;
         organizations: { name: string } | null;
       }) => {
-      const org = v.organizations;
-      return {
-        id: v.id,
-        item: v.name,
-        type: "Venue Listing",
-        submittedBy: org?.name ?? "Venue Owner",
-        status: "Pending Review",
-      };
-    },
+        const org = v.organizations;
+        return {
+          id: v.id,
+          item: v.name,
+          type: "Venue Listing",
+          submittedBy: org?.name ?? "Venue Owner",
+          status: "Pending Review",
+        };
+      },
     ),
     ...(recentSuppliers ?? []).map(
       (s: { id: string; business_name: string }) => ({
-      id: s.id,
-      item: s.business_name,
-      type: "Supplier Profile",
-      submittedBy: s.business_name,
-      status: "Needs Verification",
-    })),
+        id: s.id,
+        item: s.business_name,
+        type: "Supplier Profile",
+        submittedBy: s.business_name,
+        status: "Needs Verification",
+      }),
+    ),
   ];
 
   // Quick-link visibility is derived from the same NAV_BY_ROLE.admin
@@ -96,12 +101,19 @@ export default async function AdminDashboardPage() {
     return !permission || hasPermission(permission);
   }
 
-  const [canReviewApplications, canReviewVenues, moduleVisibility] = await Promise.all([
-    hrefVisible("/admin/applications"),
-    hrefVisible("/admin/venues"),
-    Promise.all(ADMIN_MODULES.map(async (mod) => [mod.href, await hrefVisible(mod.href)] as const)),
-  ]);
-  const visibleModuleHrefs = moduleVisibility.filter(([, visible]) => visible).map(([href]) => href);
+  const [canReviewApplications, canReviewVenues, moduleVisibility] =
+    await Promise.all([
+      hrefVisible("/admin/applications"),
+      hrefVisible("/admin/venues"),
+      Promise.all(
+        ADMIN_MODULES.map(
+          async (mod) => [mod.href, await hrefVisible(mod.href)] as const,
+        ),
+      ),
+    ]);
+  const visibleModuleHrefs = moduleVisibility
+    .filter(([, visible]) => visible)
+    .map(([href]) => href);
 
   return (
     <AdminOverview

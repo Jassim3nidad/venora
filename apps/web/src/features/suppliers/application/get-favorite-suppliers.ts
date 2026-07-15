@@ -1,8 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import {
-  mapDbSupplier,
-  type VenoraSupabase,
-} from "./queries";
+import { mapDbSupplier, type VenoraSupabase } from "./queries";
 import type { SupplierMarketplaceProfile } from "../types/supplier.types";
 
 const SUPPLIER_FAVORITE_SELECT = `

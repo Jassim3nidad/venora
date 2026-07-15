@@ -20,7 +20,9 @@ describe("auditLogFiltersSchema", () => {
   });
 
   it("rejects a malformed resourceId that isn't a uuid", () => {
-    const result = auditLogFiltersSchema.safeParse({ resourceId: "not-a-uuid" });
+    const result = auditLogFiltersSchema.safeParse({
+      resourceId: "not-a-uuid",
+    });
     expect(result.success).toBe(false);
   });
 

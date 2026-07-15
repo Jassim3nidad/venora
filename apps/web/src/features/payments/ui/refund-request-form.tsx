@@ -52,14 +52,20 @@ export function RefundRequestForm({ bookingId }: { bookingId: string }) {
           setError(null);
           startTransition(async () => {
             try {
-              const response = await fetch(`/api/bookings/${bookingId}/refund`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ reason }),
-              });
+              const response = await fetch(
+                `/api/bookings/${bookingId}/refund`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ reason }),
+                },
+              );
               const json = await response.json();
               if (!response.ok || json.error) {
-                setError(json.error?.message ?? "Refund request failed. Please try again.");
+                setError(
+                  json.error?.message ??
+                    "Refund request failed. Please try again.",
+                );
                 return;
               }
               setSuccess(
@@ -74,7 +80,11 @@ export function RefundRequestForm({ bookingId }: { bookingId: string }) {
           });
         }}
       >
-        {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+        {isPending ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <RotateCcw className="h-4 w-4" />
+        )}
         Request Refund
       </CustomerButton>
     </div>

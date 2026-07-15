@@ -39,20 +39,31 @@ export async function getCommissionRules(): Promise<{
 
   const rows = (data ?? []) as CommissionRuleRow[];
 
-  const venueIds = rows.filter((r) => r.scope === "venue" && r.reference_id).map((r) => r.reference_id as string);
-  const categoryIds = rows.filter((r) => r.scope === "category" && r.reference_id).map((r) => r.reference_id as string);
+  const venueIds = rows
+    .filter((r) => r.scope === "venue" && r.reference_id)
+    .map((r) => r.reference_id as string);
+  const categoryIds = rows
+    .filter((r) => r.scope === "category" && r.reference_id)
+    .map((r) => r.reference_id as string);
 
   const [venueNames, categoryNames] = await Promise.all([
     venueIds.length
       ? supabase.from("venues").select("id, name").in("id", venueIds)
       : Promise.resolve({ data: [] as { id: string; name: string }[] }),
     categoryIds.length
-      ? supabase.from("venue_categories").select("id, name").in("id", categoryIds)
+      ? supabase
+          .from("venue_categories")
+          .select("id, name")
+          .in("id", categoryIds)
       : Promise.resolve({ data: [] as { id: string; name: string }[] }),
   ]);
 
-  const venueNameById = new Map<string, string>((venueNames.data ?? []).map((v: any) => [v.id, v.name]));
-  const categoryNameById = new Map<string, string>((categoryNames.data ?? []).map((c: any) => [c.id, c.name]));
+  const venueNameById = new Map<string, string>(
+    (venueNames.data ?? []).map((v: any) => [v.id, v.name]),
+  );
+  const categoryNameById = new Map<string, string>(
+    (categoryNames.data ?? []).map((c: any) => [c.id, c.name]),
+  );
 
   const rules: CommissionRule[] = rows.map((row) => ({
     id: row.id,
@@ -67,8 +78,14 @@ export async function getCommissionRules(): Promise<{
     label: row.label,
     percentage: row.percentage !== null ? Number(row.percentage) : null,
     flatFee: row.flat_fee !== null ? Number(row.flat_fee) : null,
-    minCommissionAmount: row.min_commission_amount !== null ? Number(row.min_commission_amount) : null,
-    maxCommissionAmount: row.max_commission_amount !== null ? Number(row.max_commission_amount) : null,
+    minCommissionAmount:
+      row.min_commission_amount !== null
+        ? Number(row.min_commission_amount)
+        : null,
+    maxCommissionAmount:
+      row.max_commission_amount !== null
+        ? Number(row.max_commission_amount)
+        : null,
     effectiveFrom: row.effective_from,
     effectiveTo: row.effective_to,
     isActive: row.is_active,
@@ -87,27 +104,36 @@ export async function getCommissionRuleHistory(ruleId: string): Promise<{
 
   const { data, error } = await supabase
     .from("commission_change_history")
-    .select("id, action, previous_values, new_values, reason, created_at, profiles:actor_id (full_name)")
+    .select(
+      "id, action, previous_values, new_values, reason, created_at, profiles:actor_id (full_name)",
+    )
     .eq("rule_id", ruleId)
     .order("created_at", { ascending: false });
 
   if (error) return { history: null, error: error.message };
 
-  const history: CommissionRuleHistoryEntry[] = (data ?? []).map((row: any) => ({
-    id: row.id,
-    action: row.action,
-    previousValues: row.previous_values,
-    newValues: row.new_values,
-    reason: row.reason,
-    actorName: row.profiles?.full_name ?? null,
-    createdAt: row.created_at,
-  }));
+  const history: CommissionRuleHistoryEntry[] = (data ?? []).map(
+    (row: any) => ({
+      id: row.id,
+      action: row.action,
+      previousValues: row.previous_values,
+      newValues: row.new_values,
+      reason: row.reason,
+      actorName: row.profiles?.full_name ?? null,
+      createdAt: row.created_at,
+    }),
+  );
 
   return { history, error: null };
 }
 
-export async function getVenueCategoryOptions(): Promise<VenueCategoryOption[]> {
+export async function getVenueCategoryOptions(): Promise<
+  VenueCategoryOption[]
+> {
   const supabase = (await createClient()) as any;
-  const { data } = await supabase.from("venue_categories").select("id, name").order("name");
+  const { data } = await supabase
+    .from("venue_categories")
+    .select("id, name")
+    .order("name");
   return (data ?? []) as VenueCategoryOption[];
 }

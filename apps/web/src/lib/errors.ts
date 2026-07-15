@@ -84,7 +84,10 @@ export class BookingConflictError extends VenoraError {
   readonly httpStatus = 409;
 
   constructor() {
-    super("BOOKING_CONFLICT", "This venue is already booked for that date and time. Please choose a different slot.");
+    super(
+      "BOOKING_CONFLICT",
+      "This venue is already booked for that date and time. Please choose a different slot.",
+    );
   }
 }
 
@@ -110,7 +113,10 @@ export class PaymentCaptureError extends VenoraError {
   readonly httpStatus = 402;
 
   constructor(gateway: string) {
-    super("PAYMENT_CAPTURE_FAILED", `Payment capture failed via ${gateway}. Please try again or use a different payment method.`);
+    super(
+      "PAYMENT_CAPTURE_FAILED",
+      `Payment capture failed via ${gateway}. Please try again or use a different payment method.`,
+    );
   }
 }
 
@@ -118,7 +124,10 @@ export class RefundError extends VenoraError {
   readonly httpStatus = 402;
 
   constructor() {
-    super("REFUND_FAILED", "Refund could not be processed. Please contact support.");
+    super(
+      "REFUND_FAILED",
+      "Refund could not be processed. Please contact support.",
+    );
   }
 }
 
@@ -128,7 +137,10 @@ export class BookingInvalidStatusError extends VenoraError {
   readonly httpStatus = 400;
 
   constructor(from: string, to: string) {
-    super("BOOKING_INVALID_STATUS", `Cannot transition booking from "${from}" to "${to}".`);
+    super(
+      "BOOKING_INVALID_STATUS",
+      `Cannot transition booking from "${from}" to "${to}".`,
+    );
   }
 }
 
@@ -144,7 +156,10 @@ export class ReviewBookingNotCompletedError extends VenoraError {
   readonly httpStatus = 400;
 
   constructor() {
-    super("REVIEW_BOOKING_NOT_COMPLETED", "You can only review a venue after your event has been completed.");
+    super(
+      "REVIEW_BOOKING_NOT_COMPLETED",
+      "You can only review a venue after your event has been completed.",
+    );
   }
 }
 
@@ -160,7 +175,10 @@ export class PhotoLimitExceededError extends VenoraError {
   readonly httpStatus = 400;
 
   constructor(max = 5) {
-    super("PHOTO_LIMIT_EXCEEDED", `You can attach up to ${max} photos per review.`);
+    super(
+      "PHOTO_LIMIT_EXCEEDED",
+      `You can attach up to ${max} photos per review.`,
+    );
   }
 }
 
@@ -176,29 +194,37 @@ export class ReviewReplyNotAllowedError extends VenoraError {
   readonly httpStatus = 403;
 
   constructor() {
-    super("REVIEW_REPLY_NOT_ALLOWED", "Only the venue owner can reply to this review.");
+    super(
+      "REVIEW_REPLY_NOT_ALLOWED",
+      "Only the venue owner can reply to this review.",
+    );
   }
 }
 
 // ── User-facing message map ───────────────────────────────────
 
 export const ERROR_MESSAGES: Record<string, string> = {
-  NOT_FOUND:                     "The requested resource was not found.",
-  UNAUTHORIZED:                  "Please sign in to continue.",
-  FORBIDDEN:                     "You don't have permission to do that.",
-  VALIDATION_ERROR:              "Please check the form for errors.",
-  BOOKING_CONFLICT:              "This venue is already booked for that time slot. Please choose another.",
-  BOOKING_INVALID_STATUS:        "This booking action is not currently available.",
-  VENUE_NOT_APPROVED:            "This venue is not available for booking.",
-  REVIEW_BOOKING_NOT_COMPLETED:  "You can review this venue once your event has taken place.",
-  REVIEW_ALREADY_EXISTS:         "You've already submitted a review for this booking.",
-  REVIEW_NOT_FOUND:              "This review could not be found.",
-  PHOTO_LIMIT_EXCEEDED:          "You can attach up to 5 photos per review.",
-  ALREADY_FLAGGED:               "You've already reported this review.",
-  REVIEW_REPLY_NOT_ALLOWED:      "Only the venue owner can reply to this review.",
-  PAYMENT_CAPTURE_FAILED:        "Payment could not be processed. Please try a different card or payment method.",
-  REFUND_FAILED:                 "Refund could not be processed. Please contact our support team.",
-  INTERNAL_ERROR:                "Something went wrong on our end. Our team has been notified.",
+  NOT_FOUND: "The requested resource was not found.",
+  UNAUTHORIZED: "Please sign in to continue.",
+  FORBIDDEN: "You don't have permission to do that.",
+  VALIDATION_ERROR: "Please check the form for errors.",
+  BOOKING_CONFLICT:
+    "This venue is already booked for that time slot. Please choose another.",
+  BOOKING_INVALID_STATUS: "This booking action is not currently available.",
+  VENUE_NOT_APPROVED: "This venue is not available for booking.",
+  REVIEW_BOOKING_NOT_COMPLETED:
+    "You can review this venue once your event has taken place.",
+  REVIEW_ALREADY_EXISTS: "You've already submitted a review for this booking.",
+  REVIEW_NOT_FOUND: "This review could not be found.",
+  PHOTO_LIMIT_EXCEEDED: "You can attach up to 5 photos per review.",
+  ALREADY_FLAGGED: "You've already reported this review.",
+  REVIEW_REPLY_NOT_ALLOWED: "Only the venue owner can reply to this review.",
+  PAYMENT_CAPTURE_FAILED:
+    "Payment could not be processed. Please try a different card or payment method.",
+  REFUND_FAILED:
+    "Refund could not be processed. Please contact our support team.",
+  INTERNAL_ERROR:
+    "Something went wrong on our end. Our team has been notified.",
 };
 
 export function toErrorMessage(error: unknown): string {

@@ -5,17 +5,32 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { updateSystemSettingAction } from "../application/actions";
-import type { SettingDefinition, SystemSetting } from "../types/system-setting.types";
+import type {
+  SettingDefinition,
+  SystemSetting,
+} from "../types/system-setting.types";
 
-function toEditableString(value: unknown, valueType: SettingDefinition["valueType"]): string {
-  if (valueType === "string[]") return Array.isArray(value) ? value.join(", ") : "";
+function toEditableString(
+  value: unknown,
+  valueType: SettingDefinition["valueType"],
+): string {
+  if (valueType === "string[]")
+    return Array.isArray(value) ? value.join(", ") : "";
   if (value === undefined || value === null) return "";
   return String(value);
 }
 
-export function SettingRow({ definition, setting }: { definition: SettingDefinition; setting: SystemSetting }) {
+export function SettingRow({
+  definition,
+  setting,
+}: {
+  definition: SettingDefinition;
+  setting: SystemSetting;
+}) {
   const router = useRouter();
-  const [value, setValue] = useState(() => toEditableString(setting.value, definition.valueType));
+  const [value, setValue] = useState(() =>
+    toEditableString(setting.value, definition.valueType),
+  );
   const [checked, setChecked] = useState(() => setting.value === true);
   const [reason, setReason] = useState("");
   const [showReason, setShowReason] = useState(false);
@@ -24,13 +39,21 @@ export function SettingRow({ definition, setting }: { definition: SettingDefinit
   function parseValue(): string | number | boolean | string[] {
     if (definition.valueType === "boolean") return checked;
     if (definition.valueType === "number") return Number(value);
-    if (definition.valueType === "string[]") return value.split(",").map((v) => v.trim()).filter(Boolean);
+    if (definition.valueType === "string[]")
+      return value
+        .split(",")
+        .map((v) => v.trim())
+        .filter(Boolean);
     return value;
   }
 
   function save(reasonText?: string) {
     startTransition(async () => {
-      const result = await updateSystemSettingAction({ key: definition.key, value: parseValue(), reason: reasonText });
+      const result = await updateSystemSettingAction({
+        key: definition.key,
+        value: parseValue(),
+        reason: reasonText,
+      });
       if (result.error) {
         toast.error(result.error.message);
         return;
@@ -55,12 +78,19 @@ export function SettingRow({ definition, setting }: { definition: SettingDefinit
       <div className="min-w-0 sm:max-w-[45%]">
         <p className="text-sm font-bold text-[#111827]">
           {definition.label}
-          {definition.isDangerous ? <span className="ml-2 rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-black uppercase text-red-700">Sensitive</span> : null}
+          {definition.isDangerous ? (
+            <span className="ml-2 rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-black uppercase text-red-700">
+              Sensitive
+            </span>
+          ) : null}
         </p>
         <p className="text-xs text-[#6b7280]">{setting.description}</p>
         {setting.updatedAt ? (
           <p className="mt-1 text-[11px] text-[#6b7280]">
-            Last changed {new Date(setting.updatedAt).toLocaleDateString("en-PH", { dateStyle: "medium" })}
+            Last changed{" "}
+            {new Date(setting.updatedAt).toLocaleDateString("en-PH", {
+              dateStyle: "medium",
+            })}
             {setting.updatedByName ? ` by ${setting.updatedByName}` : ""}
           </p>
         ) : null}
@@ -76,7 +106,9 @@ export function SettingRow({ definition, setting }: { definition: SettingDefinit
               disabled={isPending}
               className="h-4 w-4 rounded border-[#dbe3ef]"
             />
-            <span className="text-sm text-[#111827]">{checked ? "Enabled" : "Disabled"}</span>
+            <span className="text-sm text-[#111827]">
+              {checked ? "Enabled" : "Disabled"}
+            </span>
           </label>
         ) : (
           <input

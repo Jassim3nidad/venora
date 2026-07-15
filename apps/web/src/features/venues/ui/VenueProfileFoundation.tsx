@@ -31,7 +31,10 @@ export default function VenueProfileFoundation({
     <div className="space-y-6 md:space-y-8">
       {/* Airbnb pattern: photos first, full-bleed on mobile */}
       <div className="-mx-4 md:mx-0">
-        <VenueFeaturedGallery media={venue.venue_images} venueName={venue.name} />
+        <VenueFeaturedGallery
+          media={venue.venue_images}
+          venueName={venue.name}
+        />
       </div>
 
       <VenueProfileCard

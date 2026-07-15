@@ -8,7 +8,11 @@ import type {
 } from "../schemas/ai-description.schema";
 
 export function useGenerateVenueDescription() {
-  return useMutation<GenerateVenueDescriptionResponse, Error, GenerateVenueDescriptionRequest>({
+  return useMutation<
+    GenerateVenueDescriptionResponse,
+    Error,
+    GenerateVenueDescriptionRequest
+  >({
     mutationFn: generateVenueDescription,
   });
 }

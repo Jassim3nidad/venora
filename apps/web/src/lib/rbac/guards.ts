@@ -62,7 +62,9 @@ export async function requireAuth(): Promise<SessionContext> {
  * @throws {UnauthorizedError} when no session exists.
  * @throws {ForbiddenError}    when the user is signed in but lacks every allowed role.
  */
-export async function requireRole(...allowedRoles: RoleName[]): Promise<SessionContext> {
+export async function requireRole(
+  ...allowedRoles: RoleName[]
+): Promise<SessionContext> {
   const supabase = await createClient();
 
   const {
@@ -84,7 +86,7 @@ export async function requireRole(...allowedRoles: RoleName[]): Promise<SessionC
 
   if (allowedRoles.length > 0 && !allowedRoles.some((r) => roles.includes(r))) {
     throw new ForbiddenError(
-      `This action requires one of: ${allowedRoles.join(", ")}. Your role(s): ${roles.join(", ") || "none"}.`
+      `This action requires one of: ${allowedRoles.join(", ")}. Your role(s): ${roles.join(", ") || "none"}.`,
     );
   }
 
@@ -134,11 +136,16 @@ export async function requireAdmin(): Promise<SessionContext> {
  * when you don't already have a resolved user.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function isAdminUser(supabase: any, userId: string): Promise<boolean> {
+export async function isAdminUser(
+  supabase: any,
+  userId: string,
+): Promise<boolean> {
   const { data: roleRows } = await supabase
     .from("user_roles")
     .select("role")
     .eq("user_id", userId);
 
-  return (roleRows ?? []).some((row: { role: string }) => row.role === ROLES.ADMIN);
+  return (roleRows ?? []).some(
+    (row: { role: string }) => row.role === ROLES.ADMIN,
+  );
 }

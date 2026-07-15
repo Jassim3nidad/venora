@@ -137,10 +137,8 @@ function NotificationRow({
 }
 
 export function NotificationCenter() {
-  const [readFilter, setReadFilter] =
-    useState<NotificationReadFilter>("all");
-  const [kindFilter, setKindFilter] =
-    useState<NotificationKind | "all">("all");
+  const [readFilter, setReadFilter] = useState<NotificationReadFilter>("all");
+  const [kindFilter, setKindFilter] = useState<NotificationKind | "all">("all");
   const { data, isLoading, isError } = useNotifications({
     limit: 50,
     read: readFilter,
@@ -227,8 +225,8 @@ export function NotificationCenter() {
             Nothing here yet
           </h2>
           <p className="mx-auto mt-2 max-w-md text-sm font-medium leading-6 text-slate-500">
-            Booking updates, payment changes, review requests, admin alerts,
-            and realtime messages will appear here.
+            Booking updates, payment changes, review requests, admin alerts, and
+            realtime messages will appear here.
           </p>
         </div>
       ) : (

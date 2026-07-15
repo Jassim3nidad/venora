@@ -97,7 +97,6 @@ const manifest = {
   knownLimitations: [
     "Hosted migration history and migration 071 require protected verification evidence.",
     "The upstream 068-to-0680 rename and duplicate migration 071 remain pending hosted reconciliation.",
-    "Full Edge Function Deno format/type checks have recorded legacy debt.",
   ],
   workflowInitiator: process.env.GITHUB_ACTOR ?? null,
   releaseApprover: process.env.RELEASE_APPROVER ?? null,

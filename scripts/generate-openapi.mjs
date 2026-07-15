@@ -1655,7 +1655,7 @@ const definitions = [
     security: bearer,
     edge: true,
     description:
-      "Internal queue endpoint expected behind platform JWT/service invocation. Dispatches one delivery or a batch, updates attempts/status, retries failed rows, and skips SMS. Do not expose publicly.",
+      "Internal queue endpoint requiring the exact service-role bearer used by the database webhook. Dispatches one delivery or a bounded batch, updates attempts/status, retries failed rows, and skips SMS. Do not expose publicly.",
     requestBody: body("NotificationDeliveryRequest", {
       record: {
         id: "00000000-0000-4000-8000-000000000001",
@@ -1666,7 +1666,7 @@ const definitions = [
     }),
     successSchema: schemaRef("GenericObject"),
     successExample: { success: true },
-    errors: [401, 500],
+    errors: [401, 500, 503],
   },
 ];
 

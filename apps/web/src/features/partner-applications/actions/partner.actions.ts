@@ -31,7 +31,9 @@ export async function submitPartnerApplicationAction(rawInput: unknown) {
       };
     }
 
-    const { error: insertError } = await (supabase.from("partner_applications") as any).insert({
+    const { error: insertError } = await (
+      supabase.from("partner_applications") as any
+    ).insert({
       user_id: user.id,
       role_applied_for: parsed.data.roleAppliedFor,
       category: parsed.data.category,
@@ -47,7 +49,10 @@ export async function submitPartnerApplicationAction(rawInput: unknown) {
     });
 
     if (insertError) {
-      console.error("[submitPartnerApplicationAction] Database error:", insertError);
+      console.error(
+        "[submitPartnerApplicationAction] Database error:",
+        insertError,
+      );
       return {
         success: false,
         error: insertError.message,

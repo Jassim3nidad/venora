@@ -26,7 +26,8 @@ export default async function AdminDashboardLayout({
   if (!(await hasRole(ROLES.ADMIN))) redirect("/unauthorized");
 
   const profile = await getNavbarProfile(supabase, user.id);
-  const userName = profile?.full_name || user.email?.split("@")[0] || "Administrator";
+  const userName =
+    profile?.full_name || user.email?.split("@")[0] || "Administrator";
 
   return (
     <EnterpriseShell

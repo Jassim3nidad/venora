@@ -44,7 +44,10 @@ export default async function SupplierBookingsPage() {
 
   if (!supplierProfile) {
     return (
-      <DashboardSubPage title="Jobs" description="Set up your supplier profile first.">
+      <DashboardSubPage
+        title="Jobs"
+        description="Set up your supplier profile first."
+      >
         <EmptyState
           icon="event_available"
           title="Profile setup pending"
@@ -73,7 +76,9 @@ export default async function SupplierBookingsPage() {
     .eq("status", "confirmed")
     .order("id", { ascending: false });
 
-  const rows: BookingDisplayRow[] = ((bookingsRaw ?? []) as BookingSupplierRow[]).map((b) => ({
+  const rows: BookingDisplayRow[] = (
+    (bookingsRaw ?? []) as BookingSupplierRow[]
+  ).map((b) => ({
     id: b.id,
     venue: b.bookings?.venues?.name ?? "-",
     client: b.bookings?.profiles?.full_name ?? "-",
@@ -87,7 +92,9 @@ export default async function SupplierBookingsPage() {
     {
       key: "venue",
       header: "Venue",
-      cell: (row) => <span className="font-semibold text-[#111827]">{row.venue}</span>,
+      cell: (row) => (
+        <span className="font-semibold text-[#111827]">{row.venue}</span>
+      ),
     },
     { key: "client", header: "Client", cell: (row) => row.client },
     { key: "date", header: "Event Date", cell: (row) => row.date },
@@ -95,7 +102,9 @@ export default async function SupplierBookingsPage() {
     {
       key: "price",
       header: "Agreed Price",
-      cell: (row) => <span className="font-semibold text-[#111827]">{row.price}</span>,
+      cell: (row) => (
+        <span className="font-semibold text-[#111827]">{row.price}</span>
+      ),
     },
     {
       key: "status",

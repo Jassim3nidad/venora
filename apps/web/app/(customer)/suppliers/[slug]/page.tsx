@@ -25,8 +25,11 @@ export async function generateMetadata({
   }
 
   const description =
-    supplier.headline ?? supplier.description ?? "Accredited Venora supplier profile.";
-  const ogImage = supplier.heroImageUrl ?? supplier.profileImageUrl ?? undefined;
+    supplier.headline ??
+    supplier.description ??
+    "Accredited Venora supplier profile.";
+  const ogImage =
+    supplier.heroImageUrl ?? supplier.profileImageUrl ?? undefined;
 
   return {
     title: `${supplier.businessName} - Supplier Profile`,
@@ -97,7 +100,10 @@ export default async function SupplierDetailPage({
       ])
     : [[], false];
 
-  const jsonLd = buildSupplierJsonLd(supplier, absoluteUrl(`/suppliers/${slug}`));
+  const jsonLd = buildSupplierJsonLd(
+    supplier,
+    absoluteUrl(`/suppliers/${slug}`),
+  );
 
   return (
     <>

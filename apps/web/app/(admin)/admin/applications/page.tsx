@@ -21,9 +21,12 @@ export default async function AdminApplicationsPage() {
   return (
     <DashboardPage>
       <div>
-        <h1 className="text-3xl font-black text-slate-900">Partner Applications</h1>
+        <h1 className="text-3xl font-black text-slate-900">
+          Partner Applications
+        </h1>
         <p className="mt-2 text-slate-500">
-          Review and approve vendor applications to upgrade their workspace access.
+          Review and approve vendor applications to upgrade their workspace
+          access.
         </p>
       </div>
 
@@ -32,19 +35,33 @@ export default async function AdminApplicationsPage() {
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-slate-500">
               <tr>
-                <th className="px-6 py-4 font-bold uppercase tracking-wider text-xs">Applicant</th>
-                <th className="px-6 py-4 font-bold uppercase tracking-wider text-xs">Role Applied</th>
-                <th className="px-6 py-4 font-bold uppercase tracking-wider text-xs">Category</th>
-                <th className="px-6 py-4 font-bold uppercase tracking-wider text-xs">Applied</th>
-                <th className="px-6 py-4 font-bold uppercase tracking-wider text-xs text-right">Action</th>
+                <th className="px-6 py-4 font-bold uppercase tracking-wider text-xs">
+                  Applicant
+                </th>
+                <th className="px-6 py-4 font-bold uppercase tracking-wider text-xs">
+                  Role Applied
+                </th>
+                <th className="px-6 py-4 font-bold uppercase tracking-wider text-xs">
+                  Category
+                </th>
+                <th className="px-6 py-4 font-bold uppercase tracking-wider text-xs">
+                  Applied
+                </th>
+                <th className="px-6 py-4 font-bold uppercase tracking-wider text-xs text-right">
+                  Action
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {applications.map((app) => (
                 <tr key={app.id} className="transition hover:bg-slate-50">
                   <td className="px-6 py-4">
-                    <p className="font-bold text-slate-900">{app.profiles?.full_name || "Unknown"}</p>
-                    <p className="text-xs text-slate-500">{app.profiles?.email || "No email"}</p>
+                    <p className="font-bold text-slate-900">
+                      {app.profiles?.full_name || "Unknown"}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {app.profiles?.email || "No email"}
+                    </p>
                   </td>
                   <td className="px-6 py-4">
                     <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-bold text-blue-700">
@@ -53,7 +70,9 @@ export default async function AdminApplicationsPage() {
                   </td>
                   <td className="px-6 py-4 text-slate-600">{app.category}</td>
                   <td className="px-6 py-4 text-slate-500 text-xs">
-                    {formatDistanceToNow(new Date(app.created_at), { addSuffix: true })}
+                    {formatDistanceToNow(new Date(app.created_at), {
+                      addSuffix: true,
+                    })}
                   </td>
                   <td className="px-6 py-4 text-right">
                     <ApplicationReviewModal application={app} />
@@ -69,7 +88,9 @@ export default async function AdminApplicationsPage() {
             <span className="text-2xl">🎉</span>
           </div>
           <h3 className="text-lg font-bold text-slate-900">All caught up!</h3>
-          <p className="text-sm text-slate-500">There are no pending partner applications to review.</p>
+          <p className="text-sm text-slate-500">
+            There are no pending partner applications to review.
+          </p>
         </div>
       )}
     </DashboardPage>

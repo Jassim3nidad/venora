@@ -34,10 +34,14 @@ export function useReviewPhotoUpload() {
     }
 
     const invalidFile = files.find(
-      (file) => !ALLOWED_MIME_TYPES.includes(file.type) || file.size > MAX_FILE_SIZE_BYTES,
+      (file) =>
+        !ALLOWED_MIME_TYPES.includes(file.type) ||
+        file.size > MAX_FILE_SIZE_BYTES,
     );
     if (invalidFile) {
-      setError(`"${invalidFile.name}" must be a JPEG, PNG, or WEBP image under 10 MB.`);
+      setError(
+        `"${invalidFile.name}" must be a JPEG, PNG, or WEBP image under 10 MB.`,
+      );
       return [];
     }
 
@@ -48,15 +52,23 @@ export function useReviewPhotoUpload() {
     try {
       for (const file of files) {
         const path = `${userId}/${folderId}/${crypto.randomUUID()}-${file.name}`;
-        const { error: uploadError } = await supabase.storage.from("review-photos").upload(path, file);
+        const { error: uploadError } = await supabase.storage
+          .from("review-photos")
+          .upload(path, file);
         if (uploadError) throw uploadError;
 
-        const { data } = supabase.storage.from("review-photos").getPublicUrl(path);
+        const { data } = supabase.storage
+          .from("review-photos")
+          .getPublicUrl(path);
         uploaded.push({ storagePath: path, url: data.publicUrl });
       }
       return uploaded;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Photo upload failed. Please try again.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Photo upload failed. Please try again.",
+      );
       return uploaded;
     } finally {
       setIsUploading(false);

@@ -1,5 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
-import type { AuditLogEntry, AuditLogFilters, AuditLogPage } from "../types/audit-log.types";
+import type {
+  AuditLogEntry,
+  AuditLogFilters,
+  AuditLogPage,
+} from "../types/audit-log.types";
 
 const DEFAULT_PAGE_SIZE = 25;
 const MAX_PAGE_SIZE = 100;
@@ -34,7 +38,10 @@ export async function getAuditLogs(
   const supabase = (await createClient()) as any;
 
   const page = Math.max(filters.page ?? 1, 1);
-  const pageSize = Math.min(filters.pageSize ?? DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
+  const pageSize = Math.min(
+    filters.pageSize ?? DEFAULT_PAGE_SIZE,
+    MAX_PAGE_SIZE,
+  );
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
@@ -52,11 +59,14 @@ export async function getAuditLogs(
     .range(from, to);
 
   if (filters.action) query = query.ilike("action", `%${filters.action}%`);
-  if (filters.resourceType) query = query.eq("entity_type", filters.resourceType);
+  if (filters.resourceType)
+    query = query.eq("entity_type", filters.resourceType);
   if (filters.resourceId) query = query.eq("entity_id", filters.resourceId);
   if (filters.actorId) query = query.eq("actor_id", filters.actorId);
-  if (filters.dateFrom) query = query.gte("created_at", `${filters.dateFrom}T00:00:00Z`);
-  if (filters.dateTo) query = query.lte("created_at", `${filters.dateTo}T23:59:59Z`);
+  if (filters.dateFrom)
+    query = query.gte("created_at", `${filters.dateFrom}T00:00:00Z`);
+  if (filters.dateTo)
+    query = query.lte("created_at", `${filters.dateTo}T23:59:59Z`);
 
   const { data, count, error } = await query;
 
@@ -64,20 +74,25 @@ export async function getAuditLogs(
     return { result: null, error: error.message };
   }
 
-  const entries: AuditLogEntry[] = ((data ?? []) as AuditLogRow[]).map((row) => ({
-    id: row.id,
-    actorId: row.actor_id,
-    actorName: row.profiles?.full_name ?? null,
-    actorRole: row.actor_role,
-    action: row.action,
-    resourceType: row.entity_type,
-    resourceId: row.entity_id,
-    reason: row.reason,
-    metadata: row.metadata,
-    previousValues: row.previous_values,
-    newValues: row.new_values,
-    createdAt: row.created_at,
-  }));
+  const entries: AuditLogEntry[] = ((data ?? []) as AuditLogRow[]).map(
+    (row) => ({
+      id: row.id,
+      actorId: row.actor_id,
+      actorName: row.profiles?.full_name ?? null,
+      actorRole: row.actor_role,
+      action: row.action,
+      resourceType: row.entity_type,
+      resourceId: row.entity_id,
+      reason: row.reason,
+      metadata: row.metadata,
+      previousValues: row.previous_values,
+      newValues: row.new_values,
+      createdAt: row.created_at,
+    }),
+  );
 
-  return { result: { entries, total: count ?? 0, page, pageSize }, error: null };
+  return {
+    result: { entries, total: count ?? 0, page, pageSize },
+    error: null,
+  };
 }

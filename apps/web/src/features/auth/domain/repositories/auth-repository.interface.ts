@@ -27,5 +27,8 @@ export interface AuthRepository {
 
   getCurrentUser(): Promise<AuthUser | null>;
 
-  updateProfile(userId: string, data: { fullName: string; phone?: string | null }): Promise<void>;
+  updateProfile(
+    userId: string,
+    data: { fullName: string; phone?: string | null },
+  ): Promise<void>;
 }

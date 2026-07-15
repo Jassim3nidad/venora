@@ -67,7 +67,9 @@ export function SupplierPackageManager({
   profile: SupplierMarketplaceProfile;
 }) {
   const router = useRouter();
-  const [editingPackage, setEditingPackage] = useState<SupplierPackage | null>(null);
+  const [editingPackage, setEditingPackage] = useState<SupplierPackage | null>(
+    null,
+  );
   const [isPending, startTransition] = useTransition();
   const [formMessage, setFormMessage] = useState<string | null>(null);
   const {
@@ -146,19 +148,25 @@ export function SupplierPackageManager({
         <div className="grid gap-5">
           <input type="hidden" {...register("id")} />
           <label className="grid gap-1.5">
-            <span className="text-sm font-bold text-slate-700">Package Name</span>
+            <span className="text-sm font-bold text-slate-700">
+              Package Name
+            </span>
             <input
               {...register("name")}
               placeholder="e.g., Premium Photography Package"
               className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
             />
             {errors.name?.message ? (
-              <p className="text-xs font-semibold text-red-600">{errors.name.message}</p>
+              <p className="text-xs font-semibold text-red-600">
+                {errors.name.message}
+              </p>
             ) : null}
           </label>
 
           <label className="grid gap-1.5">
-            <span className="text-sm font-bold text-slate-700">Description</span>
+            <span className="text-sm font-bold text-slate-700">
+              Description
+            </span>
             <textarea
               {...register("description")}
               rows={3}
@@ -169,9 +177,13 @@ export function SupplierPackageManager({
 
           <div className="grid gap-5 sm:grid-cols-2">
             <label className="grid gap-1.5">
-              <span className="text-sm font-bold text-slate-700">Price (Optional)</span>
+              <span className="text-sm font-bold text-slate-700">
+                Price (Optional)
+              </span>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">₱</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
+                  ₱
+                </span>
                 <input
                   {...register("price")}
                   type="number"
@@ -182,7 +194,9 @@ export function SupplierPackageManager({
               </div>
             </label>
             <label className="grid gap-1.5">
-              <span className="text-sm font-bold text-slate-700">Pricing Unit</span>
+              <span className="text-sm font-bold text-slate-700">
+                Pricing Unit
+              </span>
               <select
                 {...register("priceUnit")}
                 className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
@@ -197,7 +211,9 @@ export function SupplierPackageManager({
 
           <div className="grid gap-5 sm:grid-cols-2">
             <label className="grid gap-1.5">
-              <span className="text-sm font-bold text-slate-700">Package Type</span>
+              <span className="text-sm font-bold text-slate-700">
+                Package Type
+              </span>
               <input
                 {...register("packageType")}
                 placeholder="e.g., standard, premium"
@@ -205,7 +221,9 @@ export function SupplierPackageManager({
               />
             </label>
             <label className="grid gap-1.5">
-              <span className="text-sm font-bold text-slate-700">Display Order</span>
+              <span className="text-sm font-bold text-slate-700">
+                Display Order
+              </span>
               <input
                 {...register("sortOrder")}
                 type="number"
@@ -218,7 +236,9 @@ export function SupplierPackageManager({
 
           <div className="grid gap-5 sm:grid-cols-2">
             <label className="grid gap-1.5">
-              <span className="text-sm font-bold text-slate-700">Minimum Guests</span>
+              <span className="text-sm font-bold text-slate-700">
+                Minimum Guests
+              </span>
               <input
                 {...register("minGuests")}
                 type="number"
@@ -228,7 +248,9 @@ export function SupplierPackageManager({
               />
             </label>
             <label className="grid gap-1.5">
-              <span className="text-sm font-bold text-slate-700">Maximum Guests</span>
+              <span className="text-sm font-bold text-slate-700">
+                Maximum Guests
+              </span>
               <input
                 {...register("maxGuests")}
                 type="number"
@@ -240,7 +262,9 @@ export function SupplierPackageManager({
           </div>
 
           <label className="grid gap-1.5">
-            <span className="text-sm font-bold text-slate-700">Inclusions (one per line)</span>
+            <span className="text-sm font-bold text-slate-700">
+              Inclusions (one per line)
+            </span>
             <textarea
               {...register("inclusionsText")}
               rows={4}

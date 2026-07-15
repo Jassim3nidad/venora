@@ -60,7 +60,12 @@ const mobileNavLinks: NavLink[] = [
     mobileOnly: true,
   },
   { label: "Favorites", href: "/favorites", icon: Heart, mobileOnly: true },
-  { label: "Notifications", href: "/notifications", icon: Bell, mobileOnly: true },
+  {
+    label: "Notifications",
+    href: "/notifications",
+    icon: Bell,
+    mobileOnly: true,
+  },
 ];
 
 export function CustomerNavbar({

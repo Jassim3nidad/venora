@@ -51,11 +51,18 @@ export async function comparePackages(
   }
 
   if (!data) {
-    throw new AIPackageComparisonClientError("EMPTY_RESPONSE", "Package comparison returned no response.");
+    throw new AIPackageComparisonClientError(
+      "EMPTY_RESPONSE",
+      "Package comparison returned no response.",
+    );
   }
 
   if (data.error) {
-    throw new AIPackageComparisonClientError(data.error.code, data.error.message, data.error.details);
+    throw new AIPackageComparisonClientError(
+      data.error.code,
+      data.error.message,
+      data.error.details,
+    );
   }
 
   const parsedOutput = comparePackagesResponseSchema.safeParse(data.data);

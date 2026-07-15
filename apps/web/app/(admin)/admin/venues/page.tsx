@@ -48,18 +48,29 @@ export default async function AdminVenuesPage({ searchParams }: Props) {
       key: "venue",
       header: "Venue",
       cell: (row) => (
-        <a href={`/admin/venues/${row.id}`} className="font-semibold text-[#111827] hover:text-[#1d4ed8] hover:underline">
+        <a
+          href={`/admin/venues/${row.id}`}
+          className="font-semibold text-[#111827] hover:text-[#1d4ed8] hover:underline"
+        >
           {row.name}
         </a>
       ),
     },
-    { key: "organization", header: "Organization", cell: (row) => row.organizationName ?? "—" },
+    {
+      key: "organization",
+      header: "Organization",
+      cell: (row) => row.organizationName ?? "—",
+    },
     {
       key: "location",
       header: "Location",
       cell: (row) => [row.city, row.province].filter(Boolean).join(", ") || "—",
     },
-    { key: "submitted", header: "Submitted", cell: (row) => formatDate(row.createdAt) },
+    {
+      key: "submitted",
+      header: "Submitted",
+      cell: (row) => formatDate(row.createdAt),
+    },
     {
       key: "status",
       header: "Status",
@@ -90,7 +101,11 @@ export default async function AdminVenuesPage({ searchParams }: Props) {
       }
     >
       {error ? (
-        <EmptyState icon="error" title="Could not load venues" description={error} />
+        <EmptyState
+          icon="error"
+          title="Could not load venues"
+          description={error}
+        />
       ) : venues && venues.length > 0 ? (
         <Panel>
           <PanelHeader

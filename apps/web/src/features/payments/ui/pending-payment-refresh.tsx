@@ -9,7 +9,11 @@ import { useRouter } from "next/navigation";
  * reload. Stops after ~2 minutes; the notification bell covers the
  * rare slower settlement.
  */
-export function PendingPaymentRefresh({ intervalMs = 5000 }: { intervalMs?: number }) {
+export function PendingPaymentRefresh({
+  intervalMs = 5000,
+}: {
+  intervalMs?: number;
+}) {
   const router = useRouter();
 
   useEffect(() => {

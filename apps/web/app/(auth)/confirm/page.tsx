@@ -14,26 +14,32 @@ function ConfirmEmailContent() {
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as "signup" | "email" | null;
   const requestedNext = searchParams.get("next") || "/profile/setup";
-  const next = isSafeInternalRedirect(requestedNext) ? requestedNext : "/profile/setup";
+  const next = isSafeInternalRedirect(requestedNext)
+    ? requestedNext
+    : "/profile/setup";
 
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   const handleVerify = () => {
     if (!tokenHash || !type) {
-      setError("Missing verification token or type. Please use the exact link from your email.");
+      setError(
+        "Missing verification token or type. Please use the exact link from your email.",
+      );
       return;
     }
 
     setError(null);
     startTransition(async () => {
       const response = await verifyOtpAction(tokenHash, type);
-      
+
       if (response.success) {
         // Redirect to login with success parameter
         router.push(`/login?verified=true&next=${encodeURIComponent(next)}`);
       } else {
-        setError(response.error ?? "Failed to verify email. The link may be expired.");
+        setError(
+          response.error ?? "Failed to verify email. The link may be expired.",
+        );
       }
     });
   };
@@ -59,7 +65,8 @@ function ConfirmEmailContent() {
               Verify your email
             </h2>
             <p className="mt-2 text-sm font-medium leading-6 text-[#6B7280]">
-              You are almost there! Click the button below to securely confirm your email address and activate your account.
+              You are almost there! Click the button below to securely confirm
+              your email address and activate your account.
             </p>
           </div>
 
@@ -76,7 +83,8 @@ function ConfirmEmailContent() {
           {!tokenHash || !type ? (
             <div className="rounded-2xl bg-amber-50 p-4 border border-amber-200 mb-6">
               <p className="text-sm text-amber-800 font-medium text-center">
-                We couldn't find a valid token in the URL. If you copied and pasted the link, make sure you included the entire URL.
+                We couldn't find a valid token in the URL. If you copied and
+                pasted the link, make sure you included the entire URL.
               </p>
             </div>
           ) : (
@@ -100,19 +108,19 @@ function ConfirmEmailContent() {
           )}
 
           <div className="mt-7 flex flex-col items-center justify-center gap-4 sm:flex-row">
-             <Link
-                href="/verify-email"
-                className="text-sm font-bold text-[#2563EB] transition hover:text-[#1D4ED8]"
-              >
-                Request new link
-              </Link>
-              <span className="hidden text-[#E5E7EB] sm:inline">•</span>
-             <Link
-                href="/login"
-                className="text-sm font-bold text-[#6B7280] transition hover:text-[#111827]"
-              >
-                Return to login
-              </Link>
+            <Link
+              href="/verify-email"
+              className="text-sm font-bold text-[#2563EB] transition hover:text-[#1D4ED8]"
+            >
+              Request new link
+            </Link>
+            <span className="hidden text-[#E5E7EB] sm:inline">•</span>
+            <Link
+              href="/login"
+              className="text-sm font-bold text-[#6B7280] transition hover:text-[#111827]"
+            >
+              Return to login
+            </Link>
           </div>
         </div>
       </div>
@@ -122,11 +130,13 @@ function ConfirmEmailContent() {
 
 export default function ConfirmEmailPage() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-[#F9FAFB]">
-        <Loader2 className="h-8 w-8 animate-spin text-[#2563EB]" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[#F9FAFB]">
+          <Loader2 className="h-8 w-8 animate-spin text-[#2563EB]" />
+        </div>
+      }
+    >
       <ConfirmEmailContent />
     </Suspense>
   );

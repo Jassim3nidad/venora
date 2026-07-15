@@ -73,7 +73,10 @@ describe("createSupplierContactRequestAction", () => {
 
   it("should fail if booking is invalid or does not belong to user", async () => {
     // Supplier exists
-    singleMock.mockResolvedValueOnce({ data: { id: supplierId, accreditation_status: "accredited" }, error: null });
+    singleMock.mockResolvedValueOnce({
+      data: { id: supplierId, accreditation_status: "accredited" },
+      error: null,
+    });
     // Booking doesn't exist or is not approved
     maybeSingleMock.mockResolvedValueOnce({ data: null, error: null });
 
@@ -86,12 +89,17 @@ describe("createSupplierContactRequestAction", () => {
     });
 
     expect(result.error).toBeDefined();
-    expect(result.error?.message).toContain("You can only link an approved venue booking");
+    expect(result.error?.message).toContain(
+      "You can only link an approved venue booking",
+    );
   });
 
   it("should populate snapshot fields when valid booking is provided", async () => {
     // Supplier exists
-    singleMock.mockResolvedValueOnce({ data: { id: supplierId, accreditation_status: "accredited" }, error: null });
+    singleMock.mockResolvedValueOnce({
+      data: { id: supplierId, accreditation_status: "accredited" },
+      error: null,
+    });
     // Booking is valid
     maybeSingleMock.mockResolvedValueOnce({
       data: {
@@ -101,12 +109,19 @@ describe("createSupplierContactRequestAction", () => {
         event_start_time: "18:00:00",
         guest_count: 100,
         venue_id: venueId,
-        venues: { name: "Grand Hall", city: "Makati", province: "Metro Manila" },
+        venues: {
+          name: "Grand Hall",
+          city: "Makati",
+          province: "Metro Manila",
+        },
       },
       error: null,
     });
     // Insert succeeds
-    singleMock.mockResolvedValueOnce({ data: { id: "00000000-0000-4000-8000-000000000005", status: "new" }, error: null });
+    singleMock.mockResolvedValueOnce({
+      data: { id: "00000000-0000-4000-8000-000000000005", status: "new" },
+      error: null,
+    });
 
     const result = await createSupplierContactRequestAction({
       supplierId,
@@ -128,7 +143,7 @@ describe("createSupplierContactRequestAction", () => {
       event_start_time_snapshot: "18:00:00",
       event_date_snapshot: "2026-12-01",
       guest_count_snapshot: 100,
-      location_snapshot: "Grand Hall — Makati, Metro Manila"
+      location_snapshot: "Grand Hall — Makati, Metro Manila",
     });
   });
 
@@ -179,7 +194,9 @@ describe("createSupplierContactRequestAction", () => {
       },
     );
     expect(mockSupabase.from).not.toHaveBeenCalledWith("supplier_quotes");
-    expect(mockSupabase.from).not.toHaveBeenCalledWith("supplier_contact_requests");
+    expect(mockSupabase.from).not.toHaveBeenCalledWith(
+      "supplier_contact_requests",
+    );
   });
 
   it("declines proposals through the safe RPC", async () => {

@@ -6,7 +6,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Controller } from "react-hook-form";
-import type { SupplierMarketplaceProfile, SupplierPortfolioItem } from "../types/supplier.types";
+import type {
+  SupplierMarketplaceProfile,
+  SupplierPortfolioItem,
+} from "../types/supplier.types";
 import { upsertSupplierPortfolioAction } from "../application/actions";
 import { PortfolioImageUploader } from "./PortfolioImageUploader";
 
@@ -63,7 +66,10 @@ export function SupplierPortfolioBuilder({
     },
   });
 
-  const onSubmit = async (values: PortfolioBuilderValues, finalStatus?: "draft" | "published" | "hidden") => {
+  const onSubmit = async (
+    values: PortfolioBuilderValues,
+    finalStatus?: "draft" | "published" | "hidden",
+  ) => {
     setError(null);
     startTransition(async () => {
       try {
@@ -71,17 +77,22 @@ export function SupplierPortfolioBuilder({
           ...values,
           id: existingProject?.id,
           status: finalStatus ?? values.status,
-          imageUrl: values.imageUrl ?? (values.imageUrls.length > 0 ? values.imageUrls[0] : ""),
+          imageUrl:
+            values.imageUrl ??
+            (values.imageUrls.length > 0 ? values.imageUrls[0] : ""),
         };
-        
+
         // Validation check for published state
-        if (payload.status === "published" && (!payload.title || payload.imageUrls.length === 0)) {
+        if (
+          payload.status === "published" &&
+          (!payload.title || payload.imageUrls.length === 0)
+        ) {
           setError("A title and at least one image are required to publish.");
           return;
         }
 
         const response = await upsertSupplierPortfolioAction(payload);
-        
+
         if (response?.error) {
           setError(response.error.message);
           return;
@@ -99,7 +110,10 @@ export function SupplierPortfolioBuilder({
   };
 
   return (
-    <form onSubmit={handleSubmit((v) => onSubmit(v))} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] xl:grid-cols-[minmax(0,1fr)_440px] items-start">
+    <form
+      onSubmit={handleSubmit((v) => onSubmit(v))}
+      className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] xl:grid-cols-[minmax(0,1fr)_440px] items-start"
+    >
       <div className="grid gap-6">
         {error && (
           <div className="rounded-lg bg-red-50 p-4 text-sm text-red-600 border border-red-100">
@@ -109,12 +123,15 @@ export function SupplierPortfolioBuilder({
         {/* Editor columns */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="mb-4">
-            <h2 className="text-base font-bold text-slate-800">Project Photos</h2>
+            <h2 className="text-base font-bold text-slate-800">
+              Project Photos
+            </h2>
             <p className="text-sm text-slate-500">
-              Upload up to 12 photos. The first image will be used as the cover. Drag and drop to reorder.
+              Upload up to 12 photos. The first image will be used as the cover.
+              Drag and drop to reorder.
             </p>
           </div>
-          
+
           <Controller
             control={control}
             name="imageUrls"
@@ -123,21 +140,29 @@ export function SupplierPortfolioBuilder({
                 imageUrls={value}
                 coverImageUrl={watch("imageUrl") ?? null}
                 onChangeImageUrls={onChange}
-                onChangeCoverImageUrl={(url) => setValue("imageUrl", url ?? "", { shouldDirty: true })}
+                onChangeCoverImageUrl={(url) =>
+                  setValue("imageUrl", url ?? "", { shouldDirty: true })
+                }
                 maxImages={12}
               />
             )}
           />
         </div>
-        
+
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="mb-4">
-            <h2 className="text-base font-bold text-slate-800">Project Details</h2>
-            <p className="text-sm text-slate-500">Provide the story and context behind this project.</p>
+            <h2 className="text-base font-bold text-slate-800">
+              Project Details
+            </h2>
+            <p className="text-sm text-slate-500">
+              Provide the story and context behind this project.
+            </p>
           </div>
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Project Title</label>
+              <label className="mb-1 block text-sm font-semibold text-slate-700">
+                Project Title
+              </label>
               <input
                 {...register("title")}
                 type="text"
@@ -146,7 +171,9 @@ export function SupplierPortfolioBuilder({
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Project Story</label>
+              <label className="mb-1 block text-sm font-semibold text-slate-700">
+                Project Story
+              </label>
               <textarea
                 {...register("description")}
                 placeholder="Describe the project, your role, and what made it special..."
@@ -155,7 +182,9 @@ export function SupplierPortfolioBuilder({
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Related Service</label>
+              <label className="mb-1 block text-sm font-semibold text-slate-700">
+                Related Service
+              </label>
               <select
                 {...register("serviceId")}
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-[#2563EB] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
@@ -170,15 +199,21 @@ export function SupplierPortfolioBuilder({
             </div>
           </div>
         </div>
-        
+
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="mb-4">
-            <h2 className="text-base font-bold text-slate-800">Event Information</h2>
-            <p className="text-sm text-slate-500">Help customers find you based on location or event type.</p>
+            <h2 className="text-base font-bold text-slate-800">
+              Event Information
+            </h2>
+            <p className="text-sm text-slate-500">
+              Help customers find you based on location or event type.
+            </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Event Type</label>
+              <label className="mb-1 block text-sm font-semibold text-slate-700">
+                Event Type
+              </label>
               <input
                 {...register("eventType")}
                 type="text"
@@ -187,7 +222,9 @@ export function SupplierPortfolioBuilder({
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Event Date</label>
+              <label className="mb-1 block text-sm font-semibold text-slate-700">
+                Event Date
+              </label>
               <input
                 {...register("eventDate")}
                 type="date"
@@ -195,7 +232,9 @@ export function SupplierPortfolioBuilder({
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Venue Name</label>
+              <label className="mb-1 block text-sm font-semibold text-slate-700">
+                Venue Name
+              </label>
               <input
                 {...register("venueName")}
                 type="text"
@@ -204,7 +243,9 @@ export function SupplierPortfolioBuilder({
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">City</label>
+              <label className="mb-1 block text-sm font-semibold text-slate-700">
+                City
+              </label>
               <input
                 {...register("city")}
                 type="text"
@@ -213,7 +254,9 @@ export function SupplierPortfolioBuilder({
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-semibold text-slate-700">Province / Region</label>
+              <label className="mb-1 block text-sm font-semibold text-slate-700">
+                Province / Region
+              </label>
               <input
                 {...register("province")}
                 type="text"
@@ -223,14 +266,18 @@ export function SupplierPortfolioBuilder({
             </div>
           </div>
         </div>
-        
+
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="mb-4">
-            <h2 className="text-base font-bold text-slate-800">Display Settings</h2>
+            <h2 className="text-base font-bold text-slate-800">
+              Display Settings
+            </h2>
           </div>
           <div className="space-y-6">
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700">Project Visibility</label>
+              <label className="mb-2 block text-sm font-semibold text-slate-700">
+                Project Visibility
+              </label>
               <div className="space-y-2">
                 <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 p-3 hover:bg-slate-50">
                   <input
@@ -240,8 +287,12 @@ export function SupplierPortfolioBuilder({
                     className="mt-1 h-4 w-4 border-slate-300 text-[#2563EB] focus:ring-[#2563EB]"
                   />
                   <div>
-                    <div className="text-sm font-bold text-slate-800">Published</div>
-                    <div className="text-xs text-slate-500">Visible to all customers on your marketplace profile</div>
+                    <div className="text-sm font-bold text-slate-800">
+                      Published
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      Visible to all customers on your marketplace profile
+                    </div>
                   </div>
                 </label>
                 <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 p-3 hover:bg-slate-50">
@@ -252,8 +303,12 @@ export function SupplierPortfolioBuilder({
                     className="mt-1 h-4 w-4 border-slate-300 text-[#2563EB] focus:ring-[#2563EB]"
                   />
                   <div>
-                    <div className="text-sm font-bold text-slate-800">Draft</div>
-                    <div className="text-xs text-slate-500">Only visible to you while you work on it</div>
+                    <div className="text-sm font-bold text-slate-800">
+                      Draft
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      Only visible to you while you work on it
+                    </div>
                   </div>
                 </label>
                 <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 p-3 hover:bg-slate-50">
@@ -264,8 +319,12 @@ export function SupplierPortfolioBuilder({
                     className="mt-1 h-4 w-4 border-slate-300 text-[#2563EB] focus:ring-[#2563EB]"
                   />
                   <div>
-                    <div className="text-sm font-bold text-slate-800">Hidden</div>
-                    <div className="text-xs text-slate-500">Temporarily hidden from your profile</div>
+                    <div className="text-sm font-bold text-slate-800">
+                      Hidden
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      Temporarily hidden from your profile
+                    </div>
                   </div>
                 </label>
               </div>
@@ -278,13 +337,17 @@ export function SupplierPortfolioBuilder({
                 className="h-5 w-5 rounded border-slate-300 text-[#2563EB] focus:ring-[#2563EB]"
               />
               <div>
-                <div className="text-sm font-semibold text-slate-800">Feature this project</div>
-                <div className="text-xs text-slate-500">Featured projects appear at the top of your portfolio</div>
+                <div className="text-sm font-semibold text-slate-800">
+                  Feature this project
+                </div>
+                <div className="text-xs text-slate-500">
+                  Featured projects appear at the top of your portfolio
+                </div>
               </div>
             </label>
           </div>
         </div>
-        
+
         {/* Action Buttons */}
         <div className="flex items-center justify-end gap-3 pt-2">
           <button
@@ -312,14 +375,16 @@ export function SupplierPortfolioBuilder({
           </button>
         </div>
       </div>
-      
+
       <div className="sticky top-6">
         <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
           <div className="bg-slate-50 px-5 py-4 border-b border-slate-200">
             <h2 className="text-sm font-bold text-slate-800">Live Preview</h2>
-            <p className="text-xs text-slate-500 mt-1">This is how your project will appear on your public profile.</p>
+            <p className="text-xs text-slate-500 mt-1">
+              This is how your project will appear on your public profile.
+            </p>
           </div>
-          
+
           <div className="p-5">
             <div className="group overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 transition duration-300 hover:shadow-md">
               <div className="aspect-[4/3] overflow-hidden bg-slate-100 relative">
@@ -356,7 +421,9 @@ export function SupplierPortfolioBuilder({
                       )}
                       {(watch("city") || watch("province")) && (
                         <div>
-                          {[watch("city"), watch("province")].filter(Boolean).join(", ")}
+                          {[watch("city"), watch("province")]
+                            .filter(Boolean)
+                            .join(", ")}
                         </div>
                       )}
                     </div>

@@ -39,8 +39,8 @@ export default async function SettingsPage() {
               Notification settings
             </h1>
             <p className="mt-1 text-sm font-medium text-slate-500">
-              Control email, push, in-app, booking, payment, review, and
-              admin alert delivery.
+              Control email, push, in-app, booking, payment, review, and admin
+              alert delivery.
             </p>
           </div>
         </div>

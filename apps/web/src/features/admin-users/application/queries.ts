@@ -2,7 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { RoleName } from "@/lib/rbac/roles";
 
-export type AccountStatusFilter = "all" | "active" | "pending_verification" | "suspended" | "banned";
+export type AccountStatusFilter =
+  "all" | "active" | "pending_verification" | "suspended" | "banned";
 export type RoleFilter = "all" | RoleName;
 
 export type UserAccountRow = {
@@ -21,7 +22,11 @@ export async function getUsersForAdmin(filters: {
   status?: AccountStatusFilter | undefined;
   search?: string | undefined;
   page?: number | undefined;
-}): Promise<{ users: UserAccountRow[] | null; total: number; error: string | null }> {
+}): Promise<{
+  users: UserAccountRow[] | null;
+  total: number;
+  error: string | null;
+}> {
   const supabase = (await createClient()) as any;
   const page = Math.max(filters.page ?? 1, 1);
   const from = (page - 1) * PAGE_SIZE;
@@ -38,26 +43,36 @@ export async function getUsersForAdmin(filters: {
     // rows rather than just the embedded resource.
     let query = supabase
       .from("user_roles")
-      .select("user_id, profiles!inner(id, full_name, status, created_at)", { count: "exact" })
+      .select("user_id, profiles!inner(id, full_name, status, created_at)", {
+        count: "exact",
+      })
       .eq("role", filters.role)
       .order("granted_at", { ascending: false })
       .range(from, to);
 
-    if (filters.status && filters.status !== "all") query = query.eq("profiles.status", filters.status);
-    if (filters.search) query = query.ilike("profiles.full_name", `%${filters.search}%`);
+    if (filters.status && filters.status !== "all")
+      query = query.eq("profiles.status", filters.status);
+    if (filters.search)
+      query = query.ilike("profiles.full_name", `%${filters.search}%`);
 
     const { data, count: c, error: e } = await query;
     if (e) error = e;
     count = c ?? 0;
-    rawRows = ((data ?? []) as any[]).map((row) => ({ ...row.profiles, role: filters.role }));
+    rawRows = ((data ?? []) as any[]).map((row) => ({
+      ...row.profiles,
+      role: filters.role,
+    }));
   } else {
     let query = supabase
       .from("profiles")
-      .select("id, full_name, status, created_at, user_roles(role)", { count: "exact" })
+      .select("id, full_name, status, created_at, user_roles(role)", {
+        count: "exact",
+      })
       .order("created_at", { ascending: false })
       .range(from, to);
 
-    if (filters.status && filters.status !== "all") query = query.eq("status", filters.status);
+    if (filters.status && filters.status !== "all")
+      query = query.eq("status", filters.status);
     if (filters.search) query = query.ilike("full_name", `%${filters.search}%`);
 
     const { data, count: c, error: e } = await query;
@@ -65,7 +80,9 @@ export async function getUsersForAdmin(filters: {
     count = c ?? 0;
     rawRows = ((data ?? []) as any[]).map((row) => ({
       ...row,
-      role: Array.isArray(row.user_roles) ? (row.user_roles[0]?.role ?? null) : (row.user_roles?.role ?? null),
+      role: Array.isArray(row.user_roles)
+        ? (row.user_roles[0]?.role ?? null)
+        : (row.user_roles?.role ?? null),
     }));
   }
 
@@ -80,7 +97,10 @@ export async function getUsersForAdmin(filters: {
 
   const users: UserAccountRow[] = await Promise.all(
     rawRows.map(async (row) => {
-      const email = adminClient ? (await adminClient.auth.admin.getUserById(row.id)).data.user?.email ?? null : null;
+      const email = adminClient
+        ? ((await adminClient.auth.admin.getUserById(row.id)).data.user
+            ?.email ?? null)
+        : null;
       return {
         id: row.id,
         fullName: row.full_name ?? "Unnamed user",
@@ -131,7 +151,9 @@ export async function getUserDetailForAdmin(userId: string): Promise<{
       fullName: profile.full_name ?? "Unnamed user",
       email,
       emailConfirmed,
-      role: Array.isArray(profile.user_roles) ? (profile.user_roles[0]?.role ?? null) : (profile.user_roles?.role ?? null),
+      role: Array.isArray(profile.user_roles)
+        ? (profile.user_roles[0]?.role ?? null)
+        : (profile.user_roles?.role ?? null),
       status: profile.status,
       createdAt: profile.created_at,
     },
@@ -203,14 +225,16 @@ export async function getPartnerApplicationHistory(userId: string): Promise<{
 
   if (error) return { applications: null, error: error.message };
 
-  const applications: PartnerApplicationSummary[] = (data ?? []).map((row: any) => ({
-    id: row.id,
-    roleAppliedFor: row.role_applied_for,
-    status: row.status,
-    category: row.category,
-    denialReason: row.denial_reason,
-    createdAt: row.created_at,
-  }));
+  const applications: PartnerApplicationSummary[] = (data ?? []).map(
+    (row: any) => ({
+      id: row.id,
+      roleAppliedFor: row.role_applied_for,
+      status: row.status,
+      category: row.category,
+      denialReason: row.denial_reason,
+      createdAt: row.created_at,
+    }),
+  );
 
   return { applications, error: null };
 }

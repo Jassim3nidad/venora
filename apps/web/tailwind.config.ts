@@ -5,7 +5,7 @@ import preset from "@venora/config/tailwind-preset"; // Adjust this path if your
 const config: Config = {
   // 1. Inherit all your Venora brand colors and Stitch tokens
   presets: [preset],
-  
+
   // 2. Tell Tailwind exactly where to look for classes
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",

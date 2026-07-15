@@ -29,7 +29,9 @@ export function BookingStatusFilterBar({
     <CustomerCard className="p-4 sm:p-5">
       <div className="mb-4 flex items-center gap-2">
         <SlidersHorizontal className="h-4 w-4 text-[#2563EB]" />
-        <p className="text-sm font-extrabold text-slate-900">Filter by status</p>
+        <p className="text-sm font-extrabold text-slate-900">
+          Filter by status
+        </p>
       </div>
 
       <div className="flex flex-wrap gap-2">

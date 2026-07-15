@@ -17,17 +17,19 @@ export type UserPartnerApplication = {
   updated_at: string;
 };
 
-export const PARTNER_DASHBOARD_ROUTES: Record<PartnerApplicationRole, string> = {
-  venue_owner: "/dashboard/venue-owner",
-  event_coordinator: "/dashboard/coordinator",
-  supplier: "/dashboard/supplier",
-};
+export const PARTNER_DASHBOARD_ROUTES: Record<PartnerApplicationRole, string> =
+  {
+    venue_owner: "/dashboard/venue-owner",
+    event_coordinator: "/dashboard/coordinator",
+    supplier: "/dashboard/supplier",
+  };
 
 export function getPartnerRoleLabel(role: PartnerApplicationRole) {
   return ROLE_LABELS[role];
 }
 
-export type ProgressStepState = "complete" | "current" | "upcoming" | "declined" | "skipped";
+export type ProgressStepState =
+  "complete" | "current" | "upcoming" | "declined" | "skipped";
 
 export type PartnerApplicationProgressStep = {
   id: string;
@@ -52,13 +54,15 @@ export function getPartnerApplicationProgressSteps(
       {
         id: "review",
         label: "Under Review",
-        description: "Our team is reviewing your documents and business details.",
+        description:
+          "Our team is reviewing your documents and business details.",
         state: "current",
       },
       {
         id: "decision",
         label: "Decision",
-        description: "You'll be notified when your application is approved or declined.",
+        description:
+          "You'll be notified when your application is approved or declined.",
         state: "upcoming",
       },
       {

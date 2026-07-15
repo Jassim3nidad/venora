@@ -17,14 +17,19 @@ export const metadata: Metadata = { title: "Audit Logs - Admin" };
 export const dynamic = "force-dynamic";
 
 function formatDateTime(value: string) {
-  return new Date(value).toLocaleString("en-PH", { dateStyle: "medium", timeStyle: "short" });
+  return new Date(value).toLocaleString("en-PH", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 }
 
 function JsonDetails({ label, value }: { label: string; value: unknown }) {
   if (value === null || value === undefined) return null;
   return (
     <details className="text-xs">
-      <summary className="cursor-pointer font-semibold text-[#2563eb]">{label}</summary>
+      <summary className="cursor-pointer font-semibold text-[#2563eb]">
+        {label}
+      </summary>
       <pre className="mt-1 max-w-[320px] overflow-x-auto rounded-lg bg-[#f8fafc] p-2 text-[11px] text-[#475569]">
         {JSON.stringify(value, null, 2)}
       </pre>
@@ -48,7 +53,9 @@ export default async function AdminAuditLogsPage({ searchParams }: Props) {
 
   const { result, error } = await getAuditLogs(filters);
 
-  const totalPages = result ? Math.max(Math.ceil(result.total / result.pageSize), 1) : 1;
+  const totalPages = result
+    ? Math.max(Math.ceil(result.total / result.pageSize), 1)
+    : 1;
   const currentPage = result?.page ?? 1;
 
   function pageHref(page: number) {
@@ -67,15 +74,25 @@ export default async function AdminAuditLogsPage({ searchParams }: Props) {
     {
       key: "when",
       header: "When",
-      cell: (row) => <span className="whitespace-nowrap">{formatDateTime(row.createdAt)}</span>,
+      cell: (row) => (
+        <span className="whitespace-nowrap">
+          {formatDateTime(row.createdAt)}
+        </span>
+      ),
     },
     {
       key: "actor",
       header: "Actor",
       cell: (row) => (
         <div>
-          <p className="font-semibold text-[#111827]">{row.actorName ?? "System"}</p>
-          {row.actorRole ? <p className="text-xs text-[#6b7280]">{row.actorRole.replace(/_/g, " ")}</p> : null}
+          <p className="font-semibold text-[#111827]">
+            {row.actorName ?? "System"}
+          </p>
+          {row.actorRole ? (
+            <p className="text-xs text-[#6b7280]">
+              {row.actorRole.replace(/_/g, " ")}
+            </p>
+          ) : null}
         </div>
       ),
     },
@@ -90,7 +107,12 @@ export default async function AdminAuditLogsPage({ searchParams }: Props) {
       cell: (row) => (
         <span className="text-[#475569]">
           {row.resourceType}
-          {row.resourceId ? <span className="text-[#6b7280]"> · {row.resourceId.slice(0, 8)}</span> : null}
+          {row.resourceId ? (
+            <span className="text-[#6b7280]">
+              {" "}
+              · {row.resourceId.slice(0, 8)}
+            </span>
+          ) : null}
         </span>
       ),
     },
@@ -98,7 +120,9 @@ export default async function AdminAuditLogsPage({ searchParams }: Props) {
       key: "reason",
       header: "Reason",
       className: "max-w-[220px]",
-      cell: (row) => <span className="line-clamp-2 text-[#4b5563]">{row.reason ?? "—"}</span>,
+      cell: (row) => (
+        <span className="line-clamp-2 text-[#4b5563]">{row.reason ?? "—"}</span>
+      ),
     },
     {
       key: "details",
@@ -119,10 +143,16 @@ export default async function AdminAuditLogsPage({ searchParams }: Props) {
       description="Every significant administrator and system action, append-only."
     >
       <Panel>
-        <PanelHeader title="Filters" description="All filters are server-side and combine with AND." />
+        <PanelHeader
+          title="Filters"
+          description="All filters are server-side and combine with AND."
+        />
         <form method="GET" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <label htmlFor="action" className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-[#64748b]">
+            <label
+              htmlFor="action"
+              className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-[#64748b]"
+            >
               Action
             </label>
             <input
@@ -134,7 +164,10 @@ export default async function AdminAuditLogsPage({ searchParams }: Props) {
             />
           </div>
           <div>
-            <label htmlFor="resourceType" className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-[#64748b]">
+            <label
+              htmlFor="resourceType"
+              className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-[#64748b]"
+            >
               Resource type
             </label>
             <input
@@ -146,7 +179,10 @@ export default async function AdminAuditLogsPage({ searchParams }: Props) {
             />
           </div>
           <div>
-            <label htmlFor="dateFrom" className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-[#64748b]">
+            <label
+              htmlFor="dateFrom"
+              className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-[#64748b]"
+            >
               From
             </label>
             <input
@@ -158,7 +194,10 @@ export default async function AdminAuditLogsPage({ searchParams }: Props) {
             />
           </div>
           <div>
-            <label htmlFor="dateTo" className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-[#64748b]">
+            <label
+              htmlFor="dateTo"
+              className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-[#64748b]"
+            >
               To
             </label>
             <input
@@ -187,14 +226,22 @@ export default async function AdminAuditLogsPage({ searchParams }: Props) {
       </Panel>
 
       {error ? (
-        <EmptyState icon="error" title="Could not load audit logs" description={error} />
+        <EmptyState
+          icon="error"
+          title="Could not load audit logs"
+          description={error}
+        />
       ) : result && result.entries.length > 0 ? (
         <Panel>
           <PanelHeader
             title="Recent activity"
             description={`Showing ${result.entries.length} of ${result.total} matching events.`}
           />
-          <DataTable rows={result.entries} columns={columns} keyFn={(row) => row.id} />
+          <DataTable
+            rows={result.entries}
+            columns={columns}
+            keyFn={(row) => row.id}
+          />
 
           {totalPages > 1 ? (
             <div className="mt-5 flex items-center justify-between">
@@ -202,7 +249,9 @@ export default async function AdminAuditLogsPage({ searchParams }: Props) {
                 href={currentPage > 1 ? pageHref(currentPage - 1) : undefined}
                 aria-disabled={currentPage <= 1}
                 className={`inline-flex h-9 items-center rounded-lg border border-[#e5e7eb] bg-white px-3 text-sm font-bold ${
-                  currentPage <= 1 ? "pointer-events-none opacity-40" : "text-[#111827] hover:border-[#1d4ed8] hover:text-[#1d4ed8]"
+                  currentPage <= 1
+                    ? "pointer-events-none opacity-40"
+                    : "text-[#111827] hover:border-[#1d4ed8] hover:text-[#1d4ed8]"
                 }`}
               >
                 Previous
@@ -211,10 +260,16 @@ export default async function AdminAuditLogsPage({ searchParams }: Props) {
                 Page {currentPage} of {totalPages}
               </span>
               <a
-                href={currentPage < totalPages ? pageHref(currentPage + 1) : undefined}
+                href={
+                  currentPage < totalPages
+                    ? pageHref(currentPage + 1)
+                    : undefined
+                }
                 aria-disabled={currentPage >= totalPages}
                 className={`inline-flex h-9 items-center rounded-lg border border-[#e5e7eb] bg-white px-3 text-sm font-bold ${
-                  currentPage >= totalPages ? "pointer-events-none opacity-40" : "text-[#111827] hover:border-[#1d4ed8] hover:text-[#1d4ed8]"
+                  currentPage >= totalPages
+                    ? "pointer-events-none opacity-40"
+                    : "text-[#111827] hover:border-[#1d4ed8] hover:text-[#1d4ed8]"
                 }`}
               >
                 Next

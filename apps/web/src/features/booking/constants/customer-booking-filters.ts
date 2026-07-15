@@ -1,12 +1,7 @@
 import type { BookingStatusValue } from "../domain/value-objects/booking-status.vo";
 
 export type CustomerBookingStatusFilter =
-  | "all"
-  | "pending"
-  | "approved"
-  | "declined"
-  | "cancelled"
-  | "completed";
+  "all" | "pending" | "approved" | "declined" | "cancelled" | "completed";
 
 export const CUSTOMER_BOOKING_STATUS_FILTERS: Array<{
   value: CustomerBookingStatusFilter;

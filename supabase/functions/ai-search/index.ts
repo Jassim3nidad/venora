@@ -2,33 +2,27 @@
  * Supabase Edge Function: ai-search
  *
  * Parses natural-language venue searches via OpenRouter, then maps the
- * parsed parameters into the existing public.search_venues RPC. Semantic
- * embeddings (optional) still go directly to OpenAI — see embeddings.ts.
+ * parsed parameters into the existing public.search_venues RPC. Venue facts
+ * and ranking results always come from the database.
  */
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { embedQuery, warmVenueEmbeddings, toVectorLiteral } from "../_shared/embeddings.ts";
 import { toVenuePayload } from "../_shared/venues.ts";
 import { cleanString, normalizeText } from "../_shared/text.ts";
 import {
-  loadAiConfig,
-  validateProviderModel,
+  type AiConfiguration,
   checkAiUsageLimits,
-  logAiUsage,
-  postChatCompletion,
   estimateCostCents,
   extractTokenUsage,
+  loadAiConfig,
+  logAiUsage,
   moderateInputText,
-  type AiConfiguration,
+  postChatCompletion,
+  validateProviderModel,
 } from "../_shared/ai-config.ts";
 
 type VenueType =
-  | "garden"
-  | "beach"
-  | "resort"
-  | "hotel"
-  | "restaurant"
-  | "church";
+  "garden" | "beach" | "resort" | "hotel" | "restaurant" | "church";
 
 type IndoorOutdoor = "indoor" | "outdoor" | "both";
 
@@ -56,6 +50,13 @@ type RawSearchFilters = {
 type SearchRequest = {
   query?: string;
   filters?: RawSearchFilters;
+};
+
+type ServiceClient = ReturnType<typeof createClient<any>>;
+type LocationRow = {
+  province: string | null;
+  city: string | null;
+  municipality: string | null;
 };
 
 type ExtractedSearchParameters = {
@@ -99,10 +100,10 @@ const venueTypes: VenueType[] = [
   "church",
 ];
 const indoorOutdoorValues: IndoorOutdoor[] = ["indoor", "outdoor", "both"];
-const featureKeywords = new Map<string, keyof Pick<
-  SearchIntent,
-  "parking" | "petFriendly" | "wheelchairAccessible"
->>([
+const featureKeywords = new Map<
+  string,
+  keyof Pick<SearchIntent, "parking" | "petFriendly" | "wheelchairAccessible">
+>([
   ["parking", "parking"],
   ["car park", "parking"],
   ["pet friendly", "petFriendly"],
@@ -147,11 +148,14 @@ function parseCurrencyToken(rawValue: string, suffix = "") {
 }
 
 function uniqueStrings(values: Array<string | null | undefined>) {
-  return [...new Set(values.map((value) => cleanString(value)).filter(Boolean))]
-    .map((value) => value as string);
+  return [
+    ...new Set(values.map((value) => cleanString(value)).filter(Boolean)),
+  ].map((value) => value as string);
 }
 
-function deterministicExtraction(query: string): Partial<ExtractedSearchParameters> {
+function deterministicExtraction(
+  query: string,
+): Partial<ExtractedSearchParameters> {
   const text = normalizeText(query);
   const budgetMatch = text.match(
     /(?:budget|under|below|less than|up to|max(?:imum)?|not more than|only)\D*([0-9][0-9,.]*)(k|m|thousand|million)?/,
@@ -179,7 +183,8 @@ function normalizeExtractedParameters(
   deterministic: Partial<ExtractedSearchParameters>,
 ): ExtractedSearchParameters {
   const maxPrice =
-    toPositiveNumber(parsed.max_price) ?? toPositiveNumber(deterministic.max_price);
+    toPositiveNumber(parsed.max_price) ??
+    toPositiveNumber(deterministic.max_price);
   const location = cleanString(parsed.location)?.toLowerCase() ?? null;
   const venueType = cleanString(parsed.venue_type)?.toLowerCase() ?? null;
   const keywords = uniqueStrings([
@@ -216,16 +221,22 @@ function extractChatContent(payload: any) {
   return null;
 }
 
-async function parseQueryWithOpenAI(
+async function parseQueryWithOpenRouter(
   query: string,
   openRouterApiKey: string,
-  openAiApiKey: string | null,
   config: AiConfiguration,
-): Promise<ExtractedSearchParameters & { inputTokens: number | null; outputTokens: number | null; providerUsed: string; modelUsed: string }> {
+): Promise<
+  ExtractedSearchParameters & {
+    inputTokens: number | null;
+    outputTokens: number | null;
+    providerUsed: string;
+    modelUsed: string;
+  }
+> {
   const deterministic = deterministicExtraction(query);
   const { response, providerUsed, modelUsed } = await postChatCompletion(
     config,
-    { openrouter: openRouterApiKey, openai: openAiApiKey },
+    openRouterApiKey,
     {
       temperature: config.temperature ?? 0,
       // Generous budget: the default free model is a reasoning model that
@@ -274,7 +285,9 @@ async function parseQueryWithOpenAI(
 
   const payload = await response.json();
   const content = extractChatContent(payload);
-  if (!content) throw new Error("AI provider returned no JSON content for query parsing.");
+  if (!content) {
+    throw new Error("AI provider returned no JSON content for query parsing.");
+  }
 
   return {
     ...normalizeExtractedParameters(JSON.parse(content), deterministic),
@@ -317,7 +330,7 @@ function explicitVenueTypes(filters?: RawSearchFilters): VenueType[] {
 }
 
 async function resolveLocation(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ServiceClient,
   location: string | null,
 ): Promise<LocationMatch> {
   if (!location) return { province: null, city: null, municipality: null };
@@ -333,19 +346,20 @@ async function resolveLocation(
     return { province: location, city: null, municipality: null };
   }
 
-  for (const row of data) {
+  const rows = data as LocationRow[];
+  for (const row of rows) {
     if (normalizeText(row.province) === normalizedLocation) {
       return { province: row.province, city: null, municipality: null };
     }
   }
 
-  for (const row of data) {
+  for (const row of rows) {
     if (normalizeText(row.city) === normalizedLocation) {
       return { province: null, city: row.city, municipality: null };
     }
   }
 
-  for (const row of data) {
+  for (const row of rows) {
     if (normalizeText(row.municipality) === normalizedLocation) {
       return { province: null, city: null, municipality: row.municipality };
     }
@@ -384,7 +398,7 @@ function buildKeyword(parameters: ExtractedSearchParameters) {
 }
 
 async function buildIntent(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ServiceClient,
   parameters: ExtractedSearchParameters,
   filters?: RawSearchFilters,
 ): Promise<SearchIntent> {
@@ -456,9 +470,6 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const openRouterApiKey = Deno.env.get("OPENROUTER_API_KEY");
-    // Optional — only used for semantic embeddings, which degrade
-    // gracefully to keyword/rating ranking when unset or unfunded.
-    const openAiApiKey = Deno.env.get("OPENAI_API_KEY");
 
     if (!supabaseUrl || !serviceRoleKey) {
       return errorResponse(
@@ -484,12 +495,23 @@ serve(async (req) => {
     // *some* interpretation via the existing deterministic (regex-based)
     // extraction rather than failing the whole search.
     const searchAiConfig = await loadAiConfig(supabase, "search");
-    const searchProviderCheck = searchAiConfig ? validateProviderModel(searchAiConfig) : { ok: false as const };
-    let searchLimitCheck: { allowed: boolean; reason?: string } = { allowed: true };
+    const searchProviderCheck = searchAiConfig
+      ? validateProviderModel(searchAiConfig)
+      : { ok: false as const };
+    let searchLimitCheck: { allowed: boolean; reason?: string } = {
+      allowed: true,
+    };
     if (searchAiConfig?.enabled && searchProviderCheck.ok) {
-      searchLimitCheck = await checkAiUsageLimits(supabase, "search", searchAiConfig);
+      searchLimitCheck = await checkAiUsageLimits(
+        supabase,
+        "search",
+        searchAiConfig,
+      );
     }
-    const aiParsingAllowed = !!searchAiConfig?.enabled && searchProviderCheck.ok && searchLimitCheck.allowed;
+    const aiParsingAllowed =
+      !!searchAiConfig?.enabled &&
+      searchProviderCheck.ok &&
+      searchLimitCheck.allowed;
 
     const body = (await req.json().catch(() => null)) as SearchRequest | null;
     const filters = body?.filters ?? {};
@@ -517,7 +539,11 @@ serve(async (req) => {
     if (query && aiParsingAllowed) {
       const requestStartedAt = Date.now();
       try {
-        const result = await parseQueryWithOpenAI(query, openRouterApiKey, openAiApiKey ?? null, searchAiConfig!);
+        const result = await parseQueryWithOpenRouter(
+          query,
+          openRouterApiKey,
+          searchAiConfig!,
+        );
         parameters = result;
         await logAiUsage(supabase, {
           feature: "search",
@@ -525,7 +551,10 @@ serve(async (req) => {
           model: result.modelUsed,
           inputTokens: result.inputTokens,
           outputTokens: result.outputTokens,
-          estimatedCostCents: estimateCostCents(result.modelUsed, (result.inputTokens ?? 0) + (result.outputTokens ?? 0)),
+          estimatedCostCents: estimateCostCents(
+            result.modelUsed,
+            (result.inputTokens ?? 0) + (result.outputTokens ?? 0),
+          ),
           durationMs: Date.now() - requestStartedAt,
           success: true,
         });
@@ -541,7 +570,10 @@ serve(async (req) => {
         throw error;
       }
     } else if (query) {
-      parameters = normalizeExtractedParameters({}, deterministicExtraction(query));
+      parameters = normalizeExtractedParameters(
+        {},
+        deterministicExtraction(query),
+      );
     } else {
       parameters = normalizeExtractedParameters({}, {});
     }
@@ -551,26 +583,10 @@ serve(async (req) => {
       Math.max(1, Number(filters.per_page ?? 24)),
     );
 
-    const semanticText = cleanString(query, 500) ?? intent.keyword;
-    let embeddedVenueCount = 0;
-    let queryVector: number[] | null = null;
-
-    const embeddingsConfig = await loadAiConfig(supabase, "embeddings");
-    const embeddingsEnabled = embeddingsConfig?.enabled ?? true; // fail open only if the row is somehow missing — embeddings already degrade gracefully everywhere else
-
-    if (semanticText && openAiApiKey && embeddingsEnabled) {
-      embeddedVenueCount = await warmVenueEmbeddings(
-        supabase,
-        openAiApiKey,
-        Number(Deno.env.get("AI_SEARCH_EMBED_REFRESH_LIMIT") ?? 8),
-      );
-      queryVector = await embedQuery(openAiApiKey, semanticText);
-    }
-
     const { data: venueRows, error: searchError } = await supabase.rpc(
       "search_venues",
       {
-        query_embedding: queryVector ? toVectorLiteral(queryVector) : null,
+        query_embedding: null,
         keyword: intent.keyword,
         filter_province: intent.province,
         filter_city: intent.city,
@@ -616,7 +632,7 @@ serve(async (req) => {
         parsedFilters: intent,
         searchParameters: parameters,
         fallbackReason: null,
-        embeddedVenueCount,
+        embeddedVenueCount: 0,
       },
       error: null,
     });

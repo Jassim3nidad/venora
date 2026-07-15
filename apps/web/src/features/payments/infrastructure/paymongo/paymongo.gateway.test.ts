@@ -4,12 +4,22 @@ import { PayMongoGateway } from "./paymongo.gateway";
 
 const WEBHOOK_SECRET = "whsk_test_secret_for_unit_tests_only";
 
-function sign(rawBody: string, timestamp: number, secret: string, mode: "te" | "li" = "te") {
-  const hmac = crypto.createHmac("sha256", secret).update(`${timestamp}.${rawBody}`).digest("hex");
+function sign(
+  rawBody: string,
+  timestamp: number,
+  secret: string,
+  mode: "te" | "li" = "te",
+) {
+  const hmac = crypto
+    .createHmac("sha256", secret)
+    .update(`${timestamp}.${rawBody}`)
+    .digest("hex");
   return `t=${timestamp},${mode}=${hmac}`;
 }
 
-function makeGateway(overrides: Partial<{ secretKey: string; webhookSecret: string }> = {}) {
+function makeGateway(
+  overrides: Partial<{ secretKey: string; webhookSecret: string }> = {},
+) {
   return new PayMongoGateway({
     secretKey: overrides.secretKey ?? "sk_test_dummy",
     webhookSecret: overrides.webhookSecret ?? WEBHOOK_SECRET,
@@ -20,21 +30,36 @@ describe("PayMongoGateway.verifyWebhookSignature", () => {
   it("accepts a valid test-mode (te=) signature", () => {
     const gateway = makeGateway();
     const body = JSON.stringify({ hello: "world" });
-    const header = sign(body, Math.floor(Date.now() / 1000), WEBHOOK_SECRET, "te");
+    const header = sign(
+      body,
+      Math.floor(Date.now() / 1000),
+      WEBHOOK_SECRET,
+      "te",
+    );
     expect(gateway.verifyWebhookSignature(body, header)).toBe(true);
   });
 
   it("accepts a valid live-mode (li=) signature", () => {
     const gateway = makeGateway();
     const body = JSON.stringify({ hello: "world" });
-    const header = sign(body, Math.floor(Date.now() / 1000), WEBHOOK_SECRET, "li");
+    const header = sign(
+      body,
+      Math.floor(Date.now() / 1000),
+      WEBHOOK_SECRET,
+      "li",
+    );
     expect(gateway.verifyWebhookSignature(body, header)).toBe(true);
   });
 
   it("rejects a signature computed with the wrong secret", () => {
     const gateway = makeGateway();
     const body = JSON.stringify({ hello: "world" });
-    const header = sign(body, Math.floor(Date.now() / 1000), "wrong_secret", "te");
+    const header = sign(
+      body,
+      Math.floor(Date.now() / 1000),
+      "wrong_secret",
+      "te",
+    );
     expect(gateway.verifyWebhookSignature(body, header)).toBe(false);
   });
 
@@ -42,7 +67,12 @@ describe("PayMongoGateway.verifyWebhookSignature", () => {
     const gateway = makeGateway();
     const originalBody = JSON.stringify({ amount: 100 });
     const tamperedBody = JSON.stringify({ amount: 999999 });
-    const header = sign(originalBody, Math.floor(Date.now() / 1000), WEBHOOK_SECRET, "te");
+    const header = sign(
+      originalBody,
+      Math.floor(Date.now() / 1000),
+      WEBHOOK_SECRET,
+      "te",
+    );
     expect(gateway.verifyWebhookSignature(tamperedBody, header)).toBe(false);
   });
 
@@ -53,13 +83,20 @@ describe("PayMongoGateway.verifyWebhookSignature", () => {
 
   it("rejects a malformed signature header", () => {
     const gateway = makeGateway();
-    expect(gateway.verifyWebhookSignature("{}", "not-a-valid-header")).toBe(false);
+    expect(gateway.verifyWebhookSignature("{}", "not-a-valid-header")).toBe(
+      false,
+    );
   });
 
   it("rejects when no webhook secret is configured", () => {
     const gateway = makeGateway({ webhookSecret: "" });
     const body = JSON.stringify({ hello: "world" });
-    const header = sign(body, Math.floor(Date.now() / 1000), WEBHOOK_SECRET, "te");
+    const header = sign(
+      body,
+      Math.floor(Date.now() / 1000),
+      WEBHOOK_SECRET,
+      "te",
+    );
     expect(gateway.verifyWebhookSignature(body, header)).toBe(false);
   });
 
@@ -74,7 +111,11 @@ describe("PayMongoGateway.verifyWebhookSignature", () => {
 describe("PayMongoGateway.parseWebhookEvent", () => {
   const gateway = makeGateway();
 
-  function event(type: string, dataId: string, attributes: Record<string, unknown>) {
+  function event(
+    type: string,
+    dataId: string,
+    attributes: Record<string, unknown>,
+  ) {
     return JSON.stringify({
       data: {
         id: `evt_${type}_1`,
@@ -89,7 +130,9 @@ describe("PayMongoGateway.parseWebhookEvent", () => {
   it("normalizes checkout_session.payment.paid using the session id as the checkout reference", () => {
     const raw = event("checkout_session.payment.paid", "cs_abc123", {
       metadata: { booking_id: "booking-1", transaction_id: "transaction-1" },
-      payments: [{ id: "pay_xyz789", attributes: { amount: 150000, currency: "PHP" } }],
+      payments: [
+        { id: "pay_xyz789", attributes: { amount: 150000, currency: "PHP" } },
+      ],
     });
 
     const result = gateway.parseWebhookEvent(raw);
@@ -194,13 +237,19 @@ describe("PayMongoGateway.parseWebhookEvent", () => {
   });
 
   it("normalizes payment.refund.updated (succeeded) as refund.succeeded", () => {
-    const raw = event("payment.refund.updated", "ref_456", { status: "succeeded", amount: 10000 });
+    const raw = event("payment.refund.updated", "ref_456", {
+      status: "succeeded",
+      amount: 10000,
+    });
     const result = gateway.parseWebhookEvent(raw);
     expect(result.kind).toBe("refund.succeeded");
   });
 
   it("normalizes payment.refund.updated (failed) as refund.failed", () => {
-    const raw = event("payment.refund.updated", "ref_789", { status: "failed", failed_reason: "insufficient" });
+    const raw = event("payment.refund.updated", "ref_789", {
+      status: "failed",
+      failed_reason: "insufficient",
+    });
     const result = gateway.parseWebhookEvent(raw);
     expect(result.kind).toBe("refund.failed");
     if (result.kind === "refund.failed") {
@@ -209,7 +258,9 @@ describe("PayMongoGateway.parseWebhookEvent", () => {
   });
 
   it("normalizes payment.refund.updated (pending) as ignored", () => {
-    const raw = event("payment.refund.updated", "ref_999", { status: "pending" });
+    const raw = event("payment.refund.updated", "ref_999", {
+      status: "pending",
+    });
     const result = gateway.parseWebhookEvent(raw);
     expect(result.kind).toBe("ignored");
   });
@@ -299,7 +350,12 @@ describe("PayMongoGateway.createCheckoutSession", () => {
     const fetchSpy = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
-        data: { id: "cs_valid", attributes: { checkout_url: "https://checkout.paymongo.com/cs_valid" } },
+        data: {
+          id: "cs_valid",
+          attributes: {
+            checkout_url: "https://checkout.paymongo.com/cs_valid",
+          },
+        },
       }),
     });
     global.fetch = fetchSpy as unknown as typeof fetch;
@@ -311,7 +367,8 @@ describe("PayMongoGateway.createCheckoutSession", () => {
       currency: "PHP",
       description: "Reservation deposit - Test Venue",
       customerEmail: "customer@example.test",
-      successUrl: "https://venora-web.vercel.app/bookings/booking-1/confirmation",
+      successUrl:
+        "https://venora-web.vercel.app/bookings/booking-1/confirmation",
       cancelUrl: "https://venora-web.vercel.app/bookings/booking-1/payment",
       metadata: {
         booking_id: "booking-1",
@@ -327,7 +384,9 @@ describe("PayMongoGateway.createCheckoutSession", () => {
       Authorization: `Basic ${Buffer.from(`${secretKey}:`).toString("base64")}`,
       "Content-Type": "application/json",
     });
-    expect(String((init.headers as Record<string, string>).Authorization)).not.toContain(secretKey);
+    expect(
+      String((init.headers as Record<string, string>).Authorization),
+    ).not.toContain(secretKey);
 
     const body = JSON.parse(String(init.body));
     expect(body.data.attributes).toMatchObject({
@@ -341,7 +400,8 @@ describe("PayMongoGateway.createCheckoutSession", () => {
       ],
       payment_method_types: ["card", "gcash", "paymaya", "grab_pay"],
       reference_number: "transaction-1",
-      success_url: "https://venora-web.vercel.app/bookings/booking-1/confirmation",
+      success_url:
+        "https://venora-web.vercel.app/bookings/booking-1/confirmation",
       cancel_url: "https://venora-web.vercel.app/bookings/booking-1/payment",
       billing: { email: "customer@example.test" },
       metadata: {
@@ -356,7 +416,9 @@ describe("PayMongoGateway.createCheckoutSession", () => {
     global.fetch = vi.fn().mockResolvedValue({
       ok: false,
       status: 404,
-      json: async () => ({ errors: [{ code: "resource_not_found", detail: "Not Found" }] }),
+      json: async () => ({
+        errors: [{ code: "resource_not_found", detail: "Not Found" }],
+      }),
     }) as unknown as typeof fetch;
 
     await expect(
@@ -378,7 +440,12 @@ describe("PayMongoGateway.createCheckoutSession", () => {
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
-        data: { id: "cs_valid", attributes: { checkout_url: "https://checkout.paymongo.com/cs_valid" } },
+        data: {
+          id: "cs_valid",
+          attributes: {
+            checkout_url: "https://checkout.paymongo.com/cs_valid",
+          },
+        },
       }),
     }) as unknown as typeof fetch;
 

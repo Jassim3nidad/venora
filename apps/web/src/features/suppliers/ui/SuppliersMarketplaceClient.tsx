@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ChangeEventHandler, type ReactNode } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type ChangeEventHandler,
+  type ReactNode,
+} from "react";
 import Link from "next/link";
 import {
   ArrowUpDown,
@@ -137,10 +143,13 @@ function SupplierCard({ supplier }: { supplier: SupplierMarketplaceProfile }) {
             <div className="flex min-w-0 items-start gap-2">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB]" />
               <span className="min-w-0 truncate font-semibold">
-                {supplier.publicLocationLabel 
+                {supplier.publicLocationLabel
                   ? supplier.publicLocationLabel
-                  : [supplier.city, supplier.province].filter(Boolean).length > 0
-                    ? [supplier.city, supplier.province].filter(Boolean).join(", ")
+                  : [supplier.city, supplier.province].filter(Boolean).length >
+                      0
+                    ? [supplier.city, supplier.province]
+                        .filter(Boolean)
+                        .join(", ")
                     : topAreas.length > 0
                       ? topAreas.join(", ")
                       : "Service area on request"}

@@ -7,12 +7,18 @@
  */
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import webpush from "https://esm.sh/web-push@3.6.7";
+import {
+  sendNotification,
+  setVapidDetails,
+} from "https://esm.sh/web-push@3.6.7";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
+
+type ServiceClient = ReturnType<typeof createClient<any>>;
 
 type NotificationChannel = "email" | "sms" | "push" | "in_app";
 type DeliveryStatus = "sent" | "failed" | "skipped";
@@ -53,9 +59,42 @@ function appUrl() {
 }
 
 function absoluteUrl(link: string | null) {
-  if (!link) return `${appUrl()}/notifications`;
-  if (link.startsWith("http")) return link;
-  return `${appUrl()}${link.startsWith("/") ? link : `/${link}`}`;
+  const base = new URL(appUrl());
+  const fallback = new URL("/notifications", base).toString();
+  if (!link) return fallback;
+
+  try {
+    const target = new URL(link, base);
+    return target.origin === base.origin ? target.toString() : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function escapeHtml(value: string) {
+  return value.replace(
+    /[&<>"']/g,
+    (character) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      })[character]!,
+  );
+}
+
+function constantTimeEqual(left: string, right: string) {
+  const encoder = new TextEncoder();
+  const leftBytes = encoder.encode(left);
+  const rightBytes = encoder.encode(right);
+  const length = Math.max(leftBytes.length, rightBytes.length);
+  let difference = leftBytes.length ^ rightBytes.length;
+  for (let index = 0; index < length; index += 1) {
+    difference |= (leftBytes[index] ?? 0) ^ (rightBytes[index] ?? 0);
+  }
+  return difference === 0;
 }
 
 function errorMessage(error: unknown) {
@@ -66,7 +105,10 @@ function resendErrorMessage(payload: { message?: string; error?: string }) {
   const message = payload?.message ?? payload?.error ?? "Resend request failed";
   const normalized = message.toLowerCase();
 
-  if (normalized.includes("domain is not verified") || normalized.includes("sender")) {
+  if (
+    normalized.includes("domain is not verified") ||
+    normalized.includes("sender")
+  ) {
     return `Resend sender is not verified: ${message}`;
   }
 
@@ -115,9 +157,11 @@ async function sendEmail(
       subject: notification.title,
       html: `
         <div style="font-family:Inter,Arial,sans-serif;color:#111827;line-height:1.6">
-          <h2>${notification.title}</h2>
-          ${notification.body ? `<p>${notification.body}</p>` : ""}
-          <p><a href="${absoluteUrl(notification.link)}" style="color:#2563eb;font-weight:700">Open in Venora</a></p>
+          <h2>${escapeHtml(notification.title)}</h2>
+          ${notification.body ? `<p>${escapeHtml(notification.body)}</p>` : ""}
+          <p><a href="${escapeHtml(
+            absoluteUrl(notification.link),
+          )}" style="color:#2563eb;font-weight:700">Open in Venora</a></p>
         </div>
       `,
     }),
@@ -141,7 +185,7 @@ async function sendEmail(
 }
 
 async function sendPush(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ServiceClient,
   userId: string,
   notification: NotificationPayload,
 ): Promise<DispatchResult> {
@@ -173,7 +217,7 @@ async function sendPush(
     };
   }
 
-  webpush.setVapidDetails(subject, publicKey, privateKey);
+  setVapidDetails(subject, publicKey, privateKey);
 
   const payload = JSON.stringify({
     title: notification.title,
@@ -183,30 +227,38 @@ async function sendPush(
   });
 
   const results = await Promise.allSettled(
-    subscriptions.map((subscription: { id: string; endpoint: string; p256dh: string; auth: string }) =>
-      webpush.sendNotification(
-        {
-          endpoint: subscription.endpoint,
-          keys: {
-            p256dh: subscription.p256dh,
-            auth: subscription.auth,
+    subscriptions.map(
+      (subscription: {
+        id: string;
+        endpoint: string;
+        p256dh: string;
+        auth: string;
+      }) =>
+        sendNotification(
+          {
+            endpoint: subscription.endpoint,
+            keys: {
+              p256dh: subscription.p256dh,
+              auth: subscription.auth,
+            },
           },
-        },
-        payload,
-      ).catch(async (error: { statusCode?: number; message?: string }) => {
-        if (error.statusCode === 404 || error.statusCode === 410) {
-          await supabase
-            .from("push_subscriptions")
-            .update({ disabled_at: new Date().toISOString() })
-            .eq("id", subscription.id);
-        }
+          payload,
+        ).catch(async (error: { statusCode?: number; message?: string }) => {
+          if (error.statusCode === 404 || error.statusCode === 410) {
+            await supabase
+              .from("push_subscriptions")
+              .update({ disabled_at: new Date().toISOString() })
+              .eq("id", subscription.id);
+          }
 
-        throw error;
-      }),
+          throw error;
+        }),
     ),
   );
 
-  const sentCount = results.filter((result) => result.status === "fulfilled").length;
+  const sentCount = results.filter(
+    (result) => result.status === "fulfilled",
+  ).length;
   if (sentCount === 0) {
     const firstError = results.find(
       (result): result is PromiseRejectedResult => result.status === "rejected",
@@ -226,7 +278,7 @@ async function sendPush(
 }
 
 async function updateDelivery(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ServiceClient,
   deliveryId: string,
   result: DispatchResult,
   attemptCount: number,
@@ -234,7 +286,9 @@ async function updateDelivery(
   const now = new Date().toISOString();
   const nextAttemptAt =
     result.status === "failed" && attemptCount + 1 < 3
-      ? new Date(Date.now() + Math.min(60, 5 * 2 ** attemptCount) * 60_000).toISOString()
+      ? new Date(
+          Date.now() + Math.min(60, 5 * 2 ** attemptCount) * 60_000,
+        ).toISOString()
       : null;
 
   await supabase
@@ -294,10 +348,15 @@ async function processDelivery(record: DeliveryRecord) {
     : delivery.notifications;
 
   if (!notification) {
-    await updateDelivery(supabase, record.id, {
-      status: "failed",
-      errorMessage: "Notification row not found",
-    }, delivery.attempt_count ?? 0);
+    await updateDelivery(
+      supabase,
+      record.id,
+      {
+        status: "failed",
+        errorMessage: "Notification row not found",
+      },
+      delivery.attempt_count ?? 0,
+    );
     return;
   }
 
@@ -307,7 +366,9 @@ async function processDelivery(record: DeliveryRecord) {
     if (delivery.channel === "in_app") {
       result = { status: "sent", provider: "supabase-realtime" };
     } else if (delivery.channel === "email") {
-      const userResponse = await supabase.auth.admin.getUserById(delivery.user_id);
+      const userResponse = await supabase.auth.admin.getUserById(
+        delivery.user_id,
+      );
       result = await sendEmail(userResponse.data.user?.email, notification);
     } else if (delivery.channel === "sms") {
       result = {
@@ -326,7 +387,12 @@ async function processDelivery(record: DeliveryRecord) {
     };
   }
 
-  await updateDelivery(supabase, record.id, result, delivery.attempt_count ?? 0);
+  await updateDelivery(
+    supabase,
+    record.id,
+    result,
+    delivery.attempt_count ?? 0,
+  );
 }
 
 async function processQueuedDeliveries(limit = 25) {
@@ -335,14 +401,18 @@ async function processQueuedDeliveries(limit = 25) {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
-  await supabase.rpc("retry_failed_notification_deliveries", { p_limit: limit });
+  await supabase.rpc("retry_failed_notification_deliveries", {
+    p_limit: limit,
+  });
 
   const { data, error } = await supabase
     .from("notification_deliveries")
     .select("id, notification_id, user_id, channel")
     .eq("status", "queued")
     .neq("channel", "sms")
-    .or(`next_attempt_at.is.null,next_attempt_at.lte.${new Date().toISOString()}`)
+    .or(
+      `next_attempt_at.is.null,next_attempt_at.lte.${new Date().toISOString()}`,
+    )
     .order("created_at", { ascending: true })
     .limit(limit);
 
@@ -351,7 +421,9 @@ async function processQueuedDeliveries(limit = 25) {
   const results = await Promise.allSettled(
     (data ?? []).map((record) => processDelivery(record as DeliveryRecord)),
   );
-  const failedCount = results.filter((result) => result.status === "rejected").length;
+  const failedCount = results.filter(
+    (result) => result.status === "rejected",
+  ).length;
 
   const { data: smsRows } = await supabase
     .from("notification_deliveries")
@@ -387,9 +459,9 @@ function isDeliveryRecord(record: unknown): record is DeliveryRecord {
   const value = record as Partial<DeliveryRecord>;
   return Boolean(
     value.id &&
-      value.notification_id &&
-      value.user_id &&
-      ["email", "sms", "push", "in_app"].includes(String(value.channel)),
+    value.notification_id &&
+    value.user_id &&
+    ["email", "sms", "push", "in_app"].includes(String(value.channel)),
   );
 }
 
@@ -399,11 +471,33 @@ serve(async (req) => {
   }
 
   try {
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!serviceRoleKey) {
+      return new Response(
+        JSON.stringify({ error: "Notification dispatcher is not configured" }),
+        {
+          status: 503,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+    const suppliedAuthorization = req.headers.get("Authorization") ?? "";
+    if (!constantTimeEqual(suppliedAuthorization, `Bearer ${serviceRoleKey}`)) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const payload = await req.json().catch(() => ({}));
     const record = payload.record ?? payload;
 
     if (!isDeliveryRecord(record)) {
-      const result = await processQueuedDeliveries(Number(payload.limit ?? 25));
+      const requestedLimit = Number(payload.limit ?? 25);
+      const limit = Number.isFinite(requestedLimit)
+        ? Math.min(100, Math.max(1, Math.trunc(requestedLimit)))
+        : 25;
+      const result = await processQueuedDeliveries(limit);
       return new Response(
         JSON.stringify({
           success: true,

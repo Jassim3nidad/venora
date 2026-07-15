@@ -1,15 +1,8 @@
 export type SupplierQuoteStatus =
-  | "draft"
-  | "sent"
-  | "accepted"
-  | "declined"
-  | "expired"
-  | "withdrawn";
+  "draft" | "sent" | "accepted" | "declined" | "expired" | "withdrawn";
 
 export type SupplierAvailabilityStatus =
-  | "available"
-  | "unavailable"
-  | "blocked";
+  "available" | "unavailable" | "blocked";
 
 export type SupplierQuoteItem = {
   id: string;
@@ -57,4 +50,3 @@ export type SupplierAvailabilityEntry = {
   createdAt: string;
   updatedAt: string;
 };
-

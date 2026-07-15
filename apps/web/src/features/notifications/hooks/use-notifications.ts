@@ -163,10 +163,9 @@ export function useNotificationActions() {
 
   const markRead = useMutation({
     mutationFn: (notificationId: string) =>
-      requestJson<{ id: string }>(
-        `/api/notifications/${notificationId}/read`,
-        { method: "POST" },
-      ),
+      requestJson<{ id: string }>(`/api/notifications/${notificationId}/read`, {
+        method: "POST",
+      }),
     onSuccess: invalidate,
   });
 
@@ -217,7 +216,9 @@ export function useRegisterPushSubscription() {
             endpoint: subscription.endpoint,
             keys: subscription.toJSON().keys,
             userAgent:
-              typeof navigator === "undefined" ? undefined : navigator.userAgent,
+              typeof navigator === "undefined"
+                ? undefined
+                : navigator.userAgent,
           }),
         },
       ),

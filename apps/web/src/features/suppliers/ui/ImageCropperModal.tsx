@@ -57,7 +57,10 @@ export function ImageCropperModal({
     containerW = containerRef.current.clientWidth;
     containerH = containerRef.current.clientHeight;
 
-    baseScale = Math.max(containerW / imgSize.width, containerH / imgSize.height);
+    baseScale = Math.max(
+      containerW / imgSize.width,
+      containerH / imgSize.height,
+    );
     currentScale = baseScale * zoom;
 
     dw = imgSize.width * currentScale;
@@ -119,17 +122,7 @@ export function ImageCropperModal({
     const sWidth = containerW / currentScale;
     const sHeight = containerH / currentScale;
 
-    ctx.drawImage(
-      imageRef.current,
-      sx,
-      sy,
-      sWidth,
-      sHeight,
-      0,
-      0,
-      outW,
-      outH
-    );
+    ctx.drawImage(imageRef.current, sx, sy, sWidth, sHeight, 0, 0, outW, outH);
 
     canvas.toBlob(
       (blob) => {
@@ -138,7 +131,7 @@ export function ImageCropperModal({
         }
       },
       "image/jpeg",
-      0.9
+      0.9,
     );
   };
 
@@ -195,7 +188,7 @@ export function ImageCropperModal({
                     draggable={false}
                   />
                 )}
-                
+
                 {/* Crop Overlay Guidelines */}
                 <div className="pointer-events-none absolute inset-0 grid grid-cols-3 grid-rows-3 opacity-30">
                   <div className="border-b border-r border-white"></div>

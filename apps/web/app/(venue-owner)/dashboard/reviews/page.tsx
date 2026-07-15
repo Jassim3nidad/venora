@@ -10,8 +10,15 @@ import {
   StatusBadge,
   type DataTableColumn,
 } from "@/components/dashboard/enterprise";
-import { getOwnerDashboardContext, getOwnerVenueIds, formatDate } from "../_lib/owner-dashboard-data";
-import { getOwnerReviewsForVenues, getReviewAnalytics } from "@/features/reviews/application/queries";
+import {
+  getOwnerDashboardContext,
+  getOwnerVenueIds,
+  formatDate,
+} from "../_lib/owner-dashboard-data";
+import {
+  getOwnerReviewsForVenues,
+  getReviewAnalytics,
+} from "@/features/reviews/application/queries";
 import { OwnerReplyForm } from "@/features/reviews/ui/OwnerReplyForm";
 import type { ReviewForModeration } from "@/features/reviews/types/review.types";
 
@@ -32,7 +39,9 @@ export default async function OwnerReviewsPage() {
       key: "guest",
       header: "Guest",
       cell: (row) => (
-        <span className="font-semibold text-[#111827]">{row.profile?.fullName ?? "Anonymous Guest"}</span>
+        <span className="font-semibold text-[#111827]">
+          {row.profile?.fullName ?? "Anonymous Guest"}
+        </span>
       ),
     },
     { key: "venue", header: "Venue", cell: (row) => row.venueName },
@@ -65,7 +74,12 @@ export default async function OwnerReviewsPage() {
       key: "reply",
       header: "Reply",
       className: "min-w-[280px]",
-      cell: (row) => <OwnerReplyForm reviewId={row.id} existingReply={row.ownerReply ?? null} />,
+      cell: (row) => (
+        <OwnerReplyForm
+          reviewId={row.id}
+          existingReply={row.ownerReply ?? null}
+        />
+      ),
     },
   ];
 
@@ -75,20 +89,44 @@ export default async function OwnerReviewsPage() {
       description="See what guests are saying about your venues, reply publicly, and track review performance."
     >
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <KpiCard label="Average Rating" value={analytics.averageRating.toFixed(2)} icon="star" />
-        <KpiCard label="Total Reviews" value={String(analytics.totalReviews)} icon="rate_review" />
-        <KpiCard label="Needs Attention" value={String(analytics.flaggedCount)} icon="flag" />
-        <KpiCard label="Helpful Votes" value={String(analytics.helpfulVotesTotal)} icon="thumb_up" />
+        <KpiCard
+          label="Average Rating"
+          value={analytics.averageRating.toFixed(2)}
+          icon="star"
+        />
+        <KpiCard
+          label="Total Reviews"
+          value={String(analytics.totalReviews)}
+          icon="rate_review"
+        />
+        <KpiCard
+          label="Needs Attention"
+          value={String(analytics.flaggedCount)}
+          icon="flag"
+        />
+        <KpiCard
+          label="Helpful Votes"
+          value={String(analytics.helpfulVotesTotal)}
+          icon="thumb_up"
+        />
       </div>
 
       {analytics.totalReviews > 0 ? (
         <div className="grid gap-6 lg:grid-cols-2">
           <Panel>
-            <PanelHeader title="Rating distribution" description="How guests are rating your venues." />
+            <PanelHeader
+              title="Rating distribution"
+              description="How guests are rating your venues."
+            />
             <div className="grid gap-3">
               {[...analytics.ratingDistribution].reverse().map((bucket) => (
-                <div key={bucket.rating} className="flex items-center gap-3 text-sm">
-                  <span className="w-10 shrink-0 font-semibold text-[#111827]">{bucket.rating} star</span>
+                <div
+                  key={bucket.rating}
+                  className="flex items-center gap-3 text-sm"
+                >
+                  <span className="w-10 shrink-0 font-semibold text-[#111827]">
+                    {bucket.rating} star
+                  </span>
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-[#eff6ff]">
                     <div
                       className="h-full rounded-full bg-[#1d4ed8]"
@@ -97,20 +135,30 @@ export default async function OwnerReviewsPage() {
                       }}
                     />
                   </div>
-                  <span className="w-8 shrink-0 text-right font-semibold text-[#4b5563]">{bucket.count}</span>
+                  <span className="w-8 shrink-0 text-right font-semibold text-[#4b5563]">
+                    {bucket.count}
+                  </span>
                 </div>
               ))}
             </div>
           </Panel>
 
           <Panel>
-            <PanelHeader title="Dimension averages" description="Average score across review categories." />
+            <PanelHeader
+              title="Dimension averages"
+              description="Average score across review categories."
+            />
             <div className="grid gap-3">
               {analytics.dimensionAverages
                 .filter((dimension) => dimension.value > 0)
                 .map((dimension) => (
-                  <div key={dimension.key} className="flex items-center gap-3 text-sm">
-                    <span className="w-32 shrink-0 font-semibold text-[#111827]">{dimension.label}</span>
+                  <div
+                    key={dimension.key}
+                    className="flex items-center gap-3 text-sm"
+                  >
+                    <span className="w-32 shrink-0 font-semibold text-[#111827]">
+                      {dimension.label}
+                    </span>
                     <div className="h-2 flex-1 overflow-hidden rounded-full bg-[#eff6ff]">
                       <div
                         className="h-full rounded-full bg-[#1d4ed8]"
@@ -129,7 +177,10 @@ export default async function OwnerReviewsPage() {
 
       {reviews.length > 0 ? (
         <Panel>
-          <PanelHeader title="All reviews" description="Reviews across every venue you manage." />
+          <PanelHeader
+            title="All reviews"
+            description="Reviews across every venue you manage."
+          />
           <DataTable rows={reviews} columns={columns} keyFn={(row) => row.id} />
         </Panel>
       ) : (

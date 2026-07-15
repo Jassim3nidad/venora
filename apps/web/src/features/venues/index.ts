@@ -7,4 +7,8 @@ export { default as VenueCapacitySection } from "./ui/VenueCapacitySection";
 export { default as VenuePricingSection } from "./ui/VenuePricingSection";
 export { default as VenueDetails } from "./ui/VenueDetails";
 export { default as VenueGallery } from "./ui/VenueGallery";
-export type { VenueProfileData, VenueMedia, VenuePackage } from "./types/venue.types";
+export type {
+  VenueProfileData,
+  VenueMedia,
+  VenuePackage,
+} from "./types/venue.types";

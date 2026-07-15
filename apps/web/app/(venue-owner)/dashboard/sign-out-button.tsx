@@ -31,7 +31,8 @@ export default function SignOutButton() {
         transition: "background 0.15s",
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.background = "rgba(239,68,68,0.08)";
+        (e.currentTarget as HTMLButtonElement).style.background =
+          "rgba(239,68,68,0.08)";
       }}
       onMouseLeave={(e) => {
         (e.currentTarget as HTMLButtonElement).style.background = "transparent";

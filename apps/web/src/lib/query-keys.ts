@@ -13,39 +13,44 @@
 export const queryKeys = {
   // ── Venues ─────────────────────────────────────────────────
   venues: {
-    all:      ["venues"]                          as const,
-    list:     (filters: Record<string, unknown>) => ["venues", "list",   filters] as const,
-    detail:   (slug: string)                     => ["venues", "detail", slug]    as const,
-    packages: (venueId: string)                  => ["venues", "packages", venueId] as const,
-    blocks:   (venueId: string)                  => ["venues", "blocks",   venueId] as const,
+    all: ["venues"] as const,
+    list: (filters: Record<string, unknown>) =>
+      ["venues", "list", filters] as const,
+    detail: (slug: string) => ["venues", "detail", slug] as const,
+    packages: (venueId: string) => ["venues", "packages", venueId] as const,
+    blocks: (venueId: string) => ["venues", "blocks", venueId] as const,
   },
 
   // ── Bookings ───────────────────────────────────────────────
   bookings: {
-    all:        ["bookings"]                                          as const,
-    byCustomer: (customerId: string)             => ["bookings", "customer", customerId] as const,
-    byVenue:    (venueId: string)                => ["bookings", "venue",    venueId]    as const,
-    detail:     (bookingId: string)              => ["bookings", "detail",   bookingId]  as const,
+    all: ["bookings"] as const,
+    byCustomer: (customerId: string) =>
+      ["bookings", "customer", customerId] as const,
+    byVenue: (venueId: string) => ["bookings", "venue", venueId] as const,
+    detail: (bookingId: string) => ["bookings", "detail", bookingId] as const,
   },
 
   // ── Suppliers ──────────────────────────────────────────────
   suppliers: {
-    all:       ["suppliers"]                                          as const,
-    list:      (filters: Record<string, unknown>) => ["suppliers", "list",  filters]    as const,
-    detail:    (supplierId: string)              => ["suppliers", "detail", supplierId] as const,
-    bySelf:    (ownerId: string)                 => ["suppliers", "self",   ownerId]    as const,
+    all: ["suppliers"] as const,
+    list: (filters: Record<string, unknown>) =>
+      ["suppliers", "list", filters] as const,
+    detail: (supplierId: string) =>
+      ["suppliers", "detail", supplierId] as const,
+    bySelf: (ownerId: string) => ["suppliers", "self", ownerId] as const,
   },
 
   // ── Reviews ────────────────────────────────────────────────
   reviews: {
-    all:      ["reviews"]                                             as const,
-    byVenue:  (venueId: string)                  => ["reviews", "venue",    venueId]    as const,
-    byCustomer: (customerId: string)             => ["reviews", "customer", customerId] as const,
+    all: ["reviews"] as const,
+    byVenue: (venueId: string) => ["reviews", "venue", venueId] as const,
+    byCustomer: (customerId: string) =>
+      ["reviews", "customer", customerId] as const,
   },
 
   // ── Favourites ─────────────────────────────────────────────
   favourites: {
-    byCustomer: (customerId: string)             => ["favourites", customerId] as const,
+    byCustomer: (customerId: string) => ["favourites", customerId] as const,
   },
 
   // ── Analytics ──────────────────────────────────────────────
@@ -57,36 +62,45 @@ export const queryKeys = {
 
   // ── Auth / Profile ─────────────────────────────────────────
   auth: {
-    session: ["auth", "session"]           as const,
-    profile: (userId: string)              => ["auth", "profile", userId] as const,
+    session: ["auth", "session"] as const,
+    profile: (userId: string) => ["auth", "profile", userId] as const,
   },
 
   // Notifications
   notifications: {
     all: ["notifications"] as const,
-    list: (filters: Record<string, unknown>) => ["notifications", "list", filters] as const,
+    list: (filters: Record<string, unknown>) =>
+      ["notifications", "list", filters] as const,
     preferences: ["notifications", "preferences"] as const,
   },
 
   // ── Search ─────────────────────────────────────────────────
   search: {
-    results: (query: Record<string, unknown>) => ["search", "results", query] as const,
-    ai:      (query: Record<string, unknown>) => ["search", "ai",      query] as const,
+    results: (query: Record<string, unknown>) =>
+      ["search", "results", query] as const,
+    ai: (query: Record<string, unknown>) => ["search", "ai", query] as const,
   },
 
   // ── Calendar ───────────────────────────────────────────────
   calendar: {
-    availability: (venueId: string, month: string) => ["calendar", "availability", venueId, month] as const,
-    bookings: (venueId: string, month: string) => ["calendar", "bookings", venueId, month] as const,
+    availability: (venueId: string, month: string) =>
+      ["calendar", "availability", venueId, month] as const,
+    bookings: (venueId: string, month: string) =>
+      ["calendar", "bookings", venueId, month] as const,
   },
 
   // ── AI ──────────────────────────────────────────────────────
   ai: {
-    costEstimate:     (venueId: string, params: Record<string, unknown>) => ["ai", "costEstimate", venueId, params] as const,
-    recommendations:  (userId: string)                    => ["ai", "recommendations", userId] as const,
-    descriptionDrafts: (venueId: string)                  => ["ai", "descriptionDrafts", venueId] as const,
-    packageComparison: (packageIds: string[])             => ["ai", "packageComparison", [...packageIds].sort()] as const,
-    conversation:      (sessionId: string)                => ["ai", "conversation", sessionId] as const,
+    costEstimate: (venueId: string, params: Record<string, unknown>) =>
+      ["ai", "costEstimate", venueId, params] as const,
+    recommendations: (userId: string) =>
+      ["ai", "recommendations", userId] as const,
+    descriptionDrafts: (venueId: string) =>
+      ["ai", "descriptionDrafts", venueId] as const,
+    packageComparison: (packageIds: string[]) =>
+      ["ai", "packageComparison", [...packageIds].sort()] as const,
+    conversation: (sessionId: string) =>
+      ["ai", "conversation", sessionId] as const,
   },
 } as const;
 

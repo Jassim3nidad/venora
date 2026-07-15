@@ -19,18 +19,18 @@ const badgeVariants = cva(
           "bg-transparent text-[var(--text-primary)] ring-[var(--border-strong)]",
         secondary:
           "bg-[var(--bg-muted)] text-[var(--text-secondary)] ring-[var(--border-default)]",
-        info:
-          "bg-[var(--color-info-bg)] text-[var(--color-info)] ring-[var(--color-info)]/20",
+        info: "bg-[var(--color-info-bg)] text-[var(--color-info)] ring-[var(--color-info)]/20",
       },
     },
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLSpanElement>,
+  extends
+    React.HTMLAttributes<HTMLSpanElement>,
     VariantProps<typeof badgeVariants> {}
 
 function Badge({ className, variant, ...props }: BadgeProps) {

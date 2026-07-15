@@ -56,7 +56,7 @@ Generated from repository scan at branch `main`, commit `15e6173b6f695f6d9f5f4a2
 | `POST /ai-recommendation`     | `supabase/functions/ai-recommendation/index.ts`     | Bearer required                            | Documented |
 | `POST /ai-search`             | `supabase/functions/ai-search/index.ts`             | Optional bearer                            | Documented |
 | `POST /ai-venue-description`  | `supabase/functions/ai-venue-description/index.ts`  | Bearer plus org/admin authorization        | Documented |
-| `POST /booking-notifications` | `supabase/functions/booking-notifications/index.ts` | Platform JWT/service invocation expected   | Documented |
+| `POST /booking-notifications` | `supabase/functions/booking-notifications/index.ts` | Exact service-role bearer required         | Documented |
 
 ## Non-HTTP inventories
 

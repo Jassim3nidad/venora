@@ -21,29 +21,27 @@ import type { z } from "zod";
 import { VenoraError } from "./errors";
 
 export type ApiError = {
-  code:     string;
-  message:  string;
+  code: string;
+  message: string;
   details?: unknown;
 };
 
 export type ApiResponse<T> =
-  | { data: T;    error: null  }
-  | { data: null; error: ApiError };
+  { data: T; error: null } | { data: null; error: ApiError };
 
-export async function createServerAction<
-  TSchema extends z.ZodTypeAny,
-  TResult,
->(
-  schema:    TSchema,
-  handler:   (input: z.infer<TSchema>) => Promise<TResult>,
-  rawInput:  unknown
+export async function createServerAction<TSchema extends z.ZodTypeAny, TResult>(
+  schema: TSchema,
+  handler: (input: z.infer<TSchema>) => Promise<TResult>,
+  rawInput: unknown,
 ): Promise<ApiResponse<TResult>> {
   // ── 1. Validate input ────────────────────────────────────
   const parsed = schema.safeParse(rawInput);
 
   if (!parsed.success) {
     console.error("[Server Action Validation Error]", parsed.error.issues);
-    const issuesMsg = parsed.error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join(', ');
+    const issuesMsg = parsed.error.issues
+      .map((i) => `${i.path.join(".")}: ${i.message}`)
+      .join(", ");
     return {
       data: null,
       error: {
@@ -62,9 +60,9 @@ export async function createServerAction<
     // Known domain / application errors
     if (e instanceof VenoraError) {
       return {
-        data:  null,
+        data: null,
         error: {
-          code:    e.code,
+          code: e.code,
           message: e.message,
         },
       };
@@ -73,9 +71,9 @@ export async function createServerAction<
     // Unexpected errors (Supabase network failure, etc.)
     console.error("[ServerAction] Unexpected error:", e);
     return {
-      data:  null,
+      data: null,
       error: {
-        code:    "INTERNAL_ERROR",
+        code: "INTERNAL_ERROR",
         message: "Something went wrong. Please try again.",
       },
     };
@@ -92,7 +90,7 @@ export async function createServerAction<
  *   }
  */
 export function isSuccess<T>(
-  response: ApiResponse<T>
+  response: ApiResponse<T>,
 ): response is { data: T; error: null } {
   return response.error === null;
 }
@@ -101,7 +99,7 @@ export function isSuccess<T>(
  * Type guard: check if a response is an error.
  */
 export function isError<T>(
-  response: ApiResponse<T>
+  response: ApiResponse<T>,
 ): response is { data: null; error: ApiError } {
   return response.error !== null;
 }

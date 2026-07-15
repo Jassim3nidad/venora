@@ -34,29 +34,25 @@ below are names and placeholders only.
 
 ## Integrations and AI
 
-| Variable                        | Class / requirement                                                           | Scope and exposure                       | Placeholder / absence / rotation                                                                          |
-| ------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `PAYMONGO_SECRET_KEY`           | SERVER-ONLY, RUNTIME; required for checkout/refund                            | web server preview/prod/test             | `<paymongo-test-secret-key>`; missing causes gateway failure; rotate with checkout validation             |
-| `PAYMONGO_WEBHOOK_SECRET`       | SERVER-ONLY, RUNTIME; required for PayMongo webhook                           | webhook environment                      | `<paymongo-test-webhook-secret>`; mismatch rejects signatures; coordinate endpoint rotation               |
-| `MAYA_WEBHOOK_SECRET`           | SERVER-ONLY, CONFIGURATION ONLY                                               | inactive Maya signature route            | Placeholder only; absence keeps incomplete provider unusable; not evidence of Maya readiness              |
-| `MAYA_SECRET_KEY`               | DEPRECATED/CONFIGURATION ONLY                                                 | comments/examples, no registered gateway | Do not set expecting working checkout                                                                     |
-| `STRIPE_SECRET_KEY`             | DEPRECATED/CONFIGURATION ONLY                                                 | comments/examples, no registered gateway | Do not set expecting working checkout                                                                     |
-| `STRIPE_WEBHOOK_SECRET`         | DEPRECATED/CONFIGURATION ONLY                                                 | old examples only                        | Do not set expecting working webhooks                                                                     |
-| `RESEND_API_KEY`                | SERVER-ONLY/EDGE-FUNCTION SECRET, RUNTIME                                     | web/Edge/test; never browser             | `<resend-test-api-key>`; missing email delivery fails; rotate and send test mail                          |
-| `RESEND_FROM`                   | SERVER-ONLY/EDGE-FUNCTION SECRET, RUNTIME                                     | web/Edge/test                            | `Venora <notifications@example.test>`; invalid sender is rejected; no credential rotation                 |
-| `VAPID_PUBLIC_KEY`              | SERVER-ONLY RUNTIME value shared with subscribers                             | web/Edge; not a private credential       | `<vapid-public-key>`; missing prevents subscription/delivery; key-pair rotation invalidates subscriptions |
-| `VAPID_PRIVATE_KEY`             | SERVER-ONLY/EDGE-FUNCTION SECRET, RUNTIME                                     | web/Edge only                            | `<vapid-private-key>`; missing delivery fails; rotate pair and resubscribe                                |
-| `VAPID_SUBJECT`                 | SERVER-ONLY/EDGE-FUNCTION SECRET, RUNTIME                                     | web/Edge                                 | `mailto:operations@example.test`; invalid subject fails provider validation                               |
-| `OPENROUTER_API_KEY`            | EDGE-FUNCTION SECRET, RUNTIME; required for current generation/assistant path | Supabase Edge local/preview/prod         | `<openrouter-api-key>`; missing triggers feature fallback/error; rotate and smoke-test AI                 |
-| `OPENAI_API_KEY`                | EDGE-FUNCTION SECRET, OPTIONAL                                                | Edge fallback and embeddings             | `<openai-api-key>`; missing disables OpenAI-dependent paths; rotate and test embeddings                   |
-| `OPENAI_EMBEDDING_MODEL`        | EDGE RUNTIME, OPTIONAL                                                        | Edge Functions                           | `text-embedding-3-small`; invalid model breaks embedding refresh                                          |
-| `AI_SEARCH_EMBED_REFRESH_LIMIT` | EDGE RUNTIME, OPTIONAL                                                        | Edge Functions                           | Positive integer such as `8`; invalid value uses code fallback                                            |
+| Variable                  | Class / requirement                                                           | Scope and exposure                       | Placeholder / absence / rotation                                                                          |
+| ------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `PAYMONGO_SECRET_KEY`     | SERVER-ONLY, RUNTIME; required for checkout/refund                            | web server preview/prod/test             | `<paymongo-test-secret-key>`; missing causes gateway failure; rotate with checkout validation             |
+| `PAYMONGO_WEBHOOK_SECRET` | SERVER-ONLY, RUNTIME; required for PayMongo webhook                           | webhook environment                      | `<paymongo-test-webhook-secret>`; mismatch rejects signatures; coordinate endpoint rotation               |
+| `MAYA_WEBHOOK_SECRET`     | SERVER-ONLY, CONFIGURATION ONLY                                               | inactive Maya signature route            | Placeholder only; absence keeps incomplete provider unusable; not evidence of Maya readiness              |
+| `MAYA_SECRET_KEY`         | DEPRECATED/CONFIGURATION ONLY                                                 | comments/examples, no registered gateway | Do not set expecting working checkout                                                                     |
+| `STRIPE_SECRET_KEY`       | DEPRECATED/CONFIGURATION ONLY                                                 | comments/examples, no registered gateway | Do not set expecting working checkout                                                                     |
+| `STRIPE_WEBHOOK_SECRET`   | DEPRECATED/CONFIGURATION ONLY                                                 | old examples only                        | Do not set expecting working webhooks                                                                     |
+| `RESEND_API_KEY`          | SERVER-ONLY/EDGE-FUNCTION SECRET, RUNTIME                                     | web/Edge/test; never browser             | `<resend-test-api-key>`; missing email delivery fails; rotate and send test mail                          |
+| `RESEND_FROM`             | SERVER-ONLY/EDGE-FUNCTION SECRET, RUNTIME                                     | web/Edge/test                            | `Venora <notifications@example.test>`; invalid sender is rejected; no credential rotation                 |
+| `VAPID_PUBLIC_KEY`        | SERVER-ONLY RUNTIME value shared with subscribers                             | web/Edge; not a private credential       | `<vapid-public-key>`; missing prevents subscription/delivery; key-pair rotation invalidates subscriptions |
+| `VAPID_PRIVATE_KEY`       | SERVER-ONLY/EDGE-FUNCTION SECRET, RUNTIME                                     | web/Edge only                            | `<vapid-private-key>`; missing delivery fails; rotate pair and resubscribe                                |
+| `VAPID_SUBJECT`           | SERVER-ONLY/EDGE-FUNCTION SECRET, RUNTIME                                     | web/Edge                                 | `mailto:operations@example.test`; invalid subject fails provider validation                               |
+| `OPENROUTER_API_KEY`      | EDGE-FUNCTION SECRET, RUNTIME; required for current generation/assistant path | Supabase Edge local/preview/prod         | `<openrouter-api-key>`; missing triggers feature fallback/error; rotate and smoke-test AI                 |
 
-There is no Google Maps key, direct Anthropic key, or external analytics key in
-the implementation. Maps use MapLibre/OpenFreeMap and OSM Nominatim; analytics
-are database-derived. `OPENAI_SEARCH_MODEL` and old per-feature
-`OPENAI_*_MODEL` variables are deprecated documentation—the database
-`ai_configurations` table owns current provider/model configuration.
+There is no Google Maps key, alternate AI-provider key, or external analytics
+key in the implementation. Maps use MapLibre/OpenFreeMap and OSM Nominatim;
+analytics are database-derived. The database constrains every active AI feature
+to OpenRouter with `tencent/hy3:free`.
 
 ## Test-only variables
 

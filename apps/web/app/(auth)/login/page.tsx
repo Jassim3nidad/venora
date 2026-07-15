@@ -4,14 +4,7 @@ import { Suspense, type FormEvent, useState, useTransition } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
-import {
-  Check,
-  Eye,
-  EyeOff,
-  LockKeyhole,
-  Mail,
-  Sparkles,
-} from "lucide-react";
+import { Check, Eye, EyeOff, LockKeyhole, Mail, Sparkles } from "lucide-react";
 import {
   loginAction,
   resendVerificationEmailAction,
@@ -153,8 +146,7 @@ function LoginForm() {
       if (response && !response.success) {
         setGeneralError(response.error);
         const data = response.data as
-          | { reason?: string; email?: string }
-          | undefined;
+          { reason?: string; email?: string } | undefined;
         setShowResendVerification(data?.reason === "email_unverified");
 
         if (response.fieldErrors) {
@@ -168,7 +160,9 @@ function LoginForm() {
     <main className="flex h-screen w-full overflow-hidden bg-[#F9FAFB] text-[#111827]">
       <section className="relative hidden h-screen w-1/2 overflow-hidden bg-[#111827] lg:flex">
         <img
-          src={heroVenue.photos.cover_image_url ?? heroVenue.photos.image_urls?.[0]}
+          src={
+            heroVenue.photos.cover_image_url ?? heroVenue.photos.image_urls?.[0]
+          }
           alt={`${heroVenue.name} venue`}
           className="absolute inset-0 h-full w-full object-cover opacity-45"
         />
@@ -456,7 +450,9 @@ function LoginForm() {
               ) : (
                 <GoogleLogo />
               )}
-              {isGoogleLoading ? "Connecting to Google..." : "Continue with Google"}
+              {isGoogleLoading
+                ? "Connecting to Google..."
+                : "Continue with Google"}
             </button>
           </div>
 

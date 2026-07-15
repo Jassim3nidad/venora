@@ -1,4 +1,9 @@
-import { DashboardPage, DataTable, StatusBadge, EmptyState } from "@/components/dashboard/enterprise";
+import {
+  DashboardPage,
+  DataTable,
+  StatusBadge,
+  EmptyState,
+} from "@/components/dashboard/enterprise";
 import { createClient } from "@/lib/supabase/server";
 import { requirePermissionOrRedirect } from "@/lib/rbac/admin-context";
 import Link from "next/link";
@@ -12,14 +17,20 @@ export default async function AdminBookingsPage() {
   const supabase = (await createClient()) as any;
   const { data: bookings, error } = await supabase
     .from("bookings")
-    .select("id, status, created_at, total_price, start_time, end_time, profiles(full_name), venues(name)")
+    .select(
+      "id, status, created_at, total_price, start_time, end_time, profiles(full_name), venues(name)",
+    )
     .order("created_at", { ascending: false })
     .limit(50);
 
   if (error) {
     return (
       <DashboardPage>
-        <EmptyState icon="error" title="Error loading bookings" description={error.message} />
+        <EmptyState
+          icon="error"
+          title="Error loading bookings"
+          description={error.message}
+        />
       </DashboardPage>
     );
   }
@@ -36,9 +47,12 @@ export default async function AdminBookingsPage() {
   return (
     <DashboardPage>
       <div className="mb-6">
-        <h1 className="text-3xl font-black text-slate-900">Bookings Overview</h1>
+        <h1 className="text-3xl font-black text-slate-900">
+          Bookings Overview
+        </h1>
         <p className="mt-2 text-slate-500">
-          View all marketplace bookings across venues. (Read-only view for monitoring).
+          View all marketplace bookings across venues. (Read-only view for
+          monitoring).
         </p>
       </div>
 
@@ -51,7 +65,9 @@ export default async function AdminBookingsPage() {
             {
               key: "venue",
               header: "Venue",
-              cell: (r: any) => <span className="font-bold text-slate-900">{r.venue}</span>,
+              cell: (r: any) => (
+                <span className="font-bold text-slate-900">{r.venue}</span>
+              ),
             },
             {
               key: "customer",

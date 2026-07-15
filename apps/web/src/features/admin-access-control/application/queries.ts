@@ -44,7 +44,9 @@ export async function getAdminAccounts(): Promise<{
     return { accounts: null, error: error.message };
   }
 
-  const adminUserIds = ((rows ?? []) as UserRoleRow[]).map((row) => row.user_id);
+  const adminUserIds = ((rows ?? []) as UserRoleRow[]).map(
+    (row) => row.user_id,
+  );
 
   // admin_user_roles isn't linked to user_roles by a foreign key (both are
   // independent tables keyed on user_id -> profiles), so PostgREST can't
@@ -79,7 +81,9 @@ export async function getAdminAccounts(): Promise<{
 
   const accounts = await Promise.all(
     ((rows ?? []) as UserRoleRow[]).map(async (row): Promise<AdminAccount> => {
-      const { data: authUser } = await adminClient.auth.admin.getUserById(row.user_id);
+      const { data: authUser } = await adminClient.auth.admin.getUserById(
+        row.user_id,
+      );
       const tierRow = tierByUserId.get(row.user_id);
 
       return {

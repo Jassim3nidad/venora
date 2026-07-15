@@ -32,7 +32,11 @@ function formatCurrency(value?: number | null) {
   }).format(value);
 }
 
-function parseInitialGuests(value: string | undefined, min: number, max: number) {
+function parseInitialGuests(
+  value: string | undefined,
+  min: number,
+  max: number,
+) {
   const parsed = Number(value);
 
   if (!Number.isFinite(parsed)) return min;
@@ -72,7 +76,9 @@ export default async function BookVenuePage({ params, searchParams }: Props) {
     )
     .eq("status", "published");
 
-  venueQuery = isUuid(slug) ? venueQuery.eq("id", slug) : venueQuery.eq("slug", slug);
+  venueQuery = isUuid(slug)
+    ? venueQuery.eq("id", slug)
+    : venueQuery.eq("slug", slug);
 
   const { data: venue } = await venueQuery.maybeSingle();
 
@@ -84,9 +90,15 @@ export default async function BookVenuePage({ params, searchParams }: Props) {
   );
   const capacityMin = venue.capacity_min ?? 1;
   const capacityMax = venue.capacity_max ?? capacityMin;
-  const initialGuests = parseInitialGuests(query?.guests, capacityMin, capacityMax);
+  const initialGuests = parseInitialGuests(
+    query?.guests,
+    capacityMin,
+    capacityMax,
+  );
   const initialPackageId =
-    query?.packageId && query.packageId !== "none" ? query.packageId : undefined;
+    query?.packageId && query.packageId !== "none"
+      ? query.packageId
+      : undefined;
 
   const isOwnVenue = await userOwnsVenue(supabase, user.id, venue.id);
 
@@ -131,7 +143,8 @@ export default async function BookVenuePage({ params, searchParams }: Props) {
                   You cannot book your own venue.
                 </h3>
                 <p className="mt-3 text-base font-medium leading-relaxed text-[#3B82F6] max-w-md mx-auto">
-                  Use your Venue Owner Dashboard to manage availability, block dates, and view bookings for this venue.
+                  Use your Venue Owner Dashboard to manage availability, block
+                  dates, and view bookings for this venue.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4 mt-2">
@@ -190,7 +203,10 @@ export default async function BookVenuePage({ params, searchParams }: Props) {
                 "Event completion",
                 "Customer review",
               ].map((label, index) => (
-                <li key={label} className="flex gap-3 border-l border-[#DBEAFE] pb-5 last:border-transparent last:pb-0">
+                <li
+                  key={label}
+                  className="flex gap-3 border-l border-[#DBEAFE] pb-5 last:border-transparent last:pb-0"
+                >
                   <span className="-ml-[13px] flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#2563EB] text-xs font-black text-white">
                     {index + 1}
                   </span>

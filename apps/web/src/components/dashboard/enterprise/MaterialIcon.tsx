@@ -12,7 +12,10 @@ export function MaterialIcon({ name, className, filled }: MaterialIconProps) {
       className={cn("material-symbols-outlined leading-none", className)}
       style={
         filled
-          ? { fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24" }
+          ? {
+              fontVariationSettings:
+                "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24",
+            }
           : undefined
       }
     >

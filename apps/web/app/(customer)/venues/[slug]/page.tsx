@@ -47,14 +47,20 @@ function getResearchVenueByIdentifier(identifier: string) {
 // image_urls}) — generateMetadata runs before the two shapes are merged
 // into the normalized record the page body uses, so both are handled here.
 function resolveVenueOgImage(metadataVenue: any): string | undefined {
-  if (Array.isArray(metadataVenue.venue_images) && metadataVenue.venue_images.length > 0) {
+  if (
+    Array.isArray(metadataVenue.venue_images) &&
+    metadataVenue.venue_images.length > 0
+  ) {
     const featured =
       metadataVenue.venue_images.find((img: any) => img.is_featured) ??
       metadataVenue.venue_images[0];
-    if (featured?.storage_path) return buildVenueImageUrl(featured.storage_path);
+    if (featured?.storage_path)
+      return buildVenueImageUrl(featured.storage_path);
   }
   if (metadataVenue.photos) {
-    const url = metadataVenue.photos.cover_image_url ?? metadataVenue.photos.image_urls?.[0];
+    const url =
+      metadataVenue.photos.cover_image_url ??
+      metadataVenue.photos.image_urls?.[0];
     if (url) return url;
   }
   return undefined;
@@ -153,7 +159,10 @@ function buildVenueJsonLd(venue: any, canonicalUrl: string) {
     },
   };
 
-  if (typeof venue.latitude === "number" && typeof venue.longitude === "number") {
+  if (
+    typeof venue.latitude === "number" &&
+    typeof venue.longitude === "number"
+  ) {
     jsonLd.geo = {
       "@type": "GeoCoordinates",
       latitude: venue.latitude,

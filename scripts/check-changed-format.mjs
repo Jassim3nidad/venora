@@ -35,6 +35,9 @@ const generated = new Set([
 const files = [...candidates]
   .filter((file) => /\.(?:ts|tsx|md|json|ya?ml|mjs)$/.test(file))
   .filter((file) => !generated.has(file))
+  // Supabase Edge sources use Deno's canonical formatter. The strict
+  // edge:validate gate checks that tree with `deno fmt --check`.
+  .filter((file) => !file.startsWith("supabase/functions/"))
   .filter((file) => existsSync(join(root, file)))
   .sort();
 

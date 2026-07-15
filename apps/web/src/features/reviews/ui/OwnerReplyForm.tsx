@@ -4,7 +4,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, MessageSquareReply } from "lucide-react";
 import { toast } from "sonner";
-import { replyToReviewSchema, type ReplyToReviewInput } from "../schemas/review-reply.schema";
+import {
+  replyToReviewSchema,
+  type ReplyToReviewInput,
+} from "../schemas/review-reply.schema";
 import { replyToReviewAction } from "../application/actions";
 
 export function OwnerReplyForm({
@@ -48,7 +51,9 @@ export function OwnerReplyForm({
         className="w-full resize-none rounded-xl border border-[var(--border-default)] bg-[var(--bg-base)] p-3 text-sm font-medium text-[var(--text-primary)] outline-none focus:border-[var(--color-brand-500)]"
       />
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[11px] text-[var(--text-muted)]">{replyValue.length}/1000</span>
+        <span className="text-[11px] text-[var(--text-muted)]">
+          {replyValue.length}/1000
+        </span>
         <button
           type="submit"
           disabled={isSubmitting}
@@ -62,7 +67,9 @@ export function OwnerReplyForm({
           {existingReply ? "Update reply" : "Reply"}
         </button>
       </div>
-      {errors.reply ? <span className="text-xs text-red-600">{errors.reply.message}</span> : null}
+      {errors.reply ? (
+        <span className="text-xs text-red-600">{errors.reply.message}</span>
+      ) : null}
     </form>
   );
 }

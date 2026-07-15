@@ -6,9 +6,14 @@ import {
   Panel,
   StatusBadge,
 } from "@/components/dashboard/enterprise";
-import { formatPeso, getOwnerDashboardContext } from "@/lib/dashboard/org-dashboard-data";
+import {
+  formatPeso,
+  getOwnerDashboardContext,
+} from "@/lib/dashboard/org-dashboard-data";
 
-export const metadata: Metadata = { title: "Suppliers - Coordinator Dashboard" };
+export const metadata: Metadata = {
+  title: "Suppliers - Coordinator Dashboard",
+};
 export const dynamic = "force-dynamic";
 
 type SupplierCategory = { id: string; name: string; slug: string };
@@ -28,7 +33,9 @@ type Props = {
   searchParams: Promise<{ q?: string; category?: string }>;
 };
 
-export default async function CoordinatorSuppliersPage({ searchParams }: Props) {
+export default async function CoordinatorSuppliersPage({
+  searchParams,
+}: Props) {
   const { q, category } = await searchParams;
   const { supabase } = await getOwnerDashboardContext();
 
@@ -62,7 +69,10 @@ export default async function CoordinatorSuppliersPage({ searchParams }: Props) 
       description="Discover accredited suppliers to recommend for your coordinated events."
     >
       <Panel>
-        <form className="flex flex-col gap-3 sm:flex-row sm:items-center" method="get">
+        <form
+          className="flex flex-col gap-3 sm:flex-row sm:items-center"
+          method="get"
+        >
           <div className="relative flex-1">
             <MaterialIcon
               name="search"
@@ -108,7 +118,8 @@ export default async function CoordinatorSuppliersPage({ searchParams }: Props) 
                 {supplier.review_count > 0 ? (
                   <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-800">
                     <MaterialIcon name="star" className="text-sm" filled />
-                    {Number(supplier.avg_rating).toFixed(1)} ({supplier.review_count})
+                    {Number(supplier.avg_rating).toFixed(1)} (
+                    {supplier.review_count})
                   </span>
                 ) : (
                   <StatusBadge status="active" label="New" />
@@ -125,11 +136,15 @@ export default async function CoordinatorSuppliersPage({ searchParams }: Props) 
                 ) : null}
               </div>
               {supplier.description ? (
-                <p className="line-clamp-3 text-sm text-[#4b5563]">{supplier.description}</p>
+                <p className="line-clamp-3 text-sm text-[#4b5563]">
+                  {supplier.description}
+                </p>
               ) : null}
               <div className="mt-auto flex items-center justify-between border-t border-[#e5e7eb] pt-3">
                 <span className="text-sm font-bold text-[#111827]">
-                  {supplier.base_price ? formatPeso(supplier.base_price) : "Contact for price"}
+                  {supplier.base_price
+                    ? formatPeso(supplier.base_price)
+                    : "Contact for price"}
                 </span>
                 {supplier.price_unit ? (
                   <span className="text-xs text-[#6b7280]">

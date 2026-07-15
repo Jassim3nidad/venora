@@ -5,13 +5,7 @@
       "width": 1440,
       "height": 900
     },
-    "positions": [
-      0,
-      591,
-      1181,
-      1772,
-      2362
-    ],
+    "positions": [0, 591, 1181, 1772, 2362],
     "metrics": {
       "scroller": {
         "cls": "flex min-h-0 flex-1 flex-col overflow-y-auto",
@@ -234,13 +228,7 @@
       "width": 768,
       "height": 1024
     },
-    "positions": [
-      0,
-      568,
-      1137,
-      1705,
-      2273
-    ],
+    "positions": [0, 568, 1137, 1705, 2273],
     "metrics": {
       "scroller": {
         "cls": "flex min-h-0 flex-1 flex-col overflow-y-auto",
@@ -463,13 +451,7 @@
       "width": 390,
       "height": 844
     },
-    "positions": [
-      0,
-      662,
-      1324,
-      1986,
-      2648
-    ],
+    "positions": [0, 662, 1324, 1986, 2648],
     "metrics": {
       "scroller": {
         "cls": "flex min-h-0 flex-1 flex-col overflow-y-auto",

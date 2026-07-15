@@ -19,7 +19,9 @@ const baseInquiry = {
     supplier_categories: { name: "Catering" },
   },
   supplier_services: { name: "Wedding Dessert Package" },
-  supplier_quotes: [{ id: "quote-1", status: "sent", updated_at: "2026-07-10T04:00:00.000Z" }],
+  supplier_quotes: [
+    { id: "quote-1", status: "sent", updated_at: "2026-07-10T04:00:00.000Z" },
+  ],
 };
 
 describe("customer supplier inquiry logic", () => {
@@ -28,9 +30,7 @@ describe("customer supplier inquiry logic", () => {
     expect(getCustomerActivityHref("suppliers")).toBe(
       "/bookings?view=suppliers",
     );
-    expect(parseCustomerActivityView("suppliers")).toBe(
-      "suppliers",
-    );
+    expect(parseCustomerActivityView("suppliers")).toBe("suppliers");
     expect(parseCustomerActivityView("anything-else")).toBe("venues");
   });
 
@@ -61,7 +61,13 @@ describe("customer supplier inquiry logic", () => {
           supplier_categories: { name: "Entertainment" },
         },
         supplier_services: { name: "DJ Package" },
-        supplier_quotes: [{ id: "quote-2", status: "draft", updated_at: "2026-07-12T02:00:00.000Z" }],
+        supplier_quotes: [
+          {
+            id: "quote-2",
+            status: "draft",
+            updated_at: "2026-07-12T02:00:00.000Z",
+          },
+        ],
       },
     ];
 
@@ -105,10 +111,21 @@ describe("customer supplier inquiry logic", () => {
   it("blocks customer proposal actions for expired and non-sent quotes", () => {
     const now = new Date("2026-07-13T00:00:00.000Z");
 
-    expect(canCustomerActOnQuote({ status: "sent", valid_until: "2026-07-14" }, now)).toBe(true);
-    expect(canCustomerActOnQuote({ status: "draft", valid_until: "2026-07-14" }, now)).toBe(false);
-    expect(canCustomerActOnQuote({ status: "sent", valid_until: "2026-07-12" }, now)).toBe(false);
-    expect(canCustomerActOnQuote({ status: "withdrawn", valid_until: null }, now)).toBe(false);
+    expect(
+      canCustomerActOnQuote({ status: "sent", valid_until: "2026-07-14" }, now),
+    ).toBe(true);
+    expect(
+      canCustomerActOnQuote(
+        { status: "draft", valid_until: "2026-07-14" },
+        now,
+      ),
+    ).toBe(false);
+    expect(
+      canCustomerActOnQuote({ status: "sent", valid_until: "2026-07-12" }, now),
+    ).toBe(false);
+    expect(
+      canCustomerActOnQuote({ status: "withdrawn", valid_until: null }, now),
+    ).toBe(false);
   });
 
   it("builds timeline entries from real inquiry, message, and quote timestamps only", () => {

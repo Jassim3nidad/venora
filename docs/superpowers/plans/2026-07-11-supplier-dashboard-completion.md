@@ -23,12 +23,14 @@
 ### Task 1: Supplier Domain Migration and Contracts
 
 **Files:**
+
 - Create: `supabase/migrations/053_supplier_dashboard_domains.sql`
 - Create: `apps/web/src/features/suppliers/types/supplier-dashboard.types.ts`
 - Create: `apps/web/src/features/suppliers/schemas/supplier-dashboard.schema.ts`
 - Test: `apps/web/src/features/suppliers/schemas/supplier-dashboard.schema.test.ts`
 
 **Interfaces:**
+
 - Produces: `SupplierQuoteStatus`, `SupplierAvailabilityStatus`, `SupplierQuote`, `SupplierQuoteItem`, `SupplierInquiryMessage`, `SupplierAvailabilityEntry`
 - Produces: `supplierQuoteSchema`, `supplierMessageSchema`, `supplierAvailabilitySchema`, `supplierInquiryQuerySchema`
 
@@ -39,8 +41,12 @@ Cover positive quote totals, non-empty line items, valid ISO dates, allowed avai
 ```ts
 expect(() => supplierQuoteSchema.parse(validQuote)).not.toThrow();
 expect(() => supplierQuoteSchema.parse({ ...validQuote, items: [] })).toThrow();
-expect(() => supplierAvailabilitySchema.parse({ date: "2026-12-01", status: "booked" })).toThrow();
-expect(() => supplierMessageSchema.parse({ inquiryId, message: "   " })).toThrow();
+expect(() =>
+  supplierAvailabilitySchema.parse({ date: "2026-12-01", status: "booked" }),
+).toThrow();
+expect(() =>
+  supplierMessageSchema.parse({ inquiryId, message: "   " }),
+).toThrow();
 ```
 
 - [ ] **Step 2: Run the schema tests and confirm failure**
@@ -66,12 +72,14 @@ Expected: PASS.
 ### Task 2: Secure Supplier Dashboard Server Operations
 
 **Files:**
+
 - Create: `apps/web/src/features/suppliers/application/dashboard-actions.ts`
 - Create: `apps/web/src/features/suppliers/application/dashboard-queries.ts`
 - Test: `apps/web/src/features/suppliers/application/dashboard-actions.test.ts`
 - Modify: `apps/web/src/features/suppliers/application/actions.ts`
 
 **Interfaces:**
+
 - Produces: `getOwnedSupplierInquiry`, `listSupplierQuotes`, `getSupplierCalendarMonth`, `getSupplierReviews`
 - Produces: `upsertSupplierQuoteAction`, `sendSupplierQuoteAction`, `withdrawSupplierQuoteAction`, `sendSupplierInquiryMessageAction`, `setSupplierAvailabilityAction`, `clearSupplierAvailabilityAction`
 - Consumes: schemas and types from Task 1
@@ -81,8 +89,12 @@ Expected: PASS.
 Test that the authenticated supplier is derived from `supplier_profiles.profile_id`, inquiry ownership is checked before quote/message writes, only drafts are editable/sendable, only sent quotes are withdrawable, and availability ignores client-provided supplier IDs.
 
 ```ts
-expect(await upsertSupplierQuoteAction(foreignInquiry)).toMatchObject({ error: { code: "FORBIDDEN" } });
-expect(await sendSupplierQuoteAction({ quoteId: acceptedQuoteId })).toHaveProperty("error");
+expect(await upsertSupplierQuoteAction(foreignInquiry)).toMatchObject({
+  error: { code: "FORBIDDEN" },
+});
+expect(
+  await sendSupplierQuoteAction({ quoteId: acceptedQuoteId }),
+).toHaveProperty("error");
 expect(availabilityInsert).toMatchObject({ supplier_id: ownedSupplierId });
 ```
 
@@ -113,12 +125,14 @@ Expected: PASS.
 ### Task 3: Inquiry List, Detail, and Conversation
 
 **Files:**
+
 - Modify: `apps/web/app/(supplier)/dashboard/supplier/inquiries/page.tsx`
 - Create: `apps/web/app/(supplier)/dashboard/supplier/inquiries/[id]/page.tsx`
 - Create: `apps/web/app/(supplier)/dashboard/supplier/_components/inquiry-message-thread.tsx`
 - Create: `apps/web/app/(supplier)/dashboard/supplier/_components/inquiry-filters.tsx`
 
 **Interfaces:**
+
 - Consumes: `getOwnedSupplierInquiry`, inquiry message query, and `sendSupplierInquiryMessageAction`
 - Produces: detail links used by quote creation
 
@@ -143,12 +157,14 @@ Run the supplier action tests and type-check the web app.
 ### Task 4: Quote Management UI
 
 **Files:**
+
 - Create: `apps/web/app/(supplier)/dashboard/supplier/quotes/page.tsx`
 - Create: `apps/web/app/(supplier)/dashboard/supplier/quotes/[id]/page.tsx`
 - Create: `apps/web/app/(supplier)/dashboard/supplier/_components/quote-editor.tsx`
 - Create: `apps/web/app/(supplier)/dashboard/supplier/_components/quote-actions.tsx`
 
 **Interfaces:**
+
 - Consumes: quote query/actions from Task 2
 - Produces: quote list/detail routes linked from inquiry details
 
@@ -173,6 +189,7 @@ Run quote/action tests and web type-check.
 ### Task 5: Supplier Availability and Customer Blocking
 
 **Files:**
+
 - Create: `apps/web/app/(supplier)/dashboard/supplier/calendar/page.tsx`
 - Create: `apps/web/src/features/suppliers/ui/SupplierAvailabilityCalendar.tsx`
 - Create: `apps/web/src/features/suppliers/ui/SupplierAvailabilityEditor.tsx`
@@ -180,6 +197,7 @@ Run quote/action tests and web type-check.
 - Test: `apps/web/src/features/suppliers/application/actions.test.ts`
 
 **Interfaces:**
+
 - Consumes: calendar month query and availability actions from Task 2
 - Produces: disabled dates for the public inquiry form
 
@@ -208,12 +226,14 @@ Expected: PASS.
 ### Task 6: Reviews, Jobs, and Supplier Navigation
 
 **Files:**
+
 - Create: `apps/web/app/(supplier)/dashboard/supplier/reviews/page.tsx`
 - Modify: `apps/web/app/(supplier)/dashboard/supplier/bookings/page.tsx`
 - Modify: `apps/web/src/components/dashboard/enterprise/nav-config.ts`
 - Modify: `apps/web/src/components/dashboard/enterprise/EnterpriseShell.tsx`
 
 **Interfaces:**
+
 - Consumes: published supplier review query from Task 2
 - Produces: final supplier route map
 
@@ -238,6 +258,7 @@ Type-check and inspect desktop/mobile navigation behavior.
 ### Task 7: Overview, Analytics, and Shared Responsive Polish
 
 **Files:**
+
 - Modify: `apps/web/app/(supplier)/dashboard/supplier/page.tsx`
 - Modify: `apps/web/src/components/dashboard/enterprise/SupplierOverview.tsx`
 - Modify: `apps/web/app/(supplier)/dashboard/supplier/analytics/page.tsx`
@@ -247,6 +268,7 @@ Type-check and inspect desktop/mobile navigation behavior.
 - Modify: `apps/web/src/features/suppliers/ui/SupplierPortfolioManager.tsx`
 
 **Interfaces:**
+
 - Consumes: real quote, inquiry, job, review, service, and profile data
 
 - [ ] **Step 1: Correct overview metrics and sections**
@@ -272,6 +294,7 @@ Expected: PASS.
 ### Task 8: Final Review and Verification
 
 **Files:**
+
 - Review all files changed by Tasks 1-7
 
 - [ ] **Step 1: Run focused supplier tests**

@@ -23,7 +23,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
     className={cn(
       "flex cursor-default select-none items-center rounded-lg px-2 py-1.5 text-sm outline-none focus:bg-[var(--bg-subtle)] data-[state=open]:bg-[var(--bg-subtle)]",
       inset && "pl-8",
-      className
+      className,
     )}
     {...props}
   >
@@ -43,7 +43,7 @@ const DropdownMenuSubContent = React.forwardRef<
     className={cn(
       "z-50 min-w-[8rem] overflow-hidden rounded-xl border border-[var(--border-default)] bg-[var(--bg-base)] p-1 text-[var(--text-primary)] shadow-[var(--shadow-md)]",
       "data-[state=open]:animate-scale-in",
-      className
+      className,
     )}
     {...props}
   />
@@ -63,7 +63,7 @@ const DropdownMenuContent = React.forwardRef<
         "z-50 min-w-[12rem] overflow-hidden rounded-2xl border border-[var(--border-default)] bg-[var(--bg-base)] p-1.5 text-[var(--text-primary)] shadow-[var(--shadow-md)]",
         "data-[state=open]:animate-scale-in duration-150",
         "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
-        className
+        className,
       )}
       {...props}
     />
@@ -84,7 +84,7 @@ const DropdownMenuItem = React.forwardRef<
       "focus:bg-[var(--bg-subtle)] focus:text-[var(--text-primary)]",
       "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       inset && "pl-8",
-      className
+      className,
     )}
     {...props}
   />
@@ -99,7 +99,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
     ref={ref}
     className={cn(
       "relative flex cursor-pointer select-none items-center rounded-lg py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-[var(--bg-subtle)] data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-      className
+      className,
     )}
     {...props}
   >
@@ -122,7 +122,7 @@ const DropdownMenuRadioItem = React.forwardRef<
     ref={ref}
     className={cn(
       "relative flex cursor-pointer select-none items-center rounded-lg py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-[var(--bg-subtle)] data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-      className
+      className,
     )}
     {...props}
   >
@@ -147,7 +147,7 @@ const DropdownMenuLabel = React.forwardRef<
     className={cn(
       "px-2 py-1.5 text-xs font-semibold text-[var(--text-muted)]",
       inset && "pl-8",
-      className
+      className,
     )}
     {...props}
   />

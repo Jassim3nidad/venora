@@ -152,14 +152,14 @@ export default function MarketingHomePage() {
 
                 <div className="flex items-end justify-between border-t border-slate-100 pt-4">
                   <div>
-                    <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-slate-400">
+                    <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-slate-500">
                       Starting at
                     </p>
                     <p className="text-lg font-black text-[#111827]">
                       {heroVenue.price}
                     </p>
                   </div>
-                  <div className="flex items-center gap-1.5 rounded-2xl bg-slate-100 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.08em] text-[#6B7280]">
+                  <div className="flex items-center gap-1.5 rounded-2xl bg-slate-100 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.08em] text-slate-600">
                     <Users className="h-3.5 w-3.5" />
                     {heroVenue.capacity}
                   </div>

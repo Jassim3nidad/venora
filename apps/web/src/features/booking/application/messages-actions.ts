@@ -186,7 +186,7 @@ export async function getBookingMessages(
     .in("id", senderIds);
 
   const profilesMap = new Map(
-    (profilesData ?? []).map((p: any) => [p.id, p.full_name])
+    (profilesData ?? []).map((p: any) => [p.id, p.full_name]),
   );
 
   return messages.map((msg: any) => ({
@@ -211,9 +211,7 @@ export async function sendBookingMessageAction(rawInput: unknown) {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        throw new UnauthorizedError(
-          "You must be signed in to send messages.",
-        );
+        throw new UnauthorizedError("You must be signed in to send messages.");
       }
 
       // 1. Verify access and determine role

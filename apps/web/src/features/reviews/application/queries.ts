@@ -52,7 +52,9 @@ function normalizeReview(row: any): ReviewWithDetails {
     helpfulCount: Number(row.helpful_count) || 0,
     status: row.status,
     createdAt: row.created_at,
-    profile: profile ? { fullName: profile.full_name, avatarUrl: profile.avatar_url ?? null } : null,
+    profile: profile
+      ? { fullName: profile.full_name, avatarUrl: profile.avatar_url ?? null }
+      : null,
     photos: (row.review_photos ?? []).map((photo: any) => ({
       id: String(photo.id),
       url: photo.url,
@@ -64,7 +66,8 @@ function normalizeReview(row: any): ReviewWithDetails {
 function topReasonOf(flags: { reason: string }[]): ReviewFlagReason | null {
   if (flags.length === 0) return null;
   const counts = new Map<string, number>();
-  for (const flag of flags) counts.set(flag.reason, (counts.get(flag.reason) ?? 0) + 1);
+  for (const flag of flags)
+    counts.set(flag.reason, (counts.get(flag.reason) ?? 0) + 1);
   const top = [...counts.entries()].sort((a, b) => b[1] - a[1])[0];
   return (top?.[0] as ReviewFlagReason) ?? null;
 }
@@ -94,7 +97,10 @@ export async function getPublishedVenueReviews(
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("[reviews] published venue reviews fetch failed:", error.message);
+    console.error(
+      "[reviews] published venue reviews fetch failed:",
+      error.message,
+    );
     return [];
   }
 
@@ -120,7 +126,10 @@ export async function getPublishedVenueReviewsRaw(
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("[reviews] published venue reviews (raw) fetch failed:", error.message);
+    console.error(
+      "[reviews] published venue reviews (raw) fetch failed:",
+      error.message,
+    );
     return [];
   }
 
@@ -161,10 +170,16 @@ export async function getReviewsForModeration(
     return [];
   }
 
-  const normalized: ReviewForModeration[] = (data ?? []).map(normalizeReviewForModeration);
-  const filtered = onlyFlagged ? normalized.filter((review) => review.flagCount > 0) : normalized;
+  const normalized: ReviewForModeration[] = (data ?? []).map(
+    normalizeReviewForModeration,
+  );
+  const filtered = onlyFlagged
+    ? normalized.filter((review) => review.flagCount > 0)
+    : normalized;
 
-  return filtered.sort((a, b) => b.flagCount - a.flagCount || (a.createdAt < b.createdAt ? 1 : -1));
+  return filtered.sort(
+    (a, b) => b.flagCount - a.flagCount || (a.createdAt < b.createdAt ? 1 : -1),
+  );
 }
 
 export async function getReviewAnalytics(
@@ -177,7 +192,10 @@ export async function getReviewAnalytics(
       averageRating: 0,
       flaggedCount: 0,
       helpfulVotesTotal: 0,
-      ratingDistribution: [1, 2, 3, 4, 5].map((rating) => ({ rating: rating as 1 | 2 | 3 | 4 | 5, count: 0 })),
+      ratingDistribution: [1, 2, 3, 4, 5].map((rating) => ({
+        rating: rating as 1 | 2 | 3 | 4 | 5,
+        count: 0,
+      })),
       dimensionAverages: [],
       monthlyTrend: [],
     };
@@ -196,19 +214,34 @@ export async function getReviewAnalytics(
       averageRating: 0,
       flaggedCount: 0,
       helpfulVotesTotal: 0,
-      ratingDistribution: [1, 2, 3, 4, 5].map((rating) => ({ rating: rating as 1 | 2 | 3 | 4 | 5, count: 0 })),
+      ratingDistribution: [1, 2, 3, 4, 5].map((rating) => ({
+        rating: rating as 1 | 2 | 3 | 4 | 5,
+        count: 0,
+      })),
       dimensionAverages: [],
       monthlyTrend: [],
     };
   }
 
   const rows = (data ?? []) as any[];
-  const reviews = rows.map(normalizeReview).filter((review) => review.status !== "removed");
-  const flaggedCount = rows.filter((row) => (row.review_flags ?? []).length > 0).length;
-  const helpfulVotesTotal = reviews.reduce((sum, review) => sum + review.helpfulCount, 0);
+  const reviews = rows
+    .map(normalizeReview)
+    .filter((review) => review.status !== "removed");
+  const flaggedCount = rows.filter(
+    (row) => (row.review_flags ?? []).length > 0,
+  ).length;
+  const helpfulVotesTotal = reviews.reduce(
+    (sum, review) => sum + review.helpfulCount,
+    0,
+  );
   const averageRating =
     reviews.length > 0
-      ? Number((reviews.reduce((sum, review) => sum + review.overallRating, 0) / reviews.length).toFixed(2))
+      ? Number(
+          (
+            reviews.reduce((sum, review) => sum + review.overallRating, 0) /
+            reviews.length
+          ).toFixed(2),
+        )
       : 0;
 
   const ratingDistribution = ([1, 2, 3, 4, 5] as const).map((rating) => ({

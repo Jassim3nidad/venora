@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Sparkles, MapPin, Star, Image as ImageIcon, RefreshCw } from "lucide-react";
+import {
+  Sparkles,
+  MapPin,
+  Star,
+  Image as ImageIcon,
+  RefreshCw,
+} from "lucide-react";
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 import { useVenueRecommendations } from "../hooks/use-venue-recommendations";
 import { recordRecommendationClick } from "../api/ai-recommendation.client";
@@ -58,7 +64,9 @@ export default function RecommendedVenues() {
             disabled={isFetching}
             className="flex items-center gap-1.5 rounded-xl border border-[var(--border-default)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] disabled:opacity-50"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`}
+            />
             Retry
           </button>
         )}

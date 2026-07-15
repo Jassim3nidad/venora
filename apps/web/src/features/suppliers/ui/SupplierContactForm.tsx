@@ -57,18 +57,22 @@ export function SupplierContactForm({
     () => supplier.packages.filter((pkg) => pkg.isActive),
     [supplier.packages],
   );
-  
+
   const approvedBookings = useMemo(
-    () => bookings.filter((b) => b.status === "approved" || b.status === "confirmed"),
-    [bookings]
+    () =>
+      bookings.filter(
+        (b) => b.status === "approved" || b.status === "confirmed",
+      ),
+    [bookings],
   );
   const pendingBookings = useMemo(
     () => bookings.filter((b) => b.status === "pending"),
-    [bookings]
+    [bookings],
   );
-  
+
   const hasApprovedBookings = approvedBookings.length > 0;
-  const hasOnlyPendingBookings = !hasApprovedBookings && pendingBookings.length > 0;
+  const hasOnlyPendingBookings =
+    !hasApprovedBookings && pendingBookings.length > 0;
 
   const handleBookingChange = (bookingId: string) => {
     setSelectedBookingId(bookingId);
@@ -162,11 +166,15 @@ export function SupplierContactForm({
               </p>
               {hasOnlyPendingBookings ? (
                 <p className="mt-1 text-sm font-medium leading-6 text-amber-700">
-                  You have pending venue bookings. Pending venue bookings cannot be used as confirmed event locations yet. Please wait for the venue owner to approve your booking first.
+                  You have pending venue bookings. Pending venue bookings cannot
+                  be used as confirmed event locations yet. Please wait for the
+                  venue owner to approve your booking first.
                 </p>
               ) : (
                 <p className="mt-1 text-sm font-medium leading-6 text-amber-700">
-                  You need an approved venue booking before you can link an event location to this supplier inquiry. Browse venues to book first.
+                  You need an approved venue booking before you can link an
+                  event location to this supplier inquiry. Browse venues to book
+                  first.
                 </p>
               )}
             </div>
@@ -357,7 +365,11 @@ export function SupplierContactForm({
           <p>{status.message}</p>
           {status.type === "success" ? (
             <Link
-              href={status.requestId ? `/inquiries/${status.requestId}` : "/bookings?view=suppliers"}
+              href={
+                status.requestId
+                  ? `/inquiries/${status.requestId}`
+                  : "/bookings?view=suppliers"
+              }
               className="mt-2 inline-flex font-black text-emerald-800 underline-offset-4 hover:underline"
             >
               View Inquiry

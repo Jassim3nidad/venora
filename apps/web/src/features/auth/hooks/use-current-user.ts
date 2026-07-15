@@ -11,18 +11,20 @@ export function useCurrentUser() {
 
     async function fetchUser() {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
         if (!session?.user) {
           setUser(null);
           setLoading(false);
           return;
         }
 
-        const { data: profile } = await supabase
+        const { data: profile } = (await supabase
           .from("profiles")
           .select("full_name, avatar_url, phone, status")
           .eq("id", session.user.id)
-          .single() as any;
+          .single()) as any;
 
         // Fetch roles
         const { data: roleRows } = await supabase
@@ -53,7 +55,9 @@ export function useCurrentUser() {
 
     fetchUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_OUT") {
         setUser(null);
       } else if (event === "SIGNED_IN" || event === "USER_UPDATED") {

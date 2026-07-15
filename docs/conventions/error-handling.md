@@ -25,28 +25,28 @@ See implementation: [`src/lib/errors.ts`](../../apps/web/src/lib/errors.ts)
 
 ## 2. Where Errors Are Caught
 
-| Layer | Catches | Action |
-|---|---|---|
-| Domain entities | Invalid state transitions | Throws `VenoraError` |
-| Use cases | Repo errors, domain errors | Re-throws or wraps |
-| Server Actions | All errors | Maps to `ApiResponse` via `createServerAction` |
-| Route Handlers | All errors | Maps to JSON response with HTTP status |
-| React `error.tsx` | Unhandled client errors | Renders friendly error UI |
-| TanStack Query | Network/fetch errors | Exposed via `isError` + `error` in hooks |
+| Layer             | Catches                    | Action                                         |
+| ----------------- | -------------------------- | ---------------------------------------------- |
+| Domain entities   | Invalid state transitions  | Throws `VenoraError`                           |
+| Use cases         | Repo errors, domain errors | Re-throws or wraps                             |
+| Server Actions    | All errors                 | Maps to `ApiResponse` via `createServerAction` |
+| Route Handlers    | All errors                 | Maps to JSON response with HTTP status         |
+| React `error.tsx` | Unhandled client errors    | Renders friendly error UI                      |
+| TanStack Query    | Network/fetch errors       | Exposed via `isError` + `error` in hooks       |
 
 ---
 
 ## 3. Domain Error Codes
 
-| Code | Description | HTTP |
-|---|---|---|
-| `BOOKING_CONFLICT` | Venue already booked for requested date/time | 409 |
-| `BOOKING_INVALID_STATUS` | Invalid booking status transition | 400 |
-| `VENUE_NOT_APPROVED` | Attempt to book an unapproved venue | 403 |
-| `REVIEW_BOOKING_NOT_COMPLETED` | Review attempted before booking completed | 400 |
-| `REVIEW_ALREADY_EXISTS` | Customer already reviewed this booking | 409 |
-| `PAYMENT_CAPTURE_FAILED` | Payment gateway returned failure | 402 |
-| `INSUFFICIENT_PERMISSIONS` | User role lacks required access | 403 |
+| Code                           | Description                                  | HTTP |
+| ------------------------------ | -------------------------------------------- | ---- |
+| `BOOKING_CONFLICT`             | Venue already booked for requested date/time | 409  |
+| `BOOKING_INVALID_STATUS`       | Invalid booking status transition            | 400  |
+| `VENUE_NOT_APPROVED`           | Attempt to book an unapproved venue          | 403  |
+| `REVIEW_BOOKING_NOT_COMPLETED` | Review attempted before booking completed    | 400  |
+| `REVIEW_ALREADY_EXISTS`        | Customer already reviewed this booking       | 409  |
+| `PAYMENT_CAPTURE_FAILED`       | Payment gateway returned failure             | 402  |
+| `INSUFFICIENT_PERMISSIONS`     | User role lacks required access              | 403  |
 
 ---
 
@@ -90,9 +90,12 @@ Toast:        Shown for async mutations (success + error)
 ```typescript
 // src/lib/error-messages.ts
 export const ERROR_MESSAGES: Record<string, string> = {
-  BOOKING_CONFLICT:      "This venue is already booked for that date and time. Please choose a different slot.",
-  PAYMENT_CAPTURE_FAILED: "Your payment could not be processed. Please try again or use a different payment method.",
-  INTERNAL_ERROR:        "Something went wrong on our end. Our team has been notified.",
+  BOOKING_CONFLICT:
+    "This venue is already booked for that date and time. Please choose a different slot.",
+  PAYMENT_CAPTURE_FAILED:
+    "Your payment could not be processed. Please try again or use a different payment method.",
+  INTERNAL_ERROR:
+    "Something went wrong on our end. Our team has been notified.",
   // ...
 };
 ```

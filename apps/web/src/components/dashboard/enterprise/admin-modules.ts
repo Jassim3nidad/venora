@@ -14,7 +14,8 @@ export type AdminModule = {
 export const ADMIN_MODULES: AdminModule[] = [
   {
     title: "Partner Applications",
-    description: "Approve or deny applications for venue owner, coordinator, and supplier roles.",
+    description:
+      "Approve or deny applications for venue owner, coordinator, and supplier roles.",
     href: "/admin/applications",
     icon: "how_to_reg",
   },

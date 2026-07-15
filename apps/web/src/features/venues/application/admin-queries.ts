@@ -19,7 +19,9 @@ const STATUS_FOR_FILTER: Record<VenueQueueFilter, string[] | null> = {
   all: null,
 };
 
-export async function getVenuesForAdminReview(filter: VenueQueueFilter = "pending"): Promise<{
+export async function getVenuesForAdminReview(
+  filter: VenueQueueFilter = "pending",
+): Promise<{
   venues: VenueQueueRow[] | null;
   error: string | null;
 }> {
@@ -69,7 +71,12 @@ export type VenueReviewDetail = {
   venueRules: string | null;
   organizationName: string | null;
   ownerName: string | null;
-  images: { id: string; storagePath: string; mediaType: string; isFeatured: boolean }[];
+  images: {
+    id: string;
+    storagePath: string;
+    mediaType: string;
+    isFeatured: boolean;
+  }[];
   packages: { id: string; name: string; price: number; priceUnit: string }[];
   amenities: string[];
   eventTypes: string[];
@@ -101,8 +108,12 @@ export async function getVenueForAdminReview(venueId: string): Promise<{
   if (error) return { venue: null, error: error.message };
   if (!venue) return { venue: null, error: "Venue not found" };
 
-  const org = Array.isArray(venue.organizations) ? venue.organizations[0] : venue.organizations;
-  const ownerProfile = Array.isArray(org?.profiles) ? org?.profiles[0] : org?.profiles;
+  const org = Array.isArray(venue.organizations)
+    ? venue.organizations[0]
+    : venue.organizations;
+  const ownerProfile = Array.isArray(org?.profiles)
+    ? org?.profiles[0]
+    : org?.profiles;
 
   return {
     venue: {
@@ -136,8 +147,12 @@ export async function getVenueForAdminReview(venueId: string): Promise<{
         price: Number(pkg.price),
         priceUnit: pkg.price_unit,
       })),
-      amenities: (venue.venue_amenities ?? []).map((a: any) => a.amenities?.name).filter(Boolean),
-      eventTypes: (venue.venue_event_types ?? []).map((e: any) => e.event_types?.name).filter(Boolean),
+      amenities: (venue.venue_amenities ?? [])
+        .map((a: any) => a.amenities?.name)
+        .filter(Boolean),
+      eventTypes: (venue.venue_event_types ?? [])
+        .map((e: any) => e.event_types?.name)
+        .filter(Boolean),
     },
     error: null,
   };
@@ -161,7 +176,9 @@ export async function getVenueReviewHistory(venueId: string): Promise<{
 
   const { data, error } = await supabase
     .from("venue_review_history")
-    .select("id, action, previous_status, new_status, reason, created_at, profiles:actor_id (full_name)")
+    .select(
+      "id, action, previous_status, new_status, reason, created_at, profiles:actor_id (full_name)",
+    )
     .eq("venue_id", venueId)
     .order("created_at", { ascending: false });
 

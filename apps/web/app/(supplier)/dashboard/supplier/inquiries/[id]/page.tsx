@@ -22,7 +22,8 @@ export default async function SupplierInquiryDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { supabase, profile, user } = await getRequiredSupplierDashboardContext();
+  const { supabase, profile, user } =
+    await getRequiredSupplierDashboardContext();
   if (!profile) notFound();
   const inquiry = await getOwnedSupplierInquiry(supabase, profile.id, id);
   if (!inquiry) notFound();
@@ -54,29 +55,50 @@ export default async function SupplierInquiryDetailPage({
             <dl className="grid gap-4 text-sm sm:grid-cols-2">
               {[
                 ["Service", service?.name ?? "General inquiry"],
-                ["Event date", inquiry.event_date_snapshot ?? inquiry.event_date],
+                [
+                  "Event date",
+                  inquiry.event_date_snapshot ?? inquiry.event_date,
+                ],
                 ["Start time", inquiry.event_start_time_snapshot],
                 ["Venue", inquiry.venue_name_snapshot],
-                ["Location", inquiry.location_snapshot ?? inquiry.event_location],
-                ["Guest count", inquiry.guest_count_snapshot ?? inquiry.guest_count],
+                [
+                  "Location",
+                  inquiry.location_snapshot ?? inquiry.event_location,
+                ],
+                [
+                  "Guest count",
+                  inquiry.guest_count_snapshot ?? inquiry.guest_count,
+                ],
               ].map(([label, content]) => (
-                <div key={String(label)} className="rounded-2xl bg-[#f8fafc] p-4">
-                  <dt className="text-xs font-bold uppercase tracking-wide text-[#64748b]">{label}</dt>
-                  <dd className="mt-1 font-semibold text-[#0f172a]">{value(content)}</dd>
+                <div
+                  key={String(label)}
+                  className="rounded-2xl bg-[#f8fafc] p-4"
+                >
+                  <dt className="text-xs font-bold uppercase tracking-wide text-[#64748b]">
+                    {label}
+                  </dt>
+                  <dd className="mt-1 font-semibold text-[#0f172a]">
+                    {value(content)}
+                  </dd>
                 </div>
               ))}
             </dl>
           </Panel>
           <Panel>
             <PanelHeader title="Customer Message" />
-            <p className="whitespace-pre-wrap text-sm leading-7 text-[#334155]">{inquiry.message}</p>
+            <p className="whitespace-pre-wrap text-sm leading-7 text-[#334155]">
+              {inquiry.message}
+            </p>
           </Panel>
           <Panel>
-            <PanelHeader title="Conversation" description="Messages are visible only to you and this customer." />
-            <InquiryMessageThread 
-              inquiryId={id} 
-              messages={messages ?? []} 
-              supplierUserId={user.id} 
+            <PanelHeader
+              title="Conversation"
+              description="Messages are visible only to you and this customer."
+            />
+            <InquiryMessageThread
+              inquiryId={id}
+              messages={messages ?? []}
+              supplierUserId={user.id}
               customerName={inquiry.contact_name}
               supplierName={profile.businessName}
             />
@@ -96,11 +118,23 @@ export default async function SupplierInquiryDetailPage({
             {quote ? (
               <div className="space-y-4">
                 <StatusBadge status={quote.status} />
-                <p className="text-2xl font-black text-[#0f172a]">₱{Number(quote.total).toLocaleString("en-PH")}</p>
-                <DashButton href={`/dashboard/supplier/quotes/${quote.id}`} variant="secondary">View proposal</DashButton>
+                <p className="text-2xl font-black text-[#0f172a]">
+                  ₱{Number(quote.total).toLocaleString("en-PH")}
+                </p>
+                <DashButton
+                  href={`/dashboard/supplier/quotes/${quote.id}`}
+                  variant="secondary"
+                >
+                  View proposal
+                </DashButton>
               </div>
             ) : (
-              <DashButton href={`/dashboard/supplier/quotes/new?inquiryId=${id}`} icon="request_quote">Create service proposal</DashButton>
+              <DashButton
+                href={`/dashboard/supplier/quotes/new?inquiryId=${id}`}
+                icon="request_quote"
+              >
+                Create service proposal
+              </DashButton>
             )}
           </Panel>
         </div>

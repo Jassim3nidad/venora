@@ -2,24 +2,22 @@
  * Supabase Edge Function: ai-recommendation
  *
  * Personalised venue recommendations from a customer's booking/favorite
- * history, ranked via the same hybrid public.search_venues() RPC that
- * backs ai-search — semantic similarity (once embeddings are warmed) plus
- * keyword/rating signals, so results are useful even for venues that
- * haven't been embedded yet.
+ * history, ranked via the same public.search_venues() RPC that backs
+ * ai-search. OpenRouter turns history into a grounded keyword query; the
+ * database remains the source of venue facts and ranking results.
  */
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { embedQuery, warmVenueEmbeddings, toVectorLiteral } from "../_shared/embeddings.ts";
 import { toVenuePayload } from "../_shared/venues.ts";
 import {
-  loadAiConfig,
-  validateProviderModel,
+  type AiConfiguration,
   checkAiUsageLimits,
-  logAiUsage,
-  postChatCompletion,
   estimateCostCents,
   extractTokenUsage,
-  type AiConfiguration,
+  loadAiConfig,
+  logAiUsage,
+  postChatCompletion,
+  validateProviderModel,
 } from "../_shared/ai-config.ts";
 
 const corsHeaders = {
@@ -44,13 +42,18 @@ function errorResponse(code: string, message: string, status = 500) {
 
 async function buildPreferenceQuery(
   openRouterApiKey: string,
-  openAiApiKey: string | null,
   venueNames: string[],
   config: AiConfiguration,
-): Promise<{ query: string; inputTokens: number | null; outputTokens: number | null; providerUsed: string; modelUsed: string }> {
+): Promise<{
+  query: string;
+  inputTokens: number | null;
+  outputTokens: number | null;
+  providerUsed: string;
+  modelUsed: string;
+}> {
   const { response, providerUsed, modelUsed } = await postChatCompletion(
     config,
-    { openrouter: openRouterApiKey, openai: openAiApiKey },
+    openRouterApiKey,
     {
       temperature: config.temperature ?? 0.3,
       // Generous budget — the default free model reasons before writing
@@ -64,7 +67,9 @@ async function buildPreferenceQuery(
         },
         {
           role: "user",
-          content: `Past venues: ${venueNames.join(", ") || "none yet"}. Return only the search query string.`,
+          content: `Past venues: ${
+            venueNames.join(", ") || "none yet"
+          }. Return only the search query string.`,
         },
       ],
     },
@@ -77,7 +82,10 @@ async function buildPreferenceQuery(
 
   const payload = await response.json();
   const content = payload?.choices?.[0]?.message?.content;
-  const query = typeof content === "string" && content.trim() ? content.trim() : "elegant event venue";
+  const query =
+    typeof content === "string" && content.trim()
+      ? content.trim()
+      : "elegant event venue";
   return { query, ...extractTokenUsage(payload), providerUsed, modelUsed };
 }
 
@@ -87,7 +95,11 @@ serve(async (req) => {
   }
 
   if (req.method !== "POST") {
-    return errorResponse("METHOD_NOT_ALLOWED", "Use POST for recommendations.", 405);
+    return errorResponse(
+      "METHOD_NOT_ALLOWED",
+      "Use POST for recommendations.",
+      405,
+    );
   }
 
   try {
@@ -95,8 +107,6 @@ serve(async (req) => {
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const openRouterApiKey = Deno.env.get("OPENROUTER_API_KEY");
-    // Optional — only used for semantic embeddings; degrades gracefully.
-    const openAiApiKey = Deno.env.get("OPENAI_API_KEY");
 
     if (!supabaseUrl || !anonKey || !serviceRoleKey) {
       return errorResponse(
@@ -115,25 +125,36 @@ serve(async (req) => {
     }
 
     // Service-role client for writes/RPCs that must bypass RLS (impression
-    // logging, embedding warm-up) — also used to load AI config before auth
+    // logging) — also used to load AI config before auth
     // resolves, since config gating doesn't depend on who's asking.
     const supabase = createClient(supabaseUrl, serviceRoleKey);
     const aiConfig = await loadAiConfig(supabase, "recommendation");
-    const providerCheck = aiConfig ? validateProviderModel(aiConfig) : { ok: false as const };
+    const providerCheck = aiConfig
+      ? validateProviderModel(aiConfig)
+      : { ok: false as const };
     let aiLimitCheck: { allowed: boolean; reason?: string } = { allowed: true };
     if (aiConfig?.enabled && providerCheck.ok) {
-      aiLimitCheck = await checkAiUsageLimits(supabase, "recommendation", aiConfig);
+      aiLimitCheck = await checkAiUsageLimits(
+        supabase,
+        "recommendation",
+        aiConfig,
+      );
     }
     // If the AI personalization feature is disabled/misconfigured/rate-limited,
     // this endpoint doesn't fail closed entirely — it falls back to the
     // existing cold-start (rating-based) path below, which needs no AI call
     // at all. That's a deliberate, narrower interpretation of "fail closed"
     // for this specific endpoint: the AI call is skipped, not the feature.
-    const personalizationAllowed = !!aiConfig?.enabled && providerCheck.ok && aiLimitCheck.allowed;
+    const personalizationAllowed =
+      !!aiConfig?.enabled && providerCheck.ok && aiLimitCheck.allowed;
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      return errorResponse("UNAUTHORIZED", "Sign in to see personalised recommendations.", 401);
+      return errorResponse(
+        "UNAUTHORIZED",
+        "Sign in to see personalised recommendations.",
+        401,
+      );
     }
 
     const userClient = createClient(supabaseUrl, anonKey, {
@@ -144,7 +165,11 @@ serve(async (req) => {
     } = await userClient.auth.getUser();
 
     if (!user) {
-      return errorResponse("UNAUTHORIZED", "Sign in to see personalised recommendations.", 401);
+      return errorResponse(
+        "UNAUTHORIZED",
+        "Sign in to see personalised recommendations.",
+        401,
+      );
     }
 
     const [bookingsRes, favsRes] = await Promise.all([
@@ -164,7 +189,9 @@ serve(async (req) => {
     ]);
 
     const history = [...(bookingsRes.data ?? []), ...(favsRes.data ?? [])];
-    const excludeVenueIds = [...new Set(history.map((row: any) => row.venue_id))];
+    const excludeVenueIds = [
+      ...new Set(history.map((row: any) => row.venue_id)),
+    ];
     const venueNames = history
       .map((row: any) => row.venues?.name)
       .filter((name: unknown): name is string => typeof name === "string");
@@ -182,8 +209,15 @@ serve(async (req) => {
       });
 
       if (error) {
-        console.error("[ai-recommendation] Cold-start search_venues failed:", error);
-        return errorResponse("RECOMMENDATION_FAILED", "Could not load recommendations.", 500);
+        console.error(
+          "[ai-recommendation] Cold-start search_venues failed:",
+          error,
+        );
+        return errorResponse(
+          "RECOMMENDATION_FAILED",
+          "Could not load recommendations.",
+          500,
+        );
       }
 
       venueRows = data ?? [];
@@ -192,7 +226,11 @@ serve(async (req) => {
       const requestStartedAt = Date.now();
       let queryResult: Awaited<ReturnType<typeof buildPreferenceQuery>>;
       try {
-        queryResult = await buildPreferenceQuery(openRouterApiKey, openAiApiKey, venueNames, aiConfig!);
+        queryResult = await buildPreferenceQuery(
+          openRouterApiKey,
+          venueNames,
+          aiConfig!,
+        );
       } catch (error) {
         await logAiUsage(supabase, {
           feature: "recommendation",
@@ -213,38 +251,31 @@ serve(async (req) => {
         actorId: user.id,
         inputTokens: queryResult.inputTokens,
         outputTokens: queryResult.outputTokens,
-        estimatedCostCents: estimateCostCents(queryResult.modelUsed, (queryResult.inputTokens ?? 0) + (queryResult.outputTokens ?? 0)),
+        estimatedCostCents: estimateCostCents(
+          queryResult.modelUsed,
+          (queryResult.inputTokens ?? 0) + (queryResult.outputTokens ?? 0),
+        ),
         durationMs: Date.now() - requestStartedAt,
         success: true,
       });
 
-      // Best-effort backfill so newer venues have embeddings to match against.
-      // (Deliberate narrow exception to "fail closed": embeddings are a
-      // best-effort ranking enhancement that already degrades gracefully
-      // everywhere else, so a transient config-read failure here falls back
-      // to "attempt it" rather than silently disabling ranking quality.)
-      const embeddingsConfig = await loadAiConfig(supabase, "embeddings");
-      const embeddingsEnabled = embeddingsConfig?.enabled ?? true;
-      let queryVector: number[] | null = null;
-      if (openAiApiKey && embeddingsEnabled) {
-        await warmVenueEmbeddings(
-          supabase,
-          openAiApiKey,
-          Number(Deno.env.get("AI_SEARCH_EMBED_REFRESH_LIMIT") ?? 8),
-        );
-        queryVector = await embedQuery(openAiApiKey, preferenceQuery);
-      }
-
       const { data, error } = await supabase.rpc("search_venues", {
-        query_embedding: queryVector ? toVectorLiteral(queryVector) : null,
+        query_embedding: null,
         keyword: preferenceQuery,
         match_count: recommendationCount + excludeVenueIds.length,
         sort_by: "relevance",
       });
 
       if (error) {
-        console.error("[ai-recommendation] Personalized search_venues failed:", error);
-        return errorResponse("RECOMMENDATION_FAILED", "Could not load recommendations.", 500);
+        console.error(
+          "[ai-recommendation] Personalized search_venues failed:",
+          error,
+        );
+        return errorResponse(
+          "RECOMMENDATION_FAILED",
+          "Could not load recommendations.",
+          500,
+        );
       }
 
       venueRows = data ?? [];
@@ -269,7 +300,11 @@ serve(async (req) => {
       reason:
         mode === "cold_start"
           ? { cold_start: true }
-          : { matched: ["preference_summary"], preferenceQuery, similarity: venue.similarity },
+          : {
+              matched: ["preference_summary"],
+              preferenceQuery,
+              similarity: venue.similarity,
+            },
       shown_at: new Date().toISOString(),
     }));
 
@@ -279,7 +314,10 @@ serve(async (req) => {
       .select("id, venue_id");
 
     if (insertError) {
-      console.error("[ai-recommendation] Failed to log impressions:", insertError);
+      console.error(
+        "[ai-recommendation] Failed to log impressions:",
+        insertError,
+      );
     }
 
     const recommendationEventIds: Record<string, string> = {};
@@ -295,7 +333,9 @@ serve(async (req) => {
     console.error("[ai-recommendation] Unexpected error:", error);
     return errorResponse(
       "INTERNAL_ERROR",
-      error instanceof Error ? error.message : "Recommendations are temporarily unavailable.",
+      error instanceof Error
+        ? error.message
+        : "Recommendations are temporarily unavailable.",
       500,
     );
   }

@@ -23,7 +23,10 @@ export default async function BecomePartnerPage() {
       ) : null}
 
       {showWizard ? (
-        <section className={cardClassName} aria-label="Partner application setup">
+        <section
+          className={cardClassName}
+          aria-label="Partner application setup"
+        >
           {application?.status === "denied" ? (
             <header className="mb-8 border-b border-[#E5E7EB]/80 pb-8">
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">

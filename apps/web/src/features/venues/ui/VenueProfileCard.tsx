@@ -68,7 +68,9 @@ export default function VenueProfileCard({
 
           <p className="text-sm text-[var(--text-secondary)]">
             Event venue hosted by{" "}
-            <span className="font-semibold text-[var(--text-primary)]">{hostName}</span>
+            <span className="font-semibold text-[var(--text-primary)]">
+              {hostName}
+            </span>
           </p>
         </div>
 
@@ -91,7 +93,9 @@ export default function VenueProfileCard({
                 : "text-[var(--text-primary)] hover:bg-[var(--bg-subtle)]"
             }`}
           >
-            <Heart className={`h-4 w-4 md:mr-2 ${isFavorited ? "fill-current" : ""}`} />
+            <Heart
+              className={`h-4 w-4 md:mr-2 ${isFavorited ? "fill-current" : ""}`}
+            />
             <span className="hidden md:inline">
               {isFavorited ? "Saved" : "Save"}
             </span>

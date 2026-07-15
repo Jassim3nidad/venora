@@ -47,10 +47,9 @@ a dedicated style-only change rather than mixing broad formatting into fixes.
 
 `pnpm edge:validate` inventories every Edge Function and checks entrypoints,
 environment access, CORS/preflight, error handling, authentication assumptions,
-service-role use, and obvious secret literals. Full Deno formatting/type/import
-validation remains visibly blocked by legacy debt (12 formatting failures and
-15 type errors). Protected Edge deployment runs strict Deno checks for the
-selected function and refuses deployment on failure.
+service-role use, obvious secret literals, full Deno formatting, and type/import
+resolution for all seven entrypoints. Protected Edge deployment repeats strict
+Deno checks for the selected function and refuses deployment on failure.
 
 The pnpm store is lockfile-keyed by `setup-node`; protected hosted browser runs
 also cache Chromium by OS and lockfile. No generated database types, secrets,

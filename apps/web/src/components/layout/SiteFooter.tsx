@@ -54,7 +54,10 @@ export function SiteFooter() {
           <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
             <span>{new Date().getFullYear()} Venora, Inc.</span>
             <span aria-hidden="true">.</span>
-            <Link href="/privacy" className="font-semibold hover:text-[#2563EB]">
+            <Link
+              href="/privacy"
+              className="font-semibold hover:text-[#2563EB]"
+            >
               Privacy
             </Link>
             <span aria-hidden="true">.</span>

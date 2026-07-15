@@ -68,7 +68,7 @@ export default async function PackagesPage() {
     inclusions:
       pkg.inclusions.length > 0
         ? pkg.inclusions.slice(0, 3).join(", ")
-        : pkg.description ?? "-",
+        : (pkg.description ?? "-"),
     status: pkg.is_active ? "active" : "inactive",
   }));
 
@@ -105,7 +105,11 @@ export default async function PackagesPage() {
       description="Review venue packages, pricing, inclusions, and guest capacity."
       action={
         rows.length > 0 ? (
-          <DashButton href="/dashboard/venues" variant="secondary" icon="location_city">
+          <DashButton
+            href="/dashboard/venues"
+            variant="secondary"
+            icon="location_city"
+          >
             Review Venues
           </DashButton>
         ) : null
@@ -125,7 +129,11 @@ export default async function PackagesPage() {
           title="No packages configured"
           description="Packages connected to your venues will appear here. Add package records once your venue setup flow is available."
           action={
-            <DashButton href="/dashboard/venues" variant="secondary" icon="location_city">
+            <DashButton
+              href="/dashboard/venues"
+              variant="secondary"
+              icon="location_city"
+            >
               Review Venues
             </DashButton>
           }
