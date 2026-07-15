@@ -15,7 +15,10 @@ import {
   researchVenues,
 } from "@/src/features/venues/data/research-venues";
 import { searchMarketplaceVenues } from "@/src/features/venues/application/queries";
-import { resolveFeaturedMarketplaceVenues } from "@/src/features/venues/application/featured-venues";
+import {
+  getFeaturedVenueIds,
+  resolveFeaturedMarketplaceVenues,
+} from "@/src/features/venues/application/featured-venues";
 import { toLiveMarketplaceVenue } from "@/src/features/venues/utils/venue-mappers";
 import FeaturedVenueCard from "@/src/features/venues/ui/FeaturedVenueCard";
 const provinceCount = new Set(
@@ -31,15 +34,6 @@ const stats = [
 
 export default async function MarketingHomePage() {
   const supabase = await createClient();
-  const { data: dbVenues, error } = await searchMarketplaceVenues(supabase, {
-    page: 1,
-    limit: researchVenues.length,
-  });
-
-  if (error) {
-    console.error("[marketing/page] Supabase fetch error:", error.message);
-  }
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -65,6 +59,17 @@ export default async function MarketingHomePage() {
   }
 
   const fallbackVenues = getMarketplaceResearchVenues(favoriteVenueIds);
+  const featuredVenueIds = getFeaturedVenueIds(fallbackVenues);
+  const { data: dbVenues, error } = await searchMarketplaceVenues(supabase, {
+    page: 1,
+    limit: featuredVenueIds.length,
+    venueIds: featuredVenueIds,
+  });
+
+  if (error) {
+    console.error("[marketing/page] Supabase fetch error:", error.message);
+  }
+
   const researchVenueById = new Map(
     researchVenues.map((venue) => [venue.id, venue]),
   );
