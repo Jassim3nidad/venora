@@ -127,7 +127,11 @@ export default async function CoordinatorEventsPage() {
       title="Events"
       description="Every booking across the venues your organization coordinates."
       action={
-        <DashButton href="/dashboard/calendar" variant="secondary" icon="event">
+        <DashButton
+          href="/dashboard/coordinator/calendar"
+          variant="secondary"
+          icon="event"
+        >
           Calendar
         </DashButton>
       }

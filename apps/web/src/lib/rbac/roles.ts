@@ -62,9 +62,10 @@ export const PROTECTED_ROUTES: { prefix: string; allow: RoleName[] }[] = [
     prefix: "/dashboard/venues",
     allow: [ROLES.VENUE_OWNER, ROLES.EVENT_COORDINATOR, ROLES.ADMIN],
   },
+  // Venue-owner calendar only — coordinators use /dashboard/coordinator/calendar
   {
     prefix: "/dashboard/calendar",
-    allow: [ROLES.VENUE_OWNER, ROLES.EVENT_COORDINATOR, ROLES.ADMIN],
+    allow: [ROLES.VENUE_OWNER, ROLES.ADMIN],
   },
   {
     prefix: "/dashboard/packages",

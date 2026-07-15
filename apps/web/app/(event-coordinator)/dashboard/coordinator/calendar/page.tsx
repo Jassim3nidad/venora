@@ -10,6 +10,7 @@ import { getOwnerDashboardContext } from "@/lib/dashboard/org-dashboard-data";
 export const metadata: Metadata = {
   title: "Event Calendar - Coordinator Dashboard",
 };
+
 export const dynamic = "force-dynamic";
 
 type CalendarVenue = {
@@ -44,7 +45,7 @@ export default async function CoordinatorCalendarPage() {
   return (
     <DashboardSubPage
       title="Availability Calendar"
-      description="View the schedule of events for the venues you coordinate."
+      description="Review and manage availability across the venues your organization coordinates."
       action={
         <DashButton
           href="/dashboard/coordinator/events"
@@ -64,8 +65,13 @@ export default async function CoordinatorCalendarPage() {
       ) : venueRows.length === 0 ? (
         <EmptyState
           icon="event"
-          title="No assigned venues"
-          description="Your organization has not assigned any venues to coordinate."
+          title="No venues yet"
+          description="Venues assigned to your organization will appear here for availability management."
+          action={
+            <DashButton href="/dashboard/coordinator/venues" icon="location_city">
+              View Venues
+            </DashButton>
+          }
         />
       ) : (
         <BookingCalendar venues={venueRows} />
