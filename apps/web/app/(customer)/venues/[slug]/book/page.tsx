@@ -184,7 +184,10 @@ export default async function BookVenuePage({ params, searchParams }: Props) {
             />
           )}
 
-          <CustomerCard className="lg:sticky lg:top-24">
+          <CustomerCard
+            data-testid="booking-workflow-summary"
+            className="lg:sticky lg:top-[9.5rem] lg:self-start"
+          >
             <div className="border-b border-[#E5E7EB] p-5 sm:p-6">
               <CustomerStatusBadge icon={ShieldCheck}>
                 Workflow

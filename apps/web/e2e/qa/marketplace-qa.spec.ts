@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 test("landing search suggestions support keyboard selection and GET filters", async ({
   page,
@@ -89,6 +89,43 @@ test("venue estimate uses booking guests without public package sections", async
   await expect(
     estimator.getByRole("spinbutton", { name: "Guest Count" }),
   ).toHaveValue("200");
+});
+
+async function expectDesktopSupportingCardOffset(
+  card: Locator,
+) {
+  await expect(card).toBeVisible();
+  const styles = await card.evaluate((element) => {
+    const computed = getComputedStyle(element);
+    return { position: computed.position, top: computed.top };
+  });
+
+  expect(styles).toEqual({ position: "sticky", top: "152px" });
+}
+
+test("supplier profile removes back control and keeps proposal card sticky", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/suppliers/qa-supplier");
+
+  await expect(
+    page.getByRole("link", { name: /Back to suppliers/i }),
+  ).toHaveCount(0);
+  await expectDesktopSupportingCardOffset(
+    page.locator("#supplier-request-card").first().locator(".."),
+  );
+});
+
+test("venue profile keeps the booking card below the header stack", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/venues/the-blue-leaf-filipinas");
+
+  await expectDesktopSupportingCardOffset(
+    page.getByTestId("venue-booking-sidebar"),
+  );
 });
 
 test("marketplace uses document scrolling and renders a normal-flow footer", async ({
