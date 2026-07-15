@@ -23,6 +23,7 @@ export default function FeaturedVenueCard({
     Boolean(venue.isFavorited),
   );
   const [isPending, setIsPending] = useState(false);
+  const [favoriteError, setFavoriteError] = useState<string | null>(null);
 
   const handleFavoriteToggle = async (
     event: React.MouseEvent<HTMLButtonElement>,
@@ -36,6 +37,7 @@ export default function FeaturedVenueCard({
     }
 
     const previousIsFavorited = isFavorited;
+    setFavoriteError(null);
     setIsFavorited(!previousIsFavorited);
     setIsPending(true);
 
@@ -44,6 +46,9 @@ export default function FeaturedVenueCard({
     setIsPending(false);
     if (result.error) {
       setIsFavorited(previousIsFavorited);
+      setFavoriteError(
+        result.error.message || "Unable to update favorites. Please try again.",
+      );
       return;
     }
 
@@ -120,6 +125,15 @@ export default function FeaturedVenueCard({
           }`}
         />
       </button>
+
+      {favoriteError ? (
+        <p
+          role="alert"
+          className="absolute inset-x-3 bottom-3 z-20 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-bold text-red-700 shadow-sm"
+        >
+          {favoriteError}
+        </p>
+      ) : null}
     </article>
   );
 }

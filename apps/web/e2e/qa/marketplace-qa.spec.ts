@@ -6,11 +6,13 @@ test("landing search suggestions support keyboard selection and GET filters", as
   await page.goto("/");
 
   const location = page.getByRole("combobox", { name: "Location" });
-  await location.fill("alf");
-  await expect(page.getByRole("option", { name: "Alfonso, Cavite" })).toBeVisible();
+  await location.fill("puerto");
+  await expect(
+    page.getByRole("option", { name: "Puerto Princesa City, Palawan" }),
+  ).toBeVisible();
   await location.press("ArrowDown");
   await location.press("Enter");
-  await expect(location).toHaveValue("Alfonso, Cavite");
+  await expect(location).toHaveValue("Puerto Princesa City, Palawan");
 
   const eventType = page.getByRole("combobox", { name: "Event Type" });
   await eventType.fill("wed");
@@ -19,13 +21,16 @@ test("landing search suggestions support keyboard selection and GET filters", as
   await expect(eventType).toHaveValue("Destination Wedding");
 
   await page.getByRole("button", { name: "Search", exact: true }).click();
-  await expect(page).toHaveURL((url) => {
-    return (
-      url.pathname === "/venues" &&
-      url.searchParams.get("location") === "Alfonso, Cavite" &&
-      url.searchParams.get("event") === "Destination Wedding"
-    );
-  });
+  await page.waitForURL("**/venues?**");
+  const searchUrl = new URL(page.url());
+  expect(searchUrl.pathname).toBe("/venues");
+  expect(searchUrl.searchParams.get("location")).toBe(
+    "Puerto Princesa City, Palawan",
+  );
+  expect(searchUrl.searchParams.get("event")).toBe("Destination Wedding");
+  await expect(
+    page.getByRole("heading", { name: "Astoria Palawan", exact: true }),
+  ).toBeVisible();
 });
 
 test("featured venue card identity matches its destination", async ({ page }) => {
@@ -36,11 +41,18 @@ test("featured venue card identity matches its destination", async ({ page }) =>
   });
   const firstCard = featuredRegion.getByRole("article").first();
   const cardHeading = await firstCard.getByRole("heading").innerText();
+  const cardLink = firstCard.getByRole("link");
+  const destination = await cardLink.getAttribute("href");
 
-  await firstCard.getByRole("link").click();
+  expect(destination).toMatch(/^\/venues\//);
+  await cardLink.click();
+  await expect(page).toHaveURL(new RegExp(`${destination}$`), {
+    timeout: 30_000,
+  });
 
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     cardHeading.trim(),
+    { timeout: 30_000 },
   );
 });
 
@@ -95,6 +107,7 @@ test("venue estimate uses booking guests without public package sections", async
 });
 
 async function expectDesktopSupportingCardOffset(
+  page: Page,
   card: Locator,
 ) {
   await expect(card).toBeVisible();
@@ -104,6 +117,21 @@ async function expectDesktopSupportingCardOffset(
   });
 
   expect(styles).toEqual({ position: "sticky", top: "152px" });
+
+  const cardDocumentTop = await card.evaluate(
+    (element) => element.getBoundingClientRect().top + window.scrollY,
+  );
+  await page.evaluate(
+    (top) => window.scrollTo({ top, behavior: "instant" }),
+    Math.max(0, cardDocumentTop - 32),
+  );
+  await expect
+    .poll(() =>
+      card.evaluate((element) =>
+        Math.round(element.getBoundingClientRect().top),
+      ),
+    )
+    .toBe(152);
 }
 
 test("supplier profile removes back control and keeps proposal card sticky", async ({
@@ -116,6 +144,7 @@ test("supplier profile removes back control and keeps proposal card sticky", asy
     page.getByRole("link", { name: /Back to suppliers/i }),
   ).toHaveCount(0);
   await expectDesktopSupportingCardOffset(
+    page,
     page.locator("#supplier-request-card").first().locator(".."),
   );
 });
@@ -127,6 +156,7 @@ test("venue profile keeps the booking card below the header stack", async ({
   await page.goto("/venues/the-blue-leaf-filipinas");
 
   await expectDesktopSupportingCardOffset(
+    page,
     page.getByTestId("venue-booking-sidebar"),
   );
 });

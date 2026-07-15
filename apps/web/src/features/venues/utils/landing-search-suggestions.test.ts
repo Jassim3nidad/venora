@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildLandingSearchSuggestions,
   filterLandingSearchSuggestions,
+  mergeLandingSearchSuggestionSources,
 } from "./landing-search-suggestions";
 
 describe("landing search suggestions", () => {
@@ -28,5 +29,35 @@ describe("landing search suggestions", () => {
     expect(filterLandingSearchSuggestions(["Wedding", "Corporate"], " ")).toEqual(
       ["Wedding", "Corporate"],
     );
+  });
+
+  it("includes non-featured live venues and replaces stale fallback identities", () => {
+    const result = mergeLandingSearchSuggestionSources(
+      [
+        {
+          id: "venue-1",
+          location: "Updated City, Cavite",
+          eventTypes: ["Wedding"],
+        },
+        {
+          id: "new-live-venue",
+          location: "New City, Laguna",
+          eventTypes: ["Corporate"],
+        },
+      ],
+      [
+        {
+          id: "venue-1",
+          location: "Old City, Cavite",
+          eventTypes: ["Wedding"],
+        },
+      ],
+    );
+
+    expect(result).toHaveLength(2);
+    expect(result.map((venue) => venue.location)).toEqual([
+      "Updated City, Cavite",
+      "New City, Laguna",
+    ]);
   });
 });

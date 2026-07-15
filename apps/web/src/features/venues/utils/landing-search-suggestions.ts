@@ -1,6 +1,27 @@
-interface SuggestionVenue {
+export interface SuggestionVenue {
+  id?: string | number | undefined;
   location?: string | null;
   eventTypes?: string[] | null;
+}
+
+export function mergeLandingSearchSuggestionSources(
+  liveVenues: SuggestionVenue[],
+  fallbackVenues: SuggestionVenue[],
+) {
+  const liveVenueIds = new Set(
+    liveVenues
+      .map((venue) => venue.id)
+      .filter((id): id is string | number => id !== undefined)
+      .map(String),
+  );
+
+  return [
+    ...liveVenues,
+    ...fallbackVenues.filter(
+      (venue) =>
+        venue.id === undefined || !liveVenueIds.has(String(venue.id)),
+    ),
+  ];
 }
 
 function uniqueSorted(values: Array<string | null | undefined>) {
