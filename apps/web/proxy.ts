@@ -136,7 +136,14 @@ export async function proxy(request: NextRequest) {
   if (isProtected && !user) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
+    redirectUrl.search = "";
     redirectUrl.searchParams.set("redirectTo", `${pathname}${search}`);
+
+    if (pathname.startsWith("/bookings")) {
+      redirectUrl.searchParams.set("prompt", "bookings");
+    } else if (pathname.startsWith("/favorites")) {
+      redirectUrl.searchParams.set("prompt", "favorites");
+    }
 
     return redirectWithCookies(redirectUrl, supabaseResponse);
   }

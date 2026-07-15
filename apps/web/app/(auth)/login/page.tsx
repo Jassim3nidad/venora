@@ -65,6 +65,17 @@ function LoginForm() {
   const didVerify = searchParams.get("verified") === "true";
   const redirectTo =
     searchParams.get("redirectTo") || searchParams.get("next") || undefined;
+  const promptParam = searchParams.get("prompt");
+  const gatePrompt =
+    promptParam === "bookings" ||
+    redirectTo === "/bookings" ||
+    redirectTo?.startsWith("/bookings")
+      ? "Login to see Bookings"
+      : promptParam === "favorites" ||
+          redirectTo === "/favorites" ||
+          redirectTo?.startsWith("/favorites")
+        ? "Login to see Favorites"
+        : null;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -232,9 +243,18 @@ function LoginForm() {
               <h2 className="text-3xl font-black leading-tight tracking-[-0.04em] text-[#111827]">
                 Sign in to Venora
               </h2>
-              <p className="mt-2 text-sm font-medium leading-6 text-[#6B7280]">
-                Enter your details to continue planning.
-              </p>
+              {gatePrompt ? (
+                <p
+                  role="status"
+                  className="mt-3 rounded-2xl border border-[#BFDBFE] bg-[#EFF6FF] px-4 py-3 text-sm font-extrabold leading-6 text-[#1D4ED8]"
+                >
+                  {gatePrompt}
+                </p>
+              ) : (
+                <p className="mt-2 text-sm font-medium leading-6 text-[#6B7280]">
+                  Enter your details to continue planning.
+                </p>
+              )}
             </div>
 
             {didReset ? (

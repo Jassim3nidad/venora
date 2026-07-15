@@ -30,13 +30,11 @@ export function MarketplaceLayout({
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-[#F8FAFC] text-[#111827]">
       <MarketingNavbar embedded={Boolean(user)} />
-      {user ? (
-        <CustomerNavbar
-          user={user}
-          profile={profile ?? null}
-          variant="subnav"
-        />
-      ) : null}
+      <CustomerNavbar
+        user={user}
+        profile={profile ?? null}
+        variant="subnav"
+      />
 
       <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">
         {children}

@@ -23,7 +23,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   {
     href: "/venues",
-    label: "Browse",
+    label: "Venues",
     description: "Discover venues for your event",
     icon: Compass,
   },

@@ -44,14 +44,14 @@ type NavLink = {
 };
 
 const primaryNavLinks: NavLink[] = [
-  { label: "Browse", href: "/venues" },
+  { label: "Venues", href: "/venues" },
   { label: "Suppliers", href: "/suppliers" },
   { label: "Bookings", href: "/bookings" },
   { label: "Favorites", href: "/favorites" },
 ];
 
 const mobileNavLinks: NavLink[] = [
-  { label: "Browse", href: "/venues", icon: Search, mobileOnly: true },
+  { label: "Venues", href: "/venues", icon: Search, mobileOnly: true },
   { label: "Suppliers", href: "/suppliers", icon: Store, mobileOnly: true },
   {
     label: "Bookings",
@@ -67,6 +67,19 @@ const mobileNavLinks: NavLink[] = [
     mobileOnly: true,
   },
 ];
+
+/** Auth-gated destinations stay visible logged out, but send guests to login. */
+function resolveNavHref(href: string, isAuthenticated: boolean) {
+  if (isAuthenticated) return href;
+  if (href === "/bookings" || href === "/favorites") {
+    const params = new URLSearchParams({
+      redirectTo: href,
+      prompt: href === "/bookings" ? "bookings" : "favorites",
+    });
+    return `/login?${params.toString()}`;
+  }
+  return href;
+}
 
 export function CustomerNavbar({
   user,
@@ -85,6 +98,7 @@ export function CustomerNavbar({
   const displayName =
     profile?.full_name || user?.email?.split("@")[0] || "Venora User";
   const email = user?.email ?? "";
+  const isAuthenticated = Boolean(user);
 
   if (variant === "subnav") {
     return (
@@ -99,7 +113,7 @@ export function CustomerNavbar({
             return (
               <Link
                 key={item.href}
-                href={item.href}
+                href={resolveNavHref(item.href, isAuthenticated)}
                 className={[
                   "min-w-[5.5rem] flex-1 whitespace-nowrap border-b-2 px-3 py-3 text-center text-sm font-bold transition sm:px-4 sm:py-3.5",
                   active
@@ -147,7 +161,7 @@ export function CustomerNavbar({
               return (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  href={resolveNavHref(item.href, isAuthenticated)}
                   className={[
                     "rounded-full px-4 py-2 text-sm font-bold transition",
                     active
@@ -214,7 +228,12 @@ export function CustomerNavbar({
                 className="fixed inset-x-3 top-20 z-[60] max-h-[calc(100dvh-5.5rem)] overflow-y-auto rounded-[28px] border border-[#E5E7EB] bg-white p-3 shadow-2xl shadow-slate-300/50"
               >
                 <div className="grid gap-1">
-                  {mobileNavLinks.map((item) => {
+                  {mobileNavLinks
+                    .filter(
+                      (item) =>
+                        isAuthenticated || item.href !== "/notifications",
+                    )
+                    .map((item) => {
                     const Icon = item.icon ?? Search;
                     const active = isActive(pathname, item.href);
                     const itemClassName = [
@@ -228,7 +247,7 @@ export function CustomerNavbar({
                     return (
                       <Link
                         key={item.href}
-                        href={item.href}
+                        href={resolveNavHref(item.href, isAuthenticated)}
                         role="menuitem"
                         onClick={closeMenu}
                         className={itemClassName}

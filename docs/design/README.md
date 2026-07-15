@@ -12,6 +12,8 @@ from source only because no test credentials or private data were used.
 - [Navigation map](navigation-map.md) — public, account, and role navigation.
 - [Role experience matrix](role-experience-matrix.md) — role access, completeness, and gaps.
 - [User flows](user-flows.md) — 32 required journeys with Mermaid flowcharts.
+- [Overall system user flow](overall-system-user-flow.md) — end-to-end system map with real-life scenarios.
+- [Marketplace relationships & overall user flow](marketplace-relationships-user-flow.md) — customer / venue / supplier / coordinator relationships and whether clients hire ECs.
 - [Wireframes](wireframes.md) — low-fidelity layouts for 25 screen families.
 - [Responsive behavior](responsive-behavior.md) — tested viewports and source-based risks.
 - [Accessibility requirements](accessibility-requirements.md) — implementation and QA criteria.

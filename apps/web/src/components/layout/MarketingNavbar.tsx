@@ -32,7 +32,7 @@ type MobileLink = {
 function getNavLinks(user?: { email?: string | null } | null): MobileLink[] {
   return [
     { label: "Home", href: "/" },
-    { label: "Venues", href: "/venues" },
+    { label: "Browse", href: "/venues" },
     { label: "About", href: "/about" },
     {
       label: "Host a Venue",
