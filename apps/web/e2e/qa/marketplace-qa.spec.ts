@@ -66,6 +66,31 @@ test("anonymous featured favorite opens login instead of venue details", async (
   });
 });
 
+test("venue estimate uses booking guests without public package sections", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/venues/the-blue-leaf-filipinas");
+
+  await expect(
+    page.getByRole("heading", { name: "Available packages" }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Compare Packages" }),
+  ).toHaveCount(0);
+
+  const bookingGuests = page.getByRole("spinbutton", {
+    name: "Guests count",
+  });
+  await bookingGuests.fill("200");
+  await page.getByRole("button", { name: "Estimate Event Cost" }).click();
+
+  const estimator = page.getByRole("dialog");
+  await expect(
+    estimator.getByRole("spinbutton", { name: "Guest Count" }),
+  ).toHaveValue("200");
+});
+
 test("marketplace uses document scrolling and renders a normal-flow footer", async ({
   page,
 }) => {

@@ -19,6 +19,7 @@ import type { AICostEstimatorInput } from "../schemas/ai.schema";
 interface CostEstimatorPanelProps {
   venueId: string;
   venueName: string;
+  initialGuestCount?: number | undefined;
   capacityMin?: number | null | undefined;
   capacityMax?: number | null | undefined;
 }
@@ -26,6 +27,7 @@ interface CostEstimatorPanelProps {
 export default function CostEstimatorPanel({
   venueId,
   venueName,
+  initialGuestCount,
   capacityMin,
   capacityMax,
 }: CostEstimatorPanelProps) {
@@ -74,6 +76,7 @@ export default function CostEstimatorPanel({
             <CostEstimatorResult result={data} onReset={reset} />
           ) : (
             <CostEstimatorForm
+              initialGuestCount={initialGuestCount}
               capacityMin={capacityMin}
               capacityMax={capacityMax}
               isPending={isPending}

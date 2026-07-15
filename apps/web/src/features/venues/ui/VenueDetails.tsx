@@ -44,8 +44,6 @@ import { toggleFavoriteAction } from "../application/actions";
 import { isOptimizableImageSrc } from "@/src/lib/image-host";
 import CostEstimatorPanel from "@/features/ai/ui/CostEstimatorPanel";
 import RecommendedVenues from "@/features/ai/ui/RecommendedVenues";
-import PackageComparePicker from "./PackageComparePicker";
-import VenuePricingSection from "./VenuePricingSection";
 import { pickGalleryImages, pickPromotionalVideo } from "../utils/venue-media";
 
 interface VenueDetailsProps {
@@ -290,16 +288,6 @@ export default function VenueDetails({
               </div>
             )}
           </section>
-
-          <Separator />
-
-          {/* Packages */}
-          <VenuePricingSection
-            basePrice={venue.base_price}
-            priceUnit={venue.price_unit}
-            packages={activePackages}
-          />
-          <PackageComparePicker packages={activePackages} />
 
           <Separator />
 
@@ -557,12 +545,15 @@ export default function VenueDetails({
                 capacityMax={venue.capacity_max}
                 packages={activePackages}
               >
-                <CostEstimatorPanel
-                  venueId={venue.id}
-                  venueName={venue.name}
-                  capacityMin={venue.capacity_min}
-                  capacityMax={venue.capacity_max}
-                />
+                {(guestCount) => (
+                  <CostEstimatorPanel
+                    venueId={venue.id}
+                    venueName={venue.name}
+                    initialGuestCount={guestCount}
+                    capacityMin={venue.capacity_min}
+                    capacityMax={venue.capacity_max}
+                  />
+                )}
               </BookingSidebar>
             </>
           )}
