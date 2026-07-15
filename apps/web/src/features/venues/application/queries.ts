@@ -25,6 +25,24 @@ function parseMoney(value: string | undefined): number {
   return Number.isFinite(amount) ? amount : 0;
 }
 
+function sanitizeLocationPart(value: string) {
+  return value.replace(/[()",]/g, " ").replace(/\s+/g, " ").trim();
+}
+
+export function parseMarketplaceLocation(value: string) {
+  const parts = value.split(",");
+  const locality = sanitizeLocationPart(parts[0]?.split("(")[0] ?? "");
+  const province =
+    parts.length > 1
+      ? sanitizeLocationPart(parts[parts.length - 1] ?? "")
+      : "";
+
+  return {
+    locality,
+    ...(province ? { province } : {}),
+  };
+}
+
 // SupabaseClient generic typing can conflict with generated Database types
 // We use any here since the query result is processed dynamically anyway.
 export async function searchMarketplaceVenues(
@@ -69,11 +87,14 @@ export async function searchMarketplaceVenues(
   }
 
   if (params.location) {
-    const loc = params.location.replace(/[,()"]/g, "").trim();
-    if (loc) {
+    const location = parseMarketplaceLocation(params.location);
+    if (location.locality) {
       query = query.or(
-        `city.ilike.%${loc}%,municipality.ilike.%${loc}%,province.ilike.%${loc}%`,
+        `city.ilike.%${location.locality}%,municipality.ilike.%${location.locality}%,province.ilike.%${location.locality}%`,
       );
+      if (location.province) {
+        query = query.ilike("province", `%${location.province}%`);
+      }
     }
   }
 
@@ -174,6 +195,21 @@ export async function searchMarketplaceVenues(
   const to = from + limit - 1;
 
   return query.order("created_at", { ascending: false }).range(from, to);
+}
+
+export async function getLandingSearchSuggestionVenues(supabase: any) {
+  return supabase
+    .from("venues")
+    .select(
+      `
+        id,
+        city,
+        province,
+        venue_event_types(event_types(name))
+      `,
+    )
+    .eq("status", "published")
+    .order("name", { ascending: true });
 }
 
 /** Latest ai_generated_content draft/approved/rejected row per content type for a venue. */

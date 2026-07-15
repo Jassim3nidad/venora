@@ -6,7 +6,10 @@ import { usePathname } from "next/navigation";
 import { CustomerNavbar } from "@/components/layout/CustomerNavbar";
 import MarketingNavbar from "@/components/layout/MarketingNavbar";
 import { SiteFooter } from "@/components/layout/SiteFooter";
-import { isMarketplaceRoute } from "@/src/lib/is-marketplace-route";
+import {
+  isAccountCenterRoute,
+  isMarketplaceRoute,
+} from "@/src/lib/is-marketplace-route";
 
 interface MarketplaceLayoutProps {
   children: ReactNode;
@@ -24,8 +27,9 @@ export function MarketplaceLayout({
 }: MarketplaceLayoutProps) {
   const pathname = usePathname();
   const showMarketplaceSubnav = isMarketplaceRoute(pathname);
+  const showAccountTopNav = isAccountCenterRoute(pathname);
 
-  if (!showMarketplaceSubnav) {
+  if (!showMarketplaceSubnav && !showAccountTopNav) {
     return <>{children}</>;
   }
 
@@ -44,7 +48,11 @@ export function MarketplaceLayout({
           />
         ) : null}
       </div>
-      <main className="flex min-w-0 flex-1 flex-col">{children}</main>
+      {showMarketplaceSubnav ? (
+        <main className="flex min-w-0 flex-1 flex-col">{children}</main>
+      ) : (
+        <div className="flex min-w-0 flex-1 flex-col">{children}</div>
+      )}
       {showMarketplaceSubnav ? <SiteFooter /> : null}
     </div>
   );

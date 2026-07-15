@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { isMarketplaceRoute } from "./is-marketplace-route";
+import {
+  isAccountCenterRoute,
+  isMarketplaceRoute,
+} from "./is-marketplace-route";
 
 describe("isMarketplaceRoute", () => {
   it.each(["/venues", "/suppliers", "/bookings", "/favorites"])(
@@ -9,5 +12,11 @@ describe("isMarketplaceRoute", () => {
 
   it("excludes Account Center from marketplace subnavigation", () => {
     expect(isMarketplaceRoute("/account")).toBe(false);
+  });
+
+  it("recognizes Account Center routes for top-level navigation only", () => {
+    expect(isAccountCenterRoute("/account")).toBe(true);
+    expect(isAccountCenterRoute("/account/personal-details")).toBe(true);
+    expect(isAccountCenterRoute("/settings")).toBe(false);
   });
 });

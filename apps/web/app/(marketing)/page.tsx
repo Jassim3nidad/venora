@@ -13,7 +13,10 @@ import {
   researchVenueImageCount,
   researchVenues,
 } from "@/src/features/venues/data/research-venues";
-import { searchMarketplaceVenues } from "@/src/features/venues/application/queries";
+import {
+  getLandingSearchSuggestionVenues,
+  searchMarketplaceVenues,
+} from "@/src/features/venues/application/queries";
 import {
   getFeaturedVenueIds,
   resolveFeaturedMarketplaceVenues,
@@ -21,7 +24,10 @@ import {
 import { toLiveMarketplaceVenue } from "@/src/features/venues/utils/venue-mappers";
 import FeaturedVenueCard from "@/src/features/venues/ui/FeaturedVenueCard";
 import LandingSegmentedSearch from "@/src/features/venues/ui/LandingSegmentedSearch";
-import { buildLandingSearchSuggestions } from "@/src/features/venues/utils/landing-search-suggestions";
+import {
+  buildLandingSearchSuggestions,
+  mergeLandingSearchSuggestionSources,
+} from "@/src/features/venues/utils/landing-search-suggestions";
 const provinceCount = new Set(
   researchVenues.map((venue) => venue.location.province),
 ).size;
@@ -61,14 +67,24 @@ export default async function MarketingHomePage() {
 
   const fallbackVenues = getMarketplaceResearchVenues(favoriteVenueIds);
   const featuredVenueIds = getFeaturedVenueIds(fallbackVenues);
-  const { data: dbVenues, error } = await searchMarketplaceVenues(supabase, {
-    page: 1,
-    limit: featuredVenueIds.length,
-    venueIds: featuredVenueIds,
-  });
+  const [featuredResult, suggestionResult] = await Promise.all([
+    searchMarketplaceVenues(supabase, {
+      page: 1,
+      limit: featuredVenueIds.length,
+      venueIds: featuredVenueIds,
+    }),
+    getLandingSearchSuggestionVenues(supabase),
+  ]);
+  const { data: dbVenues, error } = featuredResult;
 
   if (error) {
     console.error("[marketing/page] Supabase fetch error:", error.message);
+  }
+  if (suggestionResult.error) {
+    console.error(
+      "[marketing/page] Suggestion fetch error:",
+      suggestionResult.error.message,
+    );
   }
 
   const researchVenueById = new Map(
@@ -87,13 +103,22 @@ export default async function MarketingHomePage() {
     liveVenues,
     fallbackVenues,
   );
-  const liveVenueIds = new Set(liveVenues.map((venue) => String(venue.id)));
-  const searchSuggestions = buildLandingSearchSuggestions([
-    ...liveVenues,
-    ...fallbackVenues.filter(
-      (venue) => !liveVenueIds.has(String(venue.id)),
-    ),
-  ]);
+  const liveSuggestionVenues = (suggestionResult.data ?? []).map(
+    (venue: any) => ({
+      id: String(venue.id),
+      location: [venue.city, venue.province].filter(Boolean).join(", "),
+      eventTypes: (venue.venue_event_types ?? [])
+        .map((assignment: any) => assignment.event_types?.name)
+        .filter((name: unknown): name is string => typeof name === "string"),
+    }),
+  );
+  const suggestionVenues = suggestionResult.error
+    ? fallbackVenues
+    : mergeLandingSearchSuggestionSources(
+        liveSuggestionVenues,
+        fallbackVenues,
+      );
+  const searchSuggestions = buildLandingSearchSuggestions(suggestionVenues);
   const heroVenue = featuredVenues[0]!;
 
   return (

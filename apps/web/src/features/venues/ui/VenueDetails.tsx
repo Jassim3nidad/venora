@@ -492,9 +492,9 @@ export default function VenueDetails({
         </div>
 
         {/* Right Sticky Column - Booking Card Widget */}
-        <div className="lg:col-span-1 space-y-4">
+        <div className="space-y-4 lg:col-span-1 lg:self-stretch">
           {isOwnVenue ? (
-            <div className="sticky top-[100px] rounded-[32px] border border-[#BFDBFE] bg-[#EFF6FF] p-6 shadow-sm shadow-blue-200/50 flex flex-col gap-5">
+            <div className="sticky top-[9.5rem] rounded-[32px] border border-[#BFDBFE] bg-[#EFF6FF] p-6 shadow-sm shadow-blue-200/50 flex flex-col gap-5">
               <div>
                 <h3 className="text-xl font-black tracking-[-0.03em] text-[#1D4ED8]">
                   This is your venue listing.
