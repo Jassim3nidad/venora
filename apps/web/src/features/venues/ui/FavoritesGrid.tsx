@@ -83,75 +83,95 @@ export default function FavoritesGrid({ initialVenues }: FavoritesGridProps) {
         const id = String(venue.id);
         const isPending = pendingId === id;
 
+        const detailTags = [
+          venue.category,
+          ...(venue.categories ?? []).slice(0, 1),
+          ...(venue.eventTypes ?? []).slice(0, 1),
+        ].filter(Boolean) as string[];
+        const uniqueDetailTags = [...new Set(detailTags)].slice(0, 2);
+
         return (
           <article
             key={id}
-            className="group relative flex h-full overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-sm shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1 hover:border-[#2563EB]/50 hover:shadow-xl hover:shadow-slate-200/80"
+            className="group relative flex h-full overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70 transition duration-300 hover:-translate-y-1 hover:border-[#BFDBFE] hover:shadow-xl hover:shadow-slate-200/80"
           >
             <Link
               href={`/venues/${venue.slug ?? id}`}
-              className="flex h-full w-full flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
+              className="flex min-w-0 flex-1 flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
             >
-              <div className="relative aspect-[16/11] overflow-hidden bg-slate-100">
+              <div className="relative aspect-[4/3] overflow-hidden bg-[#EFF6FF]">
                 {venue.image ? (
                   <Image
                     src={venue.image}
                     alt={venue.name}
                     fill
                     unoptimized={!isOptimizableImageSrc(venue.image)}
-                    sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
-                    className="object-cover transition duration-700 group-hover:scale-[1.04]"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                    className="object-cover transition duration-500 group-hover:scale-[1.03]"
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center">
-                    <ImageIcon className="h-8 w-8 text-slate-300" />
+                    <ImageIcon className="h-8 w-8 text-[#93C5FD]" />
                   </div>
                 )}
 
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-slate-950/5 to-transparent" />
-
-                <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#1D4ED8] shadow-sm backdrop-blur-md">
-                  {venue.category ?? "Venue"}
-                </span>
-
-                <div className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-slate-800 shadow-sm backdrop-blur-md">
-                  <Star className="h-3.5 w-3.5 fill-[#F59E0B] text-[#F59E0B]" />
-                  <span className="text-xs font-extrabold">
-                    {typeof venue.rating === "number"
-                      ? venue.rating.toFixed(1)
-                      : "New"}
-                  </span>
-                </div>
+                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#111827]/55 to-transparent" />
               </div>
 
-              <div className="flex min-h-[190px] flex-1 flex-col justify-between gap-5 p-5">
-                <div className="min-w-0">
-                  <h2 className="line-clamp-1 text-lg font-extrabold leading-6 tracking-[-0.02em] text-slate-950 transition group-hover:text-[#1D4ED8]">
-                    {venue.name}
-                  </h2>
-
-                  <p className="mt-2 flex min-w-0 items-center gap-2 text-sm font-medium leading-5 text-slate-500">
-                    <MapPin className="h-4 w-4 shrink-0 text-slate-400" />
-                    <span className="line-clamp-1">{venue.location}</span>
-                  </p>
-                </div>
-
-                <div className="flex items-end justify-between gap-4 border-t border-slate-100 pt-4">
-                  <div className="min-w-0">
-                    <p className="text-lg font-black leading-6 text-slate-950">
-                      {venue.price}
-                    </p>
-                    <p className="mt-0.5 text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">
-                      starting price
-                    </p>
-                  </div>
-
-                  <div className="inline-flex max-w-[60%] items-center gap-1.5 rounded-2xl bg-[#EFF6FF] px-3 py-2 text-[#1D4ED8]">
-                    <Users className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate text-[11px] font-extrabold uppercase tracking-[0.08em]">
-                      {venue.capacity}
+              <div className="flex flex-1 flex-col gap-4 p-5">
+                <div className="flex min-h-[112px] flex-col">
+                  <div className="mb-3 flex min-h-[28px] flex-wrap items-start gap-2">
+                    {uniqueDetailTags.length > 0 ? (
+                      uniqueDetailTags.map((detailTag) => (
+                        <span
+                          key={`${id}-${detailTag}`}
+                          className="inline-flex max-w-full items-center rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1 text-xs font-extrabold text-[#1D4ED8]"
+                        >
+                          <span className="truncate">{detailTag}</span>
+                        </span>
+                      ))
+                    ) : (
+                      <span className="inline-flex max-w-full items-center rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1 text-xs font-extrabold text-[#1D4ED8]">
+                        Venue
+                      </span>
+                    )}
+                    <span className="inline-flex shrink-0 items-center gap-1 py-1 text-xs font-bold text-amber-700">
+                      <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                      {typeof venue.rating === "number"
+                        ? venue.rating.toFixed(1)
+                        : "New"}
                     </span>
                   </div>
+
+                  <h2 className="line-clamp-2 min-h-[48px] text-lg font-black leading-6 tracking-[-0.03em] text-[#111827] transition group-hover:text-[#1D4ED8]">
+                    {venue.name}
+                  </h2>
+                </div>
+
+                <div className="grid min-h-[58px] content-start gap-2.5 text-sm text-[#6B7280]">
+                  <div className="flex min-w-0 items-start gap-2">
+                    <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB]" />
+                    <span className="min-w-0 truncate font-semibold">
+                      {venue.location}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-[#2563EB]" />
+                    <span className="font-semibold">{venue.capacity}</span>
+                  </div>
+                </div>
+
+                <div className="mt-auto grid gap-3 border-t border-[#E5E7EB] pt-4">
+                  <div>
+                    <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">
+                      Starts at
+                    </p>
+                    <p className="text-lg font-black text-slate-950">{venue.price}</p>
+                  </div>
+
+                  <span className="inline-flex h-11 w-full items-center justify-center rounded-2xl bg-[#2563EB] px-4 text-center text-xs font-black uppercase tracking-[0.08em] text-white shadow-sm shadow-[#2563EB]/20 transition group-hover:bg-[#1D4ED8]">
+                    View Details
+                  </span>
                 </div>
               </div>
             </Link>
@@ -160,7 +180,7 @@ export default function FavoritesGrid({ initialVenues }: FavoritesGridProps) {
               type="button"
               onClick={(event) => handleUnfavorite(event, id)}
               disabled={isPending}
-              className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-red-500 shadow-sm backdrop-blur-md transition hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 disabled:cursor-wait disabled:opacity-70"
+              className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-500 shadow-sm backdrop-blur-md transition hover:scale-105 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 disabled:cursor-wait disabled:opacity-70"
               aria-label={`Remove ${venue.name} from favorites`}
             >
               <Heart className="h-4 w-4 fill-red-500 text-red-500" />
