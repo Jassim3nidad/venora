@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 
-const email = process.env.NOTIFICATION_TEST_EMAIL;
-const password = process.env.NOTIFICATION_TEST_PASSWORD;
+const email = process.env.E2E_CUSTOMER_EMAIL;
+const password = process.env.E2E_CUSTOMER_PASSWORD;
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -33,13 +33,10 @@ test.describe("Notification Platform E2E", () => {
     // Navigate to settings
     await page.goto("/settings");
 
-    const { data: user, error: userError } = await supabase!
-      .from("profiles")
-      .select("id")
-      .eq("email", email)
-      .single();
+    const { data: usersData, error: userError } = await supabase!.auth.admin.listUsers();
     expect(userError).toBeNull();
-    expect(user).not.toBeNull();
+    const user = usersData.users.find(u => u.email === email);
+    expect(user).toBeDefined();
 
     const { data: existingSubscriptions, error: existingError } =
       await supabase!
@@ -114,13 +111,10 @@ test.describe("Notification Platform E2E", () => {
     await page.goto("/dashboard");
 
     // Get user id
-    const { data: user, error: userError } = await supabase!
-      .from("profiles")
-      .select("id")
-      .eq("email", email)
-      .single();
+    const { data: usersData, error: userError } = await supabase!.auth.admin.listUsers();
     expect(userError).toBeNull();
-    expect(user).not.toBeNull();
+    const user = usersData.users.find(u => u.email === email);
+    expect(user).toBeDefined();
 
     // Trigger a backend notification via Supabase
     const { data: notification, error: insertError } = await supabase!

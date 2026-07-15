@@ -12,7 +12,7 @@ Upstream commit `323d823` renamed
 `0680_enforce_booking_availability_integrity.sql` without hosted history
 evidence available to this task. It also added
 `071_supplier_location_coverage.sql`, duplicating existing
-`071_tighten_venue_media_storage_ownership.sql`. Supabase migration history is
+`0711_tighten_venue_media_storage_ownership.sql`. Supabase migration history is
 version-based, so either change can make local/linked ordering or application
 ambiguous. Do not rename, delete, repair, or mark these applied without checking
 the actual hosted migration table/schema and approving a forward-only plan.

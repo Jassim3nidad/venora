@@ -164,7 +164,7 @@ for (const file of markdownFiles) {
     mermaidCount += 1;
     const declaration = diagram[1].trimStart().split(/\r?\n/, 1)[0].trim();
     if (
-      !/^(?:flowchart (?:TD|TB|BT|RL|LR)|sequenceDiagram|stateDiagram-v2)$/.test(
+      !/^(?:flowchart (?:TD|TB|BT|RL|LR)|sequenceDiagram|stateDiagram-v2|erDiagram)$/.test(
         declaration,
       )
     ) {
@@ -311,7 +311,7 @@ const migrations = readFileSync(join(docsRoot, "migrations.md"), "utf8");
 for (const file of [
   "0680_enforce_booking_availability_integrity.sql",
   "071_supplier_location_coverage.sql",
-  "071_tighten_venue_media_storage_ownership.sql",
+  "0711_tighten_venue_media_storage_ownership.sql",
 ]) {
   if (!migrations.includes(file))
     errors.push(`known migration history conflict not documented: ${file}`);

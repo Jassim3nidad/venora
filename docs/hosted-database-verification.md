@@ -34,7 +34,7 @@ query is assertion-only and writes a redacted PASS marker artifact.
 - all namespaced test objects are removed in cleanup.
 
 The check validates behavior, not only SQL text. Migration
-`071_tighten_venue_media_storage_ownership.sql` must be applied to staging.
+`0711_tighten_venue_media_storage_ownership.sql` must be applied to staging.
 
 ## Migration history
 
@@ -48,7 +48,7 @@ that the SQL will not be treated as a new `0680` migration. CI tracks the exact
 rename and ordering exception; it does not declare reconciliation complete.
 
 The same upstream change introduced `071_supplier_location_coverage.sql`, which
-now duplicates `071_tighten_venue_media_storage_ownership.sql`. Both exact files
+now duplicates `0711_tighten_venue_media_storage_ownership.sql`. Both exact files
 are allowlisted only to preserve current `main`; any third duplicate fails. The
 hosted workflow requires both the supplier-location columns and venue-media
 policy definitions, because a `071` history row alone cannot prove which SQL
