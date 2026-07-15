@@ -157,8 +157,6 @@ export function CustomerInquiryDetail({
         </Link>
 
         <CustomerPageHeader
-          eyebrow="Supplier Inquiry"
-          icon={ShieldCheck}
           title={supplier?.business_name ?? "Supplier"}
           description={`Inquiry for: ${service?.name ?? "General Inquiry"} - Submitted ${formatDate(inquiry.created_at)}`}
           action={
@@ -227,28 +225,29 @@ export function CustomerInquiryDetail({
           </div>
         )}
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-          <div className="grid gap-6">
-            <CustomerCard className="p-5 sm:p-6">
-              <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950 mb-4">
+        <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-3">
+          <div className="space-y-10 lg:col-span-2">
+            
+            <section className="space-y-4">
+              <h3 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
                 Supplier Information
-              </h2>
+              </h3>
               <div className="flex gap-4 items-center">
                 <img
                   src={supplierImage}
                   alt={supplier?.business_name ?? "Supplier"}
-                  className="h-16 w-16 rounded-full object-cover border border-slate-200"
+                  className="h-16 w-16 rounded-full object-cover border border-[#E5E7EB]"
                 />
                 <div>
-                  <h3 className="text-lg font-black text-slate-950">
+                  <h4 className="text-lg font-black tracking-[-0.02em] text-slate-950">
                     {supplier?.business_name ?? "Supplier"}
-                  </h3>
-                  <p className="text-sm font-semibold text-slate-500">
+                  </h4>
+                  <p className="text-sm font-medium text-slate-500">
                     {supplier?.categories?.name || "Professional Services"}
                   </p>
                 </div>
               </div>
-              <div className="mt-6 flex flex-wrap gap-4">
+              <div className="mt-4">
                 <CustomerLinkButton
                   href={`/suppliers/${supplier?.slug}`}
                   tone="secondary"
@@ -256,71 +255,159 @@ export function CustomerInquiryDetail({
                   View Supplier Profile
                 </CustomerLinkButton>
               </div>
-            </CustomerCard>
+            </section>
+
+            <hr className="border-t border-[#E5E7EB]" />
 
             {booking && (
-              <CustomerCard className="p-5 sm:p-6">
-                <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950 mb-4">
-                  Linked Event Details
-                </h2>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
-                    <CustomerStatusBadge icon={CalendarDays}>
-                      Event Date
-                    </CustomerStatusBadge>
-                    <p className="mt-3 text-lg font-black text-slate-950">
-                      {formatDate(
-                        inquiry.event_date_snapshot ?? booking.event_date,
-                      )}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-slate-500">
-                      {formatTime(
-                        inquiry.event_start_time_snapshot ??
-                          booking.event_start_time,
-                      )}
-                    </p>
+              <>
+                <section className="space-y-4">
+                  <h3 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
+                    Linked Event Details
+                  </h3>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
+                      <CustomerStatusBadge icon={CalendarDays}>
+                        Event Date
+                      </CustomerStatusBadge>
+                      <p className="mt-3 text-lg font-black text-slate-950">
+                        {formatDate(
+                          inquiry.event_date_snapshot ?? booking.event_date,
+                        )}
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-slate-500">
+                        {formatTime(
+                          inquiry.event_start_time_snapshot ??
+                            booking.event_start_time,
+                        )}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
+                      <CustomerStatusBadge icon={MapPin}>
+                        Venue
+                      </CustomerStatusBadge>
+                      <p className="mt-3 text-lg font-black text-slate-950">
+                        {inquiry.venue_name_snapshot ?? venue?.name ?? "Venue"}
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-slate-500">
+                        {inquiry.location_snapshot ??
+                          (venue?.city
+                            ? `${venue.city}, ${venue.province}`
+                            : "Location pending")}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
+                      <CustomerStatusBadge icon={Users}>
+                        Guests
+                      </CustomerStatusBadge>
+                      <p className="mt-3 text-lg font-black text-slate-950">
+                        {inquiry.guest_count_snapshot ??
+                          booking.guest_count ??
+                          "Not specified"}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 flex flex-col justify-center">
+                      <CustomerLinkButton
+                        href={`/bookings/${booking.id}`}
+                        tone="secondary"
+                      >
+                        View Venue Booking
+                      </CustomerLinkButton>
+                    </div>
                   </div>
-                  <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
-                    <CustomerStatusBadge icon={MapPin}>
-                      Venue
-                    </CustomerStatusBadge>
-                    <p className="mt-3 text-lg font-black text-slate-950">
-                      {inquiry.venue_name_snapshot ?? venue?.name ?? "Venue"}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-slate-500">
-                      {inquiry.location_snapshot ??
-                        (venue?.city
-                          ? `${venue.city}, ${venue.province}`
-                          : "Location pending")}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
-                    <CustomerStatusBadge icon={Users}>
-                      Guests
-                    </CustomerStatusBadge>
-                    <p className="mt-3 text-lg font-black text-slate-950">
-                      {inquiry.guest_count_snapshot ??
-                        booking.guest_count ??
-                        "Not specified"}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 flex flex-col justify-center">
-                    <CustomerLinkButton
-                      href={`/bookings/${booking.id}`}
-                      tone="secondary"
-                    >
-                      View Venue Booking
-                    </CustomerLinkButton>
-                  </div>
-                </div>
-              </CustomerCard>
+                </section>
+                <hr className="border-t border-[#E5E7EB]" />
+              </>
             )}
 
-            <CustomerCard className="p-5 sm:p-6">
-              <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950 mb-4">
-                Customer Request Details
-              </h2>
-              <div className="grid gap-3">
+            <section className="space-y-4">
+              <h3 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
+                Service Proposal
+              </h3>
+              {quote ? (
+                <div className="rounded-2xl border border-[#DBEAFE] bg-[#EFF6FF] p-5 shadow-sm">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                    <div>
+                      <h4 className="text-lg font-black tracking-[-0.02em] text-[#1D4ED8]">
+                        {quote.title || "Service Proposal"}
+                      </h4>
+                      {quote.description && (
+                        <p className="mt-2 text-sm font-medium leading-relaxed text-[#1E40AF]">
+                          {quote.description}
+                        </p>
+                      )}
+                    </div>
+                    <div className="shrink-0 sm:text-right">
+                      <p className="text-lg font-black text-[#1E3A8A]">
+                        {formatCurrency(quote.total)}
+                      </p>
+                      <p className="text-xs font-semibold text-[#3B82F6]">
+                        Proposed total price
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {(quote.line_items as any[])?.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-blue-200/50">
+                       <h4 className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#1E40AF] mb-3">
+                         Line Items
+                       </h4>
+                       <div className="space-y-3">
+                         {(quote.line_items as any[])?.map((item, index) => (
+                           <div
+                             key={index}
+                             className="flex justify-between items-start gap-4"
+                           >
+                             <div>
+                               <p className="text-sm font-bold text-[#1E3A8A]">
+                                 {item.description}
+                               </p>
+                               {item.quantity > 1 && (
+                                 <p className="text-xs font-medium text-[#1E40AF]">
+                                   {item.quantity} ×{" "}
+                                   {formatCurrency(item.unit_price)}
+                                 </p>
+                               )}
+                             </div>
+                             <p className="text-sm font-bold text-[#1E3A8A] shrink-0">
+                               {formatCurrency(item.amount)}
+                             </p>
+                           </div>
+                         ))}
+                       </div>
+                    </div>
+                  )}
+                  {quote.terms_and_conditions && (
+                    <div className="mt-4 pt-4 border-t border-blue-200/50">
+                      <h4 className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#1E40AF] mb-2">
+                        Terms & Conditions
+                      </h4>
+                      <p className="text-xs font-medium text-[#1E40AF] whitespace-pre-wrap">
+                        {quote.terms_and_conditions}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-5 text-center">
+                  <FileText className="mx-auto h-8 w-8 text-slate-400 mb-2" />
+                  <h4 className="text-base font-bold text-slate-900">
+                    No service proposal yet
+                  </h4>
+                  <p className="mt-1 text-sm font-medium text-slate-500">
+                    The supplier may send a service proposal after reviewing your inquiry.
+                  </p>
+                </div>
+              )}
+            </section>
+
+            <hr className="border-t border-[#E5E7EB]" />
+
+            <section className="space-y-4">
+              <h3 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
+                Your Request & Notes
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
                   <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
                     Message to Supplier
@@ -340,279 +427,189 @@ export function CustomerInquiryDetail({
                   </div>
                 )}
               </div>
-            </CustomerCard>
+            </section>
 
-            <CustomerCard className="p-5 sm:p-6">
-              <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">
-                Service Proposal
-              </h2>
-              {quote ? (
-                <div className="mt-5">
-                  <div className="rounded-2xl border border-[#E5E7EB] bg-white">
-                    <div className="border-b border-[#E5E7EB] p-4 sm:p-5">
-                      <h3 className="font-black text-slate-950 text-lg">
-                        {quote.title || "Service Proposal"}
-                      </h3>
-                      {quote.description && (
-                        <p className="mt-1 text-sm font-medium text-slate-600">
-                          {quote.description}
-                        </p>
-                      )}
-                    </div>
+            <hr className="border-t border-[#E5E7EB]" />
 
-                    <div className="p-4 sm:p-5">
-                      <h4 className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400 mb-3">
-                        Line Items
-                      </h4>
-                      <div className="space-y-3">
-                        {(quote.line_items as any[])?.map((item, index) => (
+            <section className="space-y-4">
+              <div className="flex items-center gap-2">
+                <h3 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
+                  Chat with the Supplier
+                </h3>
+                {conversationClosed && (
+                  <span className="rounded-full border border-[#E5E7EB] bg-[#F3F4F6] px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#6B7280]">
+                    Read-only
+                  </span>
+                )}
+              </div>
+              <div className="overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm p-4 sm:p-5">
+                <div className="grid gap-4">
+                  {messages.length === 0 ? (
+                    <p className="rounded-2xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-semibold text-slate-500 text-center">
+                      No messages yet.
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {messages.map((msg) => {
+                        const isCustomer = msg.sender_id === inquiry.customer_id;
+                        return (
                           <div
-                            key={index}
-                            className="flex justify-between items-start gap-4"
+                            key={msg.id}
+                            className={`flex ${isCustomer ? "justify-end" : "justify-start"}`}
                           >
-                            <div>
-                              <p className="text-sm font-bold text-slate-950">
-                                {item.description}
-                              </p>
-                              {item.quantity > 1 && (
-                                <p className="text-xs font-medium text-slate-500">
-                                  {item.quantity} ×{" "}
-                                  {formatCurrency(item.unit_price)}
-                                </p>
-                              )}
-                            </div>
-                            <p className="text-sm font-bold text-slate-950 shrink-0">
-                              {formatCurrency(item.amount)}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="my-5 border-t border-dashed border-[#E5E7EB]"></div>
-
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <p className="text-sm font-semibold text-slate-600">
-                            Subtotal
-                          </p>
-                          <p className="text-sm font-bold text-slate-950">
-                            {formatCurrency(quote.subtotal)}
-                          </p>
-                        </div>
-                        {quote.discount_amount > 0 && (
-                          <div className="flex justify-between items-center text-emerald-700">
-                            <p className="text-sm font-semibold">Discount</p>
-                            <p className="text-sm font-bold">
-                              -{formatCurrency(quote.discount_amount)}
-                            </p>
-                          </div>
-                        )}
-                        <div className="flex justify-between items-center pt-2">
-                          <p className="text-base font-black text-slate-950">
-                            Total Amount
-                          </p>
-                          <p className="text-lg font-black text-[#2563EB]">
-                            {formatCurrency(quote.total)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {quote.terms_and_conditions && (
-                      <div className="border-t border-[#E5E7EB] bg-[#F9FAFB] p-4 sm:p-5 rounded-b-2xl">
-                        <h4 className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500 mb-2">
-                          Terms & Conditions
-                        </h4>
-                        <p className="text-sm font-medium text-slate-600 whitespace-pre-wrap">
-                          {quote.terms_and_conditions}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="mt-5 rounded-2xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-6 text-center">
-                  <FileText className="mx-auto h-8 w-8 text-slate-400 mb-2" />
-                  <h3 className="text-sm font-bold text-slate-900">
-                    No service proposal yet
-                  </h3>
-                  <p className="mt-1 text-sm font-semibold text-slate-500">
-                    The supplier may send a service proposal after reviewing
-                    your inquiry.
-                  </p>
-                </div>
-              )}
-            </CustomerCard>
-
-            <CustomerCard className="p-5 sm:p-6">
-              <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950 mb-4">
-                Conversation
-              </h2>
-
-              <div className="grid gap-4">
-                {messages.length === 0 ? (
-                  <p className="rounded-2xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-semibold text-slate-500 text-center">
-                    No messages yet.
-                  </p>
-                ) : (
-                  <div className="space-y-4">
-                    {messages.map((msg) => {
-                      const isCustomer = msg.sender_id === inquiry.customer_id;
-                      return (
-                        <div
-                          key={msg.id}
-                          className={`flex ${isCustomer ? "justify-end" : "justify-start"}`}
-                        >
-                          <div
-                            className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-                              isCustomer
-                                ? "bg-[#2563EB] text-white rounded-tr-sm"
-                                : "bg-[#F1F5F9] text-slate-900 rounded-tl-sm"
-                            }`}
-                          >
-                            <p className="text-sm font-semibold leading-relaxed whitespace-pre-wrap">
-                              {msg.message}
-                            </p>
-                            <p
-                              className={`mt-1 text-[10px] font-bold uppercase tracking-wider ${isCustomer ? "text-blue-100" : "text-slate-500"}`}
+                            <div
+                              className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+                                isCustomer
+                                  ? "bg-[#2563EB] text-white rounded-tr-sm"
+                                  : "bg-[#F1F5F9] text-slate-900 rounded-tl-sm"
+                              }`}
                             >
-                              {formatDate(msg.created_at)} at{" "}
-                              {formatTime(msg.created_at?.split("T")[1])}
-                            </p>
+                              <p className="text-sm font-semibold leading-relaxed whitespace-pre-wrap">
+                                {msg.message}
+                              </p>
+                              <p
+                                className={`mt-1 text-[10px] font-bold uppercase tracking-wider ${isCustomer ? "text-blue-100" : "text-slate-500"}`}
+                              >
+                                {formatDate(msg.created_at)} at{" "}
+                                {formatTime(msg.created_at?.split("T")[1])}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {conversationClosed ? (
-                  <div className="mt-2 rounded-xl border border-amber-200 bg-amber-50 p-4 flex gap-3">
-                    <Info className="h-5 w-5 shrink-0 text-amber-600" />
-                    <p className="text-sm font-semibold text-amber-800">
-                      This conversation is read-only because the inquiry is
-                      closed.
-                    </p>
-                  </div>
-                ) : (
-                  <form
-                    id="chat-form"
-                    action={handleSendMessage}
-                    className="mt-2 flex gap-3 relative"
-                  >
-                    <textarea
-                      name="message"
-                      rows={1}
-                      placeholder="Type a message..."
-                      className="w-full resize-none rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] py-3 pl-4 pr-12 text-sm font-semibold outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
-                    />
-                    <button
-                      type="submit"
-                      disabled={isPending}
-                      className="absolute right-2 top-2 bottom-2 flex w-10 items-center justify-center rounded-xl bg-[#2563EB] text-white transition hover:bg-[#1D4ED8] disabled:opacity-50"
-                    >
-                      {isPending ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <MessageSquare className="h-4 w-4" />
-                      )}
-                    </button>
-                  </form>
-                )}
-              </div>
-            </CustomerCard>
-          </div>
-
-          <div className="grid gap-6 sticky top-6">
-            <CustomerCard className="p-5 sm:p-6">
-              <h2 className="text-lg font-black tracking-[-0.03em] text-slate-950 mb-4">
-                Summary
-              </h2>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
-                    Total Amount
-                  </p>
-                  <p className="mt-1 text-2xl font-black text-[#2563EB]">
-                    {formatCurrency(quote?.total)}
-                  </p>
-                </div>
-
-                {quote?.valid_until && quote.status === "sent" && (
-                  <div>
-                    <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
-                      Valid Until
-                    </p>
-                    <p className="mt-1 text-sm font-bold text-slate-900">
-                      {formatDate(quote.valid_until)}
-                    </p>
-                  </div>
-                )}
-
-                {canActOnQuote && (
-                  <div className="pt-2 grid gap-2">
-                    <button
-                      onClick={() =>
-                        handleAction(acceptSupplierQuoteAction, "accept")
-                      }
-                      disabled={isPending}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 py-3 text-sm font-black text-white transition hover:bg-[#1D4ED8] disabled:opacity-50"
-                    >
-                      <CheckCircle2 className="h-4 w-4" />
-                      Accept Proposal
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleAction(declineSupplierQuoteAction, "decline")
-                      }
-                      disabled={isPending}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-[#E5E7EB] px-4 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
-                    >
-                      <XCircle className="h-4 w-4" />
-                      Decline
-                    </button>
-                  </div>
-                )}
-              </div>
-            </CustomerCard>
-
-            <CustomerCard className="p-5 sm:p-6">
-              <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">
-                Status Timeline
-              </h2>
-              <div className="mt-5 grid gap-0">
-                {timeline.length > 0 ? (
-                  timeline.map((item: any, index: number) => (
-                    <div
-                      key={index}
-                      className="flex gap-3 border-l border-[#DBEAFE] pb-5 last:border-transparent last:pb-0"
-                    >
-                      <span className="-ml-[13px] flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#2563EB] text-white">
-                        <Clock3 className="h-3.5 w-3.5" />
-                      </span>
-                      <div>
-                        <p className="text-sm font-black capitalize text-slate-950">
-                          {item.title}
-                        </p>
-                        <p className="mt-1 text-xs font-semibold text-slate-500">
-                          {formatDate(item.date)}
-                        </p>
-                        {item.description && (
-                          <p className="mt-2 text-sm font-medium text-slate-600">
-                            {item.description}
-                          </p>
-                        )}
-                      </div>
+                        );
+                      })}
                     </div>
-                  ))
-                ) : (
-                  <p className="rounded-2xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-semibold text-slate-500">
-                    No timeline updates yet.
-                  </p>
+                  )}
+
+                  {conversationClosed ? (
+                    <div className="mt-2 rounded-xl border border-amber-200 bg-amber-50 p-4 flex gap-3">
+                      <Info className="h-5 w-5 shrink-0 text-amber-600" />
+                      <p className="text-sm font-semibold text-amber-800">
+                        This conversation is read-only because the inquiry is
+                        closed.
+                      </p>
+                    </div>
+                  ) : (
+                    <form
+                      id="chat-form"
+                      action={handleSendMessage}
+                      className="mt-2 flex gap-3 relative"
+                    >
+                      <textarea
+                        name="message"
+                        rows={1}
+                        placeholder="Type a message..."
+                        className="w-full resize-none rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] py-3 pl-4 pr-12 text-sm font-semibold outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
+                      />
+                      <button
+                        type="submit"
+                        disabled={isPending}
+                        className="absolute right-2 top-2 bottom-2 flex w-10 items-center justify-center rounded-xl bg-[#2563EB] text-white transition hover:bg-[#1D4ED8] disabled:opacity-50"
+                      >
+                        {isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <MessageSquare className="h-4 w-4" />
+                        )}
+                      </button>
+                    </form>
+                  )}
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <aside className="space-y-4 lg:sticky lg:top-24">
+            {canActOnQuote && (
+              <div className="flex flex-col gap-5 rounded-[24px] border border-[#BFDBFE] bg-white p-6 shadow-sm shadow-blue-200/50">
+                <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">
+                  Next Step
+                </h2>
+                <div className="grid gap-3">
+                  <button
+                    onClick={() =>
+                      handleAction(acceptSupplierQuoteAction, "accept")
+                    }
+                    disabled={isPending}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-5 h-12 text-sm font-bold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8] disabled:opacity-50"
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                    Accept Proposal
+                  </button>
+                  <button
+                    onClick={() =>
+                      handleAction(declineSupplierQuoteAction, "decline")
+                    }
+                    disabled={isPending}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white border border-[#E5E7EB] px-5 h-12 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                  >
+                    <XCircle className="h-4 w-4" />
+                    Decline
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-4 rounded-[24px] border border-[#E5E7EB] bg-white p-6 shadow-sm shadow-slate-200/60">
+              <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">
+                Payment Summary
+              </h2>
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm font-medium text-slate-600">
+                  <span>Total Amount</span>
+                  <span className="font-bold text-slate-950">
+                    {formatCurrency(quote?.total)}
+                  </span>
+                </div>
+                {quote?.valid_until && quote.status === "sent" && (
+                  <div className="flex justify-between text-sm font-medium text-slate-600">
+                    <span>Valid Until</span>
+                    <span className="font-bold text-slate-950">
+                      {formatDate(quote.valid_until)}
+                    </span>
+                  </div>
                 )}
               </div>
-            </CustomerCard>
-          </div>
+              
+              <hr className="border-t border-[#E5E7EB]" />
+              
+              <div className="space-y-3">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  Status Timeline
+                </h3>
+                <div className="grid gap-0">
+                  {timeline.length > 0 ? (
+                    timeline.map((item: any, index: number) => (
+                      <div
+                        key={index}
+                        className="flex gap-4 border-l-2 border-[#DBEAFE] pb-6 last:border-transparent last:pb-0"
+                      >
+                        <span className="-ml-[13px] flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-4 border-white bg-[#2563EB] text-white">
+                          <Clock3 className="h-3 w-3" />
+                        </span>
+                        <div className="-mt-1.5">
+                          <p className="text-sm font-black capitalize text-slate-950">
+                            {item.title}
+                          </p>
+                          <p className="mt-0.5 text-xs font-semibold text-slate-500">
+                            {formatDate(item.date)}
+                          </p>
+                          {item.description && (
+                            <div className="mt-2 rounded-xl bg-slate-50 p-3 text-sm font-medium text-slate-600">
+                              {item.description}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="rounded-2xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-semibold text-slate-500">
+                      No timeline updates yet.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </aside>
         </div>
       </div>
     </div>

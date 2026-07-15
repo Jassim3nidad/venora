@@ -398,7 +398,6 @@ export default async function CustomerBookingsPage({
         ) : (
           <CustomerPageHeader
             eyebrow="Booking center"
-            icon={Sparkles}
             title="Track every booking request."
             description="Follow each venue from inquiry to approval, deposit payment, confirmation, completion, and review."
             action={
