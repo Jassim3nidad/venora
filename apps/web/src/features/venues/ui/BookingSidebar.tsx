@@ -49,7 +49,7 @@ interface BookingSidebarProps {
   capacityMin: number;
   capacityMax: number;
   packages: Package[];
-  children?: React.ReactNode;
+  children?: React.ReactNode | ((guestCount: number) => React.ReactNode);
 }
 
 function formatCurrency(value: number) {
@@ -282,7 +282,10 @@ export default function BookingSidebar({
               value={selectedPackageId}
               onValueChange={setSelectedPackageId}
             >
-              <SelectTrigger className="w-full h-11 px-4 border border-[var(--border-default)] bg-[var(--bg-subtle)] rounded-xl text-sm font-medium">
+              <SelectTrigger
+                aria-label="Select Package"
+                className="w-full h-11 px-4 border border-[var(--border-default)] bg-[var(--bg-subtle)] rounded-xl text-sm font-medium"
+              >
                 <SelectValue placeholder="Custom (Base Price)" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-[var(--border-default)]">
@@ -330,6 +333,7 @@ export default function BookingSidebar({
             />
             <input
               type="number"
+              aria-label="Guests count"
               value={inputValue}
               onChange={(e) => {
                 const valStr = e.target.value;
@@ -444,7 +448,7 @@ export default function BookingSidebar({
         >
           Book This Venue
         </Button>
-        {children}
+        {typeof children === "function" ? children(guests) : children}
       </div>
 
       <div className="mt-4 flex items-center gap-2 justify-center text-xs text-[var(--text-muted)] font-medium">

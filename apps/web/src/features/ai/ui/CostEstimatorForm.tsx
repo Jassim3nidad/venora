@@ -36,13 +36,31 @@ const costEstimatorFormSchema = z.object({
 type CostEstimatorFormValues = z.infer<typeof costEstimatorFormSchema>;
 
 interface CostEstimatorFormProps {
+  initialGuestCount?: number | undefined;
   capacityMin?: number | null | undefined;
   capacityMax?: number | null | undefined;
   isPending: boolean;
   onSubmit: (input: Omit<AICostEstimatorInput, "venue_id">) => void;
 }
 
+export function getCostEstimatorDefaultValues({
+  initialGuestCount,
+  capacityMin,
+}: {
+  initialGuestCount?: number | undefined;
+  capacityMin?: number | null | undefined;
+}) {
+  return {
+    guestCount: initialGuestCount ?? capacityMin ?? 50,
+    eventType: "",
+    durationHours: 4,
+    includesCatering: false,
+    includesAv: false,
+  };
+}
+
 export default function CostEstimatorForm({
+  initialGuestCount,
   capacityMin,
   capacityMax,
   isPending,
@@ -50,13 +68,10 @@ export default function CostEstimatorForm({
 }: CostEstimatorFormProps) {
   const form = useForm<CostEstimatorFormValues>({
     resolver: zodResolver(costEstimatorFormSchema),
-    defaultValues: {
-      guestCount: capacityMin ?? 50,
-      eventType: "",
-      durationHours: 4,
-      includesCatering: false,
-      includesAv: false,
-    },
+    defaultValues: getCostEstimatorDefaultValues({
+      initialGuestCount,
+      capacityMin,
+    }),
   });
 
   function handleSubmit(values: CostEstimatorFormValues) {
