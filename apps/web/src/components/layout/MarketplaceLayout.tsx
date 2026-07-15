@@ -31,7 +31,7 @@ export function MarketplaceLayout({
     <div className="flex h-dvh flex-col overflow-hidden bg-[#F8FAFC] text-[#111827]">
       <MarketingNavbar embedded={Boolean(user)} />
       <CustomerNavbar
-        user={user}
+        user={user ?? null}
         profile={profile ?? null}
         variant="subnav"
       />
