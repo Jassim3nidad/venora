@@ -14,6 +14,7 @@ export interface VenueSearchParams {
   venueTypes?: string[] | undefined;
   indoorOutdoor?: string | undefined;
   amenities?: string[] | undefined;
+  venueIds?: string[] | undefined;
   page?: number | undefined;
   limit?: number | undefined;
 }
@@ -42,6 +43,10 @@ export async function searchMarketplaceVenues(
     `,
     )
     .eq("status", "published");
+
+  if (params.venueIds?.length) {
+    query = query.in("id", params.venueIds);
+  }
 
   if (params.q) {
     // Sanitize to prevent PostgREST syntax errors (commas, quotes, parentheses break .or)
