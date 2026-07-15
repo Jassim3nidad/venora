@@ -279,7 +279,7 @@ const requiredMigrations = [
   "0680_enforce_booking_availability_integrity.sql",
   "070_supplier_portfolio_enhancements.sql",
   "071_supplier_location_coverage.sql",
-  "071_tighten_venue_media_storage_ownership.sql",
+  "0711_tighten_venue_media_storage_ownership.sql",
 ];
 for (const name of requiredMigrations) {
   if (!migrationFiles.includes(name))
@@ -327,10 +327,9 @@ for (const name of [
   }
 }
 
-const venueStorageMigration =
-  migrations.find(
-    ({ name }) => name === "071_tighten_venue_media_storage_ownership.sql",
-  )?.source ?? "";
+const venueStorageMigration = migrations.find(
+  ({ name }) => name === "0711_tighten_venue_media_storage_ownership.sql",
+)?.source ?? "";
 for (const token of [
   "v.id::text = (storage.foldername(name))[2]",
   "v.organization_id::text = (storage.foldername(name))[1]",
