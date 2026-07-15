@@ -473,7 +473,7 @@ export function SuppliersMarketplaceClient({
   );
 
   return (
-    <div className="flex h-full min-w-0 flex-1 overflow-hidden bg-[linear-gradient(180deg,#F9FAFB_0%,#F8FAFC_100%)]">
+    <div className="flex min-w-0 flex-1 items-start bg-[linear-gradient(180deg,#F9FAFB_0%,#F8FAFC_100%)]">
       {mobileFiltersOpen && (
         <div
           className="fixed inset-0 z-[60] lg:hidden"
@@ -509,7 +509,7 @@ export function SuppliersMarketplaceClient({
 
       <aside
         className={[
-          "hidden h-full shrink-0 overflow-hidden transition-[width,opacity] duration-300 ease-out lg:block",
+          "hidden shrink-0 transition-[width,opacity] duration-300 ease-out lg:sticky lg:top-[9.5rem] lg:block lg:max-h-[calc(100dvh-10.5rem)] lg:self-start lg:overflow-hidden",
           desktopFiltersOpen ? "w-[300px] opacity-100" : "w-0 opacity-0",
         ].join(" ")}
         aria-label="Supplier filters"
@@ -517,7 +517,7 @@ export function SuppliersMarketplaceClient({
         {filterPanel("desktop")}
       </aside>
 
-      <main className="h-full min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-4 py-5 sm:px-6 sm:py-6 lg:px-7 xl:px-10">
+      <main className="min-w-0 flex-1 overflow-x-hidden px-4 py-5 sm:px-6 sm:py-6 lg:px-7 xl:px-10">
         <div className="flex flex-col gap-6">
           <section className="max-w-full overflow-hidden rounded-[24px] border border-[#E5E7EB]/90 bg-white shadow-sm shadow-slate-200/60">
             <div className="grid gap-4 p-5 sm:p-6 lg:p-7">

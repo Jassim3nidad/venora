@@ -108,13 +108,9 @@ export default async function VenuesMarketplacePage({
         );
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-[#F9FAFB] text-[#111827]">
-      <div className="flex min-h-0 w-full flex-1 overflow-hidden">
-        <VenuesClient
-          initialVenues={venues}
-          favoriteVenueIds={[...favoriteVenueIds]}
-        />
-      </div>
-    </div>
+    <VenuesClient
+      initialVenues={venues}
+      favoriteVenueIds={[...favoriteVenueIds]}
+    />
   );
 }
