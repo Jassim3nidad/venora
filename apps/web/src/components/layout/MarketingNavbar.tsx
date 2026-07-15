@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import ProfileMenu from "@/components/layout/ProfileMenu";
+import { isMarketplaceParentActive } from "@/components/layout/marketplace-navigation";
 import { NotificationBell } from "@/features/notifications/ui/NotificationBell";
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 
@@ -32,7 +33,7 @@ type MobileLink = {
 function getNavLinks(user?: { email?: string | null } | null): MobileLink[] {
   return [
     { label: "Home", href: "/" },
-    { label: "Browse", href: "/venues" },
+    { label: "Venues", href: "/venues" },
     { label: "About", href: "/about" },
     {
       label: "Host a Venue",
@@ -51,10 +52,7 @@ function isActive(pathname: string, href: string, label?: string) {
   }
   if (href === "/") return pathname === "/";
   if (href === "/venues") {
-    return pathname === "/venues" || pathname.startsWith("/venues/");
-  }
-  if (href === "/suppliers") {
-    return pathname === "/suppliers" || pathname.startsWith("/suppliers/");
+    return isMarketplaceParentActive(pathname);
   }
   return pathname === href || pathname.startsWith(`${href}/`);
 }

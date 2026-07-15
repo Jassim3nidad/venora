@@ -16,17 +16,14 @@ import {
   X,
 } from "lucide-react";
 import ProfileMenu from "@/components/layout/ProfileMenu";
+import {
+  isMarketplaceNavItemActive,
+  MARKETPLACE_NAV_LINKS,
+  resolveMarketplaceNavHref,
+} from "@/components/layout/marketplace-navigation";
 import { NotificationBell } from "@/features/notifications/ui/NotificationBell";
 
-function isActive(pathname: string, href: string) {
-  if (href === "/venues") {
-    return pathname === "/venues" || pathname.startsWith("/venues/");
-  }
-
-  if (href === "/suppliers") {
-    return pathname === "/suppliers" || pathname.startsWith("/suppliers/");
-  }
-
+function isRouteActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -43,15 +40,10 @@ type NavLink = {
   mobileOnly?: boolean;
 };
 
-const primaryNavLinks: NavLink[] = [
-  { label: "Venues", href: "/venues" },
-  { label: "Suppliers", href: "/suppliers" },
-  { label: "Bookings", href: "/bookings" },
-  { label: "Favorites", href: "/favorites" },
-];
+const primaryNavLinks = MARKETPLACE_NAV_LINKS;
 
 const mobileNavLinks: NavLink[] = [
-  { label: "Venues", href: "/venues", icon: Search, mobileOnly: true },
+  { label: "Browse", href: "/venues", icon: Search, mobileOnly: true },
   { label: "Suppliers", href: "/suppliers", icon: Store, mobileOnly: true },
   {
     label: "Bookings",
@@ -67,19 +59,6 @@ const mobileNavLinks: NavLink[] = [
     mobileOnly: true,
   },
 ];
-
-/** Auth-gated destinations stay visible logged out, but send guests to login. */
-function resolveNavHref(href: string, isAuthenticated: boolean) {
-  if (isAuthenticated) return href;
-  if (href === "/bookings" || href === "/favorites") {
-    const params = new URLSearchParams({
-      redirectTo: href,
-      prompt: href === "/bookings" ? "bookings" : "favorites",
-    });
-    return `/login?${params.toString()}`;
-  }
-  return href;
-}
 
 export function CustomerNavbar({
   user,
@@ -108,12 +87,12 @@ export function CustomerNavbar({
           className="mx-auto flex w-full max-w-[1600px] overflow-x-auto px-2 sm:px-4 lg:px-8"
         >
           {primaryNavLinks.map((item) => {
-            const active = isActive(pathname, item.href);
+            const active = isMarketplaceNavItemActive(pathname, item.href);
 
             return (
               <Link
                 key={item.href}
-                href={resolveNavHref(item.href, isAuthenticated)}
+                href={resolveMarketplaceNavHref(item.href, isAuthenticated)}
                 className={[
                   "min-w-[5.5rem] flex-1 whitespace-nowrap border-b-2 px-3 py-3 text-center text-sm font-bold transition sm:px-4 sm:py-3.5",
                   active
@@ -156,12 +135,12 @@ export function CustomerNavbar({
         >
           <div className="inline-flex items-center gap-1 rounded-full border border-[#E5E7EB]/90 bg-white/90 p-1">
             {primaryNavLinks.map((item) => {
-              const active = isActive(pathname, item.href);
+              const active = isMarketplaceNavItemActive(pathname, item.href);
 
               return (
                 <Link
                   key={item.href}
-                  href={resolveNavHref(item.href, isAuthenticated)}
+                  href={resolveMarketplaceNavHref(item.href, isAuthenticated)}
                   className={[
                     "rounded-full px-4 py-2 text-sm font-bold transition",
                     active
@@ -235,7 +214,7 @@ export function CustomerNavbar({
                     )
                     .map((item) => {
                     const Icon = item.icon ?? Search;
-                    const active = isActive(pathname, item.href);
+                    const active = isMarketplaceNavItemActive(pathname, item.href);
                     const itemClassName = [
                       "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold transition",
                       item.mobileOnly ? "" : "",
@@ -247,7 +226,7 @@ export function CustomerNavbar({
                     return (
                       <Link
                         key={item.href}
-                        href={resolveNavHref(item.href, isAuthenticated)}
+                        href={resolveMarketplaceNavHref(item.href, isAuthenticated)}
                         role="menuitem"
                         onClick={closeMenu}
                         className={itemClassName}
@@ -278,7 +257,7 @@ export function CustomerNavbar({
                         onClick={closeMenu}
                         className={[
                           "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold transition",
-                          isActive(pathname, "/account")
+                          isRouteActive(pathname, "/account")
                             ? "bg-[#EFF6FF] text-[#2563EB]"
                             : "text-[#111827] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]",
                         ].join(" ")}
