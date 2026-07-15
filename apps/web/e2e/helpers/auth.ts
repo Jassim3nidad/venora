@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 
-export type Role = "customer" | "venue" | "coordinator" | "supplier" | "superadmin" | "analystAdmin" | "financeAdmin";
+export type Role = "customer" | "venue" | "coordinator" | "supplier" | "superadmin" | "analystAdmin" | "financeAdmin" | "tenantAOwner" | "tenantBOwner" | "tenantACustomer" | "tenantBCustomer" | "nonMember";
 
 const CREDENTIAL_ENV: Record<Role, { email: string; password: string }> = {
   customer: { email: "E2E_CUSTOMER_EMAIL", password: "E2E_CUSTOMER_PASSWORD" },
@@ -10,6 +10,11 @@ const CREDENTIAL_ENV: Record<Role, { email: string; password: string }> = {
   superadmin: { email: "E2E_SUPERADMIN_EMAIL", password: "E2E_SUPERADMIN_PASSWORD" },
   analystAdmin: { email: "E2E_ANALYST_ADMIN_EMAIL", password: "E2E_ANALYST_ADMIN_PASSWORD" },
   financeAdmin: { email: "E2E_FINANCE_ADMIN_EMAIL", password: "E2E_FINANCE_ADMIN_PASSWORD" },
+  tenantAOwner: { email: "E2E_TENANT_A_OWNER_EMAIL", password: "E2E_TENANT_A_OWNER_PASSWORD" },
+  tenantBOwner: { email: "E2E_TENANT_B_OWNER_EMAIL", password: "E2E_TENANT_B_OWNER_PASSWORD" },
+  tenantACustomer: { email: "E2E_TENANT_A_CUSTOMER_EMAIL", password: "E2E_TENANT_A_CUSTOMER_PASSWORD" },
+  tenantBCustomer: { email: "E2E_TENANT_B_CUSTOMER_EMAIL", password: "E2E_TENANT_B_CUSTOMER_PASSWORD" },
+  nonMember: { email: "E2E_NON_MEMBER_EMAIL", password: "E2E_NON_MEMBER_PASSWORD" },
 };
 
 // Dedicated QA fixtures (see apps/web/.env.local, gitignored) -- never

@@ -32,5 +32,11 @@
   ],
   "mutableMigrationFiles": [],
   "destructiveStatements": [],
-  "sensitiveStatements": []
+  "sensitiveStatements": [
+    {
+      "file": "supabase/migrations/076_admin_disputes.sql",
+      "kind": "SECURITY_DEFINER",
+      "reason": "RPC requires elevated privileges to securely mutate dispute states and log audits."
+    }
+  ]
 }
