@@ -188,7 +188,6 @@ function LoginForm() {
           </Link>
 
           <div className="max-w-xl">
-
             <h1 className="text-5xl font-black leading-tight tracking-[-0.05em] text-white xl:text-6xl">
               Where extraordinary events begin.
             </h1>

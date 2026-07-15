@@ -3,7 +3,9 @@ import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 
 const appBaseUrl = process.env.APP_BASE_URL ?? "http://127.0.0.1:3000";
-const isHostedTest = Boolean(process.env.APP_BASE_URL);
+const isHostedTest =
+  appBaseUrl !== "http://127.0.0.1:3000" &&
+  appBaseUrl !== "http://localhost:3000";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -19,9 +21,9 @@ export default defineConfig({
   use: {
     actionTimeout: 0,
     baseURL: appBaseUrl,
-    trace: "retain-on-failure",
-    screenshot: "only-on-failure",
-    video: "retain-on-failure",
+    trace: process.env.E2E_LOW_DISK === "true" ? "off" : "retain-on-failure",
+    screenshot: process.env.E2E_LOW_DISK === "true" ? "off" : "only-on-failure",
+    video: process.env.E2E_LOW_DISK === "true" ? "off" : "retain-on-failure",
   },
   ...(!isHostedTest
     ? {

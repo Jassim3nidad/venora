@@ -1428,7 +1428,6 @@ export default function VenuesClient({
             <div className="grid gap-4 p-5 sm:p-6 lg:p-7">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0">
-
                   <h1 className="max-w-3xl break-words text-2xl font-black leading-8 tracking-[-0.04em] text-slate-950 sm:text-3xl sm:leading-tight">
                     Wedding & Event Venues
                   </h1>

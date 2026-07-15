@@ -89,10 +89,7 @@ export async function middleware(request: NextRequest) {
     let maxRequests = 100; // Default generic limit
 
     // Specific Rate Limits
-    if (
-      method === "POST" &&
-      (path === "/login" || path === "/register")
-    ) {
+    if (method === "POST" && (path === "/login" || path === "/register")) {
       maxRequests = 10; // Login/Registration limit
     } else if (path.startsWith("/api/ai") || path.includes("ai-assistant")) {
       maxRequests = 20; // AI requests limit
@@ -100,7 +97,8 @@ export async function middleware(request: NextRequest) {
       maxRequests = 60; // Search limit
     } else if (
       method === "POST" &&
-      (path.startsWith("/api/bookings") || path.startsWith("/dashboard/bookings"))
+      (path.startsWith("/api/bookings") ||
+        path.startsWith("/dashboard/bookings"))
     ) {
       maxRequests = 30; // Bookings limit
     } else if (
@@ -116,10 +114,15 @@ export async function middleware(request: NextRequest) {
     if (!isAllowed) {
       if (path.startsWith("/api")) {
         return new NextResponse(
-          JSON.stringify({ error: "Too many requests. Please try again later." }),
+          JSON.stringify({
+            error: "Too many requests. Please try again later.",
+          }),
           {
             status: 429,
-            headers: { "Content-Type": "application/json", "Retry-After": "60" },
+            headers: {
+              "Content-Type": "application/json",
+              "Retry-After": "60",
+            },
           },
         );
       } else {

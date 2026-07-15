@@ -57,14 +57,14 @@ const nextConfig: NextConfig = {
     // Server Actions
     serverActions: {
       allowedOrigins: [
-        "localhost:3000",
-        "localhost:3001",
+        "127.0.0.1:3000",
         "venora-web.vercel.app",
         process.env.VERCEL_PROJECT_PRODUCTION_URL || "",
         process.env.VERCEL_URL || "",
       ].filter(Boolean),
     },
   },
+  allowedDevOrigins: ["127.0.0.1"],
   images: {
     remotePatterns: [
       // Supabase Storage

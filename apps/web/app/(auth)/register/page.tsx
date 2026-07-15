@@ -71,8 +71,8 @@ export default function RegisterPage() {
         setGeneralError(response.error || "Unable to create account.");
         setShowResendVerification(
           response.error.toLowerCase().includes("already registered") ||
-          response.error.toLowerCase().includes("already exists") ||
-          response.error.toLowerCase().includes("user already"),
+            response.error.toLowerCase().includes("already exists") ||
+            response.error.toLowerCase().includes("user already"),
         );
         if (response.fieldErrors) setFieldErrors(response.fieldErrors);
       }
@@ -100,7 +100,6 @@ export default function RegisterPage() {
           </Link>
 
           <div className="max-w-xl">
-
             <h1 className="text-5xl font-black leading-tight tracking-[-0.05em] text-white xl:text-6xl">
               Create your event workspace.
             </h1>
@@ -384,7 +383,10 @@ export default function RegisterPage() {
               </div>
 
               <div className="mt-2 mb-2">
-                <PasswordRequirements password={password} confirmPassword={confirmPassword} />
+                <PasswordRequirements
+                  password={password}
+                  confirmPassword={confirmPassword}
+                />
               </div>
 
               <button

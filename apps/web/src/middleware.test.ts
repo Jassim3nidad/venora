@@ -30,7 +30,7 @@ describe("Middleware Rate Limiter", () => {
     path: string,
     method: string,
     ip: string | null = null,
-    headers: Record<string, string> = {}
+    headers: Record<string, string> = {},
   ): NextRequest {
     const req = new NextRequest(`http://localhost:3000${path}`, {
       method,
@@ -60,13 +60,15 @@ describe("Middleware Rate Limiter", () => {
     // 21st request should fail
     const res = await middleware(req);
     expect(res.status).toBe(429);
-    
+
     // 3. Retry-After is included
     expect(res.headers.get("Retry-After")).toBe("60");
-    
+
     // 7. API routes receive JSON
     const json = await res.json();
-    expect(json).toEqual({ error: "Too many requests. Please try again later." });
+    expect(json).toEqual({
+      error: "Too many requests. Please try again later.",
+    });
   });
 
   it("4. Entries expire and 5. Expired entries are removed (implicitly by resetAt logic)", async () => {

@@ -216,7 +216,10 @@ export default function ResetPasswordPage() {
           </div>
 
           <div className="mb-[8px]">
-            <PasswordRequirements password={password} confirmPassword={confirmPassword} />
+            <PasswordRequirements
+              password={password}
+              confirmPassword={confirmPassword}
+            />
           </div>
 
           {/* Submit Button */}

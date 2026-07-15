@@ -15,10 +15,11 @@ export function PasswordRequirements({
   const hasUppercase = /[A-Z]/.test(password);
   const hasLowercase = /[a-z]/.test(password);
   const hasSymbol = /[^A-Za-z0-9\s]/.test(password);
-  
+
   // Show error only if confirmPassword has been typed into and they don't match
   const matchError = confirmPassword.length > 0 && password !== confirmPassword;
-  const matchSuccess = confirmPassword.length > 0 && password === confirmPassword;
+  const matchSuccess =
+    confirmPassword.length > 0 && password === confirmPassword;
 
   const requirements = [
     {
@@ -71,8 +72,8 @@ export function PasswordRequirements({
                 req.satisfied
                   ? "font-medium text-emerald-700"
                   : req.isError
-                  ? "font-medium text-red-600"
-                  : "text-slate-600"
+                    ? "font-medium text-red-600"
+                    : "text-slate-600"
               }`}
             >
               {req.label}
