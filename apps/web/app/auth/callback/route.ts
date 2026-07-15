@@ -1,7 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { type RoleName } from "@/lib/rbac/roles";
-import { isSafeInternalRedirect, resolvePostAuthRedirect } from "@/lib/profile-setup";
+import {
+  isSafeInternalRedirect,
+  resolvePostAuthRedirect,
+} from "@/lib/profile-setup";
 
 const PASSWORD_RECOVERY_COOKIE = "venora-password-recovery";
 
@@ -29,7 +32,8 @@ export async function GET(request: NextRequest) {
     const confirmUrl = new URL("/confirm", request.url);
     confirmUrl.searchParams.set("token_hash", tokenHash);
     confirmUrl.searchParams.set("type", type);
-    if (isSafeInternalRedirect(next)) confirmUrl.searchParams.set("next", next!);
+    if (isSafeInternalRedirect(next))
+      confirmUrl.searchParams.set("next", next!);
 
     return NextResponse.redirect(confirmUrl);
   }
@@ -41,7 +45,9 @@ export async function GET(request: NextRequest) {
     const redirectUrl = new URL("/login", request.url);
     redirectUrl.searchParams.set(
       "error",
-      providerError === "access_denied" ? "oauth_cancelled" : "oauth_provider_error",
+      providerError === "access_denied"
+        ? "oauth_cancelled"
+        : "oauth_provider_error",
     );
 
     return NextResponse.redirect(redirectUrl);
@@ -63,7 +69,9 @@ export async function GET(request: NextRequest) {
     const redirectUrl = new URL("/login", request.url);
     redirectUrl.searchParams.set(
       "error",
-      isRestrictedAccountError(error.message) ? "account_restricted" : "oauth_callback_failed",
+      isRestrictedAccountError(error.message)
+        ? "account_restricted"
+        : "oauth_callback_failed",
     );
 
     return NextResponse.redirect(redirectUrl);

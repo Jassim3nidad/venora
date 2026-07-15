@@ -49,7 +49,11 @@ const nextConfig: NextConfig = {
   // Turbopack is used in dev (--turbopack flag in package.json)
   experimental: {
     // Optimise package imports for large icon/component libraries
-    optimizePackageImports: ["lucide-react", "@radix-ui/react-icons", "recharts"],
+    optimizePackageImports: [
+      "lucide-react",
+      "@radix-ui/react-icons",
+      "recharts",
+    ],
     // Server Actions
     serverActions: {
       allowedOrigins: [
@@ -57,7 +61,7 @@ const nextConfig: NextConfig = {
         "localhost:3001",
         "venora-web.vercel.app",
         process.env.VERCEL_PROJECT_PRODUCTION_URL || "",
-        process.env.VERCEL_URL || ""
+        process.env.VERCEL_URL || "",
       ].filter(Boolean),
     },
   },

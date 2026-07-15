@@ -167,31 +167,31 @@ Main abuse cases:
 
 ## 6. RLS Review
 
-| Table | RLS status | Customer access | Partner access | Admin access | Public access | Finding | Change |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| profiles | Enabled | Self update | Reads via broad policy | All | Broad SELECT | Public profile data too broad | Recommended follow-up |
-| user_roles | Enabled | Self select | Self select | All | None | Signup trigger trusted role metadata | Fixed by migration 072 |
-| organizations | Enabled | None | Venue owner/member scoped | All | None | Owner policies present | None |
-| organization_members | Enabled | Self/member scoped | Org owner scoped | All | None | Owner policies present | None |
-| venues | Enabled | Public published read | Org member manage | All | Published only | OK from migration review | None |
-| venue_images/packages/amenities | Enabled | Public listing read | Venue scoped write | All | Public listing read | Broad public listing intended | None |
-| venue_availability | Enabled | Public read | Venue scoped write | All | Public read | Required for booking calendar | None |
-| bookings | Enabled | Own records | Venue-owner venue scoped | All | None | Later migration tightens insert/update | None |
-| booking_status_history | Enabled | Own booking | Venue booking scoped | All | None | OK from migration review | None |
-| favorites | Enabled | Own records | None | Via admin policy where present | None | OK | None |
-| supplier_profiles | Enabled | Public accredited read | Self write | All | Accredited only | OK from migration review | None |
-| supplier_services | Enabled | Public read | Supplier scoped write | All | Public read | Public service listing intended | None |
-| supplier_quotes | Enabled | Participant | Supplier participant | All | None | OK from migration review | None |
-| supplier_quote_items | Enabled | Participant | Supplier participant | All | None | OK from migration review | None |
-| supplier_inquiry_messages | Enabled | Participant | Supplier participant | All | None | OK from migration review | None |
-| supplier_availability | Enabled | Public read | Supplier scoped write | All | Public read | Required for supplier discovery | None |
-| reviews | Enabled | Own/create | Owner reply | All | Published only | OK from migration review | None |
-| supplier_reviews | Enabled | Own/create | None | All | Published only | OK from migration review | None |
-| notifications | Enabled | Own records | Own records | All | None | OK | None |
-| audit_logs | Enabled | None | None | Permission-gated | None | OK after migration 054/065 | None |
-| transactions/payouts | Enabled | Booking/customer scoped | Org/supplier scoped | All | None | OK from migration review | None |
-| verification_requests | Enabled | Own records | Own records | All | None | OK | None |
-| admin_* tables | Enabled | None | None | Permission-gated | None | OK from migration review | None |
+| Table                           | RLS status | Customer access         | Partner access            | Admin access                   | Public access       | Finding                                | Change                 |
+| ------------------------------- | ---------- | ----------------------- | ------------------------- | ------------------------------ | ------------------- | -------------------------------------- | ---------------------- |
+| profiles                        | Enabled    | Self update             | Reads via broad policy    | All                            | Broad SELECT        | Public profile data too broad          | Recommended follow-up  |
+| user_roles                      | Enabled    | Self select             | Self select               | All                            | None                | Signup trigger trusted role metadata   | Fixed by migration 072 |
+| organizations                   | Enabled    | None                    | Venue owner/member scoped | All                            | None                | Owner policies present                 | None                   |
+| organization_members            | Enabled    | Self/member scoped      | Org owner scoped          | All                            | None                | Owner policies present                 | None                   |
+| venues                          | Enabled    | Public published read   | Org member manage         | All                            | Published only      | OK from migration review               | None                   |
+| venue_images/packages/amenities | Enabled    | Public listing read     | Venue scoped write        | All                            | Public listing read | Broad public listing intended          | None                   |
+| venue_availability              | Enabled    | Public read             | Venue scoped write        | All                            | Public read         | Required for booking calendar          | None                   |
+| bookings                        | Enabled    | Own records             | Venue-owner venue scoped  | All                            | None                | Later migration tightens insert/update | None                   |
+| booking_status_history          | Enabled    | Own booking             | Venue booking scoped      | All                            | None                | OK from migration review               | None                   |
+| favorites                       | Enabled    | Own records             | None                      | Via admin policy where present | None                | OK                                     | None                   |
+| supplier_profiles               | Enabled    | Public accredited read  | Self write                | All                            | Accredited only     | OK from migration review               | None                   |
+| supplier_services               | Enabled    | Public read             | Supplier scoped write     | All                            | Public read         | Public service listing intended        | None                   |
+| supplier_quotes                 | Enabled    | Participant             | Supplier participant      | All                            | None                | OK from migration review               | None                   |
+| supplier_quote_items            | Enabled    | Participant             | Supplier participant      | All                            | None                | OK from migration review               | None                   |
+| supplier_inquiry_messages       | Enabled    | Participant             | Supplier participant      | All                            | None                | OK from migration review               | None                   |
+| supplier_availability           | Enabled    | Public read             | Supplier scoped write     | All                            | Public read         | Required for supplier discovery        | None                   |
+| reviews                         | Enabled    | Own/create              | Owner reply               | All                            | Published only      | OK from migration review               | None                   |
+| supplier_reviews                | Enabled    | Own/create              | None                      | All                            | Published only      | OK from migration review               | None                   |
+| notifications                   | Enabled    | Own records             | Own records               | All                            | None                | OK                                     | None                   |
+| audit_logs                      | Enabled    | None                    | None                      | Permission-gated               | None                | OK after migration 054/065             | None                   |
+| transactions/payouts            | Enabled    | Booking/customer scoped | Org/supplier scoped       | All                            | None                | OK from migration review               | None                   |
+| verification_requests           | Enabled    | Own records             | Own records               | All                            | None                | OK                                     | None                   |
+| admin_* tables                  | Enabled    | None                    | None                      | Permission-gated               | None                | OK from migration review               | None                   |
 
 ## 7. Supabase Manual Configuration
 

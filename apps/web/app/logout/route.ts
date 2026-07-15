@@ -13,16 +13,16 @@ export async function GET(request: NextRequest) {
 
   const homeUrl = new URL("/", request.url);
   const response = NextResponse.redirect(homeUrl);
-  
+
   // Explicitly clear all chunked auth cookies to ensure the session is destroyed locally
   const cookieStore = await cookies();
   const allCookies = cookieStore.getAll();
-  
+
   allCookies.forEach((c) => {
     if (c.name.startsWith("sb-") || c.name.includes("auth-token")) {
       // 1. Delete from cookieStore
       cookieStore.delete(c.name);
-      
+
       // 2. Delete from response cookie manager
       response.cookies.set(c.name, "", {
         path: "/",

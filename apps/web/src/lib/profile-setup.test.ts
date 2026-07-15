@@ -4,7 +4,9 @@ import { isSafeInternalRedirect } from "./profile-setup";
 describe("isSafeInternalRedirect", () => {
   it("accepts normal internal app routes", () => {
     expect(isSafeInternalRedirect("/account")).toBe(true);
-    expect(isSafeInternalRedirect("/bookings?activity=supplier-inquiries")).toBe(true);
+    expect(
+      isSafeInternalRedirect("/bookings?activity=supplier-inquiries"),
+    ).toBe(true);
     expect(isSafeInternalRedirect("/dashboard/supplier")).toBe(true);
   });
 

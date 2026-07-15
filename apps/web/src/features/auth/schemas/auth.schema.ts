@@ -5,7 +5,12 @@ import { z } from "zod";
  * administrator accounts are provisioned manually by an existing admin
  * (see also the defense-in-depth check in application/auth.usecases.ts).
  */
-export const ROLE_OPTIONS = ["customer", "venue_owner", "event_coordinator", "supplier"] as const;
+export const ROLE_OPTIONS = [
+  "customer",
+  "venue_owner",
+  "event_coordinator",
+  "supplier",
+] as const;
 
 const passwordSchema = z
   .string()
@@ -55,7 +60,10 @@ export const updateProfileSchema = z.object({
   phone: z
     .string()
     .trim()
-    .regex(/^(\+63|0)9\d{9}$/, "Enter a valid PH mobile number (e.g. 09171234567)")
+    .regex(
+      /^(\+63|0)9\d{9}$/,
+      "Enter a valid PH mobile number (e.g. 09171234567)",
+    )
     .optional()
     .or(z.literal("")),
 });
@@ -81,16 +89,18 @@ export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 
 export const DELETE_ACCOUNT_CONFIRMATION_PHRASE = "DELETE MY ACCOUNT";
 
-export const deleteAccountSchema = z.object({
-  password: z.string().min(1, "Password is required"),
-  confirmPassword: z.string().min(1, "Re-enter your password"),
-  confirmationPhrase: z
-    .string()
-    .refine((value) => value === DELETE_ACCOUNT_CONFIRMATION_PHRASE, {
-      message: `Type ${DELETE_ACCOUNT_CONFIRMATION_PHRASE} to confirm.`,
-    }),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
-});
+export const deleteAccountSchema = z
+  .object({
+    password: z.string().min(1, "Password is required"),
+    confirmPassword: z.string().min(1, "Re-enter your password"),
+    confirmationPhrase: z
+      .string()
+      .refine((value) => value === DELETE_ACCOUNT_CONFIRMATION_PHRASE, {
+        message: `Type ${DELETE_ACCOUNT_CONFIRMATION_PHRASE} to confirm.`,
+      }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 export type DeleteAccountInput = z.infer<typeof deleteAccountSchema>;

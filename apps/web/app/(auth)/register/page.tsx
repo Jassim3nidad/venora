@@ -18,8 +18,6 @@ import {
 import { registerSchema } from "@/features/auth/schemas/auth.schema";
 import { researchVenues } from "@/src/features/venues/data/research-venues";
 
-
-
 const brandPoints = [
   "Discover venues for weddings, parties, and corporate events.",
   "Manage bookings, favorites, and event details in one place.",
@@ -84,7 +82,9 @@ export default function RegisterPage() {
     <main className="flex min-h-screen w-full overflow-hidden bg-[#F9FAFB] text-[#111827]">
       <section className="relative hidden min-h-screen w-1/2 overflow-hidden bg-[#111827] lg:flex">
         <img
-          src={heroVenue.photos.cover_image_url ?? heroVenue.photos.image_urls?.[0]}
+          src={
+            heroVenue.photos.cover_image_url ?? heroVenue.photos.image_urls?.[0]
+          }
           alt={`${heroVenue.name} venue`}
           className="absolute inset-0 h-full w-full object-cover opacity-45"
         />
@@ -389,8 +389,6 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-
-
               <button
                 id="register-submit-btn"
                 type="submit"
@@ -399,7 +397,6 @@ export default function RegisterPage() {
               >
                 {isPending ? "Creating account..." : "Create account"}
               </button>
-
             </form>
           </div>
 
