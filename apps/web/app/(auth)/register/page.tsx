@@ -331,7 +331,7 @@ export default function RegisterPage() {
                     </p>
                   ) : (
                     <p className="text-xs font-medium text-[#6B7280]">
-                      At least 8 characters.
+                      At least 12 characters.
                     </p>
                   )}
                 </div>

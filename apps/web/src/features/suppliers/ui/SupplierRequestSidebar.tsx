@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition, useEffect } from "react";
 import Link from "next/link";
 import {
   CalendarDays,
@@ -70,6 +70,17 @@ export function SupplierRequestSidebar({
   const [selectedPackageId, setSelectedPackageId] = useState(
     supplier.packages.find((pkg) => pkg.isActive)?.id ?? "",
   );
+
+  useEffect(() => {
+    const handleSelectService = (e: Event) => {
+      const customEvent = e as CustomEvent<{ serviceId: string }>;
+      if (customEvent.detail?.serviceId) {
+        setSelectedPackageId(customEvent.detail.serviceId);
+      }
+    };
+    window.addEventListener("venora:select-service", handleSelectService);
+    return () => window.removeEventListener("venora:select-service", handleSelectService);
+  }, []);
   const [selectedBookingId, setSelectedBookingId] = useState("");
   const [eventDate, setEventDate] = useState("");
   const [guestCount, setGuestCount] = useState("");

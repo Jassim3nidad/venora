@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -39,12 +40,6 @@ function isUnverifiedEmailError(message: string) {
   );
 }
 
-function isBannedUserError(message: string) {
-  const normalized = message.toLowerCase();
-
-  return normalized.includes("banned");
-}
-
 function isAlreadyRegisteredError(message: string) {
   const normalized = message.toLowerCase();
 
@@ -54,6 +49,9 @@ function isAlreadyRegisteredError(message: string) {
     normalized.includes("user already")
   );
 }
+
+const PASSWORD_RECOVERY_COOKIE = "venora-password-recovery";
+const INVALID_LOGIN_MESSAGE = "Invalid email or password.";
 
 function getAvatarsStoragePath(publicUrl: string | null | undefined) {
   if (!publicUrl) return null;
@@ -95,13 +93,14 @@ export async function registerAction(rawInput: unknown): Promise<ActionResult> {
     if (isAlreadyRegisteredError(message)) {
       return {
         success: false,
-        error: "This email is already registered. Please log in instead.",
+        error:
+          "Unable to create this account. Please sign in if you already have an account.",
       };
     }
 
     return {
       success: false,
-      error: message,
+      error: "Unable to create this account. Please check your details and try again.",
     };
   }
 
@@ -127,7 +126,7 @@ export async function loginAction(rawInput: unknown): Promise<ActionResult> {
 
     return {
       success: false,
-      error: isBannedUserError(message) ? "Invalid login credentials" : message,
+      error: isUnverifiedEmail ? message : INVALID_LOGIN_MESSAGE,
       data: isUnverifiedEmail
         ? { reason: "email_unverified", email: parsed.data.email }
         : undefined,
@@ -241,6 +240,18 @@ export async function forgotPasswordAction(
 export async function resetPasswordAction(
   rawInput: unknown,
 ): Promise<ActionResult> {
+  const cookieStore = await cookies();
+  const hasRecoveryContext =
+    cookieStore.get(PASSWORD_RECOVERY_COOKIE)?.value === "1";
+
+  if (!hasRecoveryContext) {
+    return {
+      success: false,
+      error:
+        "This password reset link is invalid or expired. Please request a new reset link.",
+    };
+  }
+
   const parsed = resetPasswordSchema.safeParse(rawInput);
 
   if (!parsed.success) {
@@ -265,6 +276,8 @@ export async function resetPasswordAction(
   } catch {
     // Best effort only.
   }
+
+  cookieStore.delete(PASSWORD_RECOVERY_COOKIE);
 
   redirect("/login?reset=true");
 }

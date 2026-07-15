@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -16,6 +18,15 @@ import {
   ShieldCheck,
   Star,
   Users,
+  Images,
+  Camera,
+  BriefcaseBusiness,
+  ArrowUpRight,
+  Send,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  CalendarDays,
 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import type { CustomerBookingOption } from "../application/get-customer-bookings-for-contact";
@@ -32,7 +43,16 @@ import {
 } from "../utils/supplier-format";
 import { SupplierRequestSidebar } from "./SupplierRequestSidebar";
 import { SupplierFavoriteButton } from "./SupplierFavoriteButton";
-import { Button, Badge, Separator } from "@venora/ui";
+import {
+  Button,
+  Badge,
+  Separator,
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogTitle,
+  DialogClose,
+} from "@venora/ui";
 import VenueGallery from "@/src/features/venues/ui/VenueGallery";
 import dynamic from "next/dynamic";
 
@@ -73,11 +93,145 @@ function InfoCard({
   );
 }
 
-function EmptyPanel({ message }: { message: string }) {
+function EmptyPanel({ message, icon }: { message: string; icon?: React.ReactNode }) {
   return (
-    <div className="rounded-[18px] border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-semibold text-[#6B7280] sm:p-5">
-      {message}
+    <div className="flex flex-col items-center justify-center rounded-[18px] border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-8 text-center sm:p-10">
+      {icon && <div className="mb-3 text-slate-400">{icon}</div>}
+      <p className="text-sm font-semibold text-[#6B7280]">{message}</p>
     </div>
+  );
+}
+
+function PortfolioProjectModal({
+  project,
+  isOpen,
+  onOpenChange
+}: {
+  project: any; // using any temporarily to avoid circular types if needed, or import type
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const images = project.imageUrls && project.imageUrls.length > 0
+    ? project.imageUrls
+    : (project.imageUrl ? [project.imageUrl] : []);
+
+  const handleNext = () => setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  const handlePrev = () => setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl p-0 overflow-hidden bg-white sm:rounded-[24px]">
+        <div className="flex flex-col h-[85vh] sm:h-[80vh]">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-slate-100">
+            <DialogTitle className="text-lg font-black text-slate-900 line-clamp-1 pr-8">
+              {project.title || "Portfolio Project"}
+            </DialogTitle>
+            <DialogClose asChild>
+              <button className="rounded-full p-2 hover:bg-slate-100 transition-colors" aria-label="Close">
+                <X className="h-5 w-5 text-slate-500" />
+              </button>
+            </DialogClose>
+          </div>
+
+          {/* Body */}
+          <div className="flex-1 overflow-y-auto">
+            {/* Gallery */}
+            {images.length > 0 ? (
+              <div className="relative bg-slate-100 w-full aspect-video sm:aspect-[16/9] flex items-center justify-center group">
+                <img
+                  src={images[currentImageIndex]}
+                  alt={`${project.title} - image ${currentImageIndex + 1}`}
+                  className="max-h-full max-w-full object-contain"
+                />
+
+                {images.length > 1 && (
+                  <>
+                    <button
+                      onClick={handlePrev}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 text-slate-800 shadow-md backdrop-blur opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0"
+                      aria-label="Previous image"
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={handleNext}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 text-slate-800 shadow-md backdrop-blur opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0"
+                      aria-label="Next image"
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </button>
+                    <div className="absolute bottom-4 right-4 rounded-md bg-black/70 px-2.5 py-1 text-xs font-bold text-white backdrop-blur">
+                      {currentImageIndex + 1} of {images.length}
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="w-full aspect-video bg-slate-100 flex items-center justify-center">
+                <Images className="h-10 w-10 text-slate-300" />
+              </div>
+            )}
+
+            {/* Details */}
+            <div className="p-5 sm:p-8 space-y-6">
+              {/* Metadata */}
+              <div className="flex flex-wrap gap-x-6 gap-y-3">
+                {project.eventType && (
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-600">
+                    <BriefcaseBusiness className="h-4 w-4" />
+                    {project.eventType}
+                  </div>
+                )}
+                {(project.city || project.province) && (
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-600">
+                    <MapPin className="h-4 w-4" />
+                    {[project.city, project.province].filter(Boolean).join(", ")}
+                  </div>
+                )}
+                {project.eventDate && (
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-600">
+                    <CalendarDays className="h-4 w-4" />
+                    Completed {new Date(project.eventDate).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+                  </div>
+                )}
+              </div>
+
+              {/* Story */}
+              <div>
+                <h3 className="text-sm font-extrabold uppercase tracking-widest text-slate-500 mb-2">About this project</h3>
+                {project.description ? (
+                  <p className="text-base text-slate-700 leading-relaxed whitespace-pre-wrap">
+                    {project.description}
+                  </p>
+                ) : (
+                  <p className="text-sm italic text-slate-400">Project details have not been added yet.</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer Action */}
+          {project.serviceId && (
+            <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50 flex justify-end">
+              <Button
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 rounded-xl"
+                onClick={() => {
+                  onOpenChange(false);
+                  window.dispatchEvent(new CustomEvent('venora:select-service', { detail: { serviceId: project.serviceId } }));
+                  document.getElementById('supplier-request-card')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
+                <Send className="mr-2 h-4 w-4" />
+                Request Similar Service
+              </Button>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -93,8 +247,12 @@ export function SupplierDetail({
     (pkg) => pkg.price === startingPrice,
   );
   const activePackages = supplier.packages.filter((pkg) => pkg.isActive);
-  const featuredPortfolio = supplier.portfolio.slice(0, 6);
+  const publicPortfolio = [...supplier.portfolio]
+    .filter((item) => item.status === "published")
+    .sort((a, b) => a.sortOrder - b.sortOrder);
   const serviceAreas = supplier.serviceAreas;
+
+  const [selectedProject, setSelectedProject] = useState<any | null>(null);
 
   // Transform supplier images to VenueGallery format
   const galleryMedia = [];
@@ -112,7 +270,7 @@ export function SupplierDetail({
   }
 
   // Add portfolio images to gallery
-  featuredPortfolio.forEach((item) => {
+  publicPortfolio.slice(0, 6).forEach((item) => {
     if (item.imageUrls && item.imageUrls.length > 0) {
       item.imageUrls.forEach((url, i) => {
         galleryMedia.push({
@@ -377,71 +535,152 @@ export function SupplierDetail({
                 Portfolio
               </h2>
               <p className="mt-1 text-sm font-medium text-[#6B7280]">
-                See past projects and work samples
+                Explore completed projects and examples of this supplier’s work.
               </p>
             </div>
 
-            {featuredPortfolio.length === 0 ? (
-              <EmptyPanel message="No portfolio projects have been published yet." />
+            {publicPortfolio.length === 0 ? (
+              <EmptyPanel
+                message="No portfolio projects have been published yet."
+                icon={<Images className="h-8 w-8 text-slate-300" />}
+              />
             ) : (
-              <div className={featuredPortfolio.length === 1 ? "grid gap-4" : "grid gap-4 sm:grid-cols-2"}>
-                {featuredPortfolio.map((item) => (
-                  <article
-                    key={item.id}
-                    className={
-                      featuredPortfolio.length === 1
-                        ? "group overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70 md:grid md:grid-cols-[minmax(220px,320px)_minmax(0,1fr)]"
-                        : "group overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70"
-                    }
-                  >
-                    <div className={featuredPortfolio.length === 1 ? "relative h-[220px] overflow-hidden bg-slate-100 sm:h-[240px] md:h-[220px]" : "relative aspect-[4/3] overflow-hidden bg-slate-100"}>
-                      {item.imageUrls && item.imageUrls.length > 1 ? (
-                        <div className="flex h-full w-full snap-x snap-mandatory overflow-x-auto scroll-smooth no-scrollbar">
-                          {item.imageUrls.map((url, idx) => (
-                            <div key={idx} className="h-full min-w-full shrink-0 snap-center">
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img
-                                src={url}
-                                alt={`${item.title} portfolio image ${idx + 1}`}
-                                className="h-full w-full object-cover transition duration-500 hover:scale-[1.03]"
-                                loading="lazy"
-                              />
+              <div className={
+                publicPortfolio.length === 1 ? "grid gap-4" :
+                publicPortfolio.length === 2 ? "grid gap-4 sm:grid-cols-2" :
+                "grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+              }>
+                {publicPortfolio.map((item) => {
+                  const images = item.imageUrls && item.imageUrls.length > 0
+                    ? item.imageUrls
+                    : (item.imageUrl ? [item.imageUrl] : []);
+                  const hasImages = images.length > 0;
+                  const isFeaturedLayout = publicPortfolio.length === 1;
+
+                  return (
+                    <article
+                      key={item.id}
+                      className={
+                        isFeaturedLayout
+                          ? "group overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70 md:grid md:grid-cols-[60%_40%]"
+                          : "group overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70 flex flex-col"
+                      }
+                    >
+                      {/* Image Area */}
+                      <button
+                        onClick={() => setSelectedProject(item)}
+                        className={
+                          isFeaturedLayout
+                            ? "relative h-[280px] w-full overflow-hidden bg-slate-100 sm:h-[320px] md:h-[400px] block text-left"
+                            : "relative aspect-[4/3] w-full overflow-hidden bg-slate-100 block text-left"
+                        }
+                      >
+                        {hasImages ? (
+                          <img
+                            src={images[0]}
+                            alt={`${item.title || 'Project'} cover`}
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center">
+                            <Images className="h-8 w-8 text-slate-300" />
+                          </div>
+                        )}
+
+                        <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10" />
+
+                        {/* Top left badges */}
+                        <div className="absolute left-3 top-3 flex flex-col gap-2 items-start">
+                          {item.isFeatured && (
+                            <div className="rounded-full bg-amber-100/95 px-2.5 py-1 text-[11px] font-bold text-amber-700 shadow-sm backdrop-blur flex items-center gap-1">
+                              <Star className="h-3 w-3 fill-current" />
+                              Featured Project
                             </div>
-                          ))}
+                          )}
                         </div>
-                      ) : (
-                        /* eslint-disable-next-line @next/next/no-img-element */
-                        <img
-                          src={item.imageUrl || undefined}
-                          alt={`${item.title} portfolio image`}
-                          className="h-full w-full object-cover transition duration-500 hover:scale-[1.03]"
-                          loading="lazy"
-                        />
-                      )}
-                      {item.imageUrls && item.imageUrls.length > 1 && (
-                        <div className="pointer-events-none absolute bottom-3 right-3 rounded-md bg-black/60 px-2 py-1 text-[10px] font-bold text-white backdrop-blur-md">
-                          1 / {item.imageUrls.length}
+
+                        {/* Bottom right photo count */}
+                        {hasImages && (
+                          <div className="absolute bottom-3 right-3 rounded-md bg-black/70 px-2 py-1 text-[11px] font-bold text-white shadow-sm backdrop-blur flex items-center gap-1.5">
+                            <Images className="h-3 w-3" />
+                            {images.length} photo{images.length !== 1 ? 's' : ''}
+                          </div>
+                        )}
+                      </button>
+
+                      {/* Content Area */}
+                      <div className="flex flex-col p-5 sm:p-6 flex-1">
+                        <div className="flex-1">
+                          <h3
+                            className="text-lg font-black text-[#111827] group-hover:text-[#2563EB] transition-colors cursor-pointer line-clamp-1"
+                            onClick={() => setSelectedProject(item)}
+                          >
+                            {item.title || "Portfolio Project"}
+                          </h3>
+
+                          <div className="mt-2 space-y-1.5">
+                            {item.eventType && (
+                              <p className="text-xs font-semibold text-slate-600 line-clamp-1">
+                                {item.eventType}
+                              </p>
+                            )}
+                            {(item.city || item.province) && (
+                              <p className="text-xs font-semibold text-slate-600 line-clamp-1">
+                                {[item.city, item.province].filter(Boolean).join(", ")}
+                              </p>
+                            )}
+                            {item.eventDate && (
+                              <p className="text-xs font-semibold text-slate-600 line-clamp-1">
+                                Completed {new Date(item.eventDate).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+                              </p>
+                            )}
+                          </div>
+
+                          {item.description && (
+                            <p className={
+                              isFeaturedLayout
+                                ? "mt-4 line-clamp-3 text-sm font-medium leading-relaxed text-[#4B5563]"
+                                : "mt-4 line-clamp-2 text-sm font-medium leading-relaxed text-[#4B5563]"
+                            }>
+                              {item.description}
+                            </p>
+                          )}
                         </div>
-                      )}
-                    </div>
-                    <div className="p-4 sm:p-5">
-                      <h3 className="break-words text-base font-black text-[#111827] group-hover:text-[#2563EB] transition-colors">
-                        {item.title}
-                      </h3>
-                      <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-[#6B7280]">
-                        {[item.eventType, item.city, item.province]
-                          .filter(Boolean)
-                          .join(" • ")}
-                      </p>
-                      {item.description ? (
-                        <p className="mt-2 line-clamp-2 break-words text-sm font-medium leading-relaxed text-[#4B5563]">
-                          {item.description}
-                        </p>
-                      ) : null}
-                    </div>
-                  </article>
-                ))}
+
+                        <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                          <div className="min-w-0 flex-1 pr-2">
+                            {item.serviceId ? (
+                              <p className="text-xs font-semibold text-slate-500 truncate flex items-center gap-1.5">
+                                <BriefcaseBusiness className="h-3.5 w-3.5 shrink-0" />
+                                <span className="truncate">Linked to a service</span>
+                              </p>
+                            ) : null}
+                          </div>
+
+                          <button
+                            className="text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 shrink-0"
+                            onClick={() => setSelectedProject(item)}
+                          >
+                            View Project
+                            <ArrowUpRight className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
+            )}
+
+            {selectedProject && (
+              <PortfolioProjectModal
+                project={selectedProject}
+                isOpen={!!selectedProject}
+                onOpenChange={(open) => {
+                  if (!open) setSelectedProject(null);
+                }}
+              />
             )}
           </section>
 

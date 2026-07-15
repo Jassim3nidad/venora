@@ -15,22 +15,11 @@ export async function GET(request: NextRequest) {
   const response = NextResponse.redirect(homeUrl);
   
   // Explicitly clear all chunked auth cookies to ensure the session is destroyed locally
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-  const host = supabaseUrl.split("//")[1] || "";
-  const projectRef = host.split(".")[0] || "";
-  const cookieName = `sb-${projectRef}-auth-token`;
-  
-  console.log("[LOGOUT] Supabase URL:", supabaseUrl);
-  console.log("[LOGOUT] Expected Cookie Name Prefix:", cookieName);
-  
   const cookieStore = await cookies();
   const allCookies = cookieStore.getAll();
-  console.log("[LOGOUT] Incoming Cookie Names:", allCookies.map(c => c.name));
   
   allCookies.forEach((c) => {
     if (c.name.startsWith("sb-") || c.name.includes("auth-token")) {
-      console.log("[LOGOUT] Deleting cookie:", c.name);
-      
       // 1. Delete from cookieStore
       cookieStore.delete(c.name);
       

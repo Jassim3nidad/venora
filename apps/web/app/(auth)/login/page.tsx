@@ -423,7 +423,7 @@ function LoginForm() {
                   </p>
                 ) : (
                   <p className="text-xs font-medium text-[#6B7280]">
-                    Must be at least 8 characters.
+                    Must be at least 12 characters.
                   </p>
                 )}
               </div>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Mail, Sparkles, Loader2, AlertCircle } from "lucide-react";
 import { verifyOtpAction } from "@/features/auth/actions/auth.actions";
+import { isSafeInternalRedirect } from "@/lib/profile-setup";
 
 function ConfirmEmailContent() {
   const searchParams = useSearchParams();
@@ -12,7 +13,8 @@ function ConfirmEmailContent() {
 
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as "signup" | "email" | null;
-  const next = searchParams.get("next") || "/profile/setup";
+  const requestedNext = searchParams.get("next") || "/profile/setup";
+  const next = isSafeInternalRedirect(requestedNext) ? requestedNext : "/profile/setup";
 
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);

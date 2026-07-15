@@ -179,7 +179,7 @@ export default function ResetPasswordPage() {
               </p>
             ) : (
               <p className="mt-[2px] text-[14px] font-medium leading-[20px] text-[#4B5563]">
-                Must be at least 8 characters.
+                Must be at least 12 characters.
               </p>
             )}
           </div>
