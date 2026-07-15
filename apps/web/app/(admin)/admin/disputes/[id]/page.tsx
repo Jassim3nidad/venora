@@ -14,8 +14,9 @@ export const dynamic = "force-dynamic";
 export default async function DisputeDetailsPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   await requirePermissionOrRedirect("reports.view");
 
   const supabase = (await createClient()) as any;
@@ -24,7 +25,7 @@ export default async function DisputeDetailsPage({
     .select(
       "*, profiles!raised_by(full_name, email), venues(name), bookings(total_price, start_time, status)",
     )
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
 
   if (error || !dispute) {
