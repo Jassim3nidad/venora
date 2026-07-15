@@ -6,6 +6,7 @@ import { LockKeyhole, Sparkles, KeyRound } from "lucide-react";
 import { resetPasswordAction } from "@/features/auth/actions/auth.actions";
 import { resetPasswordSchema } from "@/features/auth/schemas/auth.schema";
 import { createClient } from "@/lib/supabase/client";
+import { PasswordRequirements } from "@/features/auth/ui/password-requirements";
 
 // --- Invalid / Expired Link view ----------------------------------------------
 
@@ -152,9 +153,9 @@ export default function ResetPasswordPage() {
           <div className="flex flex-col gap-[6px]">
             <label
               htmlFor="new-password"
-              className="text-[12px] font-bold uppercase leading-[16px] tracking-[0.08em] text-slate-950"
+              className="text-[12px] font-bold leading-[16px] text-slate-950"
             >
-              New Password
+              New password
             </label>
 
             <div className="relative">
@@ -164,7 +165,7 @@ export default function ResetPasswordPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password"
+                placeholder="Enter a password"
                 autoComplete="new-password"
                 disabled={isPending}
                 className={`h-[46px] w-full rounded-[6px] border bg-white !pl-[42px] pr-[16px] text-[16px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
@@ -177,20 +178,16 @@ export default function ResetPasswordPage() {
               <p className="text-[13px] font-medium text-red-600">
                 {fieldErrors.password[0]}
               </p>
-            ) : (
-              <p className="mt-[2px] text-[14px] font-medium leading-[20px] text-[#4B5563]">
-                Must be at least 12 characters.
-              </p>
-            )}
+            ) : null}
           </div>
 
           {/* Confirm Password */}
           <div className="flex flex-col gap-[6px]">
             <label
               htmlFor="confirm-new-password"
-              className="text-[12px] font-bold uppercase leading-[16px] tracking-[0.08em] text-slate-950"
+              className="text-[12px] font-bold leading-[16px] text-slate-950"
             >
-              Confirm New Password
+              Confirm new password
             </label>
 
             <div className="relative">
@@ -200,7 +197,7 @@ export default function ResetPasswordPage() {
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Enter password"
+                placeholder="Re-enter your password"
                 autoComplete="new-password"
                 disabled={isPending}
                 className={`h-[46px] w-full rounded-[6px] border bg-white !pl-[42px] pr-[16px] text-[16px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
@@ -214,6 +211,10 @@ export default function ResetPasswordPage() {
                 {fieldErrors.confirmPassword[0]}
               </p>
             )}
+          </div>
+
+          <div className="mb-[8px]">
+            <PasswordRequirements password={password} confirmPassword={confirmPassword} />
           </div>
 
           {/* Submit Button */}

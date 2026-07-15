@@ -165,8 +165,8 @@ function LoginForm() {
   };
 
   return (
-    <main className="flex min-h-screen w-full overflow-hidden bg-[#F9FAFB] text-[#111827]">
-      <section className="relative hidden min-h-screen w-1/2 overflow-hidden bg-[#111827] lg:flex">
+    <main className="flex h-screen w-full overflow-hidden bg-[#F9FAFB] text-[#111827]">
+      <section className="relative hidden h-screen w-1/2 overflow-hidden bg-[#111827] lg:flex">
         <img
           src={heroVenue.photos.cover_image_url ?? heroVenue.photos.image_urls?.[0]}
           alt={`${heroVenue.name} venue`}
@@ -183,9 +183,6 @@ function LoginForm() {
           </Link>
 
           <div className="max-w-xl">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-white backdrop-blur-md">
-              Premium venue access
-            </div>
 
             <h1 className="text-5xl font-black leading-tight tracking-[-0.05em] text-white xl:text-6xl">
               Where extraordinary events begin.
@@ -222,8 +219,8 @@ function LoginForm() {
         </div>
       </section>
 
-      <section className="flex min-h-screen w-full items-center justify-center bg-[#F9FAFB] px-4 py-8 sm:px-6 lg:w-1/2 lg:px-12 xl:px-16">
-        <div className="w-full max-w-[460px]">
+      <section className="flex h-full w-full flex-col overflow-y-auto bg-[#F9FAFB] px-4 py-8 sm:px-6 lg:w-1/2 lg:px-12 xl:px-16">
+        <div className="my-auto w-full max-w-[460px] self-center">
           <div className="mb-8 flex items-center justify-center lg:hidden">
             <Link
               href="/"
@@ -421,11 +418,7 @@ function LoginForm() {
                   <p className="text-xs font-semibold text-red-600">
                     {fieldErrors.password[0]}
                   </p>
-                ) : (
-                  <p className="text-xs font-medium text-[#6B7280]">
-                    Must be at least 12 characters.
-                  </p>
-                )}
+                ) : null}
               </div>
 
               <button

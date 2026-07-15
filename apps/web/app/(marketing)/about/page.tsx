@@ -240,10 +240,6 @@ export default function AboutPage() {
           <div className="absolute left-1/2 top-10 h-64 w-64 -translate-x-1/2 rounded-full bg-[#BFDBFE]/35 blur-3xl" />
           <div className="relative mx-auto grid w-full max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">
             <div className="min-w-0">
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#BFDBFE] bg-white/80 px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.14em] text-[#1D4ED8] shadow-sm">
-                <Sparkles className="h-3.5 w-3.5" />
-                AI-powered event marketplace
-              </div>
               <h1 className="max-w-4xl text-4xl font-black leading-tight tracking-[-0.05em] text-[#111827] sm:text-5xl lg:text-6xl">
                 Where Extraordinary Events Begin
               </h1>

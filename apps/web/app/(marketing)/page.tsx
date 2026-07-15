@@ -52,10 +52,6 @@ export default function MarketingHomePage() {
         <section className="relative w-full py-14 md:py-24">
           <div className="mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
             <div className="min-w-0">
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#E5E7EB] bg-[#EFF6FF] px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.14em] text-[#1D4ED8]">
-                <Sparkles className="h-3.5 w-3.5" />
-                Premium event venue marketplace
-              </div>
 
               <h1 className="max-w-3xl text-4xl font-black leading-tight tracking-[-0.05em] text-[#111827] sm:text-5xl md:text-6xl">
                 Where Extraordinary Events Begin

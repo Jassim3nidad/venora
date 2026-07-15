@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -196,7 +196,7 @@ function OptionButton({
       type="button"
       onClick={onClick}
       className={[
-        "h-10 rounded-2xl border text-sm font-semibold transition",
+        "h-10 rounded-2xl border text-xs font-semibold transition",
         active
           ? "border-[#BFDBFE] bg-[#EFF6FF] text-[#2563EB] shadow-[inset_0_0_0_1px_rgba(37,99,235,0.12)]"
           : "border-[#E5E7EB] bg-white text-[#111827] hover:border-[#BFDBFE] hover:bg-[#F8FAFC] hover:text-[#2563EB]",

@@ -1428,13 +1428,6 @@ export default function VenuesClient({
             <div className="grid gap-4 p-5 sm:p-6 lg:p-7">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0">
-                  <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1.5 text-[#2563EB]">
-                    <Sparkles className="h-3.5 w-3.5" />
-
-                    <span className="text-[11px] font-extrabold uppercase tracking-[0.14em]">
-                      Venue marketplace
-                    </span>
-                  </div>
 
                   <h1 className="max-w-3xl break-words text-2xl font-black leading-8 tracking-[-0.04em] text-slate-950 sm:text-3xl sm:leading-tight">
                     Wedding & Event Venues
@@ -1495,7 +1488,7 @@ export default function VenuesClient({
                       Natural language venue search
                     </label>
 
-                    <Sparkles className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#2563EB]" />
+                    <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#2563EB]" />
 
                     <input
                       id="venue-ai-search"
@@ -1519,7 +1512,7 @@ export default function VenuesClient({
                     {smartSearch.isPending ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      <Sparkles className="h-4 w-4" />
+                      <Search className="h-4 w-4" />
                     )}
                     AI search
                   </button>

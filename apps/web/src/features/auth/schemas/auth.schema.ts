@@ -9,10 +9,11 @@ export const ROLE_OPTIONS = ["customer", "venue_owner", "event_coordinator", "su
 
 const passwordSchema = z
   .string()
-  .min(12, "Password must be at least 12 characters")
+  .min(8, "Password must be at least 8 characters")
   .max(128, "Password must be 128 characters or fewer")
-  .regex(/[A-Za-z]/, "Password must include at least one letter")
-  .regex(/[0-9]/, "Password must include at least one number");
+  .regex(/[A-Z]/, "Password must include at least one uppercase letter")
+  .regex(/[a-z]/, "Password must include at least one lowercase letter")
+  .regex(/[^A-Za-z0-9\s]/, "Password must include at least one symbol");
 
 export const registerSchema = z
   .object({

@@ -13,6 +13,7 @@ import {
   TextField,
   type FieldErrors,
 } from "./account-form-shared";
+import { PasswordRequirements } from "@/features/auth/ui/password-requirements";
 
 export default function ChangePasswordForm() {
   const [oldPassword, setOldPassword] = useState("");
@@ -117,7 +118,7 @@ export default function ChangePasswordForm() {
               type="password"
               value={password}
               onChange={setPassword}
-              placeholder="Enter password"
+              placeholder="Enter a password"
               disabled={isPending}
               error={fieldErrors.password?.[0]}
               icon={KeyRound}
@@ -132,7 +133,7 @@ export default function ChangePasswordForm() {
               type="password"
               value={confirmPassword}
               onChange={setConfirmPassword}
-              placeholder="Enter password"
+              placeholder="Re-enter your password"
               disabled={isPending}
               error={fieldErrors.confirmPassword?.[0]}
               icon={ShieldCheck}
@@ -141,13 +142,7 @@ export default function ChangePasswordForm() {
               onShowPasswordChange={setShowConfirmPassword}
             />
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-sm font-bold text-slate-700">Password tips</p>
-              <p className="mt-1 text-sm font-medium leading-6 text-slate-500">
-                Use at least 8 characters with a mix of letters, numbers, and
-                symbols for better protection.
-              </p>
-            </div>
+            <PasswordRequirements password={password} confirmPassword={confirmPassword} />
           </div>
         </div>
 

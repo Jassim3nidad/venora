@@ -17,6 +17,7 @@ import {
 } from "@/features/auth/actions/auth.actions";
 import { registerSchema } from "@/features/auth/schemas/auth.schema";
 import { researchVenues } from "@/src/features/venues/data/research-venues";
+import { PasswordRequirements } from "@/features/auth/ui/password-requirements";
 
 
 
@@ -72,8 +73,8 @@ export default function RegisterPage() {
         setGeneralError(response.error || "Unable to create account.");
         setShowResendVerification(
           response.error.toLowerCase().includes("already registered") ||
-            response.error.toLowerCase().includes("already exists") ||
-            response.error.toLowerCase().includes("user already"),
+          response.error.toLowerCase().includes("already exists") ||
+          response.error.toLowerCase().includes("user already"),
         );
         if (response.fieldErrors) setFieldErrors(response.fieldErrors);
       }
@@ -81,8 +82,8 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="flex min-h-screen w-full overflow-hidden bg-[#F9FAFB] text-[#111827]">
-      <section className="relative hidden min-h-screen w-1/2 overflow-hidden bg-[#111827] lg:flex">
+    <main className="flex h-screen w-full overflow-hidden bg-[#F9FAFB] text-[#111827]">
+      <section className="relative hidden h-screen w-1/2 overflow-hidden bg-[#111827] lg:flex">
         <img
           src={heroVenue.photos.cover_image_url ?? heroVenue.photos.image_urls?.[0]}
           alt={`${heroVenue.name} venue`}
@@ -99,9 +100,6 @@ export default function RegisterPage() {
           </Link>
 
           <div className="max-w-xl">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-white backdrop-blur-md">
-              Join the marketplace
-            </div>
 
             <h1 className="text-5xl font-black leading-tight tracking-[-0.05em] text-white xl:text-6xl">
               Create your event workspace.
@@ -126,7 +124,7 @@ export default function RegisterPage() {
             </ul>
           </div>
 
-          <div className=" -translate-y-20 rounded-[28px] border border-white/20 bg-white/15 p-5 text-white shadow-2xl shadow-black/20 backdrop-blur-md">
+          <div className="rounded-[28px] border border-white/20 bg-white/15 p-5 text-white shadow-2xl shadow-black/20 backdrop-blur-md">
             <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-white/70">
               Customer account first
             </p>
@@ -138,8 +136,8 @@ export default function RegisterPage() {
         </div>
       </section>
 
-      <section className="flex min-h-screen w-full items-center justify-center overflow-y-auto bg-[#F9FAFB] px-4 py-8 sm:px-6 lg:w-1/2 lg:px-12 xl:px-16">
-        <div className="w-full max-w-[500px]">
+      <section className="flex h-full w-full flex-col overflow-y-auto bg-[#F9FAFB] px-4 py-8 sm:px-6 lg:w-1/2 lg:px-12 xl:px-16">
+        <div className="my-auto w-full max-w-[500px] self-center">
           <div className="mb-6 flex items-center justify-center lg:hidden">
             <Link
               href="/"
@@ -285,9 +283,9 @@ export default function RegisterPage() {
                 <div className="flex flex-col gap-2">
                   <label
                     htmlFor="password"
-                    className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#111827]"
+                    className="text-xs font-extrabold tracking-[0.12em] text-[#111827]"
                   >
-                    Password
+                    PASSWORD
                   </label>
 
                   <div className="relative">
@@ -299,7 +297,7 @@ export default function RegisterPage() {
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Create password"
+                      placeholder="Enter a password"
                       autoComplete="new-password"
                       disabled={isPending}
                       className={[
@@ -329,19 +327,15 @@ export default function RegisterPage() {
                     <p className="text-xs font-semibold text-red-600">
                       {fieldErrors.password[0]}
                     </p>
-                  ) : (
-                    <p className="text-xs font-medium text-[#6B7280]">
-                      At least 12 characters.
-                    </p>
-                  )}
+                  ) : null}
                 </div>
 
                 <div className="flex flex-col gap-2">
                   <label
                     htmlFor="confirmPassword"
-                    className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#111827]"
+                    className="text-xs font-extrabold tracking-[0.12em] text-[#111827]"
                   >
-                    Confirm password
+                    CONFIRM PASSWORD
                   </label>
 
                   <div className="relative">
@@ -353,7 +347,7 @@ export default function RegisterPage() {
                       type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Confirm password"
+                      placeholder="Re-enter your password"
                       autoComplete="new-password"
                       disabled={isPending}
                       className={[
@@ -389,7 +383,9 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-
+              <div className="mt-2 mb-2">
+                <PasswordRequirements password={password} confirmPassword={confirmPassword} />
+              </div>
 
               <button
                 id="register-submit-btn"
