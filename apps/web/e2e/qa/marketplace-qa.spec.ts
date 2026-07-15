@@ -1,5 +1,43 @@
 import { expect, test, type Page } from "@playwright/test";
 
+test("featured venue card identity matches its destination", async ({ page }) => {
+  await page.goto("/");
+
+  const featuredRegion = page.getByRole("region", {
+    name: "Featured Venues",
+  });
+  const firstCard = featuredRegion.getByRole("article").first();
+  const cardHeading = await firstCard.getByRole("heading").innerText();
+
+  await firstCard.getByRole("link").click();
+
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    cardHeading.trim(),
+  );
+});
+
+test("anonymous featured favorite opens login instead of venue details", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  const featuredRegion = page.getByRole("region", {
+    name: "Featured Venues",
+  });
+  await featuredRegion
+    .getByRole("button", { name: /^Add .* to favorites$/ })
+    .first()
+    .click();
+
+  await expect(page).toHaveURL((url) => {
+    return (
+      url.pathname === "/login" &&
+      url.searchParams.get("redirectTo") === "/" &&
+      url.searchParams.get("prompt") === "favorites"
+    );
+  });
+});
+
 test("marketplace uses document scrolling and renders a normal-flow footer", async ({
   page,
 }) => {

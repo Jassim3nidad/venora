@@ -1,36 +1,23 @@
 ﻿import Link from "next/link";
 import {
   ArrowRight,
-  Heart,
   MapPin,
   Search,
   Sparkles,
   Star,
   Users,
 } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
 import MarketingNavbar from "@/components/layout/MarketingNavbar";
 import {
   getMarketplaceResearchVenues,
   researchVenueImageCount,
   researchVenues,
 } from "@/src/features/venues/data/research-venues";
-
-const featuredVenues = getMarketplaceResearchVenues()
-  .slice(0, 3)
-  .map((venue, index) => ({
-    name: venue.name,
-    slug: venue.slug,
-    location: venue.location,
-    price: venue.price,
-    rating: venue.rating ? venue.rating.toFixed(1) : "New",
-    category: venue.category,
-    image: venue.image,
-    alt: `${venue.name} in ${venue.location}`,
-    capacity: venue.capacity,
-    filledHeart: index === 0,
-  }));
-
-const heroVenue = featuredVenues[0]!;
+import { searchMarketplaceVenues } from "@/src/features/venues/application/queries";
+import { resolveFeaturedMarketplaceVenues } from "@/src/features/venues/application/featured-venues";
+import { toLiveMarketplaceVenue } from "@/src/features/venues/utils/venue-mappers";
+import FeaturedVenueCard from "@/src/features/venues/ui/FeaturedVenueCard";
 const provinceCount = new Set(
   researchVenues.map((venue) => venue.location.province),
 ).size;
@@ -42,7 +29,60 @@ const stats = [
   { value: "100%", label: "Source Checked" },
 ];
 
-export default function MarketingHomePage() {
+export default async function MarketingHomePage() {
+  const supabase = await createClient();
+  const { data: dbVenues, error } = await searchMarketplaceVenues(supabase, {
+    page: 1,
+    limit: researchVenues.length,
+  });
+
+  if (error) {
+    console.error("[marketing/page] Supabase fetch error:", error.message);
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let favoriteVenueIds = new Set<string>();
+  if (user) {
+    const { data: favoriteRows, error: favoritesError } = await (
+      supabase.from("favorites") as any
+    )
+      .select("venue_id")
+      .eq("customer_id", user.id);
+
+    if (favoritesError) {
+      console.error(
+        "[marketing/page] Favorites fetch error:",
+        favoritesError.message,
+      );
+    } else {
+      favoriteVenueIds = new Set(
+        (favoriteRows ?? []).map((row: any) => String(row.venue_id)),
+      );
+    }
+  }
+
+  const fallbackVenues = getMarketplaceResearchVenues(favoriteVenueIds);
+  const researchVenueById = new Map(
+    researchVenues.map((venue) => [venue.id, venue]),
+  );
+  const liveVenues = (error ? [] : ((dbVenues ?? []) as any[]))
+    .filter((venue) => venue.status === "published")
+    .map((venue) =>
+      toLiveMarketplaceVenue(
+        venue,
+        favoriteVenueIds,
+        researchVenueById.get(String(venue.id)),
+      ),
+    );
+  const featuredVenues = resolveFeaturedMarketplaceVenues(
+    liveVenues,
+    fallbackVenues,
+  );
+  const heroVenue = featuredVenues[0]!;
+
   return (
     <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-[#F9FAFB] text-[#111827] antialiased">
       <MarketingNavbar />
@@ -131,13 +171,15 @@ export default function MarketingHomePage() {
                 <div className="relative mb-4 h-64 w-full overflow-hidden rounded-[22px]">
                   <img
                     className="h-full w-full object-cover"
-                    alt={heroVenue.alt}
+                    alt={`${heroVenue.name} in ${heroVenue.location}`}
                     src={heroVenue.image}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent" />
                   <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full bg-white/90 px-3 py-1.5 text-xs font-extrabold text-[#111827] shadow-sm backdrop-blur">
                     <Star className="h-3.5 w-3.5 fill-[#F59E0B] text-[#F59E0B]" />
-                    {heroVenue.rating}
+                    {typeof heroVenue.rating === "number"
+                      ? heroVenue.rating.toFixed(1)
+                      : "New"}
                   </div>
                 </div>
 
@@ -185,11 +227,17 @@ export default function MarketingHomePage() {
         </section>
 
         {/* Featured Venues */}
-        <section className="w-full py-14 md:py-20">
+        <section
+          aria-labelledby="featured-venues-heading"
+          className="w-full py-14 md:py-20"
+        >
           <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-7 flex items-end justify-between gap-6">
               <div>
-                <h2 className="text-3xl font-black tracking-[-0.04em] text-[#111827] md:text-4xl">
+                <h2
+                  id="featured-venues-heading"
+                  className="text-3xl font-black tracking-[-0.04em] text-[#111827] md:text-4xl"
+                >
                   Featured Venues
                 </h2>
                 <p className="mt-2 text-base font-medium text-[#6B7280]">
@@ -207,58 +255,11 @@ export default function MarketingHomePage() {
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
               {featuredVenues.map((venue) => (
-                <Link
-                  key={venue.name}
-                  className="group block overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1 hover:border-[#2563EB]/50 hover:shadow-xl hover:shadow-slate-200/80"
-                  href={`/venues/${venue.slug}`}
-                >
-                  <div className="relative h-52 w-full overflow-hidden">
-                    <img
-                      className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
-                      alt={venue.alt}
-                      src={venue.image}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/35 via-transparent to-transparent" />
-                    <div className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#1D4ED8] shadow-sm backdrop-blur">
-                      {venue.category}
-                    </div>
-                    <span
-                      className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-500 shadow-sm backdrop-blur transition group-hover:text-red-500"
-                      aria-hidden="true"
-                    >
-                      <Heart
-                        className={[
-                          "h-4 w-4",
-                          venue.filledHeart ? "fill-red-500 text-red-500" : "",
-                        ].join(" ")}
-                      />
-                    </span>
-                  </div>
-
-                  <div className="p-5">
-                    <div className="mb-2 flex items-start justify-between gap-3">
-                      <h3 className="text-lg font-black tracking-[-0.03em] text-[#111827]">
-                        {venue.name}
-                      </h3>
-                      <div className="flex items-center gap-1 text-sm font-extrabold text-[#111827]">
-                        <Star className="h-4 w-4 fill-[#F59E0B] text-[#F59E0B]" />
-                        {venue.rating}
-                      </div>
-                    </div>
-                    <p className="mb-5 flex items-center gap-1.5 text-sm font-semibold text-[#6B7280]">
-                      <MapPin className="h-4 w-4" />
-                      {venue.location}
-                    </p>
-                    <div className="flex items-center justify-between border-t border-slate-100 pt-4">
-                      <p className="text-base font-black text-[#111827]">
-                        {venue.price}
-                      </p>
-                      <span className="text-sm font-extrabold text-[#2563EB]">
-                        View details
-                      </span>
-                    </div>
-                  </div>
-                </Link>
+                <FeaturedVenueCard
+                  key={String(venue.id)}
+                  venue={venue}
+                  isAuthenticated={Boolean(user)}
+                />
               ))}
             </div>
 
