@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import dynamic from "next/dynamic";
+import { AlertTriangle } from "lucide-react";
 import {
   DashButton,
   DashboardSubPage,
@@ -11,6 +12,7 @@ import {
 import VenuePhotoUpload from "@/components/venues/VenuePhotoUpload";
 import VenueVideoUpload from "@/components/venues/VenueVideoUpload";
 import DescriptionGeneratorPanel from "@/features/venues/ui/DescriptionGeneratorPanel";
+import DeleteVenueButton from "@/src/features/venues/ui/DeleteVenueButton";
 import { getLatestGeneratedContentByType } from "@/features/venues/application/queries";
 import {
   getOwnerDashboardContext,
@@ -77,6 +79,16 @@ function validPriceUnit(value: string) {
     : "per_event";
 }
 
+function slugify(value: string) {
+  const slug = value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return slug || "venue";
+}
+
 function errorRedirect(id: string, message: string): never {
   redirect(editVenuePath(id, `error=${encodeURIComponent(message)}`));
 }
@@ -133,6 +145,37 @@ export default async function EditVenuePage({
     ),
   );
 
+  async function deleteVenueAction() {
+    "use server";
+    const actionContext = await getOwnerDashboardContext();
+    const existingVenue = await getOwnerVenueById(
+      actionContext,
+      id,
+      "id, slug",
+    );
+    if (!existingVenue) return { error: "Venue not found." };
+
+    const { error } = await actionContext.supabase
+      .from("venues")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      return { error: error.message || "Unable to delete venue." };
+    }
+
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/venue-owner");
+    revalidatePath("/dashboard/venues");
+    revalidatePath("/venues");
+    if (existingVenue.slug) {
+      revalidatePath(`/venues/${existingVenue.slug}`);
+      revalidatePath(`/venues/${existingVenue.slug}/book`);
+    }
+
+    redirect("/dashboard/venues?deleted=1");
+  }
+
   async function updateVenueAction(formData: FormData) {
     "use server";
 
@@ -140,7 +183,7 @@ export default async function EditVenuePage({
     const existingVenue = await getOwnerVenueById(
       actionContext,
       id,
-      "id, slug",
+      "id, slug, name",
     );
     if (!existingVenue) notFound();
 
@@ -206,10 +249,25 @@ export default async function EditVenuePage({
       errorRedirect(id, "Please enter valid map coordinates.");
     }
 
+    let slugToUpdate = existingVenue.slug;
+    if (name !== existingVenue.name) {
+      const baseSlug = slugify(name);
+      const { data: existingSlugRecord } = await actionContext.supabase
+        .from("venues")
+        .select("id")
+        .eq("slug", baseSlug)
+        .maybeSingle();
+
+      slugToUpdate = (existingSlugRecord && existingSlugRecord.id !== id)
+        ? `${baseSlug}-${Date.now().toString(36)}`
+        : baseSlug;
+    }
+
     const { error } = await actionContext.supabase
       .from("venues")
       .update({
         name,
+        slug: slugToUpdate,
         province,
         city,
         municipality: fieldValue(formData, "municipality") || null,
@@ -428,6 +486,10 @@ export default async function EditVenuePage({
     if (existingVenue.slug) {
       revalidatePath(`/venues/${existingVenue.slug}`);
       revalidatePath(`/venues/${existingVenue.slug}/book`);
+    }
+    if (slugToUpdate && slugToUpdate !== existingVenue.slug) {
+      revalidatePath(`/venues/${slugToUpdate}`);
+      revalidatePath(`/venues/${slugToUpdate}/book`);
     }
     redirect(editVenuePath(id, "saved=1"));
   }
@@ -1109,6 +1171,20 @@ export default async function EditVenuePage({
             venueId={venue.id}
             organizationId={venue.organization_id}
           />
+          <div className="w-full border border-[var(--border-default)] shadow-md overflow-hidden bg-[var(--bg-base)] rounded-3xl mt-6">
+            <div className="flex flex-col space-y-1.5 border-b border-[var(--border-default)] bg-[var(--color-danger-bg)]/30 p-6 pb-4">
+              <h3 className="text-xl font-bold font-display text-[var(--color-danger)] flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5" />
+                Danger Zone
+              </h3>
+              <p className="text-sm text-[var(--text-secondary)] mt-1">
+                Permanently delete this venue and all associated data, packages, and images.
+              </p>
+            </div>
+            <div className="p-6">
+              <DeleteVenueButton onDelete={deleteVenueAction} />
+            </div>
+          </div>
         </div>
       </div>
     </DashboardSubPage>

@@ -194,7 +194,7 @@ export async function searchMarketplaceVenues(
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
-  return query.order("created_at", { ascending: false }).range(from, to);
+  return query.order("updated_at", { ascending: false }).range(from, to);
 }
 
 export async function getLandingSearchSuggestionVenues(supabase: any) {
