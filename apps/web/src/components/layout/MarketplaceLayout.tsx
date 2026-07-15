@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 import { CustomerNavbar } from "@/components/layout/CustomerNavbar";
 import MarketingNavbar from "@/components/layout/MarketingNavbar";
+import { SiteFooter } from "@/components/layout/SiteFooter";
 import { isMarketplaceRoute } from "@/src/lib/is-marketplace-route";
 
 interface MarketplaceLayoutProps {
@@ -22,23 +23,29 @@ export function MarketplaceLayout({
   profile,
 }: MarketplaceLayoutProps) {
   const pathname = usePathname();
+  const showMarketplaceSubnav = isMarketplaceRoute(pathname);
 
-  if (!isMarketplaceRoute(pathname)) {
+  if (!showMarketplaceSubnav) {
     return <>{children}</>;
   }
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-[#F8FAFC] text-[#111827]">
-      <MarketingNavbar embedded={Boolean(user)} />
-      <CustomerNavbar
-        user={user ?? null}
-        profile={profile ?? null}
-        variant="subnav"
-      />
-
-      <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        {children}
-      </main>
+    <div
+      data-testid="marketplace-shell"
+      className="flex min-h-screen flex-col bg-[#F8FAFC] text-[#111827]"
+    >
+      <div className="sticky top-0 z-50 shrink-0">
+        <MarketingNavbar embedded />
+        {showMarketplaceSubnav ? (
+          <CustomerNavbar
+            user={user ?? null}
+            profile={profile ?? null}
+            variant="subnav"
+          />
+        ) : null}
+      </div>
+      <main className="flex min-w-0 flex-1 flex-col">{children}</main>
+      {showMarketplaceSubnav ? <SiteFooter /> : null}
     </div>
   );
 }
