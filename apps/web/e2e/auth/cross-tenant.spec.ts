@@ -48,26 +48,36 @@ test.describe("Cross-tenant isolation (Venue & Supplier)", () => {
     // Log in as Tenant A
     await loginAs(page, "tenantAOwner");
     // Attempt to fetch Tenant B's bookings via API
-    // We don't have a specific Tenant B booking ID, but we can query the bookings endpoint 
+    // We don't have a specific Tenant B booking ID, but we can query the bookings endpoint
     // and verify it only returns Tenant A's bookings
-    const res = await page.request.get(`/api/bookings`, { failOnStatusCode: false });
+    const res = await page.request.get(`/api/bookings`, {
+      failOnStatusCode: false,
+    });
     if (res.ok()) {
-      const data = await res.json();
+      const body = await res.json();
+      const bookings = Array.isArray(body) ? body : body.data || [];
       // Ensure no bookings belong to Tenant B Venue
-      const hasTenantB = data.some((b: any) => b.venue_name === 'Tenant B Venue');
+      const hasTenantB = bookings.some(
+        (b: any) => b.venue_name === "Tenant B Venue",
+      );
       expect(hasTenantB).toBe(false);
     }
   });
 
-  test("supplier A cannot read supplier B's private records", async ({ page }) => {
+  test("supplier A cannot read supplier B's private records", async ({
+    page,
+  }) => {
     // Log in as Supplier
     await loginAs(page, "supplier");
-    const res = await page.request.get(`/api/supplier/inquiries`, { failOnStatusCode: false });
+    const res = await page.request.get(`/api/supplier/inquiries`, {
+      failOnStatusCode: false,
+    });
     if (res.ok()) {
-      const data = await res.json();
-      // Test passes if it only returns their own data or nothing, but we just verify it doesn't crash 
+      const body = await res.json();
+      const inquiries = Array.isArray(body) ? body : body.data || [];
+      // Test passes if it only returns their own data or nothing, but we just verify it doesn't crash
       // and doesn't leak other suppliers. Since we only have one or two, we just ensure it's isolated.
-      expect(Array.isArray(data)).toBe(true);
+      expect(Array.isArray(inquiries)).toBe(true);
     }
   });
 });
