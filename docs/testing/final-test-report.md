@@ -167,7 +167,7 @@ Created:
 - `scripts/scan-changed-secrets.mjs`
 - `scripts/validate-database-contracts.mjs`
 - `scripts/validate-test-suite.mjs`
-- `supabase/migrations/071_tighten_venue_media_storage_ownership.sql`
+- `supabase/migrations/0711_tighten_venue_media_storage_ownership.sql`
 
 Modified:
 

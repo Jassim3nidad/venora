@@ -18,7 +18,7 @@
 - [ ] `database-plan` output is reviewed.
 - [ ] Hosted history is reconciled for the upstream `068`-to-`0680` rename and
       duplicate version `071`.
-- [ ] Migration `071_tighten_venue_media_storage_ownership.sql` is present where
+- [ ] Migration `0711_tighten_venue_media_storage_ownership.sql` is present where
       venue-media RLS verification is required.
 - [ ] Edge Function name and existing/intended `verify_jwt` mode are verified.
 - [ ] Required reviewer approved the environment run.

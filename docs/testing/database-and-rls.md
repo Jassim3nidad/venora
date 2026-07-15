@@ -16,7 +16,7 @@ PUBLIC grants.
 - Upstream renamed `068_enforce_booking_availability_integrity.sql` to `0680_...`
   without hosted proof, so reapplication/history risk remains tracked.
 - `071_supplier_location_coverage.sql` duplicates
-  `071_tighten_venue_media_storage_ownership.sql`; both exact files are
+  `0711_tighten_venue_media_storage_ownership.sql`; both exact files are
   allowlisted pending hosted history/schema reconciliation.
 - Legacy padded `0040`/`0045` ordering is detected and warned. Renaming also
   needs hosted-history proof.
@@ -25,7 +25,7 @@ PUBLIC grants.
   nullable. Static type consistency passes.
 - Supplier-location fields from the second migration 071 are present in the
   generated `supplier_profiles` contract.
-- Migration `071_tighten_venue_media_storage_ownership.sql` binds Storage
+- Migration `0711_tighten_venue_media_storage_ownership.sql` binds Storage
   insert/update/delete to `{organization_id}/{venue_id}` and membership, with
   admin override.
 
