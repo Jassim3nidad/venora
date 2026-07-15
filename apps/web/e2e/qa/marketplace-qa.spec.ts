@@ -1,5 +1,33 @@
 import { expect, test, type Page } from "@playwright/test";
 
+test("landing search suggestions support keyboard selection and GET filters", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  const location = page.getByRole("combobox", { name: "Location" });
+  await location.fill("alf");
+  await expect(page.getByRole("option", { name: "Alfonso, Cavite" })).toBeVisible();
+  await location.press("ArrowDown");
+  await location.press("Enter");
+  await expect(location).toHaveValue("Alfonso, Cavite");
+
+  const eventType = page.getByRole("combobox", { name: "Event Type" });
+  await eventType.fill("wed");
+  await eventType.press("ArrowDown");
+  await eventType.press("Enter");
+  await expect(eventType).toHaveValue("Destination Wedding");
+
+  await page.getByRole("button", { name: "Search", exact: true }).click();
+  await expect(page).toHaveURL((url) => {
+    return (
+      url.pathname === "/venues" &&
+      url.searchParams.get("location") === "Alfonso, Cavite" &&
+      url.searchParams.get("event") === "Destination Wedding"
+    );
+  });
+});
+
 test("featured venue card identity matches its destination", async ({ page }) => {
   await page.goto("/");
 

@@ -2,7 +2,6 @@
 import {
   ArrowRight,
   MapPin,
-  Search,
   Sparkles,
   Star,
   Users,
@@ -21,6 +20,8 @@ import {
 } from "@/src/features/venues/application/featured-venues";
 import { toLiveMarketplaceVenue } from "@/src/features/venues/utils/venue-mappers";
 import FeaturedVenueCard from "@/src/features/venues/ui/FeaturedVenueCard";
+import LandingSegmentedSearch from "@/src/features/venues/ui/LandingSegmentedSearch";
+import { buildLandingSearchSuggestions } from "@/src/features/venues/utils/landing-search-suggestions";
 const provinceCount = new Set(
   researchVenues.map((venue) => venue.location.province),
 ).size;
@@ -86,6 +87,13 @@ export default async function MarketingHomePage() {
     liveVenues,
     fallbackVenues,
   );
+  const liveVenueIds = new Set(liveVenues.map((venue) => String(venue.id)));
+  const searchSuggestions = buildLandingSearchSuggestions([
+    ...liveVenues,
+    ...fallbackVenues.filter(
+      (venue) => !liveVenueIds.has(String(venue.id)),
+    ),
+  ]);
   const heroVenue = featuredVenues[0]!;
 
   return (
@@ -120,54 +128,7 @@ export default async function MarketingHomePage() {
                 </Link>
               </div>
 
-              {/* Search Bar */}
-              <form
-                action="/venues"
-                method="GET"
-                className="mt-8 w-full max-w-2xl rounded-[24px] border border-[#E5E7EB] bg-white p-2 shadow-xl shadow-slate-200/60"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] md:items-stretch">
-                  <div className="min-w-0 border-b border-[#E5E7EB] px-4 py-3 md:border-b-0 md:border-r">
-                    <label
-                      className="block text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#1D4ED8]"
-                      htmlFor="hero-search-location"
-                    >
-                      Location
-                    </label>
-                    <input
-                      id="hero-search-location"
-                      name="location"
-                      className="mt-1 w-full min-w-0 border-none bg-transparent p-0 text-sm font-semibold text-[#111827] outline-none placeholder:text-slate-400"
-                      placeholder="Where to?"
-                      type="text"
-                      autoComplete="off"
-                    />
-                  </div>
-                  <div className="min-w-0 border-b border-[#E5E7EB] px-4 py-3 md:border-b-0 md:border-r">
-                    <label
-                      className="block text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#1D4ED8]"
-                      htmlFor="hero-search-event-type"
-                    >
-                      Event Type
-                    </label>
-                    <input
-                      id="hero-search-event-type"
-                      name="event"
-                      className="mt-1 w-full min-w-0 border-none bg-transparent p-0 text-sm font-semibold text-[#111827] outline-none placeholder:text-slate-400"
-                      placeholder="Wedding, Corporate..."
-                      type="text"
-                      autoComplete="off"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="m-2 inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-6 text-sm font-extrabold text-white transition hover:bg-[#1d4ed8] md:self-center"
-                  >
-                    <Search className="h-4 w-4" />
-                    Search
-                  </button>
-                </div>
-              </form>
+              <LandingSegmentedSearch {...searchSuggestions} />
             </div>
 
             {/* Hero Visual Card */}
