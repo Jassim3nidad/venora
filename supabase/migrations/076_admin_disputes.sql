@@ -8,7 +8,7 @@ INSERT INTO public.admin_permissions (key, description) VALUES
 ON CONFLICT (key) DO NOTHING;
 
 -- Assign permissions to roles based on existing conventions from 054
-INSERT INTO public.admin_role_permissions (role_name, permission_key) VALUES
+INSERT INTO public.admin_role_permissions (tier, permission_key) VALUES
   ('admin', 'disputes.view'),
   ('admin', 'disputes.manage'),
   ('admin', 'disputes.resolve'),
@@ -23,7 +23,7 @@ INSERT INTO public.admin_role_permissions (role_name, permission_key) VALUES
   ('compliance_admin', 'disputes.view'),
   
   ('analyst', 'disputes.view')
-ON CONFLICT (role_name, permission_key) DO NOTHING;
+ON CONFLICT (tier, permission_key) DO NOTHING;
 
 -- Dispute Status Enum
 CREATE TYPE public.dispute_status AS ENUM ('open', 'under_review', 'resolved', 'rejected', 'cancelled');
@@ -93,7 +93,7 @@ CREATE POLICY "Deny direct deletes" ON public.disputes
 CREATE TRIGGER set_disputes_updated_at
     BEFORE UPDATE ON public.disputes
     FOR EACH ROW
-    EXECUTE FUNCTION public.handle_updated_at();
+    EXECUTE FUNCTION public.set_updated_at();
 
 COMMENT ON TABLE public.disputes IS 'Admin dispute resolution records, linking bookings and transactions.';
 
