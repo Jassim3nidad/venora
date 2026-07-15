@@ -57,14 +57,12 @@ export async function middleware(request: NextRequest) {
 
   // 14. Avoid trusting arbitrary client-controlled IP headers without validation.
   // 13. Handle malformed forwarding headers safely.
-  let ip = request.ip || "127.0.0.1";
-  if (!request.ip) {
-    const forwardedFor = request.headers.get("x-forwarded-for");
-    if (forwardedFor) {
-      ip = forwardedFor.split(",")[0].trim() || "127.0.0.1";
-    } else {
-      ip = request.headers.get("x-real-ip") || "127.0.0.1";
-    }
+  let ip = "127.0.0.1";
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  if (forwardedFor) {
+    ip = forwardedFor.split(",")[0]?.trim() || "127.0.0.1";
+  } else {
+    ip = request.headers.get("x-real-ip") || "127.0.0.1";
   }
 
   const url = request.nextUrl.clone();
