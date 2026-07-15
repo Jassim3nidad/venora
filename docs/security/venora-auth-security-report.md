@@ -206,7 +206,7 @@ To be filled by validation commands after implementation:
 - Build: passed (`pnpm --filter @venora/web build`)
 - Conflict marker scan: passed (`git grep -n -E "^(<<<<<<<|=======|>>>>>>>)"` returned no matches)
 - Diff check: passed (`git diff --check`)
-- Package files: unchanged (`package.json`, `pnpm-lock.yaml`, `apps/web/package.json`, and `apps/web/pnpm-lock.yaml`)
+- Package files: unchanged (`package.json`, `pnpm-lock.yaml`, and `apps/web/package.json`)
 - Safe secret-name search: completed; no secret values printed. Service-role references are server-only helpers, route handlers, Edge Functions, migrations, scripts, or docs.
 - Browser tests: not run. Auth flow testing needs safe test credentials and non-production/staging data.
 
