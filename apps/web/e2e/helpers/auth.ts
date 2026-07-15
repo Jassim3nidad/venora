@@ -76,16 +76,32 @@ export function credentialsFor(role: Role): {
 
 export async function loginAs(page: Page, role: Role): Promise<void> {
   const { email, password } = credentialsFor(role);
-  await page.goto("/login");
-  await page.fill("#login-email", email);
-  await page.fill("#login-password", password);
-  await page.click("#login-submit-btn");
-  // A successful login always navigates away from /login; an unauthorized
-  // route after that lands on /unauthorized rather than bouncing back to
-  // /login, so waiting for either confirms the auth step itself completed.
-  await page.waitForURL((url) => !url.pathname.startsWith("/login"), {
-    timeout: 15000,
-  });
+  const maxAttempts = 3;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    await page.goto("/login");
+    await page.fill("#login-email", email);
+    await page.fill("#login-password", password);
+    await page.click("#login-submit-btn");
+
+    try {
+      // A successful login always navigates away from /login; an unauthorized
+      // route after that lands on /unauthorized rather than bouncing back to
+      // /login, so waiting for either confirms the auth step itself completed.
+      await page.waitForURL((url) => !url.pathname.startsWith("/login"), {
+        timeout: 20_000,
+      });
+      return; // success
+    } catch {
+      if (attempt === maxAttempts) throw new Error(
+        `loginAs("${role}") failed after ${maxAttempts} attempts (last email: ${email}). ` +
+        `Page stayed on /login — likely Supabase auth rate-limit or credential mismatch.`,
+      );
+      // Jittered backoff before retry (absorbs free-tier rate-limit bursts)
+      const delay = 2000 * attempt + Math.random() * 1000;
+      await page.waitForTimeout(delay);
+    }
+  }
 }
 
 export const VIEWPORTS = {

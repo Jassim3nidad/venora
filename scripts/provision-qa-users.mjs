@@ -85,6 +85,8 @@ async function provisionAccounts() {
     
     if (existingUser) {
       userId = existingUser.id;
+      console.log(`[${acc.email}] Updating password...`);
+      await adminClient.auth.admin.updateUserById(userId, { password: acc.password });
     } else {
       console.log(`[${acc.email}] Creating user...`);
       const { data: userData, error } = await adminClient.auth.admin.createUser({
