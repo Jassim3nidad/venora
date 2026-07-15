@@ -1,15 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-// Simple in-memory rate limiter for Edge Runtime
+// Best-effort application throttling for the approved free-tier deployment.
+// Note: Counters are isolated by serverless instance and may reset during cold starts.
+// This implementation is best-effort and not globally distributed.
 type RateLimitEntry = {
   count: number;
   resetAt: number;
 };
 
-const rateLimits = new Map<string, RateLimitEntry>();
+export const rateLimits = new Map<string, RateLimitEntry>();
+const MAX_ENTRIES = 5000;
 
-function checkRateLimit(
+export function checkRateLimit(
   ip: string,
   path: string,
   method: string,
@@ -18,6 +21,19 @@ function checkRateLimit(
 ): boolean {
   const now = Date.now();
   const key = `${ip}:${path}:${method}`;
+
+  // Periodically remove expired entries and bound memory
+  if (rateLimits.size > MAX_ENTRIES) {
+    for (const [k, v] of rateLimits.entries()) {
+      if (now > v.resetAt) {
+        rateLimits.delete(k);
+      }
+    }
+    // If still too large (e.g. active attack), clear it to avoid OOM
+    if (rateLimits.size > MAX_ENTRIES) {
+      rateLimits.clear();
+    }
+  }
 
   const entry = rateLimits.get(key);
 
@@ -39,54 +55,79 @@ export async function middleware(request: NextRequest) {
     request,
   });
 
-  // Basic IP extraction for Rate Limiting
-  const ip = request.headers.get("x-forwarded-for") ?? "127.0.0.1";
+  // 14. Avoid trusting arbitrary client-controlled IP headers without validation.
+  // 13. Handle malformed forwarding headers safely.
+  let ip = request.ip || "127.0.0.1";
+  if (!request.ip) {
+    const forwardedFor = request.headers.get("x-forwarded-for");
+    if (forwardedFor) {
+      ip = forwardedFor.split(",")[0].trim() || "127.0.0.1";
+    } else {
+      ip = request.headers.get("x-real-ip") || "127.0.0.1";
+    }
+  }
+
   const url = request.nextUrl.clone();
   const path = url.pathname;
   const method = request.method;
 
-  // Define limits (requests per minute)
-  let maxRequests = 100; // Default generic limit
-
-  // Specific Rate Limits
-  if (
-    method === "POST" &&
-    (path === "/login" ||
-      path === "/register" ||
-      path.startsWith("/auth/callback"))
-  ) {
-    maxRequests = 10; // Login/Registration limit
-  } else if (path.startsWith("/api/ai") || path.includes("ai-assistant")) {
-    maxRequests = 20; // AI requests limit
-  } else if (path === "/search" || path.startsWith("/api/search")) {
-    maxRequests = 60; // Search limit
-  } else if (
-    method === "POST" &&
-    (path.startsWith("/api/bookings") || path.startsWith("/dashboard/bookings"))
-  ) {
-    maxRequests = 30; // Bookings limit
-  } else if (
-    path.startsWith("/admin") &&
-    ["POST", "PUT", "DELETE", "PATCH"].includes(method)
-  ) {
-    maxRequests = 50; // Admin mutations limit
+  // 15. Avoid redirect loops involving the 429 page.
+  if (path === "/429") {
+    return supabaseResponse;
   }
 
-  // Check Rate Limit (1 minute window)
-  const isAllowed = checkRateLimit(ip, path, method, maxRequests, 60000);
+  // 3. Exclude health checks and required platform callbacks.
+  // 4. Avoid breaking Supabase authentication callbacks.
+  // 5. Avoid breaking PayMongo webhook delivery.
+  // 6. Avoid breaking Vercel deployment verification.
+  const isExcludedRoute =
+    path === "/api/health" ||
+    path.startsWith("/auth/callback") ||
+    path.startsWith("/api/webhooks/") ||
+    path === "/api/deployment-verify";
 
-  if (!isAllowed) {
-    if (path.startsWith("/api")) {
-      return new NextResponse(
-        JSON.stringify({ error: "Too many requests. Please try again later." }),
-        {
-          status: 429,
-          headers: { "Content-Type": "application/json", "Retry-After": "60" },
-        },
-      );
-    } else {
-      url.pathname = "/429";
-      return NextResponse.redirect(url);
+  if (!isExcludedRoute) {
+    // Define limits (requests per minute)
+    let maxRequests = 100; // Default generic limit
+
+    // Specific Rate Limits
+    if (
+      method === "POST" &&
+      (path === "/login" || path === "/register")
+    ) {
+      maxRequests = 10; // Login/Registration limit
+    } else if (path.startsWith("/api/ai") || path.includes("ai-assistant")) {
+      maxRequests = 20; // AI requests limit
+    } else if (path === "/search" || path.startsWith("/api/search")) {
+      maxRequests = 60; // Search limit
+    } else if (
+      method === "POST" &&
+      (path.startsWith("/api/bookings") || path.startsWith("/dashboard/bookings"))
+    ) {
+      maxRequests = 30; // Bookings limit
+    } else if (
+      path.startsWith("/admin") &&
+      ["POST", "PUT", "DELETE", "PATCH"].includes(method)
+    ) {
+      maxRequests = 50; // Admin mutations limit
+    }
+
+    // Check Rate Limit (1 minute window)
+    const isAllowed = checkRateLimit(ip, path, method, maxRequests, 60000);
+
+    if (!isAllowed) {
+      if (path.startsWith("/api")) {
+        return new NextResponse(
+          JSON.stringify({ error: "Too many requests. Please try again later." }),
+          {
+            status: 429,
+            headers: { "Content-Type": "application/json", "Retry-After": "60" },
+          },
+        );
+      } else {
+        url.pathname = "/429";
+        return NextResponse.redirect(url);
+      }
     }
   }
 
