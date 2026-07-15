@@ -10,7 +10,10 @@ import {
   startBookingPaymentAction,
   submitBookingReviewAction,
 } from "../application/actions";
-import { CustomerButton, CustomerLinkButton } from "@/src/components/customer/CustomerUI";
+import {
+  CustomerButton,
+  CustomerLinkButton,
+} from "@/src/components/customer/CustomerUI";
 import { ReviewPhotoUploader } from "@/features/reviews/ui/ReviewPhotoUploader";
 import { attachReviewPhotosAction } from "@/features/reviews/application/actions";
 import type { UploadedPhoto } from "@/features/reviews/hooks/useReviewPhotoUpload";
@@ -72,7 +75,9 @@ export function StartPaymentForm({
           Payment provider
           <select
             value={provider}
-            onChange={(event) => setProvider(event.target.value as "paymongo" | "maya" | "stripe")}
+            onChange={(event) =>
+              setProvider(event.target.value as "paymongo" | "maya" | "stripe")
+            }
             className="h-12 rounded-2xl border border-[#E5E7EB] bg-white px-4 text-sm font-semibold outline-none focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
           >
             {providers.map((id) => (
@@ -92,7 +97,10 @@ export function StartPaymentForm({
         onClick={() => {
           setError(null);
           startTransition(async () => {
-            const result = await startBookingPaymentAction({ bookingId, provider });
+            const result = await startBookingPaymentAction({
+              bookingId,
+              provider,
+            });
             if (result.error) {
               setError(result.error.message);
               return;
@@ -108,7 +116,11 @@ export function StartPaymentForm({
           });
         }}
       >
-        {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
+        {isPending ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <CreditCard className="h-4 w-4" />
+        )}
         Pay Deposit
       </CustomerButton>
     </div>
@@ -188,7 +200,11 @@ export function OwnerBookingDecisionForm({
           disabled={isPending}
           className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#1D4ED8] px-4 text-sm font-black text-white transition hover:bg-[#1E40AF] disabled:opacity-60"
         >
-          {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+          {isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <CheckCircle2 className="h-4 w-4" />
+          )}
           Approve Quote
         </button>
       </form>
@@ -232,7 +248,11 @@ export function OwnerBookingDecisionForm({
   );
 }
 
-export function OwnerCompleteBookingButton({ bookingId }: { bookingId: string }) {
+export function OwnerCompleteBookingButton({
+  bookingId,
+}: {
+  bookingId: string;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -255,7 +275,11 @@ export function OwnerCompleteBookingButton({ bookingId }: { bookingId: string })
         }}
         className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#1D4ED8] px-4 text-sm font-black text-white transition hover:bg-[#1E40AF] disabled:opacity-60"
       >
-        {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+        {isPending ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <CheckCircle2 className="h-4 w-4" />
+        )}
         Mark Complete
       </button>
       <ErrorMessage message={error} />
@@ -313,7 +337,9 @@ export function BookingReviewForm({
             });
             if (photoResult.error) {
               // Review is already saved; surface the photo failure but don't block navigation.
-              setError(`Review submitted, but photos failed to attach: ${photoResult.error.message}`);
+              setError(
+                `Review submitted, but photos failed to attach: ${photoResult.error.message}`,
+              );
               return;
             }
           }
@@ -335,7 +361,10 @@ export function BookingReviewForm({
           ["foodQuality", "Food quality"],
           ["ambience", "Ambience"],
         ].map(([name, label]) => (
-          <label key={name} className="grid gap-2 text-sm font-bold text-slate-700">
+          <label
+            key={name}
+            className="grid gap-2 text-sm font-bold text-slate-700"
+          >
             {label}
             <select
               name={name}
@@ -362,12 +391,20 @@ export function BookingReviewForm({
         />
       </label>
 
-      <ReviewPhotoUploader folderId={uploadFolderId} userId={userId} onChange={setPhotos} />
+      <ReviewPhotoUploader
+        folderId={uploadFolderId}
+        userId={userId}
+        onChange={setPhotos}
+      />
 
       <ErrorMessage message={error} />
 
       <CustomerButton type="submit" disabled={isPending}>
-        {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Star className="h-4 w-4" />}
+        {isPending ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <Star className="h-4 w-4" />
+        )}
         Submit Review
       </CustomerButton>
     </form>

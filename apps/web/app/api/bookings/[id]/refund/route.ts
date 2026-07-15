@@ -6,7 +6,12 @@ import "@/src/features/payments/infrastructure/register-gateways";
 import { refundRequestSchema } from "@/src/features/payments/schemas/payment.schema";
 import { requestRefund } from "@/src/features/payments/application/use-cases/request-refund.usecase";
 
-function apiError(code: string, message: string, status: number, details?: unknown) {
+function apiError(
+  code: string,
+  message: string,
+  status: number,
+  details?: unknown,
+) {
   return NextResponse.json(
     { data: null, error: { code, message, details } },
     { status },
@@ -45,7 +50,11 @@ export async function POST(
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return apiError("UNAUTHORIZED", "You must be signed in to request a refund.", 401);
+      return apiError(
+        "UNAUTHORIZED",
+        "You must be signed in to request a refund.",
+        401,
+      );
     }
 
     const result = await requestRefund(supabase, createServiceClient(), {

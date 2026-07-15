@@ -98,14 +98,14 @@ The landing page had four related layout issues: a cramped header, overlapping h
 
 ## CSS Additions Reference
 
-| Class | Purpose |
-|-------|---------|
-| `.page-container` | Shared max-width content wrapper with responsive padding |
-| `.site-header-inner` | 3-column grid for balanced header layout |
-| `.site-header-nav` | Centered navigation cluster (visible ≥768px) |
-| `.site-header-actions` | Right-aligned auth buttons (visible ≥768px) |
-| `.hero-search` | Responsive grid for search fields + button |
-| `.hero-search-field` | Field cell with overflow-safe input sizing |
+| Class                  | Purpose                                                  |
+| ---------------------- | -------------------------------------------------------- |
+| `.page-container`      | Shared max-width content wrapper with responsive padding |
+| `.site-header-inner`   | 3-column grid for balanced header layout                 |
+| `.site-header-nav`     | Centered navigation cluster (visible ≥768px)             |
+| `.site-header-actions` | Right-aligned auth buttons (visible ≥768px)              |
+| `.hero-search`         | Responsive grid for search fields + button               |
+| `.hero-search-field`   | Field cell with overflow-safe input sizing               |
 
 ---
 

@@ -46,7 +46,10 @@ function HelpfulVoteButton({
   initialCount: number;
   isOwnReview: boolean;
 }) {
-  const { voted, count, toggle, isPending, error } = useHelpfulVote(reviewId, initialCount);
+  const { voted, count, toggle, isPending, error } = useHelpfulVote(
+    reviewId,
+    initialCount,
+  );
 
   if (isOwnReview) return null;
 
@@ -57,7 +60,9 @@ function HelpfulVoteButton({
         disabled={isPending}
         onClick={toggle}
         className={`inline-flex items-center gap-1.5 text-xs font-semibold transition disabled:opacity-60 ${
-          voted ? "text-[var(--color-brand-500)]" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+          voted
+            ? "text-[var(--color-brand-500)]"
+            : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
         }`}
       >
         {isPending ? (
@@ -80,7 +85,9 @@ export default function ReviewsSection({
 }: ReviewsSectionProps) {
   // Dimension calculators
   const getDimensionAverage = (key: keyof Review) => {
-    return computeDimensionAverage(reviews.map((r) => r[key] as number | undefined));
+    return computeDimensionAverage(
+      reviews.map((r) => r[key] as number | undefined),
+    );
   };
 
   const dimensions = [
@@ -102,17 +109,24 @@ export default function ReviewsSection({
         </h2>
         <div className="flex items-center gap-1.5 ml-4 bg-[var(--bg-subtle)] px-3 py-1 rounded-full text-sm font-semibold">
           <Star className="h-4 w-4 fill-amber-400 stroke-amber-400" />
-          <span className="text-[var(--text-primary)]">{avgRating.toFixed(2)}</span>
-          <span className="text-[var(--text-muted)] font-normal">({reviewCount} reviews)</span>
+          <span className="text-[var(--text-primary)]">
+            {avgRating.toFixed(2)}
+          </span>
+          <span className="text-[var(--text-muted)] font-normal">
+            ({reviewCount} reviews)
+          </span>
         </div>
       </div>
 
       {reviews.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 px-4 rounded-3xl border border-dashed border-[var(--border-default)] bg-[var(--bg-subtle)] text-center">
           <MessageSquare className="h-10 w-10 text-[var(--text-muted)] mb-3" />
-          <p className="text-sm font-semibold text-[var(--text-primary)]">No reviews yet</p>
+          <p className="text-sm font-semibold text-[var(--text-primary)]">
+            No reviews yet
+          </p>
           <p className="text-xs text-[var(--text-muted)] mt-1 max-w-[280px]">
-            Bookings that are completed will appear here once guests leave their feedback.
+            Bookings that are completed will appear here once guests leave their
+            feedback.
           </p>
         </div>
       ) : (
@@ -120,8 +134,13 @@ export default function ReviewsSection({
           {/* Dimensions grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 bg-[var(--bg-subtle)] p-6 rounded-3xl border border-[var(--border-default)]">
             {dimensions.map((dim) => (
-              <div key={dim.label} className="flex items-center justify-between text-sm py-1">
-                <span className="text-[var(--text-secondary)] font-medium">{dim.label}</span>
+              <div
+                key={dim.label}
+                className="flex items-center justify-between text-sm py-1"
+              >
+                <span className="text-[var(--text-secondary)] font-medium">
+                  {dim.label}
+                </span>
                 <div className="flex items-center gap-3 w-1/2">
                   <div className="h-1.5 w-full bg-[var(--border-default)] rounded-full overflow-hidden">
                     <div
@@ -157,7 +176,9 @@ export default function ReviewsSection({
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-11 w-11 border-2 border-[var(--border-default)]">
-                        {guestAvatar && <AvatarImage src={guestAvatar} alt={guestName} />}
+                        {guestAvatar && (
+                          <AvatarImage src={guestAvatar} alt={guestName} />
+                        )}
                         <AvatarFallback className="bg-[var(--bg-subtle)] text-[var(--text-secondary)] font-semibold text-sm">
                           {initials}
                         </AvatarFallback>
@@ -217,7 +238,9 @@ export default function ReviewsSection({
                     <HelpfulVoteButton
                       reviewId={review.id}
                       initialCount={review.helpful_count ?? 0}
-                      isOwnReview={!!currentUserId && currentUserId === review.customer_id}
+                      isOwnReview={
+                        !!currentUserId && currentUserId === review.customer_id
+                      }
                     />
                     {currentUserId && currentUserId !== review.customer_id ? (
                       <ReportReviewDialog reviewId={review.id} />
@@ -233,7 +256,10 @@ export default function ReviewsSection({
                         </span>
                         {review.owner_reply_at ? (
                           <span className="text-[11px] text-[var(--text-muted)]">
-                            {format(new Date(review.owner_reply_at), "MMMM d, yyyy")}
+                            {format(
+                              new Date(review.owner_reply_at),
+                              "MMMM d, yyyy",
+                            )}
                           </span>
                         ) : null}
                       </div>

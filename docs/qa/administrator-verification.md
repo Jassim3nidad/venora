@@ -36,6 +36,7 @@ and finance_admin actually have permission for, `/unauthorized`, and all 4
 required viewports, plus manual keyboard/focus/dialog/label checks.
 
 Violations found and fixed:
+
 - **color-contrast**: `text-red-600` (~4.8:1, borderline) → `text-red-700`
   (~6.5:1) on danger text across the sign-out control and several admin
   detail pages; `text-[#9ca3af]` (~2.5:1, fails AA) → the already-passing
@@ -92,6 +93,7 @@ Confirmed via `curl`: unauthenticated `/admin` and `/admin/settings` return
 raw error/stack-trace payloads on malformed requests.
 
 Two checklist items were **not verified**:
+
 - **Production cancellation flow**: the existing
   `e2e/auth/cancellation-flow.spec.ts` performs real service-role
   INSERT/DELETE against the shared production database. Running it against
@@ -138,6 +140,7 @@ would not have been rejected at the grant level.
 
 Also fixed in this same audit pass (all pushed to `main`, commit history
 starting at `a44cf4c`):
+
 - Migrated the deprecated `middleware.ts` convention to Next 16's `proxy.ts`.
 - Fixed a Turbopack workspace-root ambiguity in the build.
 - Restored map attribution (was disabled, contrary to the tile provider's

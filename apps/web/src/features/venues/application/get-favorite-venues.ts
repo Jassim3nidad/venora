@@ -16,7 +16,9 @@ export async function getFavoriteVenuesForUser(
 ): Promise<MarketplaceVenue[]> {
   const supabase = await createClient();
 
-  const { data: favoriteRows, error } = await (supabase.from("favorites") as any)
+  const { data: favoriteRows, error } = await (
+    supabase.from("favorites") as any
+  )
     .select("venue_id, created_at")
     .eq("customer_id", userId)
     .order("created_at", { ascending: false });
@@ -26,7 +28,9 @@ export async function getFavoriteVenuesForUser(
     return [];
   }
 
-  const orderedIds: string[] = (favoriteRows ?? []).map((row: any) => String(row.venue_id));
+  const orderedIds: string[] = (favoriteRows ?? []).map((row: any) =>
+    String(row.venue_id),
+  );
   const favoriteIdSet = new Set(orderedIds);
   const orderIndex = new Map<string, number>(
     orderedIds.map((id, index) => [id, index]),
@@ -34,8 +38,6 @@ export async function getFavoriteVenuesForUser(
 
   return researchVenues
     .filter((venue) => favoriteIdSet.has(venue.id))
-    .sort(
-      (a, b) => (orderIndex.get(a.id) ?? 0) - (orderIndex.get(b.id) ?? 0),
-    )
+    .sort((a, b) => (orderIndex.get(a.id) ?? 0) - (orderIndex.get(b.id) ?? 0))
     .map((venue) => toMarketplaceVenue(venue, favoriteIdSet));
 }

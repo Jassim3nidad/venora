@@ -38,7 +38,9 @@ export default async function AdminSuppliersPage({ searchParams }: Props) {
   await requirePermissionOrRedirect("suppliers.view");
 
   const { filter: rawFilter } = await searchParams;
-  const filter: SupplierQueueFilter = FILTER_TABS.some((t) => t.key === rawFilter)
+  const filter: SupplierQueueFilter = FILTER_TABS.some(
+    (t) => t.key === rawFilter,
+  )
     ? (rawFilter as SupplierQueueFilter)
     : "pending";
 
@@ -49,16 +51,26 @@ export default async function AdminSuppliersPage({ searchParams }: Props) {
       key: "supplier",
       header: "Supplier",
       cell: (row) => (
-        <a href={`/admin/suppliers/${row.id}`} className="font-semibold text-[#111827] hover:text-[#1d4ed8] hover:underline">
+        <a
+          href={`/admin/suppliers/${row.id}`}
+          className="font-semibold text-[#111827] hover:text-[#1d4ed8] hover:underline"
+        >
           {row.businessName}
         </a>
       ),
     },
-    { key: "status", header: "Accreditation", cell: (row) => <StatusBadge status={row.status} /> },
+    {
+      key: "status",
+      header: "Accreditation",
+      cell: (row) => <StatusBadge status={row.status} />,
+    },
     {
       key: "rating",
       header: "Rating",
-      cell: (row) => (row.reviewCount > 0 ? `${row.avgRating.toFixed(1)} (${row.reviewCount})` : "No reviews"),
+      cell: (row) =>
+        row.reviewCount > 0
+          ? `${row.avgRating.toFixed(1)} (${row.reviewCount})`
+          : "No reviews",
     },
     { key: "added", header: "Added", cell: (row) => formatDate(row.createdAt) },
     {
@@ -99,14 +111,24 @@ export default async function AdminSuppliersPage({ searchParams }: Props) {
       }
     >
       {error ? (
-        <EmptyState icon="error" title="Could not load suppliers" description={error} />
+        <EmptyState
+          icon="error"
+          title="Could not load suppliers"
+          description={error}
+        />
       ) : suppliers && suppliers.length > 0 ? (
         <Panel>
           <PanelHeader
-            title={FILTER_TABS.find((t) => t.key === filter)?.label ?? "Suppliers"}
+            title={
+              FILTER_TABS.find((t) => t.key === filter)?.label ?? "Suppliers"
+            }
             description="Select a supplier to review details and take action."
           />
-          <DataTable rows={suppliers} columns={columns} keyFn={(row) => row.id} />
+          <DataTable
+            rows={suppliers}
+            columns={columns}
+            keyFn={(row) => row.id}
+          />
         </Panel>
       ) : (
         <EmptyState

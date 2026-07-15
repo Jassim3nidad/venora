@@ -1,7 +1,14 @@
-import { DashButton, EmptyState, SupplierOverview } from "@/components/dashboard/enterprise";
+import {
+  DashButton,
+  EmptyState,
+  SupplierOverview,
+} from "@/components/dashboard/enterprise";
 import { formatSupplierPrice } from "@/features/suppliers/utils/supplier-format";
 import { getRequiredSupplierDashboardContext } from "./_lib/supplier-dashboard-data";
-import { getRevenueTrend, lastNMonthsRange } from "@/features/analytics/application/queries";
+import {
+  getRevenueTrend,
+  lastNMonthsRange,
+} from "@/features/analytics/application/queries";
 
 export const metadata = {
   title: "Supplier Dashboard",
@@ -133,25 +140,25 @@ export default async function SupplierDashboardPage() {
     status: pkg.isActive ? "Active" : "Archived",
   }));
 
-  const directInquiries = ((contactResult.data ?? []) as ContactInquiryRow[]).map(
-    (row) => ({
-      id: row.id,
-      client: row.contact_name,
-      service: row.supplier_services?.name ?? "General inquiry",
-      eventDate: formatDate(row.event_date),
-      status: row.status,
-    }),
-  );
+  const directInquiries = (
+    (contactResult.data ?? []) as ContactInquiryRow[]
+  ).map((row) => ({
+    id: row.id,
+    client: row.contact_name,
+    service: row.supplier_services?.name ?? "General inquiry",
+    eventDate: formatDate(row.event_date),
+    status: row.status,
+  }));
 
-  const bookingInquiries = ((bookingInquiryResult.data ?? []) as BookingInquiryRow[]).map(
-    (row) => ({
-      id: row.id,
-      client: row.bookings?.profiles?.full_name ?? "Client",
-      service: row.bookings?.venues?.name ?? "Venue request",
-      eventDate: formatDate(row.bookings?.event_date),
-      status: row.status,
-    }),
-  );
+  const bookingInquiries = (
+    (bookingInquiryResult.data ?? []) as BookingInquiryRow[]
+  ).map((row) => ({
+    id: row.id,
+    client: row.bookings?.profiles?.full_name ?? "Client",
+    service: row.bookings?.venues?.name ?? "Venue request",
+    eventDate: formatDate(row.bookings?.event_date),
+    status: row.status,
+  }));
 
   return (
     <SupplierOverview

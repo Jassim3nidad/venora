@@ -1,11 +1,12 @@
 import type { VenueMedia } from "../types/venue.types";
 
 const DEFAULT_SUPABASE_URL =
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://szmjjkywcsnzkgqevinz.supabase.co";
+  process.env.NEXT_PUBLIC_SUPABASE_URL ??
+  "https://szmjjkywcsnzkgqevinz.supabase.co";
 
 export function getVenueMediaUrl(
   path: string,
-  supabaseUrl = DEFAULT_SUPABASE_URL
+  supabaseUrl = DEFAULT_SUPABASE_URL,
 ): string {
   if (path.startsWith("http") || path.startsWith("/")) return path;
   return `${supabaseUrl}/storage/v1/object/public/venue-images/${path}`;
@@ -22,7 +23,9 @@ export function pickFeaturedMedia(media: VenueMedia[]): VenueMedia | null {
 }
 
 export function pickPromotionalVideo(media: VenueMedia[]): VenueMedia | null {
-  return sortVenueMedia(media).find((item) => item.media_type === "video") ?? null;
+  return (
+    sortVenueMedia(media).find((item) => item.media_type === "video") ?? null
+  );
 }
 
 export function pickGalleryImages(media: VenueMedia[]): VenueMedia[] {

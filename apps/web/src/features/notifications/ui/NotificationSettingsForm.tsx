@@ -353,7 +353,8 @@ export function NotificationSettingsForm() {
             role="status"
             className={cn(
               "inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold",
-              statusMessage.includes("saved") || statusMessage.includes("enabled")
+              statusMessage.includes("saved") ||
+                statusMessage.includes("enabled")
                 ? "bg-emerald-50 text-emerald-700"
                 : "bg-amber-50 text-amber-700",
             )}

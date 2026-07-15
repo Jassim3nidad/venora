@@ -168,17 +168,24 @@ export function Calendar({
           let ariaLabel = `${monthNames[monthIndex]} ${day}, ${year}`;
           if (isPast) ariaLabel += ", past, not selectable";
           else if (status === "available") ariaLabel += ", available";
-          else if (status === "reserved") ariaLabel += ", booked, not selectable";
-          else if (status === "tentative") ariaLabel += ", pending request, not selectable";
-          else if (status === "maintenance") ariaLabel += ", maintenance, not selectable";
-          else if (status === "blackout") ariaLabel += ", unavailable, not selectable";
+          else if (status === "reserved")
+            ariaLabel += ", booked, not selectable";
+          else if (status === "tentative")
+            ariaLabel += ", pending request, not selectable";
+          else if (status === "maintenance")
+            ariaLabel += ", maintenance, not selectable";
+          else if (status === "blackout")
+            ariaLabel += ", unavailable, not selectable";
 
           let title = "";
           if (isPast) title = "Past date";
           else if (status === "available") title = "Available for booking";
-          else if (status === "reserved") title = "This date is already booked.";
-          else if (status === "tentative") title = "This date has a pending request and cannot be booked yet.";
-          else if (status === "maintenance") title = "This date is unavailable due to maintenance.";
+          else if (status === "reserved")
+            title = "This date is already booked.";
+          else if (status === "tentative")
+            title = "This date has a pending request and cannot be booked yet.";
+          else if (status === "maintenance")
+            title = "This date is unavailable due to maintenance.";
           else if (status === "blackout") title = "This date is unavailable.";
 
           return (
@@ -196,33 +203,34 @@ export function Calendar({
               className={cn(
                 "w-full aspect-square rounded-full text-xs font-semibold flex flex-col items-center justify-center transition-all relative outline-none",
                 isPast &&
-                "cursor-not-allowed bg-[var(--bg-muted)] text-[var(--text-muted)] opacity-50",
+                  "cursor-not-allowed bg-[var(--bg-muted)] text-[var(--text-muted)] opacity-50",
                 // Available
                 !isPast &&
-                status === "available" &&
-                "hover:bg-[var(--bg-subtle)] text-[var(--text-primary)] cursor-pointer",
+                  status === "available" &&
+                  "hover:bg-[var(--bg-subtle)] text-[var(--text-primary)] cursor-pointer",
                 // Reserved
                 !isPast &&
-                status === "reserved" &&
-                "cursor-not-allowed bg-[var(--color-brand-600)] text-white shadow-sm",
+                  status === "reserved" &&
+                  "cursor-not-allowed bg-[var(--color-brand-600)] text-white shadow-sm",
                 // Tentative
                 !isPast &&
-                status === "tentative" &&
-                "cursor-not-allowed border-2 border-dashed border-orange-400 text-orange-700 bg-orange-50",
+                  status === "tentative" &&
+                  "cursor-not-allowed border-2 border-dashed border-orange-400 text-orange-700 bg-orange-50",
                 // Maintenance
                 !isPast &&
-                status === "maintenance" &&
-                "cursor-not-allowed bg-slate-200 text-slate-500",
+                  status === "maintenance" &&
+                  "cursor-not-allowed bg-slate-200 text-slate-500",
                 // Blackout
                 !isPast &&
-                status === "blackout" &&
-                "cursor-not-allowed bg-red-50 text-red-500 border border-red-100",
+                  status === "blackout" &&
+                  "cursor-not-allowed bg-red-50 text-red-500 border border-red-100",
                 // Selected override
                 isSelected &&
-                "ring-2 ring-[var(--color-brand-600)] ring-offset-2",
+                  "ring-2 ring-[var(--color-brand-600)] ring-offset-2",
                 // Today indicator
-                isTodayDate && !isSelected &&
-                "ring-1 ring-[var(--border-default)] ring-offset-1 font-bold"
+                isTodayDate &&
+                  !isSelected &&
+                  "ring-1 ring-[var(--border-default)] ring-offset-1 font-bold",
               )}
             >
               <span>{day}</span>

@@ -24,7 +24,13 @@ function formatMessageTime(iso: string): string {
   }).format(date);
 }
 
-function RoleLabel({ role, name }: { role: "customer" | "supplier", name?: string | null | undefined }) {
+function RoleLabel({
+  role,
+  name,
+}: {
+  role: "customer" | "supplier";
+  name?: string | null | undefined;
+}) {
   const label = name || (role === "customer" ? "Customer" : "Supplier");
   return (
     <span
@@ -65,7 +71,10 @@ export function InquiryMessageThread({
     setError(null);
 
     startTransition(async () => {
-      const result = await sendSupplierInquiryMessageAction({ inquiryId, message: trimmed });
+      const result = await sendSupplierInquiryMessageAction({
+        inquiryId,
+        message: trimmed,
+      });
       if (result.error) {
         setError(result.error.message);
         return;
@@ -100,7 +109,8 @@ export function InquiryMessageThread({
           </div>
           <p className="text-sm font-black text-[#111827]">No messages yet</p>
           <p className="max-w-xs text-sm font-medium leading-6 text-[#6B7280]">
-            Use this conversation to discuss event details and coordinate with the customer.
+            Use this conversation to discuss event details and coordinate with
+            the customer.
           </p>
         </div>
       ) : (
@@ -122,9 +132,9 @@ export function InquiryMessageThread({
                     isOwn ? "flex-row-reverse" : "flex-row",
                   ].join(" ")}
                 >
-                  <RoleLabel 
-                    role={isOwn ? "supplier" : "customer"} 
-                    name={isOwn ? supplierName : customerName} 
+                  <RoleLabel
+                    role={isOwn ? "supplier" : "customer"}
+                    name={isOwn ? supplierName : customerName}
                   />
                   <span className="text-[11px] font-medium text-[#9CA3AF]">
                     {formatMessageTime(msg.created_at)}

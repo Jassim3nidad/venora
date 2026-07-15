@@ -22,12 +22,7 @@ import {
 } from "../_shared/ai-config.ts";
 
 type VenueType =
-  | "garden"
-  | "beach"
-  | "resort"
-  | "hotel"
-  | "restaurant"
-  | "church";
+  "garden" | "beach" | "resort" | "hotel" | "restaurant" | "church";
 
 type IndoorOutdoor = "indoor" | "outdoor" | "both";
 
@@ -107,10 +102,7 @@ const venueTypes: VenueType[] = [
 const indoorOutdoorValues: IndoorOutdoor[] = ["indoor", "outdoor", "both"];
 const featureKeywords = new Map<
   string,
-  keyof Pick<
-    SearchIntent,
-    "parking" | "petFriendly" | "wheelchairAccessible"
-  >
+  keyof Pick<SearchIntent, "parking" | "petFriendly" | "wheelchairAccessible">
 >([
   ["parking", "parking"],
   ["car park", "parking"],
@@ -156,8 +148,9 @@ function parseCurrencyToken(rawValue: string, suffix = "") {
 }
 
 function uniqueStrings(values: Array<string | null | undefined>) {
-  return [...new Set(values.map((value) => cleanString(value)).filter(Boolean))]
-    .map((value) => value as string);
+  return [
+    ...new Set(values.map((value) => cleanString(value)).filter(Boolean)),
+  ].map((value) => value as string);
 }
 
 function deterministicExtraction(
@@ -170,7 +163,8 @@ function deterministicExtraction(
   const maxPrice = budgetMatch
     ? parseCurrencyToken(budgetMatch[1], budgetMatch[2])
     : null;
-  const venueType = indoorOutdoorValues.find((value) => text.includes(value)) ??
+  const venueType =
+    indoorOutdoorValues.find((value) => text.includes(value)) ??
     venueTypes.find((value) => text.includes(value)) ??
     null;
   const keywords = uniqueStrings(
@@ -188,7 +182,8 @@ function normalizeExtractedParameters(
   parsed: Partial<ExtractedSearchParameters>,
   deterministic: Partial<ExtractedSearchParameters>,
 ): ExtractedSearchParameters {
-  const maxPrice = toPositiveNumber(parsed.max_price) ??
+  const maxPrice =
+    toPositiveNumber(parsed.max_price) ??
     toPositiveNumber(deterministic.max_price);
   const location = cleanString(parsed.location)?.toLowerCase() ?? null;
   const venueType = cleanString(parsed.venue_type)?.toLowerCase() ?? null;
@@ -395,7 +390,7 @@ function buildKeyword(parameters: ExtractedSearchParameters) {
   const searchKeywords = parameters.keywords.filter((keyword) => {
     const normalized = normalizeText(keyword);
     return !filterOnlyKeywords.some((filterKeyword) =>
-      normalized.includes(filterKeyword)
+      normalized.includes(filterKeyword),
     );
   });
 
@@ -424,23 +419,26 @@ async function buildIntent(
   return {
     province: cleanString(filters?.province) ?? locationMatch.province,
     city: cleanString(filters?.city) ?? locationMatch.city,
-    municipality: cleanString(filters?.municipality) ??
-      locationMatch.municipality,
+    municipality:
+      cleanString(filters?.municipality) ?? locationMatch.municipality,
     minBudget: toPositiveNumber(filters?.min_budget),
-    maxBudget: parameters.max_price ??
+    maxBudget:
+      parameters.max_price ??
       toPositiveNumber(filters?.max_budget) ??
       toPositiveNumber(filters?.maxPrice),
-    guests: toPositiveNumber(filters?.guests) ??
-      toPositiveNumber(filters?.capacity),
+    guests:
+      toPositiveNumber(filters?.guests) ?? toPositiveNumber(filters?.capacity),
     venueTypes,
     indoorOutdoor: filterIndoorOutdoor ?? parsedIndoorOutdoor,
     parking: filters?.parking === true || keywordHas(keywords, ["parking"]),
-    petFriendly: filters?.pet_friendly === true ||
+    petFriendly:
+      filters?.pet_friendly === true ||
       keywordHas(keywords, ["pet friendly", "pet-friendly", "pets"]),
-    wheelchairAccessible: filters?.wheelchair_accessible === true ||
+    wheelchairAccessible:
+      filters?.wheelchair_accessible === true ||
       keywordHas(keywords, ["wheelchair", "accessible"]),
-    keyword: cleanString(filters?.keyword ?? filters?.q) ??
-      buildKeyword(parameters),
+    keyword:
+      cleanString(filters?.keyword ?? filters?.q) ?? buildKeyword(parameters),
     confidence: 1,
   };
 }
@@ -510,12 +508,15 @@ serve(async (req) => {
         searchAiConfig,
       );
     }
-    const aiParsingAllowed = !!searchAiConfig?.enabled &&
-      searchProviderCheck.ok && searchLimitCheck.allowed;
+    const aiParsingAllowed =
+      !!searchAiConfig?.enabled &&
+      searchProviderCheck.ok &&
+      searchLimitCheck.allowed;
 
     const body = (await req.json().catch(() => null)) as SearchRequest | null;
     const filters = body?.filters ?? {};
-    const query = cleanString(body?.query, 500) ??
+    const query =
+      cleanString(body?.query, 500) ??
       cleanString(filters.q ?? filters.keyword, 500) ??
       "";
 

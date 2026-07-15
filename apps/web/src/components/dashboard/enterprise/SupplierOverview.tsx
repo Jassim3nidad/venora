@@ -95,7 +95,9 @@ export function SupplierOverview({
     <DashboardPage>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-semibold text-[#6b7280]">Supplier Portal</p>
+          <p className="text-sm font-semibold text-[#6b7280]">
+            Supplier Portal
+          </p>
           <h1 className="font-display text-2xl font-bold text-[#111827] sm:text-3xl">
             {businessName}
           </h1>
@@ -186,7 +188,10 @@ export function SupplierOverview({
                 </p>
                 <div className="mt-4 flex items-center justify-between gap-3">
                   <span className="font-bold text-[#111827]">{item.price}</span>
-                  <StatusBadge status={item.status.toLowerCase()} label={item.status} />
+                  <StatusBadge
+                    status={item.status.toLowerCase()}
+                    label={item.status}
+                  />
                 </div>
               </div>
             ))}
@@ -211,11 +216,17 @@ export function SupplierOverview({
                 key: "client",
                 header: "Client",
                 cell: (row) => (
-                  <span className="font-semibold text-[#111827]">{row.client}</span>
+                  <span className="font-semibold text-[#111827]">
+                    {row.client}
+                  </span>
                 ),
               },
               { key: "service", header: "Service", cell: (row) => row.service },
-              { key: "date", header: "Event Date", cell: (row) => row.eventDate },
+              {
+                key: "date",
+                header: "Event Date",
+                cell: (row) => row.eventDate,
+              },
               {
                 key: "status",
                 header: "Status",

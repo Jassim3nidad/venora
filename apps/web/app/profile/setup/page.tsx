@@ -8,7 +8,8 @@ import type { RoleName } from "@/lib/rbac/roles";
 
 export const metadata: Metadata = {
   title: "Set Up Your Profile | Venora",
-  description: "Complete your Venora profile to personalize venue recommendations and bookings.",
+  description:
+    "Complete your Venora profile to personalize venue recommendations and bookings.",
 };
 
 export const dynamic = "force-dynamic";

@@ -11,9 +11,13 @@ import type { PaymentGateway } from "../../domain/gateways/payment-gateway.port"
  * real database in the production test-mode validation pass, not here.
  */
 
-function makeFakeSupabase(rpcImpl: (fn: string, args: unknown) => { data: unknown; error: unknown }) {
+function makeFakeSupabase(
+  rpcImpl: (fn: string, args: unknown) => { data: unknown; error: unknown },
+) {
   return {
-    rpc: vi.fn((fn: string, args: unknown) => Promise.resolve(rpcImpl(fn, args))),
+    rpc: vi.fn((fn: string, args: unknown) =>
+      Promise.resolve(rpcImpl(fn, args)),
+    ),
     from: vi.fn(() => ({
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
@@ -25,7 +29,9 @@ function makeFakeSupabase(rpcImpl: (fn: string, args: unknown) => { data: unknow
   };
 }
 
-function makeFakeGateway(overrides: Partial<PaymentGateway> = {}): PaymentGateway {
+function makeFakeGateway(
+  overrides: Partial<PaymentGateway> = {},
+): PaymentGateway {
   return {
     id: "paymongo",
     createCheckoutSession: vi.fn(),
@@ -38,10 +44,17 @@ function makeFakeGateway(overrides: Partial<PaymentGateway> = {}): PaymentGatewa
 
 describe("processWebhookEvent", () => {
   it("returns invalid_signature and never claims the event when the signature fails", async () => {
-    const gateway = makeFakeGateway({ verifyWebhookSignature: vi.fn().mockReturnValue(false) });
+    const gateway = makeFakeGateway({
+      verifyWebhookSignature: vi.fn().mockReturnValue(false),
+    });
     const supabase = makeFakeSupabase(() => ({ data: null, error: null }));
 
-    const result = await processWebhookEvent(supabase as any, gateway, "{}", "bad-sig");
+    const result = await processWebhookEvent(
+      supabase as any,
+      gateway,
+      "{}",
+      "bad-sig",
+    );
 
     expect(result).toEqual({ ok: false, result: "invalid_signature" });
     expect(supabase.rpc).not.toHaveBeenCalled();
@@ -61,15 +74,24 @@ describe("processWebhookEvent", () => {
       }),
     });
     const supabase = makeFakeSupabase((fn) => {
-      if (fn === "claim_payment_webhook_event") return { data: false, error: null };
+      if (fn === "claim_payment_webhook_event")
+        return { data: false, error: null };
       throw new Error(`unexpected call to ${fn}`);
     });
 
-    const result = await processWebhookEvent(supabase as any, gateway, "{}", "sig");
+    const result = await processWebhookEvent(
+      supabase as any,
+      gateway,
+      "{}",
+      "sig",
+    );
 
     expect(result).toEqual({ ok: true, result: "duplicate" });
     expect(supabase.rpc).toHaveBeenCalledTimes(1);
-    expect(supabase.rpc).toHaveBeenCalledWith("claim_payment_webhook_event", expect.anything());
+    expect(supabase.rpc).toHaveBeenCalledWith(
+      "claim_payment_webhook_event",
+      expect.anything(),
+    );
   });
 
   it("skips (does not confirm) a payment.succeeded event with no checkout session reference", async () => {
@@ -88,12 +110,19 @@ describe("processWebhookEvent", () => {
     const rpcCalls: string[] = [];
     const supabase = makeFakeSupabase((fn) => {
       rpcCalls.push(fn);
-      if (fn === "claim_payment_webhook_event") return { data: true, error: null };
-      if (fn === "finish_payment_webhook_event") return { data: null, error: null };
+      if (fn === "claim_payment_webhook_event")
+        return { data: true, error: null };
+      if (fn === "finish_payment_webhook_event")
+        return { data: null, error: null };
       throw new Error(`confirm_booking_payment must not be called: ${fn}`);
     });
 
-    const result = await processWebhookEvent(supabase as any, gateway, "{}", "sig");
+    const result = await processWebhookEvent(
+      supabase as any,
+      gateway,
+      "{}",
+      "sig",
+    );
 
     expect(result).toEqual({ ok: true, result: "skipped" });
     expect(rpcCalls).not.toContain("confirm_booking_payment");
@@ -115,16 +144,23 @@ describe("processWebhookEvent", () => {
     });
     let confirmArgs: unknown = null;
     const supabase = makeFakeSupabase((fn, args) => {
-      if (fn === "claim_payment_webhook_event") return { data: true, error: null };
+      if (fn === "claim_payment_webhook_event")
+        return { data: true, error: null };
       if (fn === "confirm_booking_payment") {
         confirmArgs = args;
         return { data: {}, error: null };
       }
-      if (fn === "finish_payment_webhook_event") return { data: null, error: null };
+      if (fn === "finish_payment_webhook_event")
+        return { data: null, error: null };
       throw new Error(`unexpected call to ${fn}`);
     });
 
-    const result = await processWebhookEvent(supabase as any, gateway, "{}", "sig");
+    const result = await processWebhookEvent(
+      supabase as any,
+      gateway,
+      "{}",
+      "sig",
+    );
 
     expect(result).toEqual({ ok: true, result: "processed" });
     expect(confirmArgs).toMatchObject({
@@ -156,12 +192,14 @@ describe("processWebhookEvent", () => {
     let confirmArgs: unknown = null;
     const supabase = {
       rpc: vi.fn((fn: string, args: unknown) => {
-        if (fn === "claim_payment_webhook_event") return Promise.resolve({ data: true, error: null });
+        if (fn === "claim_payment_webhook_event")
+          return Promise.resolve({ data: true, error: null });
         if (fn === "confirm_booking_payment") {
           confirmArgs = args;
           return Promise.resolve({ data: {}, error: null });
         }
-        if (fn === "finish_payment_webhook_event") return Promise.resolve({ data: null, error: null });
+        if (fn === "finish_payment_webhook_event")
+          return Promise.resolve({ data: null, error: null });
         throw new Error(`unexpected call to ${fn}`);
       }),
       from: vi.fn(() => ({
@@ -181,7 +219,12 @@ describe("processWebhookEvent", () => {
       })),
     };
 
-    const result = await processWebhookEvent(supabase as any, gateway, "{}", "sig");
+    const result = await processWebhookEvent(
+      supabase as any,
+      gateway,
+      "{}",
+      "sig",
+    );
 
     expect(result).toEqual({ ok: true, result: "processed" });
     expect(confirmArgs).toMatchObject({
@@ -234,14 +277,21 @@ describe("processWebhookEvent", () => {
     const supabase = {
       rpc: vi.fn((fn: string, args: unknown) => {
         rpcCalls.push(fn);
-        if (fn === "claim_payment_webhook_event") return Promise.resolve({ data: true, error: null });
-        if (fn === "finish_payment_webhook_event") return Promise.resolve({ data: null, error: null });
+        if (fn === "claim_payment_webhook_event")
+          return Promise.resolve({ data: true, error: null });
+        if (fn === "finish_payment_webhook_event")
+          return Promise.resolve({ data: null, error: null });
         throw new Error(`confirm_booking_payment must not be called: ${fn}`);
       }),
       from: vi.fn(() => query),
     };
 
-    const result = await processWebhookEvent(supabase as any, gateway, "{}", "sig");
+    const result = await processWebhookEvent(
+      supabase as any,
+      gateway,
+      "{}",
+      "sig",
+    );
 
     expect(result).toEqual({ ok: true, result: "skipped" });
     expect(rpcCalls).not.toContain("confirm_booking_payment");
@@ -265,9 +315,13 @@ describe("processWebhookEvent", () => {
     });
     const finishCalls: unknown[] = [];
     const supabase = makeFakeSupabase((fn, args) => {
-      if (fn === "claim_payment_webhook_event") return { data: true, error: null };
+      if (fn === "claim_payment_webhook_event")
+        return { data: true, error: null };
       if (fn === "confirm_booking_payment") {
-        return { data: null, error: { message: "Reconciliation failed: amount mismatch" } };
+        return {
+          data: null,
+          error: { message: "Reconciliation failed: amount mismatch" },
+        };
       }
       if (fn === "finish_payment_webhook_event") {
         finishCalls.push(args);
@@ -276,7 +330,12 @@ describe("processWebhookEvent", () => {
       throw new Error(`unexpected call to ${fn}`);
     });
 
-    const result = await processWebhookEvent(supabase as any, gateway, "{}", "sig");
+    const result = await processWebhookEvent(
+      supabase as any,
+      gateway,
+      "{}",
+      "sig",
+    );
 
     expect(result.ok).toBe(false);
     expect(result).toMatchObject({ result: "failed" });
@@ -296,13 +355,20 @@ describe("processWebhookEvent", () => {
     const rpcCalls: string[] = [];
     const supabase = makeFakeSupabase((fn) => {
       rpcCalls.push(fn);
-      if (fn === "claim_payment_webhook_event") return { data: true, error: null };
+      if (fn === "claim_payment_webhook_event")
+        return { data: true, error: null };
       if (fn === "complete_booking_refund") return { data: {}, error: null };
-      if (fn === "finish_payment_webhook_event") return { data: null, error: null };
+      if (fn === "finish_payment_webhook_event")
+        return { data: null, error: null };
       throw new Error(`unexpected call to ${fn}`);
     });
 
-    const result = await processWebhookEvent(supabase as any, gateway, "{}", "sig");
+    const result = await processWebhookEvent(
+      supabase as any,
+      gateway,
+      "{}",
+      "sig",
+    );
 
     expect(result).toEqual({ ok: true, result: "processed" });
     expect(rpcCalls).toContain("complete_booking_refund");
@@ -319,12 +385,19 @@ describe("processWebhookEvent", () => {
     const rpcCalls: string[] = [];
     const supabase = makeFakeSupabase((fn) => {
       rpcCalls.push(fn);
-      if (fn === "claim_payment_webhook_event") return { data: true, error: null };
-      if (fn === "finish_payment_webhook_event") return { data: null, error: null };
+      if (fn === "claim_payment_webhook_event")
+        return { data: true, error: null };
+      if (fn === "finish_payment_webhook_event")
+        return { data: null, error: null };
       throw new Error(`unexpected call to ${fn}`);
     });
 
-    const result = await processWebhookEvent(supabase as any, gateway, "{}", "sig");
+    const result = await processWebhookEvent(
+      supabase as any,
+      gateway,
+      "{}",
+      "sig",
+    );
 
     expect(result).toEqual({ ok: true, result: "skipped" });
     expect(rpcCalls).not.toContain("confirm_booking_payment");

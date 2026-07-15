@@ -33,7 +33,8 @@ export async function processWebhookEvent(
     return {
       ok: false,
       result: "failed",
-      error: error instanceof Error ? error.message : "Unparseable webhook payload",
+      error:
+        error instanceof Error ? error.message : "Unparseable webhook payload",
     };
   }
 
@@ -66,7 +67,10 @@ export async function processWebhookEvent(
   try {
     switch (event.kind) {
       case "payment.succeeded": {
-        const paymentContext = await resolvePaymentContext(serviceClient, event);
+        const paymentContext = await resolvePaymentContext(
+          serviceClient,
+          event,
+        );
 
         if (paymentContext.alreadySettled) {
           await finish("skipped", "Payment already settled");
@@ -82,7 +86,10 @@ export async function processWebhookEvent(
               `no checkout session reference for payment ${event.paymentReference}. ` +
               "Requires manual reconciliation.",
           );
-          await finish("skipped", "No checkout session reference; requires manual reconciliation");
+          await finish(
+            "skipped",
+            "No checkout session reference; requires manual reconciliation",
+          );
           return { ok: true, result: "skipped" };
         }
 
@@ -106,9 +113,14 @@ export async function processWebhookEvent(
       case "payment.failed": {
         const bookingId =
           event.bookingId ??
-          (await lookupBookingByReference(serviceClient, event.paymentReference));
+          (await lookupBookingByReference(
+            serviceClient,
+            event.paymentReference,
+          ));
         if (!bookingId) {
-          throw new Error(`No booking found for payment ${event.paymentReference}`);
+          throw new Error(
+            `No booking found for payment ${event.paymentReference}`,
+          );
         }
         const { error } = await serviceClient.rpc("fail_booking_payment", {
           p_booking_id: bookingId,
@@ -124,7 +136,10 @@ export async function processWebhookEvent(
         const { error } = await serviceClient.rpc("complete_booking_refund", {
           p_payment_provider: gateway.id,
           p_provider_reference: event.refundReference,
-          p_amount: event.amountMinor !== null ? fromMinorUnits(event.amountMinor) : null,
+          p_amount:
+            event.amountMinor !== null
+              ? fromMinorUnits(event.amountMinor)
+              : null,
         });
         if (error) throw new Error(error.message);
         break;
@@ -148,7 +163,8 @@ export async function processWebhookEvent(
     await finish("processed");
     return { ok: true, result: "processed" };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Webhook processing failed";
+    const message =
+      error instanceof Error ? error.message : "Webhook processing failed";
     await finish("failed", message);
     return { ok: false, result: "failed", error: message };
   }
@@ -179,7 +195,13 @@ type PaymentContext = {
 
 type TransactionSnapshot = Pick<
   TransactionRow,
-  "id" | "booking_id" | "provider_reference" | "amount" | "currency" | "status" | "payment_kind"
+  | "id"
+  | "booking_id"
+  | "provider_reference"
+  | "amount"
+  | "currency"
+  | "status"
+  | "payment_kind"
 >;
 
 async function resolvePaymentContext(
@@ -189,8 +211,11 @@ async function resolvePaymentContext(
   const transaction = event.transactionId
     ? await lookupTransactionById(serviceClient, event.transactionId)
     : event.checkoutSessionReference
-      ? await lookupTransactionByCheckoutReference(serviceClient, event.checkoutSessionReference)
-    : null;
+      ? await lookupTransactionByCheckoutReference(
+          serviceClient,
+          event.checkoutSessionReference,
+        )
+      : null;
 
   if (transaction?.status === "paid") {
     return { checkoutSessionReference: null, alreadySettled: true };
@@ -208,11 +233,14 @@ async function resolvePaymentContext(
   }
 
   const expectedAmountMinor = Math.round(Number(transaction.amount) * 100);
-  const amountMatches = event.amountMinor !== null && expectedAmountMinor === event.amountMinor;
+  const amountMatches =
+    event.amountMinor !== null && expectedAmountMinor === event.amountMinor;
   const currencyMatches =
     event.currency !== null &&
-    String(transaction.currency).toUpperCase() === String(event.currency).toUpperCase();
-  const bookingMatches = !event.bookingId || transaction.booking_id === event.bookingId;
+    String(transaction.currency).toUpperCase() ===
+      String(event.currency).toUpperCase();
+  const bookingMatches =
+    !event.bookingId || transaction.booking_id === event.bookingId;
 
   if (
     transaction.status !== "pending" ||
@@ -237,7 +265,9 @@ async function lookupTransactionById(
 ): Promise<TransactionSnapshot | null> {
   const { data } = await serviceClient
     .from("transactions")
-    .select("id, booking_id, provider_reference, amount, currency, status, payment_kind")
+    .select(
+      "id, booking_id, provider_reference, amount, currency, status, payment_kind",
+    )
     .eq("id", transactionId)
     .maybeSingle<TransactionSnapshot>();
 
@@ -248,7 +278,8 @@ async function lookupTransactionByCheckoutReference(
   serviceClient: SupabaseClient,
   checkoutSessionReference: string,
 ): Promise<TransactionSnapshot | null> {
-  const select = "id, booking_id, provider_reference, amount, currency, status, payment_kind";
+  const select =
+    "id, booking_id, provider_reference, amount, currency, status, payment_kind";
   const { data: directMatch } = await serviceClient
     .from("transactions")
     .select(select)
@@ -261,7 +292,9 @@ async function lookupTransactionByCheckoutReference(
   const { data: metadataMatch } = await serviceClient
     .from("transactions")
     .select(select)
-    .contains("metadata", { checkout_session_reference: checkoutSessionReference })
+    .contains("metadata", {
+      checkout_session_reference: checkoutSessionReference,
+    })
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle<TransactionSnapshot>();

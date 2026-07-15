@@ -1,9 +1,7 @@
 import { redirect } from "next/navigation";
 import { formatCurrency } from "@venora/lib";
 import { createClient } from "@/lib/supabase/server";
-import {
-  getSupplierDashboardContext as getMarketplaceSupplierDashboardContext,
-} from "@/features/suppliers/application/queries";
+import { getSupplierDashboardContext as getMarketplaceSupplierDashboardContext } from "@/features/suppliers/application/queries";
 import { ROLES } from "@/lib/rbac/roles";
 import type {
   SupplierCategory,
@@ -42,7 +40,10 @@ export async function getRequiredSupplierDashboardContext(): Promise<SupplierDas
     redirect("/unauthorized");
   }
 
-  const context = await getMarketplaceSupplierDashboardContext(supabase, user.id);
+  const context = await getMarketplaceSupplierDashboardContext(
+    supabase,
+    user.id,
+  );
   const supplierProfile = context.profile
     ? {
         id: context.profile.id,

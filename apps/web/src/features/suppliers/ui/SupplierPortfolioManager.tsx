@@ -1,7 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { Plus, Edit2, Star, Calendar, MapPin, EyeOff, LayoutGrid, CheckCircle2 } from "lucide-react";
+import {
+  Plus,
+  Edit2,
+  Star,
+  Calendar,
+  MapPin,
+  EyeOff,
+  LayoutGrid,
+  CheckCircle2,
+} from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import type {
@@ -26,7 +35,7 @@ export function SupplierPortfolioManager({
       setSuccessMessage("Project published to your live profile.");
       window.history.replaceState(null, "", "/dashboard/supplier/portfolio");
     }
-    
+
     if (successMessage) {
       const timer = setTimeout(() => setSuccessMessage(null), 4000);
       return () => clearTimeout(timer);
@@ -35,7 +44,9 @@ export function SupplierPortfolioManager({
 
   const sortedPortfolio = [...profile.portfolio].sort((a, b) => {
     if (a.isFeatured !== b.isFeatured) return a.isFeatured ? -1 : 1;
-    return a.sortOrder - b.sortOrder || (a.title || "").localeCompare(b.title || "");
+    return (
+      a.sortOrder - b.sortOrder || (a.title || "").localeCompare(b.title || "")
+    );
   });
 
   return (
@@ -48,8 +59,12 @@ export function SupplierPortfolioManager({
       )}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-xl font-bold text-slate-800">Portfolio Projects</h2>
-          <p className="text-sm text-slate-500">Manage the projects displayed on your public profile.</p>
+          <h2 className="text-xl font-bold text-slate-800">
+            Portfolio Projects
+          </h2>
+          <p className="text-sm text-slate-500">
+            Manage the projects displayed on your public profile.
+          </p>
         </div>
         <Link
           href="/dashboard/supplier/portfolio/new"
@@ -65,9 +80,12 @@ export function SupplierPortfolioManager({
           <div className="mb-4 rounded-full bg-white p-4 shadow-sm">
             <LayoutGrid className="h-8 w-8 text-slate-400" />
           </div>
-          <h3 className="mb-1 text-lg font-bold text-slate-900">No projects yet</h3>
+          <h3 className="mb-1 text-lg font-bold text-slate-900">
+            No projects yet
+          </h3>
           <p className="mb-6 max-w-sm text-sm text-slate-500">
-            Showcase your best work to help customers understand your style and expertise.
+            Showcase your best work to help customers understand your style and
+            expertise.
           </p>
           <Link
             href="/dashboard/supplier/portfolio/new"
@@ -83,7 +101,9 @@ export function SupplierPortfolioManager({
             <div
               key={item.id}
               className={`group flex flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition-all hover:shadow-md ${
-                item.status === "hidden" ? "border-slate-200 opacity-60 grayscale-[0.5]" : "border-slate-200"
+                item.status === "hidden"
+                  ? "border-slate-200 opacity-60 grayscale-[0.5]"
+                  : "border-slate-200"
               }`}
             >
               <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
@@ -100,7 +120,7 @@ export function SupplierPortfolioManager({
                     <LayoutGrid className="h-8 w-8" />
                   </div>
                 )}
-                
+
                 {/* Status Badges */}
                 <div className="absolute left-3 top-3 flex flex-col gap-2">
                   {item.isFeatured && (
@@ -141,7 +161,7 @@ export function SupplierPortfolioManager({
                     <Edit2 className="h-4 w-4" />
                   </Link>
                 </div>
-                
+
                 <div className="mt-2 flex flex-wrap gap-x-3 gap-y-2 text-xs font-semibold text-slate-500">
                   {item.eventType && (
                     <div className="flex items-center gap-1">

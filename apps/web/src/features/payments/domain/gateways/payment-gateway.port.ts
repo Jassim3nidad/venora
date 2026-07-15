@@ -38,10 +38,7 @@ export interface CheckoutSession {
 }
 
 export type RefundReason =
-  | "requested_by_customer"
-  | "duplicate"
-  | "fraudulent"
-  | "others";
+  "requested_by_customer" | "duplicate" | "fraudulent" | "others";
 
 export interface CreateRefundParams {
   /** Provider payment reference to refund (PayMongo `pay_...`). */
@@ -111,7 +108,9 @@ export interface PaymentGateway {
   readonly id: PaymentProviderId;
 
   /** Create a hosted checkout session for a deposit payment. */
-  createCheckoutSession(params: CreateCheckoutSessionParams): Promise<CheckoutSession>;
+  createCheckoutSession(
+    params: CreateCheckoutSessionParams,
+  ): Promise<CheckoutSession>;
 
   /** Issue a (full or partial) refund against a captured payment. */
   createRefund(params: CreateRefundParams): Promise<RefundResult>;
@@ -120,7 +119,10 @@ export interface PaymentGateway {
    * Verify the webhook signature against the raw request body.
    * Must be constant-time; returns false on any malformed input.
    */
-  verifyWebhookSignature(rawBody: string, signatureHeader: string | null): boolean;
+  verifyWebhookSignature(
+    rawBody: string,
+    signatureHeader: string | null,
+  ): boolean;
 
   /** Parse and normalize a (verified) webhook payload. */
   parseWebhookEvent(rawBody: string): NormalizedWebhookEvent;

@@ -128,12 +128,11 @@ function buildPrompt(
     return {
       system:
         "You are a copywriter for a Philippine event-venue marketplace. Write one short paragraph (2-4 sentences) describing an event package. You must reference its actual inclusions list — never invent inclusions, prices, or guest limits not given.",
-      user:
-        `Venue: ${facts}. Package: ${pkg.name}, price PHP ${pkg.price}, guests ${
-          pkg.min_guests ?? "?"
-        }-${pkg.max_guests ?? "?"}, inclusions: ${
-          (pkg.inclusions ?? []).join(", ") || "none listed"
-        }. Tone: ${tone}.`,
+      user: `Venue: ${facts}. Package: ${pkg.name}, price PHP ${pkg.price}, guests ${
+        pkg.min_guests ?? "?"
+      }-${pkg.max_guests ?? "?"}, inclusions: ${
+        (pkg.inclusions ?? []).join(", ") || "none listed"
+      }. Tone: ${tone}.`,
     };
   }
 
@@ -148,31 +147,25 @@ async function requestCopy(
   openRouterApiKey: string,
   prompt: { system: string; user: string },
   config: AiConfiguration,
-): Promise<
-  {
-    text: string;
-    inputTokens: number | null;
-    outputTokens: number | null;
-    providerUsed: string;
-    modelUsed: string;
-    usedFallback: boolean;
-  }
-> {
+): Promise<{
+  text: string;
+  inputTokens: number | null;
+  outputTokens: number | null;
+  providerUsed: string;
+  modelUsed: string;
+  usedFallback: boolean;
+}> {
   const { response, providerUsed, modelUsed, usedFallback } =
-    await postChatCompletion(
-      config,
-      openRouterApiKey,
-      {
-        temperature: config.temperature ?? 0.6,
-        // Generous budget — the default free model reasons before writing
-        // content; too low a cap truncates it mid-thought.
-        max_tokens: config.maxTokens,
-        messages: [
-          { role: "system", content: prompt.system },
-          { role: "user", content: prompt.user },
-        ],
-      },
-    );
+    await postChatCompletion(config, openRouterApiKey, {
+      temperature: config.temperature ?? 0.6,
+      // Generous budget — the default free model reasons before writing
+      // content; too low a cap truncates it mid-thought.
+      max_tokens: config.maxTokens,
+      messages: [
+        { role: "system", content: prompt.system },
+        { role: "user", content: prompt.user },
+      ],
+    });
 
   if (!response.ok) {
     const errorText = await response.text();

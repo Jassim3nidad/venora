@@ -24,7 +24,10 @@ export function fromMinorUnits(minor: number): number {
   return Math.round(minor) / 100;
 }
 
-export function formatMoney(amount: number, currency: string = DEFAULT_CURRENCY): string {
+export function formatMoney(
+  amount: number,
+  currency: string = DEFAULT_CURRENCY,
+): string {
   return new Intl.NumberFormat("en-PH", {
     style: "currency",
     currency,

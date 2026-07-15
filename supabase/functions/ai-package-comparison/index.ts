@@ -128,15 +128,13 @@ async function requestSummary(
   openRouterApiKey: string,
   table: ComparisonRow[],
   config: AiConfiguration,
-): Promise<
-  {
-    summary: AiSummary | null;
-    inputTokens: number | null;
-    outputTokens: number | null;
-    providerUsed: string;
-    modelUsed: string;
-  }
-> {
+): Promise<{
+  summary: AiSummary | null;
+  inputTokens: number | null;
+  outputTokens: number | null;
+  providerUsed: string;
+  modelUsed: string;
+}> {
   try {
     const { response, providerUsed, modelUsed } = await postChatCompletion(
       config,
@@ -274,8 +272,8 @@ serve(async (req) => {
         config,
       );
     }
-    const aiSummaryAllowed = !!config?.enabled && providerCheck.ok &&
-      limitCheck.allowed;
+    const aiSummaryAllowed =
+      !!config?.enabled && providerCheck.ok && limitCheck.allowed;
 
     const rawBody = await req.json().catch(() => null);
     const packageIds = parsePackageIds(rawBody);
@@ -348,7 +346,8 @@ serve(async (req) => {
     }
 
     const userId = await getAuthenticatedUserId(req, supabaseUrl);
-    const { error: logError } = await supabase.from("ai_package_comparisons")
+    const { error: logError } = await supabase
+      .from("ai_package_comparisons")
       .insert({
         user_id: userId,
         package_ids: comparisonTable.map((row) => row.id),

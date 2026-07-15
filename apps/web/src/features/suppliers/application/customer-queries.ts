@@ -38,13 +38,16 @@ export async function getCustomerInquiries(
         venues (name, city, province)
       ),
       supplier_quotes (id, status, total, sent_at, valid_until, created_at, updated_at)
-      `
+      `,
     )
     .eq("customer_id", customerId)
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("[getCustomerInquiries] Error fetching inquiries:", error.message);
+    console.error(
+      "[getCustomerInquiries] Error fetching inquiries:",
+      error.message,
+    );
     throw new Error("Failed to fetch supplier inquiries.");
   }
 
@@ -80,14 +83,17 @@ export async function getCustomerInquiryDetails(
         guest_count,
         venues (name, city, province)
       )
-      `
+      `,
     )
     .eq("id", inquiryId)
     .eq("customer_id", customerId)
     .maybeSingle();
 
   if (inquiryResult.error) {
-    console.error("[getCustomerInquiryDetails] Error:", inquiryResult.error.message);
+    console.error(
+      "[getCustomerInquiryDetails] Error:",
+      inquiryResult.error.message,
+    );
     throw new Error("Failed to fetch inquiry details.");
   }
 
@@ -113,12 +119,18 @@ export async function getCustomerInquiryDetails(
   ]);
 
   if (messagesResult.error) {
-    console.error("[getCustomerInquiryDetails] Message error:", messagesResult.error.message);
+    console.error(
+      "[getCustomerInquiryDetails] Message error:",
+      messagesResult.error.message,
+    );
     throw new Error("Failed to fetch inquiry messages.");
   }
 
   if (quoteResult.error) {
-    console.error("[getCustomerInquiryDetails] Quote error:", quoteResult.error.message);
+    console.error(
+      "[getCustomerInquiryDetails] Quote error:",
+      quoteResult.error.message,
+    );
     throw new Error("Failed to fetch service proposal.");
   }
 

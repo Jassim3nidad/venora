@@ -2,7 +2,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { NotFoundError, PaymentError } from "@/lib/errors";
 import { getGateway } from "../gateway-registry";
 import { toMinorUnits } from "../../domain/value-objects/money.vo";
-import type { PaymentProviderId, TransactionRow } from "../../types/payment.types";
+import type {
+  PaymentProviderId,
+  TransactionRow,
+} from "../../types/payment.types";
 
 export interface StartCheckoutInput {
   bookingId: string;
@@ -54,21 +57,39 @@ export async function startCheckout(
   serviceClient: SupabaseClient,
   input: StartCheckoutInput,
 ): Promise<StartCheckoutResult> {
-  if (process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "production") {
+  if (
+    process.env.NODE_ENV === "production" ||
+    process.env.VERCEL_ENV === "production"
+  ) {
     if (!input.appUrl) {
-      throw new PaymentError("INVALID_APP_URL", "Production application URL is missing.");
+      throw new PaymentError(
+        "INVALID_APP_URL",
+        "Production application URL is missing.",
+      );
     }
     if (!input.appUrl.startsWith("https://")) {
-      throw new PaymentError("INVALID_APP_URL", "Production application URL must use HTTPS.");
+      throw new PaymentError(
+        "INVALID_APP_URL",
+        "Production application URL must use HTTPS.",
+      );
     }
     let parsedUrl: URL;
     try {
       parsedUrl = new URL(input.appUrl);
     } catch {
-      throw new PaymentError("INVALID_APP_URL", "Production application URL is incorrectly formatted.");
+      throw new PaymentError(
+        "INVALID_APP_URL",
+        "Production application URL is incorrectly formatted.",
+      );
     }
-    if (parsedUrl.hostname === "localhost" || parsedUrl.hostname === "127.0.0.1") {
-      throw new PaymentError("INVALID_APP_URL", "Production application URL cannot be localhost.");
+    if (
+      parsedUrl.hostname === "localhost" ||
+      parsedUrl.hostname === "127.0.0.1"
+    ) {
+      throw new PaymentError(
+        "INVALID_APP_URL",
+        "Production application URL cannot be localhost.",
+      );
     }
   }
 
@@ -110,13 +131,19 @@ export async function startCheckout(
     };
   }
 
-  const isReplacingStaleSession = Boolean(transaction.checkout_url) && sessionAgeMs >= CHECKOUT_SESSION_TTL_MS;
+  const isReplacingStaleSession =
+    Boolean(transaction.checkout_url) &&
+    sessionAgeMs >= CHECKOUT_SESSION_TTL_MS;
 
   const { data: booking } = await supabase
     .from("bookings")
     .select("id, event_date, venues ( name )")
     .eq("id", input.bookingId)
-    .single<{ id: string; event_date: string; venues: { name: string } | null }>();
+    .single<{
+      id: string;
+      event_date: string;
+      venues: { name: string } | null;
+    }>();
 
   if (!booking) throw new NotFoundError("Booking");
 

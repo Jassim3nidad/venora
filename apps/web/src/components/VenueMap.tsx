@@ -41,7 +41,10 @@ export default function VenueMap({
 
     // Add navigation controls (zoom in/out) if interactive
     if (interactive) {
-      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+      map.addControl(
+        new maplibregl.NavigationControl({ showCompass: false }),
+        "top-right",
+      );
     }
 
     // Create custom blue brand marker pin
@@ -62,7 +65,7 @@ export default function VenueMap({
     // Add a popup tooltip if a label is provided
     if (markerLabel) {
       const popup = new maplibregl.Popup({ offset: 25 }).setHTML(
-        `<div style="font-family: var(--font-inter, sans-serif); font-size: 13px; font-weight: 600; padding: 4px 8px; color: var(--text-primary);">${markerLabel}</div>`
+        `<div style="font-family: var(--font-inter, sans-serif); font-size: 13px; font-weight: 600; padding: 4px 8px; color: var(--text-primary);">${markerLabel}</div>`,
       );
       marker.setPopup(popup);
     }
@@ -91,7 +94,9 @@ export default function VenueMap({
       <div
         ref={mapContainerRef}
         role="region"
-        aria-label={markerLabel ? `Map showing ${markerLabel}` : "Venue location map"}
+        aria-label={
+          markerLabel ? `Map showing ${markerLabel}` : "Venue location map"
+        }
         style={{ width: "100%", height: "100%" }}
       />
     </div>

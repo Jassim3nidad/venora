@@ -281,7 +281,11 @@ export function EnterpriseShell({
     <div className="flex min-h-dvh bg-[#f8fbff]">
       {/* Desktop sidebar - sticks in place while the page scrolls */}
       <aside className="sticky top-0 hidden h-dvh w-[272px] shrink-0 overflow-y-auto border-r border-[#dbe3ef] bg-[#eef6ff] p-5 lg:block">
-        <Sidebar role={role} pathname={pathname} {...(navItems ? { navItems } : {})} />
+        <Sidebar
+          role={role}
+          pathname={pathname}
+          {...(navItems ? { navItems } : {})}
+        />
       </aside>
 
       {/* Mobile drawer */}

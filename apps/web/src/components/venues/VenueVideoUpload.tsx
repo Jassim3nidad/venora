@@ -126,7 +126,9 @@ export default function VenueVideoUpload({
 
     try {
       if (video) {
-        await supabase.storage.from("venue-images").remove([video.storage_path]);
+        await supabase.storage
+          .from("venue-images")
+          .remove([video.storage_path]);
         await supabase.from("venue_images").delete().eq("id", video.id);
       }
 
@@ -231,8 +233,8 @@ export default function VenueVideoUpload({
           Promotional Video
         </CardTitle>
         <CardDescription className="text-sm text-[var(--text-secondary)]">
-          Upload one short video to showcase your venue on the public profile page.
-          MP4 or MOV up to 50MB.
+          Upload one short video to showcase your venue on the public profile
+          page. MP4 or MOV up to 50MB.
         </CardDescription>
       </CardHeader>
 

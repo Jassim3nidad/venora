@@ -55,32 +55,38 @@ const problems: Card[] = [
 const solutions: Card[] = [
   {
     title: "Discover venues",
-    description: "Browse venue profiles by location, event type, capacity, and style.",
+    description:
+      "Browse venue profiles by location, event type, capacity, and style.",
     icon: Search,
   },
   {
     title: "Compare packages",
-    description: "Review pricing, inclusions, capacities, and policies in one place.",
+    description:
+      "Review pricing, inclusions, capacities, and policies in one place.",
     icon: WalletCards,
   },
   {
     title: "Check availability",
-    description: "Plan around venue calendars and booking status with more confidence.",
+    description:
+      "Plan around venue calendars and booking status with more confidence.",
     icon: CalendarCheck,
   },
   {
     title: "Submit booking requests",
-    description: "Send structured requests that help venues respond with the right details.",
+    description:
+      "Send structured requests that help venues respond with the right details.",
     icon: CheckCircle2,
   },
   {
     title: "Connect with suppliers",
-    description: "Find event professionals who can support the full experience.",
+    description:
+      "Find event professionals who can support the full experience.",
     icon: Store,
   },
   {
     title: "Track booking status",
-    description: "Keep requests, confirmations, and next steps easier to follow.",
+    description:
+      "Keep requests, confirmations, and next steps easier to follow.",
     icon: LayoutDashboard,
   },
 ];
@@ -121,32 +127,38 @@ const audiences: Card[] = [
 const trustItems: Card[] = [
   {
     title: "Verified venue listings",
-    description: "Venue profiles are built to show the details customers need before booking.",
+    description:
+      "Venue profiles are built to show the details customers need before booking.",
     icon: BadgeCheck,
   },
   {
     title: "AI-powered search",
-    description: "Search naturally by event needs, location, guest count, budget, and preferences.",
+    description:
+      "Search naturally by event needs, location, guest count, budget, and preferences.",
     icon: BrainCircuit,
   },
   {
     title: "Transparent booking process",
-    description: "Structured requests make expectations clearer for customers and venue teams.",
+    description:
+      "Structured requests make expectations clearer for customers and venue teams.",
     icon: ClipboardList,
   },
   {
     title: "Accredited suppliers",
-    description: "Supplier profiles help customers connect with trusted event service providers.",
+    description:
+      "Supplier profiles help customers connect with trusted event service providers.",
     icon: Handshake,
   },
   {
     title: "Business tools for owners",
-    description: "Owners get modern tools for profiles, calendars, bookings, packages, and teams.",
+    description:
+      "Owners get modern tools for profiles, calendars, bookings, packages, and teams.",
     icon: LayoutDashboard,
   },
   {
     title: "Reviews and ratings",
-    description: "Customer feedback helps future planners make more confident decisions.",
+    description:
+      "Customer feedback helps future planners make more confident decisions.",
     icon: Sparkles,
   },
 ];
@@ -154,27 +166,32 @@ const trustItems: Card[] = [
 const aiFeatures: Card[] = [
   {
     title: "AI venue recommendations",
-    description: "Match event needs with venues that fit the occasion and planning context.",
+    description:
+      "Match event needs with venues that fit the occasion and planning context.",
     icon: Sparkles,
   },
   {
     title: "Smart search",
-    description: "Search by budget, guest count, event type, location, and preferences.",
+    description:
+      "Search by budget, guest count, event type, location, and preferences.",
     icon: Search,
   },
   {
     title: "Package comparison",
-    description: "Review venue options and package details without losing the planning thread.",
+    description:
+      "Review venue options and package details without losing the planning thread.",
     icon: WalletCards,
   },
   {
     title: "Cost estimation",
-    description: "Understand likely costs earlier so planning conversations stay grounded.",
+    description:
+      "Understand likely costs earlier so planning conversations stay grounded.",
     icon: WalletCards,
   },
   {
     title: "Customer assistant",
-    description: "Guide customers toward relevant venues, suppliers, and next steps.",
+    description:
+      "Guide customers toward relevant venues, suppliers, and next steps.",
     icon: Bot,
   },
 ];
@@ -248,9 +265,9 @@ export default function AboutPage() {
                 Where Extraordinary Events Begin
               </h1>
               <p className="mt-5 max-w-2xl text-base font-medium leading-7 text-[#4B5563] sm:text-lg">
-                Venora helps customers find, compare, and book the perfect
-                venue while giving venue owners modern tools to manage their
-                business, bookings, packages, and event operations.
+                Venora helps customers find, compare, and book the perfect venue
+                while giving venue owners modern tools to manage their business,
+                bookings, packages, and event operations.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link

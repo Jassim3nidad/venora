@@ -107,66 +107,59 @@ async function requestEstimate(
   venueInfo: string,
   input: EstimatorInput,
   config: AiConfiguration,
-): Promise<
-  {
-    estimate: CostEstimate;
-    inputTokens: number | null;
-    outputTokens: number | null;
-    providerUsed: string;
-    modelUsed: string;
-    usedFallback: boolean;
-  }
-> {
+): Promise<{
+  estimate: CostEstimate;
+  inputTokens: number | null;
+  outputTokens: number | null;
+  providerUsed: string;
+  modelUsed: string;
+  usedFallback: boolean;
+}> {
   const { response, providerUsed, modelUsed, usedFallback } =
-    await postChatCompletion(
-      config,
-      openRouterApiKey,
-      {
-        temperature: config.temperature ?? 0.2,
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are a venue event cost estimator for the Philippine events market. Given a venue's base price, its packages, and event parameters, produce a realistic itemized cost breakdown in PHP. Round all figures to the nearest 100. `total` must equal the sum of baseVenue + packages + catering + av. If catering or AV is not requested, their values must be 0. `breakdown` is 3 to 6 short line items explaining the total in plain English for a customer, not code.",
-          },
-          {
-            role: "user",
-            content:
-              `Venue: ${venueInfo}. Event: ${input.eventType}, ${input.guestCount} guests, ${input.durationHours}h. Catering requested: ${input.includesCatering}. AV requested: ${input.includesAv}.`,
-          },
-        ],
-        response_format: {
-          type: "json_schema",
-          json_schema: {
-            name: "venue_cost_estimate",
-            strict: true,
-            schema: {
-              type: "object",
-              additionalProperties: false,
-              properties: {
-                baseVenue: { type: "number" },
-                packages: { type: "number" },
-                catering: { type: "number" },
-                av: { type: "number" },
-                total: { type: "number" },
-                breakdown: { type: "array", items: { type: "string" } },
-              },
-              required: [
-                "baseVenue",
-                "packages",
-                "catering",
-                "av",
-                "total",
-                "breakdown",
-              ],
+    await postChatCompletion(config, openRouterApiKey, {
+      temperature: config.temperature ?? 0.2,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a venue event cost estimator for the Philippine events market. Given a venue's base price, its packages, and event parameters, produce a realistic itemized cost breakdown in PHP. Round all figures to the nearest 100. `total` must equal the sum of baseVenue + packages + catering + av. If catering or AV is not requested, their values must be 0. `breakdown` is 3 to 6 short line items explaining the total in plain English for a customer, not code.",
+        },
+        {
+          role: "user",
+          content: `Venue: ${venueInfo}. Event: ${input.eventType}, ${input.guestCount} guests, ${input.durationHours}h. Catering requested: ${input.includesCatering}. AV requested: ${input.includesAv}.`,
+        },
+      ],
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "venue_cost_estimate",
+          strict: true,
+          schema: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              baseVenue: { type: "number" },
+              packages: { type: "number" },
+              catering: { type: "number" },
+              av: { type: "number" },
+              total: { type: "number" },
+              breakdown: { type: "array", items: { type: "string" } },
             },
+            required: [
+              "baseVenue",
+              "packages",
+              "catering",
+              "av",
+              "total",
+              "breakdown",
+            ],
           },
         },
-        // Generous budget — the default free model reasons before writing
-        // content; too low a cap truncates it mid-thought.
-        max_tokens: config.maxTokens,
       },
-    );
+      // Generous budget — the default free model reasons before writing
+      // content; too low a cap truncates it mid-thought.
+      max_tokens: config.maxTokens,
+    });
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -380,7 +373,8 @@ serve(async (req) => {
       success: true,
     });
 
-    const { error: logError } = await supabase.from("ai_generated_content")
+    const { error: logError } = await supabase
+      .from("ai_generated_content")
       .insert({
         venue_id: input.venueId,
         content_type: "cost_estimate",
@@ -399,9 +393,8 @@ serve(async (req) => {
         venue: {
           id: venue.id,
           name: venue.name,
-          basePrice: venue.base_price === null
-            ? null
-            : Number(venue.base_price),
+          basePrice:
+            venue.base_price === null ? null : Number(venue.base_price),
         },
       },
       error: null,

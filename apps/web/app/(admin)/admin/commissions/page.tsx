@@ -11,10 +11,22 @@ import {
   type DataTableColumn,
 } from "@/components/dashboard/enterprise";
 import { createClient } from "@/lib/supabase/server";
-import { getCommissionTrend, lastNMonthsRange } from "@/features/analytics/application/queries";
-import { requirePermissionOrRedirect, hasPermission } from "@/lib/rbac/admin-context";
-import { getCommissionRules, getVenueCategoryOptions } from "@/features/admin-commissions/application/queries";
-import { CreateCommissionRuleForm, EditCommissionRuleDialog } from "@/features/admin-commissions/ui/CommissionRuleForm";
+import {
+  getCommissionTrend,
+  lastNMonthsRange,
+} from "@/features/analytics/application/queries";
+import {
+  requirePermissionOrRedirect,
+  hasPermission,
+} from "@/lib/rbac/admin-context";
+import {
+  getCommissionRules,
+  getVenueCategoryOptions,
+} from "@/features/admin-commissions/application/queries";
+import {
+  CreateCommissionRuleForm,
+  EditCommissionRuleDialog,
+} from "@/features/admin-commissions/ui/CommissionRuleForm";
 import type { CommissionRule } from "@/features/admin-commissions/types/commission-rule.types";
 
 export const metadata: Metadata = { title: "Commissions - Admin" };
@@ -36,7 +48,8 @@ type PayoutRow = {
   scheduled_at: string | null;
   paid_at: string | null;
   organizations: { name: string } | { name: string }[] | null;
-  supplier_profiles: { business_name: string } | { business_name: string }[] | null;
+  supplier_profiles:
+    { business_name: string } | { business_name: string }[] | null;
 };
 
 type PayoutDisplayRow = {
@@ -67,22 +80,39 @@ export default async function AdminCommissionsPage() {
     { rules, error: rulesError },
     categories,
   ] = await Promise.all([
-    supabase.from("transactions").select("commission_amount").eq("status", "paid"),
-    supabase.from("payouts").select("amount").in("status", ["scheduled", "processing"]),
+    supabase
+      .from("transactions")
+      .select("commission_amount")
+      .eq("status", "paid"),
+    supabase
+      .from("payouts")
+      .select("amount")
+      .in("status", ["scheduled", "processing"]),
     supabase
       .from("payouts")
       .select("amount")
       .eq("status", "paid")
-      .gte("paid_at", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()),
+      .gte(
+        "paid_at",
+        new Date(
+          new Date().getFullYear(),
+          new Date().getMonth(),
+          1,
+        ).toISOString(),
+      ),
     supabase
       .from("commission_rules")
       .select("id", { count: "exact", head: true })
       .eq("is_active", true)
-      .or(`effective_to.is.null,effective_to.gte.${new Date().toISOString().slice(0, 10)}`),
+      .or(
+        `effective_to.is.null,effective_to.gte.${new Date().toISOString().slice(0, 10)}`,
+      ),
     getCommissionTrend(supabase, range),
     supabase
       .from("payouts")
-      .select("id, amount, status, scheduled_at, paid_at, organizations(name), supplier_profiles(business_name)")
+      .select(
+        "id, amount, status, scheduled_at, paid_at, organizations(name), supplier_profiles(business_name)",
+      )
       .order("scheduled_at", { ascending: false })
       .limit(10),
     getCommissionRules(),
@@ -90,21 +120,30 @@ export default async function AdminCommissionsPage() {
   ]);
 
   const totalCommission = (paidTransactions ?? []).reduce(
-    (sum: number, row: { commission_amount: number | null }) => sum + (Number(row.commission_amount) || 0),
+    (sum: number, row: { commission_amount: number | null }) =>
+      sum + (Number(row.commission_amount) || 0),
     0,
   );
   const pendingPayoutTotal = (pendingPayouts ?? []).reduce(
-    (sum: number, row: { amount: number | null }) => sum + (Number(row.amount) || 0),
+    (sum: number, row: { amount: number | null }) =>
+      sum + (Number(row.amount) || 0),
     0,
   );
   const paidThisMonthTotal = (paidPayoutsThisMonth ?? []).reduce(
-    (sum: number, row: { amount: number | null }) => sum + (Number(row.amount) || 0),
+    (sum: number, row: { amount: number | null }) =>
+      sum + (Number(row.amount) || 0),
     0,
   );
 
-  const recentPayouts: PayoutDisplayRow[] = ((recentPayoutsRaw ?? []) as PayoutRow[]).map((row) => {
-    const org = Array.isArray(row.organizations) ? row.organizations[0] : row.organizations;
-    const supplier = Array.isArray(row.supplier_profiles) ? row.supplier_profiles[0] : row.supplier_profiles;
+  const recentPayouts: PayoutDisplayRow[] = (
+    (recentPayoutsRaw ?? []) as PayoutRow[]
+  ).map((row) => {
+    const org = Array.isArray(row.organizations)
+      ? row.organizations[0]
+      : row.organizations;
+    const supplier = Array.isArray(row.supplier_profiles)
+      ? row.supplier_profiles[0]
+      : row.supplier_profiles;
     return {
       id: row.id,
       recipient: org?.name ?? supplier?.business_name ?? "Unknown recipient",
@@ -116,9 +155,19 @@ export default async function AdminCommissionsPage() {
   });
 
   const columns: DataTableColumn<PayoutDisplayRow>[] = [
-    { key: "recipient", header: "Recipient", cell: (row) => <span className="font-semibold text-[#111827]">{row.recipient}</span> },
+    {
+      key: "recipient",
+      header: "Recipient",
+      cell: (row) => (
+        <span className="font-semibold text-[#111827]">{row.recipient}</span>
+      ),
+    },
     { key: "amount", header: "Amount", cell: (row) => row.amount },
-    { key: "status", header: "Status", cell: (row) => <StatusBadge status={row.status} /> },
+    {
+      key: "status",
+      header: "Status",
+      cell: (row) => <StatusBadge status={row.status} />,
+    },
     { key: "scheduled", header: "Scheduled", cell: (row) => row.scheduledAt },
     { key: "paid", header: "Paid", cell: (row) => row.paidAt },
   ];
@@ -130,7 +179,9 @@ export default async function AdminCommissionsPage() {
       cell: (row) => (
         <div>
           <StatusBadge status="active" label={row.scope} />
-          {row.referenceLabel ? <p className="mt-1 text-xs text-[#6b7280]">{row.referenceLabel}</p> : null}
+          {row.referenceLabel ? (
+            <p className="mt-1 text-xs text-[#6b7280]">{row.referenceLabel}</p>
+          ) : null}
         </div>
       ),
     },
@@ -157,15 +208,24 @@ export default async function AdminCommissionsPage() {
     {
       key: "window",
       header: "Effective",
-      cell: (row) => `${formatDate(row.effectiveFrom)} – ${row.effectiveTo ? formatDate(row.effectiveTo) : "ongoing"}`,
+      cell: (row) =>
+        `${formatDate(row.effectiveFrom)} – ${row.effectiveTo ? formatDate(row.effectiveTo) : "ongoing"}`,
     },
-    { key: "status", header: "Status", cell: (row) => <StatusBadge status={row.isActive ? "active" : "inactive"} /> },
+    {
+      key: "status",
+      header: "Status",
+      cell: (row) => (
+        <StatusBadge status={row.isActive ? "active" : "inactive"} />
+      ),
+    },
     ...(canOverride
       ? [
           {
             key: "actions",
             header: "Actions",
-            cell: (row: CommissionRule) => <EditCommissionRuleDialog rule={row} />,
+            cell: (row: CommissionRule) => (
+              <EditCommissionRuleDialog rule={row} />
+            ),
           } satisfies DataTableColumn<CommissionRule>,
         ]
       : []),
@@ -177,10 +237,27 @@ export default async function AdminCommissionsPage() {
       description="Platform earnings and payout summaries, distinct from gross booking revenue."
     >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard label="Total Commission Earned" value={formatPeso(totalCommission)} icon="payments" highlight />
-        <KpiCard label="Pending Payouts" value={formatPeso(pendingPayoutTotal)} icon="pending_actions" />
-        <KpiCard label="Paid Payouts This Month" value={formatPeso(paidThisMonthTotal)} icon="task_alt" />
-        <KpiCard label="Active Commission Rules" value={String(activeRulesCount ?? 0)} icon="rule" />
+        <KpiCard
+          label="Total Commission Earned"
+          value={formatPeso(totalCommission)}
+          icon="payments"
+          highlight
+        />
+        <KpiCard
+          label="Pending Payouts"
+          value={formatPeso(pendingPayoutTotal)}
+          icon="pending_actions"
+        />
+        <KpiCard
+          label="Paid Payouts This Month"
+          value={formatPeso(paidThisMonthTotal)}
+          icon="task_alt"
+        />
+        <KpiCard
+          label="Active Commission Rules"
+          value={String(activeRulesCount ?? 0)}
+          icon="rule"
+        />
       </div>
 
       <Panel>
@@ -195,12 +272,22 @@ export default async function AdminCommissionsPage() {
         <PanelHeader
           title="Commission Rules"
           description="Resolution order is fixed: venue-specific rules win, then category, then the global default."
-          {...(canManage ? { action: <CreateCommissionRuleForm categories={categories} /> } : {})}
+          {...(canManage
+            ? { action: <CreateCommissionRuleForm categories={categories} /> }
+            : {})}
         />
         {rulesError ? (
-          <EmptyState icon="error" title="Could not load commission rules" description={rulesError} />
+          <EmptyState
+            icon="error"
+            title="Could not load commission rules"
+            description={rulesError}
+          />
         ) : rules && rules.length > 0 ? (
-          <DataTable rows={rules} columns={ruleColumns} keyFn={(row) => row.id} />
+          <DataTable
+            rows={rules}
+            columns={ruleColumns}
+            keyFn={(row) => row.id}
+          />
         ) : (
           <EmptyState
             icon="rule"
@@ -211,9 +298,16 @@ export default async function AdminCommissionsPage() {
       </Panel>
 
       <Panel>
-        <PanelHeader title="Recent Payouts" description="The latest scheduled and completed payouts." />
+        <PanelHeader
+          title="Recent Payouts"
+          description="The latest scheduled and completed payouts."
+        />
         {recentPayouts.length > 0 ? (
-          <DataTable rows={recentPayouts} columns={columns} keyFn={(row) => row.id} />
+          <DataTable
+            rows={recentPayouts}
+            columns={columns}
+            keyFn={(row) => row.id}
+          />
         ) : (
           <EmptyState
             icon="payments"

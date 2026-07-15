@@ -305,7 +305,14 @@ export const LUZON_LOCATIONS: LuzonProvince[] = [
     province: "Batanes",
     region: "Cagayan Valley",
     cities: [],
-    municipalities: ["Basco", "Itbayat", "Ivana", "Mahatao", "Sabtang", "Uyugan"],
+    municipalities: [
+      "Basco",
+      "Itbayat",
+      "Ivana",
+      "Mahatao",
+      "Sabtang",
+      "Uyugan",
+    ],
   },
   {
     province: "Cagayan",
@@ -482,13 +489,7 @@ export const LUZON_LOCATIONS: LuzonProvince[] = [
   {
     province: "Nueva Ecija",
     region: "Central Luzon",
-    cities: [
-      "Cabanatuan",
-      "Gapan",
-      "Muñoz",
-      "Palayan",
-      "San Jose",
-    ],
+    cities: ["Cabanatuan", "Gapan", "Muñoz", "Palayan", "San Jose"],
     municipalities: [
       "Aliaga",
       "Bongabon",

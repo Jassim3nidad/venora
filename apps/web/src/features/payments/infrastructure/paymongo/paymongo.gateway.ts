@@ -33,7 +33,10 @@ interface PayMongoErrorBody {
   errors?: Array<{ code?: string; detail?: string }>;
 }
 
-function metadataValue(metadata: Record<string, unknown> | null | undefined, key: string): string | null {
+function metadataValue(
+  metadata: Record<string, unknown> | null | undefined,
+  key: string,
+): string | null {
   const value = metadata?.[key];
   return typeof value === "string" && value.trim() ? value : null;
 }
@@ -45,7 +48,10 @@ function lineItemAmountMinor(
 
   const total = lineItems.reduce((sum, item) => {
     if (typeof item.amount !== "number") return sum;
-    return sum + item.amount * (typeof item.quantity === "number" ? item.quantity : 1);
+    return (
+      sum +
+      item.amount * (typeof item.quantity === "number" ? item.quantity : 1)
+    );
   }, 0);
 
   return total > 0 ? total : null;
@@ -54,7 +60,9 @@ function lineItemAmountMinor(
 function lineItemCurrency(
   lineItems: Array<{ currency?: string }> | undefined,
 ): string | null {
-  const currency = lineItems?.find((item) => typeof item.currency === "string")?.currency;
+  const currency = lineItems?.find(
+    (item) => typeof item.currency === "string",
+  )?.currency;
   return currency ?? null;
 }
 
@@ -79,7 +87,10 @@ export class PayMongoGateway implements PaymentGateway {
     return `Basic ${Buffer.from(`${this.config.secretKey}:`).toString("base64")}`;
   }
 
-  private async request<T>(path: string, body: unknown): Promise<PayMongoResource<T>> {
+  private async request<T>(
+    path: string,
+    body: unknown,
+  ): Promise<PayMongoResource<T>> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
@@ -96,7 +107,9 @@ export class PayMongoGateway implements PaymentGateway {
       });
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
-        console.error(`[paymongo] ${path} timed out after ${REQUEST_TIMEOUT_MS}ms`);
+        console.error(
+          `[paymongo] ${path} timed out after ${REQUEST_TIMEOUT_MS}ms`,
+        );
         throw new PaymentError(
           "PAYMENT_PROVIDER_TIMEOUT",
           "The payment provider took too long to respond. Please try again.",
@@ -156,15 +169,24 @@ export class PayMongoGateway implements PaymentGateway {
       show_line_items: true,
       success_url: params.successUrl,
       cancel_url: params.cancelUrl,
-      ...(params.customerEmail ? { billing: { email: params.customerEmail } } : {}),
+      ...(params.customerEmail
+        ? { billing: { email: params.customerEmail } }
+        : {}),
       metadata: params.metadata,
     });
 
-    if (!session.id || typeof session.attributes?.checkout_url !== "string" || !session.attributes.checkout_url) {
-      console.error("[paymongo] createCheckoutSession returned an unexpected shape:", {
-        hasId: Boolean(session.id),
-        hasCheckoutUrl: Boolean(session.attributes?.checkout_url),
-      });
+    if (
+      !session.id ||
+      typeof session.attributes?.checkout_url !== "string" ||
+      !session.attributes.checkout_url
+    ) {
+      console.error(
+        "[paymongo] createCheckoutSession returned an unexpected shape:",
+        {
+          hasId: Boolean(session.id),
+          hasCheckoutUrl: Boolean(session.attributes?.checkout_url),
+        },
+      );
       throw new PaymentError(
         "PAYMENT_PROVIDER_ERROR",
         "The payment provider returned an unexpected response. Please try again.",
@@ -211,7 +233,10 @@ export class PayMongoGateway implements PaymentGateway {
    * The signature is HMAC-SHA256 of `<timestamp>.<rawBody>` with the
    * webhook secret. We accept whichever mode signature is present.
    */
-  verifyWebhookSignature(rawBody: string, signatureHeader: string | null): boolean {
+  verifyWebhookSignature(
+    rawBody: string,
+    signatureHeader: string | null,
+  ): boolean {
     if (!signatureHeader || !this.config.webhookSecret) return false;
 
     const parts = new Map<string, string>();
@@ -290,14 +315,17 @@ export class PayMongoGateway implements PaymentGateway {
       // transaction. That equality is what confirm_booking_payment
       // reconciles against.
       case "checkout_session.payment.paid": {
-        const payment = attrs.payments?.[0] ?? attrs.payment_intent?.attributes?.payments?.[0];
+        const payment =
+          attrs.payments?.[0] ??
+          attrs.payment_intent?.attributes?.payments?.[0];
         return {
           eventId,
           eventType,
           kind: "payment.succeeded",
           bookingId,
           checkoutSessionReference: resource.id,
-          paymentReference: payment?.id ?? attrs.payment_intent?.id ?? resource.id,
+          paymentReference:
+            payment?.id ?? attrs.payment_intent?.id ?? resource.id,
           amountMinor:
             payment?.attributes?.amount ??
             attrs.payment_intent?.attributes?.amount ??
@@ -335,7 +363,8 @@ export class PayMongoGateway implements PaymentGateway {
           kind: "payment.failed",
           bookingId,
           paymentReference: resource.id,
-          failureReason: attrs.failed_message ?? attrs.failed_code ?? attrs.status ?? null,
+          failureReason:
+            attrs.failed_message ?? attrs.failed_code ?? attrs.status ?? null,
         };
 
       // Refund lifecycle. The resource is the refund object (`ref_...`).
@@ -364,7 +393,8 @@ export class PayMongoGateway implements PaymentGateway {
             eventType,
             kind: "refund.failed",
             refundReference: resource.id,
-            failureReason: (attrs["failed_reason"] as string | undefined) ?? null,
+            failureReason:
+              (attrs["failed_reason"] as string | undefined) ?? null,
           };
         }
         return { eventId, eventType, kind: "ignored" };

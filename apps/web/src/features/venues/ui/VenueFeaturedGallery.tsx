@@ -32,7 +32,9 @@ export default function VenueFeaturedGallery({
     return <VenueGalleryPlaceholder variant="hero" />;
   }
 
-  const gridMedia = sortedMedia.filter((item) => item.id !== featured.id).slice(0, 4);
+  const gridMedia = sortedMedia
+    .filter((item) => item.id !== featured.id)
+    .slice(0, 4);
 
   const openLightbox = (index: number) => {
     setActiveIndex(index);
@@ -64,7 +66,9 @@ export default function VenueFeaturedGallery({
             alt={featured.alt_text || venueName}
             fill
             priority
-            unoptimized={!isOptimizableImageSrc(getVenueMediaUrl(featured.storage_path))}
+            unoptimized={
+              !isOptimizableImageSrc(getVenueMediaUrl(featured.storage_path))
+            }
             sizes="100vw"
             className="object-cover"
           />
@@ -90,7 +94,9 @@ export default function VenueFeaturedGallery({
                   src={getVenueMediaUrl(item.storage_path)}
                   alt={item.alt_text || `${venueName} photo ${index + 1}`}
                   fill
-                  unoptimized={!isOptimizableImageSrc(getVenueMediaUrl(item.storage_path))}
+                  unoptimized={
+                    !isOptimizableImageSrc(getVenueMediaUrl(item.storage_path))
+                  }
                   sizes="80px"
                   className="object-cover"
                 />
@@ -123,7 +129,9 @@ export default function VenueFeaturedGallery({
             alt={featured.alt_text || venueName}
             fill
             priority
-            unoptimized={!isOptimizableImageSrc(getVenueMediaUrl(featured.storage_path))}
+            unoptimized={
+              !isOptimizableImageSrc(getVenueMediaUrl(featured.storage_path))
+            }
             sizes="50vw"
             className="object-cover transition-transform duration-500 hover:scale-[1.03]"
           />
@@ -140,7 +148,9 @@ export default function VenueFeaturedGallery({
           {Array.from({ length: 4 }).map((_, index) => {
             const item = gridMedia[index];
             if (!item) {
-              return <VenueGalleryPlaceholder key={`slot-${index}`} variant="slot" />;
+              return (
+                <VenueGalleryPlaceholder key={`slot-${index}`} variant="slot" />
+              );
             }
 
             return (
@@ -154,7 +164,9 @@ export default function VenueFeaturedGallery({
                   src={getVenueMediaUrl(item.storage_path)}
                   alt={item.alt_text || `${venueName} photo`}
                   fill
-                  unoptimized={!isOptimizableImageSrc(getVenueMediaUrl(item.storage_path))}
+                  unoptimized={
+                    !isOptimizableImageSrc(getVenueMediaUrl(item.storage_path))
+                  }
                   sizes="25vw"
                   className="object-cover transition-transform duration-500 hover:scale-[1.05]"
                 />
@@ -220,7 +232,11 @@ export default function VenueFeaturedGallery({
                   src={getVenueMediaUrl(activeMedia.storage_path)}
                   alt={activeMedia.alt_text || "Venue media"}
                   fill
-                  unoptimized={!isOptimizableImageSrc(getVenueMediaUrl(activeMedia.storage_path))}
+                  unoptimized={
+                    !isOptimizableImageSrc(
+                      getVenueMediaUrl(activeMedia.storage_path),
+                    )
+                  }
                   sizes="100vw"
                   className="rounded-2xl object-contain shadow-2xl"
                 />
@@ -252,7 +268,9 @@ export default function VenueFeaturedGallery({
                   src={getVenueMediaUrl(item.storage_path)}
                   alt="Thumbnail"
                   fill
-                  unoptimized={!isOptimizableImageSrc(getVenueMediaUrl(item.storage_path))}
+                  unoptimized={
+                    !isOptimizableImageSrc(getVenueMediaUrl(item.storage_path))
+                  }
                   sizes="80px"
                   className="object-cover"
                 />

@@ -17,10 +17,16 @@ test.describe("Customer role", () => {
 
   test("logs in successfully", async ({ page }) => {
     const cookies = await page.context().cookies();
-    expect(cookies.some((c) => c.name.startsWith("sb-") && c.name.endsWith("-auth-token"))).toBe(true);
+    expect(
+      cookies.some(
+        (c) => c.name.startsWith("sb-") && c.name.endsWith("-auth-token"),
+      ),
+    ).toBe(true);
   });
 
-  test("can access their own bookings, favorites, and profile", async ({ page }) => {
+  test("can access their own bookings, favorites, and profile", async ({
+    page,
+  }) => {
     await page.goto("/bookings");
     await expect(page).toHaveTitle(/Bookings/i);
 
@@ -34,7 +40,14 @@ test.describe("Customer role", () => {
   });
 
   test("cannot access /admin or any admin subroute", async ({ page }) => {
-    for (const path of ["/admin", "/admin/administrators", "/admin/users", "/admin/commissions", "/admin/audit-logs", "/admin/settings"]) {
+    for (const path of [
+      "/admin",
+      "/admin/administrators",
+      "/admin/users",
+      "/admin/commissions",
+      "/admin/audit-logs",
+      "/admin/settings",
+    ]) {
       await page.goto(path);
       await expect(page).toHaveTitle(/Unauthorized/i);
     }
@@ -48,12 +61,16 @@ test.describe("Customer role", () => {
     await expect(page).toHaveTitle(/Unauthorized/i);
   });
 
-  test("cannot invoke administrator APIs directly (401/403, not data)", async ({ page }) => {
+  test("cannot invoke administrator APIs directly (401/403, not data)", async ({
+    page,
+  }) => {
     const res = await page.request.get("/api/admin/reports/export");
     expect([401, 403]).toContain(res.status());
   });
 
-  test("cannot supply commission snapshot fields via any client-reachable path", async ({ page }) => {
+  test("cannot supply commission snapshot fields via any client-reachable path", async ({
+    page,
+  }) => {
     // There is no customer-facing form or API route that accepts
     // commission fields at all -- confirm the admin commission-rule
     // creation endpoint rejects this session outright rather than
@@ -68,12 +85,18 @@ test.describe("Customer role", () => {
 
 test.describe("Customer role — responsive", () => {
   for (const [name, viewport] of Object.entries(VIEWPORTS)) {
-    test(`loads /bookings cleanly at ${name} (${viewport.width}x${viewport.height})`, async ({ page }) => {
+    test(`loads /bookings cleanly at ${name} (${viewport.width}x${viewport.height})`, async ({
+      page,
+    }) => {
       await page.setViewportSize(viewport);
       await loginAs(page, "customer");
       await page.goto("/bookings");
       await expect(page).toHaveTitle(/Bookings/i);
-      const hasOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
+      const hasOverflow = await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth >
+          document.documentElement.clientWidth + 1,
+      );
       expect(hasOverflow).toBe(false);
     });
   }

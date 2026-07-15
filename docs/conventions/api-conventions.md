@@ -11,14 +11,13 @@ All Route Handlers and Server Actions return a **typed discriminated union**:
 ```typescript
 // src/lib/types.ts
 export type ApiResponse<T> =
-  | { data: T;    error: null }
-  | { data: null; error: ApiError };
+  { data: T; error: null } | { data: null; error: ApiError };
 
 export type ApiError = {
-  code:     string;   // machine-readable, e.g. "BOOKING_CONFLICT"
-  message:  string;   // human-readable, shown to user
-  details?: unknown;  // Zod field errors, DB constraint details, etc.
-  status?:  number;   // HTTP status code (only on Route Handlers)
+  code: string; // machine-readable, e.g. "BOOKING_CONFLICT"
+  message: string; // human-readable, shown to user
+  details?: unknown; // Zod field errors, DB constraint details, etc.
+  status?: number; // HTTP status code (only on Route Handlers)
 };
 ```
 
@@ -96,7 +95,7 @@ export async function createBookingAction(rawInput: unknown) {
     async (input) => {
       // ... execute use case
     },
-    rawInput
+    rawInput,
   );
 }
 ```
@@ -107,24 +106,25 @@ export async function createBookingAction(rawInput: unknown) {
 
 ## 4. HTTP Status Code Map
 
-| Scenario | Status |
-|---|---|
-| Success | 200 |
-| Created | 201 |
-| Validation error | 400 |
-| Unauthorized (no session) | 401 |
-| Forbidden (wrong role) | 403 |
-| Not found | 404 |
-| Conflict (e.g., booking overlap) | 409 |
-| Payment required / failed | 402 |
-| Rate limited | 429 |
-| Server error | 500 |
+| Scenario                         | Status |
+| -------------------------------- | ------ |
+| Success                          | 200    |
+| Created                          | 201    |
+| Validation error                 | 400    |
+| Unauthorized (no session)        | 401    |
+| Forbidden (wrong role)           | 403    |
+| Not found                        | 404    |
+| Conflict (e.g., booking overlap) | 409    |
+| Payment required / failed        | 402    |
+| Rate limited                     | 429    |
+| Server error                     | 500    |
 
 ---
 
 ## 5. Webhook Handlers
 
 All webhook handlers MUST:
+
 1. **Verify the signature** before processing (HMAC-SHA256 for PayMongo, HMAC-SHA512 for Maya)
 2. Return `200 { received: true }` immediately, process async
 3. Use `SUPABASE_SERVICE_ROLE_KEY` (bypasses RLS) only inside webhook handlers
@@ -153,7 +153,10 @@ Apply at middleware level for all `/api/` routes. Use Upstash Redis + `@upstash/
 // middleware.ts
 import { Ratelimit } from "@upstash/ratelimit";
 // 30 requests per 60 seconds per IP
-const ratelimit = new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, "60 s") });
+const ratelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(30, "60 s"),
+});
 ```
 
 Webhooks are exempted from rate limiting (authenticated by signature).

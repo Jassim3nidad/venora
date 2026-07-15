@@ -1,4 +1,9 @@
-import { DashboardPage, DataTable, StatusBadge, EmptyState } from "@/components/dashboard/enterprise";
+import {
+  DashboardPage,
+  DataTable,
+  StatusBadge,
+  EmptyState,
+} from "@/components/dashboard/enterprise";
 import { createClient } from "@/lib/supabase/server";
 import { requirePermissionOrRedirect } from "@/lib/rbac/admin-context";
 import Link from "next/link";
@@ -12,13 +17,19 @@ export default async function AdminDisputesPage() {
   const supabase = (await createClient()) as any;
   const { data: disputes, error } = await supabase
     .from("disputes")
-    .select("id, status, created_at, reason, profiles(full_name), venues(name), bookings(id)")
+    .select(
+      "id, status, created_at, reason, profiles(full_name), venues(name), bookings(id)",
+    )
     .order("created_at", { ascending: false });
 
   if (error) {
     return (
       <DashboardPage>
-        <EmptyState icon="error" title="Error loading disputes" description={error.message} />
+        <EmptyState
+          icon="error"
+          title="Error loading disputes"
+          description={error.message}
+        />
       </DashboardPage>
     );
   }
@@ -35,9 +46,12 @@ export default async function AdminDisputesPage() {
   return (
     <DashboardPage>
       <div className="mb-6">
-        <h1 className="text-3xl font-black text-slate-900">Disputes Overview</h1>
+        <h1 className="text-3xl font-black text-slate-900">
+          Disputes Overview
+        </h1>
         <p className="mt-2 text-slate-500">
-          Review booking, payment, and marketplace disputes that require administrator follow-up.
+          Review booking, payment, and marketplace disputes that require
+          administrator follow-up.
         </p>
       </div>
 
@@ -50,7 +64,9 @@ export default async function AdminDisputesPage() {
             {
               key: "venue",
               header: "Venue",
-              cell: (r: any) => <span className="font-bold text-slate-900">{r.venue}</span>,
+              cell: (r: any) => (
+                <span className="font-bold text-slate-900">{r.venue}</span>
+              ),
             },
             {
               key: "customer",
@@ -60,7 +76,8 @@ export default async function AdminDisputesPage() {
             {
               key: "reason",
               header: "Reason",
-              cell: (r: any) => r.reason.slice(0, 50) + (r.reason.length > 50 ? "..." : ""),
+              cell: (r: any) =>
+                r.reason.slice(0, 50) + (r.reason.length > 50 ? "..." : ""),
             },
             {
               key: "date",
@@ -76,7 +93,10 @@ export default async function AdminDisputesPage() {
               key: "actions",
               header: "",
               cell: (r: any) => (
-                <Link href={`/admin/disputes/${r.id}`} className="text-brand-600 hover:underline">
+                <Link
+                  href={`/admin/disputes/${r.id}`}
+                  className="text-brand-600 hover:underline"
+                >
                   View Details
                 </Link>
               ),

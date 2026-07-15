@@ -121,35 +121,47 @@ export default async function SupplierInquiriesPage({
   ]);
 
   if (directResult.error) {
-    console.error("[supplier direct inquiries] fetch failed:", directResult.error.message);
+    console.error(
+      "[supplier direct inquiries] fetch failed:",
+      directResult.error.message,
+    );
   }
 
-  const directRows: DirectInquiryDisplayRow[] = ((directResult.data ?? []) as DirectInquiryRow[]).map(
-    (row) => {
-      const eventLocation = row.venue_name_snapshot || row.location_snapshot || row.event_location;
-      
-      const timeStr = row.event_start_time_snapshot 
-        ? new Date(`1970-01-01T${row.event_start_time_snapshot}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
-        : null;
-        
-      const eventDateTimeParts = [formatDate(row.event_date_snapshot || row.event_date), timeStr].filter(Boolean);
-      const eventDateTime = eventDateTimeParts.length > 0 ? eventDateTimeParts.join(" at ") : null;
-      
-      return {
-        id: row.id,
-        client: row.contact_name,
-        packageName: row.supplier_services?.name ?? "General inquiry",
-        event: [eventDateTime, eventLocation]
+  const directRows: DirectInquiryDisplayRow[] = (
+    (directResult.data ?? []) as DirectInquiryRow[]
+  ).map((row) => {
+    const eventLocation =
+      row.venue_name_snapshot || row.location_snapshot || row.event_location;
+
+    const timeStr = row.event_start_time_snapshot
+      ? new Date(
+          `1970-01-01T${row.event_start_time_snapshot}`,
+        ).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
+      : null;
+
+    const eventDateTimeParts = [
+      formatDate(row.event_date_snapshot || row.event_date),
+      timeStr,
+    ].filter(Boolean);
+    const eventDateTime =
+      eventDateTimeParts.length > 0 ? eventDateTimeParts.join(" at ") : null;
+
+    return {
+      id: row.id,
+      client: row.contact_name,
+      packageName: row.supplier_services?.name ?? "General inquiry",
+      event:
+        [eventDateTime, eventLocation]
           .filter((value) => value && value !== "-")
           .join(" / ") || "-",
-        guests: (row.guest_count_snapshot || row.guest_count)
+      guests:
+        row.guest_count_snapshot || row.guest_count
           ? `${(row.guest_count_snapshot || row.guest_count)!.toLocaleString("en-PH")} guests`
           : "-",
-        received: formatDate(row.created_at),
-        status: row.status,
-      };
-    },
-  );
+      received: formatDate(row.created_at),
+      status: row.status,
+    };
+  });
 
   const directColumns: DataTableColumn<DirectInquiryDisplayRow>[] = [
     {
@@ -193,10 +205,36 @@ export default async function SupplierInquiriesPage({
     >
       <Panel>
         <form className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_180px_180px_auto]">
-          <input name="q" defaultValue={q} placeholder="Search customer" className="min-h-11 rounded-2xl border border-[#dbe3ef] px-4 text-sm" />
-          <select name="status" defaultValue={status ?? ""} className="min-h-11 rounded-2xl border border-[#dbe3ef] px-4 text-sm"><option value="">All statuses</option><option value="new">New</option><option value="responded">Responded</option><option value="closed">Closed</option></select>
-          <select name="sort" defaultValue={sort === "event_date" ? "event_date" : "newest"} className="min-h-11 rounded-2xl border border-[#dbe3ef] px-4 text-sm"><option value="newest">Newest first</option><option value="event_date">Event date</option></select>
-          <button type="submit" className="min-h-11 rounded-2xl bg-[#1d4ed8] px-5 text-sm font-bold text-white">Apply</button>
+          <input
+            name="q"
+            defaultValue={q}
+            placeholder="Search customer"
+            className="min-h-11 rounded-2xl border border-[#dbe3ef] px-4 text-sm"
+          />
+          <select
+            name="status"
+            defaultValue={status ?? ""}
+            className="min-h-11 rounded-2xl border border-[#dbe3ef] px-4 text-sm"
+          >
+            <option value="">All statuses</option>
+            <option value="new">New</option>
+            <option value="responded">Responded</option>
+            <option value="closed">Closed</option>
+          </select>
+          <select
+            name="sort"
+            defaultValue={sort === "event_date" ? "event_date" : "newest"}
+            className="min-h-11 rounded-2xl border border-[#dbe3ef] px-4 text-sm"
+          >
+            <option value="newest">Newest first</option>
+            <option value="event_date">Event date</option>
+          </select>
+          <button
+            type="submit"
+            className="min-h-11 rounded-2xl bg-[#1d4ed8] px-5 text-sm font-bold text-white"
+          >
+            Apply
+          </button>
         </form>
       </Panel>
       <Panel>

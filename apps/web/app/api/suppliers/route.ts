@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { getPublicSupplierList } from "@/features/suppliers/application/queries";
-import { getSupplierStartingPrice, supplierSearchText } from "@/features/suppliers/utils/supplier-derive";
+import {
+  getSupplierStartingPrice,
+  supplierSearchText,
+} from "@/features/suppliers/utils/supplier-derive";
 import { supplierSearchSchema } from "@/features/suppliers/schemas/supplier.schema";
 
 const listQuerySchema = supplierSearchSchema.extend({
@@ -11,7 +14,9 @@ const listQuerySchema = supplierSearchSchema.extend({
 });
 
 function normalize(value: unknown) {
-  return String(value ?? "").trim().toLowerCase();
+  return String(value ?? "")
+    .trim()
+    .toLowerCase();
 }
 
 export async function GET(request: NextRequest) {
@@ -38,15 +43,23 @@ export async function GET(request: NextRequest) {
     const { suppliers, categories } = await getPublicSupplierList(supabase);
     const filtered = suppliers
       .filter((supplier) => {
-        if (filters.q && !supplierSearchText(supplier).includes(normalize(filters.q))) {
+        if (
+          filters.q &&
+          !supplierSearchText(supplier).includes(normalize(filters.q))
+        ) {
           return false;
         }
-        if (filters.category && supplier.category?.slug !== normalize(filters.category)) {
+        if (
+          filters.category &&
+          supplier.category?.slug !== normalize(filters.category)
+        ) {
           return false;
         }
         if (
           filters.location &&
-          !supplier.serviceAreas.some((area) => normalize(area).includes(normalize(filters.location)))
+          !supplier.serviceAreas.some((area) =>
+            normalize(area).includes(normalize(filters.location)),
+          )
         ) {
           return false;
         }
@@ -55,10 +68,16 @@ export async function GET(request: NextRequest) {
         }
 
         const startingPrice = getSupplierStartingPrice(supplier);
-        if (filters.minPrice && (!startingPrice || startingPrice < filters.minPrice)) {
+        if (
+          filters.minPrice &&
+          (!startingPrice || startingPrice < filters.minPrice)
+        ) {
           return false;
         }
-        if (filters.maxPrice && (!startingPrice || startingPrice > filters.maxPrice)) {
+        if (
+          filters.maxPrice &&
+          (!startingPrice || startingPrice > filters.maxPrice)
+        ) {
           return false;
         }
 
@@ -73,7 +92,9 @@ export async function GET(request: NextRequest) {
           );
         }
         if (filters.sort === "newest") {
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
         }
 
         if (a.isFeatured !== b.isFeatured) return a.isFeatured ? -1 : 1;

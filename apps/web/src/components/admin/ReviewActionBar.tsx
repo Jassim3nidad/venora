@@ -26,9 +26,13 @@ type ReviewActionResult = {
   error: { message: string } | null;
 };
 
-const VARIANT_STYLES: Record<NonNullable<ReviewActionDef["variant"]>, string> = {
+const VARIANT_STYLES: Record<
+  NonNullable<ReviewActionDef["variant"]>,
+  string
+> = {
   primary: "bg-[#1d4ed8] text-white hover:bg-[#1e40af]",
-  secondary: "border border-[#dbe3ef] bg-white text-[#111827] hover:border-[#1d4ed8] hover:text-[#1d4ed8]",
+  secondary:
+    "border border-[#dbe3ef] bg-white text-[#111827] hover:border-[#1d4ed8] hover:text-[#1d4ed8]",
   danger: "border border-red-200 bg-red-50 text-red-700 hover:bg-red-100",
 };
 
@@ -39,10 +43,16 @@ export function ReviewActionBar({
 }: {
   entityId: string;
   actions: ReviewActionDef[];
-  onSubmit: (input: { id: string; action: string; reason?: string }) => Promise<ReviewActionResult>;
+  onSubmit: (input: {
+    id: string;
+    action: string;
+    reason?: string;
+  }) => Promise<ReviewActionResult>;
 }) {
   const router = useRouter();
-  const [activeAction, setActiveAction] = useState<ReviewActionDef | null>(null);
+  const [activeAction, setActiveAction] = useState<ReviewActionDef | null>(
+    null,
+  );
   const [reason, setReason] = useState("");
   const [isPending, startTransition] = useTransition();
 
@@ -57,7 +67,11 @@ export function ReviewActionBar({
 
   function run(actionKey: string, reasonText?: string) {
     startTransition(async () => {
-      const result = await onSubmit({ id: entityId, action: actionKey, ...(reasonText ? { reason: reasonText } : {}) });
+      const result = await onSubmit({
+        id: entityId,
+        action: actionKey,
+        ...(reasonText ? { reason: reasonText } : {}),
+      });
       if (result.error) {
         toast.error(result.error.message);
         return;
@@ -92,7 +106,10 @@ export function ReviewActionBar({
 
       {activeAction ? (
         <div className="rounded-xl border border-[#e5e7eb] bg-[#f8fafc] p-4">
-          <label htmlFor={`reason-${activeAction.key}`} className="mb-2 block text-sm font-bold text-[#111827]">
+          <label
+            htmlFor={`reason-${activeAction.key}`}
+            className="mb-2 block text-sm font-bold text-[#111827]"
+          >
             {activeAction.reasonLabel ?? "Reason"}
           </label>
           <textarea
@@ -119,7 +136,9 @@ export function ReviewActionBar({
               disabled={isPending || !reason.trim()}
               className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition disabled:opacity-50 ${VARIANT_STYLES[activeAction.variant ?? "secondary"]}`}
             >
-              {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+              {isPending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : null}
               Confirm {activeAction.label.toLowerCase()}
             </button>
           </div>

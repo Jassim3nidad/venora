@@ -1,31 +1,75 @@
 import type { Page } from "@playwright/test";
 
-export type Role = "customer" | "venue" | "coordinator" | "supplier" | "superadmin" | "analystAdmin" | "financeAdmin" | "tenantAOwner" | "tenantBOwner" | "tenantACustomer" | "tenantBCustomer" | "nonMember";
+export type Role =
+  | "customer"
+  | "venue"
+  | "coordinator"
+  | "supplier"
+  | "superadmin"
+  | "analystAdmin"
+  | "financeAdmin"
+  | "tenantAOwner"
+  | "tenantBOwner"
+  | "tenantACustomer"
+  | "tenantBCustomer"
+  | "nonMember";
 
 const CREDENTIAL_ENV: Record<Role, { email: string; password: string }> = {
   customer: { email: "E2E_CUSTOMER_EMAIL", password: "E2E_CUSTOMER_PASSWORD" },
   venue: { email: "E2E_VENUE_EMAIL", password: "E2E_VENUE_PASSWORD" },
-  coordinator: { email: "E2E_COORDINATOR_EMAIL", password: "E2E_COORDINATOR_PASSWORD" },
+  coordinator: {
+    email: "E2E_COORDINATOR_EMAIL",
+    password: "E2E_COORDINATOR_PASSWORD",
+  },
   supplier: { email: "E2E_SUPPLIER_EMAIL", password: "E2E_SUPPLIER_PASSWORD" },
-  superadmin: { email: "E2E_SUPERADMIN_EMAIL", password: "E2E_SUPERADMIN_PASSWORD" },
-  analystAdmin: { email: "E2E_ANALYST_ADMIN_EMAIL", password: "E2E_ANALYST_ADMIN_PASSWORD" },
-  financeAdmin: { email: "E2E_FINANCE_ADMIN_EMAIL", password: "E2E_FINANCE_ADMIN_PASSWORD" },
-  tenantAOwner: { email: "E2E_TENANT_A_OWNER_EMAIL", password: "E2E_TENANT_A_OWNER_PASSWORD" },
-  tenantBOwner: { email: "E2E_TENANT_B_OWNER_EMAIL", password: "E2E_TENANT_B_OWNER_PASSWORD" },
-  tenantACustomer: { email: "E2E_TENANT_A_CUSTOMER_EMAIL", password: "E2E_TENANT_A_CUSTOMER_PASSWORD" },
-  tenantBCustomer: { email: "E2E_TENANT_B_CUSTOMER_EMAIL", password: "E2E_TENANT_B_CUSTOMER_PASSWORD" },
-  nonMember: { email: "E2E_NON_MEMBER_EMAIL", password: "E2E_NON_MEMBER_PASSWORD" },
+  superadmin: {
+    email: "E2E_SUPERADMIN_EMAIL",
+    password: "E2E_SUPERADMIN_PASSWORD",
+  },
+  analystAdmin: {
+    email: "E2E_ANALYST_ADMIN_EMAIL",
+    password: "E2E_ANALYST_ADMIN_PASSWORD",
+  },
+  financeAdmin: {
+    email: "E2E_FINANCE_ADMIN_EMAIL",
+    password: "E2E_FINANCE_ADMIN_PASSWORD",
+  },
+  tenantAOwner: {
+    email: "E2E_TENANT_A_OWNER_EMAIL",
+    password: "E2E_TENANT_A_OWNER_PASSWORD",
+  },
+  tenantBOwner: {
+    email: "E2E_TENANT_B_OWNER_EMAIL",
+    password: "E2E_TENANT_B_OWNER_PASSWORD",
+  },
+  tenantACustomer: {
+    email: "E2E_TENANT_A_CUSTOMER_EMAIL",
+    password: "E2E_TENANT_A_CUSTOMER_PASSWORD",
+  },
+  tenantBCustomer: {
+    email: "E2E_TENANT_B_CUSTOMER_EMAIL",
+    password: "E2E_TENANT_B_CUSTOMER_PASSWORD",
+  },
+  nonMember: {
+    email: "E2E_NON_MEMBER_EMAIL",
+    password: "E2E_NON_MEMBER_PASSWORD",
+  },
 };
 
 // Dedicated QA fixtures (see apps/web/.env.local, gitignored) -- never
 // real customer accounts. Credentials are read from the environment only,
 // never hardcoded here.
-export function credentialsFor(role: Role): { email: string; password: string } {
+export function credentialsFor(role: Role): {
+  email: string;
+  password: string;
+} {
   const keys = CREDENTIAL_ENV[role];
   const email = process.env[keys.email];
   const password = process.env[keys.password];
   if (!email || !password) {
-    throw new Error(`Missing E2E credentials for role "${role}" -- set ${keys.email}/${keys.password} in apps/web/.env.local`);
+    throw new Error(
+      `Missing E2E credentials for role "${role}" -- set ${keys.email}/${keys.password} in apps/web/.env.local`,
+    );
   }
   return { email, password };
 }
@@ -39,7 +83,9 @@ export async function loginAs(page: Page, role: Role): Promise<void> {
   // A successful login always navigates away from /login; an unauthorized
   // route after that lands on /unauthorized rather than bouncing back to
   // /login, so waiting for either confirms the auth step itself completed.
-  await page.waitForURL((url) => !url.pathname.startsWith("/login"), { timeout: 15000 });
+  await page.waitForURL((url) => !url.pathname.startsWith("/login"), {
+    timeout: 15000,
+  });
 }
 
 export const VIEWPORTS = {

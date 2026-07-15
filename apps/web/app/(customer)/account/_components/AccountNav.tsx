@@ -43,9 +43,7 @@ export default function AccountNav() {
               </div>
 
               <div className="min-w-0">
-                <p className="text-sm font-extrabold leading-5">
-                  {item.label}
-                </p>
+                <p className="text-sm font-extrabold leading-5">{item.label}</p>
                 <p
                   className={`mt-0.5 text-xs font-medium leading-4 ${
                     isActive ? "text-[#2563EB]/70" : "text-slate-400"

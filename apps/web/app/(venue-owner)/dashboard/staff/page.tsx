@@ -44,7 +44,9 @@ export default async function StaffPage() {
     isAdmin || orgIds.length > 0 ? await membersQuery : { data: [] };
 
   const memberRows = (members ?? []) as MemberRow[];
-  const memberUserIds = [...new Set(memberRows.map((member) => member.user_id))];
+  const memberUserIds = [
+    ...new Set(memberRows.map((member) => member.user_id)),
+  ];
   const memberOrgIds = [
     ...new Set(memberRows.map((member) => member.organization_id)),
   ];
@@ -81,7 +83,8 @@ export default async function StaffPage() {
   const rows: StaffDisplayRow[] = memberRows.map((member) => ({
     id: `${member.organization_id}-${member.user_id}`,
     name: profileById.get(member.user_id) ?? "Team member",
-    organization: organizationById.get(member.organization_id) ?? "Organization",
+    organization:
+      organizationById.get(member.organization_id) ?? "Organization",
     role: member.role,
     joined: formatDate(member.invited_at),
   }));
@@ -100,7 +103,9 @@ export default async function StaffPage() {
     {
       key: "role",
       header: "Role",
-      cell: (row) => <StatusBadge status={row.role} label={row.role.replace(/_/g, " ")} />,
+      cell: (row) => (
+        <StatusBadge status={row.role} label={row.role.replace(/_/g, " ")} />
+      ),
     },
     { key: "joined", header: "Added", cell: (row) => row.joined },
   ];
@@ -111,7 +116,11 @@ export default async function StaffPage() {
       description="Review organization members who can help manage venues and operations."
       action={
         rows.length > 0 ? (
-          <DashButton href="/account" variant="secondary" icon="manage_accounts">
+          <DashButton
+            href="/account"
+            variant="secondary"
+            icon="manage_accounts"
+          >
             Account Settings
           </DashButton>
         ) : null
@@ -131,7 +140,11 @@ export default async function StaffPage() {
           title="No staff members yet"
           description="Invite and permission workflows are not active yet. Team members will appear here after they are added to your organization."
           action={
-            <DashButton href="/account" variant="secondary" icon="manage_accounts">
+            <DashButton
+              href="/account"
+              variant="secondary"
+              icon="manage_accounts"
+            >
               Review Account
             </DashButton>
           }

@@ -48,7 +48,11 @@ function mockAdminManageableBooking(bookingId: string) {
         select: () => ({
           eq: () => ({
             maybeSingle: async () => ({
-              data: { id: bookingId, status: "pending", venues: { organization_id: "org-1" } },
+              data: {
+                id: bookingId,
+                status: "pending",
+                venues: { organization_id: "org-1" },
+              },
               error: null,
             }),
           }),
@@ -104,7 +108,11 @@ describe("approveBookingAction", () => {
     // instead of the RPC — assert that path is never taken.
     expect(bookingsUpdateMock).not.toHaveBeenCalled();
     expect(result.error).toBeNull();
-    expect(result.data).toMatchObject({ status: "approved", totalAmount: 100000, depositAmount: 50000 });
+    expect(result.data).toMatchObject({
+      status: "approved",
+      totalAmount: 100000,
+      depositAmount: 50000,
+    });
   });
 
   it("rejects approval with a non-positive total and performs no write", async () => {
@@ -129,7 +137,9 @@ describe("approveBookingAction", () => {
     // (the real Postgres function raises before any UPDATE runs).
     expect(rpcMock).toHaveBeenCalledWith(
       "approve_booking_quote",
-      expect.objectContaining({ p_booking_id: "00000000-0000-0000-0000-000000000002" }),
+      expect.objectContaining({
+        p_booking_id: "00000000-0000-0000-0000-000000000002",
+      }),
     );
     expect(result.error).not.toBeNull();
     expect(result.data).toBeNull();
@@ -159,7 +169,12 @@ describe("approveBookingAction", () => {
     mockAdminManageableBooking("00000000-0000-0000-0000-000000000004");
     // First call succeeds.
     rpcMock.mockResolvedValueOnce({
-      data: { id: "00000000-0000-0000-0000-000000000004", status: "approved", total_amount: 100000, deposit_amount: 50000 },
+      data: {
+        id: "00000000-0000-0000-0000-000000000004",
+        status: "approved",
+        total_amount: 100000,
+        deposit_amount: 50000,
+      },
       error: null,
     });
     // Second call (booking is no longer "pending") — the RPC's own

@@ -135,15 +135,21 @@ function normalizePackages(rows: any[] | null | undefined): SupplierPackage[] {
     .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name));
 }
 
-function normalizePortfolio(rows: any[] | null | undefined): SupplierPortfolioItem[] {
+function normalizePortfolio(
+  rows: any[] | null | undefined,
+): SupplierPortfolioItem[] {
   return (rows ?? [])
     .map((item) => {
       // Prefer the proper image_urls array column (migration 070), fall back to parsing image_url
-      const imageUrls: string[] = Array.isArray(item.image_urls) && item.image_urls.length > 0
-        ? item.image_urls
-        : item.image_url
-          ? String(item.image_url).split(",").map((s: string) => s.trim()).filter(Boolean)
-          : [];
+      const imageUrls: string[] =
+        Array.isArray(item.image_urls) && item.image_urls.length > 0
+          ? item.image_urls
+          : item.image_url
+            ? String(item.image_url)
+                .split(",")
+                .map((s: string) => s.trim())
+                .filter(Boolean)
+            : [];
       const mainImageUrl = imageUrls.length > 0 ? imageUrls[0] : null;
 
       return {
@@ -160,13 +166,17 @@ function normalizePortfolio(rows: any[] | null | undefined): SupplierPortfolioIt
         eventDate: item.event_date ?? null,
         isFeatured: item.is_featured ?? false,
         sortOrder: item.sort_order ?? 0,
-        status: (item.status ?? "published") as "draft" | "hidden" | "published",
+        status: (item.status ?? "published") as
+          "draft" | "hidden" | "published",
         serviceId: item.service_id ?? null,
       };
     })
     .sort((a, b) => {
       if (a.isFeatured !== b.isFeatured) return a.isFeatured ? -1 : 1;
-      return a.sortOrder - b.sortOrder || (a.title || "").localeCompare(b.title || "");
+      return (
+        a.sortOrder - b.sortOrder ||
+        (a.title || "").localeCompare(b.title || "")
+      );
     });
 }
 
@@ -260,15 +270,24 @@ async function getSupplierRelations(
   ]);
 
   if (servicesResult.error) {
-    console.error("[suppliers] services fetch failed:", servicesResult.error.message);
+    console.error(
+      "[suppliers] services fetch failed:",
+      servicesResult.error.message,
+    );
   }
 
   if (portfolioResult.error) {
-    console.error("[suppliers] portfolio fetch failed:", portfolioResult.error.message);
+    console.error(
+      "[suppliers] portfolio fetch failed:",
+      portfolioResult.error.message,
+    );
   }
 
   if (reviewsResult.error) {
-    console.error("[suppliers] reviews fetch failed:", reviewsResult.error.message);
+    console.error(
+      "[suppliers] reviews fetch failed:",
+      reviewsResult.error.message,
+    );
   }
 
   return {
@@ -306,7 +325,9 @@ export function mapDbSupplier(row: any): SupplierMarketplaceProfile {
     accreditationStatus: row.accreditation_status ?? "pending",
     avgRating: Number(row.avg_rating) || 0,
     reviewCount: Number(row.review_count) || 0,
-    createdAt: row.created_at ? String(row.created_at) : new Date().toISOString(),
+    createdAt: row.created_at
+      ? String(row.created_at)
+      : new Date().toISOString(),
     // Location fields (migration 071)
     latitude: row.latitude != null ? Number(row.latitude) : null,
     longitude: row.longitude != null ? Number(row.longitude) : null,
@@ -334,7 +355,8 @@ export async function getSupplierCategories(
     .order("name", { ascending: true });
 
   if (error || !data || data.length === 0) {
-    if (error) console.error("[suppliers] categories fetch failed:", error.message);
+    if (error)
+      console.error("[suppliers] categories fetch failed:", error.message);
     return sampleSupplierCategories;
   }
 
@@ -441,9 +463,7 @@ export async function getPublicSupplierBySlug(
 
   return (
     sampleSuppliers.find(
-      (supplier) =>
-        supplier.slug === identifier ||
-        supplier.id === identifier,
+      (supplier) => supplier.slug === identifier || supplier.id === identifier,
     ) ?? null
   );
 }
@@ -462,7 +482,10 @@ export async function getSupplierDashboardContext(
   ]);
 
   if (profileResult.error) {
-    console.error("[suppliers] dashboard profile fetch failed:", profileResult.error.message);
+    console.error(
+      "[suppliers] dashboard profile fetch failed:",
+      profileResult.error.message,
+    );
   }
 
   if (!profileResult.data) {

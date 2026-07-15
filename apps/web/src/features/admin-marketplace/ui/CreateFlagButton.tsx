@@ -73,7 +73,12 @@ export function CreateFlagButton({
       >
         {isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Confirm"}
       </button>
-      <button type="button" onClick={() => setIsOpen(false)} disabled={isPending} className="text-xs font-bold text-[#6b7280]">
+      <button
+        type="button"
+        onClick={() => setIsOpen(false)}
+        disabled={isPending}
+        className="text-xs font-bold text-[#6b7280]"
+      >
         Cancel
       </button>
     </div>

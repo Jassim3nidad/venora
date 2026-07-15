@@ -1,15 +1,7 @@
 export type CustomerInquiryTone =
-  | "amber"
-  | "blue"
-  | "violet"
-  | "green"
-  | "red"
-  | "gray";
+  "amber" | "blue" | "violet" | "green" | "red" | "gray";
 
-export type CustomerInquirySort =
-  | "newest"
-  | "event_date"
-  | "last_activity";
+export type CustomerInquirySort = "newest" | "event_date" | "last_activity";
 
 export type CustomerActivityView = "venues" | "suppliers";
 
@@ -88,7 +80,9 @@ export function getCustomerActivityHref(view: CustomerActivityView) {
 }
 
 function normalize(value?: string | null) {
-  return String(value ?? "").trim().toLowerCase();
+  return String(value ?? "")
+    .trim()
+    .toLowerCase();
 }
 
 function toTime(value?: string | null) {
@@ -121,7 +115,10 @@ export function getPrimaryQuoteStatus(inquiry: InquiryLike) {
 export function getLastInquiryActivityAt(inquiry: InquiryLike) {
   const quoteStatus = getPrimaryQuoteStatus(inquiry);
   const quoteUpdatedAt = Array.isArray(inquiry.supplier_quotes)
-    ? Math.max(...inquiry.supplier_quotes.map((quote) => toTime(quote.updated_at)), 0)
+    ? Math.max(
+        ...inquiry.supplier_quotes.map((quote) => toTime(quote.updated_at)),
+        0,
+      )
     : toTime(inquiry.supplier_quotes?.updated_at);
 
   const baseTime = Math.max(
@@ -138,11 +135,14 @@ export function getCustomerInquiryStats(inquiries: InquiryLike[]) {
     { label: "Total inquiries", value: inquiries.length },
     {
       label: "Pending review",
-      value: inquiries.filter((inquiry) => normalize(inquiry.status) === "new").length,
+      value: inquiries.filter((inquiry) => normalize(inquiry.status) === "new")
+        .length,
     },
     {
       label: "Responded",
-      value: inquiries.filter((inquiry) => normalize(inquiry.status) === "responded").length,
+      value: inquiries.filter(
+        (inquiry) => normalize(inquiry.status) === "responded",
+      ).length,
     },
     {
       label: "Proposals",
@@ -303,7 +303,8 @@ export function buildInquiryTimeline(
     entries.push({
       label: "Message sent",
       at: message.created_at,
-      actor: message.sender_id === inquiry.customer_id ? "customer" : "supplier",
+      actor:
+        message.sender_id === inquiry.customer_id ? "customer" : "supplier",
     });
   }
 

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { ADMIN_TIERS, ADMIN_TIER_PERMISSIONS, tierHasPermission } from "./permissions";
+import {
+  ADMIN_TIERS,
+  ADMIN_TIER_PERMISSIONS,
+  tierHasPermission,
+} from "./permissions";
 
 describe("admin tier permissions", () => {
   it("gives super_admin every permission in the catalog", () => {
@@ -12,10 +16,24 @@ describe("admin tier permissions", () => {
   });
 
   it("keeps analyst strictly read-only — no mutation permission anywhere", () => {
-    const mutationVerbs = ["manage", "approve", "reject", "suspend", "override", "moderate", "reactivate", "verify"];
+    const mutationVerbs = [
+      "manage",
+      "approve",
+      "reject",
+      "suspend",
+      "override",
+      "moderate",
+      "reactivate",
+      "verify",
+    ];
     for (const permission of ADMIN_TIER_PERMISSIONS.analyst) {
-      const isMutation = mutationVerbs.some((verb) => permission.endsWith(`.${verb}`));
-      expect(isMutation, `analyst should not have mutation permission "${permission}"`).toBe(false);
+      const isMutation = mutationVerbs.some((verb) =>
+        permission.endsWith(`.${verb}`),
+      );
+      expect(
+        isMutation,
+        `analyst should not have mutation permission "${permission}"`,
+      ).toBe(false);
     }
   });
 
@@ -28,13 +46,17 @@ describe("admin tier permissions", () => {
 
   it("reserves admin_roles.manage (tier assignment) for super_admin only", () => {
     for (const tier of ADMIN_TIERS) {
-      expect(tierHasPermission(tier, "admin_roles.manage")).toBe(tier === "super_admin");
+      expect(tierHasPermission(tier, "admin_roles.manage")).toBe(
+        tier === "super_admin",
+      );
     }
   });
 
   it("gives finance_admin commission management but not marketplace moderation", () => {
     expect(tierHasPermission("finance_admin", "commissions.manage")).toBe(true);
-    expect(tierHasPermission("finance_admin", "marketplace.moderate")).toBe(false);
+    expect(tierHasPermission("finance_admin", "marketplace.moderate")).toBe(
+      false,
+    );
   });
 
   it("has no duplicate permissions within a single tier's list", () => {

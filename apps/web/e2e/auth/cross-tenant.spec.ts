@@ -19,7 +19,9 @@ import { loginAs } from "../helpers/auth";
 const OTHER_CUSTOMER_BOOKING_ID = "90369d1c-883b-4db2-9d50-8c14c332f56f"; // belongs to a real, different customer
 
 test.describe("Cross-tenant isolation", () => {
-  test("customer cannot view another customer's private booking by ID", async ({ page }) => {
+  test("customer cannot view another customer's private booking by ID", async ({
+    page,
+  }) => {
     await loginAs(page, "customer");
     await page.goto(`/bookings/${OTHER_CUSTOMER_BOOKING_ID}`);
     // Must not render the other customer's booking details -- either a
@@ -29,17 +31,28 @@ test.describe("Cross-tenant isolation", () => {
     expect(bodyText).not.toMatch(/Lyceum of the Philippines/i);
   });
 
-  test("customer cannot fetch another customer's booking via the app's own API", async ({ page }) => {
+  test("customer cannot fetch another customer's booking via the app's own API", async ({
+    page,
+  }) => {
     await loginAs(page, "customer");
-    const res = await page.request.get(`/api/bookings/${OTHER_CUSTOMER_BOOKING_ID}`, { failOnStatusCode: false });
+    const res = await page.request.get(
+      `/api/bookings/${OTHER_CUSTOMER_BOOKING_ID}`,
+      { failOnStatusCode: false },
+    );
     expect([401, 403, 404]).toContain(res.status());
   });
 });
 
 test.describe("Cross-tenant isolation — not testable with current seed data", () => {
-  test.skip(true, "Every venue in the hosted database belongs to the same single organization (confirmed via direct query) -- no second venue-owning org exists to test venue-vs-venue isolation against.");
+  test.skip(
+    true,
+    "Every venue in the hosted database belongs to the same single organization (confirmed via direct query) -- no second venue-owning org exists to test venue-vs-venue isolation against.",
+  );
   test("venue A cannot read venue B's private records", () => {});
 
-  test.skip(true, "supplier_profiles is empty in the hosted database (confirmed via direct query) -- no second supplier exists to test supplier-vs-supplier isolation against.");
+  test.skip(
+    true,
+    "supplier_profiles is empty in the hosted database (confirmed via direct query) -- no second supplier exists to test supplier-vs-supplier isolation against.",
+  );
   test("supplier A cannot read supplier B's private records", () => {});
 });

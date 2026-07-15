@@ -158,11 +158,9 @@ export async function checkAiUsageLimits(
       .select("estimated_cost_cents")
       .eq("feature", feature)
       .gte("created_at", startOfDay.toISOString());
-    const spent = ((data ?? []) as { estimated_cost_cents: number | null }[])
-      .reduce(
-        (sum, row) => sum + (row.estimated_cost_cents ?? 0),
-        0,
-      );
+    const spent = (
+      (data ?? []) as { estimated_cost_cents: number | null }[]
+    ).reduce((sum, row) => sum + (row.estimated_cost_cents ?? 0), 0);
     if (spent >= config.spendingLimitCents) {
       return {
         allowed: false,
@@ -187,7 +185,7 @@ const COST_PER_1K_TOKENS_CENTS: Record<string, number> = {
 
 export function estimateCostCents(model: string, totalTokens: number): number {
   const rate = COST_PER_1K_TOKENS_CENTS[model] ?? 0;
-  return Math.round(((totalTokens / 1000) * rate) * 100) / 100;
+  return Math.round((totalTokens / 1000) * rate * 100) / 100;
 }
 
 export type LogAiUsageEntry = {
@@ -263,9 +261,10 @@ const BLOCKED_INPUT_PATTERNS = [
   /reveal (your|the) (system prompt|instructions)/i,
 ];
 
-export function moderateInputText(
-  text: string,
-): { allowed: boolean; reason?: string } {
+export function moderateInputText(text: string): {
+  allowed: boolean;
+  reason?: string;
+} {
   for (const pattern of BLOCKED_INPUT_PATTERNS) {
     if (pattern.test(text)) {
       return {
@@ -315,14 +314,12 @@ export async function postChatCompletion(
   config: AiConfiguration,
   openRouterApiKey: string,
   body: Record<string, unknown>,
-): Promise<
-  {
-    response: Response;
-    providerUsed: string;
-    modelUsed: string;
-    usedFallback: boolean;
-  }
-> {
+): Promise<{
+  response: Response;
+  providerUsed: string;
+  modelUsed: string;
+  usedFallback: boolean;
+}> {
   const validation = validateProviderModel(config);
   if (!validation.ok) {
     throw new Error(validation.reason ?? "Invalid AI provider configuration");

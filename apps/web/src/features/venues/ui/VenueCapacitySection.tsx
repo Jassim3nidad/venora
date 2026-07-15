@@ -19,7 +19,9 @@ interface CapacityItem {
   value: string;
 }
 
-export default function VenueCapacitySection({ venue }: VenueCapacitySectionProps) {
+export default function VenueCapacitySection({
+  venue,
+}: VenueCapacitySectionProps) {
   const minGuests = venue.capacity_min ?? 1;
   const maxGuests = venue.capacity_max;
 
@@ -40,12 +42,16 @@ export default function VenueCapacitySection({ venue }: VenueCapacitySectionProp
     {
       icon: <ParkingCircle className="h-5 w-5" />,
       label: "Parking",
-      value: venue.parking_available ? "On-site parking" : "Street parking nearby",
+      value: venue.parking_available
+        ? "On-site parking"
+        : "Street parking nearby",
     },
     {
       icon: <Accessibility className="h-5 w-5" />,
       label: "Accessibility",
-      value: venue.wheelchair_accessible ? "Wheelchair accessible" : "Limited accessibility",
+      value: venue.wheelchair_accessible
+        ? "Wheelchair accessible"
+        : "Limited accessibility",
     },
   ];
 
@@ -61,7 +67,9 @@ export default function VenueCapacitySection({ venue }: VenueCapacitySectionProp
             key={item.label}
             className="rounded-2xl border border-[var(--border-default)] bg-[var(--bg-subtle)] p-4"
           >
-            <div className="mb-3 text-[var(--color-brand-600)]">{item.icon}</div>
+            <div className="mb-3 text-[var(--color-brand-600)]">
+              {item.icon}
+            </div>
             <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
               {item.label}
             </p>

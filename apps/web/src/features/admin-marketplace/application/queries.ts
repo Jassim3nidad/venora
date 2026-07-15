@@ -45,22 +45,27 @@ export async function getMarketplaceFlags(status?: string): Promise<{
 
 const REJECTION_LOOKBACK_DAYS = 180;
 
-export async function getRepeatedRejectionSignals(): Promise<RepeatedRejectionSignal[]> {
+export async function getRepeatedRejectionSignals(): Promise<
+  RepeatedRejectionSignal[]
+> {
   const supabase = (await createClient()) as any;
-  const since = new Date(Date.now() - REJECTION_LOOKBACK_DAYS * 24 * 60 * 60 * 1000).toISOString();
+  const since = new Date(
+    Date.now() - REJECTION_LOOKBACK_DAYS * 24 * 60 * 60 * 1000,
+  ).toISOString();
 
-  const [{ data: venueRejections }, { data: supplierRejections }] = await Promise.all([
-    supabase
-      .from("venue_review_history")
-      .select("venue_id, venues(name)")
-      .eq("action", "reject")
-      .gte("created_at", since),
-    supabase
-      .from("supplier_review_history")
-      .select("supplier_id, supplier_profiles(business_name)")
-      .eq("action", "reject")
-      .gte("created_at", since),
-  ]);
+  const [{ data: venueRejections }, { data: supplierRejections }] =
+    await Promise.all([
+      supabase
+        .from("venue_review_history")
+        .select("venue_id, venues(name)")
+        .eq("action", "reject")
+        .gte("created_at", since),
+      supabase
+        .from("supplier_review_history")
+        .select("supplier_id, supplier_profiles(business_name)")
+        .eq("action", "reject")
+        .gte("created_at", since),
+    ]);
 
   const venueCounts = new Map<string, { label: string; count: number }>();
   for (const row of (venueRejections ?? []) as any[]) {
@@ -73,15 +78,30 @@ export async function getRepeatedRejectionSignals(): Promise<RepeatedRejectionSi
   for (const row of (supplierRejections ?? []) as any[]) {
     const existing = supplierCounts.get(row.supplier_id);
     const label = row.supplier_profiles?.business_name ?? "Unknown supplier";
-    supplierCounts.set(row.supplier_id, { label, count: (existing?.count ?? 0) + 1 });
+    supplierCounts.set(row.supplier_id, {
+      label,
+      count: (existing?.count ?? 0) + 1,
+    });
   }
 
   const signals: RepeatedRejectionSignal[] = [];
   for (const [id, { label, count }] of venueCounts) {
-    if (count >= 2) signals.push({ entityType: "venue", entityId: id, label, rejectionCount: count });
+    if (count >= 2)
+      signals.push({
+        entityType: "venue",
+        entityId: id,
+        label,
+        rejectionCount: count,
+      });
   }
   for (const [id, { label, count }] of supplierCounts) {
-    if (count >= 2) signals.push({ entityType: "supplier", entityId: id, label, rejectionCount: count });
+    if (count >= 2)
+      signals.push({
+        entityType: "supplier",
+        entityId: id,
+        label,
+        rejectionCount: count,
+      });
   }
 
   return signals.sort((a, b) => b.rejectionCount - a.rejectionCount);
@@ -91,7 +111,9 @@ const CANCELLATION_LOOKBACK_DAYS = 90;
 
 export async function getCancellationSignals(): Promise<CancellationSignal[]> {
   const supabase = (await createClient()) as any;
-  const since = new Date(Date.now() - CANCELLATION_LOOKBACK_DAYS * 24 * 60 * 60 * 1000).toISOString();
+  const since = new Date(
+    Date.now() - CANCELLATION_LOOKBACK_DAYS * 24 * 60 * 60 * 1000,
+  ).toISOString();
 
   const { data } = await supabase
     .from("bookings")
@@ -102,21 +124,33 @@ export async function getCancellationSignals(): Promise<CancellationSignal[]> {
   const counts = new Map<string, { label: string; count: number }>();
   for (const row of (data ?? []) as any[]) {
     const existing = counts.get(row.venue_id);
-    counts.set(row.venue_id, { label: row.venues?.name ?? "Unknown venue", count: (existing?.count ?? 0) + 1 });
+    counts.set(row.venue_id, {
+      label: row.venues?.name ?? "Unknown venue",
+      count: (existing?.count ?? 0) + 1,
+    });
   }
 
   return Array.from(counts.entries())
     .filter(([, v]) => v.count >= 3)
-    .map(([venueId, v]) => ({ venueId, venueName: v.label, cancellationCount: v.count }))
+    .map(([venueId, v]) => ({
+      venueId,
+      venueName: v.label,
+      cancellationCount: v.count,
+    }))
     .sort((a, b) => b.cancellationCount - a.cancellationCount);
 }
 
-async function getTransactionSignals(statuses: string[], limit = 20): Promise<TransactionSignal[]> {
+async function getTransactionSignals(
+  statuses: string[],
+  limit = 20,
+): Promise<TransactionSignal[]> {
   const supabase = (await createClient()) as any;
 
   const { data } = await supabase
     .from("transactions")
-    .select("id, booking_id, amount, status, created_at, bookings(venues(name))")
+    .select(
+      "id, booking_id, amount, status, created_at, bookings(venues(name))",
+    )
     .in("status", statuses)
     .order("created_at", { ascending: false })
     .limit(limit);
@@ -148,13 +182,21 @@ export function getRefundSignals() {
 export async function getPriceOutlierSignals(): Promise<PriceOutlierSignal[]> {
   const supabase = (await createClient()) as any;
 
-  const { data } = await supabase.from("venues").select("id, name, base_price").eq("status", "published");
-  const venues = (data ?? []) as { id: string; name: string; base_price: number }[];
+  const { data } = await supabase
+    .from("venues")
+    .select("id, name, base_price")
+    .eq("status", "published");
+  const venues = (data ?? []) as {
+    id: string;
+    name: string;
+    base_price: number;
+  }[];
   if (venues.length < 5) return []; // not enough data for a meaningful stddev
 
   const prices = venues.map((v) => Number(v.base_price));
   const mean = prices.reduce((s, p) => s + p, 0) / prices.length;
-  const variance = prices.reduce((s, p) => s + (p - mean) ** 2, 0) / prices.length;
+  const variance =
+    prices.reduce((s, p) => s + (p - mean) ** 2, 0) / prices.length;
   const stddev = Math.sqrt(variance);
   if (stddev === 0) return [];
 

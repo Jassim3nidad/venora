@@ -50,7 +50,9 @@ export default function VenuePricingSection({
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="font-semibold text-[var(--text-primary)]">{pkg.name}</p>
+                    <p className="font-semibold text-[var(--text-primary)]">
+                      {pkg.name}
+                    </p>
                     {pkg.description && (
                       <p className="mt-1 text-sm text-[var(--text-secondary)]">
                         {pkg.description}
@@ -91,8 +93,8 @@ export default function VenuePricingSection({
         </div>
       ) : (
         <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--bg-subtle)] p-4 text-sm text-[var(--text-secondary)]">
-          Base venue rate applies. Select your event date in the booking panel to see the
-          estimated total including platform fees.
+          Base venue rate applies. Select your event date in the booking panel
+          to see the estimated total including platform fees.
         </div>
       )}
     </section>

@@ -10,7 +10,7 @@ const PH_CURRENCY = "PHP";
 
 export function formatDate(
   date: Date | string,
-  options?: Intl.DateTimeFormatOptions
+  options?: Intl.DateTimeFormatOptions,
 ): string {
   const d = typeof date === "string" ? new Date(date) : date;
   return d.toLocaleDateString(PH_LOCALE, {
@@ -60,7 +60,7 @@ export function formatRelative(date: Date | string): string {
 
 export function formatCurrency(
   amount: number,
-  options?: Intl.NumberFormatOptions
+  options?: Intl.NumberFormatOptions,
 ): string {
   return new Intl.NumberFormat(PH_LOCALE, {
     style: "currency",

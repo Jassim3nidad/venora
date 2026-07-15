@@ -114,24 +114,38 @@ function getSupplierImage(supplier: any) {
 function getEventLocation(inquiry: any) {
   const booking = first(inquiry.bookings);
   const venue = first(booking?.venues);
-  const venueLocation = [venue?.city, venue?.province].filter(Boolean).join(", ");
+  const venueLocation = [venue?.city, venue?.province]
+    .filter(Boolean)
+    .join(", ");
   return (
     inquiry.location_snapshot ||
     inquiry.venue_name_snapshot ||
     inquiry.event_location ||
-    (venue?.name ? `${venue.name}${venueLocation ? ` - ${venueLocation}` : ""}` : null) ||
+    (venue?.name
+      ? `${venue.name}${venueLocation ? ` - ${venueLocation}` : ""}`
+      : null) ||
     "Location unavailable"
   );
 }
 
 function getEventDate(inquiry: any) {
   const booking = first(inquiry.bookings);
-  return inquiry.event_date_snapshot || inquiry.event_date || booking?.event_date || null;
+  return (
+    inquiry.event_date_snapshot ||
+    inquiry.event_date ||
+    booking?.event_date ||
+    null
+  );
 }
 
 function getGuestCount(inquiry: any) {
   const booking = first(inquiry.bookings);
-  return inquiry.guest_count_snapshot || inquiry.guest_count || booking?.guest_count || null;
+  return (
+    inquiry.guest_count_snapshot ||
+    inquiry.guest_count ||
+    booking?.guest_count ||
+    null
+  );
 }
 
 function getPrimaryQuote(inquiry: any) {
@@ -141,7 +155,9 @@ function getPrimaryQuote(inquiry: any) {
       ? [inquiry.supplier_quotes]
       : [];
   const status = getPrimaryQuoteStatus(inquiry);
-  return quotes.find((quote: any) => quote.status === status) ?? quotes[0] ?? null;
+  return (
+    quotes.find((quote: any) => quote.status === status) ?? quotes[0] ?? null
+  );
 }
 
 function buildInquiryHref(
@@ -193,23 +209,28 @@ export function CustomerInquiryList({
   const q = query.q ?? "";
   const status = query.status ?? "all";
   const proposal = query.proposal ?? "all";
-  const sort = (query.sort === "event_date" || query.sort === "last_activity"
-    ? query.sort
-    : "newest") as CustomerInquirySort;
+  const sort = (
+    query.sort === "event_date" || query.sort === "last_activity"
+      ? query.sort
+      : "newest"
+  ) as CustomerInquirySort;
   const filtered = filterCustomerInquiries(inquiries, {
     q,
     inquiryStatus: status,
     proposalStatus: proposal,
     sort,
   });
-  const hasFilters = Boolean(q || status !== "all" || proposal !== "all" || sort !== "newest");
+  const hasFilters = Boolean(
+    q || status !== "all" || proposal !== "all" || sort !== "newest",
+  );
   const stats = getCustomerInquiryStats(inquiries);
   const statusCounts = inquiryStatuses.reduce(
     (counts, option) => {
       counts[option.value] =
         option.value === "all"
           ? inquiries.length
-          : inquiries.filter((inquiry) => inquiry.status === option.value).length;
+          : inquiries.filter((inquiry) => inquiry.status === option.value)
+              .length;
       return counts;
     },
     {} as Record<string, number>,
@@ -266,7 +287,12 @@ export function CustomerInquiryList({
             return (
               <Link
                 key={option.value}
-                href={buildInquiryHref({ q, status: option.value, proposal, sort })}
+                href={buildInquiryHref({
+                  q,
+                  status: option.value,
+                  proposal,
+                  sort,
+                })}
                 aria-current={isActive ? "page" : undefined}
                 className={[
                   "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-extrabold transition",
@@ -365,7 +391,10 @@ export function CustomerInquiryList({
           title="No supplier inquiries match these filters."
           description="Try another status, proposal state, or search term."
           action={
-            <CustomerLinkButton href="/bookings?view=suppliers" tone="secondary">
+            <CustomerLinkButton
+              href="/bookings?view=suppliers"
+              tone="secondary"
+            >
               Clear filters
             </CustomerLinkButton>
           }
@@ -375,7 +404,10 @@ export function CustomerInquiryList({
           const supplier = first(inquiry.supplier_profiles);
           const service = first(inquiry.supplier_services);
           const quoteStatus = getPrimaryQuoteStatus(inquiry);
-          const displayStatus = getInquiryDisplayStatus(inquiry.status, quoteStatus);
+          const displayStatus = getInquiryDisplayStatus(
+            inquiry.status,
+            quoteStatus,
+          );
           const proposalLabel = quoteStatus
             ? getInquiryDisplayStatus(null, quoteStatus).label
             : "No proposal yet";
@@ -410,7 +442,9 @@ export function CustomerInquiryList({
                         {supplier?.business_name ?? "Supplier"}
                       </h2>
                       <p className="mt-1 truncate text-sm font-bold text-[#6B7280]">
-                        {service?.name ?? supplier?.supplier_categories?.name ?? "General inquiry"}
+                        {service?.name ??
+                          supplier?.supplier_categories?.name ??
+                          "General inquiry"}
                       </p>
 
                       <div className="mt-3 flex flex-wrap gap-3 text-sm font-semibold text-[#6B7280] lg:flex-nowrap">
@@ -438,14 +472,19 @@ export function CustomerInquiryList({
                         Proposal
                       </p>
                       <p className="mt-1 text-lg font-black text-[#111827]">
-                        {quote?.total ? formatCurrency(quote.total) : proposalLabel}
+                        {quote?.total
+                          ? formatCurrency(quote.total)
+                          : proposalLabel}
                       </p>
                     </div>
                   </div>
 
                   <div>
                     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-                      <CustomerLinkButton href={`/inquiries/${inquiry.id}`} tone="secondary">
+                      <CustomerLinkButton
+                        href={`/inquiries/${inquiry.id}`}
+                        tone="secondary"
+                      >
                         View Details
                       </CustomerLinkButton>
 
@@ -461,7 +500,8 @@ export function CustomerInquiryList({
                     </div>
 
                     <p className="mt-4 text-xs font-semibold text-slate-400">
-                      Last activity: {formatRelative(getLastInquiryActivityAt(inquiry))}
+                      Last activity:{" "}
+                      {formatRelative(getLastInquiryActivityAt(inquiry))}
                     </p>
                   </div>
                 </div>

@@ -14,7 +14,7 @@ function checkRateLimit(
   path: string,
   method: string,
   maxRequests: number,
-  windowMs: number
+  windowMs: number,
 ): boolean {
   const now = Date.now();
   const key = `${ip}:${path}:${method}`;
@@ -47,28 +47,42 @@ export async function middleware(request: NextRequest) {
 
   // Define limits (requests per minute)
   let maxRequests = 100; // Default generic limit
-  
+
   // Specific Rate Limits
-  if (method === "POST" && (path === "/login" || path === "/register" || path.startsWith("/auth/callback"))) {
+  if (
+    method === "POST" &&
+    (path === "/login" ||
+      path === "/register" ||
+      path.startsWith("/auth/callback"))
+  ) {
     maxRequests = 10; // Login/Registration limit
   } else if (path.startsWith("/api/ai") || path.includes("ai-assistant")) {
     maxRequests = 20; // AI requests limit
   } else if (path === "/search" || path.startsWith("/api/search")) {
     maxRequests = 60; // Search limit
-  } else if (method === "POST" && (path.startsWith("/api/bookings") || path.startsWith("/dashboard/bookings"))) {
+  } else if (
+    method === "POST" &&
+    (path.startsWith("/api/bookings") || path.startsWith("/dashboard/bookings"))
+  ) {
     maxRequests = 30; // Bookings limit
-  } else if (path.startsWith("/admin") && ["POST", "PUT", "DELETE", "PATCH"].includes(method)) {
+  } else if (
+    path.startsWith("/admin") &&
+    ["POST", "PUT", "DELETE", "PATCH"].includes(method)
+  ) {
     maxRequests = 50; // Admin mutations limit
   }
 
   // Check Rate Limit (1 minute window)
   const isAllowed = checkRateLimit(ip, path, method, maxRequests, 60000);
-  
+
   if (!isAllowed) {
     if (path.startsWith("/api")) {
       return new NextResponse(
         JSON.stringify({ error: "Too many requests. Please try again later." }),
-        { status: 429, headers: { "Content-Type": "application/json", "Retry-After": "60" } }
+        {
+          status: 429,
+          headers: { "Content-Type": "application/json", "Retry-After": "60" },
+        },
       );
     } else {
       url.pathname = "/429";
@@ -86,17 +100,17 @@ export async function middleware(request: NextRequest) {
         },
         setAll(cookiesToSet: any[]) {
           cookiesToSet.forEach(({ name, value, options }) =>
-            request.cookies.set(name, value)
+            request.cookies.set(name, value),
           );
           supabaseResponse = NextResponse.next({
             request,
           });
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, options),
           );
         },
       },
-    }
+    },
   );
 
   // IMPORTANT: Avoid writing any logic between createServerClient and
@@ -113,7 +127,7 @@ export async function middleware(request: NextRequest) {
       url.pathname = "/login";
       return NextResponse.redirect(url);
     }
-    
+
     // Server-side granular role checks are handled via requireAdmin() in the Server Components,
     // so we just need to ensure the user is logged in here before they hit the admin bundle.
   }

@@ -6,7 +6,10 @@ type SupplierRouteProps = {
   params: Promise<{ id: string }>;
 };
 
-export async function GET(_request: NextRequest, { params }: SupplierRouteProps) {
+export async function GET(
+  _request: NextRequest,
+  { params }: SupplierRouteProps,
+) {
   try {
     const { id } = await params;
     const supabase = await createClient();

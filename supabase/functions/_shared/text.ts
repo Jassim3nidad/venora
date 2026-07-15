@@ -3,8 +3,11 @@
 const DIACRITIC_RANGE_START = 0x0300;
 const DIACRITIC_RANGE_END = 0x036f;
 const COMBINING_DIACRITICS = new RegExp(
-  "[" + String.fromCharCode(DIACRITIC_RANGE_START) + "-" +
-    String.fromCharCode(DIACRITIC_RANGE_END) + "]",
+  "[" +
+    String.fromCharCode(DIACRITIC_RANGE_START) +
+    "-" +
+    String.fromCharCode(DIACRITIC_RANGE_END) +
+    "]",
   "g",
 );
 

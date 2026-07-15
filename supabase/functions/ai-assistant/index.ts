@@ -229,19 +229,17 @@ serve(async (req) => {
       const venues = (venueRows ?? []).slice(0, 5).map(toVenuePayload);
       if (venues.length > 0) {
         contextParts.push(
-          `Matching venues: ${
-            JSON.stringify(
-              venues.map((v: any) => ({
-                name: v.name,
-                city: v.city,
-                province: v.province,
-                basePrice: v.basePrice,
-                capacityMin: v.capacityMin,
-                capacityMax: v.capacityMax,
-                avgRating: v.avgRating,
-              })),
-            )
-          }`,
+          `Matching venues: ${JSON.stringify(
+            venues.map((v: any) => ({
+              name: v.name,
+              city: v.city,
+              province: v.province,
+              basePrice: v.basePrice,
+              capacityMin: v.capacityMin,
+              capacityMax: v.capacityMax,
+              avgRating: v.avgRating,
+            })),
+          )}`,
         );
       }
     }
@@ -256,15 +254,13 @@ serve(async (req) => {
 
       if (bookingRows && bookingRows.length > 0) {
         contextParts.push(
-          `This user's recent bookings: ${
-            JSON.stringify(
-              bookingRows.map((b: any) => ({
-                venue: b.venues?.name ?? "Unknown venue",
-                eventDate: b.event_date,
-                status: b.status,
-              })),
-            )
-          }`,
+          `This user's recent bookings: ${JSON.stringify(
+            bookingRows.map((b: any) => ({
+              venue: b.venues?.name ?? "Unknown venue",
+              eventDate: b.event_date,
+              status: b.status,
+            })),
+          )}`,
         );
       }
     }
@@ -283,7 +279,8 @@ serve(async (req) => {
 
     // Persist the user's message immediately so it survives even if the
     // completion call below fails partway through.
-    const { error: userMessageError } = await supabase.from("ai_messages")
+    const { error: userMessageError } = await supabase
+      .from("ai_messages")
       .insert({
         conversation_id: conversationId,
         role: "user",
@@ -347,9 +344,9 @@ serve(async (req) => {
         // distinguishable from OpenRouter chunks, which have `choices`.
         controller.enqueue(
           encoder.encode(
-            `data: ${
-              JSON.stringify({ conversationId: finalConversationId })
-            }\n\n`,
+            `data: ${JSON.stringify({
+              conversationId: finalConversationId,
+            })}\n\n`,
           ),
         );
 
@@ -388,13 +385,13 @@ serve(async (req) => {
           console.error("[ai-assistant] Stream read failed:", streamError);
         } finally {
           if (fullText.trim()) {
-            const { error: assistantMessageError } = await supabase.from(
-              "ai_messages",
-            ).insert({
-              conversation_id: finalConversationId,
-              role: "assistant",
-              content: fullText.trim(),
-            });
+            const { error: assistantMessageError } = await supabase
+              .from("ai_messages")
+              .insert({
+                conversation_id: finalConversationId,
+                role: "assistant",
+                content: fullText.trim(),
+              });
             if (assistantMessageError) {
               console.error(
                 "[ai-assistant] Failed to persist assistant message:",

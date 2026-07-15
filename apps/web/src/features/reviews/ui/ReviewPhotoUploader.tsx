@@ -2,7 +2,10 @@
 
 import { useRef, useState } from "react";
 import { ImagePlus, Loader2, X } from "lucide-react";
-import { useReviewPhotoUpload, type UploadedPhoto } from "../hooks/useReviewPhotoUpload";
+import {
+  useReviewPhotoUpload,
+  type UploadedPhoto,
+} from "../hooks/useReviewPhotoUpload";
 
 type ReviewPhotoUploaderProps = {
   /** A real review id (post-hoc upload) or a temp id if the review doesn't exist yet. */
@@ -45,7 +48,9 @@ export function ReviewPhotoUploader({
 
   return (
     <div className="grid gap-3">
-      <span className="text-sm font-bold text-[var(--text-primary)]">Photos (optional)</span>
+      <span className="text-sm font-bold text-[var(--text-primary)]">
+        Photos (optional)
+      </span>
 
       {photos.length > 0 ? (
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
@@ -55,7 +60,11 @@ export function ReviewPhotoUploader({
               className="relative aspect-square overflow-hidden rounded-xl border border-[var(--border-default)]"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photo.url} alt="Review photo" className="h-full w-full object-cover" />
+              <img
+                src={photo.url}
+                alt="Review photo"
+                className="h-full w-full object-cover"
+              />
               <button
                 type="button"
                 onClick={() => removePhoto(photo.storagePath)}
@@ -68,7 +77,9 @@ export function ReviewPhotoUploader({
           ))}
         </div>
       ) : (
-        <p className="text-xs font-semibold text-[var(--text-muted)]">No photos added yet.</p>
+        <p className="text-xs font-semibold text-[var(--text-muted)]">
+          No photos added yet.
+        </p>
       )}
 
       {photos.length < maxPhotos ? (
@@ -78,7 +89,11 @@ export function ReviewPhotoUploader({
           onClick={() => inputRef.current?.click()}
           className="inline-flex h-11 w-fit items-center gap-2 rounded-xl border border-dashed border-[var(--border-default)] px-4 text-sm font-bold text-[var(--text-secondary)] transition hover:border-[var(--color-brand-500)] hover:text-[var(--color-brand-500)] disabled:opacity-60"
         >
-          {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
+          {isUploading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <ImagePlus className="h-4 w-4" />
+          )}
           {isUploading ? "Uploading..." : "Add photos"}
         </button>
       ) : null}
@@ -92,7 +107,9 @@ export function ReviewPhotoUploader({
         onChange={(event) => handleFiles(event.target.files)}
       />
 
-      {error ? <p className="text-xs font-semibold text-red-600">{error}</p> : null}
+      {error ? (
+        <p className="text-xs font-semibold text-red-600">{error}</p>
+      ) : null}
     </div>
   );
 }

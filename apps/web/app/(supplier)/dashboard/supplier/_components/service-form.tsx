@@ -3,7 +3,10 @@
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Plus, Trash2 } from "lucide-react";
-import { addSupplierServiceAction, deleteSupplierServiceAction } from "../actions";
+import {
+  addSupplierServiceAction,
+  deleteSupplierServiceAction,
+} from "../actions";
 
 const PRICE_UNITS = [
   { value: "per_event", label: "Per event" },
@@ -30,7 +33,9 @@ export function AddServiceForm() {
           const result = await addSupplierServiceAction({
             name: String(formData.get("name") ?? ""),
             description: String(formData.get("description") ?? ""),
-            price: formData.get("price") ? Number(formData.get("price")) : undefined,
+            price: formData.get("price")
+              ? Number(formData.get("price"))
+              : undefined,
             priceUnit: String(formData.get("priceUnit") ?? "") || undefined,
           });
           if (result.error) {
@@ -101,7 +106,11 @@ export function AddServiceForm() {
           disabled={isPending}
           className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#1d4ed8] px-5 text-sm font-bold text-white transition hover:bg-[#1e40af] disabled:opacity-60"
         >
-          {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+          {isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Plus className="h-4 w-4" />
+          )}
           Add Service
         </button>
       </div>
@@ -126,7 +135,11 @@ export function DeleteServiceButton({ serviceId }: { serviceId: string }) {
       className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 text-xs font-bold text-red-700 transition hover:bg-red-100 disabled:opacity-60"
       aria-label="Delete service"
     >
-      {isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+      {isPending ? (
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+      ) : (
+        <Trash2 className="h-3.5 w-3.5" />
+      )}
       Remove
     </button>
   );

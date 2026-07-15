@@ -7,21 +7,21 @@ const alertVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-[var(--bg-subtle)] text-[var(--text-primary)] border-[var(--border-default)]",
+        default:
+          "bg-[var(--bg-subtle)] text-[var(--text-primary)] border-[var(--border-default)]",
         destructive:
           "bg-[var(--color-danger-bg)] text-[var(--color-danger)] border-[var(--color-danger)]/20 [&>svg]:text-[var(--color-danger)]",
         success:
           "bg-[var(--color-success-bg)] text-[var(--color-success)] border-[var(--color-success)]/20 [&>svg]:text-[var(--color-success)]",
         warning:
           "bg-[var(--color-warning-bg)] text-[var(--color-warning)] border-[var(--color-warning)]/20 [&>svg]:text-[var(--color-warning)]",
-        info:
-          "bg-[var(--color-info-bg)] text-[var(--color-info)] border-[var(--color-info)]/20 [&>svg]:text-[var(--color-info)]",
+        info: "bg-[var(--color-info-bg)] text-[var(--color-info)] border-[var(--color-info)]/20 [&>svg]:text-[var(--color-info)]",
       },
     },
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 const Alert = React.forwardRef<
@@ -43,7 +43,10 @@ const AlertTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h5
     ref={ref}
-    className={cn("mb-1 font-semibold leading-none tracking-tight text-current", className)}
+    className={cn(
+      "mb-1 font-semibold leading-none tracking-tight text-current",
+      className,
+    )}
     {...props}
   />
 ));

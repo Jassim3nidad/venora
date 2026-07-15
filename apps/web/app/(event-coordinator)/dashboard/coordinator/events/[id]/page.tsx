@@ -20,7 +20,9 @@ import {
 import { getBookingMessages } from "@/src/features/booking/application/messages-actions";
 import { BookingConversation } from "@/src/features/booking/ui/BookingConversation";
 
-export const metadata: Metadata = { title: "Event Detail - Coordinator Dashboard" };
+export const metadata: Metadata = {
+  title: "Event Detail - Coordinator Dashboard",
+};
 export const dynamic = "force-dynamic";
 
 type Props = {

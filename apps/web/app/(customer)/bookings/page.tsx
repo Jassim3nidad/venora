@@ -281,7 +281,7 @@ export default async function CustomerBookingsPage({
   // Load inquiries OR bookings depending on view
   let inquiries: any[] = [];
   let bookings: BookingRecord[] = [];
-  
+
   if (view === "suppliers") {
     inquiries = await getCustomerInquiries(supabase as any, user.id);
   } else {
@@ -289,7 +289,7 @@ export default async function CustomerBookingsPage({
   }
 
   const filterCounts = getFilterCounts(bookings);
-  
+
   function normalize(val?: string | null) {
     return (val || "").trim().toLowerCase();
   }
@@ -301,11 +301,13 @@ export default async function CustomerBookingsPage({
     if (!bookingMatchesStatusFilter(booking.status, statusFilter)) return false;
 
     if (q) {
-      const venue = Array.isArray(booking.venues) ? booking.venues[0] : booking.venues;
+      const venue = Array.isArray(booking.venues)
+        ? booking.venues[0]
+        : booking.venues;
       const venueName = normalize(venue?.name);
       const venueCity = normalize(venue?.city);
       const venueProvince = normalize(venue?.province);
-      
+
       const matchesQ =
         venueName.includes(q) ||
         venueCity.includes(q) ||
@@ -322,7 +324,9 @@ export default async function CustomerBookingsPage({
       if (!a.event_date && !b.event_date) return 0;
       if (!a.event_date) return 1;
       if (!b.event_date) return -1;
-      return new Date(a.event_date).getTime() - new Date(b.event_date).getTime();
+      return (
+        new Date(a.event_date).getTime() - new Date(b.event_date).getTime()
+      );
     });
   } else {
     // newest first
@@ -330,7 +334,9 @@ export default async function CustomerBookingsPage({
       if (!a.created_at && !b.created_at) return 0;
       if (!a.created_at) return 1;
       if (!b.created_at) return -1;
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      return (
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
     });
   }
 
@@ -440,133 +446,134 @@ export default async function CustomerBookingsPage({
             </div>
 
             {bookings.length > 0 ? (
-          <BookingStatusFilterBar
-            activeFilter={statusFilter}
-            counts={filterCounts}
-            query={query}
-            filteredCount={filteredBookings.length}
-            totalCount={bookings.length}
-          />
-        ) : null}
+              <BookingStatusFilterBar
+                activeFilter={statusFilter}
+                counts={filterCounts}
+                query={query}
+                filteredCount={filteredBookings.length}
+                totalCount={bookings.length}
+              />
+            ) : null}
 
-        {bookings.length === 0 ? (
-          <CustomerEmptyState
-            icon={TicketCheck}
-            eyebrow="No bookings yet"
-            title="Start with your first venue inquiry."
-            description="Browse curated Venora spaces and send your event details when a venue feels right."
-            action={
-              <CustomerLinkButton href="/venues">
-                Browse Venues
-              </CustomerLinkButton>
-            }
-          />
-        ) : filteredBookings.length === 0 ? (
-          <CustomerEmptyState
-            icon={TicketCheck}
-            eyebrow="No matches"
-            title="No bookings match this status."
-            description="Try another filter to see more of your booking history."
-            action={
-              <CustomerLinkButton href="/bookings">
-                Show all bookings
-              </CustomerLinkButton>
-            }
-          />
-        ) : (
-          <div className="grid gap-5">
-            {filteredBookings.map((booking) => {
-              const venue = getVenue(booking);
-              const venueImage = venue?.venue_images?.[0]?.storage_path;
-              const quote =
-                booking.status === "approved"
-                  ? booking.deposit_amount
-                  : booking.total_amount;
+            {bookings.length === 0 ? (
+              <CustomerEmptyState
+                icon={TicketCheck}
+                eyebrow="No bookings yet"
+                title="Start with your first venue inquiry."
+                description="Browse curated Venora spaces and send your event details when a venue feels right."
+                action={
+                  <CustomerLinkButton href="/venues">
+                    Browse Venues
+                  </CustomerLinkButton>
+                }
+              />
+            ) : filteredBookings.length === 0 ? (
+              <CustomerEmptyState
+                icon={TicketCheck}
+                eyebrow="No matches"
+                title="No bookings match this status."
+                description="Try another filter to see more of your booking history."
+                action={
+                  <CustomerLinkButton href="/bookings">
+                    Show all bookings
+                  </CustomerLinkButton>
+                }
+              />
+            ) : (
+              <div className="grid gap-5">
+                {filteredBookings.map((booking) => {
+                  const venue = getVenue(booking);
+                  const venueImage = venue?.venue_images?.[0]?.storage_path;
+                  const quote =
+                    booking.status === "approved"
+                      ? booking.deposit_amount
+                      : booking.total_amount;
 
-              return (
-                <article
-                  key={booking.id}
-                  className="overflow-hidden rounded-[28px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70"
-                >
-                  <div className="grid gap-0 lg:grid-cols-[260px_minmax(0,1fr)]">
-                    <div className="relative h-56 overflow-hidden bg-[#EFF6FF] lg:h-full">
-                      <img
-                        src={buildVenueImageUrl(venueImage)}
-                        alt={venue?.name ?? "Venue booking"}
-                        className="h-full w-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/35 to-transparent lg:bg-gradient-to-r" />
-                    </div>
-
-                    <div className="grid gap-5 p-5 sm:p-6">
-                      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                        <div>
-                          <BookingStatusBadge status={booking.status} />
-                          <h2 className="mt-3 text-2xl font-black tracking-[-0.04em] text-[#111827]">
-                            {venue?.name ?? "Untitled Venue"}
-                          </h2>
-
-                          <div className="mt-3 flex flex-wrap gap-3 text-sm font-semibold text-[#6B7280]">
-                            <span className="inline-flex items-center gap-2">
-                              <MapPin className="h-4 w-4 text-[#2563EB]" />
-                              {getVenueLocation(venue)}
-                            </span>
-                            <span className="inline-flex items-center gap-2">
-                              <CalendarDays className="h-4 w-4 text-[#2563EB]" />
-                              {formatDate(booking.event_date)}
-                            </span>
-                            <span className="inline-flex items-center gap-2">
-                              <TicketCheck className="h-4 w-4 text-[#2563EB]" />
-                              {(booking.guest_count ?? 0).toLocaleString(
-                                "en-PH",
-                              )}{" "}
-                              guests
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 lg:text-right">
-                          <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">
-                            {booking.status === "approved"
-                              ? "Deposit due"
-                              : "Quote"}
-                          </p>
-                          <p className="mt-1 text-lg font-black text-[#111827]">
-                            {formatCurrency(quote)}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-                        {actionForBooking(booking, venue)}
-                        {canCancelBookingStatus(booking.status) ? (
-                          <CustomerCancelBookingButton
-                            bookingId={booking.id}
-                            compact
+                  return (
+                    <article
+                      key={booking.id}
+                      className="overflow-hidden rounded-[28px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70"
+                    >
+                      <div className="grid gap-0 lg:grid-cols-[260px_minmax(0,1fr)]">
+                        <div className="relative h-56 overflow-hidden bg-[#EFF6FF] lg:h-full">
+                          <img
+                            src={buildVenueImageUrl(venueImage)}
+                            alt={venue?.name ?? "Venue booking"}
+                            className="h-full w-full object-cover"
                           />
-                        ) : null}
-                        {venue?.slug ? (
-                          <Link
-                            href={`/venues/${venue.slug}`}
-                            className="inline-flex h-12 items-center justify-center rounded-2xl border border-[#E5E7EB] bg-white px-5 text-sm font-extrabold text-[#111827] shadow-sm transition hover:border-[#2563EB]/50 hover:bg-[#EFF6FF] hover:text-[#2563EB]"
-                          >
-                            View Venue
-                          </Link>
-                        ) : null}
-                      </div>
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/35 to-transparent lg:bg-gradient-to-r" />
+                        </div>
 
-                      <p className="text-xs font-semibold text-slate-400">
-                        Current status: {BOOKING_STATUS_LABEL[booking.status]}
-                      </p>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+                        <div className="grid gap-5 p-5 sm:p-6">
+                          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                            <div>
+                              <BookingStatusBadge status={booking.status} />
+                              <h2 className="mt-3 text-2xl font-black tracking-[-0.04em] text-[#111827]">
+                                {venue?.name ?? "Untitled Venue"}
+                              </h2>
+
+                              <div className="mt-3 flex flex-wrap gap-3 text-sm font-semibold text-[#6B7280]">
+                                <span className="inline-flex items-center gap-2">
+                                  <MapPin className="h-4 w-4 text-[#2563EB]" />
+                                  {getVenueLocation(venue)}
+                                </span>
+                                <span className="inline-flex items-center gap-2">
+                                  <CalendarDays className="h-4 w-4 text-[#2563EB]" />
+                                  {formatDate(booking.event_date)}
+                                </span>
+                                <span className="inline-flex items-center gap-2">
+                                  <TicketCheck className="h-4 w-4 text-[#2563EB]" />
+                                  {(booking.guest_count ?? 0).toLocaleString(
+                                    "en-PH",
+                                  )}{" "}
+                                  guests
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 lg:text-right">
+                              <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">
+                                {booking.status === "approved"
+                                  ? "Deposit due"
+                                  : "Quote"}
+                              </p>
+                              <p className="mt-1 text-lg font-black text-[#111827]">
+                                {formatCurrency(quote)}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                            {actionForBooking(booking, venue)}
+                            {canCancelBookingStatus(booking.status) ? (
+                              <CustomerCancelBookingButton
+                                bookingId={booking.id}
+                                compact
+                              />
+                            ) : null}
+                            {venue?.slug ? (
+                              <Link
+                                href={`/venues/${venue.slug}`}
+                                className="inline-flex h-12 items-center justify-center rounded-2xl border border-[#E5E7EB] bg-white px-5 text-sm font-extrabold text-[#111827] shadow-sm transition hover:border-[#2563EB]/50 hover:bg-[#EFF6FF] hover:text-[#2563EB]"
+                              >
+                                View Venue
+                              </Link>
+                            ) : null}
+                          </div>
+
+                          <p className="text-xs font-semibold text-slate-400">
+                            Current status:{" "}
+                            {BOOKING_STATUS_LABEL[booking.status]}
+                          </p>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
-        </>
-      )}
       </div>
     </div>
   );

@@ -45,7 +45,9 @@ function getNavLinks(user?: { email?: string | null } | null): MobileLink[] {
 
 function isActive(pathname: string, href: string, label?: string) {
   if (label === "Host a Venue") {
-    return pathname === HOST_VENUE_PATH || pathname.startsWith(`${HOST_VENUE_PATH}/`);
+    return (
+      pathname === HOST_VENUE_PATH || pathname.startsWith(`${HOST_VENUE_PATH}/`)
+    );
   }
   if (href === "/") return pathname === "/";
   if (href === "/venues") {

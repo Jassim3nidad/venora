@@ -118,8 +118,8 @@ export default function DeleteAccountDangerZone() {
                   Confirm Account Deletion
                 </DialogTitle>
                 <DialogDescription className="leading-6">
-                  This action cannot be easily undone. Please enter your
-                  current password, re-enter it, and type "DELETE MY ACCOUNT" to
+                  This action cannot be easily undone. Please enter your current
+                  password, re-enter it, and type "DELETE MY ACCOUNT" to
                   continue.
                 </DialogDescription>
               </DialogHeader>

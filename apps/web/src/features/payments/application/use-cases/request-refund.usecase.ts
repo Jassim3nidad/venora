@@ -50,7 +50,8 @@ export async function requestRefund(
   const gateway = getGateway(refund.payment_provider);
 
   const paymentReference =
-    (refund.metadata?.["payment_provider_reference"] as string | undefined) ?? null;
+    (refund.metadata?.["payment_provider_reference"] as string | undefined) ??
+    null;
 
   if (!paymentReference) {
     // No provider payment to refund against — leave the refund pending
@@ -76,25 +77,34 @@ export async function requestRefund(
     throw new RefundError();
   }
 
-  const { error: markError } = await serviceClient.rpc("mark_refund_processing", {
-    p_refund_id: refund.id,
-    p_provider_reference: providerRefund.refundReference,
-  });
+  const { error: markError } = await serviceClient.rpc(
+    "mark_refund_processing",
+    {
+      p_refund_id: refund.id,
+      p_provider_reference: providerRefund.refundReference,
+    },
+  );
 
   if (markError) {
     // The provider refund exists but we could not record it — surface
     // loudly; reconciliation happens via the webhook + audit trail.
-    console.error("[payments] mark_refund_processing failed:", markError.message);
+    console.error(
+      "[payments] mark_refund_processing failed:",
+      markError.message,
+    );
   }
 
   let finalStatus = "processing";
 
   if (providerRefund.status === "succeeded") {
-    const { error: completeError } = await serviceClient.rpc("complete_booking_refund", {
-      p_payment_provider: refund.payment_provider,
-      p_provider_reference: providerRefund.refundReference,
-      p_amount: Number(refund.amount),
-    });
+    const { error: completeError } = await serviceClient.rpc(
+      "complete_booking_refund",
+      {
+        p_payment_provider: refund.payment_provider,
+        p_provider_reference: providerRefund.refundReference,
+        p_amount: Number(refund.amount),
+      },
+    );
     if (!completeError) finalStatus = "succeeded";
   }
 

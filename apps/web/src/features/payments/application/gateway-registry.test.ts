@@ -18,19 +18,24 @@ describe("gateway-registry", () => {
   });
 
   it("throws PaymentProviderNotAvailableError for an unregistered provider", async () => {
-    const { getGateway, PaymentProviderNotAvailableError } = await import("./gateway-registry");
-    expect(() => getGateway("stripe")).toThrow(PaymentProviderNotAvailableError);
+    const { getGateway, PaymentProviderNotAvailableError } =
+      await import("./gateway-registry");
+    expect(() => getGateway("stripe")).toThrow(
+      PaymentProviderNotAvailableError,
+    );
   });
 
   it("listAvailableProviders reflects only registered providers", async () => {
-    const { registerGateway, listAvailableProviders } = await import("./gateway-registry");
+    const { registerGateway, listAvailableProviders } =
+      await import("./gateway-registry");
     registerGateway("paymongo", () => ({ id: "paymongo" as const }) as any);
 
     expect(listAvailableProviders()).toEqual(["paymongo"]);
   });
 
   it("isGatewayAvailable is false before registration and true after", async () => {
-    const { registerGateway, isGatewayAvailable } = await import("./gateway-registry");
+    const { registerGateway, isGatewayAvailable } =
+      await import("./gateway-registry");
     expect(isGatewayAvailable("paymongo")).toBe(false);
     registerGateway("paymongo", () => ({ id: "paymongo" as const }) as any);
     expect(isGatewayAvailable("paymongo")).toBe(true);

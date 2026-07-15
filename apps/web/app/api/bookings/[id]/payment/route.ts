@@ -6,7 +6,12 @@ import "@/src/features/payments/infrastructure/register-gateways";
 import { startPaymentSchema } from "@/src/features/payments/schemas/payment.schema";
 import { startCheckout } from "@/src/features/payments/application/use-cases/start-checkout.usecase";
 
-function apiError(code: string, message: string, status: number, details?: unknown) {
+function apiError(
+  code: string,
+  message: string,
+  status: number,
+  details?: unknown,
+) {
   return NextResponse.json(
     { data: null, error: { code, message, details } },
     { status },
@@ -41,7 +46,9 @@ export async function POST(
 
     const appUrl =
       process.env.NEXT_PUBLIC_APP_URL ??
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+      (process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : "http://localhost:3000");
     const supabase = (await createClient()) as any;
 
     const {

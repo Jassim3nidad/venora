@@ -9,7 +9,11 @@ export const sampleSupplierCategories: SupplierCategory[] = [
   { id: "sample-cat-video", name: "Videography", slug: "videography" },
   { id: "sample-cat-floral", name: "Floral & Styling", slug: "floral-styling" },
   { id: "sample-cat-lights", name: "Lights & Sounds", slug: "lights-sounds" },
-  { id: "sample-cat-coordination", name: "Event Coordination", slug: "event-coordination" },
+  {
+    id: "sample-cat-coordination",
+    name: "Event Coordination",
+    slug: "event-coordination",
+  },
   { id: "sample-cat-desserts", name: "Cake & Desserts", slug: "cake-desserts" },
   { id: "sample-cat-makeup", name: "Hair & Makeup", slug: "hair-makeup" },
 ];
@@ -28,7 +32,7 @@ const sampleSupplierLocationDefaults = {
   travelFeeNote: "Travel fees apply outside Metro Manila.",
 };
 
-export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
+export const sampleSuppliers: SupplierMarketplaceProfile[] = [
   {
     id: "sample-aurora-table",
     profileId: "sample-profile-aurora-table",
@@ -36,7 +40,8 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
     slug: "aurora-table-catering",
     category: sampleSupplierCategories[0] ?? null,
     ...sampleSupplierLocationDefaults,
-    headline: "Modern Filipino catering for weddings, debuts, and corporate celebrations.",
+    headline:
+      "Modern Filipino catering for weddings, debuts, and corporate celebrations.",
     description:
       "Aurora Table builds plated menus, grazing stations, and cocktail service around seasonal Filipino flavors. Their production team handles tasting, menu planning, service staffing, and venue coordination.",
     basePrice: 1350,
@@ -65,11 +70,17 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
         id: "sample-aurora-classic",
         supplierId: "sample-aurora-table",
         name: "Classic Reception Buffet",
-        description: "Four-hour buffet service with carving station and dessert bar.",
+        description:
+          "Four-hour buffet service with carving station and dessert bar.",
         price: 1350,
         priceUnit: "per_pax",
         packageType: "standard",
-        inclusions: ["Menu tasting", "Buffet styling", "Service crew", "Basic tableware"],
+        inclusions: [
+          "Menu tasting",
+          "Buffet styling",
+          "Service crew",
+          "Basic tableware",
+        ],
         minGuests: 80,
         maxGuests: 350,
         isActive: true,
@@ -79,11 +90,17 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
         id: "sample-aurora-signature",
         supplierId: "sample-aurora-table",
         name: "Signature Plated Dinner",
-        description: "Multi-course plated dinner with cocktail hour and late-night snack.",
+        description:
+          "Multi-course plated dinner with cocktail hour and late-night snack.",
         price: 2400,
         priceUnit: "per_pax",
         packageType: "premium",
-        inclusions: ["Menu tasting", "Cocktail canapes", "Plated service", "Event captain"],
+        inclusions: [
+          "Menu tasting",
+          "Cocktail canapes",
+          "Plated service",
+          "Event captain",
+        ],
         minGuests: 60,
         maxGuests: 220,
         isActive: true,
@@ -133,7 +150,8 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
         id: "sample-aurora-review-1",
         supplierId: "sample-aurora-table",
         overallRating: 5,
-        comment: "Menu planning was precise and the service captain kept the reception moving smoothly.",
+        comment:
+          "Menu planning was precise and the service captain kept the reception moving smoothly.",
         createdAt: "2026-03-24T09:00:00.000Z",
         customerName: "Mika Reyes",
         customerAvatarUrl: null,
@@ -147,7 +165,8 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
     slug: "stilllight-studios",
     category: sampleSupplierCategories[1] ?? null,
     ...sampleSupplierLocationDefaults,
-    headline: "Editorial wedding photography with fast previews and structured shot planning.",
+    headline:
+      "Editorial wedding photography with fast previews and structured shot planning.",
     description:
       "Stilllight Studios specializes in documentary coverage, family formals, and polished editorial portraits. Every booking includes pre-event planning, timeline review, and a curated online gallery.",
     basePrice: 85000,
@@ -176,11 +195,17 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
         id: "sample-stilllight-essentials",
         supplierId: "sample-stilllight",
         name: "Essentials Coverage",
-        description: "Eight-hour two-photographer coverage with online gallery.",
+        description:
+          "Eight-hour two-photographer coverage with online gallery.",
         price: 85000,
         priceUnit: "per_event",
         packageType: "standard",
-        inclusions: ["2 photographers", "Online gallery", "300 edited images", "Timeline consult"],
+        inclusions: [
+          "2 photographers",
+          "Online gallery",
+          "300 edited images",
+          "Timeline consult",
+        ],
         minGuests: null,
         maxGuests: null,
         isActive: true,
@@ -190,11 +215,17 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
         id: "sample-stilllight-editorial",
         supplierId: "sample-stilllight",
         name: "Editorial Weekend",
-        description: "Full wedding weekend story with rehearsal coverage and album design.",
+        description:
+          "Full wedding weekend story with rehearsal coverage and album design.",
         price: 165000,
         priceUnit: "per_event",
         packageType: "premium",
-        inclusions: ["Engagement shoot", "Weekend coverage", "Fine art album", "Same-week previews"],
+        inclusions: [
+          "Engagement shoot",
+          "Weekend coverage",
+          "Fine art album",
+          "Same-week previews",
+        ],
         minGuests: null,
         maxGuests: null,
         isActive: true,
@@ -226,7 +257,8 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
         id: "sample-stilllight-review-1",
         supplierId: "sample-stilllight",
         overallRating: 5,
-        comment: "They were calm, organized, and gave us previews before our honeymoon flight.",
+        comment:
+          "They were calm, organized, and gave us previews before our honeymoon flight.",
         createdAt: "2026-04-26T09:00:00.000Z",
         customerName: "Paolo Santos",
         customerAvatarUrl: null,
@@ -240,7 +272,8 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
     slug: "petal-and-form-studio",
     category: sampleSupplierCategories[3] ?? null,
     ...sampleSupplierLocationDefaults,
-    headline: "Floral installations and ceremony styling with calm production management.",
+    headline:
+      "Floral installations and ceremony styling with calm production management.",
     description:
       "Petal & Form creates ceremony arches, aisle concepts, reception tablescapes, and photo corners. Their team is known for clean logistics, sustainable floral sourcing, and detailed venue turnover.",
     basePrice: 65000,
@@ -273,7 +306,11 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
         price: 65000,
         priceUnit: "per_event",
         packageType: "standard",
-        inclusions: ["Ceremony arch", "Aisle florals", "Welcome signage styling"],
+        inclusions: [
+          "Ceremony arch",
+          "Aisle florals",
+          "Welcome signage styling",
+        ],
         minGuests: null,
         maxGuests: null,
         isActive: true,
@@ -283,11 +320,17 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
         id: "sample-petal-full",
         supplierId: "sample-petal-form",
         name: "Full Venue Styling",
-        description: "Ceremony, reception tables, stage, and photo area styling.",
+        description:
+          "Ceremony, reception tables, stage, and photo area styling.",
         price: 185000,
         priceUnit: "per_event",
         packageType: "full_service",
-        inclusions: ["Mood board", "Tablescapes", "Stage florals", "Turnover crew"],
+        inclusions: [
+          "Mood board",
+          "Tablescapes",
+          "Stage florals",
+          "Turnover crew",
+        ],
         minGuests: null,
         maxGuests: null,
         isActive: true,
@@ -299,7 +342,8 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
         id: "sample-petal-portfolio-1",
         supplierId: "sample-petal-form",
         title: "Glasshouse Ceremony",
-        description: "White and green ceremony concept with layered aisle florals.",
+        description:
+          "White and green ceremony concept with layered aisle florals.",
         imageUrl:
           "https://images.unsplash.com/photo-1529634806980-85c3dd6d34ac?auto=format&fit=crop&w=1000&q=80",
         eventType: "Wedding",
@@ -319,7 +363,8 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
         id: "sample-petal-review-1",
         supplierId: "sample-petal-form",
         overallRating: 5,
-        comment: "The ceremony area was exactly the mood board, and teardown was handled cleanly.",
+        comment:
+          "The ceremony area was exactly the mood board, and teardown was handled cleanly.",
         createdAt: "2026-05-10T09:00:00.000Z",
         customerName: "Aly Cruz",
         customerAvatarUrl: null,
@@ -333,7 +378,8 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
     slug: "pulse-grid-lights-and-sounds",
     category: sampleSupplierCategories[4] ?? null,
     ...sampleSupplierLocationDefaults,
-    headline: "Reliable audio, intelligent lighting, LED walls, and technical direction.",
+    headline:
+      "Reliable audio, intelligent lighting, LED walls, and technical direction.",
     description:
       "Pulse Grid supplies event-grade sound systems, lighting plots, LED walls, rigging plans, and technical operators for weddings, concerts, and corporate events.",
     basePrice: 78000,
@@ -362,11 +408,17 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
         id: "sample-pulse-standard",
         supplierId: "sample-pulse-grid",
         name: "Reception Technical Package",
-        description: "Sound, basic wash lighting, and technical crew for reception programs.",
+        description:
+          "Sound, basic wash lighting, and technical crew for reception programs.",
         price: 78000,
         priceUnit: "per_event",
         packageType: "standard",
-        inclusions: ["Main PA system", "Wireless microphones", "Basic lights", "2 technicians"],
+        inclusions: [
+          "Main PA system",
+          "Wireless microphones",
+          "Basic lights",
+          "2 technicians",
+        ],
         minGuests: 80,
         maxGuests: 300,
         isActive: true,
@@ -376,11 +428,17 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
         id: "sample-pulse-production",
         supplierId: "sample-pulse-grid",
         name: "Full Production Grid",
-        description: "LED wall, intelligent lights, program operator, and stage tech crew.",
+        description:
+          "LED wall, intelligent lights, program operator, and stage tech crew.",
         price: 215000,
         priceUnit: "per_event",
         packageType: "premium",
-        inclusions: ["LED wall", "Moving heads", "Stage plot", "Show caller support"],
+        inclusions: [
+          "LED wall",
+          "Moving heads",
+          "Stage plot",
+          "Show caller support",
+        ],
         minGuests: 150,
         maxGuests: 900,
         isActive: true,
@@ -392,7 +450,8 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
         id: "sample-pulse-portfolio-1",
         supplierId: "sample-pulse-grid",
         title: "Corporate Awards Night",
-        description: "LED wall, stage wash, and clean audio for a 600-person ballroom event.",
+        description:
+          "LED wall, stage wash, and clean audio for a 600-person ballroom event.",
         imageUrl:
           "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=80",
         eventType: "Corporate",
@@ -412,11 +471,12 @@ export const sampleSuppliers: SupplierMarketplaceProfile[] = ([
         id: "sample-pulse-review-1",
         supplierId: "sample-pulse-grid",
         overallRating: 4,
-        comment: "Clear audio, clean cues, and quick coordination with the venue tech team.",
+        comment:
+          "Clear audio, clean cues, and quick coordination with the venue tech team.",
         createdAt: "2026-03-15T09:00:00.000Z",
         customerName: "Nina Bautista",
         customerAvatarUrl: null,
       },
     ],
   },
-] as any[]) as SupplierMarketplaceProfile[];
+] as any[] as SupplierMarketplaceProfile[];

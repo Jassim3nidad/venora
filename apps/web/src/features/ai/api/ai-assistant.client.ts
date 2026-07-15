@@ -33,7 +33,10 @@ export async function* streamAssistantReply(
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !anonKey) {
-    throw new AIAssistantClientError("CONFIGURATION_ERROR", "Assistant is not configured.");
+    throw new AIAssistantClientError(
+      "CONFIGURATION_ERROR",
+      "Assistant is not configured.",
+    );
   }
 
   const supabase = createClient();

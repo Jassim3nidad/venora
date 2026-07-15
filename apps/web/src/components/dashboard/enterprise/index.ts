@@ -1,7 +1,10 @@
 export { EnterpriseShell } from "./EnterpriseShell";
 export { MaterialIcon } from "./MaterialIcon";
 export { VenueOwnerOverview } from "./VenueOwnerOverview";
-export type { VenueOwnerBooking, VenueOwnerOverviewProps } from "./VenueOwnerOverview";
+export type {
+  VenueOwnerBooking,
+  VenueOwnerOverviewProps,
+} from "./VenueOwnerOverview";
 export { CoordinatorOverview } from "./CoordinatorOverview";
 export type {
   CoordinatorOverviewProps,
@@ -27,10 +30,7 @@ export {
   EmptyState,
 } from "./ui";
 export type { DataTableColumn } from "./ui";
-export {
-  NAV_BY_ROLE,
-  ROLE_LABELS,
-} from "./nav-config";
+export { NAV_BY_ROLE, ROLE_LABELS } from "./nav-config";
 export type { EnterpriseRole, NavItem } from "./nav-config";
 import dynamic from "next/dynamic";
 

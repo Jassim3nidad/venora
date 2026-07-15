@@ -54,21 +54,23 @@ export default async function CoordinatorVenuesPage() {
   const { data: venues } =
     isAdmin || orgIds.length > 0 ? await venuesQuery : { data: [] };
 
-  const rows: VenueDisplayRow[] = ((venues ?? []) as VenueRow[]).map((venue) => ({
-    id: venue.id,
-    name: venue.name,
-    location: [venue.city, venue.province].filter(Boolean).join(", "),
-    capacity:
-      venue.capacity_min != null
-        ? `${venue.capacity_min}-${venue.capacity_max} guests`
-        : `${venue.capacity_max} guests`,
-    basePrice: formatPeso(venue.base_price),
-    rating:
-      venue.review_count > 0
-        ? `${Number(venue.avg_rating).toFixed(1)} (${venue.review_count})`
-        : "No reviews",
-    status: venue.status,
-  }));
+  const rows: VenueDisplayRow[] = ((venues ?? []) as VenueRow[]).map(
+    (venue) => ({
+      id: venue.id,
+      name: venue.name,
+      location: [venue.city, venue.province].filter(Boolean).join(", "),
+      capacity:
+        venue.capacity_min != null
+          ? `${venue.capacity_min}-${venue.capacity_max} guests`
+          : `${venue.capacity_max} guests`,
+      basePrice: formatPeso(venue.base_price),
+      rating:
+        venue.review_count > 0
+          ? `${Number(venue.avg_rating).toFixed(1)} (${venue.review_count})`
+          : "No reviews",
+      status: venue.status,
+    }),
+  );
 
   const columns: DataTableColumn<VenueDisplayRow>[] = [
     {
@@ -77,7 +79,9 @@ export default async function CoordinatorVenuesPage() {
       cell: (row) => (
         <div>
           <p className="font-semibold text-[#111827]">{row.name}</p>
-          <p className="text-xs text-[#6b7280]">{row.location || "Location pending"}</p>
+          <p className="text-xs text-[#6b7280]">
+            {row.location || "Location pending"}
+          </p>
         </div>
       ),
     },
@@ -85,7 +89,9 @@ export default async function CoordinatorVenuesPage() {
     {
       key: "basePrice",
       header: "Base Price",
-      cell: (row) => <span className="font-semibold text-[#111827]">{row.basePrice}</span>,
+      cell: (row) => (
+        <span className="font-semibold text-[#111827]">{row.basePrice}</span>
+      ),
     },
     { key: "rating", header: "Rating", cell: (row) => row.rating },
     {
@@ -115,7 +121,11 @@ export default async function CoordinatorVenuesPage() {
       description="Venues owned by the organization(s) you coordinate for."
       action={
         rows.length > 0 ? (
-          <DashButton href="/dashboard/packages" variant="secondary" icon="inventory_2">
+          <DashButton
+            href="/dashboard/packages"
+            variant="secondary"
+            icon="inventory_2"
+          >
             View Packages
           </DashButton>
         ) : null

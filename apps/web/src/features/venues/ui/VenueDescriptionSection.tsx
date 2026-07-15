@@ -19,7 +19,9 @@ export default function VenueDescriptionSection({
   const [expanded, setExpanded] = useState(false);
   const shouldTruncate = body.length > PREVIEW_LENGTH;
   const visibleText =
-    expanded || !shouldTruncate ? body : `${body.slice(0, PREVIEW_LENGTH).trim()}…`;
+    expanded || !shouldTruncate
+      ? body
+      : `${body.slice(0, PREVIEW_LENGTH).trim()}…`;
 
   return (
     <section className="space-y-4 border-b border-[var(--border-default)] pb-8">

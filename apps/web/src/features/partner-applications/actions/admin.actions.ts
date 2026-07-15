@@ -29,7 +29,10 @@ export async function getVerificationDocumentUrlAction(path: string) {
       .createSignedUrl(path, 60 * 10);
 
     if (error || !data) {
-      return { success: false, error: error?.message ?? "Could not generate document link" };
+      return {
+        success: false,
+        error: error?.message ?? "Could not generate document link",
+      };
     }
 
     return { success: true, url: data.signedUrl };
@@ -52,9 +55,12 @@ export async function approveApplicationAction(applicationId: string) {
     }
 
     // Call RPC
-    const { error: rpcError } = await (supabase as any).rpc("admin_approve_partner_application", {
-      p_application_id: applicationId,
-    });
+    const { error: rpcError } = await (supabase as any).rpc(
+      "admin_approve_partner_application",
+      {
+        p_application_id: applicationId,
+      },
+    );
 
     if (rpcError) {
       return { success: false, error: rpcError.message };
@@ -70,9 +76,15 @@ export async function approveApplicationAction(applicationId: string) {
   }
 }
 
-export async function denyApplicationAction(applicationId: string, reason: string) {
+export async function denyApplicationAction(
+  applicationId: string,
+  reason: string,
+) {
   if (!reason.trim()) {
-    return { success: false, error: "A reason is required to deny an application." };
+    return {
+      success: false,
+      error: "A reason is required to deny an application.",
+    };
   }
 
   try {
@@ -88,10 +100,13 @@ export async function denyApplicationAction(applicationId: string, reason: strin
     }
 
     // Call RPC
-    const { error: rpcError } = await (supabase as any).rpc("admin_deny_partner_application", {
-      p_application_id: applicationId,
-      p_reason: reason.trim(),
-    });
+    const { error: rpcError } = await (supabase as any).rpc(
+      "admin_deny_partner_application",
+      {
+        p_application_id: applicationId,
+        p_reason: reason.trim(),
+      },
+    );
 
     if (rpcError) {
       return { success: false, error: rpcError.message };

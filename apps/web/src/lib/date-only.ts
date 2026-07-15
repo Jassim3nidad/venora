@@ -41,7 +41,9 @@ export function coerceDateOnlyValue(value: unknown) {
 }
 
 export function isPastDate(date: Date) {
-  return startOfLocalDay(date).getTime() < startOfLocalDay(new Date()).getTime();
+  return (
+    startOfLocalDay(date).getTime() < startOfLocalDay(new Date()).getTime()
+  );
 }
 
 export function isTodayOrFutureDate(date: Date) {

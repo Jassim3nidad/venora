@@ -37,11 +37,18 @@ export async function fetchVenueRecommendations(): Promise<AIRecommendationRespo
   }
 
   if (!data) {
-    throw new AIRecommendationClientError("EMPTY_RESPONSE", "Recommendations returned no response.");
+    throw new AIRecommendationClientError(
+      "EMPTY_RESPONSE",
+      "Recommendations returned no response.",
+    );
   }
 
   if (data.error) {
-    throw new AIRecommendationClientError(data.error.code, data.error.message, data.error.details);
+    throw new AIRecommendationClientError(
+      data.error.code,
+      data.error.message,
+      data.error.details,
+    );
   }
 
   const parsed = aiRecommendationResponseSchema.safeParse(data.data);
@@ -57,7 +64,9 @@ export async function fetchVenueRecommendations(): Promise<AIRecommendationRespo
   return parsed.data;
 }
 
-export async function recordRecommendationClick(eventId: string): Promise<void> {
+export async function recordRecommendationClick(
+  eventId: string,
+): Promise<void> {
   // `record_recommendation_click` predates the last `pnpm db:types` regeneration
   // (see packages/database/types/generated.ts header) — cast like other
   // not-yet-typed RPCs in this codebase (e.g. booking actions.ts).

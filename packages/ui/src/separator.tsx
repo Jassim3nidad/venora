@@ -4,8 +4,9 @@ import * as React from "react";
 import * as SeparatorPrimitive from "@radix-ui/react-separator";
 import { cn } from "@venora/lib";
 
-export interface SeparatorProps
-  extends React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root> {
+export interface SeparatorProps extends React.ComponentPropsWithoutRef<
+  typeof SeparatorPrimitive.Root
+> {
   variant?: "default" | "gradient";
 }
 
@@ -14,8 +15,14 @@ const Separator = React.forwardRef<
   SeparatorProps
 >(
   (
-    { className, orientation = "horizontal", decorative = true, variant = "default", ...props },
-    ref
+    {
+      className,
+      orientation = "horizontal",
+      decorative = true,
+      variant = "default",
+      ...props
+    },
+    ref,
   ) => (
     <SeparatorPrimitive.Root
       ref={ref}
@@ -27,11 +34,11 @@ const Separator = React.forwardRef<
         variant === "default" && "bg-[var(--border-default)]",
         variant === "gradient" &&
           "bg-gradient-to-r from-[var(--color-brand-600)] to-[var(--color-accent-500)] h-[2px]",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  ),
 );
 Separator.displayName = SeparatorPrimitive.Root.displayName;
 

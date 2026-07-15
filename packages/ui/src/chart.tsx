@@ -51,7 +51,7 @@ const ChartContainer = React.forwardRef<
           "[&_.recharts-cartesian-grid_line]:stroke-[var(--border-default)]",
           "[&_.recharts-curve.recharts-tooltip-cursor]:stroke-[var(--border-default)]",
           "[&_.recharts-layer]:outline-none [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
-          className
+          className,
         )}
         {...props}
       >
@@ -107,19 +107,24 @@ const ChartTooltipContent = React.forwardRef<
         {payload.map((item, index) => {
           const key = String(item.dataKey ?? item.name ?? index);
           const itemConfig = config[key];
-          const value = typeof item.value === "number" ? item.value : Number(item.value);
+          const value =
+            typeof item.value === "number" ? item.value : Number(item.value);
 
           return (
             <div key={key} className="flex items-center justify-between gap-4">
               <span className="flex items-center gap-1.5 text-[var(--text-secondary)]">
                 <span
                   className="h-2 w-2 shrink-0 rounded-[2px]"
-                  style={{ backgroundColor: item.color ?? "var(--color-brand-500)" }}
+                  style={{
+                    backgroundColor: item.color ?? "var(--color-brand-500)",
+                  }}
                 />
                 {itemConfig?.label ?? key}
               </span>
               <span className="font-semibold text-[var(--text-primary)]">
-                {valueFormatter && !Number.isNaN(value) ? valueFormatter(value) : item.value}
+                {valueFormatter && !Number.isNaN(value)
+                  ? valueFormatter(value)
+                  : item.value}
               </span>
             </div>
           );
@@ -141,16 +146,24 @@ const ChartLegendContent = React.forwardRef<
   if (!payload?.length) return null;
 
   return (
-    <div ref={ref} className="flex flex-wrap items-center justify-center gap-4 pt-3">
+    <div
+      ref={ref}
+      className="flex flex-wrap items-center justify-center gap-4 pt-3"
+    >
       {payload.map((item, index) => {
         const key = String(item.dataKey ?? item.value ?? index);
         const itemConfig = config[key];
 
         return (
-          <div key={key} className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
+          <div
+            key={key}
+            className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)]"
+          >
             <span
               className="h-2 w-2 shrink-0 rounded-[2px]"
-              style={{ backgroundColor: item.color ?? "var(--color-brand-500)" }}
+              style={{
+                backgroundColor: item.color ?? "var(--color-brand-500)",
+              }}
             />
             {itemConfig?.label ?? item.value}
           </div>

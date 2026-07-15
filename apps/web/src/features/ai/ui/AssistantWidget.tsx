@@ -1,18 +1,34 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MessageCircle, X, Send, Sparkles, RotateCcw, Loader2 } from "lucide-react";
+import {
+  MessageCircle,
+  X,
+  Send,
+  Sparkles,
+  RotateCcw,
+  Loader2,
+} from "lucide-react";
 import { useAssistantConversation } from "../hooks/use-assistant-conversation";
 
 export default function AssistantWidget() {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
-  const { messages, sendMessage, isStreaming, error, startNewConversation, ready } =
-    useAssistantConversation();
+  const {
+    messages,
+    sendMessage,
+    isStreaming,
+    error,
+    startNewConversation,
+    ready,
+  } = useAssistantConversation();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    scrollRef.current?.scrollTo({
+      top: scrollRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }, [messages]);
 
   function handleSubmit(event: React.FormEvent) {
@@ -52,7 +68,10 @@ export default function AssistantWidget() {
             </div>
           </div>
 
-          <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+          <div
+            ref={scrollRef}
+            className="flex-1 space-y-3 overflow-y-auto px-4 py-4"
+          >
             {messages.length === 0 && (
               <div className="rounded-2xl bg-[var(--bg-subtle)] p-3.5 text-xs leading-relaxed text-[var(--text-secondary)]">
                 Hi! Ask me about venues, packages, pricing, or your bookings.
@@ -116,7 +135,11 @@ export default function AssistantWidget() {
         className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-brand-600)] text-white shadow-xl transition hover:bg-[var(--color-brand-700)] hover:scale-105"
         aria-label={open ? "Close assistant" : "Open assistant"}
       >
-        {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
+        {open ? (
+          <X className="h-6 w-6" />
+        ) : (
+          <MessageCircle className="h-6 w-6" />
+        )}
       </button>
     </div>
   );

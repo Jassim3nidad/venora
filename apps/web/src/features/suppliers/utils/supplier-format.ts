@@ -16,7 +16,7 @@ export function formatPriceUnit(unit?: string | null) {
     per_day: "per day",
   };
 
-  return unit ? labels[unit] ?? unit.replace(/_/g, " ") : "";
+  return unit ? (labels[unit] ?? unit.replace(/_/g, " ")) : "";
 }
 
 export function formatRating(rating: number, count: number) {

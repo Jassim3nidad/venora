@@ -14,7 +14,10 @@ import {
   type GeneratedContent,
 } from "../schemas/ai-description.schema";
 
-const contentTypeLabels: Record<(typeof generatedContentTypeOptions)[number], string> = {
+const contentTypeLabels: Record<
+  (typeof generatedContentTypeOptions)[number],
+  string
+> = {
   description: "Venue description",
   seo_meta: "SEO meta description",
   package_description: "Package description",
@@ -40,10 +43,13 @@ export default function DescriptionGeneratorPanel({
 }: DescriptionGeneratorPanelProps) {
   const [contentType, setContentType] =
     useState<(typeof generatedContentTypeOptions)[number]>("description");
-  const [tone, setTone] = useState<(typeof generatedContentToneOptions)[number]>("elegant");
+  const [tone, setTone] =
+    useState<(typeof generatedContentToneOptions)[number]>("elegant");
   const [packageId, setPackageId] = useState<string>(packages[0]?.id ?? "");
   const [drafts, setDrafts] = useState(initialDrafts);
-  const [decisionState, setDecisionState] = useState<"idle" | "pending" | "error">("idle");
+  const [decisionState, setDecisionState] = useState<
+    "idle" | "pending" | "error"
+  >("idle");
   const [decisionError, setDecisionError] = useState<string | null>(null);
 
   const { mutate, isPending, error, reset } = useGenerateVenueDescription();
@@ -55,7 +61,8 @@ export default function DescriptionGeneratorPanel({
       {
         venueId,
         contentType,
-        packageId: contentType === "package_description" ? packageId || null : null,
+        packageId:
+          contentType === "package_description" ? packageId || null : null,
         tone,
       },
       {
@@ -71,7 +78,9 @@ export default function DescriptionGeneratorPanel({
     setDecisionState("pending");
     setDecisionError(null);
 
-    const result = await approveGeneratedContentAction({ contentId: activeDraft.id });
+    const result = await approveGeneratedContentAction({
+      contentId: activeDraft.id,
+    });
 
     if (result.error) {
       setDecisionState("error");
@@ -91,7 +100,9 @@ export default function DescriptionGeneratorPanel({
     setDecisionState("pending");
     setDecisionError(null);
 
-    const result = await rejectGeneratedContentAction({ contentId: activeDraft.id });
+    const result = await rejectGeneratedContentAction({
+      contentId: activeDraft.id,
+    });
 
     if (result.error) {
       setDecisionState("error");
@@ -186,7 +197,8 @@ export default function DescriptionGeneratorPanel({
           type="button"
           onClick={handleGenerate}
           disabled={
-            isPending || (contentType === "package_description" && packages.length === 0)
+            isPending ||
+            (contentType === "package_description" && packages.length === 0)
           }
           className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#1d4ed8] text-sm font-bold text-white transition hover:bg-[#1e40af] disabled:opacity-60"
         >

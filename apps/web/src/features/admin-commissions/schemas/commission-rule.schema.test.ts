@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { createCommissionRuleSchema, updateCommissionRuleSchema } from "./commission-rule.schema";
+import {
+  createCommissionRuleSchema,
+  updateCommissionRuleSchema,
+} from "./commission-rule.schema";
 
 const validBase = {
   scope: "global" as const,
@@ -14,17 +17,26 @@ describe("createCommissionRuleSchema", () => {
   });
 
   it("rejects a rule with neither percentage nor flat fee", () => {
-    const result = createCommissionRuleSchema.safeParse({ scope: "global", effectiveFrom: "2026-01-01" });
+    const result = createCommissionRuleSchema.safeParse({
+      scope: "global",
+      effectiveFrom: "2026-01-01",
+    });
     expect(result.success).toBe(false);
   });
 
   it("rejects percentage above 100", () => {
-    const result = createCommissionRuleSchema.safeParse({ ...validBase, percentage: 150 });
+    const result = createCommissionRuleSchema.safeParse({
+      ...validBase,
+      percentage: 150,
+    });
     expect(result.success).toBe(false);
   });
 
   it("requires a referenceId for venue/category scope", () => {
-    const result = createCommissionRuleSchema.safeParse({ ...validBase, scope: "venue" });
+    const result = createCommissionRuleSchema.safeParse({
+      ...validBase,
+      scope: "venue",
+    });
     expect(result.success).toBe(false);
   });
 
@@ -53,12 +65,19 @@ describe("createCommissionRuleSchema", () => {
   });
 
   it("treats a blank effectiveTo as not-provided rather than an invalid date", () => {
-    const result = createCommissionRuleSchema.safeParse({ ...validBase, effectiveTo: "" });
+    const result = createCommissionRuleSchema.safeParse({
+      ...validBase,
+      effectiveTo: "",
+    });
     expect(result.success).toBe(true);
   });
 
   it("still accepts an explicit zero percentage (a genuine 0% rule)", () => {
-    const result = createCommissionRuleSchema.safeParse({ ...validBase, percentage: 0, flatFee: 50 });
+    const result = createCommissionRuleSchema.safeParse({
+      ...validBase,
+      percentage: 0,
+      flatFee: 50,
+    });
     expect(result.success).toBe(true);
   });
 });
@@ -78,7 +97,10 @@ describe("updateCommissionRuleSchema", () => {
   });
 
   it("rejects an update with a blank reason", () => {
-    const result = updateCommissionRuleSchema.safeParse({ ...validUpdate, reason: "   " });
+    const result = updateCommissionRuleSchema.safeParse({
+      ...validUpdate,
+      reason: "   ",
+    });
     expect(result.success).toBe(false);
   });
 

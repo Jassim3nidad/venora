@@ -19,8 +19,15 @@ function formatMessageTime(iso: string): string {
   }).format(date);
 }
 
-function RoleLabel({ role, name }: { role: "customer" | "venue_owner", name?: string | null | undefined }) {
-  const label = role === "customer" ? (name || "Customer") : (name || "Venue Owner");
+function RoleLabel({
+  role,
+  name,
+}: {
+  role: "customer" | "venue_owner";
+  name?: string | null | undefined;
+}) {
+  const label =
+    role === "customer" ? name || "Customer" : name || "Venue Owner";
   return (
     <span
       className={[

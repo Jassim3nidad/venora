@@ -12,10 +12,16 @@ test.describe("Supplier role", () => {
 
   test("logs in successfully", async ({ page }) => {
     const cookies = await page.context().cookies();
-    expect(cookies.some((c) => c.name.startsWith("sb-") && c.name.endsWith("-auth-token"))).toBe(true);
+    expect(
+      cookies.some(
+        (c) => c.name.startsWith("sb-") && c.name.endsWith("-auth-token"),
+      ),
+    ).toBe(true);
   });
 
-  test("can access the supplier dashboard and its own records", async ({ page }) => {
+  test("can access the supplier dashboard and its own records", async ({
+    page,
+  }) => {
     await page.goto("/dashboard/supplier");
     expect(page.url()).not.toContain("/unauthorized");
     expect(page.url()).not.toContain("/login");
@@ -28,7 +34,12 @@ test.describe("Supplier role", () => {
   });
 
   test("cannot access /admin or any admin subroute", async ({ page }) => {
-    for (const path of ["/admin", "/admin/suppliers", "/admin/commissions", "/admin/administrators"]) {
+    for (const path of [
+      "/admin",
+      "/admin/suppliers",
+      "/admin/commissions",
+      "/admin/administrators",
+    ]) {
       await page.goto(path);
       await expect(page).toHaveTitle(/Unauthorized/i);
     }
@@ -39,25 +50,39 @@ test.describe("Supplier role", () => {
     await expect(page).toHaveTitle(/Unauthorized/i);
   });
 
-  test("cannot approve its own platform application through admin APIs", async ({ page }) => {
-    const res = await page.request.post("/api/admin/suppliers/approve", { data: {}, failOnStatusCode: false });
+  test("cannot approve its own platform application through admin APIs", async ({
+    page,
+  }) => {
+    const res = await page.request.post("/api/admin/suppliers/approve", {
+      data: {},
+      failOnStatusCode: false,
+    });
     expect([401, 403, 404, 405]).toContain(res.status());
   });
 
   test("cannot change commission rules via admin APIs", async ({ page }) => {
-    const res = await page.request.post("/api/admin/commissions", { data: {}, failOnStatusCode: false });
+    const res = await page.request.post("/api/admin/commissions", {
+      data: {},
+      failOnStatusCode: false,
+    });
     expect([401, 403, 404, 405]).toContain(res.status());
   });
 });
 
 test.describe("Supplier role — responsive", () => {
   for (const [name, viewport] of Object.entries(VIEWPORTS)) {
-    test(`loads the supplier dashboard cleanly at ${name} (${viewport.width}x${viewport.height})`, async ({ page }) => {
+    test(`loads the supplier dashboard cleanly at ${name} (${viewport.width}x${viewport.height})`, async ({
+      page,
+    }) => {
       await page.setViewportSize(viewport);
       await loginAs(page, "supplier");
       await page.goto("/dashboard/supplier");
       expect(page.url()).not.toContain("/unauthorized");
-      const hasOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
+      const hasOverflow = await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth >
+          document.documentElement.clientWidth + 1,
+      );
       expect(hasOverflow).toBe(false);
     });
   }

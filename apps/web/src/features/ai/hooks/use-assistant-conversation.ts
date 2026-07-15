@@ -1,7 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { streamAssistantReply, AIAssistantClientError } from "../api/ai-assistant.client";
+import {
+  streamAssistantReply,
+  AIAssistantClientError,
+} from "../api/ai-assistant.client";
 
 export interface AssistantMessage {
   id: string;
@@ -72,14 +75,19 @@ export function useAssistantConversation() {
             conversationIdRef.current = event.conversationId;
             setConversationId(event.conversationId);
             if (typeof window !== "undefined") {
-              window.localStorage.setItem(CONVERSATION_STORAGE_KEY, event.conversationId);
+              window.localStorage.setItem(
+                CONVERSATION_STORAGE_KEY,
+                event.conversationId,
+              );
             }
             continue;
           }
 
           setMessages((prev) =>
             prev.map((m) =>
-              m.id === assistantMessageId ? { ...m, content: m.content + event.text } : m,
+              m.id === assistantMessageId
+                ? { ...m, content: m.content + event.text }
+                : m,
             ),
           );
         }
@@ -91,7 +99,9 @@ export function useAssistantConversation() {
         setError(message);
         // Drop the placeholder only if no partial content ever arrived.
         setMessages((prev) =>
-          prev.filter((m) => m.id !== assistantMessageId || m.content.length > 0),
+          prev.filter(
+            (m) => m.id !== assistantMessageId || m.content.length > 0,
+          ),
         );
       } finally {
         setIsStreaming(false);

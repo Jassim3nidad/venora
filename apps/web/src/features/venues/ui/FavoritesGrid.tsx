@@ -3,7 +3,14 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Heart, Image as ImageIcon, MapPin, Star, Users } from "lucide-react";
+import {
+  ArrowRight,
+  Heart,
+  Image as ImageIcon,
+  MapPin,
+  Star,
+  Users,
+} from "lucide-react";
 import { toggleFavoriteAction } from "../application/actions";
 import type { MarketplaceVenue } from "../data/research-venues";
 import { isOptimizableImageSrc } from "@/src/lib/image-host";

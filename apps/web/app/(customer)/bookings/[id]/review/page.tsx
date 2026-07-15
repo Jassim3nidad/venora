@@ -38,7 +38,8 @@ export default async function BookingReviewPage({ params }: Props) {
 
   const { data: booking } = await supabase
     .from("bookings")
-    .select(`
+    .select(
+      `
       id,
       status,
       venue_id,
@@ -52,7 +53,8 @@ export default async function BookingReviewPage({ params }: Props) {
         overall_rating,
         comment
       )
-    `)
+    `,
+    )
     .eq("id", id)
     .eq("customer_id", user.id)
     .single();
@@ -82,7 +84,11 @@ export default async function BookingReviewPage({ params }: Props) {
 
         <CustomerCard className="p-5 sm:p-6">
           {canReview ? (
-            <BookingReviewForm bookingId={booking.id} venueId={booking.venue_id} userId={user.id} />
+            <BookingReviewForm
+              bookingId={booking.id}
+              venueId={booking.venue_id}
+              userId={user.id}
+            />
           ) : existingReview ? (
             <div className="grid gap-4">
               <div className="rounded-2xl border border-[#DBEAFE] bg-[#EFF6FF] p-5 text-[#1D4ED8]">
@@ -93,10 +99,14 @@ export default async function BookingReviewPage({ params }: Props) {
                   {existingReview.overall_rating} stars
                 </p>
                 {existingReview.comment ? (
-                  <p className="mt-3 text-sm font-semibold leading-6">{existingReview.comment}</p>
+                  <p className="mt-3 text-sm font-semibold leading-6">
+                    {existingReview.comment}
+                  </p>
                 ) : null}
               </div>
-              <CustomerLinkButton href={`/bookings/${id}`}>View Booking</CustomerLinkButton>
+              <CustomerLinkButton href={`/bookings/${id}`}>
+                View Booking
+              </CustomerLinkButton>
             </div>
           ) : (
             <div className="grid gap-4">

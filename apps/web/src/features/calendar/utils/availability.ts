@@ -75,7 +75,9 @@ export function isActiveBookingStatus(status?: string | null) {
   return (ACTIVE_BOOKING_STATUSES as readonly string[]).includes(status ?? "");
 }
 
-export function isAvailabilityStatus(value?: string | null): value is AvailabilityStatusValue {
+export function isAvailabilityStatus(
+  value?: string | null,
+): value is AvailabilityStatusValue {
   return (AVAILABILITY_STATUSES as readonly string[]).includes(value ?? "");
 }
 
@@ -84,7 +86,9 @@ export function isCustomerSelectableAvailabilityStatus(status?: string | null) {
 }
 
 export function getCustomerAvailabilityLabel(status?: string | null) {
-  return isAvailabilityStatus(status) ? AVAILABILITY_LABELS[status] : AVAILABILITY_LABELS.available;
+  return isAvailabilityStatus(status)
+    ? AVAILABILITY_LABELS[status]
+    : AVAILABILITY_LABELS.available;
 }
 
 export function buildCustomerAvailabilityMap(

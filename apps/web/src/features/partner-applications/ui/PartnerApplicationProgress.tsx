@@ -1,11 +1,5 @@
 import Link from "next/link";
-import {
-  AlertCircle,
-  CheckCircle2,
-  Circle,
-  Clock3,
-  Minus,
-} from "lucide-react";
+import { AlertCircle, CheckCircle2, Circle, Clock3, Minus } from "lucide-react";
 import {
   getPartnerApplicationProgressSteps,
   getPartnerRoleLabel,
@@ -163,10 +157,10 @@ export function PartnerApplicationProgress({
 
       {application.status === "pending" ? (
         <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          We&apos;ll send a notification when your application has been reviewed.
+          We&apos;ll send a notification when your application has been
+          reviewed.
         </div>
       ) : null}
-
     </div>
   );
 }

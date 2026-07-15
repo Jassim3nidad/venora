@@ -10,10 +10,10 @@ export function slugify(input: string): string {
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "") // strip accents
-    .replace(/[^a-z0-9\s-]/g, "")   // strip non-alphanumeric
+    .replace(/[^a-z0-9\s-]/g, "") // strip non-alphanumeric
     .trim()
-    .replace(/\s+/g, "-")            // spaces → hyphens
-    .replace(/-+/g, "-");            // collapse multiple hyphens
+    .replace(/\s+/g, "-") // spaces → hyphens
+    .replace(/-+/g, "-"); // collapse multiple hyphens
 }
 
 /**

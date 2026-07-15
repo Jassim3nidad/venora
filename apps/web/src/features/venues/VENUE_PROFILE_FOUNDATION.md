@@ -19,16 +19,16 @@ The orchestrator component is `VenueProfileFoundation`, used by `VenueDetails` a
 
 ## Component Map
 
-| Component | File | Purpose |
-|-----------|------|---------|
-| `VenueProfileFoundation` | `ui/VenueProfileFoundation.tsx` | Composes all foundation sections |
-| `VenueProfileCard` | `ui/VenueProfileCard.tsx` | Title, host, location, rating, share/save |
-| `VenueFeaturedGallery` | `ui/VenueFeaturedGallery.tsx` | Featured photo + desktop grid + lightbox |
-| `VenueGalleryPlaceholder` | `ui/VenueGalleryPlaceholder.tsx` | Empty hero and grid slot placeholders |
-| `VenueCapacitySection` | `ui/VenueCapacitySection.tsx` | Guest range, space type, parking, accessibility |
-| `VenueDescriptionSection` | `ui/VenueDescriptionSection.tsx` | About copy with Show more / Show less |
-| `VenuePricingSection` | `ui/VenuePricingSection.tsx` | Base rate and package breakdown |
-| `VenueMobileBookingBar` | `ui/VenueMobileBookingBar.tsx` | Sticky mobile Reserve bar |
+| Component                 | File                             | Purpose                                         |
+| ------------------------- | -------------------------------- | ----------------------------------------------- |
+| `VenueProfileFoundation`  | `ui/VenueProfileFoundation.tsx`  | Composes all foundation sections                |
+| `VenueProfileCard`        | `ui/VenueProfileCard.tsx`        | Title, host, location, rating, share/save       |
+| `VenueFeaturedGallery`    | `ui/VenueFeaturedGallery.tsx`    | Featured photo + desktop grid + lightbox        |
+| `VenueGalleryPlaceholder` | `ui/VenueGalleryPlaceholder.tsx` | Empty hero and grid slot placeholders           |
+| `VenueCapacitySection`    | `ui/VenueCapacitySection.tsx`    | Guest range, space type, parking, accessibility |
+| `VenueDescriptionSection` | `ui/VenueDescriptionSection.tsx` | About copy with Show more / Show less           |
+| `VenuePricingSection`     | `ui/VenuePricingSection.tsx`     | Base rate and package breakdown                 |
+| `VenueMobileBookingBar`   | `ui/VenueMobileBookingBar.tsx`   | Sticky mobile Reserve bar                       |
 
 Shared utilities live in:
 

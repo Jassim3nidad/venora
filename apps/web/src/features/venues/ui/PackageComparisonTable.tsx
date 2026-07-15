@@ -15,7 +15,9 @@ interface PackageComparisonTableProps {
   result: ComparePackagesResponse;
 }
 
-export default function PackageComparisonTable({ result }: PackageComparisonTableProps) {
+export default function PackageComparisonTable({
+  result,
+}: PackageComparisonTableProps) {
   const { comparisonTable, aiSummary } = result;
   const allInclusions = [
     ...new Set(comparisonTable.flatMap((row) => row.inclusions)),
@@ -45,9 +47,14 @@ export default function PackageComparisonTable({ result }: PackageComparisonTabl
           </thead>
           <tbody>
             <tr className="border-t border-[var(--border-default)]">
-              <td className="p-3.5 text-xs font-semibold text-[var(--text-muted)]">Price</td>
+              <td className="p-3.5 text-xs font-semibold text-[var(--text-muted)]">
+                Price
+              </td>
               {comparisonTable.map((row) => (
-                <td key={row.id} className="p-3.5 text-sm font-bold text-[var(--text-primary)]">
+                <td
+                  key={row.id}
+                  className="p-3.5 text-sm font-bold text-[var(--text-primary)]"
+                >
                   {formatCurrency(row.price)}
                   <span className="ml-1 text-[11px] font-normal text-[var(--text-muted)]">
                     /{row.priceUnit.replace("per_", "")}
@@ -56,16 +63,26 @@ export default function PackageComparisonTable({ result }: PackageComparisonTabl
               ))}
             </tr>
             <tr className="border-t border-[var(--border-default)]">
-              <td className="p-3.5 text-xs font-semibold text-[var(--text-muted)]">Guests</td>
+              <td className="p-3.5 text-xs font-semibold text-[var(--text-muted)]">
+                Guests
+              </td>
               {comparisonTable.map((row) => (
-                <td key={row.id} className="p-3.5 text-sm text-[var(--text-primary)]">
+                <td
+                  key={row.id}
+                  className="p-3.5 text-sm text-[var(--text-primary)]"
+                >
                   {row.minGuests ?? "—"}–{row.maxGuests ?? "—"}
                 </td>
               ))}
             </tr>
             {allInclusions.map((inclusion) => (
-              <tr key={inclusion} className="border-t border-[var(--border-default)]">
-                <td className="p-3.5 text-xs text-[var(--text-secondary)]">{inclusion}</td>
+              <tr
+                key={inclusion}
+                className="border-t border-[var(--border-default)]"
+              >
+                <td className="p-3.5 text-xs text-[var(--text-secondary)]">
+                  {inclusion}
+                </td>
                 {comparisonTable.map((row) => (
                   <td key={row.id} className="p-3.5">
                     {row.inclusions.includes(inclusion) ? (
@@ -126,7 +143,9 @@ export default function PackageComparisonTable({ result }: PackageComparisonTabl
                 Best for
               </p>
               {aiSummary.bestFor.map((entry) => {
-                const pkg = comparisonTable.find((row) => row.id === entry.packageId);
+                const pkg = comparisonTable.find(
+                  (row) => row.id === entry.packageId,
+                );
                 return (
                   <p key={entry.packageId} className="text-xs text-[#4B5563]">
                     <span className="font-semibold text-[var(--text-primary)]">

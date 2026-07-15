@@ -24,7 +24,13 @@ export const metadata: Metadata = {
   },
   description:
     "Discover and book stunning event venues across the Philippines. Weddings, corporate events, debuts, and more — all in one place.",
-  keywords: ["venue booking", "event venues", "Philippines", "wedding venue", "corporate events"],
+  keywords: [
+    "venue booking",
+    "event venues",
+    "Philippines",
+    "wedding venue",
+    "corporate events",
+  ],
   authors: [{ name: "Venora" }],
   creator: "Venora",
   metadataBase: new URL(SITE_URL),
@@ -56,7 +62,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "hsl(217 75% 55%)" },
-    { media: "(prefers-color-scheme: dark)",  color: "hsl(217 50% 15%)" },
+    { media: "(prefers-color-scheme: dark)", color: "hsl(217 50% 15%)" },
   ],
 };
 
@@ -68,9 +74,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link 
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" 
-          rel="stylesheet" 
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+          rel="stylesheet"
         />
       </head>
       <body className={`${inter.variable} ${sora.variable} font-sans`}>

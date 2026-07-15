@@ -39,8 +39,13 @@ export default function CostEstimatorResult({
       <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--bg-subtle)] p-4">
         <dl className="space-y-2.5">
           {lineItems.map((item) => (
-            <div key={item.label} className="flex items-center justify-between text-sm">
-              <dt className="text-[var(--text-secondary)] font-medium">{item.label}</dt>
+            <div
+              key={item.label}
+              className="flex items-center justify-between text-sm"
+            >
+              <dt className="text-[var(--text-secondary)] font-medium">
+                {item.label}
+              </dt>
               <dd className="text-[var(--text-primary)] font-semibold">
                 {formatCurrency(item.value)}
               </dd>
@@ -75,8 +80,8 @@ export default function CostEstimatorResult({
       </div>
 
       <p className="text-[11px] text-[var(--text-muted)]">
-        This is an AI-generated estimate for planning purposes only. Contact the venue
-        for a final quote.
+        This is an AI-generated estimate for planning purposes only. Contact the
+        venue for a final quote.
       </p>
 
       <Button

@@ -45,7 +45,11 @@ export function ApplicationReviewModal({
           const res = await getVerificationDocumentUrlAction(doc);
           return res.success
             ? { path: doc, url: res.url ?? null, error: null }
-            : { path: doc, url: null, error: res.error ?? "Could not load document" };
+            : {
+                path: doc,
+                url: null,
+                error: res.error ?? "Could not load document",
+              };
         }),
       );
 
@@ -98,12 +102,20 @@ export function ApplicationReviewModal({
 
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
-          
+          <div
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            onClick={() => setIsOpen(false)}
+          />
+
           <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[24px] bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-100 p-6">
-              <h2 className="text-xl font-black text-slate-900">Application Review</h2>
-              <button onClick={() => setIsOpen(false)} className="rounded-full p-2 text-slate-400 hover:bg-slate-100">
+              <h2 className="text-xl font-black text-slate-900">
+                Application Review
+              </h2>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="rounded-full p-2 text-slate-400 hover:bg-slate-100"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -117,14 +129,28 @@ export function ApplicationReviewModal({
 
               <div className="grid gap-6 sm:grid-cols-2 mb-8">
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Applicant</p>
-                  <p className="font-bold text-slate-900">{application.profiles?.full_name}</p>
-                  <p className="text-sm text-slate-600">{application.profiles?.email}</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                    Applicant
+                  </p>
+                  <p className="font-bold text-slate-900">
+                    {application.profiles?.full_name}
+                  </p>
+                  <p className="text-sm text-slate-600">
+                    {application.profiles?.email}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Role & Category</p>
-                  <p className="font-bold text-slate-900">{application.role_applied_for.replace("_", " ").toUpperCase()}</p>
-                  <p className="text-sm text-slate-600">{application.category}</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                    Role & Category
+                  </p>
+                  <p className="font-bold text-slate-900">
+                    {application.role_applied_for
+                      .replace("_", " ")
+                      .toUpperCase()}
+                  </p>
+                  <p className="text-sm text-slate-600">
+                    {application.category}
+                  </p>
                 </div>
               </div>
 
@@ -134,18 +160,28 @@ export function ApplicationReviewModal({
                   <h3 className="font-bold text-slate-900">Business Address</h3>
                 </div>
                 <p className="text-sm text-slate-700">
-                  {application.address_unit ? `${application.address_unit}, ` : ""}
-                  {application.address_building ? `${application.address_building}, ` : ""}
-                  {application.address_street}<br/>
-                  {application.address_district}, {application.address_city}<br/>
+                  {application.address_unit
+                    ? `${application.address_unit}, `
+                    : ""}
+                  {application.address_building
+                    ? `${application.address_building}, `
+                    : ""}
+                  {application.address_street}
+                  <br />
+                  {application.address_district}, {application.address_city}
+                  <br />
                   {application.address_country} {application.address_zip}
                 </p>
               </div>
 
               <div className="mb-8">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Verification Documents</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
+                  Verification Documents
+                </h3>
                 {docs.length === 0 ? (
-                  <p className="text-sm text-slate-500">No documents were submitted.</p>
+                  <p className="text-sm text-slate-500">
+                    No documents were submitted.
+                  </p>
                 ) : docLinks === null ? (
                   <div className="flex items-center gap-2 text-sm text-slate-500">
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -166,8 +202,12 @@ export function ApplicationReviewModal({
                             <FileText className="h-5 w-5" />
                           </div>
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-bold text-slate-900">Document {idx + 1}</p>
-                            <p className="text-xs text-slate-500">Click to view</p>
+                            <p className="truncate text-sm font-bold text-slate-900">
+                              Document {idx + 1}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              Click to view
+                            </p>
                           </div>
                         </a>
                       ) : (
@@ -179,8 +219,12 @@ export function ApplicationReviewModal({
                             <FileText className="h-5 w-5" />
                           </div>
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-bold text-slate-900">Document {idx + 1}</p>
-                            <p className="truncate text-xs text-red-600">{doc.error}</p>
+                            <p className="truncate text-sm font-bold text-slate-900">
+                              Document {idx + 1}
+                            </p>
+                            <p className="truncate text-xs text-red-600">
+                              {doc.error}
+                            </p>
                           </div>
                         </div>
                       ),
@@ -191,7 +235,9 @@ export function ApplicationReviewModal({
 
               {showDenyInput ? (
                 <div className="rounded-2xl border border-red-200 bg-red-50 p-5">
-                  <label className="mb-2 block text-sm font-bold text-red-900">Reason for Denial</label>
+                  <label className="mb-2 block text-sm font-bold text-red-900">
+                    Reason for Denial
+                  </label>
                   <textarea
                     value={denialReason}
                     onChange={(e) => setDenialReason(e.target.value)}
@@ -211,7 +257,11 @@ export function ApplicationReviewModal({
                       disabled={isDenying}
                       className="flex items-center gap-2 rounded-full bg-red-600 px-6 py-2 text-sm font-bold text-white hover:bg-red-700 disabled:opacity-50"
                     >
-                      {isDenying ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
+                      {isDenying ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <X className="h-4 w-4" />
+                      )}
                       Confirm Denial
                     </button>
                   </div>
@@ -229,7 +279,11 @@ export function ApplicationReviewModal({
                     disabled={isApproving}
                     className="flex items-center justify-center gap-2 rounded-full bg-[#2563EB] px-8 py-2.5 text-sm font-bold text-white transition hover:bg-[#1D4ED8] disabled:opacity-50"
                   >
-                    {isApproving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                    {isApproving ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Check className="h-4 w-4" />
+                    )}
                     Approve & Upgrade Role
                   </button>
                 </div>

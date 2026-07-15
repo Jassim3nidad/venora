@@ -69,21 +69,27 @@ export default async function CoordinatorEventsPage() {
           .order("event_date", { ascending: false })
       : { data: [] };
 
-  const rows: EventDisplayRow[] = ((bookings ?? []) as BookingRow[]).map((b) => ({
-    id: b.id,
-    venue: b.venues?.name ?? "-",
-    customer: b.profiles?.full_name ?? "-",
-    date: formatDate(b.event_date),
-    guests: b.guest_count ? `${b.guest_count.toLocaleString("en-PH")} guests` : "-",
-    amount: formatPeso(b.total_amount),
-    status: b.status,
-  }));
+  const rows: EventDisplayRow[] = ((bookings ?? []) as BookingRow[]).map(
+    (b) => ({
+      id: b.id,
+      venue: b.venues?.name ?? "-",
+      customer: b.profiles?.full_name ?? "-",
+      date: formatDate(b.event_date),
+      guests: b.guest_count
+        ? `${b.guest_count.toLocaleString("en-PH")} guests`
+        : "-",
+      amount: formatPeso(b.total_amount),
+      status: b.status,
+    }),
+  );
 
   const columns: DataTableColumn<EventDisplayRow>[] = [
     {
       key: "venue",
       header: "Venue",
-      cell: (row) => <span className="font-semibold text-[#111827]">{row.venue}</span>,
+      cell: (row) => (
+        <span className="font-semibold text-[#111827]">{row.venue}</span>
+      ),
     },
     { key: "customer", header: "Client", cell: (row) => row.customer },
     { key: "date", header: "Event Date", cell: (row) => row.date },
@@ -91,7 +97,9 @@ export default async function CoordinatorEventsPage() {
     {
       key: "amount",
       header: "Quote",
-      cell: (row) => <span className="font-semibold text-[#111827]">{row.amount}</span>,
+      cell: (row) => (
+        <span className="font-semibold text-[#111827]">{row.amount}</span>
+      ),
     },
     {
       key: "status",

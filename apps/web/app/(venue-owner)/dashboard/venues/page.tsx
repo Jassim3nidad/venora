@@ -78,7 +78,9 @@ export default async function OwnerVenuesPage() {
       cell: (row) => (
         <div>
           <p className="font-semibold text-[#111827]">{row.name}</p>
-          <p className="text-xs text-[#6b7280]">{row.location || "Location pending"}</p>
+          <p className="text-xs text-[#6b7280]">
+            {row.location || "Location pending"}
+          </p>
         </div>
       ),
     },
@@ -122,7 +124,11 @@ export default async function OwnerVenuesPage() {
             Add Venue
           </DashButton>
           {rows.length > 0 ? (
-            <DashButton href="/dashboard/packages" variant="secondary" icon="inventory_2">
+            <DashButton
+              href="/dashboard/packages"
+              variant="secondary"
+              icon="inventory_2"
+            >
               Manage Packages
             </DashButton>
           ) : null}

@@ -1,7 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { format, addMonths, subMonths, eachDayOfInterval, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isSameMonth, isToday } from "date-fns";
+import {
+  format,
+  addMonths,
+  subMonths,
+  eachDayOfInterval,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  isSameMonth,
+  isToday,
+} from "date-fns";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useCalendar } from "../hooks/use-calendar";
 import { isPastDate } from "@/src/lib/date-only";
@@ -13,10 +24,19 @@ interface CustomerCalendarProps {
   basePrice: number;
 }
 
-export function CustomerCalendar({ venueId, basePrice }: CustomerCalendarProps) {
+export function CustomerCalendar({
+  venueId,
+  basePrice,
+}: CustomerCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  
-  const { bookings, availability, isLoading, getBookingsForDay, getAvailabilityForDay } = useCalendar(venueId, currentMonth);
+
+  const {
+    bookings,
+    availability,
+    isLoading,
+    getBookingsForDay,
+    getAvailabilityForDay,
+  } = useCalendar(venueId, currentMonth);
 
   const calendarDays = eachDayOfInterval({
     start: startOfWeek(startOfMonth(currentMonth)),
@@ -59,7 +79,10 @@ export function CustomerCalendar({ venueId, basePrice }: CustomerCalendarProps) 
       <div>
         <div className="grid grid-cols-7 gap-1 mb-2">
           {DAYS_OF_WEEK.map((d) => (
-            <div key={d} className="text-center text-[10px] font-bold text-gray-400 uppercase">
+            <div
+              key={d}
+              className="text-center text-[10px] font-bold text-gray-400 uppercase"
+            >
               {d}
             </div>
           ))}
@@ -75,12 +98,14 @@ export function CustomerCalendar({ venueId, basePrice }: CustomerCalendarProps) 
 
             // Determine if unavailable
             // Unavailable if blackout, maintenance, or if there's an approved booking
-            const isUnavailable = 
+            const isUnavailable =
               isPast ||
-              dayAvailability?.status === "blackout" || 
+              dayAvailability?.status === "blackout" ||
               dayAvailability?.status === "maintenance" ||
               dayAvailability?.status === "reserved" ||
-              dayBookings.some(b => b.status === "approved" || b.status === "completed");
+              dayBookings.some(
+                (b) => b.status === "approved" || b.status === "completed",
+              );
 
             const price = dayAvailability?.seasonal_price_override ?? basePrice;
 
@@ -95,12 +120,14 @@ export function CustomerCalendar({ venueId, basePrice }: CustomerCalendarProps) 
               >
                 <span
                   className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold mt-1 ${
-                    isTodayDate && !isUnavailable ? "bg-blue-600 text-white" : ""
+                    isTodayDate && !isUnavailable
+                      ? "bg-blue-600 text-white"
+                      : ""
                   }`}
                 >
                   {format(day, "d")}
                 </span>
-                
+
                 {!isUnavailable && isCurrentMonth && (
                   <span className="text-[9px] font-semibold text-green-600 mb-1">
                     ₱{(price / 1000).toFixed(1)}k

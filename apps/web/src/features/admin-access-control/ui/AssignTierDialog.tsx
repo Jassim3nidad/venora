@@ -6,7 +6,11 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Loader2, Shield, X } from "lucide-react";
 import { toast } from "sonner";
 import { assignAdminTierAction } from "../application/actions";
-import { ADMIN_TIERS, ADMIN_TIER_LABELS, type AdminTier } from "@/lib/rbac/permissions";
+import {
+  ADMIN_TIERS,
+  ADMIN_TIER_LABELS,
+  type AdminTier,
+} from "@/lib/rbac/permissions";
 
 export function AssignTierDialog({
   userId,
@@ -27,7 +31,11 @@ export function AssignTierDialog({
   function handleConfirm() {
     setError(null);
     startTransition(async () => {
-      const result = await assignAdminTierAction({ userId, tier, reason: reason.trim() || undefined });
+      const result = await assignAdminTierAction({
+        userId,
+        tier,
+        reason: reason.trim() || undefined,
+      });
       if (result.error) {
         setError(result.error.message);
         return;
@@ -85,8 +93,9 @@ export function AssignTierDialog({
 
           <div className="space-y-5 p-6">
             <Dialog.Description className="text-sm text-slate-600">
-              Assigning a new tier for <span className="font-bold text-slate-900">{fullName}</span>.
-              This takes effect immediately and is recorded in the audit log.
+              Assigning a new tier for{" "}
+              <span className="font-bold text-slate-900">{fullName}</span>. This
+              takes effect immediately and is recorded in the audit log.
             </Dialog.Description>
 
             {error ? (
@@ -96,7 +105,10 @@ export function AssignTierDialog({
             ) : null}
 
             <div>
-              <label htmlFor="admin-tier-select" className="mb-2 block text-sm font-bold text-slate-900">
+              <label
+                htmlFor="admin-tier-select"
+                className="mb-2 block text-sm font-bold text-slate-900"
+              >
                 Tier
               </label>
               <select
@@ -115,8 +127,14 @@ export function AssignTierDialog({
             </div>
 
             <div>
-              <label htmlFor="admin-tier-reason" className="mb-2 block text-sm font-bold text-slate-900">
-                Reason <span className="font-normal text-slate-400">(optional, recommended)</span>
+              <label
+                htmlFor="admin-tier-reason"
+                className="mb-2 block text-sm font-bold text-slate-900"
+              >
+                Reason{" "}
+                <span className="font-normal text-slate-400">
+                  (optional, recommended)
+                </span>
               </label>
               <textarea
                 id="admin-tier-reason"
@@ -146,7 +164,11 @@ export function AssignTierDialog({
                 disabled={isPending || tier === currentTier}
                 className="flex items-center gap-2 rounded-full bg-[#1d4ed8] px-6 py-2 text-sm font-bold text-white transition hover:bg-[#1e40af] disabled:opacity-50"
               >
-                {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Shield className="h-4 w-4" />}
+                {isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Shield className="h-4 w-4" />
+                )}
                 Confirm change
               </button>
             </div>

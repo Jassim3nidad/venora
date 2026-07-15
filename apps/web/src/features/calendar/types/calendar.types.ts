@@ -8,4 +8,5 @@ export type BookingStatusValue =
   | "completed"
   | "reviewed"
   | "expired";
-export type AvailabilityStatusValue = "available" | "reserved" | "tentative" | "maintenance" | "blackout";
+export type AvailabilityStatusValue =
+  "available" | "reserved" | "tentative" | "maintenance" | "blackout";

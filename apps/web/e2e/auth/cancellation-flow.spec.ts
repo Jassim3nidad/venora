@@ -11,7 +11,10 @@ import { loginAs } from "../helpers/auth";
 // service-role (which can no longer pass the permission check at all,
 // by design, after migration 064's auth fix).
 
-const service = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+const service = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+);
 
 const TEST_CUSTOMER_ID = "00000000-0000-0000-0000-000000000003";
 const TEST_VENUE_ID = "d131d99a-5300-4de4-a23f-03abf6c61c1d"; // Amorita Resort
@@ -23,7 +26,14 @@ test.describe("Cancellation flow (real customer session)", () => {
   test.beforeEach(async () => {
     const { data, error } = await service
       .from("bookings")
-      .insert({ venue_id: TEST_VENUE_ID, customer_id: TEST_CUSTOMER_ID, package_id: TEST_PACKAGE_ID, event_date: "2099-10-01", guest_count: 25, status: "pending" })
+      .insert({
+        venue_id: TEST_VENUE_ID,
+        customer_id: TEST_CUSTOMER_ID,
+        package_id: TEST_PACKAGE_ID,
+        event_date: "2099-10-01",
+        guest_count: 25,
+        status: "pending",
+      })
       .select()
       .single();
     if (error) throw error;
@@ -31,43 +41,79 @@ test.describe("Cancellation flow (real customer session)", () => {
   });
 
   test.afterEach(async () => {
-    await service.from("notifications").delete().ilike("link", `%${bookingId}%`);
-    await service.from("booking_status_history").delete().eq("booking_id", bookingId);
+    await service
+      .from("notifications")
+      .delete()
+      .ilike("link", `%${bookingId}%`);
+    await service
+      .from("booking_status_history")
+      .delete()
+      .eq("booking_id", bookingId);
     await service.from("audit_logs").delete().eq("entity_id", bookingId);
     await service.from("bookings").delete().eq("id", bookingId);
   });
 
-  test("the real customer can cancel their own booking, and it is audited exactly once", async ({ page }) => {
+  test("the real customer can cancel their own booking, and it is audited exactly once", async ({
+    page,
+  }) => {
     await loginAs(page, "customer");
     await page.goto(`/bookings/${bookingId}/cancel`);
     await page.click('button[type="submit"]');
-    await page.waitForURL((url) => url.pathname === "/bookings", { timeout: 15000 });
+    await page.waitForURL((url) => url.pathname === "/bookings", {
+      timeout: 15000,
+    });
 
-    const { data: booking } = await service.from("bookings").select("status").eq("id", bookingId).single();
+    const { data: booking } = await service
+      .from("bookings")
+      .select("status")
+      .eq("id", bookingId)
+      .single();
     expect(booking?.status).toBe("cancelled");
 
-    const { data: auditRows } = await service.from("audit_logs").select("id").eq("entity_id", bookingId).eq("action", "booking.cancelled");
+    const { data: auditRows } = await service
+      .from("audit_logs")
+      .select("id")
+      .eq("entity_id", bookingId)
+      .eq("action", "booking.cancelled");
     expect(auditRows?.length).toBe(1);
 
-    const { data: historyRows } = await service.from("booking_status_history").select("id").eq("booking_id", bookingId).eq("status", "cancelled");
+    const { data: historyRows } = await service
+      .from("booking_status_history")
+      .select("id")
+      .eq("booking_id", bookingId)
+      .eq("status", "cancelled");
     expect(historyRows?.length).toBe(1);
   });
 
-  test("the cancel page itself blocks re-entry for an already-cancelled booking (page-level guard, before the RPC)", async ({ page }) => {
+  test("the cancel page itself blocks re-entry for an already-cancelled booking (page-level guard, before the RPC)", async ({
+    page,
+  }) => {
     await loginAs(page, "customer");
     await page.goto(`/bookings/${bookingId}/cancel`);
     await page.click('button[type="submit"]');
-    await page.waitForURL((url) => url.pathname === "/bookings", { timeout: 15000 });
+    await page.waitForURL((url) => url.pathname === "/bookings", {
+      timeout: 15000,
+    });
 
     // Second attempt: the cancel page's own canCancelBookingStatus() guard
     // (apps/web/app/(customer)/bookings/[id]/cancel/page.tsx) redirects
     // away before the form -- and therefore the RPC -- is ever reached.
     await page.goto(`/bookings/${bookingId}/cancel`);
-    await page.waitForURL((url) => url.pathname === `/bookings/${bookingId}`, { timeout: 15000 });
+    await page.waitForURL((url) => url.pathname === `/bookings/${bookingId}`, {
+      timeout: 15000,
+    });
 
-    const { data: auditRows } = await service.from("audit_logs").select("id").eq("entity_id", bookingId).eq("action", "booking.cancelled");
+    const { data: auditRows } = await service
+      .from("audit_logs")
+      .select("id")
+      .eq("entity_id", bookingId)
+      .eq("action", "booking.cancelled");
     expect(auditRows?.length).toBe(1);
-    const { data: historyRows } = await service.from("booking_status_history").select("id").eq("booking_id", bookingId).eq("status", "cancelled");
+    const { data: historyRows } = await service
+      .from("booking_status_history")
+      .select("id")
+      .eq("booking_id", bookingId)
+      .eq("status", "cancelled");
     expect(historyRows?.length).toBe(1);
   });
 });

@@ -2,9 +2,24 @@ import { Building2, Truck, ClipboardCheck } from "lucide-react";
 import { useState } from "react";
 
 const ROLES = [
-  { value: "venue_owner", label: "Venue Owner", icon: Building2, desc: "List and manage your event spaces." },
-  { value: "event_coordinator", label: "Event Coordinator", icon: ClipboardCheck, desc: "Manage clients and plan events." },
-  { value: "supplier", label: "Supplier", icon: Truck, desc: "Provide catering, AV, decor, or photography." },
+  {
+    value: "venue_owner",
+    label: "Venue Owner",
+    icon: Building2,
+    desc: "List and manage your event spaces.",
+  },
+  {
+    value: "event_coordinator",
+    label: "Event Coordinator",
+    icon: ClipboardCheck,
+    desc: "Manage clients and plan events.",
+  },
+  {
+    value: "supplier",
+    label: "Supplier",
+    icon: Truck,
+    desc: "Provide catering, AV, decor, or photography.",
+  },
 ] as const;
 
 export function RoleSelection({ onNext }: { onNext: (role: string) => void }) {
@@ -40,11 +55,17 @@ export function RoleSelection({ onNext }: { onNext: (role: string) => void }) {
                 onChange={() => setSelected(r.value)}
                 className="sr-only"
               />
-              <Icon className={`mb-4 h-8 w-8 ${isSelected ? "text-[#2563EB]" : "text-slate-600"}`} />
-              <h3 className={`text-lg font-bold mb-1 ${isSelected ? "text-[#1D4ED8]" : "text-slate-900"}`}>
+              <Icon
+                className={`mb-4 h-8 w-8 ${isSelected ? "text-[#2563EB]" : "text-slate-600"}`}
+              />
+              <h3
+                className={`text-lg font-bold mb-1 ${isSelected ? "text-[#1D4ED8]" : "text-slate-900"}`}
+              >
                 {r.label}
               </h3>
-              <p className={`text-sm ${isSelected ? "text-[#2563EB]/80" : "text-slate-500"}`}>
+              <p
+                className={`text-sm ${isSelected ? "text-[#2563EB]/80" : "text-slate-500"}`}
+              >
                 {r.desc}
               </p>
             </label>

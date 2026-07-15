@@ -2,7 +2,14 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Grid, Play, X, ChevronLeft, ChevronRight, Image as ImageIcon } from "lucide-react";
+import {
+  Grid,
+  Play,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Image as ImageIcon,
+} from "lucide-react";
 import { Dialog, DialogContent, DialogClose, Button } from "@venora/ui";
 import { isOptimizableImageSrc } from "@/src/lib/image-host";
 
@@ -20,11 +27,16 @@ interface VenueGalleryProps {
   venueName: string;
 }
 
-export default function VenueGallery({ media = [], venueName }: VenueGalleryProps) {
+export default function VenueGallery({
+  media = [],
+  venueName,
+}: VenueGalleryProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://szmjjkywcsnzkgqevinz.supabase.co";
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    "https://szmjjkywcsnzkgqevinz.supabase.co";
 
   const getMediaUrl = (path: string) => {
     if (path.startsWith("http") || path.startsWith("/")) return path;
@@ -32,14 +44,18 @@ export default function VenueGallery({ media = [], venueName }: VenueGalleryProp
   };
 
   // Sort media by display order
-  const sortedMedia = [...media].sort((a, b) => a.display_order - b.display_order);
+  const sortedMedia = [...media].sort(
+    (a, b) => a.display_order - b.display_order,
+  );
 
   // If no media is uploaded, display a fallback
   if (sortedMedia.length === 0) {
     return (
       <div className="h-[350px] md:h-[450px] w-full rounded-3xl bg-gradient-to-br from-slate-100 to-slate-200 border border-[var(--border-default)] flex flex-col items-center justify-center text-center p-4">
         <ImageIcon className="h-10 w-10 text-[var(--text-muted)] mb-2" />
-        <p className="text-sm font-semibold text-[var(--text-primary)]">No photos uploaded yet</p>
+        <p className="text-sm font-semibold text-[var(--text-primary)]">
+          No photos uploaded yet
+        </p>
       </div>
     );
   }
@@ -78,7 +94,9 @@ export default function VenueGallery({ media = [], venueName }: VenueGalleryProp
             alt={featured.alt_text || venueName}
             fill
             priority
-            unoptimized={!isOptimizableImageSrc(getMediaUrl(featured.storage_path))}
+            unoptimized={
+              !isOptimizableImageSrc(getMediaUrl(featured.storage_path))
+            }
             sizes="(max-width: 768px) 100vw, 50vw"
             className="object-cover hover:scale-[1.03] transition-transform duration-500"
           />
@@ -116,7 +134,9 @@ export default function VenueGallery({ media = [], venueName }: VenueGalleryProp
                   src={getMediaUrl(item.storage_path)}
                   alt={item.alt_text || `${venueName} photo`}
                   fill
-                  unoptimized={!isOptimizableImageSrc(getMediaUrl(item.storage_path))}
+                  unoptimized={
+                    !isOptimizableImageSrc(getMediaUrl(item.storage_path))
+                  }
                   sizes="25vw"
                   className="object-cover hover:scale-[1.05] transition-transform duration-500"
                 />
@@ -186,7 +206,11 @@ export default function VenueGallery({ media = [], venueName }: VenueGalleryProp
                     src={getMediaUrl(activeMedia.storage_path)}
                     alt={activeMedia.alt_text || "Venue media"}
                     fill
-                    unoptimized={!isOptimizableImageSrc(getMediaUrl(activeMedia.storage_path))}
+                    unoptimized={
+                      !isOptimizableImageSrc(
+                        getMediaUrl(activeMedia.storage_path),
+                      )
+                    }
                     sizes="100vw"
                     className="rounded-2xl object-contain shadow-2xl"
                   />
@@ -210,14 +234,18 @@ export default function VenueGallery({ media = [], venueName }: VenueGalleryProp
                 key={m.id}
                 onClick={() => setActiveIndex(idx)}
                 className={`relative h-14 w-20 rounded-xl overflow-hidden cursor-pointer border-2 transition-all flex-shrink-0 ${
-                  idx === activeIndex ? "border-[var(--color-brand-500)] scale-105" : "border-transparent opacity-60 hover:opacity-100"
+                  idx === activeIndex
+                    ? "border-[var(--color-brand-500)] scale-105"
+                    : "border-transparent opacity-60 hover:opacity-100"
                 }`}
               >
                 <Image
                   src={getMediaUrl(m.storage_path)}
                   alt="Thumbnail"
                   fill
-                  unoptimized={!isOptimizableImageSrc(getMediaUrl(m.storage_path))}
+                  unoptimized={
+                    !isOptimizableImageSrc(getMediaUrl(m.storage_path))
+                  }
                   sizes="80px"
                   className="object-cover"
                 />

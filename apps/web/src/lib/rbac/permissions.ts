@@ -23,13 +23,13 @@ export const ADMIN_TIERS = [
 export type AdminTier = (typeof ADMIN_TIERS)[number];
 
 export const ADMIN_TIER_LABELS: Record<AdminTier, string> = {
-  super_admin:       "Super Administrator",
-  admin:             "Administrator",
-  operations_admin:  "Operations Admin",
-  finance_admin:     "Finance Admin",
-  compliance_admin:  "Compliance Admin",
-  support_admin:     "Support Admin",
-  analyst:           "Analyst",
+  super_admin: "Super Administrator",
+  admin: "Administrator",
+  operations_admin: "Operations Admin",
+  finance_admin: "Finance Admin",
+  compliance_admin: "Compliance Admin",
+  support_admin: "Support Admin",
+  analyst: "Analyst",
 };
 
 export const ADMIN_PERMISSIONS = [
@@ -91,12 +91,29 @@ export const ADMIN_TIER_PERMISSIONS: Record<AdminTier, AdminPermission[]> = {
 
   admin: [
     "admin.dashboard.view",
-    "users.view", "users.verify", "users.suspend", "users.reactivate",
-    "venues.view", "venues.review", "venues.approve", "venues.reject", "venues.suspend",
-    "suppliers.view", "suppliers.review", "suppliers.approve", "suppliers.reject", "suppliers.suspend",
-    "commissions.view", "commissions.manage", "commissions.export",
-    "reports.view", "reports.generate", "reports.export",
-    "marketplace.view", "marketplace.moderate", "marketplace.suspend_listing",
+    "users.view",
+    "users.verify",
+    "users.suspend",
+    "users.reactivate",
+    "venues.view",
+    "venues.review",
+    "venues.approve",
+    "venues.reject",
+    "venues.suspend",
+    "suppliers.view",
+    "suppliers.review",
+    "suppliers.approve",
+    "suppliers.reject",
+    "suppliers.suspend",
+    "commissions.view",
+    "commissions.manage",
+    "commissions.export",
+    "reports.view",
+    "reports.generate",
+    "reports.export",
+    "marketplace.view",
+    "marketplace.moderate",
+    "marketplace.suspend_listing",
     "audit_logs.view",
     "system_settings.view",
     "admin_accounts.view",
@@ -104,44 +121,71 @@ export const ADMIN_TIER_PERMISSIONS: Record<AdminTier, AdminPermission[]> = {
 
   operations_admin: [
     "admin.dashboard.view",
-    "users.view", "users.verify",
-    "venues.view", "venues.review", "venues.approve", "venues.reject", "venues.suspend",
-    "suppliers.view", "suppliers.review", "suppliers.approve", "suppliers.reject", "suppliers.suspend",
-    "marketplace.view", "marketplace.moderate", "marketplace.suspend_listing",
+    "users.view",
+    "users.verify",
+    "venues.view",
+    "venues.review",
+    "venues.approve",
+    "venues.reject",
+    "venues.suspend",
+    "suppliers.view",
+    "suppliers.review",
+    "suppliers.approve",
+    "suppliers.reject",
+    "suppliers.suspend",
+    "marketplace.view",
+    "marketplace.moderate",
+    "marketplace.suspend_listing",
     "reports.view",
     "audit_logs.view",
   ],
 
   finance_admin: [
     "admin.dashboard.view",
-    "commissions.view", "commissions.manage", "commissions.override", "commissions.export",
-    "reports.view", "reports.generate", "reports.export",
+    "commissions.view",
+    "commissions.manage",
+    "commissions.override",
+    "commissions.export",
+    "reports.view",
+    "reports.generate",
+    "reports.export",
     "audit_logs.view",
   ],
 
   compliance_admin: [
     "admin.dashboard.view",
-    "users.view", "users.verify",
-    "venues.view", "venues.review",
-    "suppliers.view", "suppliers.review",
+    "users.view",
+    "users.verify",
+    "venues.view",
+    "venues.review",
+    "suppliers.view",
+    "suppliers.review",
     "reports.view",
-    "audit_logs.view", "audit_logs.export",
+    "audit_logs.view",
+    "audit_logs.export",
   ],
 
   support_admin: [
     "admin.dashboard.view",
-    "users.view", "users.suspend", "users.reactivate",
+    "users.view",
+    "users.suspend",
+    "users.reactivate",
     "marketplace.view",
     "audit_logs.view",
   ],
 
   analyst: [
     "admin.dashboard.view",
-    "reports.view", "reports.generate", "reports.export",
+    "reports.view",
+    "reports.generate",
+    "reports.export",
     "audit_logs.view",
   ],
 };
 
-export function tierHasPermission(tier: AdminTier, permission: AdminPermission): boolean {
+export function tierHasPermission(
+  tier: AdminTier,
+  permission: AdminPermission,
+): boolean {
   return ADMIN_TIER_PERMISSIONS[tier].includes(permission);
 }

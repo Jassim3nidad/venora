@@ -34,86 +34,103 @@ async function requireSupplierId(
     .maybeSingle();
 
   if (!supplierProfile) {
-    throw new ForbiddenError("Create your supplier profile before managing services.");
+    throw new ForbiddenError(
+      "Create your supplier profile before managing services.",
+    );
   }
 
   return supplierProfile.id as string;
 }
 
 export async function addSupplierServiceAction(rawInput: unknown) {
-  return createServerAction(addServiceSchema, async ({ name, description, price, priceUnit }) => {
-    const supabase = (await createClient()) as any;
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+  return createServerAction(
+    addServiceSchema,
+    async ({ name, description, price, priceUnit }) => {
+      const supabase = (await createClient()) as any;
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (!user) throw new UnauthorizedError("You must be signed in as a supplier.");
+      if (!user)
+        throw new UnauthorizedError("You must be signed in as a supplier.");
 
-    const supplierId = await requireSupplierId(supabase, user.id);
+      const supplierId = await requireSupplierId(supabase, user.id);
 
-    const { error } = await supabase.from("supplier_services").insert({
-      supplier_id: supplierId,
-      name,
-      description: description || null,
-      price: price ?? null,
-      price_unit: priceUnit ?? null,
-    });
+      const { error } = await supabase.from("supplier_services").insert({
+        supplier_id: supplierId,
+        name,
+        description: description || null,
+        price: price ?? null,
+        price_unit: priceUnit ?? null,
+      });
 
-    if (error) throw error;
+      if (error) throw error;
 
-    revalidatePath("/dashboard/supplier/services");
-    revalidatePath("/dashboard/supplier");
-    return { success: true };
-  }, rawInput);
+      revalidatePath("/dashboard/supplier/services");
+      revalidatePath("/dashboard/supplier");
+      return { success: true };
+    },
+    rawInput,
+  );
 }
 
 export async function deleteSupplierServiceAction(rawInput: unknown) {
-  return createServerAction(deleteServiceSchema, async ({ serviceId }) => {
-    const supabase = (await createClient()) as any;
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+  return createServerAction(
+    deleteServiceSchema,
+    async ({ serviceId }) => {
+      const supabase = (await createClient()) as any;
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (!user) throw new UnauthorizedError("You must be signed in as a supplier.");
+      if (!user)
+        throw new UnauthorizedError("You must be signed in as a supplier.");
 
-    const supplierId = await requireSupplierId(supabase, user.id);
+      const supplierId = await requireSupplierId(supabase, user.id);
 
-    const { error } = await supabase
-      .from("supplier_services")
-      .delete()
-      .eq("id", serviceId)
-      .eq("supplier_id", supplierId);
+      const { error } = await supabase
+        .from("supplier_services")
+        .delete()
+        .eq("id", serviceId)
+        .eq("supplier_id", supplierId);
 
-    if (error) throw error;
+      if (error) throw error;
 
-    revalidatePath("/dashboard/supplier/services");
-    revalidatePath("/dashboard/supplier");
-    return { success: true };
-  }, rawInput);
+      revalidatePath("/dashboard/supplier/services");
+      revalidatePath("/dashboard/supplier");
+      return { success: true };
+    },
+    rawInput,
+  );
 }
 
 export async function updateInquiryStatusAction(rawInput: unknown) {
-  return createServerAction(updateInquiryStatusSchema, async ({ bookingSupplierId, status }) => {
-    const supabase = (await createClient()) as any;
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+  return createServerAction(
+    updateInquiryStatusSchema,
+    async ({ bookingSupplierId, status }) => {
+      const supabase = (await createClient()) as any;
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (!user) throw new UnauthorizedError("You must be signed in as a supplier.");
+      if (!user)
+        throw new UnauthorizedError("You must be signed in as a supplier.");
 
-    const supplierId = await requireSupplierId(supabase, user.id);
+      const supplierId = await requireSupplierId(supabase, user.id);
 
-    const { error } = await supabase
-      .from("booking_suppliers")
-      .update({ status })
-      .eq("id", bookingSupplierId)
-      .eq("supplier_id", supplierId);
+      const { error } = await supabase
+        .from("booking_suppliers")
+        .update({ status })
+        .eq("id", bookingSupplierId)
+        .eq("supplier_id", supplierId);
 
-    if (error) throw error;
+      if (error) throw error;
 
-    revalidatePath("/dashboard/supplier/inquiries");
-    revalidatePath("/dashboard/supplier/bookings");
-    revalidatePath("/dashboard/supplier");
-    return { success: true };
-  }, rawInput);
+      revalidatePath("/dashboard/supplier/inquiries");
+      revalidatePath("/dashboard/supplier/bookings");
+      revalidatePath("/dashboard/supplier");
+      return { success: true };
+    },
+    rawInput,
+  );
 }

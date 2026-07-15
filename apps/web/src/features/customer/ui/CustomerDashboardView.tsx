@@ -79,7 +79,10 @@ export async function CustomerDashboardView() {
 
   const statusCounts = new Map<string, number>();
   for (const booking of bookingRows) {
-    statusCounts.set(booking.status, (statusCounts.get(booking.status) ?? 0) + 1);
+    statusCounts.set(
+      booking.status,
+      (statusCounts.get(booking.status) ?? 0) + 1,
+    );
   }
   const statusMix = [...statusCounts.entries()].map(([status, count]) => ({
     status,

@@ -21,7 +21,8 @@ export default async function SupplierDashboardLayout({
   if (!(await hasRole(ROLES.SUPPLIER, ROLES.ADMIN))) redirect("/unauthorized");
 
   const profile = await getNavbarProfile(supabase, user.id);
-  const userName = profile?.full_name || user.email?.split("@")[0] || "Supplier";
+  const userName =
+    profile?.full_name || user.email?.split("@")[0] || "Supplier";
 
   return (
     <EnterpriseShell

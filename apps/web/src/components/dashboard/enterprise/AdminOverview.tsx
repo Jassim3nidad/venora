@@ -108,7 +108,11 @@ export function AdminOverview({
         {(canReviewApplications || canReviewVenues) && (
           <div className="flex flex-wrap gap-2">
             {canReviewApplications && (
-              <DashButton href="/admin/applications" variant="secondary" icon="how_to_reg">
+              <DashButton
+                href="/admin/applications"
+                variant="secondary"
+                icon="how_to_reg"
+              >
                 Review Applications
               </DashButton>
             )}
@@ -129,41 +133,43 @@ export function AdminOverview({
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <div data-testid="admin-modules-panel">
-        <Panel>
-          <PanelHeader
-            title="Admin Modules"
-            description="Quick access to major administrator tools."
-          />
-          {visibleModules.length > 0 ? (
-            <div className="grid gap-3 md:grid-cols-2">
-              {visibleModules.map((mod) => (
-                <Link
-                  key={mod.title}
-                  href={mod.href}
-                  className="group rounded-xl border border-[#e5e7eb] bg-[#f9fafb] p-4 transition hover:border-[#1d4ed8] hover:bg-[#eff6ff]"
-                >
-                  <div className="mb-3 flex items-center justify-between">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#1d4ed8] shadow-sm">
-                      <MaterialIcon name={mod.icon} />
-                    </div>
-                    <MaterialIcon
-                      name="arrow_forward"
-                      className="text-[#6b7280] transition group-hover:text-[#1d4ed8]"
-                    />
-                  </div>
-                  <p className="font-semibold text-[#111827]">{mod.title}</p>
-                  <p className="mt-1 text-sm text-[#4b5563]">{mod.description}</p>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <EmptyState
-              icon="lock"
-              title="No modules available"
-              description="Your administrator tier doesn't have access to any quick-access modules yet."
+          <Panel>
+            <PanelHeader
+              title="Admin Modules"
+              description="Quick access to major administrator tools."
             />
-          )}
-        </Panel>
+            {visibleModules.length > 0 ? (
+              <div className="grid gap-3 md:grid-cols-2">
+                {visibleModules.map((mod) => (
+                  <Link
+                    key={mod.title}
+                    href={mod.href}
+                    className="group rounded-xl border border-[#e5e7eb] bg-[#f9fafb] p-4 transition hover:border-[#1d4ed8] hover:bg-[#eff6ff]"
+                  >
+                    <div className="mb-3 flex items-center justify-between">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#1d4ed8] shadow-sm">
+                        <MaterialIcon name={mod.icon} />
+                      </div>
+                      <MaterialIcon
+                        name="arrow_forward"
+                        className="text-[#6b7280] transition group-hover:text-[#1d4ed8]"
+                      />
+                    </div>
+                    <p className="font-semibold text-[#111827]">{mod.title}</p>
+                    <p className="mt-1 text-sm text-[#4b5563]">
+                      {mod.description}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon="lock"
+                title="No modules available"
+                description="Your administrator tier doesn't have access to any quick-access modules yet."
+              />
+            )}
+          </Panel>
         </div>
 
         <Panel>
@@ -227,7 +233,7 @@ export function AdminOverview({
           />
         </div>
       </Panel>
-      
+
       <Panel padding={false} className="overflow-hidden">
         <div className="border-b border-[#e5e7eb] p-5 sm:p-6">
           <PanelHeader
@@ -250,7 +256,9 @@ export function AdminOverview({
                 key: "action",
                 header: "Action",
                 cell: (r) => (
-                  <span className="font-semibold text-[#111827]">{r.action}</span>
+                  <span className="font-semibold text-[#111827]">
+                    {r.action}
+                  </span>
                 ),
               },
               { key: "entity", header: "Target", cell: (r) => r.entity_type },

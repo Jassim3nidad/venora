@@ -3,7 +3,12 @@ import { createClient } from "@/lib/supabase/server";
 import { notificationPreferencesSchema } from "@/features/notifications/schemas/notification.schema";
 import { mapNotificationPreferences } from "@/features/notifications/application/mappers";
 
-function apiError(code: string, message: string, status: number, details?: unknown) {
+function apiError(
+  code: string,
+  message: string,
+  status: number,
+  details?: unknown,
+) {
   return NextResponse.json(
     { data: null, error: { code, message, details } },
     { status },

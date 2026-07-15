@@ -52,7 +52,10 @@ export function buildVenueImageUrl(storagePath?: string | null, fallback = "") {
   return `${supabaseUrl}/storage/v1/object/public/venue-images/${storagePath}`;
 }
 
-export function relationNames(rows: any[] | null | undefined, relationName: string) {
+export function relationNames(
+  rows: any[] | null | undefined,
+  relationName: string,
+) {
   return (rows ?? [])
     .map((row) => row?.[relationName]?.name)
     .filter((name): name is string => Boolean(name));
@@ -62,10 +65,10 @@ export function firstVenueImage(venue: any) {
   return [...(venue.venue_images ?? [])]
     .filter((item: any) => item.media_type !== "video")
     .sort((a: any, b: any) => {
-    if (a.is_featured && !b.is_featured) return -1;
-    if (!a.is_featured && b.is_featured) return 1;
-    return (a.display_order ?? 0) - (b.display_order ?? 0);
-  })[0];
+      if (a.is_featured && !b.is_featured) return -1;
+      if (!a.is_featured && b.is_featured) return 1;
+      return (a.display_order ?? 0) - (b.display_order ?? 0);
+    })[0];
 }
 
 export function toLiveMarketplaceVenue(
@@ -116,9 +119,12 @@ export function toLiveMarketplaceVenue(
     hasPool: Boolean(venue.has_pool),
     ceremonyVenue: Boolean(venue.ceremony_venue),
     receptionVenue: Boolean(venue.reception_venue),
-    eventTypes: eventTypes.length > 0 ? eventTypes : (fallbackVenue?.eventTypes ?? []),
-    categories: categories.length > 0 ? categories : (fallbackVenue?.categories ?? []),
-    amenities: amenities.length > 0 ? amenities : (fallbackVenue?.amenities ?? []),
+    eventTypes:
+      eventTypes.length > 0 ? eventTypes : (fallbackVenue?.eventTypes ?? []),
+    categories:
+      categories.length > 0 ? categories : (fallbackVenue?.categories ?? []),
+    amenities:
+      amenities.length > 0 ? amenities : (fallbackVenue?.amenities ?? []),
     isFavorited: favoriteVenueIds.has(String(venue.id)),
   };
 }

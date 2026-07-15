@@ -8,7 +8,10 @@ import {
   StatusBadge,
   type DataTableColumn,
 } from "@/components/dashboard/enterprise";
-import { requirePermissionOrRedirect, getCurrentAdminContext } from "@/lib/rbac/admin-context";
+import {
+  requirePermissionOrRedirect,
+  getCurrentAdminContext,
+} from "@/lib/rbac/admin-context";
 import { ADMIN_TIER_LABELS } from "@/lib/rbac/permissions";
 import { getAdminAccounts } from "@/features/admin-access-control/application/queries";
 import { AssignTierDialog } from "@/features/admin-access-control/ui/AssignTierDialog";
@@ -39,7 +42,9 @@ export default async function AdminAccountsPage() {
       cell: (row) => (
         <div>
           <p className="font-semibold text-[#111827]">{row.fullName}</p>
-          <p className="text-xs text-[#6b7280]">{row.email ?? "No email on file"}</p>
+          <p className="text-xs text-[#6b7280]">
+            {row.email ?? "No email on file"}
+          </p>
         </div>
       ),
     },
@@ -48,7 +53,10 @@ export default async function AdminAccountsPage() {
       header: "Tier",
       cell: (row) =>
         row.tier ? (
-          <StatusBadge status={row.isActive ? "active" : "inactive"} label={ADMIN_TIER_LABELS[row.tier]} />
+          <StatusBadge
+            status={row.isActive ? "active" : "inactive"}
+            label={ADMIN_TIER_LABELS[row.tier]}
+          />
         ) : (
           <span className="text-[#6b7280]">Not yet assigned</span>
         ),
@@ -58,14 +66,22 @@ export default async function AdminAccountsPage() {
       header: "Assigned",
       cell: (row) => (row.assignedAt ? formatDate(row.assignedAt) : "—"),
     },
-    { key: "since", header: "Admin since", cell: (row) => formatDate(row.grantedAt) },
+    {
+      key: "since",
+      header: "Admin since",
+      cell: (row) => formatDate(row.grantedAt),
+    },
     ...(canManageRoles
       ? [
           {
             key: "actions",
             header: "Actions",
             cell: (row: AdminAccount) => (
-              <AssignTierDialog userId={row.userId} fullName={row.fullName} currentTier={row.tier} />
+              <AssignTierDialog
+                userId={row.userId}
+                fullName={row.fullName}
+                currentTier={row.tier}
+              />
             ),
           } satisfies DataTableColumn<AdminAccount>,
         ]
@@ -93,7 +109,11 @@ export default async function AdminAccountsPage() {
                 : "You can view administrator accounts, but changing tiers requires the admin_roles.manage permission."
             }
           />
-          <DataTable rows={accounts} columns={columns} keyFn={(row) => row.userId} />
+          <DataTable
+            rows={accounts}
+            columns={columns}
+            keyFn={(row) => row.userId}
+          />
         </Panel>
       ) : (
         <EmptyState

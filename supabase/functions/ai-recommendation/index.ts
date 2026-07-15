@@ -44,15 +44,13 @@ async function buildPreferenceQuery(
   openRouterApiKey: string,
   venueNames: string[],
   config: AiConfiguration,
-): Promise<
-  {
-    query: string;
-    inputTokens: number | null;
-    outputTokens: number | null;
-    providerUsed: string;
-    modelUsed: string;
-  }
-> {
+): Promise<{
+  query: string;
+  inputTokens: number | null;
+  outputTokens: number | null;
+  providerUsed: string;
+  modelUsed: string;
+}> {
   const { response, providerUsed, modelUsed } = await postChatCompletion(
     config,
     openRouterApiKey,
@@ -84,9 +82,10 @@ async function buildPreferenceQuery(
 
   const payload = await response.json();
   const content = payload?.choices?.[0]?.message?.content;
-  const query = typeof content === "string" && content.trim()
-    ? content.trim()
-    : "elegant event venue";
+  const query =
+    typeof content === "string" && content.trim()
+      ? content.trim()
+      : "elegant event venue";
   return { query, ...extractTokenUsage(payload), providerUsed, modelUsed };
 }
 
@@ -146,8 +145,8 @@ serve(async (req) => {
     // existing cold-start (rating-based) path below, which needs no AI call
     // at all. That's a deliberate, narrower interpretation of "fail closed"
     // for this specific endpoint: the AI call is skipped, not the feature.
-    const personalizationAllowed = !!aiConfig?.enabled && providerCheck.ok &&
-      aiLimitCheck.allowed;
+    const personalizationAllowed =
+      !!aiConfig?.enabled && providerCheck.ok && aiLimitCheck.allowed;
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
@@ -298,11 +297,14 @@ serve(async (req) => {
     const impressionRows = venues.map((venue) => ({
       user_id: user.id,
       venue_id: venue.id,
-      reason: mode === "cold_start" ? { cold_start: true } : {
-        matched: ["preference_summary"],
-        preferenceQuery,
-        similarity: venue.similarity,
-      },
+      reason:
+        mode === "cold_start"
+          ? { cold_start: true }
+          : {
+              matched: ["preference_summary"],
+              preferenceQuery,
+              similarity: venue.similarity,
+            },
       shown_at: new Date().toISOString(),
     }));
 

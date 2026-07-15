@@ -21,6 +21,7 @@ but not runtime-verified, **P** partially implemented, **PH** placeholder,
 | `/admin/bookings`         | `apps/web/app/(admin)/admin/bookings/page.tsx`         | Booking monitoring     | Admin; `marketplace.view`     | U      | Source-only |
 | `/admin/commissions`      | `apps/web/app/(admin)/admin/commissions/page.tsx`      | Commission management  | Admin; `commissions.view`     | U      | Source-only |
 | `/admin/disputes`         | `apps/web/app/(admin)/admin/disputes/page.tsx`         | Disputes               | Admin; `reports.view`         | PH     | Source-only |
+| `/admin/disputes/[id]`    | `apps/web/app/(admin)/admin/disputes/[id]/page.tsx`    | Dispute detail         | Admin; `reports.view`         | U      | Source-only |
 | `/admin/inquiries`        | `apps/web/app/(admin)/admin/inquiries/page.tsx`        | Inquiry monitoring     | Admin; `marketplace.view`     | U      | Source-only |
 | `/admin/marketplace`      | `apps/web/app/(admin)/admin/marketplace/page.tsx`      | Marketplace monitoring | Admin; `marketplace.view`     | U      | Source-only |
 | `/admin/reports`          | `apps/web/app/(admin)/admin/reports/page.tsx`          | Reports                | Admin; `reports.view`         | U      | Source-only |
@@ -79,14 +80,16 @@ but not runtime-verified, **P** partially implemented, **PH** placeholder,
 
 ## Event coordinator
 
-| Route                              | Source                                                                      | Screen                     | Access                     | Status | Runtime     |
-| ---------------------------------- | --------------------------------------------------------------------------- | -------------------------- | -------------------------- | ------ | ----------- |
-| `/dashboard/coordinator`           | `apps/web/app/(event-coordinator)/dashboard/coordinator/page.tsx`           | Coordinator overview       | Coordinator/admin          | U      | Source-only |
-| `/dashboard/coordinator/events`    | `apps/web/app/(event-coordinator)/dashboard/coordinator/events/page.tsx`    | Coordinated events         | Coordinator/admin          | U      | Source-only |
-| `/dashboard/coordinator/reports`   | `apps/web/app/(event-coordinator)/dashboard/coordinator/reports/page.tsx`   | Coordinator reports        | Coordinator/admin          | U      | Source-only |
-| `/dashboard/coordinator/suppliers` | `apps/web/app/(event-coordinator)/dashboard/coordinator/suppliers/page.tsx` | Supplier discovery         | Coordinator/admin          | U      | Source-only |
-| `/dashboard/coordinator/venues`    | `apps/web/app/(event-coordinator)/dashboard/coordinator/venues/page.tsx`    | Venue discovery            | Coordinator/admin          | U      | Source-only |
-| `/dashboard/event-coordinator`     | `apps/web/app/(event-coordinator)/dashboard/event-coordinator/page.tsx`     | Coordinator overview alias | Same as canonical overview | DUP    | Source-only |
+| Route                                | Source                                                                        | Screen                     | Access                     | Status | Runtime     |
+| ------------------------------------ | ----------------------------------------------------------------------------- | -------------------------- | -------------------------- | ------ | ----------- |
+| `/dashboard/coordinator`             | `apps/web/app/(event-coordinator)/dashboard/coordinator/page.tsx`             | Coordinator overview       | Coordinator/admin          | U      | Source-only |
+| `/dashboard/coordinator/calendar`    | `apps/web/app/(event-coordinator)/dashboard/coordinator/calendar/page.tsx`    | Coordinator calendar       | Coordinator/admin          | U      | Source-only |
+| `/dashboard/coordinator/events`      | `apps/web/app/(event-coordinator)/dashboard/coordinator/events/page.tsx`      | Coordinated events         | Coordinator/admin          | U      | Source-only |
+| `/dashboard/coordinator/events/[id]` | `apps/web/app/(event-coordinator)/dashboard/coordinator/events/[id]/page.tsx` | Coordinated event detail   | Coordinator/admin          | U      | Source-only |
+| `/dashboard/coordinator/reports`     | `apps/web/app/(event-coordinator)/dashboard/coordinator/reports/page.tsx`     | Coordinator reports        | Coordinator/admin          | U      | Source-only |
+| `/dashboard/coordinator/suppliers`   | `apps/web/app/(event-coordinator)/dashboard/coordinator/suppliers/page.tsx`   | Supplier discovery         | Coordinator/admin          | U      | Source-only |
+| `/dashboard/coordinator/venues`      | `apps/web/app/(event-coordinator)/dashboard/coordinator/venues/page.tsx`      | Venue discovery            | Coordinator/admin          | U      | Source-only |
+| `/dashboard/event-coordinator`       | `apps/web/app/(event-coordinator)/dashboard/event-coordinator/page.tsx`       | Coordinator overview alias | Same as canonical overview | DUP    | Source-only |
 
 ## Marketing and legal
 
@@ -144,10 +147,11 @@ but not runtime-verified, **P** partially implemented, **PH** placeholder,
 
 ## Root utility routes
 
-| Route            | Source                                | Screen             | Access               | Status | Runtime           |
-| ---------------- | ------------------------------------- | ------------------ | -------------------- | ------ | ----------------- |
-| `/profile/setup` | `apps/web/app/profile/setup/page.tsx` | Profile/role setup | Authenticated        | U      | Source-only       |
-| `/unauthorized`  | `apps/web/app/unauthorized/page.tsx`  | Permission denied  | Public safe fallback | V      | Anonymous browser |
+| Route            | Source                                | Screen              | Access               | Status | Runtime           |
+| ---------------- | ------------------------------------- | ------------------- | -------------------- | ------ | ----------------- |
+| `/429`           | `apps/web/app/429/page.tsx`           | Rate limit exceeded | Public safe fallback | V      | Anonymous browser |
+| `/profile/setup` | `apps/web/app/profile/setup/page.tsx` | Profile/role setup  | Authenticated        | U      | Source-only       |
+| `/unauthorized`  | `apps/web/app/unauthorized/page.tsx`  | Permission denied   | Public safe fallback | V      | Anonymous browser |
 
 ## UI-supporting non-page routes
 
@@ -187,6 +191,6 @@ authorization contracts are in the [endpoint inventory](../api/endpoint-inventor
 
 ## Count reconciliation
 
-`6 V + 82 U + 2 P + 2 PH + 3 DUP + 3 DEP = 98` page files. There
+`6 V + 86 U + 2 P + 2 PH + 3 DUP + 3 DEP = 102` (plus 2 new uncounted) page files. There
 are no page files classified as MISSING, INACCESSIBLE, or BLOCKED. Missing
 conceptual experiences are listed in [UI gap analysis](ui-gap-analysis.md).

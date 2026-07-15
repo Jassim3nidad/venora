@@ -46,10 +46,7 @@ import CostEstimatorPanel from "@/features/ai/ui/CostEstimatorPanel";
 import RecommendedVenues from "@/features/ai/ui/RecommendedVenues";
 import PackageComparePicker from "./PackageComparePicker";
 import VenuePricingSection from "./VenuePricingSection";
-import {
-  pickGalleryImages,
-  pickPromotionalVideo,
-} from "../utils/venue-media";
+import { pickGalleryImages, pickPromotionalVideo } from "../utils/venue-media";
 
 interface VenueDetailsProps {
   venue: any;
@@ -515,10 +512,12 @@ export default function VenueDetails({
                   This is your venue listing.
                 </h3>
                 <p className="mt-2 text-sm font-medium leading-relaxed text-[#3B82F6]">
-                  You are viewing your venue as customers see it. Manage bookings, availability, packages, and listing details from your Venue Owner Dashboard.
+                  You are viewing your venue as customers see it. Manage
+                  bookings, availability, packages, and listing details from
+                  your Venue Owner Dashboard.
                 </p>
               </div>
-              
+
               <div className="flex flex-col gap-3">
                 <Link
                   href="/dashboard/venues"

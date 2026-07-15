@@ -15,7 +15,7 @@ export default function VenueGalleryPlaceholder({
       <div
         className={cn(
           "flex h-full w-full items-center justify-center rounded-xl border border-dashed border-[var(--border-default)] bg-slate-50",
-          className
+          className,
         )}
       >
         <ImageIcon className="h-5 w-5 text-slate-300" />
@@ -27,7 +27,7 @@ export default function VenueGalleryPlaceholder({
     <div
       className={cn(
         "flex h-[280px] w-full flex-col items-center justify-center rounded-none border border-[var(--border-default)] bg-gradient-to-br from-slate-100 to-slate-200 p-6 text-center md:h-[450px] md:rounded-2xl",
-        className
+        className,
       )}
     >
       <ImageIcon className="mb-3 h-10 w-10 text-[var(--text-muted)]" />

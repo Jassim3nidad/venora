@@ -79,7 +79,7 @@ export default function SupplierLocationPicker({
     setLongitude(roundedLongitude);
     setLatitudeInput(toInputValue(roundedLatitude));
     setLongitudeInput(toInputValue(roundedLongitude));
-    
+
     if (onLocationChange) {
       onLocationChange(roundedLatitude, roundedLongitude);
     }
@@ -181,7 +181,9 @@ export default function SupplierLocationPicker({
           </div>
           <p className="mt-2 text-sm font-semibold leading-6 text-[#4B5563]">
             Click the map or drag the marker to set your business coordinates.
-            {radiusKm ? ` Your service radius of ${radiusKm}km applies from this point.` : ""}
+            {radiusKm
+              ? ` Your service radius of ${radiusKm}km applies from this point.`
+              : ""}
           </p>
         </div>
 

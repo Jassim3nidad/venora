@@ -1,6 +1,11 @@
 import { z } from "zod";
 
-export const REVIEW_FLAG_REASONS = ["spam", "offensive", "fake", "other"] as const;
+export const REVIEW_FLAG_REASONS = [
+  "spam",
+  "offensive",
+  "fake",
+  "other",
+] as const;
 
 export const flagReviewSchema = z.object({
   reviewId: z.string().uuid(),

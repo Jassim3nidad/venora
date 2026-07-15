@@ -22,7 +22,10 @@ type GatewayFactory = () => PaymentGateway;
 const factories = new Map<PaymentProviderId, GatewayFactory>();
 const instances = new Map<PaymentProviderId, PaymentGateway>();
 
-export function registerGateway(id: PaymentProviderId, factory: GatewayFactory): void {
+export function registerGateway(
+  id: PaymentProviderId,
+  factory: GatewayFactory,
+): void {
   factories.set(id, factory);
 }
 

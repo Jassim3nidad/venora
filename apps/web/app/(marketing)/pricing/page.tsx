@@ -55,11 +55,23 @@ export default function PricingPage() {
       >
         Simple, Transparent Pricing
       </h1>
-      <p style={{ textAlign: "center", color: "var(--text-secondary)", marginBottom: "3rem" }}>
+      <p
+        style={{
+          textAlign: "center",
+          color: "var(--text-secondary)",
+          marginBottom: "3rem",
+        }}
+      >
         No hidden fees. Cancel anytime.
       </p>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem" }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+          gap: "1.5rem",
+        }}
+      >
         {PLANS.map((plan) => (
           <div
             key={plan.name}
@@ -69,7 +81,9 @@ export default function PricingPage() {
               border: plan.highlighted
                 ? "2px solid hsl(217 70% 47%)"
                 : "1px solid var(--border-default)",
-              background: plan.highlighted ? "hsl(217 70% 47% / 0.05)" : "var(--bg-subtle)",
+              background: plan.highlighted
+                ? "hsl(217 70% 47% / 0.05)"
+                : "var(--bg-subtle)",
               position: "relative",
             }}
           >
@@ -91,16 +105,52 @@ export default function PricingPage() {
                 Most Popular
               </span>
             )}
-            <h2 style={{ fontSize: "1.25rem", fontWeight: 700, marginBottom: "0.25rem" }}>{plan.name}</h2>
-            <div style={{ fontSize: "2rem", fontWeight: 700, color: "hsl(217 70% 47%)", margin: "0.75rem 0" }}>
+            <h2
+              style={{
+                fontSize: "1.25rem",
+                fontWeight: 700,
+                marginBottom: "0.25rem",
+              }}
+            >
+              {plan.name}
+            </h2>
+            <div
+              style={{
+                fontSize: "2rem",
+                fontWeight: 700,
+                color: "hsl(217 70% 47%)",
+                margin: "0.75rem 0",
+              }}
+            >
               {plan.price}
             </div>
-            <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", marginBottom: "1.5rem" }}>
+            <p
+              style={{
+                color: "var(--text-secondary)",
+                fontSize: "0.875rem",
+                marginBottom: "1.5rem",
+              }}
+            >
               {plan.description}
             </p>
-            <ul style={{ listStyle: "none", marginBottom: "2rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            <ul
+              style={{
+                listStyle: "none",
+                marginBottom: "2rem",
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.5rem",
+              }}
+            >
               {plan.features.map((f) => (
-                <li key={f} style={{ display: "flex", gap: "0.5rem", fontSize: "0.875rem" }}>
+                <li
+                  key={f}
+                  style={{
+                    display: "flex",
+                    gap: "0.5rem",
+                    fontSize: "0.875rem",
+                  }}
+                >
                   <span style={{ color: "hsl(217 70% 47%)" }}>✓</span> {f}
                 </li>
               ))}
@@ -112,8 +162,12 @@ export default function PricingPage() {
                 textAlign: "center",
                 padding: "0.75rem",
                 borderRadius: "0.75rem",
-                background: plan.highlighted ? "hsl(217 70% 47%)" : "transparent",
-                border: plan.highlighted ? "none" : "1px solid var(--border-strong)",
+                background: plan.highlighted
+                  ? "hsl(217 70% 47%)"
+                  : "transparent",
+                border: plan.highlighted
+                  ? "none"
+                  : "1px solid var(--border-strong)",
                 color: plan.highlighted ? "#fff" : "var(--text-primary)",
                 fontWeight: 600,
                 textDecoration: "none",

@@ -4,12 +4,17 @@ import { z } from "zod";
 // z.coerce.number() turns into 0 (not undefined) and z.string().date()
 // rejects outright — both wrong for genuinely-optional fields. Treat ""
 // the same as "not provided" before the real validation runs.
-const blankToUndefined = (val: unknown) => (val === "" || val === null ? undefined : val);
+const blankToUndefined = (val: unknown) =>
+  val === "" || val === null ? undefined : val;
 const optionalNonNegative = (max?: number) => {
-  const schema = max !== undefined ? z.coerce.number().min(0).max(max) : z.coerce.number().min(0);
+  const schema =
+    max !== undefined
+      ? z.coerce.number().min(0).max(max)
+      : z.coerce.number().min(0);
   return z.preprocess(blankToUndefined, schema.optional());
 };
-const optionalDateString = () => z.preprocess(blankToUndefined, z.string().date().optional());
+const optionalDateString = () =>
+  z.preprocess(blankToUndefined, z.string().date().optional());
 
 const baseFields = {
   label: z.string().trim().max(120).optional(),
@@ -36,13 +41,18 @@ export const createCommissionRuleSchema = z
     path: ["referenceId"],
   });
 
-export type CreateCommissionRuleInput = z.infer<typeof createCommissionRuleSchema>;
+export type CreateCommissionRuleInput = z.infer<
+  typeof createCommissionRuleSchema
+>;
 
 export const updateCommissionRuleSchema = z
   .object({
     id: z.string().uuid(),
     isActive: z.boolean(),
-    reason: z.string().trim().min(1, "A reason is required to modify a commission rule."),
+    reason: z
+      .string()
+      .trim()
+      .min(1, "A reason is required to modify a commission rule."),
     ...baseFields,
   })
   .refine((v) => v.percentage !== undefined || v.flatFee !== undefined, {
@@ -50,4 +60,6 @@ export const updateCommissionRuleSchema = z
     path: ["percentage"],
   });
 
-export type UpdateCommissionRuleInput = z.infer<typeof updateCommissionRuleSchema>;
+export type UpdateCommissionRuleInput = z.infer<
+  typeof updateCommissionRuleSchema
+>;

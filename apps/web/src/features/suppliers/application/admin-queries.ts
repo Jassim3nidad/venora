@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 
-export type SupplierQueueFilter = "pending" | "accredited" | "suspended" | "rejected" | "all";
+export type SupplierQueueFilter =
+  "pending" | "accredited" | "suspended" | "rejected" | "all";
 
 export type SupplierQueueRow = {
   id: string;
@@ -19,7 +20,9 @@ const STATUS_FOR_FILTER: Record<SupplierQueueFilter, string[] | null> = {
   all: null,
 };
 
-export async function getSuppliersForAdminReview(filter: SupplierQueueFilter = "pending"): Promise<{
+export async function getSuppliersForAdminReview(
+  filter: SupplierQueueFilter = "pending",
+): Promise<{
   suppliers: SupplierQueueRow[] | null;
   error: string | null;
 }> {
@@ -27,7 +30,9 @@ export async function getSuppliersForAdminReview(filter: SupplierQueueFilter = "
 
   let query = supabase
     .from("supplier_profiles")
-    .select("id, business_name, accreditation_status, avg_rating, review_count, created_at")
+    .select(
+      "id, business_name, accreditation_status, avg_rating, review_count, created_at",
+    )
     .order("created_at", { ascending: false })
     .limit(100);
 
@@ -65,7 +70,12 @@ export type SupplierReviewDetail = {
   priceUnit: string | null;
   cancellationPolicy: string | null;
   ownerName: string | null;
-  services: { id: string; name: string; price: number | null; priceUnit: string | null }[];
+  services: {
+    id: string;
+    name: string;
+    price: number | null;
+    priceUnit: string | null;
+  }[];
   portfolio: { id: string; title: string; imageUrl: string }[];
 };
 
@@ -97,7 +107,9 @@ export async function getSupplierForAdminReview(supplierId: string): Promise<{
   const category = Array.isArray(supplier.supplier_categories)
     ? supplier.supplier_categories[0]
     : supplier.supplier_categories;
-  const owner = Array.isArray(supplier.profiles) ? supplier.profiles[0] : supplier.profiles;
+  const owner = Array.isArray(supplier.profiles)
+    ? supplier.profiles[0]
+    : supplier.profiles;
 
   return {
     supplier: {
@@ -112,7 +124,8 @@ export async function getSupplierForAdminReview(supplierId: string): Promise<{
       contactEmail: supplier.contact_email,
       contactPhone: supplier.contact_phone,
       websiteUrl: supplier.website_url,
-      basePrice: supplier.base_price !== null ? Number(supplier.base_price) : null,
+      basePrice:
+        supplier.base_price !== null ? Number(supplier.base_price) : null,
       priceUnit: supplier.price_unit,
       cancellationPolicy: supplier.cancellation_policy,
       ownerName: owner?.full_name ?? null,
@@ -150,21 +163,25 @@ export async function getSupplierReviewHistory(supplierId: string): Promise<{
 
   const { data, error } = await supabase
     .from("supplier_review_history")
-    .select("id, action, previous_status, new_status, reason, created_at, profiles:actor_id (full_name)")
+    .select(
+      "id, action, previous_status, new_status, reason, created_at, profiles:actor_id (full_name)",
+    )
     .eq("supplier_id", supplierId)
     .order("created_at", { ascending: false });
 
   if (error) return { history: null, error: error.message };
 
-  const history: SupplierReviewHistoryEntry[] = (data ?? []).map((row: any) => ({
-    id: row.id,
-    action: row.action,
-    previousStatus: row.previous_status,
-    newStatus: row.new_status,
-    reason: row.reason,
-    actorName: row.profiles?.full_name ?? null,
-    createdAt: row.created_at,
-  }));
+  const history: SupplierReviewHistoryEntry[] = (data ?? []).map(
+    (row: any) => ({
+      id: row.id,
+      action: row.action,
+      previousStatus: row.previous_status,
+      newStatus: row.new_status,
+      reason: row.reason,
+      actorName: row.profiles?.full_name ?? null,
+      createdAt: row.created_at,
+    }),
+  );
 
   return { history, error: null };
 }

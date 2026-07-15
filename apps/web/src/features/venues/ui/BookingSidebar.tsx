@@ -85,17 +85,21 @@ export default function BookingSidebar({
   >("idle");
   const [overridePrice, setOverridePrice] = useState<number | null>(null);
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
-  const [calendarMonth, setCalendarMonth] = useState(() => startOfMonth(new Date()));
+  const [calendarMonth, setCalendarMonth] = useState(() =>
+    startOfMonth(new Date()),
+  );
 
   const { availability } = useCalendar(venueId, calendarMonth);
   const calendarAvailability = useMemo(() => {
-    return availability.reduce<Record<string, "available" | "reserved" | "tentative" | "maintenance" | "blackout">>(
-      (acc, item) => {
-        acc[item.date] = item.status;
-        return acc;
-      },
-      {},
-    );
+    return availability.reduce<
+      Record<
+        string,
+        "available" | "reserved" | "tentative" | "maintenance" | "blackout"
+      >
+    >((acc, item) => {
+      acc[item.date] = item.status;
+      return acc;
+    }, {});
   }, [availability]);
 
   const selectedPackage = packages.find((p) => p.id === selectedPackageId);
@@ -168,7 +172,12 @@ export default function BookingSidebar({
   }, [guests]);
 
   const handleBook = () => {
-    if (!selectedDate || selectedDateIsPast || availabilityStatus !== "available") return;
+    if (
+      !selectedDate ||
+      selectedDateIsPast ||
+      availabilityStatus !== "available"
+    )
+      return;
     setMobileSheetOpen(false);
     const dateStr = format(selectedDate, "yyyy-MM-dd");
     const bookingIdentifier = venueSlug || venueId;
@@ -244,7 +253,8 @@ export default function BookingSidebar({
           {showCalendar && (
             <div className="absolute top-16 left-0 right-0 z-50 bg-[var(--bg-base)] border border-[var(--border-default)] shadow-2xl rounded-2xl p-2">
               <div className="px-2 pt-2 pb-3 text-[11px] text-[var(--text-muted)] text-center leading-relaxed">
-                Choose an available date for your event. Unavailable dates are disabled.
+                Choose an available date for your event. Unavailable dates are
+                disabled.
               </div>
               <Calendar
                 selectedDate={selectedDate as any}
@@ -349,39 +359,44 @@ export default function BookingSidebar({
         </div>
       </div>
 
-      {selectedDate && !isCheckingAvailability && availabilityStatus !== "idle" && (() => {
-        const dateStr = format(selectedDate, "yyyy-MM-dd");
-        const status = calendarAvailability[dateStr];
-        const formattedDate = format(selectedDate, "MMMM d, yyyy");
-        
-        let message = "This date is unavailable. Please select another date.";
-        let colorClass = "border-red-200 bg-red-50 text-red-600";
-        let Icon = AlertCircle;
+      {selectedDate &&
+        !isCheckingAvailability &&
+        availabilityStatus !== "idle" &&
+        (() => {
+          const dateStr = format(selectedDate, "yyyy-MM-dd");
+          const status = calendarAvailability[dateStr];
+          const formattedDate = format(selectedDate, "MMMM d, yyyy");
 
-        if (selectedDateIsPast) {
-          message = PAST_DATE_MESSAGE;
-        } else if (status === "tentative") {
-          message = `${formattedDate} has a pending request and cannot be booked yet.`;
-          colorClass = "border-orange-200 bg-orange-50 text-orange-700";
-        } else if (status === "reserved") {
-          message = `This date is already booked. Please choose another date.`;
-        } else if (status === "maintenance") {
-          message = `${formattedDate} is unavailable due to maintenance.`;
-        } else if (status === "blackout") {
-          message = `${formattedDate} is unavailable.`;
-        } else if (availabilityStatus === "available") {
-          message = `${formattedDate} is available for booking.`;
-          colorClass = "border-emerald-200 bg-emerald-50 text-emerald-700";
-          Icon = Check;
-        }
+          let message = "This date is unavailable. Please select another date.";
+          let colorClass = "border-red-200 bg-red-50 text-red-600";
+          let Icon = AlertCircle;
 
-        return (
-          <div className={`mt-4 flex gap-2 rounded-xl border p-3 text-xs font-semibold ${colorClass}`}>
-            <Icon className="h-4 w-4 shrink-0" />
-            <span>{message}</span>
-          </div>
-        );
-      })()}
+          if (selectedDateIsPast) {
+            message = PAST_DATE_MESSAGE;
+          } else if (status === "tentative") {
+            message = `${formattedDate} has a pending request and cannot be booked yet.`;
+            colorClass = "border-orange-200 bg-orange-50 text-orange-700";
+          } else if (status === "reserved") {
+            message = `This date is already booked. Please choose another date.`;
+          } else if (status === "maintenance") {
+            message = `${formattedDate} is unavailable due to maintenance.`;
+          } else if (status === "blackout") {
+            message = `${formattedDate} is unavailable.`;
+          } else if (availabilityStatus === "available") {
+            message = `${formattedDate} is available for booking.`;
+            colorClass = "border-emerald-200 bg-emerald-50 text-emerald-700";
+            Icon = Check;
+          }
+
+          return (
+            <div
+              className={`mt-4 flex gap-2 rounded-xl border p-3 text-xs font-semibold ${colorClass}`}
+            >
+              <Icon className="h-4 w-4 shrink-0" />
+              <span>{message}</span>
+            </div>
+          );
+        })()}
 
       {/* Cost Breakdowns */}
       <div className="mt-6 space-y-3 text-sm">

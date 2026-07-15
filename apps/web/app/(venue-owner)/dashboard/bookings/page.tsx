@@ -59,7 +59,11 @@ function formatDate(value?: string | null) {
 }
 
 function formatCurrency(value?: number | null) {
-  if (value === null || value === undefined || !Number.isFinite(Number(value))) {
+  if (
+    value === null ||
+    value === undefined ||
+    !Number.isFinite(Number(value))
+  ) {
     return "-";
   }
 
@@ -76,11 +80,9 @@ function formatTime(start?: string | null, end?: string | null) {
   return start ?? end ?? "Time pending";
 }
 
-export default async function OwnerBookingsPage(
-  props: {
-    searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
-  }
-) {
+export default async function OwnerBookingsPage(props: {
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const searchParams = await props.searchParams;
   const context = await getOwnerDashboardContext();
   const { supabase } = context;
@@ -109,9 +111,13 @@ export default async function OwnerBookingsPage(
     .in("venue_id", venueIds);
 
   if (filter === "approved") {
-    query = query.eq("status", "approved").order("created_at", { ascending: false });
+    query = query
+      .eq("status", "approved")
+      .order("created_at", { ascending: false });
   } else if (filter === "declined") {
-    query = query.eq("status", "declined").order("created_at", { ascending: false });
+    query = query
+      .eq("status", "declined")
+      .order("created_at", { ascending: false });
   } else if (filter === "oldest") {
     query = query.order("created_at", { ascending: true });
   } else {
@@ -160,9 +166,7 @@ export default async function OwnerBookingsPage(
       header: "Schedule",
       cell: (row) => (
         <div>
-          <span className="block font-semibold text-[#111827]">
-            {row.date}
-          </span>
+          <span className="block font-semibold text-[#111827]">{row.date}</span>
           <span className="mt-1 block text-xs font-medium text-[#6B7280]">
             {row.time}
           </span>
@@ -194,10 +198,7 @@ export default async function OwnerBookingsPage(
       key: "action",
       header: "",
       cell: (row) => (
-        <DashButton
-          href={`/dashboard/bookings/${row.id}`}
-          variant="secondary"
-        >
+        <DashButton href={`/dashboard/bookings/${row.id}`} variant="secondary">
           View
         </DashButton>
       ),
@@ -211,7 +212,11 @@ export default async function OwnerBookingsPage(
       action={
         <div className="flex items-center gap-3">
           <BookingFilter />
-          <DashButton href="/dashboard/calendar" variant="secondary" icon="event">
+          <DashButton
+            href="/dashboard/calendar"
+            variant="secondary"
+            icon="event"
+          >
             Calendar
           </DashButton>
         </div>

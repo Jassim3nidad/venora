@@ -5,19 +5,31 @@ import { createClient } from "@/lib/supabase/server";
 import { createServerAction } from "@/lib/server-action";
 import { requireRole } from "@/lib/rbac/guards";
 import { ROLES } from "@/lib/rbac/roles";
-import { ForbiddenError, ReviewNotFoundError, ValidationError } from "@/lib/errors";
+import {
+  ForbiddenError,
+  ReviewNotFoundError,
+  ValidationError,
+} from "@/lib/errors";
 import { moderateReviewSchema } from "../schemas/review-moderation.schema";
 
-function throwIfSupabaseError(error: { message?: string } | null | undefined): void {
+function throwIfSupabaseError(
+  error: { message?: string } | null | undefined,
+): void {
   if (!error) return;
   const normalized = (error.message ?? "").toLowerCase();
-  if (normalized.includes("permission") || normalized.includes("row-level security")) {
+  if (
+    normalized.includes("permission") ||
+    normalized.includes("row-level security")
+  ) {
     throw new ForbiddenError(error.message);
   }
   throw new ValidationError(error.message ?? "Moderation action failed");
 }
 
-async function updateReviewStatus(reviewId: string, status: "published" | "removed") {
+async function updateReviewStatus(
+  reviewId: string,
+  status: "published" | "removed",
+) {
   await requireRole(ROLES.ADMIN);
   const supabase = (await createClient()) as any;
 
@@ -40,20 +52,28 @@ async function updateReviewStatus(reviewId: string, status: "published" | "remov
     p_entity_type: "reviews",
     p_entity_id: reviewId,
     p_reason: `Review status changed to ${status}`,
-    p_metadata: { new_status: status }
+    p_metadata: { new_status: status },
   });
 
   return { reviewId, status: data.status as string };
 }
 
 export async function restoreReviewAction(rawInput: unknown) {
-  return createServerAction(moderateReviewSchema, async (input) => {
-    return updateReviewStatus(input.reviewId, "published");
-  }, rawInput);
+  return createServerAction(
+    moderateReviewSchema,
+    async (input) => {
+      return updateReviewStatus(input.reviewId, "published");
+    },
+    rawInput,
+  );
 }
 
 export async function removeReviewAction(rawInput: unknown) {
-  return createServerAction(moderateReviewSchema, async (input) => {
-    return updateReviewStatus(input.reviewId, "removed");
-  }, rawInput);
+  return createServerAction(
+    moderateReviewSchema,
+    async (input) => {
+      return updateReviewStatus(input.reviewId, "removed");
+    },
+    rawInput,
+  );
 }

@@ -51,14 +51,23 @@ export async function generateVenueDescription(
   }
 
   if (!data) {
-    throw new AIDescriptionClientError("EMPTY_RESPONSE", "Description generator returned no response.");
+    throw new AIDescriptionClientError(
+      "EMPTY_RESPONSE",
+      "Description generator returned no response.",
+    );
   }
 
   if (data.error) {
-    throw new AIDescriptionClientError(data.error.code, data.error.message, data.error.details);
+    throw new AIDescriptionClientError(
+      data.error.code,
+      data.error.message,
+      data.error.details,
+    );
   }
 
-  const parsedOutput = generateVenueDescriptionResponseSchema.safeParse(data.data);
+  const parsedOutput = generateVenueDescriptionResponseSchema.safeParse(
+    data.data,
+  );
 
   if (!parsedOutput.success) {
     throw new AIDescriptionClientError(

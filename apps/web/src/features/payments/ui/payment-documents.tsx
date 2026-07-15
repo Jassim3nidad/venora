@@ -30,7 +30,13 @@ const REFUND_STATUS_STYLES: Record<string, string> = {
   cancelled: "border-slate-200 bg-slate-50 text-slate-500",
 };
 
-function StatusPill({ status, styles }: { status: string; styles: Record<string, string> }) {
+function StatusPill({
+  status,
+  styles,
+}: {
+  status: string;
+  styles: Record<string, string>;
+}) {
   return (
     <span
       className={`rounded-full border px-3 py-1 text-xs font-extrabold uppercase tracking-[0.08em] ${styles[status] ?? "border-slate-200 bg-slate-50 text-slate-500"}`}
@@ -55,7 +61,9 @@ export function InvoiceCard({ invoice }: { invoice: InvoiceRow }) {
         {invoice.line_items.map((item, index) => (
           <div key={index} className="flex items-center justify-between gap-3">
             <dt className="truncate">{item.description}</dt>
-            <dd className="shrink-0 text-slate-950">{formatMoney(item.amount, invoice.currency)}</dd>
+            <dd className="shrink-0 text-slate-950">
+              {formatMoney(item.amount, invoice.currency)}
+            </dd>
           </div>
         ))}
         <div className="mt-1 flex items-center justify-between gap-3 border-t border-dashed border-[#E5E7EB] pt-2">
@@ -90,7 +98,8 @@ export function ReceiptCard({ receipt }: { receipt: ReceiptRow }) {
         </p>
       </div>
       <p className="mt-2 text-xs font-semibold text-slate-500">
-        Paid via {receipt.payment_provider.toUpperCase()} on {formatDate(receipt.issued_at)}
+        Paid via {receipt.payment_provider.toUpperCase()} on{" "}
+        {formatDate(receipt.issued_at)}
       </p>
     </div>
   );
@@ -102,23 +111,34 @@ export function RefundList({ refunds }: { refunds: RefundRow[] }) {
   return (
     <div className="grid gap-3">
       {refunds.map((refund) => (
-        <div key={refund.id} className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
+        <div
+          key={refund.id}
+          className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4"
+        >
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-2 text-slate-950">
               <RotateCcw className="h-4 w-4 text-[#2563EB]" />
-              <p className="text-sm font-black">{formatMoney(refund.amount, refund.currency)}</p>
+              <p className="text-sm font-black">
+                {formatMoney(refund.amount, refund.currency)}
+              </p>
             </div>
             <StatusPill status={refund.status} styles={REFUND_STATUS_STYLES} />
           </div>
           {refund.reason ? (
-            <p className="mt-2 text-sm font-semibold text-slate-600">{refund.reason}</p>
+            <p className="mt-2 text-sm font-semibold text-slate-600">
+              {refund.reason}
+            </p>
           ) : null}
           {refund.failure_reason ? (
-            <p className="mt-2 text-sm font-semibold text-red-600">{refund.failure_reason}</p>
+            <p className="mt-2 text-sm font-semibold text-red-600">
+              {refund.failure_reason}
+            </p>
           ) : null}
           <p className="mt-2 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
             Requested {formatDate(refund.created_at)}
-            {refund.processed_at ? ` · Settled ${formatDate(refund.processed_at)}` : null}
+            {refund.processed_at
+              ? ` · Settled ${formatDate(refund.processed_at)}`
+              : null}
           </p>
         </div>
       ))}

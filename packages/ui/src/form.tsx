@@ -3,34 +3,26 @@
 import * as React from "react";
 import * as LabelPrimitive from "@radix-ui/react-label";
 import { Slot } from "@radix-ui/react-slot";
-import {
-  Controller,
-  FormProvider,
-  useFormContext,
-} from "react-hook-form";
-import type {
-  ControllerProps,
-  FieldPath,
-  FieldValues,
-} from "react-hook-form";
+import { Controller, FormProvider, useFormContext } from "react-hook-form";
+import type { ControllerProps, FieldPath, FieldValues } from "react-hook-form";
 import { cn } from "@venora/lib";
 
 const Form = FormProvider;
 
 type FormFieldContextValue<
   TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 > = {
   name: TName;
 };
 
 const FormFieldContext = React.createContext<FormFieldContextValue>(
-  {} as FormFieldContextValue
+  {} as FormFieldContextValue,
 );
 
 const FormField = <
   TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
   ...props
 }: ControllerProps<TFieldValues, TName>) => {
@@ -69,7 +61,7 @@ type FormItemContextValue = {
 };
 
 const FormItemContext = React.createContext<FormItemContextValue>(
-  {} as FormItemContextValue
+  {} as FormItemContextValue,
 );
 
 const FormItem = React.forwardRef<
@@ -98,7 +90,7 @@ const FormLabel = React.forwardRef<
       className={cn(
         "text-sm font-medium text-[var(--text-secondary)]",
         error && "text-[var(--color-danger)]",
-        className
+        className,
       )}
       htmlFor={formItemId}
       {...props}
@@ -162,7 +154,10 @@ const FormMessage = React.forwardRef<
     <p
       ref={ref}
       id={formMessageId}
-      className={cn("text-xs font-medium text-[var(--color-danger)] animate-slide-up", className)}
+      className={cn(
+        "text-xs font-medium text-[var(--color-danger)] animate-slide-up",
+        className,
+      )}
       {...props}
     >
       {body}

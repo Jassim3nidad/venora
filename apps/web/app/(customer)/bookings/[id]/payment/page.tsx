@@ -37,7 +37,11 @@ type Props = {
 };
 
 function formatCurrency(value?: number | null) {
-  if (value === null || value === undefined || !Number.isFinite(Number(value))) {
+  if (
+    value === null ||
+    value === undefined ||
+    !Number.isFinite(Number(value))
+  ) {
     return "Pending";
   }
 
@@ -50,9 +54,14 @@ function formatCurrency(value?: number | null) {
 
 function formatDate(value?: string | null) {
   if (!value) return "Not set";
-  const date = value.includes("T") ? new Date(value) : new Date(`${value}T00:00:00`);
+  const date = value.includes("T")
+    ? new Date(value)
+    : new Date(`${value}T00:00:00`);
   if (Number.isNaN(date.getTime())) return "Not set";
-  return new Intl.DateTimeFormat("en-PH", { dateStyle: "medium", timeStyle: value.includes("T") ? "short" : undefined }).format(date);
+  return new Intl.DateTimeFormat("en-PH", {
+    dateStyle: "medium",
+    timeStyle: value.includes("T") ? "short" : undefined,
+  }).format(date);
 }
 
 export default async function BookingPaymentPage({ params }: Props) {
@@ -66,7 +75,8 @@ export default async function BookingPaymentPage({ params }: Props) {
 
   const { data: booking } = await supabase
     .from("bookings")
-    .select(`
+    .select(
+      `
       id,
       status,
       event_date,
@@ -87,30 +97,32 @@ export default async function BookingPaymentPage({ params }: Props) {
         created_at,
         paid_at
       )
-    `)
+    `,
+    )
     .eq("id", id)
     .eq("customer_id", user.id)
     .single();
 
   if (!booking) notFound();
 
-  const [{ data: invoices }, { data: receipts }, { data: refunds }] = await Promise.all([
-    supabase
-      .from("invoices")
-      .select("*")
-      .eq("booking_id", id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("receipts")
-      .select("*")
-      .eq("booking_id", id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("refunds")
-      .select("*")
-      .eq("booking_id", id)
-      .order("created_at", { ascending: false }),
-  ]);
+  const [{ data: invoices }, { data: receipts }, { data: refunds }] =
+    await Promise.all([
+      supabase
+        .from("invoices")
+        .select("*")
+        .eq("booking_id", id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("receipts")
+        .select("*")
+        .eq("booking_id", id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("refunds")
+        .select("*")
+        .eq("booking_id", id)
+        .order("created_at", { ascending: false }),
+    ]);
 
   const status = booking.status as BookingStatusValue;
   const payable = status === "approved" || status === "payment_pending";
@@ -126,7 +138,8 @@ export default async function BookingPaymentPage({ params }: Props) {
   const hasActiveRefund = (refunds ?? []).some((refund: RefundRow) =>
     ["pending", "processing", "succeeded"].includes(refund.status),
   );
-  const refundable = status === "cancelled" && Boolean(paidTransaction) && !hasActiveRefund;
+  const refundable =
+    status === "cancelled" && Boolean(paidTransaction) && !hasActiveRefund;
 
   const availableProviders = listAvailableProviders();
 
@@ -171,7 +184,9 @@ export default async function BookingPaymentPage({ params }: Props) {
             </div>
 
             <div className="mt-5 rounded-2xl border border-[#E5E7EB] bg-white p-4">
-              <CustomerStatusBadge icon={ShieldCheck}>Payment status</CustomerStatusBadge>
+              <CustomerStatusBadge icon={ShieldCheck}>
+                Payment status
+              </CustomerStatusBadge>
               <p className="mt-3 text-sm font-semibold leading-6 text-slate-600">
                 {paid
                   ? "Your deposit has been confirmed."
@@ -192,7 +207,10 @@ export default async function BookingPaymentPage({ params }: Props) {
 
             {payable ? (
               <div className="mt-5">
-                <StartPaymentForm bookingId={id} providers={availableProviders} />
+                <StartPaymentForm
+                  bookingId={id}
+                  providers={availableProviders}
+                />
               </div>
             ) : paid ? (
               <div className="mt-5">
@@ -229,9 +247,11 @@ export default async function BookingPaymentPage({ params }: Props) {
               {(receipts ?? []).map((receipt: ReceiptRow) => (
                 <ReceiptCard key={receipt.id} receipt={receipt} />
               ))}
-              {(invoices ?? []).length === 0 && (receipts ?? []).length === 0 ? (
+              {(invoices ?? []).length === 0 &&
+              (receipts ?? []).length === 0 ? (
                 <p className="rounded-2xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-semibold text-slate-500">
-                  Your invoice will appear here once the venue approves your booking.
+                  Your invoice will appear here once the venue approves your
+                  booking.
                 </p>
               ) : null}
             </div>
@@ -242,15 +262,23 @@ export default async function BookingPaymentPage({ params }: Props) {
             <div className="mt-4 grid gap-3">
               {(booking.transactions ?? []).length > 0 ? (
                 booking.transactions.map((transaction: any) => (
-                  <div key={transaction.id} className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
+                  <div
+                    key={transaction.id}
+                    className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4"
+                  >
                     <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-black text-slate-950">{formatCurrency(transaction.amount)}</p>
+                      <p className="text-sm font-black text-slate-950">
+                        {formatCurrency(transaction.amount)}
+                      </p>
                       <span className="rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1 text-xs font-extrabold uppercase tracking-[0.08em] text-[#2563EB]">
                         {String(transaction.status).replace(/_/g, " ")}
                       </span>
                     </div>
                     <p className="mt-2 text-xs font-semibold text-slate-500">
-                      {String(transaction.payment_provider).toUpperCase()} - {formatDate(transaction.paid_at ?? transaction.created_at)}
+                      {String(transaction.payment_provider).toUpperCase()} -{" "}
+                      {formatDate(
+                        transaction.paid_at ?? transaction.created_at,
+                      )}
                     </p>
                   </div>
                 ))

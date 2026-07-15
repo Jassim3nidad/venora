@@ -12,20 +12,20 @@ const REQUIREMENTS: Record<string, string[]> = {
     "Business Registration (DTI/SEC)",
     "BIR Certificate of Registration (Form 2303)",
     "Mayor's / Business Permit",
-    "3+ High-Quality Photos of Venue"
+    "3+ High-Quality Photos of Venue",
   ],
   event_coordinator: [
     "Valid Government-Issued ID",
     "Business Registration (DTI/SEC) or Freelance Proof",
     "BIR Certificate of Registration (Form 2303)",
-    "Portfolio Link / PDF Deck"
+    "Portfolio Link / PDF Deck",
   ],
   supplier: [
     "Business Registration (DTI/SEC)",
     "Mayor's / Business Permit",
     "BIR Certificate of Registration (Form 2303)",
-    "Service Proof / Catalog"
-  ]
+    "Service Proof / Catalog",
+  ],
 };
 
 const MAX_SIZE = 20 * 1024 * 1024; // 20 MB
@@ -36,13 +36,13 @@ const ALLOWED_TYPES = [
   "application/pdf",
 ];
 
-export function VerificationUpload({ 
-  role, 
-  isSubmitting, 
-  onSubmit, 
-  onBack 
-}: { 
-  role: "venue_owner" | "event_coordinator" | "supplier"; 
+export function VerificationUpload({
+  role,
+  isSubmitting,
+  onSubmit,
+  onBack,
+}: {
+  role: "venue_owner" | "event_coordinator" | "supplier";
   isSubmitting: boolean;
   onSubmit: (documentUrls: string[]) => void;
   onBack: () => void;
@@ -60,7 +60,9 @@ export function VerificationUpload({
 
       for (const file of selectedFiles) {
         if (!ALLOWED_TYPES.includes(file.type)) {
-          setError(`File type not supported: ${file.name}. Only PDF, JPEG, and PNG are allowed.`);
+          setError(
+            `File type not supported: ${file.name}. Only PDF, JPEG, and PNG are allowed.`,
+          );
           return;
         }
         if (file.size > MAX_SIZE) {
@@ -101,7 +103,7 @@ export function VerificationUpload({
       }));
 
       const res = await generateVerificationUploadUrlsAction(role, metadata);
-      
+
       if (!res.success || !res.payloads) {
         throw new Error(res.error || "Failed to generate upload URLs.");
       }
@@ -122,7 +124,9 @@ export function VerificationUpload({
           });
 
         if (uploadError) {
-          throw new Error(`Upload failed for ${file.name}: ${uploadError.message}`);
+          throw new Error(
+            `Upload failed for ${file.name}: ${uploadError.message}`,
+          );
         }
 
         uploadedPaths.push(payload.path);
@@ -164,7 +168,10 @@ export function VerificationUpload({
         <h3 className="font-bold text-slate-900 mb-4">Required Documents:</h3>
         <ul className="space-y-2 mb-6">
           {reqs.map((req, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
+            <li
+              key={i}
+              className="flex items-start gap-2 text-sm text-slate-600"
+            >
               <div className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#2563EB]" />
               <span>{req}</span>
             </li>
@@ -173,8 +180,12 @@ export function VerificationUpload({
 
         <label className="relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-white py-8 transition hover:border-[#2563EB] hover:bg-[#EFF6FF]">
           <UploadCloud className="mb-3 h-10 w-10 text-slate-400" />
-          <p className="text-sm font-bold text-[#2563EB]">Click to upload files</p>
-          <p className="mt-1 text-xs text-slate-500">PDF, JPG, PNG (max 20MB each)</p>
+          <p className="text-sm font-bold text-[#2563EB]">
+            Click to upload files
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            PDF, JPG, PNG (max 20MB each)
+          </p>
           <input
             type="file"
             multiple
@@ -190,10 +201,15 @@ export function VerificationUpload({
         <div className="mb-8 space-y-3">
           <h3 className="font-bold text-slate-900">Selected Files:</h3>
           {files.map((f, i) => (
-            <div key={i} className="flex items-center justify-between rounded-xl border border-slate-200 p-3 bg-white">
+            <div
+              key={i}
+              className="flex items-center justify-between rounded-xl border border-slate-200 p-3 bg-white"
+            >
               <div className="flex items-center gap-3 overflow-hidden">
                 <FileText className="h-5 w-5 shrink-0 text-[#2563EB]" />
-                <span className="truncate text-sm font-medium text-slate-700">{f.name}</span>
+                <span className="truncate text-sm font-medium text-slate-700">
+                  {f.name}
+                </span>
               </div>
               <button
                 onClick={() => removeFile(i)}

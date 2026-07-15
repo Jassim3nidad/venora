@@ -12,7 +12,9 @@ export const partnerApplicationSchema = z.object({
     city: z.string().min(1, "City/Municipality is required"),
     zip: z.string().min(1, "ZIP code is required"),
   }),
-  documents: z.array(z.string()).min(1, "Please upload the required verification documents"),
+  documents: z
+    .array(z.string())
+    .min(1, "Please upload the required verification documents"),
 });
 
 export type PartnerApplicationInput = z.infer<typeof partnerApplicationSchema>;

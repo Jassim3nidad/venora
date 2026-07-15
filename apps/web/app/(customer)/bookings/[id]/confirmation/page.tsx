@@ -1,7 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, CalendarDays, CheckCircle2, Clock3, CreditCard, MapPin, TicketCheck } from "lucide-react";
+import {
+  ArrowLeft,
+  CalendarDays,
+  CheckCircle2,
+  Clock3,
+  CreditCard,
+  MapPin,
+  TicketCheck,
+} from "lucide-react";
 import {
   CustomerCard,
   CustomerLinkButton,
@@ -27,7 +35,9 @@ type Props = {
 
 function formatDate(value?: string | null) {
   if (!value) return "Not set";
-  const date = value.includes("T") ? new Date(value) : new Date(`${value}T00:00:00`);
+  const date = value.includes("T")
+    ? new Date(value)
+    : new Date(`${value}T00:00:00`);
   if (Number.isNaN(date.getTime())) return "Not set";
   return new Intl.DateTimeFormat("en-PH", {
     dateStyle: value.includes("T") ? "medium" : "long",
@@ -36,7 +46,11 @@ function formatDate(value?: string | null) {
 }
 
 function formatCurrency(value?: number | null) {
-  if (value === null || value === undefined || !Number.isFinite(Number(value))) {
+  if (
+    value === null ||
+    value === undefined ||
+    !Number.isFinite(Number(value))
+  ) {
     return "Pending";
   }
 
@@ -58,7 +72,8 @@ export default async function BookingConfirmationPage({ params }: Props) {
 
   const { data: booking } = await supabase
     .from("bookings")
-    .select(`
+    .select(
+      `
       id,
       status,
       event_date,
@@ -84,7 +99,8 @@ export default async function BookingConfirmationPage({ params }: Props) {
         created_at,
         paid_at
       )
-    `)
+    `,
+    )
     .eq("id", id)
     .eq("customer_id", user.id)
     .single();
@@ -105,7 +121,9 @@ export default async function BookingConfirmationPage({ params }: Props) {
 
   return (
     <div className="bg-[#F8FAFC] text-[#111827]">
-      {!isConfirmed && status === "payment_pending" ? <PendingPaymentRefresh /> : null}
+      {!isConfirmed && status === "payment_pending" ? (
+        <PendingPaymentRefresh />
+      ) : null}
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <Link
           href={`/bookings/${id}`}
@@ -118,7 +136,11 @@ export default async function BookingConfirmationPage({ params }: Props) {
         <CustomerPageHeader
           eyebrow={isConfirmed ? "Confirmed" : "Payment pending"}
           icon={isConfirmed ? CheckCircle2 : Clock3}
-          title={isConfirmed ? "Your booking is confirmed." : "Waiting for payment confirmation."}
+          title={
+            isConfirmed
+              ? "Your booking is confirmed."
+              : "Waiting for payment confirmation."
+          }
           description={`${booking.venues?.name ?? "Venue"} - ${formatDate(booking.event_date)}`}
           action={<BookingStatusBadge status={status} />}
         />
@@ -126,32 +148,50 @@ export default async function BookingConfirmationPage({ params }: Props) {
         <CustomerCard className="p-5 sm:p-6">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
-              <CustomerStatusBadge icon={TicketCheck}>Booking ID</CustomerStatusBadge>
-              <p className="mt-3 break-all text-sm font-black text-slate-950">{booking.id}</p>
+              <CustomerStatusBadge icon={TicketCheck}>
+                Booking ID
+              </CustomerStatusBadge>
+              <p className="mt-3 break-all text-sm font-black text-slate-950">
+                {booking.id}
+              </p>
             </div>
 
             <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
-              <CustomerStatusBadge icon={CalendarDays}>Event</CustomerStatusBadge>
-              <p className="mt-3 text-lg font-black text-slate-950">{formatDate(booking.event_date)}</p>
+              <CustomerStatusBadge icon={CalendarDays}>
+                Event
+              </CustomerStatusBadge>
+              <p className="mt-3 text-lg font-black text-slate-950">
+                {formatDate(booking.event_date)}
+              </p>
               <p className="mt-1 text-sm font-semibold text-slate-500">
-                {booking.event_start_time || "Start time pending"} - {booking.event_end_time || "End time pending"}
+                {booking.event_start_time || "Start time pending"} -{" "}
+                {booking.event_end_time || "End time pending"}
               </p>
             </div>
 
             <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
               <CustomerStatusBadge icon={MapPin}>Venue</CustomerStatusBadge>
-              <p className="mt-3 text-lg font-black text-slate-950">{booking.venues?.name ?? "Venue"}</p>
+              <p className="mt-3 text-lg font-black text-slate-950">
+                {booking.venues?.name ?? "Venue"}
+              </p>
               <p className="mt-1 text-sm font-semibold text-slate-500">
-                {[booking.venues?.city, booking.venues?.province].filter(Boolean).join(", ") || "Location unavailable"}
+                {[booking.venues?.city, booking.venues?.province]
+                  .filter(Boolean)
+                  .join(", ") || "Location unavailable"}
               </p>
             </div>
 
             <div className="rounded-2xl border border-[#DBEAFE] bg-[#EFF6FF] p-4 text-[#1D4ED8]">
-              <CustomerStatusBadge icon={CreditCard} className="border-[#BFDBFE] bg-white text-[#1D4ED8]">
+              <CustomerStatusBadge
+                icon={CreditCard}
+                className="border-[#BFDBFE] bg-white text-[#1D4ED8]"
+              >
                 Payment
               </CustomerStatusBadge>
               <p className="mt-3 text-lg font-black">
-                {paidTransaction ? formatCurrency(paidTransaction.amount) : formatCurrency(booking.deposit_amount)}
+                {paidTransaction
+                  ? formatCurrency(paidTransaction.amount)
+                  : formatCurrency(booking.deposit_amount)}
               </p>
               <p className="mt-1 text-sm font-semibold">
                 {paidTransaction
@@ -180,7 +220,10 @@ export default async function BookingConfirmationPage({ params }: Props) {
               </CustomerLinkButton>
             )}
             {booking.venues?.slug ? (
-              <CustomerLinkButton href={`/venues/${booking.venues.slug}`} tone="secondary">
+              <CustomerLinkButton
+                href={`/venues/${booking.venues.slug}`}
+                tone="secondary"
+              >
                 View Venue
               </CustomerLinkButton>
             ) : null}

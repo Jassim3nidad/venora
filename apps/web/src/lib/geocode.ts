@@ -24,7 +24,11 @@ async function nominatimSearch(
   });
 
   if (!response.ok) {
-    console.error("OSM Nominatim API error:", response.status, response.statusText);
+    console.error(
+      "OSM Nominatim API error:",
+      response.status,
+      response.statusText,
+    );
     return null;
   }
 

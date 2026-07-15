@@ -27,6 +27,6 @@ function assertPublicKey(key: string): string {
 export function createClient() {
   return createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    assertPublicKey(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+    assertPublicKey(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!),
   );
 }

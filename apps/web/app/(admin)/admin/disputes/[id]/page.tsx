@@ -1,4 +1,9 @@
-import { DashboardPage, Panel, PanelHeader, StatusBadge } from "@/components/dashboard/enterprise";
+import {
+  DashboardPage,
+  Panel,
+  PanelHeader,
+  StatusBadge,
+} from "@/components/dashboard/enterprise";
 import { createClient } from "@/lib/supabase/server";
 import { requirePermissionOrRedirect } from "@/lib/rbac/admin-context";
 import { redirect } from "next/navigation";
@@ -6,13 +11,19 @@ import { revalidatePath } from "next/cache";
 
 export const dynamic = "force-dynamic";
 
-export default async function DisputeDetailsPage({ params }: { params: { id: string } }) {
+export default async function DisputeDetailsPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   await requirePermissionOrRedirect("reports.view");
 
   const supabase = (await createClient()) as any;
   const { data: dispute, error } = await supabase
     .from("disputes")
-    .select("*, profiles!raised_by(full_name, email), venues(name), bookings(total_price, start_time, status)")
+    .select(
+      "*, profiles!raised_by(full_name, email), venues(name), bookings(total_price, start_time, status)",
+    )
     .eq("id", params.id)
     .single();
 
@@ -24,12 +35,12 @@ export default async function DisputeDetailsPage({ params }: { params: { id: str
     "use server";
     const notes = formData.get("resolution_notes") as string;
     const client = (await createClient()) as any;
-    
+
     await client.rpc("resolve_dispute", {
       p_dispute_id: dispute.id,
       p_resolution_notes: notes,
     });
-    
+
     revalidatePath(`/admin/disputes/${dispute.id}`);
     revalidatePath("/admin/disputes");
   }
@@ -50,11 +61,15 @@ export default async function DisputeDetailsPage({ params }: { params: { id: str
             </div>
             <div>
               <span className="text-sm text-slate-500 block">Raised By</span>
-              <span className="font-medium text-slate-900">{dispute.profiles?.full_name} ({dispute.profiles?.email})</span>
+              <span className="font-medium text-slate-900">
+                {dispute.profiles?.full_name} ({dispute.profiles?.email})
+              </span>
             </div>
             <div>
               <span className="text-sm text-slate-500 block">Venue</span>
-              <span className="font-medium text-slate-900">{dispute.venues?.name}</span>
+              <span className="font-medium text-slate-900">
+                {dispute.venues?.name}
+              </span>
             </div>
             <div>
               <span className="text-sm text-slate-500 block">Reason</span>
@@ -68,16 +83,24 @@ export default async function DisputeDetailsPage({ params }: { params: { id: str
           <div className="p-6 space-y-4">
             <div>
               <span className="text-sm text-slate-500 block">Booking ID</span>
-              <span className="font-medium text-slate-900">{dispute.booking_id}</span>
+              <span className="font-medium text-slate-900">
+                {dispute.booking_id}
+              </span>
             </div>
             {dispute.bookings && (
               <>
                 <div>
-                  <span className="text-sm text-slate-500 block">Booking Amount</span>
-                  <span className="font-medium text-slate-900">₱{dispute.bookings.total_price.toLocaleString()}</span>
+                  <span className="text-sm text-slate-500 block">
+                    Booking Amount
+                  </span>
+                  <span className="font-medium text-slate-900">
+                    ₱{dispute.bookings.total_price.toLocaleString()}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-sm text-slate-500 block">Booking Status</span>
+                  <span className="text-sm text-slate-500 block">
+                    Booking Status
+                  </span>
                   <StatusBadge status={dispute.bookings.status} />
                 </div>
               </>
@@ -91,18 +114,29 @@ export default async function DisputeDetailsPage({ params }: { params: { id: str
             {dispute.status === "resolved" ? (
               <div className="space-y-4">
                 <div>
-                  <span className="text-sm text-slate-500 block">Resolved At</span>
-                  <span className="font-medium text-slate-900">{new Date(dispute.resolved_at).toLocaleString()}</span>
+                  <span className="text-sm text-slate-500 block">
+                    Resolved At
+                  </span>
+                  <span className="font-medium text-slate-900">
+                    {new Date(dispute.resolved_at).toLocaleString()}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-sm text-slate-500 block">Resolution Notes</span>
+                  <span className="text-sm text-slate-500 block">
+                    Resolution Notes
+                  </span>
                   <p className="text-slate-900">{dispute.resolution_notes}</p>
                 </div>
               </div>
             ) : (
               <form action={resolveDispute} className="space-y-4">
                 <div>
-                  <label htmlFor="resolution_notes" className="text-sm text-slate-500 block mb-2">Resolution Notes</label>
+                  <label
+                    htmlFor="resolution_notes"
+                    className="text-sm text-slate-500 block mb-2"
+                  >
+                    Resolution Notes
+                  </label>
                   <textarea
                     id="resolution_notes"
                     name="resolution_notes"

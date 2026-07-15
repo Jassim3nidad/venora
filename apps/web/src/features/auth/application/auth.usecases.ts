@@ -15,13 +15,18 @@ export async function registerUserUseCase(input: {
   // 'admin' from the selectable options, so this should be unreachable from
   // the UI — but a use-case shouldn't trust that its only caller is the form.
   if (input.role === ROLES.ADMIN) {
-    throw new ForbiddenError("Administrator accounts cannot be created through public registration.");
+    throw new ForbiddenError(
+      "Administrator accounts cannot be created through public registration.",
+    );
   }
 
   return repository.signUp(input);
 }
 
-export async function authenticateUserUseCase(input: { email: string; password: string }) {
+export async function authenticateUserUseCase(input: {
+  email: string;
+  password: string;
+}) {
   return repository.signIn(input);
 }
 
@@ -48,10 +53,16 @@ export async function getCurrentUserUseCase() {
   return repository.getCurrentUser();
 }
 
-export async function updateProfileUseCase(userId: string, data: { fullName: string; phone?: string | null }) {
+export async function updateProfileUseCase(
+  userId: string,
+  data: { fullName: string; phone?: string | null },
+) {
   return repository.updateProfile(userId, data);
 }
 
-export async function verifyOtpUseCase(tokenHash: string, type: "signup" | "email") {
+export async function verifyOtpUseCase(
+  tokenHash: string,
+  type: "signup" | "email",
+) {
   return repository.verifyOtp(tokenHash, type);
 }

@@ -21,10 +21,26 @@ describe("customer availability helpers", () => {
   });
 
   it.each([
-    ["reserved", "Booked", "This date is already booked. Please choose another date."],
-    ["tentative", "Pending", "This date has a pending request and cannot be booked yet."],
-    ["maintenance", "Maintenance", "This date is unavailable due to maintenance."],
-    ["blackout", "Blocked", "This date is unavailable. Please choose another date."],
+    [
+      "reserved",
+      "Booked",
+      "This date is already booked. Please choose another date.",
+    ],
+    [
+      "tentative",
+      "Pending",
+      "This date has a pending request and cannot be booked yet.",
+    ],
+    [
+      "maintenance",
+      "Maintenance",
+      "This date is unavailable due to maintenance.",
+    ],
+    [
+      "blackout",
+      "Blocked",
+      "This date is unavailable. Please choose another date.",
+    ],
   ] as const)("blocks %s dates", (status, label, message) => {
     expect(isCustomerSelectableAvailabilityStatus(status)).toBe(false);
     expect(getCustomerAvailabilityLabel(status)).toBe(label);

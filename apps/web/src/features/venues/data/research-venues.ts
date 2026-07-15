@@ -173,14 +173,18 @@ function formatCurrency(value: number) {
 }
 
 function unique(values: Array<string | null | undefined>) {
-  return [...new Set(values.filter((value): value is string => Boolean(value)))];
+  return [
+    ...new Set(values.filter((value): value is string => Boolean(value))),
+  ];
 }
 
 export function getResearchVenueBySlug(slug: string) {
   return researchVenues.find((venue) => venue.slug === slug) ?? null;
 }
 
-export function getResearchVenueMedia(venue: ResearchVenue): DatasetVenueMedia[] {
+export function getResearchVenueMedia(
+  venue: ResearchVenue,
+): DatasetVenueMedia[] {
   return (venue.photos.image_urls ?? []).map((url, index) => ({
     id: `${venue.id}-image-${index + 1}`,
     storage_path: url,
@@ -265,8 +269,12 @@ export function toMarketplaceVenue(
   };
 }
 
-export function getMarketplaceResearchVenues(favoriteVenueIds = new Set<string>()) {
-  return researchVenues.map((venue) => toMarketplaceVenue(venue, favoriteVenueIds));
+export function getMarketplaceResearchVenues(
+  favoriteVenueIds = new Set<string>(),
+) {
+  return researchVenues.map((venue) =>
+    toMarketplaceVenue(venue, favoriteVenueIds),
+  );
 }
 
 export function toVenueDetailRecord(venue: ResearchVenue) {

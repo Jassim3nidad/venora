@@ -1,7 +1,12 @@
 "use client";
 
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@venora/ui";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@venora/ui";
 import { CHART_COLORS } from "./palette";
 
 export type DemographicsBucket = { bucket: string; count: number };
@@ -25,10 +30,25 @@ export function DemographicsBarChart({ data }: { data: DemographicsBucket[] }) {
     <ChartContainer config={chartConfig} className="h-[180px] w-full">
       <BarChart data={data} margin={{ left: 0, right: 8, top: 4, bottom: 0 }}>
         <CartesianGrid vertical={false} stroke="#e5e7eb" />
-        <XAxis dataKey="bucket" tickLine={false} axisLine={false} fontSize={11} />
-        <YAxis tickLine={false} axisLine={false} fontSize={11} width={32} allowDecimals={false} />
+        <XAxis
+          dataKey="bucket"
+          tickLine={false}
+          axisLine={false}
+          fontSize={11}
+        />
+        <YAxis
+          tickLine={false}
+          axisLine={false}
+          fontSize={11}
+          width={32}
+          allowDecimals={false}
+        />
         <ChartTooltip content={<ChartTooltipContent />} />
-        <Bar dataKey="count" fill={CHART_COLORS.secondary} radius={[6, 6, 0, 0]} />
+        <Bar
+          dataKey="count"
+          fill={CHART_COLORS.secondary}
+          radius={[6, 6, 0, 0]}
+        />
       </BarChart>
     </ChartContainer>
   );

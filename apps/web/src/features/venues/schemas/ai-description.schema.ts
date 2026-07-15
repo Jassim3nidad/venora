@@ -6,7 +6,11 @@ export const generatedContentTypeOptions = [
   "package_description",
 ] as const;
 
-export const generatedContentToneOptions = ["elegant", "casual", "luxury"] as const;
+export const generatedContentToneOptions = [
+  "elegant",
+  "casual",
+  "luxury",
+] as const;
 
 export const generateVenueDescriptionRequestSchema = z.object({
   venueId: z.string().uuid(),

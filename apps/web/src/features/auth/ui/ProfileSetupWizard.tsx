@@ -40,11 +40,7 @@ type ProfileSetupWizardProps = {
   initialAvatarUrl: string | null;
 };
 
-function StepIndicator({
-  currentStep,
-}: {
-  currentStep: SetupStep;
-}) {
+function StepIndicator({ currentStep }: { currentStep: SetupStep }) {
   const currentIndex = STEPS.findIndex((step) => step.id === currentStep);
 
   return (
@@ -119,7 +115,9 @@ function PreferenceToggle({
         className="mt-1 h-4 w-4 rounded border-slate-300 text-[#2563EB] focus:ring-[#2563EB]/30"
       />
       <span>
-        <span className="block text-sm font-extrabold text-slate-800">{label}</span>
+        <span className="block text-sm font-extrabold text-slate-800">
+          {label}
+        </span>
         <span className="mt-1 block text-sm font-medium leading-6 text-slate-500">
           {description}
         </span>
@@ -274,9 +272,12 @@ function WizardContent({
                 <Camera className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-lg font-black text-slate-950">Profile picture</h2>
+                <h2 className="text-lg font-black text-slate-950">
+                  Profile picture
+                </h2>
                 <p className="text-sm font-medium text-slate-500">
-                  Help hosts recognize you. You can change this anytime in Account.
+                  Help hosts recognize you. You can change this anytime in
+                  Account.
                 </p>
               </div>
             </div>
@@ -296,9 +297,12 @@ function WizardContent({
                 <UserRound className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-lg font-black text-slate-950">Personal details</h2>
+                <h2 className="text-lg font-black text-slate-950">
+                  Personal details
+                </h2>
                 <p className="text-sm font-medium text-slate-500">
-                  Confirm how we should address you and how to reach you about bookings.
+                  Confirm how we should address you and how to reach you about
+                  bookings.
                 </p>
               </div>
             </div>
@@ -333,7 +337,8 @@ function WizardContent({
                 htmlFor="setup-phone"
                 className="mb-2 block text-sm font-bold text-slate-700"
               >
-                Phone number <span className="font-medium text-slate-400">(optional)</span>
+                Phone number{" "}
+                <span className="font-medium text-slate-400">(optional)</span>
               </label>
               <div className="relative">
                 <Phone className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -359,8 +364,12 @@ function WizardContent({
               <div className="flex gap-3">
                 <Mail className="mt-0.5 h-5 w-5 shrink-0 text-[#2563EB]" />
                 <div>
-                  <p className="text-sm font-extrabold text-slate-800">Account email</p>
-                  <p className="mt-1 text-sm font-medium text-slate-500">{email}</p>
+                  <p className="text-sm font-extrabold text-slate-800">
+                    Account email
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-slate-500">
+                    {email}
+                  </p>
                 </div>
               </div>
             </div>
@@ -374,9 +383,12 @@ function WizardContent({
                 <Bell className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-lg font-black text-slate-950">Your preferences</h2>
+                <h2 className="text-lg font-black text-slate-950">
+                  Your preferences
+                </h2>
                 <p className="text-sm font-medium text-slate-500">
-                  Choose what updates you want and the kinds of events you are planning.
+                  Choose what updates you want and the kinds of events you are
+                  planning.
                 </p>
               </div>
             </div>
@@ -425,11 +437,13 @@ function WizardContent({
 
             <div>
               <p className="mb-3 text-sm font-bold text-slate-700">
-                What are you planning? <span className="font-medium text-slate-400">(optional)</span>
+                What are you planning?{" "}
+                <span className="font-medium text-slate-400">(optional)</span>
               </p>
               <div className="flex flex-wrap gap-2">
                 {PROFILE_EVENT_TYPE_OPTIONS.map((eventType) => {
-                  const selected = preferences.preferredEventTypes?.includes(eventType);
+                  const selected =
+                    preferences.preferredEventTypes?.includes(eventType);
 
                   return (
                     <button
@@ -520,14 +534,22 @@ export function ProfileSetupWizard(props: ProfileSetupWizardProps) {
           <div className="flex justify-center pt-3">
             <div className="h-1.5 w-12 rounded-full bg-slate-200" />
           </div>
-          <WizardContent {...props} onSkip={handleSkip} isSkipping={isSkipping} />
+          <WizardContent
+            {...props}
+            onSkip={handleSkip}
+            isSkipping={isSkipping}
+          />
         </div>
       </div>
 
       {/* Desktop: full-page guided setup */}
       <div className="hidden min-h-screen items-center justify-center bg-[#F9FAFB] px-6 py-10 lg:flex">
         <div className="w-full max-w-2xl overflow-hidden rounded-[28px] border border-[#E5E7EB]/80 bg-white shadow-xl shadow-slate-200/60">
-          <WizardContent {...props} onSkip={handleSkip} isSkipping={isSkipping} />
+          <WizardContent
+            {...props}
+            onSkip={handleSkip}
+            isSkipping={isSkipping}
+          />
         </div>
       </div>
     </>

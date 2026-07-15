@@ -46,7 +46,9 @@ export function AvatarUpload({
     setAvatarUrl(initialAvatarUrl);
   }, [initialAvatarUrl]);
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     event.target.value = "";
 
@@ -84,7 +86,9 @@ export function AvatarUpload({
         throw new Error(uploadError.message);
       }
 
-      const { data } = supabase.storage.from("avatars").getPublicUrl(storagePath);
+      const { data } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(storagePath);
       const response = await updateAvatarAction({
         avatarUrl: data.publicUrl,
         storagePath,
@@ -152,7 +156,9 @@ export function AvatarUpload({
         </div>
 
         <div className="min-w-0 flex-1 text-center sm:text-left">
-          <p className="text-sm font-extrabold text-slate-900">Profile picture</p>
+          <p className="text-sm font-extrabold text-slate-900">
+            Profile picture
+          </p>
           <p className="mt-1 text-sm font-medium leading-6 text-slate-500">
             Upload a photo so your account feels more personal across Venora.
             Square images work best.
@@ -193,7 +199,9 @@ export function AvatarUpload({
       </div>
 
       {successMessage ? (
-        <p className="mt-4 text-sm font-semibold text-emerald-700">{successMessage}</p>
+        <p className="mt-4 text-sm font-semibold text-emerald-700">
+          {successMessage}
+        </p>
       ) : null}
 
       {error ? (

@@ -37,7 +37,9 @@ export default async function AdminReviewsPage({ searchParams }: Props) {
   const showAll = all === "true";
 
   const supabase = (await createClient()) as any;
-  const reviews = await getReviewsForModeration(supabase, { onlyFlagged: !showAll });
+  const reviews = await getReviewsForModeration(supabase, {
+    onlyFlagged: !showAll,
+  });
 
   const columns: DataTableColumn<ReviewForModeration>[] = [
     { key: "venue", header: "Venue", cell: (row) => row.venueName },
@@ -61,7 +63,9 @@ export default async function AdminReviewsPage({ searchParams }: Props) {
       header: "Comment",
       className: "max-w-[280px]",
       cell: (row) => (
-        <span className="line-clamp-2 text-[#4b5563]">{row.comment ?? "—"}</span>
+        <span className="line-clamp-2 text-[#4b5563]">
+          {row.comment ?? "—"}
+        </span>
       ),
     },
     {
@@ -76,12 +80,18 @@ export default async function AdminReviewsPage({ searchParams }: Props) {
           <span className="text-[#6b7280]">None</span>
         ),
     },
-    { key: "status", header: "Status", cell: (row) => <StatusBadge status={row.status} /> },
+    {
+      key: "status",
+      header: "Status",
+      cell: (row) => <StatusBadge status={row.status} />,
+    },
     { key: "date", header: "Date", cell: (row) => formatDate(row.createdAt) },
     {
       key: "actions",
       header: "Actions",
-      cell: (row) => <ModerationActions reviewId={row.id} status={row.status} />,
+      cell: (row) => (
+        <ModerationActions reviewId={row.id} status={row.status} />
+      ),
     },
   ];
 

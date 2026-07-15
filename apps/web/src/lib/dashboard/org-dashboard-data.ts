@@ -20,39 +20,43 @@ export type OwnerDashboardContext = {
   isAdmin: boolean;
 };
 
-export const getOwnerDashboardContext = cache(async (): Promise<OwnerDashboardContext> => {
-  const { supabase, user } = await getCurrentAuthUser();
+export const getOwnerDashboardContext = cache(
+  async (): Promise<OwnerDashboardContext> => {
+    const { supabase, user } = await getCurrentAuthUser();
 
-  if (!user) redirect("/login");
+    if (!user) redirect("/login");
 
-  const { data: roleRows } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", user.id);
-  const roles = (roleRows ?? []).map((row: { role: string }) => row.role);
+    const { data: roleRows } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id);
+    const roles = (roleRows ?? []).map((row: { role: string }) => row.role);
 
-  const { data: members } = await supabase
-    .from("organization_members")
-    .select("organization_id")
-    .eq("user_id", user.id);
-  const memberOrgs = (members ?? []).map((m: { organization_id: string }) => m.organization_id);
+    const { data: members } = await supabase
+      .from("organization_members")
+      .select("organization_id")
+      .eq("user_id", user.id);
+    const memberOrgs = (members ?? []).map(
+      (m: { organization_id: string }) => m.organization_id,
+    );
 
-  const { data: owned } = await supabase
-    .from("organizations")
-    .select("id")
-    .eq("owner_id", user.id);
-  const ownedOrgs = (owned ?? []).map((o: { id: string }) => o.id);
+    const { data: owned } = await supabase
+      .from("organizations")
+      .select("id")
+      .eq("owner_id", user.id);
+    const ownedOrgs = (owned ?? []).map((o: { id: string }) => o.id);
 
-  const orgIds = Array.from(new Set([...memberOrgs, ...ownedOrgs]));
+    const orgIds = Array.from(new Set([...memberOrgs, ...ownedOrgs]));
 
-  return {
-    supabase,
-    user,
-    orgIds,
-    roles,
-    isAdmin: roles.includes("admin"),
-  };
-});
+    return {
+      supabase,
+      user,
+      orgIds,
+      roles,
+      isAdmin: roles.includes("admin"),
+    };
+  },
+);
 
 export async function getOwnerVenueIds(context: OwnerDashboardContext) {
   const { supabase, orgIds, isAdmin } = context;

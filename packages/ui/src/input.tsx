@@ -9,7 +9,10 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, startIcon, endIcon, error, label, id, ...props }, ref) => {
+  (
+    { className, type, startIcon, endIcon, error, label, id, ...props },
+    ref,
+  ) => {
     const inputId = id ?? label?.toLowerCase().replace(/\s+/g, "-");
 
     return (
@@ -37,10 +40,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               "transition-colors duration-200",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand-500)] focus-visible:ring-offset-1",
               "disabled:cursor-not-allowed disabled:opacity-50",
-              error && "border-[var(--color-danger)] focus-visible:ring-[var(--color-danger)]",
+              error &&
+                "border-[var(--color-danger)] focus-visible:ring-[var(--color-danger)]",
               startIcon && "pl-9",
               endIcon && "pr-9",
-              className
+              className,
             )}
             ref={ref}
             aria-invalid={!!error}
@@ -64,7 +68,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
       </div>
     );
-  }
+  },
 );
 Input.displayName = "Input";
 

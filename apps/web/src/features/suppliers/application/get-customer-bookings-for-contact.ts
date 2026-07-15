@@ -79,24 +79,27 @@ export async function getCustomerBookingsForContact(
     return [];
   }
 
-  return ((data ?? []) as any[])
-    // We do NOT filter out pending here; we return it so the UI can check for pending bookings.
-    .map((row) => {
-      const venue = row.venues as VenueRecord | null;
-      const venueName = venue?.name ?? "Venue booking";
-      const locationLabel = getVenueLocation(venue);
+  return (
+    ((data ?? []) as any[])
+      // We do NOT filter out pending here; we return it so the UI can check for pending bookings.
+      .map((row) => {
+        const venue = row.venues as VenueRecord | null;
+        const venueName = venue?.name ?? "Venue booking";
+        const locationLabel = getVenueLocation(venue);
 
-      return {
-        id: String(row.id),
-        eventDate: row.event_date ?? null,
-        guestCount:
-          typeof row.guest_count === "number" ? row.guest_count : null,
-        status: String(row.status),
-        venueName,
-        locationLabel,
-        label: formatBookingLabel(venueName, locationLabel, row.event_date),
-        latitude: typeof venue?.latitude === "number" ? venue.latitude : null,
-        longitude: typeof venue?.longitude === "number" ? venue.longitude : null,
-      };
-    });
+        return {
+          id: String(row.id),
+          eventDate: row.event_date ?? null,
+          guestCount:
+            typeof row.guest_count === "number" ? row.guest_count : null,
+          status: String(row.status),
+          venueName,
+          locationLabel,
+          label: formatBookingLabel(venueName, locationLabel, row.event_date),
+          latitude: typeof venue?.latitude === "number" ? venue.latitude : null,
+          longitude:
+            typeof venue?.longitude === "number" ? venue.longitude : null,
+        };
+      })
+  );
 }
