@@ -4,7 +4,6 @@ const MARKETPLACE_ROUTE_PREFIXES = [
   "/bookings",
   "/favorites",
   "/notifications",
-  "/account",
   "/inquiries",
 ] as const;
 
