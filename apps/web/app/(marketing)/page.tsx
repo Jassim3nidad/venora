@@ -52,7 +52,6 @@ export default function MarketingHomePage() {
         <section className="relative w-full py-14 md:py-24">
           <div className="mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
             <div className="min-w-0">
-
               <h1 className="max-w-3xl text-4xl font-black leading-tight tracking-[-0.05em] text-[#111827] sm:text-5xl md:text-6xl">
                 Where Extraordinary Events Begin
               </h1>

@@ -142,7 +142,10 @@ export default function ChangePasswordForm() {
               onShowPasswordChange={setShowConfirmPassword}
             />
 
-            <PasswordRequirements password={password} confirmPassword={confirmPassword} />
+            <PasswordRequirements
+              password={password}
+              confirmPassword={confirmPassword}
+            />
           </div>
         </div>
 
