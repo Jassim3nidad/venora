@@ -26,26 +26,28 @@ export default async function CustomerInquiryDetailPage({
     redirect(`/login?redirectTo=/inquiries/${id}`);
   }
 
+  let data;
   try {
-    const { inquiry, messages, quote } = await getCustomerInquiryDetails(
+    data = await getCustomerInquiryDetails(
       supabase as any,
       user.id,
       id,
     );
-
-    if (!inquiry) {
-      notFound();
-    }
-
-    return (
-      <CustomerInquiryDetail
-        inquiry={inquiry}
-        messages={messages}
-        quote={quote}
-      />
-    );
   } catch (error) {
     console.error("[CustomerInquiryDetailPage] Error:", error);
+    // If it's a 500 error or something, we can render notFound or let error.tsx handle it.
     notFound();
   }
+
+  if (!data || !data.inquiry) {
+    notFound();
+  }
+
+  return (
+    <CustomerInquiryDetail
+      inquiry={data.inquiry}
+      messages={data.messages}
+      quote={data.quote}
+    />
+  );
 }
