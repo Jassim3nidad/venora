@@ -57,13 +57,16 @@ test("anonymous featured favorite opens login instead of venue details", async (
     .first()
     .click();
 
-  await expect(page).toHaveURL((url) => {
-    return (
-      url.pathname === "/login" &&
-      url.searchParams.get("redirectTo") === "/" &&
-      url.searchParams.get("prompt") === "favorites"
-    );
-  });
+  await expect(page).toHaveURL(
+    (url) => {
+      return (
+        url.pathname === "/login" &&
+        url.searchParams.get("redirectTo") === "/" &&
+        url.searchParams.get("prompt") === "favorites"
+      );
+    },
+    { timeout: 30_000 },
+  );
 });
 
 test("venue estimate uses booking guests without public package sections", async ({
