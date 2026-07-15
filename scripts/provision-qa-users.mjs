@@ -34,7 +34,7 @@ const adminClient = createClient(supabaseUrl, serviceKey, {
 
 const ACCOUNTS = [
   { role: "analystAdmin", email: env.E2E_ANALYST_ADMIN_EMAIL, password: env.E2E_ANALYST_ADMIN_PASSWORD, dbRole: "admin", tier: "analyst" },
-  { role: "financeAdmin", email: env.E2E_FINANCE_ADMIN_EMAIL, password: env.E2E_FINANCE_ADMIN_PASSWORD, dbRole: "admin", tier: "finance" },
+  { role: "financeAdmin", email: env.E2E_FINANCE_ADMIN_EMAIL, password: env.E2E_FINANCE_ADMIN_PASSWORD, dbRole: "admin", tier: "finance_admin" },
   { role: "superAdmin", email: env.E2E_SUPER_ADMIN_EMAIL, password: env.E2E_SUPER_ADMIN_PASSWORD, dbRole: "admin", tier: "super_admin" },
   { role: "tenantAOwner", email: env.E2E_TENANT_A_OWNER_EMAIL, password: env.E2E_TENANT_A_OWNER_PASSWORD, dbRole: "venue", orgName: "Tenant A Org", venueName: "Tenant A Venue" },
   { role: "tenantBOwner", email: env.E2E_TENANT_B_OWNER_EMAIL, password: env.E2E_TENANT_B_OWNER_PASSWORD, dbRole: "venue", orgName: "Tenant B Org", venueName: "Tenant B Venue" },

@@ -20,10 +20,23 @@ const TEST_CUSTOMER_ID = "00000000-0000-0000-0000-000000000003";
 const TEST_VENUE_ID = "d131d99a-5300-4de4-a23f-03abf6c61c1d"; // Amorita Resort
 const TEST_PACKAGE_ID = "c8c8da12-0d46-4fd3-bc5f-63c484628bcc"; // Silver Package
 
-test.describe("Cancellation flow (real customer session)", () => {
+test.describe.serial("Cancellation flow (real customer session)", () => {
   let bookingId: string;
 
   test.beforeEach(async () => {
+    // Clean up any stray availability from a crashed prior run
+    await service
+      .from("venue_availability")
+      .delete()
+      .eq("venue_id", TEST_VENUE_ID)
+      .eq("date", "2099-10-01");
+    // Also clean up any stray booking
+    await service
+      .from("bookings")
+      .delete()
+      .eq("venue_id", TEST_VENUE_ID)
+      .eq("event_date", "2099-10-01");
+
     const { data, error } = await service
       .from("bookings")
       .insert({
@@ -51,6 +64,13 @@ test.describe("Cancellation flow (real customer session)", () => {
       .eq("booking_id", bookingId);
     await service.from("audit_logs").delete().eq("entity_id", bookingId);
     await service.from("bookings").delete().eq("id", bookingId);
+    
+    // Deleting a booking doesn't revert venue_availability (trigger only fires on UPDATE/INSERT)
+    await service
+      .from("venue_availability")
+      .delete()
+      .eq("venue_id", TEST_VENUE_ID)
+      .eq("date", "2099-10-01");
   });
 
   test("the real customer can cancel their own booking, and it is audited exactly once", async ({
