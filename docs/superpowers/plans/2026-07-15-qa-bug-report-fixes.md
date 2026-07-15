@@ -160,20 +160,32 @@ test("marketplace uses document scrolling and renders a normal-flow footer", asy
   await expect(page.getByRole("link", { name: "Browse", exact: true })).toBeVisible();
   await expect(page.getByRole("contentinfo")).toBeVisible();
 
-  const shell = page.getByTestId("marketplace-shell");
-  await expect(shell).not.toHaveCSS("height", `${await page.evaluate(() => innerHeight)}px`);
-  await expect(page.locator("html")).not.toHaveCSS("overflow-y", "hidden");
+  const scrollContract = await page.evaluate(() => {
+    const shell = document.querySelector('[data-testid="marketplace-shell"]');
+    const main = shell?.querySelector(':scope > main');
+    return {
+      documentOwnsScroll: document.scrollingElement === document.documentElement,
+      shellOverflowY: shell ? getComputedStyle(shell).overflowY : null,
+      mainOverflowY: main ? getComputedStyle(main).overflowY : null,
+    };
+  });
+
+  expect(scrollContract).toEqual({
+    documentOwnsScroll: true,
+    shellOverflowY: "visible",
+    mainOverflowY: "visible",
+  });
 });
 ```
 
-Add assertions that `/account` has no `Marketplace navigation`, and that venue/supplier result cards move during page scroll while their filter aside remains at a stable viewport top on desktop.
+Account Center subnavigation exclusion is covered by Task 1's pure route test. Add browser assertions that venue/supplier result cards move during page scroll while their filter aside remains at a stable viewport top on desktop.
 
 - [ ] **Step 2: Run the focused Playwright test and verify RED**
 
 Run against the isolated worktree server:
 
 ```powershell
-pnpm --config.verify-deps-before-run=false --filter @venora/web exec playwright test e2e/qa/marketplace-qa.spec.ts --project=chromium
+$env:PORT='3010'; $env:APP_BASE_URL='http://127.0.0.1:3010'; pnpm --config.verify-deps-before-run=false --filter @venora/web exec playwright test e2e/qa/marketplace-qa.spec.ts --project=chromium
 ```
 
 Expected: FAIL because the shell is `h-dvh overflow-hidden`, `/account` receives subnavigation, and marketplace footer is missing.
@@ -466,7 +478,7 @@ git commit -m "fix(web): keep supporting cards sticky"
 
 ```powershell
 pnpm --config.verify-deps-before-run=false --filter @venora/web exec vitest run src/components/layout/marketplace-navigation.test.ts src/lib/is-marketplace-route.test.ts src/features/venues/application/featured-venues.test.ts src/features/venues/utils/landing-search-suggestions.test.ts src/features/ai/ui/cost-estimator-form.test.ts
-pnpm --config.verify-deps-before-run=false --filter @venora/web exec playwright test e2e/qa/marketplace-qa.spec.ts
+$env:PORT='3010'; $env:APP_BASE_URL='http://127.0.0.1:3010'; pnpm --config.verify-deps-before-run=false --filter @venora/web exec playwright test e2e/qa/marketplace-qa.spec.ts
 ```
 
 Expected: all PASS.
