@@ -4,7 +4,6 @@ import { useState } from "react";
 
 import Link from "next/link";
 import {
-  ArrowLeft,
   BadgeCheck,
   CalendarClock,
   Check,
@@ -327,31 +326,7 @@ export function SupplierDetail({
   return (
     <main className="mx-auto max-w-7xl space-y-8 bg-white px-4 pb-28 pt-6 font-sans sm:px-6 sm:pt-8 lg:px-8 lg:pb-12">
       {/* Top Header info (matching VenueDetails) */}
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-          <Button
-            asChild
-            variant="ghost"
-            size="sm"
-            className="hidden h-10 gap-2 rounded-full px-0 hover:bg-transparent sm:flex text-[#6B7280] hover:text-[#111827]"
-          >
-            <Link href="/suppliers">
-              <ArrowLeft className="h-4 w-4" />
-              Back to suppliers
-            </Link>
-          </Button>
-          <Button
-            asChild
-            variant="outline"
-            size="icon"
-            className="flex h-10 w-10 shrink-0 rounded-full border-[#E5E7EB] sm:hidden text-[#6B7280]"
-          >
-            <Link href="/suppliers">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-end">
         {/* Action Controls */}
         <div className="hidden items-center gap-3 md:flex">
           {!isOwner && (
@@ -962,7 +937,7 @@ export function SupplierDetail({
 
         {/* Right Column - Sidebar (sticky container) */}
         <aside className="hidden lg:self-stretch lg:block">
-          <div className="sticky top-24 self-start">
+          <div className="sticky top-[9.5rem] self-start">
             <SupplierRequestSidebar
               supplier={supplier}
               supplierSlug={supplier.slug}

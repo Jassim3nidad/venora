@@ -461,7 +461,10 @@ export default function BookingSidebar({
   return (
     <>
       {/* Desktop: sticky sidebar card */}
-      <div className="sticky top-24 hidden w-full rounded-[24px] border border-[#E5E7EB] bg-white p-6 shadow-sm shadow-slate-200/60 lg:block">
+      <div
+        data-testid="venue-booking-sidebar"
+        className="sticky top-[9.5rem] hidden w-full rounded-[24px] border border-[#E5E7EB] bg-white p-6 shadow-sm shadow-slate-200/60 lg:block"
+      >
         {bookingForm}
       </div>
 
