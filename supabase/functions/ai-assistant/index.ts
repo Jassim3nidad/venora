@@ -12,15 +12,18 @@ import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { cleanString, looksVenueRelated } from "../_shared/text.ts";
 import { toVenuePayload } from "../_shared/venues.ts";
-import { OPENROUTER_BASE_URL, openRouterHeaders } from "../_shared/openrouter.ts";
 import {
-  loadAiConfig,
-  validateProviderModel,
+  OPENROUTER_BASE_URL,
+  openRouterHeaders,
+} from "../_shared/openrouter.ts";
+import {
   checkAiUsageLimits,
-  logAiUsage,
-  fetchWithTimeout,
   estimateCostCents,
+  fetchWithTimeout,
+  loadAiConfig,
+  logAiUsage,
   moderateInputText,
+  validateProviderModel,
 } from "../_shared/ai-config.ts";
 
 /** Rough token estimate for streaming responses, where the provider
@@ -73,7 +76,11 @@ serve(async (req) => {
   }
 
   if (req.method !== "POST") {
-    return errorResponse("METHOD_NOT_ALLOWED", "Use POST to chat with the assistant.", 405);
+    return errorResponse(
+      "METHOD_NOT_ALLOWED",
+      "Use POST to chat with the assistant.",
+      405,
+    );
   }
 
   try {
@@ -82,7 +89,11 @@ serve(async (req) => {
     const openRouterApiKey = Deno.env.get("OPENROUTER_API_KEY");
 
     if (!supabaseUrl || !serviceRoleKey) {
-      return errorResponse("CONFIGURATION_ERROR", "Missing Supabase configuration.", 500);
+      return errorResponse(
+        "CONFIGURATION_ERROR",
+        "Missing Supabase configuration.",
+        500,
+      );
     }
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
@@ -91,18 +102,34 @@ serve(async (req) => {
     // provider/model) never reaches the AI provider at all.
     const config = await loadAiConfig(supabase, "assistant");
     if (!config) {
-      return errorResponse("AI_CONFIG_MISSING", "AI configuration for this feature is missing.", 500);
+      return errorResponse(
+        "AI_CONFIG_MISSING",
+        "AI configuration for this feature is missing.",
+        500,
+      );
     }
     if (!config.enabled) {
-      return errorResponse("AI_FEATURE_DISABLED", "The assistant is currently disabled.", 403);
+      return errorResponse(
+        "AI_FEATURE_DISABLED",
+        "The assistant is currently disabled.",
+        403,
+      );
     }
     const providerCheck = validateProviderModel(config);
     if (!providerCheck.ok) {
-      return errorResponse("AI_PROVIDER_UNSUPPORTED", providerCheck.reason!, 500);
+      return errorResponse(
+        "AI_PROVIDER_UNSUPPORTED",
+        providerCheck.reason!,
+        500,
+      );
     }
 
     if (!openRouterApiKey) {
-      return errorResponse("OPENROUTER_NOT_CONFIGURED", "OPENROUTER_API_KEY is not configured.", 500);
+      return errorResponse(
+        "OPENROUTER_NOT_CONFIGURED",
+        "OPENROUTER_API_KEY is not configured.",
+        500,
+      );
     }
 
     const rawBody = await req.json().catch(() => null);
@@ -111,7 +138,11 @@ serve(async (req) => {
     const requestedConversationId = cleanString(rawBody?.conversationId, 100);
 
     if (!sessionId || !message) {
-      return errorResponse("VALIDATION_ERROR", "Provide a sessionId and a message.", 400);
+      return errorResponse(
+        "VALIDATION_ERROR",
+        "Provide a sessionId and a message.",
+        400,
+      );
     }
 
     if (config.moderationEnabled) {
@@ -151,8 +182,15 @@ serve(async (req) => {
         .single();
 
       if (createError || !created) {
-        console.error("[ai-assistant] Failed to create conversation:", createError);
-        return errorResponse("CONVERSATION_FAILED", "Could not start a conversation.", 500);
+        console.error(
+          "[ai-assistant] Failed to create conversation:",
+          createError,
+        );
+        return errorResponse(
+          "CONVERSATION_FAILED",
+          "Could not start a conversation.",
+          500,
+        );
       }
       conversationId = created.id;
     }
@@ -191,17 +229,19 @@ serve(async (req) => {
       const venues = (venueRows ?? []).slice(0, 5).map(toVenuePayload);
       if (venues.length > 0) {
         contextParts.push(
-          `Matching venues: ${JSON.stringify(
-            venues.map((v: any) => ({
-              name: v.name,
-              city: v.city,
-              province: v.province,
-              basePrice: v.basePrice,
-              capacityMin: v.capacityMin,
-              capacityMax: v.capacityMax,
-              avgRating: v.avgRating,
-            })),
-          )}`,
+          `Matching venues: ${
+            JSON.stringify(
+              venues.map((v: any) => ({
+                name: v.name,
+                city: v.city,
+                province: v.province,
+                basePrice: v.basePrice,
+                capacityMin: v.capacityMin,
+                capacityMax: v.capacityMax,
+                avgRating: v.avgRating,
+              })),
+            )
+          }`,
         );
       }
     }
@@ -216,13 +256,15 @@ serve(async (req) => {
 
       if (bookingRows && bookingRows.length > 0) {
         contextParts.push(
-          `This user's recent bookings: ${JSON.stringify(
-            bookingRows.map((b: any) => ({
-              venue: b.venues?.name ?? "Unknown venue",
-              eventDate: b.event_date,
-              status: b.status,
-            })),
-          )}`,
+          `This user's recent bookings: ${
+            JSON.stringify(
+              bookingRows.map((b: any) => ({
+                venue: b.venues?.name ?? "Unknown venue",
+                eventDate: b.event_date,
+                status: b.status,
+              })),
+            )
+          }`,
         );
       }
     }
@@ -232,19 +274,26 @@ serve(async (req) => {
       ...(contextParts.length > 0
         ? [{ role: "system" as const, content: contextParts.join("\n") }]
         : []),
-      ...(priorMessages ?? []).map((m: any) => ({ role: m.role, content: m.content })),
+      ...(priorMessages ?? []).map((m: any) => ({
+        role: m.role,
+        content: m.content,
+      })),
       { role: "user" as const, content: message },
     ];
 
     // Persist the user's message immediately so it survives even if the
     // completion call below fails partway through.
-    const { error: userMessageError } = await supabase.from("ai_messages").insert({
-      conversation_id: conversationId,
-      role: "user",
-      content: message,
-    });
+    const { error: userMessageError } = await supabase.from("ai_messages")
+      .insert({
+        conversation_id: conversationId,
+        role: "user",
+        content: message,
+      });
     if (userMessageError) {
-      console.error("[ai-assistant] Failed to persist user message:", userMessageError);
+      console.error(
+        "[ai-assistant] Failed to persist user message:",
+        userMessageError,
+      );
     }
 
     const assistantRequestStartedAt = Date.now();
@@ -268,7 +317,10 @@ serve(async (req) => {
 
     if (!upstream.ok || !upstream.body) {
       const errorText = await upstream.text().catch(() => "");
-      console.error("[ai-assistant] OpenRouter stream request failed:", errorText);
+      console.error(
+        "[ai-assistant] OpenRouter stream request failed:",
+        errorText,
+      );
       await logAiUsage(supabase, {
         feature: "assistant",
         provider: config.provider,
@@ -278,7 +330,11 @@ serve(async (req) => {
         success: false,
         errorCategory: "provider_error",
       });
-      return errorResponse("ASSISTANT_FAILED", "The assistant is temporarily unavailable.", 502);
+      return errorResponse(
+        "ASSISTANT_FAILED",
+        "The assistant is temporarily unavailable.",
+        502,
+      );
     }
 
     const finalConversationId = conversationId;
@@ -288,9 +344,13 @@ serve(async (req) => {
     const stream = new ReadableStream({
       async start(controller) {
         // Side-channel event so the client learns the conversation id —
-        // distinguishable from OpenAI chunks, which always have `choices`.
+        // distinguishable from OpenRouter chunks, which have `choices`.
         controller.enqueue(
-          encoder.encode(`data: ${JSON.stringify({ conversationId: finalConversationId })}\n\n`),
+          encoder.encode(
+            `data: ${
+              JSON.stringify({ conversationId: finalConversationId })
+            }\n\n`,
+          ),
         );
 
         const reader = upstream.body!.getReader();
@@ -328,7 +388,9 @@ serve(async (req) => {
           console.error("[ai-assistant] Stream read failed:", streamError);
         } finally {
           if (fullText.trim()) {
-            const { error: assistantMessageError } = await supabase.from("ai_messages").insert({
+            const { error: assistantMessageError } = await supabase.from(
+              "ai_messages",
+            ).insert({
               conversation_id: finalConversationId,
               role: "assistant",
               content: fullText.trim(),
@@ -345,7 +407,9 @@ serve(async (req) => {
           // non-streaming calls do — token counts here are a character-based
           // estimate (see estimateTokens), used only for the usage-log
           // budgeting columns, never for enforcement.
-          const inputTokens = estimateTokens(messages.map((m) => m.content).join("\n"));
+          const inputTokens = estimateTokens(
+            messages.map((m) => m.content).join("\n"),
+          );
           const outputTokens = estimateTokens(fullText);
           await logAiUsage(supabase, {
             feature: "assistant",
@@ -354,7 +418,10 @@ serve(async (req) => {
             actorId: user?.id ?? null,
             inputTokens,
             outputTokens,
-            estimatedCostCents: estimateCostCents(config.model, inputTokens + outputTokens),
+            estimatedCostCents: estimateCostCents(
+              config.model,
+              inputTokens + outputTokens,
+            ),
             durationMs: Date.now() - assistantRequestStartedAt,
             success: fullText.trim().length > 0,
             errorCategory: fullText.trim().length > 0 ? null : "empty_response",
@@ -377,7 +444,9 @@ serve(async (req) => {
     console.error("[ai-assistant] Unexpected error:", error);
     return errorResponse(
       "INTERNAL_ERROR",
-      error instanceof Error ? error.message : "Assistant is temporarily unavailable.",
+      error instanceof Error
+        ? error.message
+        : "Assistant is temporarily unavailable.",
       500,
     );
   }

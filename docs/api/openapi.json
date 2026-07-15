@@ -2141,7 +2141,7 @@
     "/booking-notifications": {
       "post": {
         "summary": "Dispatch notification delivery",
-        "description": "Internal queue endpoint expected behind platform JWT/service invocation. Dispatches one delivery or a batch, updates attempts/status, retries failed rows, and skips SMS. Do not expose publicly.",
+        "description": "Internal queue endpoint requiring the exact service-role bearer used by the database webhook. Dispatches one delivery or a bounded batch, updates attempts/status, retries failed rows, and skips SMS. Do not expose publicly.",
         "operationId": "postBookingNotifications",
         "tags": ["Notifications", "Internal"],
         "x-venora-surface": "supabase-edge-function",
@@ -2176,7 +2176,8 @@
             }
           },
           "401": { "$ref": "#/components/responses/Unauthorized" },
-          "500": { "$ref": "#/components/responses/InternalError" }
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "503": { "$ref": "#/components/responses/ServiceUnavailable" }
         },
         "servers": [
           {

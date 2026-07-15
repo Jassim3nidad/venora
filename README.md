@@ -14,7 +14,7 @@ accessibility, integration, and runtime-verification gaps. Review
 - Next.js 16 and React 19 in a pnpm/Turborepo workspace
 - TypeScript, Tailwind CSS, Radix primitives, TanStack Query, Zod
 - Supabase Auth, PostgreSQL, Row Level Security, Storage, and Edge Functions
-- PayMongo, Resend, Web Push, OpenRouter/OpenAI, MapLibre/OpenFreeMap
+- PayMongo, Resend, Web Push, OpenRouter, MapLibre/OpenFreeMap
 
 ## Repository
 

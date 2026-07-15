@@ -8,14 +8,14 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
-  loadAiConfig,
-  validateProviderModel,
+  type AiConfiguration,
   checkAiUsageLimits,
-  logAiUsage,
-  postChatCompletion,
   estimateCostCents,
   extractTokenUsage,
-  type AiConfiguration,
+  loadAiConfig,
+  logAiUsage,
+  postChatCompletion,
+  validateProviderModel,
 } from "../_shared/ai-config.ts";
 
 const corsHeaders = {
@@ -104,52 +104,69 @@ function isValidEstimate(value: any): value is CostEstimate {
 
 async function requestEstimate(
   openRouterApiKey: string,
-  openAiApiKey: string | null,
   venueInfo: string,
   input: EstimatorInput,
   config: AiConfiguration,
-): Promise<{ estimate: CostEstimate; inputTokens: number | null; outputTokens: number | null; providerUsed: string; modelUsed: string; usedFallback: boolean }> {
-  const { response, providerUsed, modelUsed, usedFallback } = await postChatCompletion(
-    config,
-    { openrouter: openRouterApiKey, openai: openAiApiKey },
-    {
-      temperature: config.temperature ?? 0.2,
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are a venue event cost estimator for the Philippine events market. Given a venue's base price, its packages, and event parameters, produce a realistic itemized cost breakdown in PHP. Round all figures to the nearest 100. `total` must equal the sum of baseVenue + packages + catering + av. If catering or AV is not requested, their values must be 0. `breakdown` is 3 to 6 short line items explaining the total in plain English for a customer, not code.",
-        },
-        {
-          role: "user",
-          content: `Venue: ${venueInfo}. Event: ${input.eventType}, ${input.guestCount} guests, ${input.durationHours}h. Catering requested: ${input.includesCatering}. AV requested: ${input.includesAv}.`,
-        },
-      ],
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "venue_cost_estimate",
-          strict: true,
-          schema: {
-            type: "object",
-            additionalProperties: false,
-            properties: {
-              baseVenue: { type: "number" },
-              packages: { type: "number" },
-              catering: { type: "number" },
-              av: { type: "number" },
-              total: { type: "number" },
-              breakdown: { type: "array", items: { type: "string" } },
+): Promise<
+  {
+    estimate: CostEstimate;
+    inputTokens: number | null;
+    outputTokens: number | null;
+    providerUsed: string;
+    modelUsed: string;
+    usedFallback: boolean;
+  }
+> {
+  const { response, providerUsed, modelUsed, usedFallback } =
+    await postChatCompletion(
+      config,
+      openRouterApiKey,
+      {
+        temperature: config.temperature ?? 0.2,
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a venue event cost estimator for the Philippine events market. Given a venue's base price, its packages, and event parameters, produce a realistic itemized cost breakdown in PHP. Round all figures to the nearest 100. `total` must equal the sum of baseVenue + packages + catering + av. If catering or AV is not requested, their values must be 0. `breakdown` is 3 to 6 short line items explaining the total in plain English for a customer, not code.",
+          },
+          {
+            role: "user",
+            content:
+              `Venue: ${venueInfo}. Event: ${input.eventType}, ${input.guestCount} guests, ${input.durationHours}h. Catering requested: ${input.includesCatering}. AV requested: ${input.includesAv}.`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "venue_cost_estimate",
+            strict: true,
+            schema: {
+              type: "object",
+              additionalProperties: false,
+              properties: {
+                baseVenue: { type: "number" },
+                packages: { type: "number" },
+                catering: { type: "number" },
+                av: { type: "number" },
+                total: { type: "number" },
+                breakdown: { type: "array", items: { type: "string" } },
+              },
+              required: [
+                "baseVenue",
+                "packages",
+                "catering",
+                "av",
+                "total",
+                "breakdown",
+              ],
             },
-            required: ["baseVenue", "packages", "catering", "av", "total", "breakdown"],
           },
         },
+        // Generous budget — the default free model reasons before writing
+        // content; too low a cap truncates it mid-thought.
+        max_tokens: config.maxTokens,
       },
-      // Generous budget — the default free model reasons before writing
-      // content; too low a cap truncates it mid-thought.
-      max_tokens: config.maxTokens,
-    },
-  );
+    );
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -162,7 +179,13 @@ async function requestEstimate(
     throw new Error("AI provider returned no estimate content.");
   }
 
-  return { estimate: JSON.parse(content), ...extractTokenUsage(payload), providerUsed, modelUsed, usedFallback };
+  return {
+    estimate: JSON.parse(content),
+    ...extractTokenUsage(payload),
+    providerUsed,
+    modelUsed,
+    usedFallback,
+  };
 }
 
 async function getAuthenticatedUserId(req: Request, supabaseUrl: string) {
@@ -183,15 +206,17 @@ serve(async (req) => {
   }
 
   if (req.method !== "POST") {
-    return errorResponse("METHOD_NOT_ALLOWED", "Use POST for cost estimates.", 405);
+    return errorResponse(
+      "METHOD_NOT_ALLOWED",
+      "Use POST for cost estimates.",
+      405,
+    );
   }
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const openRouterApiKey = Deno.env.get("OPENROUTER_API_KEY");
-    // Optional — only used as a fallback provider if configured and OpenRouter fails.
-    const openAiApiKey = Deno.env.get("OPENAI_API_KEY") ?? null;
 
     if (!supabaseUrl || !serviceRoleKey) {
       return errorResponse(
@@ -207,14 +232,26 @@ serve(async (req) => {
     // provider/model) never reaches the AI provider at all.
     const config = await loadAiConfig(supabase, "cost_estimator");
     if (!config) {
-      return errorResponse("AI_CONFIG_MISSING", "AI configuration for this feature is missing.", 500);
+      return errorResponse(
+        "AI_CONFIG_MISSING",
+        "AI configuration for this feature is missing.",
+        500,
+      );
     }
     if (!config.enabled) {
-      return errorResponse("AI_FEATURE_DISABLED", "The cost estimator is currently disabled.", 403);
+      return errorResponse(
+        "AI_FEATURE_DISABLED",
+        "The cost estimator is currently disabled.",
+        403,
+      );
     }
     const providerCheck = validateProviderModel(config);
     if (!providerCheck.ok) {
-      return errorResponse("AI_PROVIDER_UNSUPPORTED", providerCheck.reason!, 500);
+      return errorResponse(
+        "AI_PROVIDER_UNSUPPORTED",
+        providerCheck.reason!,
+        500,
+      );
     }
 
     if (!openRouterApiKey) {
@@ -236,7 +273,11 @@ serve(async (req) => {
       );
     }
 
-    const limitCheck = await checkAiUsageLimits(supabase, "cost_estimator", config);
+    const limitCheck = await checkAiUsageLimits(
+      supabase,
+      "cost_estimator",
+      config,
+    );
     if (!limitCheck.allowed) {
       return errorResponse("AI_LIMIT_EXCEEDED", limitCheck.reason!, 429);
     }
@@ -252,17 +293,28 @@ serve(async (req) => {
 
     if (venueError) {
       console.error("[ai-cost-estimator] Venue lookup failed:", venueError);
-      return errorResponse("VENUE_LOOKUP_FAILED", "Could not look up the venue.", 500);
+      return errorResponse(
+        "VENUE_LOOKUP_FAILED",
+        "Could not look up the venue.",
+        500,
+      );
     }
 
     if (!venue) {
-      return errorResponse("VENUE_NOT_FOUND", "Venue not found or not published.", 404);
+      return errorResponse(
+        "VENUE_NOT_FOUND",
+        "Venue not found or not published.",
+        404,
+      );
     }
 
     const venueInfo = JSON.stringify(venue);
     let estimate: CostEstimate | null = null;
     let lastError: unknown = null;
-    let lastTokens: { inputTokens: number | null; outputTokens: number | null } = { inputTokens: null, outputTokens: null };
+    let lastTokens: {
+      inputTokens: number | null;
+      outputTokens: number | null;
+    } = { inputTokens: null, outputTokens: null };
     let lastProviderUsed = config.provider;
     let lastModelUsed = config.model;
     const requestStartedAt = Date.now();
@@ -270,8 +322,16 @@ serve(async (req) => {
     // One retry if the model's arithmetic doesn't check out.
     for (let attempt = 0; attempt < 2 && !estimate; attempt++) {
       try {
-        const candidate = await requestEstimate(openRouterApiKey, openAiApiKey, venueInfo, input, config);
-        lastTokens = { inputTokens: candidate.inputTokens, outputTokens: candidate.outputTokens };
+        const candidate = await requestEstimate(
+          openRouterApiKey,
+          venueInfo,
+          input,
+          config,
+        );
+        lastTokens = {
+          inputTokens: candidate.inputTokens,
+          outputTokens: candidate.outputTokens,
+        };
         lastProviderUsed = candidate.providerUsed;
         lastModelUsed = candidate.modelUsed;
         if (isValidEstimate(candidate.estimate)) {
@@ -285,7 +345,10 @@ serve(async (req) => {
     }
 
     if (!estimate) {
-      console.error("[ai-cost-estimator] Failed to produce a valid estimate:", lastError);
+      console.error(
+        "[ai-cost-estimator] Failed to produce a valid estimate:",
+        lastError,
+      );
       await logAiUsage(supabase, {
         feature: "cost_estimator",
         provider: lastProviderUsed,
@@ -309,18 +372,22 @@ serve(async (req) => {
       actorId: userId,
       inputTokens: lastTokens.inputTokens,
       outputTokens: lastTokens.outputTokens,
-      estimatedCostCents: estimateCostCents(lastModelUsed, (lastTokens.inputTokens ?? 0) + (lastTokens.outputTokens ?? 0)),
+      estimatedCostCents: estimateCostCents(
+        lastModelUsed,
+        (lastTokens.inputTokens ?? 0) + (lastTokens.outputTokens ?? 0),
+      ),
       durationMs: Date.now() - requestStartedAt,
       success: true,
     });
 
-    const { error: logError } = await supabase.from("ai_generated_content").insert({
-      venue_id: input.venueId,
-      content_type: "cost_estimate",
-      prompt: JSON.stringify({ ...input, userId }),
-      generated_text: JSON.stringify(estimate),
-      status: "approved",
-    });
+    const { error: logError } = await supabase.from("ai_generated_content")
+      .insert({
+        venue_id: input.venueId,
+        content_type: "cost_estimate",
+        prompt: JSON.stringify({ ...input, userId }),
+        generated_text: JSON.stringify(estimate),
+        status: "approved",
+      });
 
     if (logError) {
       console.error("[ai-cost-estimator] Failed to log estimate:", logError);
@@ -332,7 +399,9 @@ serve(async (req) => {
         venue: {
           id: venue.id,
           name: venue.name,
-          basePrice: venue.base_price === null ? null : Number(venue.base_price),
+          basePrice: venue.base_price === null
+            ? null
+            : Number(venue.base_price),
         },
       },
       error: null,
@@ -341,7 +410,9 @@ serve(async (req) => {
     console.error("[ai-cost-estimator] Unexpected error:", error);
     return errorResponse(
       "INTERNAL_ERROR",
-      error instanceof Error ? error.message : "Cost estimator is temporarily unavailable.",
+      error instanceof Error
+        ? error.message
+        : "Cost estimator is temporarily unavailable.",
       500,
     );
   }

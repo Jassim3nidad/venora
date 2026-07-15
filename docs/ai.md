@@ -1,16 +1,16 @@
 # AI Features
 
 Venora AI features run in Supabase Edge Functions with database configuration
-and usage controls. Supported provider identifiers are `openrouter` and
-`openai`; direct Anthropic integration is missing. Code inspection and automated
-tests do not prove live model/provider behavior.
+and usage controls. OpenRouter is the only supported provider and
+`tencent/hy3:free` is the required model. Code inspection and automated tests do
+not prove live model/provider behavior.
 
 ## Inventory
 
 | Feature                       | Status                     | Input / output                                  | Provider and fallback                                                                  |
 | ----------------------------- | -------------------------- | ----------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Natural-language venue search | IMPLEMENTED BUT UNVERIFIED | Query/filters to ranked venue/search output     | OpenAI embeddings when configured plus database search; deterministic/error fallback   |
-| Venue recommendations         | IMPLEMENTED BUT UNVERIFIED | User/event preferences to venue suggestions     | Configured OpenRouter/OpenAI model; safe empty/error fallback                          |
+| Natural-language venue search | IMPLEMENTED BUT UNVERIFIED | Query/filters to ranked venue/search output     | OpenRouter intent parsing plus database-grounded search; deterministic/error fallback  |
+| Venue recommendations         | IMPLEMENTED BUT UNVERIFIED | User/event preferences to venue suggestions     | OpenRouter preference query plus database-grounded results                             |
 | Venue-description generation  | IMPLEMENTED BUT UNVERIFIED | Venue attributes/instructions to generated copy | Configured model; admin/owner authorization and validation required                    |
 | Package comparison            | IMPLEMENTED BUT UNVERIFIED | Selected package facts to comparison            | Configured model with persisted comparison support                                     |
 | Cost estimation               | IMPLEMENTED BUT UNVERIFIED | Event/budget facts to estimate                  | Configured model; estimate is non-binding                                              |
@@ -19,11 +19,11 @@ tests do not prove live model/provider behavior.
 | Usage logs                    | IMPLEMENTED BUT UNVERIFIED | Token/cost/status metadata                      | `ai_usage_logs`; raw prompts/responses are intentionally not stored                    |
 | Direct Anthropic provider     | MISSING                    | None                                            | No `ANTHROPIC_API_KEY` runtime path                                                    |
 
-Provider/model selections, temperatures, token/rate/spend limits, and feature
-enablement are database-configured. Old per-feature OpenAI model environment
-variables are deprecated. `OPENROUTER_API_KEY` is required for the currently
-OpenRouter-specific assistant/generation paths; `OPENAI_API_KEY` is optional for
-configured OpenAI and embeddings.
+Feature enablement, temperatures, token/rate/spend limits, and system
+instructions are database-configured. Provider/model selection is locked to
+OpenRouter and `tencent/hy3:free`; alternate provider/model fallbacks and the
+legacy direct-embedding path are disabled. `OPENROUTER_API_KEY` stays in
+Supabase Edge Function secrets.
 
 ## Data and security
 
@@ -50,5 +50,5 @@ tokens, estimated cost, latency/status, and configuration changes without
 recording raw sensitive prompts. General non-AI API rate limiting is a separate
 known gap.
 
-Live accuracy, cost, latency, provider moderation, and failure fallback need
+Live accuracy, cost, latency, provider moderation, and failure/retry behavior need
 credentialed non-production verification before production claims.

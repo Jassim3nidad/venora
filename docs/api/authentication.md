@@ -95,4 +95,4 @@ Route Handlers use same-site session cookies but no custom CSRF token middleware
 
 ## Secret handling
 
-Never expose or send these from browser code: `SUPABASE_SERVICE_ROLE_KEY`, `PAYMONGO_SECRET_KEY`, `PAYMONGO_WEBHOOK_SECRET`, `MAYA_WEBHOOK_SECRET`, `OPENROUTER_API_KEY`, `OPENAI_API_KEY`, Resend keys, or VAPID private key. Public Supabase anon and VAPID public keys are explicitly intended for clients.
+Never expose or send these from browser code: `SUPABASE_SERVICE_ROLE_KEY`, `PAYMONGO_SECRET_KEY`, `PAYMONGO_WEBHOOK_SECRET`, `MAYA_WEBHOOK_SECRET`, `OPENROUTER_API_KEY`, Resend keys, or VAPID private key. Public Supabase anon and VAPID public keys are explicitly intended for clients.

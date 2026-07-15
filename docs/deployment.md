@@ -41,9 +41,9 @@ workflow to compare Vercel metadata with the approved full commit SHA.
 - Configure Supabase Auth site/redirect URLs for every intended origin.
 - Register PayMongo HTTPS webhook and matching secret; configure test/live keys
   in the correct scope and validate return URLs.
-- Verify Resend domain/sender, VAPID pair/subject, OpenRouter/OpenAI keys, and
-  production app origin. Google Maps and direct Anthropic settings are not
-  applicable to the current implementation.
+- Verify Resend domain/sender, VAPID pair/subject, the OpenRouter key, exact
+  `tencent/hy3:free` runtime configuration, and production app origin. Google
+  Maps and alternate AI-provider settings are not applicable.
 
 ## Safe release order
 

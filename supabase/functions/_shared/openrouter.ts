@@ -6,9 +6,9 @@
  * function just swaps its base URL + auth header + default model —
  * no SDK, same raw-fetch pattern as everything else here.
  *
- * OpenRouter does not proxy an /embeddings endpoint, so semantic
- * search embeddings still go directly to OpenAI (see embeddings.ts)
- * via the separate, fully-optional OPENAI_API_KEY.
+ * OpenRouter is the only approved AI provider. Venue facts and search
+ * ranking remain database-grounded; no direct provider-specific embeddings
+ * path is used.
  */
 
 export const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";

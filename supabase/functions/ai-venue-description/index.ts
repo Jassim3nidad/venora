@@ -11,14 +11,14 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
-  loadAiConfig,
-  validateProviderModel,
+  type AiConfiguration,
   checkAiUsageLimits,
-  logAiUsage,
-  postChatCompletion,
   estimateCostCents,
   extractTokenUsage,
-  type AiConfiguration,
+  loadAiConfig,
+  logAiUsage,
+  postChatCompletion,
+  validateProviderModel,
 } from "../_shared/ai-config.ts";
 
 const corsHeaders = {
@@ -28,7 +28,11 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const contentTypes = ["description", "seo_meta", "package_description"] as const;
+const contentTypes = [
+  "description",
+  "seo_meta",
+  "package_description",
+] as const;
 type ContentType = (typeof contentTypes)[number];
 
 const tones = ["elegant", "casual", "luxury"] as const;
@@ -70,7 +74,9 @@ function parseInput(body: any): GenerateInput | null {
   if (typeof venueId !== "string" || !uuidPattern.test(venueId)) return null;
   if (!contentTypes.includes(contentType)) return null;
   if (contentType === "package_description") {
-    if (typeof packageId !== "string" || !uuidPattern.test(packageId)) return null;
+    if (typeof packageId !== "string" || !uuidPattern.test(packageId)) {
+      return null;
+    }
   }
   if (!tones.includes(tone)) return null;
 
@@ -101,7 +107,9 @@ function buildPrompt(
   const facts = [
     `Name: ${venue.name}`,
     `Location: ${[venue.city, venue.province].filter(Boolean).join(", ")}`,
-    `Capacity: ${venue.capacity_min ?? "?"}-${venue.capacity_max ?? "?"} guests`,
+    `Capacity: ${venue.capacity_min ?? "?"}-${
+      venue.capacity_max ?? "?"
+    } guests`,
     `Setting: ${venue.indoor_outdoor}`,
     amenities ? `Amenities: ${amenities}` : null,
   ]
@@ -120,7 +128,12 @@ function buildPrompt(
     return {
       system:
         "You are a copywriter for a Philippine event-venue marketplace. Write one short paragraph (2-4 sentences) describing an event package. You must reference its actual inclusions list — never invent inclusions, prices, or guest limits not given.",
-      user: `Venue: ${facts}. Package: ${pkg.name}, price PHP ${pkg.price}, guests ${pkg.min_guests ?? "?"}-${pkg.max_guests ?? "?"}, inclusions: ${(pkg.inclusions ?? []).join(", ") || "none listed"}. Tone: ${tone}.`,
+      user:
+        `Venue: ${facts}. Package: ${pkg.name}, price PHP ${pkg.price}, guests ${
+          pkg.min_guests ?? "?"
+        }-${pkg.max_guests ?? "?"}, inclusions: ${
+          (pkg.inclusions ?? []).join(", ") || "none listed"
+        }. Tone: ${tone}.`,
     };
   }
 
@@ -133,24 +146,33 @@ function buildPrompt(
 
 async function requestCopy(
   openRouterApiKey: string,
-  openAiApiKey: string | null,
   prompt: { system: string; user: string },
   config: AiConfiguration,
-): Promise<{ text: string; inputTokens: number | null; outputTokens: number | null; providerUsed: string; modelUsed: string; usedFallback: boolean }> {
-  const { response, providerUsed, modelUsed, usedFallback } = await postChatCompletion(
-    config,
-    { openrouter: openRouterApiKey, openai: openAiApiKey },
-    {
-      temperature: config.temperature ?? 0.6,
-      // Generous budget — the default free model reasons before writing
-      // content; too low a cap truncates it mid-thought.
-      max_tokens: config.maxTokens,
-      messages: [
-        { role: "system", content: prompt.system },
-        { role: "user", content: prompt.user },
-      ],
-    },
-  );
+): Promise<
+  {
+    text: string;
+    inputTokens: number | null;
+    outputTokens: number | null;
+    providerUsed: string;
+    modelUsed: string;
+    usedFallback: boolean;
+  }
+> {
+  const { response, providerUsed, modelUsed, usedFallback } =
+    await postChatCompletion(
+      config,
+      openRouterApiKey,
+      {
+        temperature: config.temperature ?? 0.6,
+        // Generous budget — the default free model reasons before writing
+        // content; too low a cap truncates it mid-thought.
+        max_tokens: config.maxTokens,
+        messages: [
+          { role: "system", content: prompt.system },
+          { role: "user", content: prompt.user },
+        ],
+      },
+    );
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -163,7 +185,13 @@ async function requestCopy(
     throw new Error("AI provider returned no copy content.");
   }
 
-  return { text: content.trim(), ...extractTokenUsage(payload), providerUsed, modelUsed, usedFallback };
+  return {
+    text: content.trim(),
+    ...extractTokenUsage(payload),
+    providerUsed,
+    modelUsed,
+    usedFallback,
+  };
 }
 
 serve(async (req) => {
@@ -172,7 +200,11 @@ serve(async (req) => {
   }
 
   if (req.method !== "POST") {
-    return errorResponse("METHOD_NOT_ALLOWED", "Use POST to generate venue copy.", 405);
+    return errorResponse(
+      "METHOD_NOT_ALLOWED",
+      "Use POST to generate venue copy.",
+      405,
+    );
   }
 
   try {
@@ -180,11 +212,13 @@ serve(async (req) => {
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const openRouterApiKey = Deno.env.get("OPENROUTER_API_KEY");
-    // Optional — only used as a fallback provider if configured and OpenRouter fails.
-    const openAiApiKey = Deno.env.get("OPENAI_API_KEY") ?? null;
 
     if (!supabaseUrl || !anonKey || !serviceRoleKey) {
-      return errorResponse("CONFIGURATION_ERROR", "Missing Supabase configuration.", 500);
+      return errorResponse(
+        "CONFIGURATION_ERROR",
+        "Missing Supabase configuration.",
+        500,
+      );
     }
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
@@ -193,23 +227,43 @@ serve(async (req) => {
     // provider/model) never reaches the AI provider at all.
     const config = await loadAiConfig(supabase, "venue_description");
     if (!config) {
-      return errorResponse("AI_CONFIG_MISSING", "AI configuration for this feature is missing.", 500);
+      return errorResponse(
+        "AI_CONFIG_MISSING",
+        "AI configuration for this feature is missing.",
+        500,
+      );
     }
     if (!config.enabled) {
-      return errorResponse("AI_FEATURE_DISABLED", "Venue copy generation is currently disabled.", 403);
+      return errorResponse(
+        "AI_FEATURE_DISABLED",
+        "Venue copy generation is currently disabled.",
+        403,
+      );
     }
     const providerCheck = validateProviderModel(config);
     if (!providerCheck.ok) {
-      return errorResponse("AI_PROVIDER_UNSUPPORTED", providerCheck.reason!, 500);
+      return errorResponse(
+        "AI_PROVIDER_UNSUPPORTED",
+        providerCheck.reason!,
+        500,
+      );
     }
 
     if (!openRouterApiKey) {
-      return errorResponse("OPENROUTER_NOT_CONFIGURED", "OPENROUTER_API_KEY is not configured.", 500);
+      return errorResponse(
+        "OPENROUTER_NOT_CONFIGURED",
+        "OPENROUTER_API_KEY is not configured.",
+        500,
+      );
     }
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      return errorResponse("UNAUTHORIZED", "Sign in to generate venue copy.", 401);
+      return errorResponse(
+        "UNAUTHORIZED",
+        "Sign in to generate venue copy.",
+        401,
+      );
     }
 
     const userClient = createClient(supabaseUrl, anonKey, {
@@ -220,7 +274,11 @@ serve(async (req) => {
     } = await userClient.auth.getUser();
 
     if (!user) {
-      return errorResponse("UNAUTHORIZED", "Sign in to generate venue copy.", 401);
+      return errorResponse(
+        "UNAUTHORIZED",
+        "Sign in to generate venue copy.",
+        401,
+      );
     }
 
     const rawBody = await req.json().catch(() => null);
@@ -233,7 +291,11 @@ serve(async (req) => {
       );
     }
 
-    const limitCheck = await checkAiUsageLimits(supabase, "venue_description", config);
+    const limitCheck = await checkAiUsageLimits(
+      supabase,
+      "venue_description",
+      config,
+    );
     if (!limitCheck.allowed) {
       return errorResponse("AI_LIMIT_EXCEEDED", limitCheck.reason!, 429);
     }
@@ -248,7 +310,11 @@ serve(async (req) => {
 
     if (venueError) {
       console.error("[ai-venue-description] Venue lookup failed:", venueError);
-      return errorResponse("VENUE_LOOKUP_FAILED", "Could not look up the venue.", 500);
+      return errorResponse(
+        "VENUE_LOOKUP_FAILED",
+        "Could not look up the venue.",
+        500,
+      );
     }
     if (!venue) {
       return errorResponse("VENUE_NOT_FOUND", "Venue not found.", 404);
@@ -289,11 +355,22 @@ serve(async (req) => {
         .maybeSingle();
 
       if (packageError) {
-        console.error("[ai-venue-description] Package lookup failed:", packageError);
-        return errorResponse("PACKAGE_LOOKUP_FAILED", "Could not look up the package.", 500);
+        console.error(
+          "[ai-venue-description] Package lookup failed:",
+          packageError,
+        );
+        return errorResponse(
+          "PACKAGE_LOOKUP_FAILED",
+          "Could not look up the package.",
+          500,
+        );
       }
       if (!packageRow) {
-        return errorResponse("PACKAGE_NOT_FOUND", "Package not found for this venue.", 404);
+        return errorResponse(
+          "PACKAGE_NOT_FOUND",
+          "Package not found for this venue.",
+          404,
+        );
       }
       pkg = packageRow;
     }
@@ -303,7 +380,7 @@ serve(async (req) => {
     const requestStartedAt = Date.now();
     let copyResult: Awaited<ReturnType<typeof requestCopy>>;
     try {
-      copyResult = await requestCopy(openRouterApiKey, openAiApiKey, prompt, config);
+      copyResult = await requestCopy(openRouterApiKey, prompt, config);
     } catch (error) {
       await logAiUsage(supabase, {
         feature: "venue_description",
@@ -317,7 +394,14 @@ serve(async (req) => {
       throw error;
     }
 
-    const { text: generatedText, inputTokens, outputTokens, providerUsed, modelUsed, usedFallback } = copyResult;
+    const {
+      text: generatedText,
+      inputTokens,
+      outputTokens,
+      providerUsed,
+      modelUsed,
+      usedFallback,
+    } = copyResult;
     await logAiUsage(supabase, {
       feature: "venue_description",
       provider: providerUsed,
@@ -325,7 +409,10 @@ serve(async (req) => {
       actorId: user.id,
       inputTokens,
       outputTokens,
-      estimatedCostCents: estimateCostCents(modelUsed, (inputTokens ?? 0) + (outputTokens ?? 0)),
+      estimatedCostCents: estimateCostCents(
+        modelUsed,
+        (inputTokens ?? 0) + (outputTokens ?? 0),
+      ),
       durationMs: Date.now() - requestStartedAt,
       success: true,
       errorCategory: usedFallback ? "used_fallback_provider" : null,
@@ -353,7 +440,11 @@ serve(async (req) => {
       .insert({
         venue_id: input.venueId,
         content_type: input.contentType,
-        prompt: JSON.stringify({ ...prompt, tone: input.tone, packageId: input.packageId }),
+        prompt: JSON.stringify({
+          ...prompt,
+          tone: input.tone,
+          packageId: input.packageId,
+        }),
         generated_text: generatedText,
         status: "draft",
       })
@@ -361,8 +452,15 @@ serve(async (req) => {
       .single();
 
     if (insertError || !inserted) {
-      console.error("[ai-venue-description] Failed to save draft:", insertError);
-      return errorResponse("SAVE_FAILED", "Could not save the generated draft.", 500);
+      console.error(
+        "[ai-venue-description] Failed to save draft:",
+        insertError,
+      );
+      return errorResponse(
+        "SAVE_FAILED",
+        "Could not save the generated draft.",
+        500,
+      );
     }
 
     return jsonResponse({
@@ -382,7 +480,9 @@ serve(async (req) => {
     console.error("[ai-venue-description] Unexpected error:", error);
     return errorResponse(
       "INTERNAL_ERROR",
-      error instanceof Error ? error.message : "Copy generation is temporarily unavailable.",
+      error instanceof Error
+        ? error.message
+        : "Copy generation is temporarily unavailable.",
       500,
     );
   }

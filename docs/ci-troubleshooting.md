@@ -2,17 +2,17 @@
 
 ## Repository CI
 
-| Symptom                   | Check                                                     | Safe action                                                                       |
-| ------------------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| Lockfile install fails    | Node/pnpm versions and lockfile diff                      | Run pnpm 9.15 with frozen install locally; commit intended lockfile only          |
-| Formatting fails          | Named files in Prettier output                            | Format only named changed files and review every diff                             |
-| OpenAPI drift             | Generated JSON/YAML diff                                  | Run `pnpm docs:generate`; fix source/docs and commit both artifacts               |
-| Migration validator fails | Duplicate/order/destructive/mutable-file message          | Add a new forward migration; use exact allowlist only after database-owner review |
-| Test total below 124      | `artifacts/ci/test-summary.json`                          | Restore missing assertions/tests; do not lower threshold without review           |
-| Build fails only in CI    | Missing build-safe public config or case-sensitive import | Reproduce in clean checkout; never add server secrets to PR build                 |
-| Gitleaks fails            | Finding path/commit, not value                            | Revoke/rotate if real; remove safely and assess history                           |
-| Edge static audit warns   | `artifacts/ci/edge-functions.json`                        | Keep Deno format/type/import status BLOCKED until legacy debt is fixed            |
-| Edge deploy is blocked    | Selected function Deno format/type output                 | Fix that function in a focused commit; never bypass the strict gate               |
+| Symptom                   | Check                                                     | Safe action                                                                         |
+| ------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Lockfile install fails    | Node/pnpm versions and lockfile diff                      | Run pnpm 9.15 with frozen install locally; commit intended lockfile only            |
+| Formatting fails          | Named files in Prettier output                            | Format only named changed files and review every diff                               |
+| OpenAPI drift             | Generated JSON/YAML diff                                  | Run `pnpm docs:generate`; fix source/docs and commit both artifacts                 |
+| Migration validator fails | Duplicate/order/destructive/mutable-file message          | Add a new forward migration; use exact allowlist only after database-owner review   |
+| Test total below 124      | `artifacts/ci/test-summary.json`                          | Restore missing assertions/tests; do not lower threshold without review             |
+| Build fails only in CI    | Missing build-safe public config or case-sensitive import | Reproduce in clean checkout; never add server secrets to PR build                   |
+| Gitleaks fails            | Finding path/commit, not value                            | Revoke/rotate if real; remove safely and assess history                             |
+| Edge validation fails     | `artifacts/ci/edge-functions.json`                        | Fix the reported static, Deno format, type, or import error; do not bypass the gate |
+| Edge deploy is blocked    | Selected function Deno format/type output                 | Fix that function in a focused commit; never bypass the strict gate                 |
 
 ## Hosted verification
 

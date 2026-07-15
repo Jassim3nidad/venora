@@ -19,7 +19,7 @@ flowchart LR
   Edge --> DB
   Edge --> Resend["Resend"]
   Edge --> Push["Web Push endpoints"]
-  Edge --> AI["OpenRouter / OpenAI"]
+  Edge --> AI["OpenRouter: tencent/hy3:free"]
   Browser --> Maps["OpenFreeMap / Nominatim"]
   GitHub["GitHub repository"] -. "external integration" .-> Vercel
 ```
@@ -196,7 +196,7 @@ sequenceDiagram
   participant U as Authenticated user
   participant E as Supabase Edge Function
   participant D as PostgreSQL
-  participant P as OpenRouter/OpenAI
+  participant P as OpenRouter (tencent/hy3:free)
   U->>E: Feature input + JWT
   E->>D: Load ai_configurations and usage limits
   E->>E: Validate, moderate, redact/minimize
@@ -206,10 +206,10 @@ sequenceDiagram
   E-->>U: Validated output or deterministic error/fallback
 ```
 
-Supported provider identifiers are OpenRouter and OpenAI. Direct Anthropic is
-missing. Models, limits, and feature settings are database-configured. External
-model calls require prompt-injection defenses, data minimization, timeouts, cost
-limits, and safe failure behavior.
+OpenRouter is the only supported provider and `tencent/hy3:free` is the required
+model. Alternate provider/model fallbacks are rejected. Limits and feature
+settings are database-configured. External model calls require prompt-injection
+defenses, data minimization, timeouts, cost limits, and safe failure behavior.
 
 ## Services and operational properties
 
@@ -223,7 +223,7 @@ limits, and safe failure behavior.
 | PayMongo                  | Hosted checkout, webhook events                                 | Duplicate/late events expected; signature, event claim, and reconciliation required                                 |
 | Resend/Web Push           | Outbound delivery                                               | At-least-once/failed delivery possible; use delivery records and user preferences; never log credentials            |
 | Map providers             | Tiles and geocoding for public venue data                       | Network/rate-policy failure; graceful map/search fallback; no Google Maps integration                               |
-| AI providers              | Generated/search/embedding output                               | Timeout, cost, unsafe output; limit context, validate output, log metadata only                                     |
+| OpenRouter                | Generated output and search intent using `tencent/hy3:free`     | Timeout, rate limit, unsafe output; bound context, validate output, log metadata only                               |
 | GitHub/Vercel integration | Source and deployment orchestration                             | Configuration is outside repository and unverified; no repo workflow/vercel config exists                           |
 
 Logging uses application/provider logs, database audit rows, payment event

@@ -85,8 +85,8 @@ shortcut. See [Database](database.md), [Migrations](migrations.md), and
   server-only.
 - **Maps:** no Google Maps setup exists. MapLibre/OpenFreeMap and OSM Nominatim
   are used without a repository-defined Google key.
-- **AI:** set OpenRouter for configured generation; OpenAI is optional for
-  provider fallback/embeddings. Direct Anthropic integration is not implemented.
+- **AI:** set `OPENROUTER_API_KEY` for server-side generation. The runtime is
+  locked to `tencent/hy3:free`; alternate providers and models are rejected.
 
 For Edge Functions, copy safe values from `supabase/.env.example` to an ignored
 local file and serve/deploy using Supabase CLI only for a confirmed project.

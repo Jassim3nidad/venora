@@ -11,11 +11,10 @@ apps/web/src/features/search/
   SMART_SEARCH_ENGINE.md           Feature implementation notes
 
 supabase/functions/ai-search/
-  index.ts                         OpenAI intent parsing, embeddings, RPC orchestration
+  index.ts                         OpenRouter intent parsing and RPC orchestration
 
 supabase/functions/_shared/
   text.ts                          normalizeText/cleanString/looksVenueRelated (shared with ai-assistant)
-  embeddings.ts                    createEmbeddings/embedQuery/warmVenueEmbeddings (shared with ai-recommendation)
   venues.ts                        toVenuePayload row mapper (shared with ai-recommendation, ai-assistant)
 
 supabase/migrations/
@@ -30,13 +29,14 @@ above.
 ## Database Schema
 
 - `venue_embeddings`
-  - Existing pgvector table storing `text-embedding-3-small` vectors per venue.
-  - `embedding` is nullable so edited venues can be marked for regeneration.
+  - Legacy pgvector table retained for migration compatibility; the approved
+    runtime does not populate or query provider-specific embeddings.
 - `ai_search_logs`
   - Stores `user_id`, `query_text`, `parsed_filters`, and `results_count`.
   - Written by the Edge Function with the service role key.
 - `public.venues_for_embedding(refresh_limit int)`
-  - Returns published venues with missing or null embeddings.
+  - Legacy helper retained for schema compatibility; unused by the current
+    OpenRouter-only runtime.
   - Builds deterministic text from name, description, location, capacity, price, venue type, amenities, and accessibility flags.
 - `public.search_venues(...)`
   - Hybrid search RPC for filters plus semantic relevance.
@@ -51,22 +51,17 @@ above.
 - Client entry point: `searchVenuesWithAi(input)`.
 - Edge Function: `POST /functions/v1/ai-search`.
 - Required Edge Function secrets:
-  - `OPENAI_API_KEY`
+  - `OPENROUTER_API_KEY`
   - `SUPABASE_URL`
   - `SUPABASE_SERVICE_ROLE_KEY`
   - `SUPABASE_ANON_KEY`
-- Optional Edge Function configuration:
-  - `OPENAI_SEARCH_MODEL`, default `gpt-5.4-mini`
-  - `OPENAI_EMBEDDING_MODEL`, default `text-embedding-3-small`
-  - `AI_SEARCH_EMBED_REFRESH_LIMIT`, default `8`, max `25`
+- Provider/model configuration is constrained to OpenRouter with
+  `tencent/hy3:free` by migration 072 and runtime validation.
 - Local Edge Function env example: `supabase/.env.example`.
 - Deployed Supabase secret setup:
 
 ```bash
-supabase secrets set OPENAI_API_KEY=your-rotated-key
-supabase secrets set OPENAI_SEARCH_MODEL=gpt-5.4-mini
-supabase secrets set OPENAI_EMBEDDING_MODEL=text-embedding-3-small
-supabase secrets set AI_SEARCH_EMBED_REFRESH_LIMIT=8
+supabase secrets set OPENROUTER_API_KEY=your-rotated-key
 ```
 
 - Request:
@@ -136,8 +131,10 @@ supabase secrets set AI_SEARCH_EMBED_REFRESH_LIMIT=8
 
 - Client errors throw `SmartSearchClientError` with stable codes.
 - Edge Function errors return `{ data: null, error: { code, message } }`.
-- OpenAI parsing failures fall back to deterministic parsing.
-- Embedding failures fall back to keyword and structured filter search.
+- OpenRouter parsing failures return a safe provider error; when AI parsing is
+  disabled or rate-limited, deterministic parsing remains available.
+- Search ranking uses database keyword, structured filter, rating, and
+  relevance signals without a direct embedding-provider call.
 - Search logs are best-effort and do not fail the customer request.
 
 ## Loading States
@@ -153,11 +150,11 @@ supabase secrets set AI_SEARCH_EMBED_REFRESH_LIMIT=8
 
 ## Security Considerations
 
-- `OPENAI_API_KEY` is only read inside the Supabase Edge Function.
+- `OPENROUTER_API_KEY` is only read inside the Supabase Edge Function.
 - Browser code calls Supabase Functions through the anon client and never receives provider credentials.
-- The Edge Function uses the service role key only server-side for RPC calls, embedding upserts, and logs.
+- The Edge Function uses the service role key only server-side for RPC calls and logs.
 - Public venue visibility remains constrained to `status = 'published'` in the search RPC.
-- AI logs store parsed filters and query text, not raw OpenAI responses.
+- AI logs store parsed filters and query text, not raw OpenRouter responses.
 
 ## Responsive Behavior
 
@@ -168,10 +165,10 @@ supabase secrets set AI_SEARCH_EMBED_REFRESH_LIMIT=8
 
 ## Future Scalability
 
-- Embedding warm-up (`warmVenueEmbeddings`, bounded by `AI_SEARCH_EMBED_REFRESH_LIMIT`) currently runs inline on each search/recommendation request — move it to a scheduled Supabase cron job once venue volume grows enough that per-request warm-up latency matters.
 - Add cursor pagination once the marketplace stops preloading all published venues.
 - Add analytics dashboards over `ai_search_logs` for zero-result searches and popular filters.
-- Upgrade `venue_embeddings` from IVFFlat to HNSW when recall is more important than faster bulk indexing.
+- Remove the legacy embedding table/functions only through an approved forward
+  migration after hosted schema compatibility is verified.
 
 Click-through tracking into `ai_recommendation_events` is implemented (see
 `docs/modules/ai-features.md` → Venue Recommendation) — no longer a future item.
