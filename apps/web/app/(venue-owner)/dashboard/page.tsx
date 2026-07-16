@@ -65,7 +65,7 @@ export default async function VenueOwnerDashboardPage() {
             "id, event_date, status, total_amount, deposit_amount, guest_count, venues(name, base_price), venue_packages(price), profiles!customer_id(full_name)",
           )
           .in("venue_id", venueIds)
-          .order("event_date", { ascending: false })
+          .order("created_at", { ascending: false })
           .limit(10)
       : { data: [] };
 
