@@ -6,7 +6,7 @@ export async function getOwnedSupplierInquiry(
   const { data, error } = await supabase
     .from("supplier_contact_requests")
     .select(
-      "*, supplier_services(name), bookings(id, event_date, event_start_time, guest_count, venues(name, city, province))",
+      "*, supplier_services(name, price), bookings(id, event_date, event_start_time, guest_count, venues(name, city, province))",
     )
     .eq("id", inquiryId)
     .eq("supplier_id", supplierId)

@@ -213,7 +213,7 @@ export function BookingConversation({
                 className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
-                View supplier
+                View Venue
               </Link>
             )}
           </div>

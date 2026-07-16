@@ -434,7 +434,7 @@ export function CustomerInquiryDetail({
             </section>
           </div>
 
-          <aside className="space-y-4 lg:sticky lg:top-24">
+          <aside className="space-y-4 lg:sticky lg:top-[9.5rem]">
             {canActOnQuote && (
               <div className="flex flex-col gap-5 rounded-[24px] border border-[#BFDBFE] bg-white p-6 shadow-sm shadow-blue-200/50">
                 <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">
