@@ -23,6 +23,7 @@ import {
 } from "../schemas/booking.schema";
 import { formatCancellationReason } from "../constants/cancellation-reasons";
 import { startCheckout } from "@/src/features/payments/application/use-cases/start-checkout.usecase";
+import "@/src/features/payments/infrastructure/register-gateways";
 import { createServiceClient } from "@/src/lib/supabase/service";
 
 function bookingErrorFromMessage(message: string) {
