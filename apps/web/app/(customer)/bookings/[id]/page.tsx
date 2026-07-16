@@ -743,7 +743,19 @@ export default async function BookingDetailPage({ params }: Props) {
                 currentUserId={user.id}
                 currentRole="customer"
                 isReadOnly={isReadOnly}
-                counterpartLabel="the venue owner"
+                header={{
+                  role: "customer",
+                  supplierName: typedBooking.venues?.name,
+                  supplierLogo: typedBooking.venues?.venue_images?.[0]?.url,
+                  supplierSlug: typedBooking.venues?.slug,
+                  serviceName: typedBooking.venue_packages?.name,
+                  inquiryRef: `Booking #${typedBooking.id.substring(0, 8)}`,
+                  eventType: "Event",
+                  eventDate: formatDate(typedBooking.event_date),
+                  venueName: locationLabel(typedBooking.venues),
+                  venueLink: `/venues/${typedBooking.venues?.slug}`,
+                  statusLabel: String(typedBooking.status).replace(/_/g, " "),
+                }}
               />
             </div>
           </section>

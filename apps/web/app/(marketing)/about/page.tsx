@@ -1,20 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
-  ArrowRight,
+  ArrowDown,
   BadgeCheck,
   Bot,
   BrainCircuit,
   Building2,
   CalendarCheck,
+  CalendarDays,
   CheckCircle2,
   ClipboardList,
   Handshake,
   LayoutDashboard,
   MessageCircle,
-  Network,
   Search,
-  ShieldCheck,
   Sparkles,
   Store,
   UsersRound,
@@ -91,36 +90,24 @@ const solutions: Card[] = [
   },
 ];
 
-const audiences: Card[] = [
+const connectedRoles: Card[] = [
   {
     title: "Customers",
     description:
-      "Find venues, save favorites, submit bookings, track status, and leave verified reviews.",
+      "Discover venues and trusted event services in one place.",
     icon: UsersRound,
   },
   {
-    title: "Venue Owners",
+    title: "Venue owners",
     description:
-      "Manage venue profiles, bookings, packages, calendars, staff, and business insights.",
+      "Manage listings, availability, packages, and bookings with modern tools.",
     icon: Building2,
   },
   {
-    title: "Event Coordinators",
+    title: "Event suppliers",
     description:
-      "Coordinate events, review booking details, and support operations across managed venues.",
-    icon: ClipboardList,
-  },
-  {
-    title: "Suppliers",
-    description:
-      "Showcase services, receive inquiries, and connect with customers planning real events.",
+      "Showcase services and receive qualified event inquiries.",
     icon: Store,
-  },
-  {
-    title: "Administrators",
-    description:
-      "Review submissions, support trust and safety, and keep the marketplace organized.",
-    icon: ShieldCheck,
   },
 ];
 
@@ -196,13 +183,6 @@ const aiFeatures: Card[] = [
   },
 ];
 
-const ecosystem = [
-  "Customer",
-  "Venue booking",
-  "Supplier inquiry",
-  "Event experience",
-];
-
 function SectionHeading({
   eyebrow,
   title,
@@ -247,75 +227,154 @@ function FeatureCard({ item }: { item: Card }) {
   );
 }
 
+function VenoraEcosystemVisual() {
+  const roles = [
+    {
+      title: "Customers",
+      description: "Find venues and event services.",
+      icon: UsersRound,
+      className: "lg:col-start-2 lg:row-start-1",
+    },
+    {
+      title: "Venue owners",
+      description: "Manage venues and bookings.",
+      icon: Building2,
+      className: "lg:col-start-1 lg:row-start-2",
+    },
+    {
+      title: "Event suppliers",
+      description: "Offer services and receive inquiries.",
+      icon: Store,
+      className: "col-span-2 lg:col-span-1 lg:col-start-3 lg:row-start-2",
+    },
+  ];
+
+  return (
+    <div
+      className="relative overflow-hidden rounded-[28px] border border-[#DBEAFE] bg-white p-5 shadow-xl shadow-slate-200/60 sm:p-6"
+      aria-label="Venora connects customers, venue owners, and event suppliers."
+    >
+      <div
+        className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(37,99,235,0.12),_transparent_32%),radial-gradient(circle_at_bottom_right,_rgba(191,219,254,0.42),_transparent_30%)]"
+        aria-hidden="true"
+      />
+      <div
+        className="absolute bottom-28 left-1/2 top-36 hidden w-px -translate-x-1/2 bg-[#BFDBFE] lg:block"
+        aria-hidden="true"
+      />
+      <div
+        className="absolute left-[18%] right-[18%] top-[62%] hidden h-px bg-[#BFDBFE] lg:block"
+        aria-hidden="true"
+      />
+
+      <div className="relative">
+        <div className="mb-5 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#2563EB]">
+              Venora ecosystem
+            </p>
+            <h2 className="mt-2 text-xl font-black tracking-[-0.03em] text-[#111827]">
+              One place for event planning to connect.
+            </h2>
+          </div>
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB]">
+            <CalendarDays className="h-6 w-6" aria-hidden="true" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 lg:items-center">
+          <div className="relative z-10 col-span-2 rounded-[24px] border border-[#BFDBFE] bg-[#EFF6FF] p-4 shadow-sm shadow-blue-100/70 lg:col-span-1 lg:col-start-2 lg:row-start-2">
+            <div className="flex items-start gap-3">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#2563EB] text-white">
+                <Sparkles className="h-6 w-6" aria-hidden="true" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black tracking-[-0.03em] text-[#111827]">
+                  Venora
+                </h3>
+                <p className="mt-1 text-sm font-semibold leading-6 text-[#4B5563]">
+                  One platform for venues, services, and event coordination.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {roles.map((role) => {
+            const Icon = role.icon;
+
+            return (
+              <div
+                key={role.title}
+                className={[
+                  "relative z-10 rounded-[22px] border border-[#E5E7EB] bg-white p-4 shadow-sm shadow-slate-200/60",
+                  role.className,
+                ].join(" ")}
+              >
+                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F8FAFC] text-[#2563EB] ring-1 ring-[#DBEAFE]">
+                  <Icon className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <h3 className="text-base font-black tracking-[-0.03em] text-[#111827]">
+                  {role.title}
+                </h3>
+                <p className="mt-1 text-sm font-medium leading-6 text-[#6B7280]">
+                  {role.description}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AboutPage() {
   return (
     <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-[#F9FAFB] text-[#111827] antialiased">
       <MarketingNavbar />
 
       <main className="w-full flex-grow">
-        <section className="relative overflow-hidden border-b border-[#E5E7EB] bg-gradient-to-br from-white via-[#EFF6FF] to-white py-16 sm:py-20 lg:py-24">
-          <div className="absolute left-1/2 top-10 h-64 w-64 -translate-x-1/2 rounded-full bg-[#BFDBFE]/35 blur-3xl" />
-          <div className="relative mx-auto grid w-full max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">
+        <section className="relative overflow-hidden border-b border-[#E5E7EB] bg-gradient-to-br from-white via-[#F8FAFC] to-[#EFF6FF] py-12 sm:py-14 lg:py-16">
+          <div className="absolute right-0 top-10 h-56 w-56 rounded-full bg-[#DBEAFE]/50 blur-3xl" />
+          <div className="relative mx-auto grid w-full max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
             <div className="min-w-0">
-              <h1 className="max-w-4xl text-4xl font-black leading-tight tracking-[-0.05em] text-[#111827] sm:text-5xl lg:text-6xl">
-                Where Extraordinary Events Begin
-              </h1>
-              <p className="mt-5 max-w-2xl text-base font-medium leading-7 text-[#4B5563] sm:text-lg">
-                Venora helps customers find, compare, and book the perfect venue
-                while giving venue owners modern tools to manage their business,
-                bookings, packages, and event operations.
+              <p className="text-sm font-extrabold text-[#2563EB]">
+                About Venora
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link
-                  href="/venues"
-                  className="inline-flex h-12 items-center justify-center rounded-2xl bg-[#2563EB] px-7 text-sm font-extrabold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8]"
-                >
-                  Browse Venues
-                </Link>
-                <Link
-                  href="/account/become-partner"
-                  className="inline-flex h-12 items-center justify-center rounded-2xl border border-[#BFDBFE] bg-white px-7 text-sm font-extrabold text-[#1D4ED8] shadow-sm transition hover:bg-[#EFF6FF]"
-                >
-                  Host a Venue
-                </Link>
-              </div>
+              <h1 className="mt-4 max-w-2xl text-4xl font-black leading-tight tracking-[-0.045em] text-[#111827] sm:text-5xl lg:text-[3.5rem]">
+                Planning an event should feel exciting, not overwhelming.
+              </h1>
+              <p className="mt-6 max-w-xl text-base font-medium leading-7 text-[#4B5563] sm:text-lg">
+                Venora brings customers, venue owners, and event suppliers together in one platform—making it easier to discover venues, coordinate services, and manage every stage of an event.
+              </p>
+              <a
+                href="#how-venora-works"
+                className="mt-8 inline-flex h-11 w-fit items-center justify-center gap-2 rounded-2xl border border-[#DBEAFE] bg-white px-5 text-sm font-extrabold text-[#1D4ED8] shadow-sm transition hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
+              >
+                Explore how Venora works
+                <ArrowDown className="h-4 w-4" aria-hidden="true" />
+              </a>
             </div>
 
-            <div className="rounded-[28px] border border-[#DBEAFE] bg-white/90 p-5 shadow-2xl shadow-slate-200/70 backdrop-blur">
-              <div className="rounded-[22px] bg-[#EFF6FF] p-5">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#2563EB]">
-                      Marketplace flow
-                    </p>
-                    <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[#111827]">
-                      Plan with clarity
-                    </h2>
-                  </div>
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#2563EB] shadow-sm">
-                    <Network className="h-6 w-6" />
-                  </div>
-                </div>
+            <VenoraEcosystemVisual />
+          </div>
+        </section>
 
-                <div className="mt-6 grid gap-3">
-                  {ecosystem.map((step, index) => (
-                    <div
-                      key={step}
-                      className="flex items-center gap-3 rounded-2xl border border-[#DBEAFE] bg-white px-4 py-3"
-                    >
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#2563EB] text-xs font-black text-white">
-                        {index + 1}
-                      </span>
-                      <span className="text-sm font-extrabold text-[#111827]">
-                        {step}
-                      </span>
-                      {index < ecosystem.length - 1 ? (
-                        <ArrowRight className="ml-auto h-4 w-4 text-[#93C5FD]" />
-                      ) : null}
-                    </div>
-                  ))}
-                </div>
-              </div>
+        <section
+          id="how-venora-works"
+          className="scroll-mt-28 bg-white py-12 sm:py-16"
+        >
+          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+            <SectionHeading
+              eyebrow="Ecosystem"
+              title="Who Venora connects"
+              description="Venora creates a more connected experience for everyone involved in planning and delivering an event."
+              centered
+            />
+            <div className="mt-8 grid gap-5 md:grid-cols-3">
+              {connectedRoles.map((item) => (
+                <FeatureCard key={item.title} item={item} />
+              ))}
             </div>
           </div>
         </section>
@@ -349,22 +408,6 @@ export default function AboutPage() {
                   <FeatureCard key={item.title} item={item} />
                 ))}
               </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-14 sm:py-20">
-          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-            <SectionHeading
-              eyebrow="Who Venora helps"
-              title="Built for the full event marketplace."
-              description="Venora connects customers, venues, suppliers, coordinators, and administrators so planning can move through one trusted ecosystem."
-              centered
-            />
-            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-5">
-              {audiences.map((item) => (
-                <FeatureCard key={item.title} item={item} />
-              ))}
             </div>
           </div>
         </section>

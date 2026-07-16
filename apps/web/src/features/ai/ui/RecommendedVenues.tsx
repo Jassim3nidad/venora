@@ -12,6 +12,7 @@ import {
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 import { useVenueRecommendations } from "../hooks/use-venue-recommendations";
 import { recordRecommendationClick } from "../api/ai-recommendation.client";
+import { isOptimizableImageSrc } from "@/src/lib/image-host";
 
 function formatCurrency(value: number | null) {
   if (!value || !Number.isFinite(value)) return "Price pending";
@@ -83,6 +84,12 @@ export default function RecommendedVenues() {
           {data!.venues.map((venue) => {
             const eventId = data!.recommendationEventIds[venue.id];
 
+            const imgUrl = venue.image
+              ? venue.image.startsWith("http")
+                ? venue.image
+                : `${process.env.NEXT_PUBLIC_SUPABASE_URL || "https://szmjjkywcsnzkgqevinz.supabase.co"}/storage/v1/object/public/venue-images/${venue.image}`
+              : null;
+
             return (
               <Link
                 key={venue.id}
@@ -93,9 +100,20 @@ export default function RecommendedVenues() {
                 className="group flex h-full flex-col overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/50 transition-all hover:-translate-y-1 hover:border-[#BFDBFE] hover:shadow-xl hover:shadow-slate-200/70"
               >
                 <div className="relative aspect-[16/10] w-full flex-shrink-0 overflow-hidden bg-slate-100">
-                  <div className="flex h-full w-full items-center justify-center">
-                    <ImageIcon className="h-8 w-8 text-slate-300" />
-                  </div>
+                  {imgUrl ? (
+                    <Image
+                      src={imgUrl}
+                      alt={venue.name}
+                      fill
+                      unoptimized={!isOptimizableImageSrc(imgUrl)}
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center">
+                      <ImageIcon className="h-8 w-8 text-slate-300" />
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex flex-1 flex-col justify-between space-y-3 p-5">

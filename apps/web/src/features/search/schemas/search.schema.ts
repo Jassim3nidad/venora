@@ -97,6 +97,7 @@ export const smartVenueSearchVenueSchema = z.object({
   categories: z.array(z.string()),
   amenities: z.array(z.string()),
   eventTypes: z.array(z.string()),
+  image: z.string().nullable().optional(),
 });
 
 export const smartVenueSearchResponseSchema = z.object({

@@ -293,7 +293,17 @@ export default async function CoordinatorEventDetailPage({ params }: Props) {
               currentUserId={user.id}
               currentRole="venue_owner"
               isReadOnly={isReadOnly}
-              counterpartLabel="the customer"
+              header={{
+                role: "supplier",
+                customerName: typedBooking.profiles?.full_name || "Customer",
+                serviceName: typedBooking.venue_packages?.name,
+                inquiryRef: `Booking #${typedBooking.id.substring(0, 8)}`,
+                eventType: "Event",
+                eventDate: formatDate(typedBooking.event_date),
+                venueName: locationLabel(typedBooking.venues),
+                venueLink: `/venues/${typedBooking.venues?.slug}`,
+                statusLabel: String(typedBooking.status).replace(/_/g, " "),
+              }}
             />
           </section>
 

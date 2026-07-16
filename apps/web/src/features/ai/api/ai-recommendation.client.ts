@@ -61,6 +61,30 @@ export async function fetchVenueRecommendations(): Promise<AIRecommendationRespo
     );
   }
 
+  // Fetch images for the returned venues
+  const venueIds = parsed.data.venues.map((v) => v.id);
+  if (venueIds.length > 0) {
+    const { data: images } = await supabase
+      .from("venue_images")
+      .select("venue_id, storage_path")
+      .in("venue_id", venueIds)
+      .eq("is_featured", true);
+
+    const imageMap = new Map<string, string>();
+    if (images) {
+      for (const img of images as Array<{ venue_id: string; storage_path: string }>) {
+        if (!imageMap.has(img.venue_id)) {
+          imageMap.set(img.venue_id, img.storage_path);
+        }
+      }
+    }
+
+    parsed.data.venues = parsed.data.venues.map((v) => ({
+      ...v,
+      image: imageMap.get(v.id) || null,
+    }));
+  }
+
   return parsed.data;
 }
 

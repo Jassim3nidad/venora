@@ -166,25 +166,35 @@ export function OwnerBookingDecisionForm({
         <div className="flex flex-col gap-3">
           <label className="flex flex-col gap-1.5 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">
             Total quote
-            <input
-              name="totalAmount"
-              type="number"
-              min="1"
-              step="1"
-              defaultValue={Math.max(Math.round(suggestedTotal), 1)}
-              className="h-11 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm font-bold text-slate-950 outline-none focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
-            />
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <span className="text-sm font-bold text-slate-500">₱</span>
+              </div>
+              <input
+                name="totalAmount"
+                type="number"
+                min="1"
+                step="1"
+                defaultValue={Math.max(Math.round(suggestedTotal), 1)}
+                className="w-full h-11 rounded-xl border border-[#E5E7EB] bg-white pl-7 pr-3 text-sm font-bold text-slate-950 outline-none focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+              />
+            </div>
           </label>
           <label className="flex flex-col gap-1.5 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">
             Deposit
-            <input
-              name="depositAmount"
-              type="number"
-              min="1"
-              step="1"
-              defaultValue={Math.max(Math.round(suggestedDeposit), 1)}
-              className="h-11 rounded-xl border border-[#E5E7EB] bg-white px-3 text-sm font-bold text-slate-950 outline-none focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
-            />
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <span className="text-sm font-bold text-slate-500">₱</span>
+              </div>
+              <input
+                name="depositAmount"
+                type="number"
+                min="1"
+                step="1"
+                defaultValue={Math.max(Math.round(suggestedDeposit), 1)}
+                className="w-full h-11 rounded-xl border border-[#E5E7EB] bg-white pl-7 pr-3 text-sm font-bold text-slate-950 outline-none focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+              />
+            </div>
           </label>
         </div>
 

@@ -30,12 +30,9 @@ import {
   declineSupplierQuoteAction,
   sendCustomerInquiryMessageAction,
 } from "../application/actions";
-import {
-  buildInquiryTimeline,
-  canCustomerActOnQuote,
-  getInquiryDisplayStatus,
-} from "../application/customer-inquiry.logic";
+import { buildInquiryTimeline, canCustomerActOnQuote, getInquiryDisplayStatus } from "../application/customer-inquiry.logic";
 import { formatResponseTime } from "../utils/supplier-format";
+import { InquiryConversation } from "./InquiryConversation";
 
 function formatCurrency(value?: number | null) {
   if (
@@ -403,118 +400,37 @@ export function CustomerInquiryDetail({
 
             <hr className="border-t border-[#E5E7EB]" />
 
-            <section className="space-y-4">
-              <h3 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
-                Your Request & Notes
-              </h3>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
-                  <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
-                    Message to Supplier
-                  </p>
-                  <p className="mt-2 text-sm font-medium leading-6 text-slate-600">
-                    {inquiry.message || "No initial message provided."}
-                  </p>
-                </div>
-                {inquiry.special_requirements && (
-                  <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
-                    <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
-                      Special Requirements
-                    </p>
-                    <p className="mt-2 text-sm font-medium leading-6 text-slate-600">
-                      {inquiry.special_requirements}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </section>
-
-            <hr className="border-t border-[#E5E7EB]" />
-
-            <section className="space-y-4">
-              <div className="flex items-center gap-2">
-                <h3 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
-                  Chat with the Supplier
-                </h3>
-                {conversationClosed && (
-                  <span className="rounded-full border border-[#E5E7EB] bg-[#F3F4F6] px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#6B7280]">
-                    Read-only
-                  </span>
-                )}
-              </div>
-              <div className="overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm p-4 sm:p-5">
-                <div className="grid gap-4">
-                  {messages.length === 0 ? (
-                    <p className="rounded-2xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-semibold text-slate-500 text-center">
-                      No messages yet.
-                    </p>
-                  ) : (
-                    <div className="space-y-4">
-                      {messages.map((msg) => {
-                        const isCustomer = msg.sender_id === inquiry.customer_id;
-                        return (
-                          <div
-                            key={msg.id}
-                            className={`flex ${isCustomer ? "justify-end" : "justify-start"}`}
-                          >
-                            <div
-                              className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-                                isCustomer
-                                  ? "bg-[#2563EB] text-white rounded-tr-sm"
-                                  : "bg-[#F1F5F9] text-slate-900 rounded-tl-sm"
-                              }`}
-                            >
-                              <p className="text-sm font-semibold leading-relaxed whitespace-pre-wrap">
-                                {msg.message}
-                              </p>
-                              <p
-                                className={`mt-1 text-[10px] font-bold uppercase tracking-wider ${isCustomer ? "text-blue-100" : "text-slate-500"}`}
-                              >
-                                {formatDate(msg.created_at)} at{" "}
-                                {formatTime(msg.created_at?.split("T")[1])}
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {conversationClosed ? (
-                    <div className="mt-2 rounded-xl border border-amber-200 bg-amber-50 p-4 flex gap-3">
-                      <Info className="h-5 w-5 shrink-0 text-amber-600" />
-                      <p className="text-sm font-semibold text-amber-800">
-                        This conversation is read-only because the inquiry is
-                        closed.
-                      </p>
-                    </div>
-                  ) : (
-                    <form
-                      id="chat-form"
-                      action={handleSendMessage}
-                      className="mt-2 flex gap-3 relative"
-                    >
-                      <textarea
-                        name="message"
-                        rows={1}
-                        placeholder="Type a message..."
-                        className="w-full resize-none rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] py-3 pl-4 pr-12 text-sm font-semibold outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
-                      />
-                      <button
-                        type="submit"
-                        disabled={isPending}
-                        className="absolute right-2 top-2 bottom-2 flex w-10 items-center justify-center rounded-xl bg-[#2563EB] text-white transition hover:bg-[#1D4ED8] disabled:opacity-50"
-                      >
-                        {isPending ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <MessageSquare className="h-4 w-4" />
-                        )}
-                      </button>
-                    </form>
-                  )}
-                </div>
-              </div>
+            <section className="h-[600px]">
+              <InquiryConversation
+                currentUserId={inquiry.customer_id}
+                role="customer"
+                messages={messages}
+                originalRequest={{
+                  message: inquiry.message + (inquiry.special_requirements ? `\n\nSpecial Requirements:\n${inquiry.special_requirements}` : ''),
+                  createdAt: inquiry.created_at,
+                }}
+                header={{
+                  role: "customer",
+                  supplierName: supplier?.business_name,
+                  supplierLogo: supplierImage,
+                  supplierSlug: supplier?.slug,
+                  serviceName: service?.name,
+                  inquiryRef: `INQ-${inquiry.id.slice(0, 6).toUpperCase()}`,
+                  eventType: inquiry.event_type || "Event",
+                  eventDate: formatDate(inquiry.event_date_snapshot ?? booking?.event_date),
+                  venueName: inquiry.venue_name_snapshot ?? venue?.name,
+                  venueLink: booking ? `/bookings/${booking.id}` : undefined,
+                  statusLabel: displayStatus.label,
+                }}
+                isReadOnly={conversationClosed}
+                onSendMessage={async (formData) => {
+                  const message = formData.get("message") as string;
+                  return sendCustomerInquiryMessageAction({
+                    inquiryId: inquiry.id,
+                    message,
+                  });
+                }}
+              />
             </section>
           </div>
 

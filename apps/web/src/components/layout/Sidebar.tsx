@@ -355,12 +355,6 @@ export default function Sidebar({
     });
   };
 
-  // Text/number fields navigate (router.replace) on every change, which is
-  // expensive (re-renders the grid, re-runs middleware, etc). Typing into
-  // local state keeps the field itself instant; the URL only updates once
-  // the user pauses, so results still refresh automatically a moment later.
-  const [searchDraft, setSearchDraft] = useState(searchQuery);
-  const debouncedSearchDraft = useDebouncedValue(searchDraft, 300);
 
   const [minBudgetDraft, setMinBudgetDraft] = useState(selectedMinBudget);
   const debouncedMinBudgetDraft = useDebouncedValue(minBudgetDraft, 300);
@@ -368,16 +362,11 @@ export default function Sidebar({
   const [maxBudgetDraft, setMaxBudgetDraft] = useState(selectedMaxBudget);
   const debouncedMaxBudgetDraft = useDebouncedValue(maxBudgetDraft, 300);
 
-  useEffect(() => setSearchDraft(searchQuery), [searchQuery]);
+
   useEffect(() => setMinBudgetDraft(selectedMinBudget), [selectedMinBudget]);
   useEffect(() => setMaxBudgetDraft(selectedMaxBudget), [selectedMaxBudget]);
 
-  useEffect(() => {
-    if (debouncedSearchDraft !== searchQuery) {
-      updateFilters({ q: debouncedSearchDraft });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearchDraft]);
+
 
   useEffect(() => {
     if (debouncedMinBudgetDraft !== selectedMinBudget) {
@@ -529,17 +518,6 @@ export default function Sidebar({
           )}
         </div>
 
-        <div className="relative mt-4">
-          <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
-
-          <input
-            type="search"
-            value={searchDraft}
-            onChange={(event) => setSearchDraft(event.target.value)}
-            placeholder="Search venues..."
-            className="h-11 w-full rounded-2xl border border-[#E5E7EB] bg-white pl-11 pr-4 text-sm font-medium text-[#111827] outline-none transition placeholder:text-slate-400 hover:border-[#BFDBFE] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
-          />
-        </div>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [&>section:not(:last-child)]:mb-4">

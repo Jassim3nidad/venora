@@ -444,10 +444,10 @@ export function SupplierRequestSidebar({
   // 5. Logged in, expanded state, ready to fill request
   return (
     <div
-      className="w-full min-w-0 rounded-[24px] border border-[#E5E7EB] bg-white p-5 shadow-lg shadow-slate-200/40"
+      className="w-full min-w-0 flex flex-col max-h-[calc(100vh-11rem)] rounded-[24px] border border-[#E5E7EB] bg-white p-5 shadow-lg shadow-slate-200/40"
       id="supplier-request-card"
     >
-      <div className="mb-5 flex items-center justify-between">
+      <div className="mb-5 flex shrink-0 items-center justify-between">
         <h2 className="text-xl font-black text-[#111827]">Request Proposal</h2>
         <Button
           variant="ghost"
@@ -459,11 +459,11 @@ export function SupplierRequestSidebar({
         </Button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="space-y-2">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-5 overflow-y-auto pr-2 pb-2">
+        <div className="flex flex-col gap-2">
           <label
             htmlFor="service-select"
-            className="text-xs font-bold text-[#4B5563]"
+            className="text-xs font-bold leading-normal text-[#4B5563] pb-1"
           >
             Step 1: Choose a Service
           </label>
@@ -489,10 +489,10 @@ export function SupplierRequestSidebar({
           </Select>
         </div>
 
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           <label
             htmlFor="booking-select"
-            className="text-xs font-bold text-[#4B5563]"
+            className="text-xs font-bold leading-normal text-[#4B5563] pb-1"
           >
             Step 2: Select Your Event
           </label>
@@ -553,10 +553,10 @@ export function SupplierRequestSidebar({
           </div>
         )}
 
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           <label
             htmlFor="message-input"
-            className="text-xs font-bold text-[#4B5563]"
+            className="text-xs font-bold leading-normal text-[#4B5563] pb-1"
           >
             Step 3: Tell the supplier what you need
           </label>
@@ -565,7 +565,7 @@ export function SupplierRequestSidebar({
             name="message"
             required
             rows={4}
-            className="w-full resize-none rounded-xl border border-[#E5E7EB] bg-white p-3 text-sm focus:border-[#2563EB] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+            className="w-full resize-none rounded-xl border border-[#E5E7EB] bg-white p-3 text-sm outline-none focus:outline-none focus-visible:outline-none"
             placeholder="Describe your preferred style, expected coverage, important deliverables, and special event requirements."
           />
         </div>
@@ -575,7 +575,7 @@ export function SupplierRequestSidebar({
         <Button
           type="submit"
           disabled={isPending || !selectedBookingId || !selectedPackageId}
-          className="h-11 w-full rounded-2xl bg-[#2563EB] font-bold text-white shadow-sm transition hover:bg-[#1D4ED8] hover:shadow-md"
+          className="h-14 shrink-0 w-full rounded-2xl bg-[#2563EB] text-sm font-bold text-white shadow-sm transition hover:bg-[#1D4ED8] hover:shadow-md"
         >
           {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isPending ? "Sending Request..." : "Submit Request"}

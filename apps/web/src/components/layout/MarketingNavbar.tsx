@@ -20,6 +20,7 @@ interface MarketingNavbarProfile {
   full_name?: string | null;
   avatar_url?: string | null;
   isVenueOwner?: boolean;
+  isSupplier?: boolean;
 }
 
 const HOST_VENUE_PATH = "/account/become-partner";
@@ -85,6 +86,7 @@ export default function MarketingNavbar({
         full_name: currentUser.fullName,
         avatar_url: currentUser.avatarUrl,
         isVenueOwner: currentUser.roles.includes("venue_owner"),
+        isSupplier: currentUser.roles.includes("supplier"),
       }
     : null;
 
@@ -149,6 +151,7 @@ export default function MarketingNavbar({
                 email={email}
                 avatarUrl={profile?.avatar_url}
                 showEnterVenueDashboard={profile?.isVenueOwner ?? false}
+                showEnterSupplierDashboard={profile?.isSupplier ?? false}
               />
             </>
           ) : (
@@ -177,6 +180,8 @@ export default function MarketingNavbar({
                 displayName={displayName}
                 email={email}
                 avatarUrl={profile?.avatar_url}
+                showEnterVenueDashboard={profile?.isVenueOwner ?? false}
+                showEnterSupplierDashboard={profile?.isSupplier ?? false}
               />
             </>
           ) : null}
@@ -261,6 +266,17 @@ export default function MarketingNavbar({
                   >
                     <Store className="h-5 w-5" />
                     Enter Venue Owner Dashboard
+                  </Link>
+                ) : null}
+                {profile?.isSupplier ? (
+                  <Link
+                    href="/dashboard/supplier"
+                    role="menuitem"
+                    className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold text-[#1D4ED8] bg-[#EFF6FF] transition hover:bg-[#DBEAFE]"
+                    onClick={closeMenu}
+                  >
+                    <Store className="h-5 w-5" />
+                    Enter Supplier Dashboard
                   </Link>
                 ) : null}
                 <Link
