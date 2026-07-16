@@ -68,6 +68,7 @@ async function canManageBooking(supabase: any, bookingId: string) {
       .select("organization_id")
       .eq("user_id", user.id)
       .eq("organization_id", organizationId)
+      .eq("status", "active")
       .maybeSingle(),
     supabase
       .from("organizations")

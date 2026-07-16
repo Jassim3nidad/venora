@@ -111,7 +111,7 @@ export default async function CoordinatorEventsPage() {
       header: "",
       cell: (row) => (
         <DashButton
-          href={`/dashboard/bookings/${row.id}`}
+          href={`/dashboard/coordinator/events/${row.id}`}
           variant="secondary"
           icon="visibility"
           className="px-3 py-2 text-xs"

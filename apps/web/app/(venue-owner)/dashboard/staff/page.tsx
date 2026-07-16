@@ -2,17 +2,18 @@ import type { Metadata } from "next";
 import {
   DashboardSubPage,
   DashButton,
-  DataTable,
   EmptyState,
-  Panel,
-  PanelHeader,
-  StatusBadge,
-  type DataTableColumn,
 } from "@/components/dashboard/enterprise";
 import {
   formatDate,
   getOwnerDashboardContext,
 } from "../_lib/owner-dashboard-data";
+import {
+  StaffManagementClient,
+  type InvitationDisplayRow,
+  type OrganizationOption,
+  type StaffDisplayRow,
+} from "./StaffManagementClient";
 
 export const metadata: Metadata = { title: "Staff - Dashboard" };
 
@@ -21,34 +22,75 @@ type MemberRow = {
   user_id: string;
   role: string;
   invited_at: string;
+  status?: StaffDisplayRow["status"] | null;
 };
 
-type StaffDisplayRow = {
+type InvitationRow = {
   id: string;
-  name: string;
-  organization: string;
-  role: string;
-  joined: string;
+  organization_id: string;
+  email: string;
+  status: string;
+  expires_at: string;
+  created_at: string;
 };
 
 export default async function StaffPage() {
-  const { supabase, orgIds, isAdmin } = await getOwnerDashboardContext();
+  const { supabase, user, isAdmin } = await getOwnerDashboardContext();
 
-  let membersQuery = supabase
-    .from("organization_members")
-    .select("organization_id, user_id, role, invited_at")
-    .order("invited_at", { ascending: false });
-  if (!isAdmin) membersQuery = membersQuery.in("organization_id", orgIds);
+  let organizationsQuery = supabase
+    .from("organizations")
+    .select("id, name")
+    .order("name", { ascending: true });
 
-  const { data: members } =
-    isAdmin || orgIds.length > 0 ? await membersQuery : { data: [] };
+  if (!isAdmin) {
+    organizationsQuery = organizationsQuery.eq("owner_id", user.id);
+  }
+
+  const { data: organizations } = await organizationsQuery;
+  const organizationOptions: OrganizationOption[] = (organizations ?? []).map(
+    (organization: { id: string; name: string }) => ({
+      id: organization.id,
+      name: organization.name,
+    }),
+  );
+  const managedOrgIds = organizationOptions.map((organization) => organization.id);
+
+  if (managedOrgIds.length === 0) {
+    return (
+      <DashboardSubPage
+        title="Staff Management"
+        description="Invite coordinators and manage access for organizations you own."
+      >
+        <EmptyState
+          icon="lock"
+          title="Staff management is owner-only"
+          description="You can use your coordinator dashboard, but only organization owners can invite or change staff access."
+          action={
+            <DashButton href="/dashboard/coordinator" variant="secondary">
+              Open Coordinator Dashboard
+            </DashButton>
+          }
+        />
+      </DashboardSubPage>
+    );
+  }
+
+  const [{ data: members }, { data: invitations }] = await Promise.all([
+    supabase
+      .from("organization_members")
+      .select("organization_id, user_id, role, invited_at, status")
+      .in("organization_id", managedOrgIds)
+      .order("invited_at", { ascending: false }),
+    supabase
+      .from("organization_member_invitations")
+      .select("id, organization_id, email, status, expires_at, created_at")
+      .in("organization_id", managedOrgIds)
+      .order("created_at", { ascending: false }),
+  ]);
 
   const memberRows = (members ?? []) as MemberRow[];
   const memberUserIds = [
     ...new Set(memberRows.map((member) => member.user_id)),
-  ];
-  const memberOrgIds = [
-    ...new Set(memberRows.map((member) => member.organization_id)),
   ];
 
   const { data: profiles } =
@@ -59,14 +101,6 @@ export default async function StaffPage() {
           .in("id", memberUserIds)
       : { data: [] };
 
-  const { data: organizations } =
-    memberOrgIds.length > 0
-      ? await supabase
-          .from("organizations")
-          .select("id, name")
-          .in("id", memberOrgIds)
-      : { data: [] };
-
   const profileById = new Map<string, string>(
     (profiles ?? []).map((profile: { id: string; full_name: string }) => [
       profile.id,
@@ -74,82 +108,45 @@ export default async function StaffPage() {
     ]),
   );
   const organizationById = new Map<string, string>(
-    (organizations ?? []).map((organization: { id: string; name: string }) => [
+    organizationOptions.map((organization) => [
       organization.id,
       organization.name,
     ]),
   );
 
-  const rows: StaffDisplayRow[] = memberRows.map((member) => ({
+  const staffRows: StaffDisplayRow[] = memberRows.map((member) => ({
     id: `${member.organization_id}-${member.user_id}`,
+    organizationId: member.organization_id,
+    userId: member.user_id,
     name: profileById.get(member.user_id) ?? "Team member",
-    organization:
-      organizationById.get(member.organization_id) ?? "Organization",
+    organization: organizationById.get(member.organization_id) ?? "Organization",
     role: member.role,
+    status: member.status ?? "active",
     joined: formatDate(member.invited_at),
   }));
 
-  const columns: DataTableColumn<StaffDisplayRow>[] = [
-    {
-      key: "name",
-      header: "Team Member",
-      cell: (row) => (
-        <div>
-          <p className="font-semibold text-[#111827]">{row.name}</p>
-          <p className="text-xs text-[#6b7280]">{row.organization}</p>
-        </div>
-      ),
-    },
-    {
-      key: "role",
-      header: "Role",
-      cell: (row) => (
-        <StatusBadge status={row.role} label={row.role.replace(/_/g, " ")} />
-      ),
-    },
-    { key: "joined", header: "Added", cell: (row) => row.joined },
-  ];
+  const invitationRows: InvitationDisplayRow[] = (
+    (invitations ?? []) as InvitationRow[]
+  ).map((invitation) => ({
+    id: invitation.id,
+    email: invitation.email,
+    organization:
+      organizationById.get(invitation.organization_id) ?? "Organization",
+    status: invitation.status,
+    expiresAt: formatDate(invitation.expires_at),
+    createdAt: formatDate(invitation.created_at),
+  }));
 
   return (
     <DashboardSubPage
       title="Staff Management"
-      description="Review organization members who can help manage venues and operations."
-      action={
-        rows.length > 0 ? (
-          <DashButton
-            href="/account"
-            variant="secondary"
-            icon="manage_accounts"
-          >
-            Account Settings
-          </DashButton>
-        ) : null
-      }
+      description="Invite coordinators, review pending invitations, and control dashboard access."
     >
-      {rows.length > 0 ? (
-        <Panel>
-          <PanelHeader
-            title="Organization Team"
-            description="Team membership is shown from your organization records."
-          />
-          <DataTable rows={rows} columns={columns} keyFn={(row) => row.id} />
-        </Panel>
-      ) : (
-        <EmptyState
-          icon="groups"
-          title="No staff members yet"
-          description="Invite and permission workflows are not active yet. Team members will appear here after they are added to your organization."
-          action={
-            <DashButton
-              href="/account"
-              variant="secondary"
-              icon="manage_accounts"
-            >
-              Review Account
-            </DashButton>
-          }
-        />
-      )}
+      <StaffManagementClient
+        organizations={organizationOptions}
+        staffRows={staffRows}
+        invitationRows={invitationRows}
+      />
     </DashboardSubPage>
   );
 }

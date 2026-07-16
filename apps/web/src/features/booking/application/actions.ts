@@ -132,6 +132,7 @@ async function assertCanManageBooking(
       .select("organization_id")
       .eq("user_id", user.id)
       .eq("organization_id", organizationId)
+      .eq("status", "active")
       .maybeSingle(),
     supabase
       .from("organizations")
@@ -180,6 +181,11 @@ function revalidateBookingViews(bookingId: string, venueSlug?: string | null) {
   revalidatePath("/dashboard/venue-owner");
   revalidatePath("/dashboard/bookings");
   revalidatePath(`/dashboard/bookings/${bookingId}`);
+  revalidatePath("/dashboard/coordinator");
+  revalidatePath("/dashboard/coordinator/events");
+  revalidatePath(`/dashboard/coordinator/events/${bookingId}`);
+  revalidatePath("/dashboard/coordinator/calendar");
+  revalidatePath("/dashboard/coordinator/reports");
   revalidatePath("/bookings");
   revalidatePath(`/bookings/${bookingId}`);
   revalidatePath("/venues");

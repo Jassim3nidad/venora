@@ -328,9 +328,9 @@ export function CustomerInquiryDetail({
                       <h4 className="text-lg font-black tracking-[-0.02em] text-[#1D4ED8]">
                         {quote.title || "Service Proposal"}
                       </h4>
-                      {quote.description && (
+                      {quote.service_description && (
                         <p className="mt-2 text-sm font-medium leading-relaxed text-[#1E40AF]">
-                          {quote.description}
+                          {quote.service_description}
                         </p>
                       )}
                     </div>
@@ -344,13 +344,13 @@ export function CustomerInquiryDetail({
                     </div>
                   </div>
                   
-                  {(quote.line_items as any[])?.length > 0 && (
+                  {(quote.supplier_quote_items as any[])?.length > 0 && (
                     <div className="mt-4 pt-4 border-t border-blue-200/50">
                        <h4 className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#1E40AF] mb-3">
                          Line Items
                        </h4>
                        <div className="space-y-3">
-                         {(quote.line_items as any[])?.map((item, index) => (
+                         {(quote.supplier_quote_items as any[])?.map((item, index) => (
                            <div
                              key={index}
                              className="flex justify-between items-start gap-4"
@@ -374,13 +374,13 @@ export function CustomerInquiryDetail({
                        </div>
                     </div>
                   )}
-                  {quote.terms_and_conditions && (
+                  {quote.terms && (
                     <div className="mt-4 pt-4 border-t border-blue-200/50">
                       <h4 className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#1E40AF] mb-2">
                         Terms & Conditions
                       </h4>
                       <p className="text-xs font-medium text-[#1E40AF] whitespace-pre-wrap">
-                        {quote.terms_and_conditions}
+                        {quote.terms}
                       </p>
                     </div>
                   )}

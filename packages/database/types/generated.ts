@@ -30,6 +30,12 @@ export type Json =
 export type UserRole =
   "customer" | "venue_owner" | "event_coordinator" | "supplier" | "admin";
 export type OrgMemberRole = "owner" | "coordinator" | "staff";
+export type OrgMemberStatus = "active" | "suspended" | "revoked";
+export type OrganizationInvitationStatus =
+  | "pending"
+  | "accepted"
+  | "revoked"
+  | "expired";
 export type AccountStatus =
   "active" | "pending_verification" | "suspended" | "banned";
 export type VenueStatus =
@@ -138,15 +144,59 @@ export interface Database {
           user_id: string;
           role: OrgMemberRole;
           invited_at: string;
+          status: OrgMemberStatus;
+          invited_by: string | null;
+          updated_at: string;
+          suspended_at: string | null;
+          revoked_at: string | null;
         };
         Insert: {
           organization_id: string;
           user_id: string;
           role?: OrgMemberRole;
+          invited_at?: string;
+          status?: OrgMemberStatus;
+          invited_by?: string | null;
+          updated_at?: string;
+          suspended_at?: string | null;
+          revoked_at?: string | null;
         };
-        Update: Pick<
-          Database["public"]["Tables"]["organization_members"]["Row"],
-          "role"
+        Update: Partial<
+          Database["public"]["Tables"]["organization_members"]["Insert"]
+        >;
+      };
+
+      organization_member_invitations: {
+        Row: {
+          id: string;
+          organization_id: string;
+          email: string;
+          token_hash: string;
+          role: OrgMemberRole;
+          status: OrganizationInvitationStatus;
+          invited_by: string;
+          accepted_by: string | null;
+          accepted_at: string | null;
+          expires_at: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          email: string;
+          token_hash: string;
+          role?: OrgMemberRole;
+          status?: OrganizationInvitationStatus;
+          invited_by: string;
+          accepted_by?: string | null;
+          accepted_at?: string | null;
+          expires_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["organization_member_invitations"]["Insert"]
         >;
       };
 
@@ -1192,6 +1242,14 @@ export interface Database {
       };
       is_booking_customer: { Args: { p_booking_id: string }; Returns: boolean };
       owns_booking_venue: { Args: { p_booking_id: string }; Returns: boolean };
+      accept_organization_member_invitation: {
+        Args: { p_token: string };
+        Returns: Array<{
+          organization_id: string;
+          user_id: string;
+          member_status: OrgMemberStatus;
+        }>;
+      };
 
       // ── Payments (migrations 021, 037-041) ────────────────
       start_booking_payment: {
@@ -1346,6 +1404,8 @@ export interface Database {
     Enums: {
       user_role: UserRole;
       org_member_role: OrgMemberRole;
+      org_member_status: OrgMemberStatus;
+      organization_invitation_status: OrganizationInvitationStatus;
       account_status: AccountStatus;
       venue_status: VenueStatus;
       price_unit: PriceUnit;

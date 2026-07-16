@@ -25,7 +25,8 @@ export async function userOwnsVenue(
   const { data: members } = await supabase
     .from("organization_members")
     .select("organization_id")
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .eq("status", "active");
 
   const memberOrgIds = (members ?? []).map(
     (member: { organization_id: string }) => member.organization_id,

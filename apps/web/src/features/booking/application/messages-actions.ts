@@ -94,6 +94,7 @@ async function assertBookingAccess(
         .select("organization_id")
         .eq("user_id", userId)
         .eq("organization_id", orgId)
+        .eq("status", "active")
         .maybeSingle(),
       supabase
         .from("organizations")
@@ -271,6 +272,7 @@ export async function sendBookingMessageAction(rawInput: unknown) {
       // 5. Revalidate
       revalidatePath(`/bookings/${input.bookingId}`);
       revalidatePath(`/dashboard/bookings/${input.bookingId}`);
+      revalidatePath(`/dashboard/coordinator/events/${input.bookingId}`);
 
       return { ok: true };
     },

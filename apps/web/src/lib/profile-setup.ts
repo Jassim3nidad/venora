@@ -12,6 +12,7 @@ export const PROFILE_SETUP_EXEMPT_PREFIXES = [
   "/forgot-password",
   "/reset-password",
   "/verify-email",
+  "/staff/accept",
   "/api",
 ] as const;
 
@@ -100,6 +101,11 @@ export function resolvePostAuthRedirect({
   profile: ProfileSetupState | null | undefined;
   redirectTo?: string | null;
 }) {
+  if (isSafeInternalRedirect(redirectTo)) {
+    const redirectPath = new URL(redirectTo!, "https://venora.local").pathname;
+    if (isProfileSetupExemptPath(redirectPath)) return redirectTo!;
+  }
+
   if (needsProfileSetup(roles, profile)) {
     return PROFILE_SETUP_PATH;
   }

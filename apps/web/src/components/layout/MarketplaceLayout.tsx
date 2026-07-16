@@ -39,7 +39,7 @@ export function MarketplaceLayout({
       className="flex min-h-screen flex-col bg-[#F8FAFC] text-[#111827]"
     >
       <div className="sticky top-0 z-50 shrink-0">
-        <MarketingNavbar embedded />
+        <MarketingNavbar embedded mobileContext="marketplace" />
         {showMarketplaceSubnav ? (
           <CustomerNavbar
             user={user ?? null}
