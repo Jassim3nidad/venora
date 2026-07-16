@@ -41,6 +41,9 @@ export function QuoteEditor({
   const router = useRouter();
   const serviceName = inquiry?.supplier_services?.name ?? "Service";
   const customerName = inquiry?.contact_name ?? "Customer";
+  const eventDateRaw = inquiry?.event_date_snapshot || inquiry?.event_date || inquiry?.bookings?.event_date;
+  const minValidUntil = eventDateRaw ? eventDateRaw.split('T')[0] : undefined;
+  const inquiredService = inquiry?.supplier_services;
 
   const generatedTitle = `${serviceName} Proposal for ${customerName}`;
 
@@ -174,6 +177,7 @@ export function QuoteEditor({
                 value={validUntil}
                 onChange={(e) => setValidUntil(e.target.value)}
                 disabled={!editable}
+                min={minValidUntil}
               />
             </div>
           </div>
@@ -183,18 +187,41 @@ export function QuoteEditor({
           <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
             <PanelHeader title="Line Items" />
             {editable && (
-              <button
-                type="button"
-                onClick={() =>
-                  setItems([
-                    ...items,
-                    { description: "", quantity: 1, unitPrice: 0 },
-                  ])
-                }
-                className="inline-flex items-center gap-2 rounded-xl bg-[#f8fafc] px-3 py-2 text-sm font-bold text-[#2563eb] transition hover:bg-[#eff6ff]"
-              >
-                <Plus className="h-4 w-4" /> Add Line Item
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                {inquiredService && (
+                  <button
+                    type="button"
+                    disabled={items.some(i => i.description === inquiredService.name)}
+                    onClick={() => {
+                      const newItem = {
+                        description: inquiredService.name,
+                        quantity: 1,
+                        unitPrice: Number(inquiredService.price || 0),
+                      };
+                      if (items.length === 1 && items[0]?.description === "" && items[0]?.unitPrice === 0) {
+                        setItems([newItem]);
+                      } else {
+                        setItems([...items, newItem]);
+                      }
+                    }}
+                    className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-bold text-emerald-700 shadow-sm transition hover:bg-emerald-100 hover:border-emerald-300 disabled:opacity-50 disabled:pointer-events-none"
+                  >
+                    <Plus className="h-4 w-4" /> {inquiredService.name} ({formatCurrency(Number(inquiredService.price || 0))})
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setItems([
+                      ...items,
+                      { description: "", quantity: 1, unitPrice: 0 },
+                    ])
+                  }
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#f8fafc] px-3 py-2 text-sm font-bold text-[#2563eb] transition hover:bg-[#eff6ff]"
+                >
+                  <Plus className="h-4 w-4" /> Add Line Item
+                </button>
+              </div>
             )}
           </div>
 
@@ -444,7 +471,7 @@ export function QuoteEditor({
           <button
             type="button"
             onClick={() => setShowPreview(true)}
-            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#f1f5f9] px-5 text-sm font-bold text-[#475569] transition hover:bg-[#e2e8f0]"
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#2563eb] px-5 text-sm font-bold text-white transition hover:bg-[#1d4ed8]"
           >
             <Eye className="h-4 w-4" />
             Preview Proposal

@@ -76,6 +76,12 @@ function formatDate(value?: string | null) {
   }).format(date);
 }
 
+function locationLabel(venue: any) {
+  if (!venue) return "Location unavailable";
+  if (venue.city && venue.province) return `${venue.city}, ${venue.province}`;
+  return venue.city || venue.province || "Location unavailable";
+}
+
 function formatCurrency(value?: number | null) {
   if (
     value === null ||
@@ -301,7 +307,7 @@ export default async function CoordinatorEventDetailPage({ params }: Props) {
                 eventType: "Event",
                 eventDate: formatDate(typedBooking.event_date),
                 venueName: locationLabel(typedBooking.venues),
-                venueLink: `/venues/${typedBooking.venues?.slug}`,
+                venueLink: `/venues/${(typedBooking.venues as any)?.slug}`,
                 statusLabel: String(typedBooking.status).replace(/_/g, " "),
               }}
             />

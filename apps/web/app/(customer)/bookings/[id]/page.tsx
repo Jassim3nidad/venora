@@ -753,7 +753,7 @@ export default async function BookingDetailPage({ params }: Props) {
                   eventType: "Event",
                   eventDate: formatDate(typedBooking.event_date),
                   venueName: locationLabel(typedBooking.venues),
-                  venueLink: `/venues/${typedBooking.venues?.slug}`,
+                  venueLink: `/venues/${(typedBooking.venues as any)?.slug}`,
                   statusLabel: String(typedBooking.status).replace(/_/g, " "),
                 }}
               />
