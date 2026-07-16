@@ -1,14 +1,58 @@
 "use client";
 
 import { useRef, useState, useTransition, useEffect, useOptimistic } from "react";
-import { useRouter } from "next/navigation";
-import { MessageSquare, Send, Loader2, AlertCircle, CalendarDays, MapPin, BriefcaseBusiness, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { sendBookingMessageAction } from "../application/messages-actions";
-import type { BookingMessage } from "../application/messages-actions";
-import type { ConversationHeaderProps } from "../../suppliers/ui/InquiryConversation";
+import { useRouter } from "next/navigation";
+import {
+  Send,
+  Loader2,
+  CalendarDays,
+  MapPin,
+  BriefcaseBusiness,
+  AlertCircle,
+  ExternalLink,
+} from "lucide-react";
 
-// Helpers
+export type Message = {
+  id: string;
+  sender_id: string;
+  message: string;
+  created_at: string;
+};
+
+export type ConversationHeaderProps = {
+  role: "customer" | "supplier";
+  // Used for customer view
+  supplierName?: string | undefined;
+  supplierLogo?: string | null | undefined;
+  supplierSlug?: string | undefined;
+  // Used for supplier view
+  customerName?: string | undefined;
+
+  // Shared context
+  serviceName?: string | undefined;
+  inquiryRef?: string | undefined;
+  eventType?: string | undefined;
+  eventDate?: string | undefined;
+  venueName?: string | undefined;
+  venueLink?: string | undefined;
+  statusLabel: string;
+};
+
+export type InquiryConversationProps = {
+  currentUserId: string;
+  role: "customer" | "supplier";
+  messages: Message[];
+  originalRequest?: {
+    message: string;
+    createdAt?: string | null;
+  } | null | undefined;
+  header: ConversationHeaderProps;
+  isReadOnly: boolean;
+  onSendMessage: (formData: FormData) => Promise<{ error?: { message: string } | null } | void | any>;
+  readOnlyNotice?: string | undefined;
+};
+
 function formatMessageTime(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
@@ -29,38 +73,32 @@ function formatDateSeparator(iso: string): string {
   }).format(date);
 }
 
-export function BookingConversation({
-  bookingId,
-  initialMessages,
+export function InquiryConversation({
   currentUserId,
-  currentRole,
-  isReadOnly,
+  role,
+  messages,
+  originalRequest,
   header,
-  counterpartLabel = "the other party",
-}: {
-  bookingId: string;
-  initialMessages: BookingMessage[];
-  currentUserId: string;
-  currentRole: "customer" | "venue_owner";
-  isReadOnly: boolean;
-  header?: ConversationHeaderProps;
-  counterpartLabel?: string;
-}) {
+  isReadOnly,
+  onSendMessage,
+  readOnlyNotice = "This conversation is closed. Previous messages remain available.",
+}: InquiryConversationProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Optimistic UI for sending
   const [optimisticMessages, addOptimisticMessage] = useOptimistic(
-    initialMessages,
-    (state, newMessage: BookingMessage) => [...state, newMessage]
+    messages,
+    (state, newMessage: Message) => [...state, newMessage]
   );
 
   // Group messages
-  const groupedMessages: { date: string; items: BookingMessage[][] }[] = [];
-  let currentGroup: BookingMessage[] = [];
+  const groupedMessages: { date: string; items: Message[][] }[] = [];
+  let currentGroup: Message[] = [];
   let currentDate = "";
 
   optimisticMessages.forEach((msg) => {
@@ -110,6 +148,7 @@ export function BookingConversation({
     }
   }
 
+  // Scroll to bottom when messages load or change
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -121,25 +160,22 @@ export function BookingConversation({
     if (!trimmed || isPending || isReadOnly) return;
     setError(null);
 
+    // Provide optimistic message
     const tempId = `temp-${Date.now()}`;
-    const newMsg: BookingMessage = {
+    const newMsg: Message = {
       id: tempId,
-      booking_id: bookingId,
       sender_id: currentUserId,
-      sender_role: currentRole,
       message: trimmed,
       created_at: new Date().toISOString(),
     };
 
     startTransition(async () => {
       addOptimisticMessage(newMsg);
+      const formData = new FormData();
+      formData.set("message", trimmed);
 
-      const result = await sendBookingMessageAction({
-        bookingId,
-        message: trimmed,
-      });
-
-      if (result.error) {
+      const result = await onSendMessage(formData);
+      if (result && result.error) {
         setError(result.error.message);
         return;
       }
@@ -164,96 +200,114 @@ export function BookingConversation({
   };
 
   return (
-    <div className="flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden h-full min-h-[600px] max-h-[800px]">
+    <div className="flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden h-full">
       {/* ── Conversation Header ── */}
-      {header && (
-        <div className="border-b border-slate-200 bg-slate-50/50 p-4 sm:p-5">
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <div className="flex items-center gap-4">
-              {header.role === "customer" && header.supplierLogo !== undefined && (
-                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-slate-200 bg-white">
-                  {header.supplierLogo ? (
-                    <img
-                      src={header.supplierLogo}
-                      alt={header.supplierName || "Supplier"}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-slate-100 font-bold text-slate-400">
-                      {header.supplierName?.charAt(0) || "S"}
-                    </div>
-                  )}
-                </div>
-              )}
-              <div>
-                <h2 className="text-lg font-black text-slate-900 leading-tight">
-                  {header.role === "customer"
-                    ? header.supplierName || "Supplier"
-                    : header.customerName || "Customer"}
-                </h2>
-                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-slate-600">
-                  {header.serviceName && (
-                    <span className="flex items-center gap-1">
-                      <BriefcaseBusiness className="h-3.5 w-3.5 text-slate-400" />
-                      {header.serviceName}
-                    </span>
-                  )}
-                  {header.inquiryRef && (
-                    <>
-                      <span className="text-slate-300">·</span>
-                      <span>{header.inquiryRef}</span>
-                    </>
-                  )}
-                </div>
+      <div className="border-b border-slate-200 bg-slate-50/50 p-4 sm:p-5">
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          <div className="flex items-center gap-4">
+            {role === "customer" && header.supplierLogo !== undefined && (
+              <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-slate-200 bg-white">
+                {header.supplierLogo ? (
+                  <img
+                    src={header.supplierLogo}
+                    alt={header.supplierName || "Supplier"}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-slate-100 font-bold text-slate-400">
+                    {header.supplierName?.charAt(0) || "S"}
+                  </div>
+                )}
+              </div>
+            )}
+            <div>
+              <h2 className="text-lg font-black text-slate-900 leading-tight">
+                {role === "customer"
+                  ? header.supplierName || "Supplier"
+                  : header.customerName || "Customer"}
+              </h2>
+              <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-slate-600">
+                {header.serviceName && (
+                  <span className="flex items-center gap-1">
+                    <BriefcaseBusiness className="h-3.5 w-3.5 text-slate-400" />
+                    {header.serviceName}
+                  </span>
+                )}
+                {header.inquiryRef && (
+                  <>
+                    <span className="text-slate-300">·</span>
+                    <span>{header.inquiryRef}</span>
+                  </>
+                )}
               </div>
             </div>
-            {header.role === "customer" && header.supplierSlug && (
-              <Link
-                href={`/suppliers/${header.supplierSlug}`}
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
-              >
-                <ExternalLink className="h-3.5 w-3.5" />
-                View supplier
-              </Link>
-            )}
           </div>
-
-          {/* Context Row */}
-          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl bg-white p-3 border border-slate-200 text-xs sm:text-sm font-medium text-slate-600">
-            {header.eventType && header.eventDate && (
-              <span className="flex items-center gap-1.5">
-                <CalendarDays className="h-4 w-4 text-slate-400 shrink-0" />
-                {header.eventType} &middot; {header.eventDate}
-              </span>
-            )}
-            {header.venueName && (
-              <span className="flex items-center gap-1.5">
-                <MapPin className="h-4 w-4 text-slate-400 shrink-0" />
-                {header.venueLink ? (
-                  <Link
-                    href={header.venueLink}
-                    className="hover:text-blue-600 hover:underline"
-                  >
-                    {header.venueName}
-                  </Link>
-                ) : (
-                  header.venueName
-                )}
-              </span>
-            )}
-            <span className="flex items-center gap-1.5 ml-auto">
-              <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-700">
-                {header.statusLabel}
-              </span>
-            </span>
-          </div>
+          {role === "customer" && header.supplierSlug && (
+            <Link
+              href={`/suppliers/${header.supplierSlug}`}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              View supplier
+            </Link>
+          )}
         </div>
-      )}
+
+        {/* Inquiry Context Row */}
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl bg-white p-3 border border-slate-200 text-xs sm:text-sm font-medium text-slate-600">
+          {header.eventType && header.eventDate && (
+            <span className="flex items-center gap-1.5">
+              <CalendarDays className="h-4 w-4 text-slate-400 shrink-0" />
+              {header.eventType} &middot; {header.eventDate}
+            </span>
+          )}
+          {header.venueName && (
+            <span className="flex items-center gap-1.5">
+              <MapPin className="h-4 w-4 text-slate-400 shrink-0" />
+              {header.venueLink ? (
+                <Link
+                  href={header.venueLink}
+                  className="hover:text-blue-600 hover:underline"
+                >
+                  {header.venueName}
+                </Link>
+              ) : (
+                header.venueName
+              )}
+            </span>
+          )}
+          <span className="flex items-center gap-1.5 ml-auto">
+            <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-700">
+              {header.statusLabel}
+            </span>
+          </span>
+        </div>
+      </div>
 
       {/* ── Message History ── */}
-      <div className="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-5">
+      <div className="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-5 h-[400px] sm:h-[500px]">
         <div className="mx-auto max-w-[800px] flex flex-col gap-6">
-          {groupedMessages.length === 0 && (
+          {/* Original Request */}
+          {originalRequest && (
+            <div className="flex justify-center mb-4">
+              <div className="w-full max-w-lg rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
+                <h3 className="text-xs font-black uppercase tracking-wider text-blue-800 mb-2">
+                  Original request
+                </h3>
+                <p className="text-sm font-medium leading-relaxed text-slate-700 whitespace-pre-wrap">
+                  {originalRequest.message}
+                </p>
+                {originalRequest.createdAt && (
+                  <p className="mt-3 text-[11px] font-semibold text-slate-400">
+                    Submitted {formatDateSeparator(originalRequest.createdAt)} at{" "}
+                    {formatMessageTime(originalRequest.createdAt)}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {groupedMessages.length === 0 && !originalRequest && (
             <div className="flex flex-col items-center justify-center py-10 text-center">
               <p className="text-sm font-black text-slate-900">No messages yet</p>
               <p className="mt-1 text-sm font-medium text-slate-500">
@@ -278,14 +332,15 @@ export function BookingConversation({
                 const isOwn = firstMsg.sender_id === currentUserId;
                 const senderLabel = isOwn
                   ? "You"
-                  : firstMsg.sender_role === "customer"
-                    ? "Customer"
-                    : "Venue Owner";
+                  : role === "customer"
+                    ? header.supplierName || "Supplier"
+                    : header.customerName || "Customer";
 
                 return (
                   <div
                     key={gIdx}
-                    className={`flex flex-col gap-1 ${isOwn ? "items-end" : "items-start"}`}
+                    className={`flex flex-col gap-1 ${isOwn ? "items-end" : "items-start"
+                      }`}
                   >
                     <span className="mb-1 text-[11px] font-bold text-slate-500">
                       {senderLabel}
@@ -338,7 +393,7 @@ export function BookingConversation({
         {isReadOnly ? (
           <div className="flex items-center gap-2 rounded-xl bg-slate-50 p-3 text-sm font-semibold text-slate-600 justify-center">
             <AlertCircle className="h-4 w-4" />
-            This conversation is read-only because the booking is no longer active.
+            {readOnlyNotice}
           </div>
         ) : (
           <div className="mx-auto max-w-[800px] flex flex-col gap-2">
@@ -358,7 +413,7 @@ export function BookingConversation({
             <div
               className={`relative flex items-end gap-2 rounded-2xl border bg-white p-2 transition-colors ${error
                 ? "border-red-300 ring-4 ring-red-100"
-                : "border-slate-300 focus-within:border-blue-600"
+                : "border-slate-300 focus-within:border-blue-0"
                 }`}
             >
               <textarea

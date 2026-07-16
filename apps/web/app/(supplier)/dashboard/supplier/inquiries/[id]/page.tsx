@@ -85,12 +85,6 @@ export default async function SupplierInquiryDetailPage({
             </dl>
           </Panel>
           <Panel>
-            <PanelHeader title="Customer Message" />
-            <p className="whitespace-pre-wrap text-sm leading-7 text-[#334155]">
-              {inquiry.message}
-            </p>
-          </Panel>
-          <Panel>
             <PanelHeader
               title="Conversation"
               description="Messages are visible only to you and this customer."
@@ -101,6 +95,10 @@ export default async function SupplierInquiryDetailPage({
               supplierUserId={user.id}
               customerName={inquiry.contact_name}
               supplierName={profile.businessName}
+              originalRequest={{
+                message: inquiry.message,
+                createdAt: inquiry.created_at,
+              }}
             />
           </Panel>
         </div>

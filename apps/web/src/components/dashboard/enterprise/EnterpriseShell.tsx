@@ -142,27 +142,7 @@ function Sidebar({
       </nav>
 
       <div className="mt-6 border-t border-[#dbe3ef] pt-4">
-        {role === "supplier" ? (
-          <Link
-            href="/suppliers"
-            {...(onNavigate ? { onClick: onNavigate } : {})}
-            className="mb-1 flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold text-[#475569] transition hover:bg-white hover:text-[#1d4ed8]"
-          >
-            <MaterialIcon name="storefront" className="text-xl" />
-            Browse Marketplace
-          </Link>
-        ) : null}
-        <button
-          type="button"
-          onClick={() => {
-            onNavigate?.();
-            window.location.href = "/logout";
-          }}
-          className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold text-red-700 transition hover:bg-red-50"
-        >
-          <MaterialIcon name="logout" className="text-xl" />
-          Sign Out
-        </button>
+
       </div>
     </div>
   );

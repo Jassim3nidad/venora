@@ -87,7 +87,12 @@ export default async function VenuesMarketplacePage({
   const dbRows = error ? [] : ((dbVenues ?? []) as any[]);
   const dbIds = new Set(dbRows.map((venue) => String(venue.id)));
   const livePublishedVenues = dbRows
-    .filter((venue) => venue.status === "published")
+    .filter(
+      (venue) =>
+        venue.status === "published" &&
+        !venue.name.toLowerCase().includes("tenant a") &&
+        !venue.name.toLowerCase().includes("tenant b")
+    )
     .map((venue) =>
       toLiveMarketplaceVenue(
         venue,

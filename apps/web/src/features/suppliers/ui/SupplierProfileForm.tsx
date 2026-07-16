@@ -27,8 +27,12 @@ import type {
   SupplierMarketplaceProfile,
 } from "../types/supplier.types";
 import { SupplierImageUpload } from "./SupplierImageUpload";
+import {
+  Toast,
+  ToastDescription,
+  ToastTitle,
+} from "@venora/ui";
 import dynamic from "next/dynamic";
-
 const SupplierLocationPicker = dynamic(
   () => import("./SupplierLocationPicker"),
   { ssr: false },
@@ -157,6 +161,10 @@ export function SupplierProfileForm({
     type: "success" | "error";
     text: string;
   } | null>(null);
+  
+  // Toast state
+  const [toastOpen, setToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState({ title: "", description: "" });
 
   const defaultValues: ProfileFormValues = {
     businessName: profile?.businessName ?? "",
@@ -267,10 +275,14 @@ export function SupplierProfileForm({
 
       if (result.error) {
         setFormMessage({ type: "error", text: result.error.message });
+        setToastMessage({ title: "Error", description: result.error.message });
+        setToastOpen(true);
         return;
       }
 
       setFormMessage({ type: "success", text: "Profile successfully saved." });
+      setToastMessage({ title: "Success", description: "Profile successfully saved." });
+      setToastOpen(true);
       reset(values); // Reset isDirty state
       router.refresh();
 
@@ -1041,6 +1053,16 @@ export function SupplierProfileForm({
           </div>
         </div>
       </div>
+
+      {/* Global Toast component */}
+      {toastOpen && (
+        <Toast onOpenChange={setToastOpen}>
+          <div className="flex flex-col gap-1">
+            <ToastTitle>{toastMessage.title}</ToastTitle>
+            <ToastDescription>{toastMessage.description}</ToastDescription>
+          </div>
+        </Toast>
+      )}
     </div>
   );
 }

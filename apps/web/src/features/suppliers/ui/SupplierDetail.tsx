@@ -132,7 +132,7 @@ function PortfolioProjectModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden bg-white sm:rounded-[24px]">
+      <DialogContent className="max-w-4xl p-0 overflow-hidden bg-white sm:rounded-[24px] [&>button]:hidden">
         <div className="flex flex-col h-[85vh] sm:h-[80vh]">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-slate-100">
@@ -164,14 +164,14 @@ function PortfolioProjectModal({
                   <>
                     <button
                       onClick={handlePrev}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 text-slate-800 shadow-md backdrop-blur opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 text-slate-800 shadow-md backdrop-blur opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity disabled:opacity-0"
                       aria-label="Previous image"
                     >
                       <ChevronLeft className="h-5 w-5" />
                     </button>
                     <button
                       onClick={handleNext}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 text-slate-800 shadow-md backdrop-blur opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 text-slate-800 shadow-md backdrop-blur opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity disabled:opacity-0"
                       aria-label="Next image"
                     >
                       <ChevronRight className="h-5 w-5" />
@@ -935,9 +935,9 @@ export function SupplierDetail({
           </section>
         </div>
 
-        {/* Right Column - Sidebar (sticky container) */}
-        <aside className="hidden lg:self-stretch lg:block">
-          <div className="sticky top-[9.5rem] self-start">
+        {/* Right Column - Sidebar (sticky container on lg) */}
+        <aside className="w-full lg:w-auto lg:self-stretch">
+          <div className="lg:sticky lg:top-[9.5rem] lg:self-start">
             <SupplierRequestSidebar
               supplier={supplier}
               supplierSlug={supplier.slug}
