@@ -5,14 +5,22 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   type LucideIcon,
+  Bell,
+  CalendarDays,
+  Heart,
   LogOut,
   Menu,
+  Search,
   Store,
   UserRound,
   X,
 } from "lucide-react";
 import ProfileMenu from "@/components/layout/ProfileMenu";
-import { isMarketplaceParentActive } from "@/components/layout/marketplace-navigation";
+import {
+  isMarketplaceNavItemActive,
+  isMarketplaceParentActive,
+  resolveMarketplaceNavHref,
+} from "@/components/layout/marketplace-navigation";
 import { NotificationBell } from "@/features/notifications/ui/NotificationBell";
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 
@@ -29,13 +37,28 @@ type MobileLink = {
   label: string;
   href: string;
   icon?: LucideIcon;
+  authOnly?: boolean;
 };
 
-function getNavLinks(user?: { email?: string | null } | null): MobileLink[] {
+const marketingNavLinks: MobileLink[] = [
+  { label: "Home", href: "/" },
+  { label: "Venues", href: "/venues" },
+  { label: "About", href: "/about" },
+];
+
+const marketplaceMobileLinks: MobileLink[] = [
+  { label: "Venues", href: "/venues", icon: Search },
+  { label: "Suppliers", href: "/suppliers", icon: Store },
+  { label: "Bookings", href: "/bookings", icon: CalendarDays, authOnly: true },
+  { label: "Favorites", href: "/favorites", icon: Heart, authOnly: true },
+  { label: "Notifications", href: "/notifications", icon: Bell, authOnly: true },
+];
+
+function getMarketingNavLinks(
+  user?: { email?: string | null } | null,
+): MobileLink[] {
   return [
-    { label: "Home", href: "/" },
-    { label: "Venues", href: "/venues" },
-    { label: "About", href: "/about" },
+    ...marketingNavLinks,
     {
       label: "Host a Venue",
       href: user
@@ -43,6 +66,45 @@ function getNavLinks(user?: { email?: string | null } | null): MobileLink[] {
         : "/login?redirectTo=/account/become-partner",
     },
   ];
+}
+
+export function getMarketingMobileLinks({
+  user,
+  mobileContext,
+}: {
+  user?: { email?: string | null } | null;
+  mobileContext?: "marketing" | "marketplace";
+}): MobileLink[] {
+  if (mobileContext === "marketplace") {
+    return marketplaceMobileLinks.filter((item) => user || !item.authOnly);
+  }
+
+  return getMarketingNavLinks(user);
+}
+
+export function resolveMarketingMobileHref({
+  href,
+  isAuthenticated,
+  mobileContext,
+}: {
+  href: string;
+  isAuthenticated: boolean;
+  mobileContext?: "marketing" | "marketplace";
+}) {
+  if (mobileContext === "marketplace") {
+    if (href === "/notifications" && !isAuthenticated) {
+      const params = new URLSearchParams({
+        redirectTo: href,
+        prompt: "notifications",
+      });
+
+      return `/login?${params.toString()}`;
+    }
+
+    return resolveMarketplaceNavHref(href, isAuthenticated);
+  }
+
+  return href;
 }
 
 function isActive(pathname: string, href: string, label?: string) {
@@ -73,8 +135,10 @@ function isActive(pathname: string, href: string, label?: string) {
  */
 export default function MarketingNavbar({
   embedded = false,
+  mobileContext = "marketing",
 }: {
   embedded?: boolean;
+  mobileContext?: "marketing" | "marketplace";
 }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -93,10 +157,11 @@ export default function MarketingNavbar({
   const displayName =
     profile?.full_name || user?.email?.split("@")[0] || "Venora User";
   const email = user?.email ?? "";
+  const isAuthenticated = Boolean(user);
 
   const closeMenu = () => setMenuOpen(false);
-  const navLinksForUser = getNavLinks(user);
-  const mobileLinks = navLinksForUser;
+  const navLinksForUser = getMarketingNavLinks(user);
+  const mobileLinks = getMarketingMobileLinks({ user, mobileContext });
   const mobilePanelPosition = embedded
     ? "top-[8.75rem] max-h-[calc(100dvh-9.25rem)]"
     : "top-24 max-h-[calc(100dvh-6.5rem)]";
@@ -143,7 +208,7 @@ export default function MarketingNavbar({
         </nav>
 
         <div className="hidden items-center justify-end gap-3 justify-self-end md:flex">
-          {user ? (
+          {user && !menuOpen ? (
             <>
               <NotificationBell />
               <ProfileMenu
@@ -233,12 +298,19 @@ export default function MarketingNavbar({
 
             <nav className="grid gap-2">
               {mobileLinks.map(({ label, href, icon: Icon }) => {
-                const active = isActive(pathname, href, label);
+                const active =
+                  mobileContext === "marketplace"
+                    ? isMarketplaceNavItemActive(pathname, href)
+                    : isActive(pathname, href, label);
 
                 return (
                   <Link
                     key={label}
-                    href={href}
+                    href={resolveMarketingMobileHref({
+                      href,
+                      isAuthenticated,
+                      mobileContext,
+                    })}
                     role="menuitem"
                     className={[
                       "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold transition",

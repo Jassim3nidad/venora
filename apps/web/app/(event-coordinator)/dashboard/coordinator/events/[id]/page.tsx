@@ -43,6 +43,9 @@ type BookingRow = {
   venues: {
     id: string;
     name: string;
+    slug: string | null;
+    city: string | null;
+    province: string | null;
     base_price: number | null;
     organization_id: string;
   } | null;
@@ -120,7 +123,7 @@ export default async function CoordinatorEventDetailPage({ params }: Props) {
       guest_count,
       special_requests,
       payment_due_at,
-      venues(id, name, base_price, organization_id),
+      venues(id, name, slug, city, province, base_price, organization_id),
       venue_packages(name, price, price_unit),
       profiles!customer_id(full_name, phone),
       transactions(
@@ -156,6 +159,7 @@ export default async function CoordinatorEventDetailPage({ params }: Props) {
         .select("organization_id")
         .eq("user_id", user.id)
         .eq("organization_id", organizationId)
+        .eq("status", "active")
         .maybeSingle(),
       supabase
         .from("organizations")
@@ -300,14 +304,16 @@ export default async function CoordinatorEventDetailPage({ params }: Props) {
               currentRole="venue_owner"
               isReadOnly={isReadOnly}
               header={{
-                role: "supplier",
+                role: "venue_owner",
                 customerName: typedBooking.profiles?.full_name || "Customer",
                 serviceName: typedBooking.venue_packages?.name,
                 inquiryRef: `Booking #${typedBooking.id.substring(0, 8)}`,
                 eventType: "Event",
                 eventDate: formatDate(typedBooking.event_date),
                 venueName: locationLabel(typedBooking.venues),
-                venueLink: `/venues/${(typedBooking.venues as any)?.slug}`,
+                venueLink: typedBooking.venues?.slug
+                  ? `/venues/${typedBooking.venues.slug}`
+                  : undefined,
                 statusLabel: String(typedBooking.status).replace(/_/g, " "),
               }}
             />

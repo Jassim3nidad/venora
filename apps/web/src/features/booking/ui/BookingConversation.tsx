@@ -6,7 +6,21 @@ import { MessageSquare, Send, Loader2, AlertCircle, CalendarDays, MapPin, Briefc
 import Link from "next/link";
 import { sendBookingMessageAction } from "../application/messages-actions";
 import type { BookingMessage } from "../application/messages-actions";
-import type { ConversationHeaderProps } from "../../suppliers/ui/InquiryConversation";
+
+type BookingConversationHeaderProps = {
+  role: "customer" | "venue_owner";
+  supplierName?: string | undefined;
+  supplierLogo?: string | null | undefined;
+  supplierSlug?: string | undefined;
+  customerName?: string | undefined;
+  serviceName?: string | undefined;
+  inquiryRef?: string | undefined;
+  eventType?: string | undefined;
+  eventDate?: string | undefined;
+  venueName?: string | undefined;
+  venueLink?: string | undefined;
+  statusLabel: string;
+};
 
 // Helpers
 function formatMessageTime(iso: string): string {
@@ -43,7 +57,7 @@ export function BookingConversation({
   currentUserId: string;
   currentRole: "customer" | "venue_owner";
   isReadOnly: boolean;
-  header?: ConversationHeaderProps;
+  header?: BookingConversationHeaderProps;
   counterpartLabel?: string;
 }) {
   const router = useRouter();

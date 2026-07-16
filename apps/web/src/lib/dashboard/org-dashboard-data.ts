@@ -35,7 +35,8 @@ export const getOwnerDashboardContext = cache(
     const { data: members } = await supabase
       .from("organization_members")
       .select("organization_id")
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .eq("status", "active");
     const memberOrgs = (members ?? []).map(
       (m: { organization_id: string }) => m.organization_id,
     );

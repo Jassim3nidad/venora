@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isSafeInternalRedirect } from "./profile-setup";
+import { isSafeInternalRedirect, resolvePostAuthRedirect } from "./profile-setup";
 
 describe("isSafeInternalRedirect", () => {
   it("accepts normal internal app routes", () => {
@@ -24,5 +24,17 @@ describe("isSafeInternalRedirect", () => {
     expect(isSafeInternalRedirect("/login")).toBe(false);
     expect(isSafeInternalRedirect("/reset-password")).toBe(false);
     expect(isSafeInternalRedirect("/auth/callback")).toBe(false);
+  });
+});
+
+describe("resolvePostAuthRedirect", () => {
+  it("lets staff invitations complete before customer profile setup", () => {
+    expect(
+      resolvePostAuthRedirect({
+        roles: ["customer"],
+        profile: { profile_setup_completed_at: null },
+        redirectTo: "/staff/accept?token=abc123",
+      }),
+    ).toBe("/staff/accept?token=abc123");
   });
 });

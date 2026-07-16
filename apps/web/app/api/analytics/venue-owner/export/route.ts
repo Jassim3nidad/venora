@@ -46,7 +46,8 @@ async function getExportContext(
       supabase
         .from("organization_members")
         .select("organization_id")
-        .eq("user_id", userId),
+        .eq("user_id", userId)
+        .eq("status", "active"),
       supabase.from("organizations").select("id").eq("owner_id", userId),
     ]);
 

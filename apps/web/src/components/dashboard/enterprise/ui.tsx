@@ -277,6 +277,8 @@ const STATUS_STYLES: Record<string, string> = {
   blocked: "bg-slate-100 text-slate-700 ring-1 ring-slate-200",
   unavailable: "bg-red-50 text-red-800 ring-1 ring-red-200/60",
   active: "bg-[#eff6ff] text-[#1d4ed8] ring-1 ring-[#e5e7eb]",
+  suspended: "bg-amber-50 text-amber-800 ring-1 ring-amber-200/60",
+  revoked: "bg-red-50 text-red-800 ring-1 ring-red-200/60",
   inactive: "bg-slate-50 text-slate-600 ring-1 ring-slate-200/70",
 };
 
