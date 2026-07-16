@@ -204,7 +204,7 @@ export async function proxy(request: NextRequest) {
   // 4. Role guard — redirect users without the required role
   if (user) {
     const matchedGuard = ROLE_GUARDS.find((guard) =>
-      pathname.startsWith(guard.prefix),
+      pathname.startsWith(guard.prefix) && guard.prefix !== "/bookings",
     );
 
     if (matchedGuard) {
