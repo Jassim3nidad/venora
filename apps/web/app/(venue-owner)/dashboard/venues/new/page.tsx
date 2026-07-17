@@ -54,15 +54,15 @@ export default async function NewVenuePage({
 
   const { data: organizations } = isAdmin
     ? await supabase
-        .from("organizations")
-        .select("id, name")
-        .order("name", { ascending: true })
+      .from("organizations")
+      .select("id, name")
+      .order("name", { ascending: true })
     : orgIds.length > 0
       ? await supabase
-          .from("organizations")
-          .select("id, name")
-          .in("id", orgIds)
-          .order("name", { ascending: true })
+        .from("organizations")
+        .select("id, name")
+        .in("id", orgIds)
+        .order("name", { ascending: true })
       : { data: [] };
 
   const orgRows = (organizations ?? []) as Array<{ id: string; name: string }>;
@@ -253,19 +253,24 @@ export default async function NewVenuePage({
                   >
                     Organization
                   </label>
-                  <select
-                    id="new-venue-organization"
-                    name="organization_id"
-                    required
-                    defaultValue={orgRows[0]?.id}
-                    className={inputClass}
-                  >
-                    {orgRows.map((organization) => (
-                      <option key={organization.id} value={organization.id}>
-                        {organization.name}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      id="new-venue-organization"
+                      name="organization_id"
+                      required
+                      defaultValue={orgRows[0]?.id}
+                      className={`${inputClass} w-full appearance-none pr-10`}
+                    >
+                      {orgRows.map((organization) => (
+                        <option key={organization.id} value={organization.id}>
+                          {organization.name}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-[#94a3b8]">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-2 sm:col-span-2">
@@ -332,16 +337,21 @@ export default async function NewVenuePage({
                   <label htmlFor="new-venue-setting" className={labelClass}>
                     Venue setting
                   </label>
-                  <select
-                    id="new-venue-setting"
-                    name="indoor_outdoor"
-                    defaultValue="indoor"
-                    className={inputClass}
-                  >
-                    <option value="indoor">Indoor</option>
-                    <option value="outdoor">Outdoor</option>
-                    <option value="both">Indoor and outdoor</option>
-                  </select>
+                  <div className="relative">
+                    <select
+                      id="new-venue-setting"
+                      name="indoor_outdoor"
+                      defaultValue="indoor"
+                      className={`${inputClass} w-full appearance-none pr-10`}
+                    >
+                      <option value="indoor">Indoor</option>
+                      <option value="outdoor">Outdoor</option>
+                      <option value="both">Indoor and outdoor</option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-[#94a3b8]">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-2">
