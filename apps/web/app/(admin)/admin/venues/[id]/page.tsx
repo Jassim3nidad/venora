@@ -22,6 +22,7 @@ import {
   ReviewActionBar,
   type ReviewActionDef,
 } from "@/components/admin/ReviewActionBar";
+import { resolveVenueMapCoordinates } from "@/src/lib/venue-map-coordinates";
 const VenueMap = nextDynamic(() => import("@/components/VenueMap"), {
   loading: () => (
     <div className="h-[280px] w-full rounded-2xl bg-slate-100 animate-pulse" />
@@ -143,6 +144,9 @@ export default async function AdminVenueDetailPage({ params }: Props) {
     canSuspend,
   );
 
+  const mapLocation = await resolveVenueMapCoordinates(venue);
+  const hasExactCoordinates = mapLocation?.precision === "exact";
+
   async function submitReview(input: {
     id: string;
     action: string;
@@ -218,17 +222,18 @@ export default async function AdminVenueDetailPage({ params }: Props) {
           <Panel>
             <PanelHeader
               title="Location"
-              {...(venue.latitude && venue.longitude
-                ? {}
-                : {
-                    description:
-                      "No coordinates on file — required before approval.",
-                  })}
+              description={
+                hasExactCoordinates && mapLocation
+                  ? `${mapLocation.latitude.toFixed(6)}, ${mapLocation.longitude.toFixed(6)}`
+                  : mapLocation
+                    ? "Approximate map only — exact latitude/longitude are not saved on this venue yet (required before approval)."
+                    : "No coordinates on file — required before approval."
+              }
             />
-            {venue.latitude && venue.longitude ? (
+            {mapLocation ? (
               <VenueMap
-                latitude={venue.latitude}
-                longitude={venue.longitude}
+                latitude={mapLocation.latitude}
+                longitude={mapLocation.longitude}
                 interactive={false}
                 markerLabel={venue.name}
                 height="280px"

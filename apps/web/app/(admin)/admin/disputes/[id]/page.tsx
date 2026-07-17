@@ -23,7 +23,7 @@ export default async function DisputeDetailsPage({
   const { data: dispute, error } = await supabase
     .from("disputes")
     .select(
-      "*, profiles!raised_by(full_name, email), venues(name), bookings(total_price, start_time, status)",
+      "*, profiles!raised_by(full_name), venues(name), bookings(total_amount, event_date, status)",
     )
     .eq("id", id)
     .single();
@@ -63,7 +63,7 @@ export default async function DisputeDetailsPage({
             <div>
               <span className="text-sm text-slate-500 block">Raised By</span>
               <span className="font-medium text-slate-900">
-                {dispute.profiles?.full_name} ({dispute.profiles?.email})
+                {dispute.profiles?.full_name ?? "Unknown"}
               </span>
             </div>
             <div>
@@ -95,7 +95,9 @@ export default async function DisputeDetailsPage({
                     Booking Amount
                   </span>
                   <span className="font-medium text-slate-900">
-                    ₱{dispute.bookings.total_price.toLocaleString()}
+                    {dispute.bookings.total_amount != null
+                      ? `₱${Number(dispute.bookings.total_amount).toLocaleString()}`
+                      : "—"}
                   </span>
                 </div>
                 <div>
