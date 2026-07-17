@@ -142,9 +142,9 @@ export function KpiCard({
 }: {
   label: string;
   value: string;
-  change?: string;
-  icon?: string;
-  highlight?: boolean;
+  change?: string | undefined;
+  icon?: string | undefined;
+  highlight?: boolean | undefined;
 }) {
   return (
     <Panel className="flex min-h-[150px] flex-col gap-4 transition hover:-translate-y-0.5 hover:border-[#bfdbfe] hover:shadow-md hover:shadow-blue-100/60">

@@ -7,8 +7,7 @@ import {
   type DataTableColumn,
 } from "@/components/dashboard/enterprise";
 import type { MonthlyReportRow } from "../application/queries";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { Switch, Label } from "@venora/ui";
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("en-PH", {

@@ -1,5 +1,5 @@
 import { AnalyticsScope, DateRange, getRevenueTrend, getOccupancyRate, getConversionRate, getTopPackages, getBookingDemographics, getCustomerGrowth, getPopularVenues, getBookingDemandHeatmap, getMonthlyReports } from "./queries";
-import { getOwnerVenueIds } from "@/app/(venue-owner)/dashboard/_lib/owner-dashboard-data";
+import { getOwnerVenueIds } from "../../../../app/(venue-owner)/dashboard/_lib/owner-dashboard-data";
 
 export type AnalyticsPeriod =
   | "last_30_days"
