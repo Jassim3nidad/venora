@@ -113,28 +113,26 @@ export async function proxy(request: NextRequest) {
       data: { session },
     } = await supabase.auth.getSession();
 
-    const authSupabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        global: {
-          headers: {
-            Authorization: `Bearer ${session?.access_token}`,
-          },
-        },
-        cookies: {
-          getAll() {
-            return request.cookies.getAll();
-          },
-          setAll() {},
-        },
-      },
-    );
-
-    const { data: roleRows } = await authSupabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id);
+    // Use direct fetch to bypass any @supabase/ssr cookie or Authorization header override bugs
+    let roleRows: { role: RoleName }[] = [];
+    if (session?.access_token) {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/user_roles?select=role&user_id=eq.${user.id}`,
+          {
+            headers: {
+              apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          }
+        );
+        if (res.ok) {
+          roleRows = await res.json();
+        }
+      } catch (e) {
+        // Fallback to empty roles on error
+      }
+    }
 
     userRoles = ((roleRows ?? []) as { role: RoleName }[])
       .map((r) => r.role)
