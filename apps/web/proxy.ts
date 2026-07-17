@@ -137,6 +137,14 @@ export async function proxy(request: NextRequest) {
     userRoles = ((roleRows ?? []) as { role: RoleName }[])
       .map((r) => r.role)
       .filter(Boolean);
+
+    // Fallback: If a user has no roles in the database (e.g., older accounts before the trigger,
+    // or if the Edge Runtime token was missing), default them to 'customer'.
+    // This is safe because 'customer' only grants access to standard public account features,
+    // and prevents them from being completely locked out of the platform.
+    if (userRoles.length === 0) {
+      userRoles = ["customer"];
+    }
   }
 
   const { pathname, searchParams, search } = request.nextUrl;
