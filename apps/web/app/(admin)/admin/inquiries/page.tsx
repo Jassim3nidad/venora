@@ -15,9 +15,9 @@ export default async function AdminInquiriesPage() {
 
   const supabase = (await createClient()) as any;
   const { data: inquiries, error } = await supabase
-    .from("supplier_inquiries")
+    .from("supplier_contact_requests")
     .select(
-      "id, status, created_at, profiles(full_name), supplier_profiles(business_name), event_types",
+      "id, status, created_at, contact_name, event_date, event_location, guest_count, supplier_profiles(business_name), profiles!customer_id(full_name)",
     )
     .order("created_at", { ascending: false })
     .limit(50);
@@ -36,9 +36,9 @@ export default async function AdminInquiriesPage() {
 
   const rows = (inquiries ?? []).map((i: any) => ({
     id: i.id,
-    customer: i.profiles?.full_name ?? "Unknown",
+    customer: i.profiles?.full_name || i.contact_name || "Unknown",
     supplier: i.supplier_profiles?.business_name ?? "Unknown",
-    eventTypes: i.event_types?.join(", ") ?? "None",
+    event: [i.event_date, i.event_location].filter(Boolean).join(" · ") || "—",
     status: i.status,
     date: new Date(i.created_at).toLocaleString(),
   }));
@@ -74,9 +74,9 @@ export default async function AdminInquiriesPage() {
               cell: (r: any) => r.customer,
             },
             {
-              key: "eventTypes",
-              header: "Event Types",
-              cell: (r: any) => r.eventTypes,
+              key: "event",
+              header: "Event",
+              cell: (r: any) => r.event,
             },
             {
               key: "date",

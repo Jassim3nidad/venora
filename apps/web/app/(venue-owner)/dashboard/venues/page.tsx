@@ -43,6 +43,26 @@ type VenueDisplayRow = {
 export default async function OwnerVenuesPage() {
   const { supabase, orgIds, isAdmin } = await getOwnerDashboardContext();
 
+  if (!isAdmin && orgIds.length === 0) {
+    return (
+      <DashboardSubPage
+        title="Venues"
+        description="Review and maintain the venues connected to your organization."
+      >
+        <EmptyState
+          icon="business"
+          title="Create your organization first"
+          description="Venues belong to an organization. Set up your business profile, then add your first venue."
+          action={
+            <DashButton href="/dashboard/venues/new" icon="add_business">
+              Create organization
+            </DashButton>
+          }
+        />
+      </DashboardSubPage>
+    );
+  }
+
   let venuesQuery = supabase
     .from("venues")
     .select(

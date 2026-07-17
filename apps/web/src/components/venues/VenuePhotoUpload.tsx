@@ -12,6 +12,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { createClient } from "@/src/lib/supabase/client";
+import { ensureVenueOwnerMembershipAction } from "@/features/organizations/actions/organization.actions";
 import {
   Button,
   Card,
@@ -237,10 +238,12 @@ export default function VenuePhotoUpload({
           ),
         );
 
-        // Step 2: Upload to Supabase Storage
+        // Repair older owner records before Storage evaluates path-level RLS.
+        const membership = await ensureVenueOwnerMembershipAction(venueId);
+        if (!membership.success) throw new Error(membership.error);
+
         const fileExt = "jpg";
         const uniqueFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
-        // Path convention: {organization_id}/{venue_id}/{filename}
         const storagePath = `${organizationId}/${venueId}/${uniqueFileName}`;
 
         const { error: uploadError } = await supabase.storage
@@ -259,14 +262,10 @@ export default function VenuePhotoUpload({
           ),
         );
 
-        // Step 3: Insert Row into database
-        // Determine display order (max display_order + 1)
         const nextOrder =
           images.length > 0
             ? Math.max(...images.map((img) => img.display_order)) + 1
             : 0;
-
-        // If there are no images yet, make this the featured image
         const isFeatured = images.length === 0;
 
         const { data: dbData, error: dbError } = await supabase
@@ -281,7 +280,10 @@ export default function VenuePhotoUpload({
           .select()
           .single();
 
-        if (dbError) throw dbError;
+        if (dbError) {
+          await supabase.storage.from("venue-images").remove([storagePath]);
+          throw dbError;
+        }
 
         // Success! Update local images state and queue item
         setImages((prev) => [...prev, dbData as VenueMedia]);
