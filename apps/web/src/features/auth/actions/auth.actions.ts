@@ -210,7 +210,7 @@ export async function signOutAction(): Promise<ActionResult> {
     };
   }
 
-  redirect("/");
+  redirect("/login");
 }
 
 export async function forgotPasswordAction(

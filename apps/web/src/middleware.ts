@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { PROTECTED_ROUTES } from "@/lib/rbac/roles";
 
 // Best-effort application throttling for the approved free-tier deployment.
 // Note: Counters are isolated by serverless instance and may reset during cold starts.
@@ -163,15 +164,18 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protect /admin routes
-  if (url.pathname.startsWith("/admin")) {
-    if (!user) {
-      url.pathname = "/login";
-      return NextResponse.redirect(url);
-    }
+  // Protect all restricted routes
+  const isProtected = PROTECTED_ROUTES.some(
+    (route) => url.pathname === route.prefix || url.pathname.startsWith(`${route.prefix}/`)
+  );
 
-    // Server-side granular role checks are handled via requireAdmin() in the Server Components,
-    // so we just need to ensure the user is logged in here before they hit the admin bundle.
+  if (isProtected) {
+    if (!user) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/login";
+      redirectUrl.search = `?next=${encodeURIComponent(url.pathname + url.search)}`;
+      return NextResponse.redirect(redirectUrl);
+    }
   }
 
   return supabaseResponse;
