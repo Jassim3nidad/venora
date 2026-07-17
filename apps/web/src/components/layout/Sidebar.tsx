@@ -355,18 +355,14 @@ export default function Sidebar({
     });
   };
 
-
   const [minBudgetDraft, setMinBudgetDraft] = useState(selectedMinBudget);
   const debouncedMinBudgetDraft = useDebouncedValue(minBudgetDraft, 300);
 
   const [maxBudgetDraft, setMaxBudgetDraft] = useState(selectedMaxBudget);
   const debouncedMaxBudgetDraft = useDebouncedValue(maxBudgetDraft, 300);
 
-
   useEffect(() => setMinBudgetDraft(selectedMinBudget), [selectedMinBudget]);
   useEffect(() => setMaxBudgetDraft(selectedMaxBudget), [selectedMaxBudget]);
-
-
 
   useEffect(() => {
     if (debouncedMinBudgetDraft !== selectedMinBudget) {
@@ -517,10 +513,9 @@ export default function Sidebar({
             </button>
           )}
         </div>
-
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [&>section:not(:last-child)]:mb-4">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 [scrollbar-gutter:stable] [&>section:not(:last-child)]:mb-4">
         <section>
           <SectionTitle icon={MapPin} title="Location" />
 

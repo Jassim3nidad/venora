@@ -4,10 +4,10 @@ import { redirect } from "next/navigation";
 import {
   DashButton,
   DashboardSubPage,
-  EmptyState,
   Panel,
   PanelHeader,
 } from "@/components/dashboard/enterprise";
+import { createOrganizationAction } from "@/features/organizations/actions/organization.actions";
 import { getOwnerDashboardContext } from "../../_lib/owner-dashboard-data";
 
 export const metadata: Metadata = { title: "Add Venue - Dashboard" };
@@ -42,7 +42,7 @@ function newVenuePath(message: string) {
 export default async function NewVenuePage({
   searchParams,
 }: {
-  searchParams?: Promise<{ error?: string }>;
+  searchParams?: Promise<{ error?: string; org_created?: string }>;
 }) {
   const query = (await searchParams) ?? {};
   const context = await getOwnerDashboardContext();
@@ -195,8 +195,12 @@ export default async function NewVenuePage({
 
   return (
     <DashboardSubPage
-      title="Add Venue"
-      description="Create a new venue listing for your organization. New listings enter admin approval before going public."
+      title={orgRows.length === 0 ? "Create Organization" : "Add Venue"}
+      description={
+        orgRows.length === 0
+          ? "Set up your business organization before adding venues."
+          : "Create a new venue listing for your organization. New listings enter admin approval before going public."
+      }
       action={
         <DashButton
           href="/dashboard/venues"
@@ -208,20 +212,64 @@ export default async function NewVenuePage({
       }
     >
       {orgRows.length === 0 ? (
-        <EmptyState
-          icon="business"
-          title="No organization available"
-          description="A venue must belong to an organization before it can be created."
-          action={
-            <DashButton
-              href="/account/become-partner"
-              variant="secondary"
-              icon="assignment"
-            >
-              Review Partner Profile
-            </DashButton>
-          }
-        />
+        <Panel className="overflow-hidden" padding={false}>
+          <div className="border-b border-[#e5e7eb] bg-[#f8fbff] p-5 sm:p-6">
+            <PanelHeader
+              title="Create your organization"
+              description="Venues belong to an organization (your business or venue group). Create one to continue."
+            />
+          </div>
+
+          {query.error ? (
+            <div className="mx-5 mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 sm:mx-6">
+              {query.error}
+            </div>
+          ) : null}
+
+          <form
+            action={createOrganizationAction}
+            className="space-y-5 p-5 sm:p-6"
+          >
+            <div className="flex flex-col gap-2">
+              <label htmlFor="org-name" className={labelClass}>
+                Organization name
+              </label>
+              <input
+                id="org-name"
+                name="name"
+                required
+                maxLength={120}
+                placeholder="e.g. Santos Events Co."
+                className={inputClass}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="org-registration" className={labelClass}>
+                Business registration no.{" "}
+                <span className="font-medium text-[#94a3b8]">(optional)</span>
+              </label>
+              <input
+                id="org-registration"
+                name="business_registration_no"
+                maxLength={80}
+                placeholder="DTI / SEC / business permit number"
+                className={inputClass}
+              />
+            </div>
+            <div className="flex flex-wrap gap-3 pt-1">
+              <DashButton type="submit" icon="add_business">
+                Create organization
+              </DashButton>
+              <DashButton
+                href="/dashboard/venues"
+                variant="secondary"
+                icon="arrow_back"
+              >
+                Cancel
+              </DashButton>
+            </div>
+          </form>
+        </Panel>
       ) : (
         <Panel className="overflow-hidden" padding={false}>
           <div className="border-b border-[#e5e7eb] bg-[#f8fbff] p-5 sm:p-6">
@@ -230,6 +278,12 @@ export default async function NewVenuePage({
               description="Start with the core information. You can add photos after the venue record is created."
             />
           </div>
+
+          {query.org_created ? (
+            <div className="mx-5 mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800 sm:mx-6">
+              Organization created. You can add your first venue below.
+            </div>
+          ) : null}
 
           {query.error ? (
             <div className="mx-5 mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 sm:mx-6">

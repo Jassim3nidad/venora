@@ -115,6 +115,12 @@ export async function getVenueForAdminReview(venueId: string): Promise<{
     ? org?.profiles[0]
     : org?.profiles;
 
+  const toCoord = (value: unknown): number | null => {
+    if (value == null || value === "") return null;
+    const parsed = typeof value === "number" ? value : Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+
   return {
     venue: {
       id: venue.id,
@@ -125,8 +131,8 @@ export async function getVenueForAdminReview(venueId: string): Promise<{
       city: venue.city,
       province: venue.province,
       municipality: venue.municipality,
-      latitude: venue.latitude,
-      longitude: venue.longitude,
+      latitude: toCoord(venue.latitude),
+      longitude: toCoord(venue.longitude),
       capacityMin: venue.capacity_min,
       capacityMax: venue.capacity_max,
       basePrice: Number(venue.base_price),

@@ -32,6 +32,11 @@
       "file": "supabase/migrations/076_admin_disputes.sql",
       "kind": "SECURITY_DEFINER",
       "reason": "RPC requires elevated privileges to securely mutate dispute states and log audits."
+    },
+    {
+      "file": "supabase/migrations/20260717143000_ensure_organization_owner_membership.sql",
+      "kind": "SECURITY_DEFINER",
+      "reason": "An AFTER INSERT trigger must create the owner's active membership atomically; organization INSERT RLS already requires owner_id = auth.uid() and the venue_owner role, the function uses a fixed search_path, and EXECUTE is revoked from public API roles."
     }
   ]
 }
