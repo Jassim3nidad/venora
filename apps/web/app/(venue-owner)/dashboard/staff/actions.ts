@@ -163,7 +163,7 @@ export async function inviteCoordinatorAction(rawInput: unknown) {
       const tokenHash = hashToken(token);
       const acceptPath = `/staff/accept?token=${encodeURIComponent(token)}`;
       const acceptUrl = absoluteUrl(
-        `/auth/callback?next=${encodeURIComponent(acceptPath)}`,
+        `/auth/session?next=${encodeURIComponent(acceptPath)}`,
       );
 
       const { data: existingInvitation } = await admin

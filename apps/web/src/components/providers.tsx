@@ -14,6 +14,7 @@ import AssistantWidgetGate from "@/features/ai/ui/AssistantWidgetGate";
 function HashAuthCatcher() {
   if (typeof window !== "undefined") {
     const hash = window.location.hash;
+    const path = window.location.pathname;
     if (hash && hash.includes("error=access_denied")) {
       const params = new URLSearchParams(hash.substring(1));
       const errorDesc =
@@ -21,9 +22,13 @@ function HashAuthCatcher() {
         "Your link is invalid or has expired.";
       // Redirect to login with the error
       window.location.href = `/login?error=${encodeURIComponent(errorDesc)}`;
-    } else if (hash && hash.includes("access_token=")) {
-      // In case they somehow get an implicit flow token on the root
-      window.location.href = `/auth/callback${hash}`;
+    } else if (
+      hash &&
+      hash.includes("access_token=") &&
+      !path.startsWith("/auth/session")
+    ) {
+      // Supabase email links can return implicit-flow tokens in the URL hash.
+      window.location.href = `/auth/session${window.location.search}${hash}`;
     }
   }
   return null;

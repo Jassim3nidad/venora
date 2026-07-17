@@ -14,8 +14,26 @@ export default async function CoordinatorDashboardLayout({
   const { supabase, user } = await getCurrentAuthUser();
 
   if (!user) redirect("/login?redirectTo=/dashboard/coordinator");
-  if (!(await hasRole(ROLES.EVENT_COORDINATOR, ROLES.ADMIN))) {
+  const isAdmin = await hasRole(ROLES.ADMIN);
+  const isCoordinator = await hasRole(ROLES.EVENT_COORDINATOR);
+
+  if (!isAdmin && !isCoordinator) {
     redirect("/unauthorized");
+  }
+
+  if (!isAdmin) {
+    const { data: activeMembership } = await supabase
+      .from("organization_members")
+      .select("organization_id")
+      .eq("user_id", user.id)
+      .eq("role", "coordinator")
+      .eq("status", "active")
+      .limit(1)
+      .maybeSingle();
+
+    if (!activeMembership) {
+      redirect("/unauthorized");
+    }
   }
 
   const profile = await getNavbarProfile(supabase, user.id);
