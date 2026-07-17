@@ -291,6 +291,73 @@ export default function VenueDetails({
 
           <Separator />
 
+          {/* Packages Section */}
+          {activePackages && activePackages.length > 0 && (
+            <>
+              <section className="space-y-4">
+                <h3 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
+                  Available Packages
+                </h3>
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                  Choose from our carefully curated packages designed to fit your event needs.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                  {activePackages.map((pkg: any) => (
+                    <div 
+                      key={pkg.id} 
+                      className="group flex flex-col border border-[var(--border-default)] rounded-3xl p-5 shadow-sm hover:shadow-xl hover:shadow-[var(--color-brand-500)]/10 hover:border-[var(--color-brand-200)] transition-all duration-300 bg-white relative overflow-hidden"
+                    >
+                      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[var(--color-brand-400)] to-[var(--color-brand-600)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                      
+                      <div className="flex justify-between items-start gap-4 mb-3">
+                        <h4 className="font-sora font-bold text-base text-[var(--text-primary)] group-hover:text-[var(--color-brand-600)] transition-colors">{pkg.name}</h4>
+                        <div className="text-right shrink-0">
+                          <span className="font-bold text-[var(--color-brand-600)] block">
+                            {formatCurrency(pkg.price)}
+                          </span>
+                          <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest">
+                            / {pkg.price_unit.replace("per_", "")}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      {pkg.description && (
+                        <p className="text-sm text-[var(--text-secondary)] mb-5 leading-relaxed flex-grow">
+                          {pkg.description}
+                        </p>
+                      )}
+                      
+                      {(pkg.min_guests || pkg.max_guests) && (
+                        <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-semibold mb-4 bg-[var(--bg-subtle)] w-max px-3 py-1.5 rounded-full border border-[var(--border-default)]">
+                          <Users className="h-3.5 w-3.5 text-[var(--color-brand-500)]" />
+                          <span>{pkg.min_guests ?? 1} - {pkg.max_guests ?? "Any"} guests</span>
+                        </div>
+                      )}
+
+                      {pkg.inclusions && pkg.inclusions.length > 0 && (
+                        <div className="mt-auto pt-4 border-t border-[var(--border-default)]">
+                          <span className="text-[10px] font-bold tracking-widest uppercase text-[var(--text-muted)] mb-3 block">Inclusions</span>
+                          <ul className="space-y-2">
+                            {pkg.inclusions.map((inclusion: string, i: number) => (
+                              <li key={i} className="flex items-start gap-2.5 text-xs font-medium text-[var(--text-secondary)]">
+                                <div className="mt-0.5 rounded-full bg-emerald-100 p-0.5 shrink-0">
+                                  <Check className="h-2.5 w-2.5 text-emerald-600" strokeWidth={3} />
+                                </div>
+                                <span>{inclusion}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </>
+          )}
+
+          <Separator />
+
           {/* Parking, Rules, and Policies */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-3">

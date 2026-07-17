@@ -118,8 +118,8 @@ export default function BookingSidebar({
   const total = subtotal + platformFee;
 
   // Validate guest counts against package limits
-  const activeMinGuests = selectedPackage?.min_guests ?? capacityMin;
-  const activeMaxGuests = selectedPackage?.max_guests ?? capacityMax;
+  const activeMinGuests = Number(selectedPackage?.min_guests ?? capacityMin);
+  const activeMaxGuests = Number(selectedPackage?.max_guests ?? capacityMax);
 
   // Check availability when date changes
   useEffect(() => {
