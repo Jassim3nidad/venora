@@ -104,6 +104,32 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  let userRoles: RoleName[] = [];
+  if (user) {
+    const adminSupabase = createServerClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll() {},
+        },
+      },
+    );
+
+    const { data: roleRows } = await adminSupabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id);
+
+    userRoles = ((roleRows ?? []) as { role: RoleName }[])
+      .map((r) => r.role)
+      .filter(Boolean);
+  }
+
   const { pathname, searchParams, search } = request.nextUrl;
 
   // Intercept Supabase Auth PKCE code on the root
@@ -150,16 +176,6 @@ export async function proxy(request: NextRequest) {
 
   // 2. Redirect logged-in users away from auth pages
   if (user && AUTH_PATHS.some((path) => pathname.startsWith(path))) {
-    const { data: roleRows } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .limit(1);
-
-    const userRoles = ((roleRows ?? []) as { role: RoleName }[])
-      .map((r) => r.role)
-      .filter(Boolean);
-
     const { data: profile } = (await supabase
       .from("profiles")
       .select("profile_setup_completed_at")
@@ -187,15 +203,6 @@ export async function proxy(request: NextRequest) {
   // gets routed via defaultRouteForRoles so coordinators never land in the
   // venue-owner shell.
   if (user && pathname === "/dashboard") {
-    const { data: roleRows } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id);
-
-    const userRoles = ((roleRows ?? []) as { role: RoleName }[])
-      .map((r) => r.role)
-      .filter(Boolean);
-
     const target = defaultRouteForRoles(userRoles);
 
     return redirectWithCookies(new URL(target, request.url), supabaseResponse);
@@ -208,21 +215,6 @@ export async function proxy(request: NextRequest) {
     );
 
     if (matchedGuard) {
-      const { data: roleRows, error } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id);
-
-      if (error) {
-        const redirectUrl = request.nextUrl.clone();
-        redirectUrl.pathname = "/unauthorized";
-        return redirectWithCookies(redirectUrl, supabaseResponse);
-      }
-
-      const userRoles = ((roleRows ?? []) as { role: RoleName }[])
-        .map((r) => r.role)
-        .filter(Boolean);
-
       const hasAccess = matchedGuard.allow.some((role) =>
         userRoles.includes(role),
       );
@@ -237,16 +229,6 @@ export async function proxy(request: NextRequest) {
 
   // 5. Profile setup gate — prompt new customers before using the app
   if (user && !isProfileSetupExemptPath(pathname)) {
-    const { data: roleRows } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .limit(1);
-
-    const userRoles = ((roleRows ?? []) as { role: RoleName }[])
-      .map((r) => r.role)
-      .filter(Boolean);
-
     if (userRoles.includes("customer")) {
       const { data: profile } = (await supabase
         .from("profiles")
