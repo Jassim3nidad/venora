@@ -106,11 +106,22 @@ export async function proxy(request: NextRequest) {
 
   let userRoles: RoleName[] = [];
   if (user) {
-    const adminSupabase = createServerClient<Database>(
+    // Edge Runtime bug: @supabase/ssr sometimes drops cookies when calling .from()
+    // By extracting the session token and setting it explicitly in the headers,
+    // we bypass the bug without needing the service role key.
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const authSupabase = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY ||
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
+        global: {
+          headers: {
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+        },
         cookies: {
           getAll() {
             return request.cookies.getAll();
@@ -120,7 +131,7 @@ export async function proxy(request: NextRequest) {
       },
     );
 
-    const { data: roleRows } = await adminSupabase
+    const { data: roleRows } = await authSupabase
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id);
