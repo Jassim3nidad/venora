@@ -18,7 +18,7 @@ export default async function AdminDisputesPage() {
   const { data: disputes, error } = await supabase
     .from("disputes")
     .select(
-      "id, status, created_at, reason, profiles(full_name), venues(name), bookings(id)",
+      "id, status, created_at, reason, profiles!raised_by(full_name), venues(name), bookings(id)",
     )
     .order("created_at", { ascending: false });
 
@@ -38,7 +38,7 @@ export default async function AdminDisputesPage() {
     id: d.id,
     customer: d.profiles?.full_name ?? "Unknown",
     venue: d.venues?.name ?? "Unknown",
-    reason: d.reason,
+    reason: d.reason ?? "",
     status: d.status,
     date: new Date(d.created_at).toLocaleString(),
   }));

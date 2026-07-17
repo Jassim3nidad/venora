@@ -6,7 +6,6 @@ import {
 } from "@/components/dashboard/enterprise";
 import { createClient } from "@/lib/supabase/server";
 import { requirePermissionOrRedirect } from "@/lib/rbac/admin-context";
-import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Bookings - Admin" };
@@ -18,7 +17,7 @@ export default async function AdminBookingsPage() {
   const { data: bookings, error } = await supabase
     .from("bookings")
     .select(
-      "id, status, created_at, total_price, start_time, end_time, profiles(full_name), venues(name)",
+      "id, status, created_at, event_date, total_amount, profiles!customer_id(full_name), venues(name)",
     )
     .order("created_at", { ascending: false })
     .limit(50);
@@ -39,9 +38,14 @@ export default async function AdminBookingsPage() {
     id: b.id,
     customer: b.profiles?.full_name ?? "Unknown",
     venue: b.venues?.name ?? "Unknown",
-    price: b.total_price,
+    price: b.total_amount != null ? Number(b.total_amount) : null,
     status: b.status,
     date: new Date(b.created_at).toLocaleString(),
+    eventDate: b.event_date
+      ? new Date(b.event_date).toLocaleDateString("en-PH", {
+          dateStyle: "medium",
+        })
+      : "—",
   }));
 
   return (
@@ -77,7 +81,13 @@ export default async function AdminBookingsPage() {
             {
               key: "price",
               header: "Total",
-              cell: (r: any) => `₱${r.price.toLocaleString()}`,
+              cell: (r: any) =>
+                r.price != null ? `₱${r.price.toLocaleString()}` : "—",
+            },
+            {
+              key: "eventDate",
+              header: "Event Date",
+              cell: (r: any) => r.eventDate,
             },
             {
               key: "date",

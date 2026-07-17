@@ -59,8 +59,8 @@ export default async function SupplierCalendarPage({
   }
   return (
     <DashboardSubPage
-      title="Availability"
-      description="Block dates, record closures, and review confirmed jobs."
+      title="Availability Calendar"
+      description="Control which dates customers can request. Confirmed supplier jobs are shown automatically."
     >
       <SupplierAvailabilityCalendar
         month={month}
