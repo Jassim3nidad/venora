@@ -1,4 +1,4 @@
-import { ROLES, defaultRouteForRoles, type RoleName } from "@/lib/rbac/roles";
+import { ROLES, defaultRouteForRoles, type RoleName, PROTECTED_ROUTES } from "@/lib/rbac/roles";
 
 export const PROFILE_SETUP_PATH = "/profile/setup";
 
@@ -112,7 +112,18 @@ export function resolvePostAuthRedirect({
   }
 
   if (isSafeInternalRedirect(redirectTo)) {
-    return redirectTo!;
+    const redirectPath = new URL(redirectTo!, "https://venora.local").pathname;
+    
+    const matchedRoute = PROTECTED_ROUTES.find(
+      (route) => redirectPath === route.prefix || redirectPath.startsWith(`${route.prefix}/`)
+    );
+
+    if (matchedRoute) {
+      const isAllowed = roles.some((r) => matchedRoute.allow.includes(r));
+      if (isAllowed) return redirectTo!;
+    } else {
+      return redirectTo!;
+    }
   }
 
   return defaultRouteForRoles(roles);
