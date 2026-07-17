@@ -1,10 +1,10 @@
 export const BOOKING_CANCELLATION_REASONS = [
-  { value: "changed_my_mind", label: "Changed my mind" },
-  { value: "found_another_venue", label: "Found another venue" },
-  { value: "event_date_changed", label: "Event date changed" },
-  { value: "budget_constraints", label: "Budget constraints" },
-  { value: "no_longer_needed", label: "Event no longer needed" },
-  { value: "other", label: "Other" },
+  { value: "plans_changed", label: "My plans changed" },
+  { value: "found_another_venue", label: "I found another venue" },
+  { value: "event_date_changed", label: "The event date changed" },
+  { value: "budget_changed", label: "My budget changed" },
+  { value: "event_cancelled", label: "The event is no longer happening" },
+  { value: "other", label: "Other reason" },
 ] as const;
 
 export type BookingCancellationReasonCode =

@@ -114,8 +114,6 @@ export default async function BookVenuePage({ params, searchParams }: Props) {
         </Link>
 
         <CustomerPageHeader
-          eyebrow="Booking request"
-          icon={Sparkles}
           title={<>Book {venue.name}</>}
           description={
             <>

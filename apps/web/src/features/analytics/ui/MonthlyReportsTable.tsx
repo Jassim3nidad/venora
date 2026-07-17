@@ -1,9 +1,14 @@
+"use client";
+
+import { useState } from "react";
 import {
   DataTable,
   StatusBadge,
   type DataTableColumn,
 } from "@/components/dashboard/enterprise";
 import type { MonthlyReportRow } from "../application/queries";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("en-PH", {
@@ -23,7 +28,7 @@ const columns: DataTableColumn<MonthlyReportRow>[] = [
   },
   {
     key: "revenue",
-    header: "Revenue",
+    header: "Booked Value",
     cell: (row) => formatCurrency(row.revenue),
   },
   {
@@ -35,7 +40,7 @@ const columns: DataTableColumn<MonthlyReportRow>[] = [
           {row.bookings}
         </span>
         <span className="mt-1 block text-xs font-medium text-[#6b7280]">
-          {row.confirmedBookings} confirmed
+          {row.confirmedBookings} accepted
         </span>
       </div>
     ),
@@ -64,13 +69,31 @@ const columns: DataTableColumn<MonthlyReportRow>[] = [
   },
 ];
 
-export function MonthlyReportsTable({ rows }: { rows: MonthlyReportRow[] }) {
+export function MonthlyReportsTable({ data }: { data: MonthlyReportRow[] }) {
+  const [showZeroActivity, setShowZeroActivity] = useState(false);
+
+  const filteredData = showZeroActivity
+    ? data
+    : data.filter((row) => row.bookings > 0 || row.revenue > 0);
+
   return (
-    <DataTable
-      rows={rows}
-      columns={columns}
-      keyFn={(row) => row.period}
-      emptyMessage="No monthly analytics available for this range yet."
-    />
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-end gap-2 px-2 pt-2">
+        <Switch
+          id="show-zero-months"
+          checked={showZeroActivity}
+          onCheckedChange={setShowZeroActivity}
+        />
+        <Label htmlFor="show-zero-months" className="text-sm font-medium text-slate-600">
+          Show months with no activity
+        </Label>
+      </div>
+      <DataTable
+        rows={filteredData}
+        columns={columns}
+        keyFn={(row) => row.period}
+        emptyMessage="No monthly analytics available for this range."
+      />
+    </div>
   );
 }

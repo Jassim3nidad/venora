@@ -6,6 +6,7 @@ export const PROFILE_SETUP_EXEMPT_PREFIXES = [
   "/profile/setup",
   "/logout",
   "/auth/callback",
+  "/auth/session",
   "/confirm",
   "/login",
   "/register",

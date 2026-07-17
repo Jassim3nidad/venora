@@ -4,32 +4,16 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { MaterialIcon } from "@/components/dashboard/enterprise";
 import type { DateRange } from "../application/queries";
-
-function exportHref(format: "csv" | "pdf", range: DateRange, endpoint: string) {
-  const params = new URLSearchParams({
-    format,
-    from: range.from,
-    to: range.to,
-  });
-
-  return `${endpoint}?${params.toString()}`;
-}
-
-function filenameFromDisposition(disposition: string | null, fallback: string) {
-  const match = /filename="([^"]+)"/.exec(disposition ?? "");
-  return match?.[1] ?? fallback;
-}
-
-function triggerDownload(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
-}
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 
 export function AnalyticsExportActions({
   range,
@@ -42,11 +26,16 @@ export function AnalyticsExportActions({
 
   async function downloadExport(format: "csv" | "pdf") {
     if (activeFormat) return;
-
     setActiveFormat(format);
 
     try {
-      const response = await fetch(exportHref(format, range, endpoint), {
+      const params = new URLSearchParams({
+        format,
+        from: range.from,
+        to: range.to,
+      });
+
+      const response = await fetch(`${endpoint}?${params.toString()}`, {
         credentials: "include",
         cache: "no-store",
       });
@@ -60,12 +49,19 @@ export function AnalyticsExportActions({
       }
 
       const blob = await response.blob();
-      const filename = filenameFromDisposition(
-        response.headers.get("Content-Disposition"),
-        `venora-venue-analytics.${format}`,
-      );
+      const disposition = response.headers.get("Content-Disposition");
+      const match = /filename="([^"]+)"/.exec(disposition ?? "");
+      const filename = match?.[1] ?? `venora-venue-analytics.${format}`;
 
-      triggerDownload(blob, filename);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      
       toast.success(`${format.toUpperCase()} export downloaded.`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Export failed.");
@@ -75,30 +71,27 @@ export function AnalyticsExportActions({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      {[
-        { format: "csv" as const, icon: "table_view", label: "CSV" },
-        { format: "pdf" as const, icon: "picture_as_pdf", label: "PDF" },
-      ].map((item) => {
-        const isActive = activeFormat === item.format;
-        const isDisabled = activeFormat !== null;
-
-        return (
-          <button
-            key={item.format}
-            type="button"
-            disabled={isDisabled}
-            onClick={() => void downloadExport(item.format)}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-[#dbe3ef] bg-white px-4 py-2.5 text-sm font-bold text-[#0f172a] shadow-sm shadow-slate-200/60 transition hover:border-[#93c5fd] hover:text-[#1d4ed8] focus:outline-none focus:ring-4 focus:ring-[#dbeafe] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <MaterialIcon
-              name={isActive ? "progress_activity" : item.icon}
-              className={`text-lg ${isActive ? "animate-spin" : ""}`}
-            />
-            {item.label}
-          </button>
-        );
-      })}
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" className="gap-2 h-10 border-slate-200 shadow-sm" disabled={activeFormat !== null}>
+          {activeFormat !== null ? (
+            <MaterialIcon name="progress_activity" className="animate-spin text-lg" />
+          ) : (
+            <Download className="h-4 w-4" />
+          )}
+          Export
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel>Export analytics</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => void downloadExport("pdf")} disabled={activeFormat !== null}>
+          Export summary as PDF
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => void downloadExport("csv")} disabled={activeFormat !== null}>
+          Export performance as CSV
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
