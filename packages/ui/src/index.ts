@@ -113,3 +113,6 @@ export {
   ChartLegendContent,
 } from "./chart";
 export type { ChartConfig } from "./chart";
+
+export { Label } from "./label";
+export { Switch } from "./switch";

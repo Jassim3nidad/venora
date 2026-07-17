@@ -32,10 +32,11 @@ export const metadata: Metadata = { title: "Analytics - Dashboard" };
 export const dynamic = "force-dynamic";
 
 type AnalyticsPageProps = {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps) {
+export default async function AnalyticsPage(props: AnalyticsPageProps) {
+  const searchParams = await props.searchParams;
   const context = await getOwnerDashboardContext();
   const orgScopedContext = { ...context, isAdmin: false };
   
@@ -113,26 +114,24 @@ export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps
               label="Booked Value"
               value={formatPeso(kpis.totalRevenue)}
               icon="payments"
-              trend={compareRevenueDiff != null ? { value: compareRevenueDiff, label: "vs previous period" } : undefined}
+              change={compareRevenueDiff != null ? `${compareRevenueDiff > 0 ? '+' : ''}${compareRevenueDiff.toFixed(1)}% vs prev` : undefined}
               highlight
             />
             <KpiCard
               label="Accepted Bookings"
               value={String(kpis.totalAcceptedBookings)}
               icon="event_available"
-              trend={compareBookingsDiff != null ? { value: compareBookingsDiff, label: "vs previous period" } : undefined}
+              change={compareBookingsDiff != null ? `${compareBookingsDiff > 0 ? '+' : ''}${compareBookingsDiff.toFixed(1)}% vs prev` : undefined}
             />
             <KpiCard
               label="Occupancy Rate"
               value={kpis.occupancy ? `${kpis.occupancy}%` : "-"}
               icon="event_seat"
-              tooltip="Percentage of available dates booked in the selected period."
             />
             <KpiCard
               label="Conversion Rate"
               value={kpis.conversion ? `${kpis.conversion}%` : "-"}
               icon="trending_up"
-              tooltip="Percentage of incoming requests that are approved or confirmed."
             />
           </div>
 
@@ -257,14 +256,18 @@ export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps
                 description="Customer and event demographics for the selected period."
               />
               <div className="grid gap-6 md:grid-cols-2">
-                <DemographicsBarChart
-                  data={demographics?.eventTypeMix ?? []}
-                  title="Event types"
-                />
-                <DemographicsBarChart
-                  data={demographics?.guestCountBuckets ?? []}
-                  title="Guest count"
-                />
+                <div className="flex flex-col gap-3">
+                  <h3 className="text-sm font-semibold text-[#1e293b]">Event types</h3>
+                  <DemographicsBarChart
+                    data={(demographics?.eventTypeMix ?? []).map(x => ({ bucket: x.status, count: x.count }))}
+                  />
+                </div>
+                <div className="flex flex-col gap-3">
+                  <h3 className="text-sm font-semibold text-[#1e293b]">Guest count</h3>
+                  <DemographicsBarChart
+                    data={demographics?.guestCountBuckets ?? []}
+                  />
+                </div>
               </div>
             </Panel>
           </div>

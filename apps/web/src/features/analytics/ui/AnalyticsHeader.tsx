@@ -8,7 +8,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@venora/ui";
 import { AnalyticsExportActions } from "./AnalyticsExportActions";
 
 type AnalyticsHeaderProps = {
