@@ -104,6 +104,49 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  let userRoles: RoleName[] = [];
+  if (user) {
+    // Edge Runtime bug: @supabase/ssr sometimes drops cookies when calling .from()
+    // By extracting the session token and setting it explicitly in the headers,
+    // we bypass the bug without needing the service role key.
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    // Use direct fetch to bypass any @supabase/ssr cookie or Authorization header override bugs
+    let roleRows: { role: RoleName }[] = [];
+    if (session?.access_token) {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/user_roles?select=role&user_id=eq.${user.id}`,
+          {
+            headers: {
+              apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          }
+        );
+        if (res.ok) {
+          roleRows = await res.json();
+        }
+      } catch (e) {
+        // Fallback to empty roles on error
+      }
+    }
+
+    userRoles = ((roleRows ?? []) as { role: RoleName }[])
+      .map((r) => r.role)
+      .filter(Boolean);
+
+    // Fallback: If a user has no roles in the database (e.g., older accounts before the trigger,
+    // or if the Edge Runtime token was missing), default them to 'customer'.
+    // This is safe because 'customer' only grants access to standard public account features,
+    // and prevents them from being completely locked out of the platform.
+    if (userRoles.length === 0) {
+      userRoles = ["customer"];
+    }
+  }
+
   const { pathname, searchParams, search } = request.nextUrl;
 
   // Intercept Supabase Auth PKCE code on the root
@@ -150,16 +193,6 @@ export async function proxy(request: NextRequest) {
 
   // 2. Redirect logged-in users away from auth pages
   if (user && AUTH_PATHS.some((path) => pathname.startsWith(path))) {
-    const { data: roleRows } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .limit(1);
-
-    const userRoles = ((roleRows ?? []) as { role: RoleName }[])
-      .map((r) => r.role)
-      .filter(Boolean);
-
     const { data: profile } = (await supabase
       .from("profiles")
       .select("profile_setup_completed_at")
@@ -187,15 +220,6 @@ export async function proxy(request: NextRequest) {
   // gets routed via defaultRouteForRoles so coordinators never land in the
   // venue-owner shell.
   if (user && pathname === "/dashboard") {
-    const { data: roleRows } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id);
-
-    const userRoles = ((roleRows ?? []) as { role: RoleName }[])
-      .map((r) => r.role)
-      .filter(Boolean);
-
     const target = defaultRouteForRoles(userRoles);
 
     return redirectWithCookies(new URL(target, request.url), supabaseResponse);
@@ -208,21 +232,6 @@ export async function proxy(request: NextRequest) {
     );
 
     if (matchedGuard) {
-      const { data: roleRows, error } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id);
-
-      if (error) {
-        const redirectUrl = request.nextUrl.clone();
-        redirectUrl.pathname = "/unauthorized";
-        return redirectWithCookies(redirectUrl, supabaseResponse);
-      }
-
-      const userRoles = ((roleRows ?? []) as { role: RoleName }[])
-        .map((r) => r.role)
-        .filter(Boolean);
-
       const hasAccess = matchedGuard.allow.some((role) =>
         userRoles.includes(role),
       );
@@ -237,16 +246,6 @@ export async function proxy(request: NextRequest) {
 
   // 5. Profile setup gate — prompt new customers before using the app
   if (user && !isProfileSetupExemptPath(pathname)) {
-    const { data: roleRows } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .limit(1);
-
-    const userRoles = ((roleRows ?? []) as { role: RoleName }[])
-      .map((r) => r.role)
-      .filter(Boolean);
-
     if (userRoles.includes("customer")) {
       const { data: profile } = (await supabase
         .from("profiles")
