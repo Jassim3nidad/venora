@@ -1,6 +1,12 @@
 "use client";
 
-import { useRef, useState, useTransition, useEffect, useOptimistic } from "react";
+import {
+  useRef,
+  useState,
+  useTransition,
+  useEffect,
+  useOptimistic,
+} from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -43,15 +49,25 @@ export type InquiryConversationProps = {
   currentUserId: string;
   role: "customer" | "supplier";
   messages: Message[];
-  originalRequest?: {
-    message: string;
-    createdAt?: string | null;
-  } | null | undefined;
+  originalRequest?:
+    | {
+        message: string;
+        createdAt?: string | null;
+      }
+    | null
+    | undefined;
   header: ConversationHeaderProps;
   isReadOnly: boolean;
-  onSendMessage: (formData: FormData) => Promise<{ error?: { message: string } | null } | void | any>;
+  onSendMessage: (
+    formData: FormData,
+  ) => Promise<{ error?: { message: string } | null } | void | any>;
   readOnlyNotice?: string | undefined;
+  compact?: boolean | undefined;
 };
+
+function cx(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
 
 function formatMessageTime(iso: string): string {
   const date = new Date(iso);
@@ -82,18 +98,19 @@ export function InquiryConversation({
   isReadOnly,
   onSendMessage,
   readOnlyNotice = "This conversation is closed. Previous messages remain available.",
+  compact = false,
 }: InquiryConversationProps) {
   const router = useRouter();
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Optimistic UI for sending
   const [optimisticMessages, addOptimisticMessage] = useOptimistic(
     messages,
-    (state, newMessage: Message) => [...state, newMessage]
+    (state, newMessage: Message) => [...state, newMessage],
   );
 
   // Group messages
@@ -150,8 +167,8 @@ export function InquiryConversation({
 
   // Scroll to bottom when messages load or change
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
   }, [optimisticMessages]);
 
@@ -200,13 +217,28 @@ export function InquiryConversation({
   };
 
   return (
-    <div className="flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden h-full">
+    <div
+      className={cx(
+        "flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm",
+        !compact && "h-full",
+      )}
+    >
       {/* ── Conversation Header ── */}
-      <div className="border-b border-slate-200 bg-slate-50/50 p-4 sm:p-5">
+      <div
+        className={cx(
+          "border-b border-slate-200 bg-slate-50/50",
+          compact ? "p-4" : "p-4 sm:p-5",
+        )}
+      >
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div className="flex items-center gap-4">
             {role === "customer" && header.supplierLogo !== undefined && (
-              <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-slate-200 bg-white">
+              <div
+                className={cx(
+                  "shrink-0 overflow-hidden rounded-full border border-slate-200 bg-white",
+                  compact ? "h-10 w-10" : "h-12 w-12",
+                )}
+              >
                 {header.supplierLogo ? (
                   <img
                     src={header.supplierLogo}
@@ -221,7 +253,12 @@ export function InquiryConversation({
               </div>
             )}
             <div>
-              <h2 className="text-lg font-black text-slate-900 leading-tight">
+              <h2
+                className={cx(
+                  "leading-tight text-slate-900",
+                  compact ? "text-base font-bold" : "text-lg font-black",
+                )}
+              >
                 {role === "customer"
                   ? header.supplierName || "Supplier"
                   : header.customerName || "Customer"}
@@ -254,38 +291,46 @@ export function InquiryConversation({
         </div>
 
         {/* Inquiry Context Row */}
-        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl bg-white p-3 border border-slate-200 text-xs sm:text-sm font-medium text-slate-600">
-          {header.eventType && header.eventDate && (
-            <span className="flex items-center gap-1.5">
-              <CalendarDays className="h-4 w-4 text-slate-400 shrink-0" />
-              {header.eventType} &middot; {header.eventDate}
+        {!compact && (
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl bg-white p-3 border border-slate-200 text-xs sm:text-sm font-medium text-slate-600">
+            {header.eventType && header.eventDate && (
+              <span className="flex items-center gap-1.5">
+                <CalendarDays className="h-4 w-4 text-slate-400 shrink-0" />
+                {header.eventType} &middot; {header.eventDate}
+              </span>
+            )}
+            {header.venueName && (
+              <span className="flex items-center gap-1.5">
+                <MapPin className="h-4 w-4 text-slate-400 shrink-0" />
+                {header.venueLink ? (
+                  <Link
+                    href={header.venueLink}
+                    className="hover:text-blue-600 hover:underline"
+                  >
+                    {header.venueName}
+                  </Link>
+                ) : (
+                  header.venueName
+                )}
+              </span>
+            )}
+            <span className="flex items-center gap-1.5 ml-auto">
+              <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-700">
+                {header.statusLabel}
+              </span>
             </span>
-          )}
-          {header.venueName && (
-            <span className="flex items-center gap-1.5">
-              <MapPin className="h-4 w-4 text-slate-400 shrink-0" />
-              {header.venueLink ? (
-                <Link
-                  href={header.venueLink}
-                  className="hover:text-blue-600 hover:underline"
-                >
-                  {header.venueName}
-                </Link>
-              ) : (
-                header.venueName
-              )}
-            </span>
-          )}
-          <span className="flex items-center gap-1.5 ml-auto">
-            <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-700">
-              {header.statusLabel}
-            </span>
-          </span>
-        </div>
+          </div>
+        )}
       </div>
 
       {/* ── Message History ── */}
-      <div className="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-5 h-[400px] sm:h-[500px]">
+      <div
+        ref={containerRef}
+        className={cx(
+          "overflow-y-auto bg-slate-50 p-4 sm:p-5",
+          compact ? "max-h-[420px]" : "h-[400px] flex-1 sm:h-[500px]",
+        )}
+      >
         <div className="mx-auto max-w-[800px] flex flex-col gap-6">
           {/* Original Request */}
           {originalRequest && (
@@ -299,8 +344,8 @@ export function InquiryConversation({
                 </p>
                 {originalRequest.createdAt && (
                   <p className="mt-3 text-[11px] font-semibold text-slate-400">
-                    Submitted {formatDateSeparator(originalRequest.createdAt)} at{" "}
-                    {formatMessageTime(originalRequest.createdAt)}
+                    Submitted {formatDateSeparator(originalRequest.createdAt)}{" "}
+                    at {formatMessageTime(originalRequest.createdAt)}
                   </p>
                 )}
               </div>
@@ -309,7 +354,9 @@ export function InquiryConversation({
 
           {groupedMessages.length === 0 && !originalRequest && (
             <div className="flex flex-col items-center justify-center py-10 text-center">
-              <p className="text-sm font-black text-slate-900">No messages yet</p>
+              <p className="text-sm font-black text-slate-900">
+                No messages yet
+              </p>
               <p className="mt-1 text-sm font-medium text-slate-500">
                 Start the conversation by sending a message below.
               </p>
@@ -339,8 +386,9 @@ export function InquiryConversation({
                 return (
                   <div
                     key={gIdx}
-                    className={`flex flex-col gap-1 ${isOwn ? "items-end" : "items-start"
-                      }`}
+                    className={`flex flex-col gap-1 ${
+                      isOwn ? "items-end" : "items-start"
+                    }`}
                   >
                     <span className="mb-1 text-[11px] font-bold text-slate-500">
                       {senderLabel}
@@ -354,24 +402,33 @@ export function InquiryConversation({
                           className="flex flex-col gap-1 max-w-[85%] sm:max-w-[75%]"
                         >
                           <div
-                            className={`px-4 py-2.5 text-[14px] sm:text-[15px] font-medium leading-relaxed ${isOwn
-                              ? "bg-blue-600 text-white"
-                              : "bg-white border border-slate-200 text-slate-900 shadow-sm"
-                              } ${isOwn
-                                ? `rounded-l-2xl ${isFirst ? "rounded-tr-2xl" : "rounded-tr-md"
-                                } ${isLast ? "rounded-br-2xl" : "rounded-br-md"
-                                }`
-                                : `rounded-r-2xl ${isFirst ? "rounded-tl-2xl" : "rounded-tl-md"
-                                } ${isLast ? "rounded-bl-2xl" : "rounded-bl-md"
-                                }`
-                              }`}
+                            className={`px-4 py-2.5 text-[14px] sm:text-[15px] font-medium leading-relaxed ${
+                              isOwn
+                                ? "bg-blue-600 text-white"
+                                : "bg-white border border-slate-200 text-slate-900 shadow-sm"
+                            } ${
+                              isOwn
+                                ? `rounded-l-2xl ${
+                                    isFirst ? "rounded-tr-2xl" : "rounded-tr-md"
+                                  } ${
+                                    isLast ? "rounded-br-2xl" : "rounded-br-md"
+                                  }`
+                                : `rounded-r-2xl ${
+                                    isFirst ? "rounded-tl-2xl" : "rounded-tl-md"
+                                  } ${
+                                    isLast ? "rounded-bl-2xl" : "rounded-bl-md"
+                                  }`
+                            }`}
                           >
-                            <span className="whitespace-pre-wrap">{msg.message}</span>
+                            <span className="whitespace-pre-wrap">
+                              {msg.message}
+                            </span>
                           </div>
                           {isLast && (
                             <span
-                              className={`text-[10px] font-semibold text-slate-400 ${isOwn ? "text-right" : "text-left"
-                                }`}
+                              className={`text-[10px] font-semibold text-slate-400 ${
+                                isOwn ? "text-right" : "text-left"
+                              }`}
                             >
                               {formatMessageTime(msg.created_at)}
                             </span>
@@ -384,10 +441,8 @@ export function InquiryConversation({
               })}
             </div>
           ))}
-          <div ref={messagesEndRef} className="h-1" />
         </div>
       </div>
-
       {/* ── Composer ── */}
       <div className="border-t border-slate-200 bg-white p-4 shrink-0">
         {isReadOnly ? (
@@ -411,10 +466,11 @@ export function InquiryConversation({
               </div>
             )}
             <div
-              className={`relative flex items-end gap-2 rounded-2xl border bg-white p-2 transition-colors ${error
-                ? "border-red-300 ring-4 ring-red-100"
-                : "border-slate-300 focus-within:border-blue-0"
-                }`}
+              className={`relative flex items-end gap-2 rounded-2xl border bg-white p-2 transition-colors ${
+                error
+                  ? "border-red-300 ring-4 ring-red-100"
+                  : "border-slate-300 focus-within:border-blue-0"
+              }`}
             >
               <textarea
                 ref={textareaRef}

@@ -1,0 +1,2003 @@
+[
+  {
+    "name": "desktop",
+    "width": 1440,
+    "height": 900,
+    "path": "C:/venora/.codex-screenshots/inquiry-review-live-desktop.png",
+    "metrics": {
+      "url": "http://localhost:3000/inquiries/b3e74cbb-ce42-4ada-9c7d-abf1d84268ad",
+      "title": "Inquiry Details | Venora | Venora",
+      "bodyW": 1440,
+      "viewportW": 1440,
+      "docH": 2401,
+      "main": {
+        "tag": "MAIN",
+        "cls": "flex min-w-0 flex-1 flex-col",
+        "text": "Back to Supplier InquiriesSai's PhotographyInquiry for: Professional Photography Package - Submitted July 16, 2026Proposal ReceivedProposal ReceivedSupplier InformationSai's Photog",
+        "x": 0,
+        "y": 132,
+        "w": 1440,
+        "h": 1944
+      },
+      "h1": [
+        {
+          "tag": "H1",
+          "cls": "max-w-3xl break-words text-3xl font-black leading-9 tracking-[-0.04em] text-slate-950 sm:text-4xl sm:leading-tight",
+          "text": "Sai's Photography",
+          "x": 141,
+          "y": 255,
+          "w": 555,
+          "h": 45
+        }
+      ],
+      "h2": [
+        {
+          "tag": "H2",
+          "cls": "text-lg font-black text-slate-900 leading-tight",
+          "text": "Sai's Photography",
+          "x": 197,
+          "y": 1466,
+          "w": 357,
+          "h": 23
+        },
+        {
+          "tag": "H2",
+          "cls": "text-xl font-black tracking-[-0.03em] text-slate-950",
+          "text": "Next Step",
+          "x": 974,
+          "y": 414,
+          "w": 329,
+          "h": 28
+        },
+        {
+          "tag": "H2",
+          "cls": "text-xl font-black tracking-[-0.03em] text-slate-950",
+          "text": "Payment Summary",
+          "x": 974,
+          "y": 636,
+          "w": 329,
+          "h": 28
+        }
+      ],
+      "h3": [
+        {
+          "tag": "H3",
+          "cls": "font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]",
+          "text": "Supplier Information",
+          "x": 112,
+          "y": 389,
+          "w": 797,
+          "h": 28
+        },
+        {
+          "tag": "H3",
+          "cls": "font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]",
+          "text": "Linked Event Details",
+          "x": 112,
+          "y": 642,
+          "w": 797,
+          "h": 28
+        },
+        {
+          "tag": "H3",
+          "cls": "font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]",
+          "text": "Service Proposal",
+          "x": 112,
+          "y": 1064,
+          "w": 797,
+          "h": 28
+        },
+        {
+          "tag": "H3",
+          "cls": "text-xs font-black uppercase tracking-wider text-blue-800 mb-2",
+          "text": "Original request",
+          "x": 272,
+          "y": 1633,
+          "w": 478,
+          "h": 16
+        },
+        {
+          "tag": "H3",
+          "cls": "text-xs font-bold uppercase tracking-wider text-slate-400",
+          "text": "Status Timeline",
+          "x": 974,
+          "y": 733,
+          "w": 329,
+          "h": 16
+        }
+      ],
+      "cards": [
+        {
+          "tag": "DIV",
+          "cls": "overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/60 p-5 sm:p-7",
+          "text": "Sai's PhotographyInquiry for: Professional Photography Package - Submitted July 16, 2026Proposal ReceivedProposal Received",
+          "x": 112,
+          "y": 226,
+          "w": 1216,
+          "h": 139
+        },
+        {
+          "tag": "SECTION",
+          "cls": "space-y-4",
+          "text": "Supplier InformationSai's PhotographyProfessional ServicesView Supplier Profile",
+          "x": 112,
+          "y": 389,
+          "w": 797,
+          "h": 172
+        },
+        {
+          "tag": "A",
+          "cls": "inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 border border-[#E5E7EB] bg-white text-[#111827] shadow-sm hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]",
+          "text": "View Supplier Profile",
+          "x": 112,
+          "y": 513,
+          "w": 187,
+          "h": 48
+        },
+        {
+          "tag": "SECTION",
+          "cls": "space-y-4",
+          "text": "Linked Event DetailsEvent DateJuly 24, 20265:00 AMVenueLyceum of the Philippines University - CaviteLyceum of the Philippines University - Cavite — General Trias, CaviteGuests140Vi",
+          "x": 112,
+          "y": 642,
+          "w": 797,
+          "h": 341
+        },
+        {
+          "tag": "DIV",
+          "cls": "rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4",
+          "text": "Event DateJuly 24, 20265:00 AM",
+          "x": 112,
+          "y": 686,
+          "w": 391,
+          "h": 177
+        },
+        {
+          "tag": "DIV",
+          "cls": "rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4",
+          "text": "VenueLyceum of the Philippines University - CaviteLyceum of the Philippines University - Cavite — General Trias, Cavite",
+          "x": 519,
+          "y": 686,
+          "w": 391,
+          "h": 177
+        },
+        {
+          "tag": "DIV",
+          "cls": "rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4",
+          "text": "Guests140",
+          "x": 112,
+          "y": 879,
+          "w": 391,
+          "h": 105
+        },
+        {
+          "tag": "DIV",
+          "cls": "rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 flex flex-col justify-center",
+          "text": "View Venue Booking",
+          "x": 519,
+          "y": 879,
+          "w": 391,
+          "h": 105
+        },
+        {
+          "tag": "A",
+          "cls": "inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 border border-[#E5E7EB] bg-white text-[#111827] shadow-sm hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]",
+          "text": "View Venue Booking",
+          "x": 536,
+          "y": 907,
+          "w": 357,
+          "h": 48
+        },
+        {
+          "tag": "SECTION",
+          "cls": "space-y-4",
+          "text": "Service ProposalProfessional Photography Package Proposal for Jared BaquirinUnlimited Photos until the event ends₱10,000Proposed total priceLine ItemsProfessional Photography Packa",
+          "x": 112,
+          "y": 1064,
+          "w": 797,
+          "h": 299
+        },
+        {
+          "tag": "DIV",
+          "cls": "rounded-2xl border border-[#DBEAFE] bg-[#EFF6FF] p-5 shadow-sm",
+          "text": "Professional Photography Package Proposal for Jared BaquirinUnlimited Photos until the event ends₱10,000Proposed total priceLine ItemsProfessional Photography PackagePending quoteT",
+          "x": 112,
+          "y": 1108,
+          "w": 797,
+          "h": 255
+        },
+        {
+          "tag": "SECTION",
+          "cls": "h-[600px]",
+          "text": "Sai's PhotographyProfessional Photography Package·INQ-B3E74CView supplierEvent · July 24, 2026Lyceum of the Philippines University - CaviteProposal ReceivedOriginal requesti need a",
+          "x": 112,
+          "y": 1444,
+          "w": 797,
+          "h": 600
+        },
+        {
+          "tag": "DIV",
+          "cls": "flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden h-full",
+          "text": "Sai's PhotographyProfessional Photography Package·INQ-B3E74CView supplierEvent · July 24, 2026Lyceum of the Philippines University - CaviteProposal ReceivedOriginal requesti need a",
+          "x": 112,
+          "y": 1444,
+          "w": 797,
+          "h": 600
+        },
+        {
+          "tag": "DIV",
+          "cls": "w-full max-w-lg rounded-2xl border border-blue-100 bg-white p-4 shadow-sm",
+          "text": "Original requesti need a lot of foodSubmitted July 16, 2026 at 12:04 PM",
+          "x": 255,
+          "y": 1616,
+          "w": 512,
+          "h": 109
+        },
+        {
+          "tag": "DIV",
+          "cls": "relative flex items-end gap-2 rounded-2xl border bg-white p-2 transition-colors border-slate-300 focus-within:border-blue-0",
+          "text": "",
+          "x": 129,
+          "y": 1965,
+          "w": 763,
+          "h": 62
+        },
+        {
+          "tag": "ASIDE",
+          "cls": "space-y-4 lg:sticky lg:top-[9.5rem]",
+          "text": "Next StepAccept ProposalDeclinePayment SummaryTotal Amount₱10,000Status TimelineDate not setDate not setDate not set",
+          "x": 949,
+          "y": 389,
+          "w": 379,
+          "h": 517
+        },
+        {
+          "tag": "DIV",
+          "cls": "flex flex-col gap-5 rounded-[24px] border border-[#BFDBFE] bg-white p-6 shadow-sm shadow-blue-200/50",
+          "text": "Next StepAccept ProposalDecline",
+          "x": 949,
+          "y": 389,
+          "w": 379,
+          "h": 206
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-5 h-12 text-sm font-bold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8] disabled:opacity-50",
+          "text": "Accept Proposal",
+          "x": 974,
+          "y": 462,
+          "w": 329,
+          "h": 48
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white border border-[#E5E7EB] px-5 h-12 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50",
+          "text": "Decline",
+          "x": 974,
+          "y": 522,
+          "w": 329,
+          "h": 48
+        },
+        {
+          "tag": "DIV",
+          "cls": "flex flex-col gap-4 rounded-[24px] border border-[#E5E7EB] bg-white p-6 shadow-sm shadow-slate-200/60",
+          "text": "Payment SummaryTotal Amount₱10,000Status TimelineDate not setDate not setDate not set",
+          "x": 949,
+          "y": 611,
+          "w": 379,
+          "h": 295
+        },
+        {
+          "tag": "SECTION",
+          "cls": "",
+          "text": "",
+          "x": 0,
+          "y": 2401,
+          "w": 1440,
+          "h": 0
+        }
+      ],
+      "actions": [
+        {
+          "tag": "A",
+          "cls": "justify-self-start text-xl font-black tracking-[-0.04em] text-[#2563EB] transition hover:text-[#1d4ed8]",
+          "text": "Venora",
+          "x": 112,
+          "y": 26,
+          "w": 67,
+          "h": 28
+        },
+        {
+          "tag": "A",
+          "cls": "rounded-full px-4 py-2 text-sm font-bold transition text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
+          "text": "Home",
+          "x": 538,
+          "y": 22,
+          "w": 72,
+          "h": 36
+        },
+        {
+          "tag": "A",
+          "cls": "rounded-full px-4 py-2 text-sm font-bold transition text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
+          "text": "Venues",
+          "x": 614,
+          "y": 22,
+          "w": 84,
+          "h": 36
+        },
+        {
+          "tag": "A",
+          "cls": "rounded-full px-4 py-2 text-sm font-bold transition text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
+          "text": "About",
+          "x": 702,
+          "y": 22,
+          "w": 74,
+          "h": 36
+        },
+        {
+          "tag": "A",
+          "cls": "rounded-full px-4 py-2 text-sm font-bold transition text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
+          "text": "Host a Venue",
+          "x": 779,
+          "y": 22,
+          "w": 122,
+          "h": 36
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-transparent text-slate-400 transition hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30",
+          "text": "9+",
+          "x": 1232,
+          "y": 20,
+          "w": 40,
+          "h": 40
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E5E7EB] bg-[#EFF6FF] text-sm font-black text-[#2563EB] shadow-sm transition hover:border-[#2563EB]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 sm:h-11 sm:w-11",
+          "text": "",
+          "x": 1284,
+          "y": 18,
+          "w": 44,
+          "h": 44
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-transparent text-slate-400 transition hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30",
+          "text": "9+",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E5E7EB] bg-[#EFF6FF] text-sm font-black text-[#2563EB] shadow-sm transition hover:border-[#2563EB]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 sm:h-11 sm:w-11",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#1D4ED8] transition hover:bg-[#EFF6FF]",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "A",
+          "cls": "min-w-[5.5rem] flex-1 whitespace-nowrap border-b-2 px-3 py-3 text-center text-sm font-bold transition sm:px-4 sm:py-3.5 border-transparent text-[#6B7280] hover:border-[#BFDBFE] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
+          "text": "Browse",
+          "x": 32,
+          "y": 81,
+          "w": 344,
+          "h": 50
+        },
+        {
+          "tag": "A",
+          "cls": "min-w-[5.5rem] flex-1 whitespace-nowrap border-b-2 px-3 py-3 text-center text-sm font-bold transition sm:px-4 sm:py-3.5 border-transparent text-[#6B7280] hover:border-[#BFDBFE] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
+          "text": "Suppliers",
+          "x": 376,
+          "y": 81,
+          "w": 344,
+          "h": 50
+        },
+        {
+          "tag": "A",
+          "cls": "min-w-[5.5rem] flex-1 whitespace-nowrap border-b-2 px-3 py-3 text-center text-sm font-bold transition sm:px-4 sm:py-3.5 border-transparent text-[#6B7280] hover:border-[#BFDBFE] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
+          "text": "Bookings",
+          "x": 720,
+          "y": 81,
+          "w": 344,
+          "h": 50
+        },
+        {
+          "tag": "A",
+          "cls": "min-w-[5.5rem] flex-1 whitespace-nowrap border-b-2 px-3 py-3 text-center text-sm font-bold transition sm:px-4 sm:py-3.5 border-transparent text-[#6B7280] hover:border-[#BFDBFE] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
+          "text": "Favorites",
+          "x": 1064,
+          "y": 81,
+          "w": 344,
+          "h": 50
+        },
+        {
+          "tag": "A",
+          "cls": "inline-flex w-fit items-center gap-2 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-bold text-[#6B7280] shadow-sm transition hover:border-[#2563EB]/50 hover:bg-[#EFF6FF] hover:text-[#2563EB]",
+          "text": "Back to Supplier Inquiries",
+          "x": 112,
+          "y": 164,
+          "w": 232,
+          "h": 38
+        },
+        {
+          "tag": "A",
+          "cls": "inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 border border-[#E5E7EB] bg-white text-[#111827] shadow-sm hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]",
+          "text": "View Supplier Profile",
+          "x": 112,
+          "y": 513,
+          "w": 187,
+          "h": 48
+        },
+        {
+          "tag": "A",
+          "cls": "inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 border border-[#E5E7EB] bg-white text-[#111827] shadow-sm hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]",
+          "text": "View Venue Booking",
+          "x": 536,
+          "y": 907,
+          "w": 357,
+          "h": 48
+        },
+        {
+          "tag": "A",
+          "cls": "inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition",
+          "text": "View supplier",
+          "x": 762,
+          "y": 1474,
+          "w": 126,
+          "h": 30
+        },
+        {
+          "tag": "A",
+          "cls": "hover:text-blue-600 hover:underline",
+          "text": "Lyceum of the Philippines University - Cavite",
+          "x": 347,
+          "y": 1542,
+          "w": 299,
+          "h": 20
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white transition hover:bg-blue-700 disabled:opacity-50 disabled:bg-slate-100 disabled:text-slate-400",
+          "text": "",
+          "x": 839,
+          "y": 1974,
+          "w": 44,
+          "h": 44
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-5 h-12 text-sm font-bold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8] disabled:opacity-50",
+          "text": "Accept Proposal",
+          "x": 974,
+          "y": 462,
+          "w": 329,
+          "h": 48
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white border border-[#E5E7EB] px-5 h-12 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50",
+          "text": "Decline",
+          "x": 974,
+          "y": 522,
+          "w": 329,
+          "h": 48
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Help Center",
+          "x": 80,
+          "y": 2170,
+          "w": 73,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Safety Information",
+          "x": 80,
+          "y": 2196,
+          "w": 113,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Cancellation Options",
+          "x": 80,
+          "y": 2223,
+          "w": 127,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Venora your home",
+          "x": 517,
+          "y": 2170,
+          "w": 113,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Cover for Hosts",
+          "x": 517,
+          "y": 2196,
+          "w": 96,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Hosting Resources",
+          "x": 517,
+          "y": 2223,
+          "w": 116,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Newsroom",
+          "x": 955,
+          "y": 2170,
+          "w": 66,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "New Features",
+          "x": 955,
+          "y": 2196,
+          "w": 85,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Careers",
+          "x": 955,
+          "y": 2223,
+          "w": 48,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "font-semibold hover:text-[#2563EB]",
+          "text": "Privacy",
+          "x": 200,
+          "y": 2337,
+          "w": 43,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "font-semibold hover:text-[#2563EB]",
+          "text": "Terms",
+          "x": 263,
+          "y": 2337,
+          "w": 36,
+          "h": 16
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-brand-600)] text-white shadow-xl transition hover:bg-[var(--color-brand-700)] hover:scale-105",
+          "text": "",
+          "x": 1364,
+          "y": 824,
+          "w": 56,
+          "h": 56
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "tsqd-open-btn",
+          "text": "",
+          "x": 1384,
+          "y": 844,
+          "w": 40,
+          "h": 40
+        }
+      ],
+      "forms": [
+        {
+          "tag": "TEXTAREA",
+          "cls": "w-full resize-none bg-transparent py-2 pl-3 pr-2 text-sm sm:text-base font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 disabled:opacity-50",
+          "text": "",
+          "x": 138,
+          "y": 1974,
+          "w": 693,
+          "h": 44
+        }
+      ],
+      "fixedSticky": [
+        {
+          "tag": "DIV",
+          "cls": "sticky top-0 z-50 shrink-0",
+          "text": "VenoraHomeVenuesAboutHost a Venue9+9+BrowseSuppliersBookingsFavorites",
+          "x": 0,
+          "y": 0,
+          "w": 1440,
+          "h": 132
+        },
+        {
+          "tag": "ASIDE",
+          "cls": "space-y-4 lg:sticky lg:top-[9.5rem]",
+          "text": "Next StepAccept ProposalDeclinePayment SummaryTotal Amount₱10,000Status TimelineDate not setDate not setDate not set",
+          "x": 949,
+          "y": 389,
+          "w": 379,
+          "h": 517
+        },
+        {
+          "tag": "OL",
+          "cls": "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
+          "text": "",
+          "x": 1020,
+          "y": 868,
+          "w": 420,
+          "h": 32
+        },
+        {
+          "tag": "DIV",
+          "cls": "fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3",
+          "text": "",
+          "x": 1364,
+          "y": 824,
+          "w": 56,
+          "h": 56
+        }
+      ]
+    },
+    "overflow": false
+  },
+  {
+    "name": "tablet",
+    "width": 768,
+    "height": 1024,
+    "path": "C:/venora/.codex-screenshots/inquiry-review-live-tablet.png",
+    "metrics": {
+      "url": "http://localhost:3000/inquiries/b3e74cbb-ce42-4ada-9c7d-abf1d84268ad",
+      "title": "Inquiry Details | Venora | Venora",
+      "bodyW": 768,
+      "viewportW": 768,
+      "docH": 3009,
+      "main": {
+        "tag": "MAIN",
+        "cls": "flex min-w-0 flex-1 flex-col",
+        "text": "Back to Supplier InquiriesSai's PhotographyInquiry for: Professional Photography Package - Submitted July 16, 2026Proposal ReceivedProposal ReceivedSupplier InformationSai's Photog",
+        "x": 0,
+        "y": 132,
+        "w": 768,
+        "h": 2551
+      },
+      "h1": [
+        {
+          "tag": "H1",
+          "cls": "max-w-3xl break-words text-3xl font-black leading-9 tracking-[-0.04em] text-slate-950 sm:text-4xl sm:leading-tight",
+          "text": "Sai's Photography",
+          "x": 53,
+          "y": 255,
+          "w": 662,
+          "h": 45
+        }
+      ],
+      "h2": [
+        {
+          "tag": "H2",
+          "cls": "text-lg font-black text-slate-900 leading-tight",
+          "text": "Sai's Photography",
+          "x": 109,
+          "y": 1516,
+          "w": 357,
+          "h": 23
+        },
+        {
+          "tag": "H2",
+          "cls": "text-xl font-black tracking-[-0.03em] text-slate-950",
+          "text": "Next Step",
+          "x": 49,
+          "y": 2159,
+          "w": 670,
+          "h": 28
+        },
+        {
+          "tag": "H2",
+          "cls": "text-xl font-black tracking-[-0.03em] text-slate-950",
+          "text": "Payment Summary",
+          "x": 49,
+          "y": 2381,
+          "w": 670,
+          "h": 28
+        }
+      ],
+      "h3": [
+        {
+          "tag": "H3",
+          "cls": "font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]",
+          "text": "Supplier Information",
+          "x": 24,
+          "y": 440,
+          "w": 720,
+          "h": 28
+        },
+        {
+          "tag": "H3",
+          "cls": "font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]",
+          "text": "Linked Event Details",
+          "x": 24,
+          "y": 693,
+          "w": 720,
+          "h": 28
+        },
+        {
+          "tag": "H3",
+          "cls": "font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]",
+          "text": "Service Proposal",
+          "x": 24,
+          "y": 1115,
+          "w": 720,
+          "h": 28
+        },
+        {
+          "tag": "H3",
+          "cls": "text-xs font-black uppercase tracking-wider text-blue-800 mb-2",
+          "text": "Original request",
+          "x": 145,
+          "y": 1683,
+          "w": 478,
+          "h": 16
+        },
+        {
+          "tag": "H3",
+          "cls": "text-xs font-bold uppercase tracking-wider text-slate-400",
+          "text": "Status Timeline",
+          "x": 49,
+          "y": 2478,
+          "w": 670,
+          "h": 16
+        }
+      ],
+      "cards": [
+        {
+          "tag": "DIV",
+          "cls": "overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/60 p-5 sm:p-7",
+          "text": "Sai's PhotographyInquiry for: Professional Photography Package - Submitted July 16, 2026Proposal ReceivedProposal Received",
+          "x": 24,
+          "y": 226,
+          "w": 720,
+          "h": 190
+        },
+        {
+          "tag": "SECTION",
+          "cls": "space-y-4",
+          "text": "Supplier InformationSai's PhotographyProfessional ServicesView Supplier Profile",
+          "x": 24,
+          "y": 440,
+          "w": 720,
+          "h": 172
+        },
+        {
+          "tag": "A",
+          "cls": "inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 border border-[#E5E7EB] bg-white text-[#111827] shadow-sm hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]",
+          "text": "View Supplier Profile",
+          "x": 24,
+          "y": 564,
+          "w": 187,
+          "h": 48
+        },
+        {
+          "tag": "SECTION",
+          "cls": "space-y-4",
+          "text": "Linked Event DetailsEvent DateJuly 24, 20265:00 AMVenueLyceum of the Philippines University - CaviteLyceum of the Philippines University - Cavite — General Trias, CaviteGuests140Vi",
+          "x": 24,
+          "y": 693,
+          "w": 720,
+          "h": 341
+        },
+        {
+          "tag": "DIV",
+          "cls": "rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4",
+          "text": "Event DateJuly 24, 20265:00 AM",
+          "x": 24,
+          "y": 737,
+          "w": 352,
+          "h": 177
+        },
+        {
+          "tag": "DIV",
+          "cls": "rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4",
+          "text": "VenueLyceum of the Philippines University - CaviteLyceum of the Philippines University - Cavite — General Trias, Cavite",
+          "x": 392,
+          "y": 737,
+          "w": 352,
+          "h": 177
+        },
+        {
+          "tag": "DIV",
+          "cls": "rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4",
+          "text": "Guests140",
+          "x": 24,
+          "y": 929,
+          "w": 352,
+          "h": 105
+        },
+        {
+          "tag": "DIV",
+          "cls": "rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 flex flex-col justify-center",
+          "text": "View Venue Booking",
+          "x": 392,
+          "y": 929,
+          "w": 352,
+          "h": 105
+        },
+        {
+          "tag": "A",
+          "cls": "inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 border border-[#E5E7EB] bg-white text-[#111827] shadow-sm hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]",
+          "text": "View Venue Booking",
+          "x": 409,
+          "y": 957,
+          "w": 318,
+          "h": 48
+        },
+        {
+          "tag": "SECTION",
+          "cls": "space-y-4",
+          "text": "Service ProposalProfessional Photography Package Proposal for Jared BaquirinUnlimited Photos until the event ends₱10,000Proposed total priceLine ItemsProfessional Photography Packa",
+          "x": 24,
+          "y": 1115,
+          "w": 720,
+          "h": 299
+        },
+        {
+          "tag": "DIV",
+          "cls": "rounded-2xl border border-[#DBEAFE] bg-[#EFF6FF] p-5 shadow-sm",
+          "text": "Professional Photography Package Proposal for Jared BaquirinUnlimited Photos until the event ends₱10,000Proposed total priceLine ItemsProfessional Photography PackagePending quoteT",
+          "x": 24,
+          "y": 1159,
+          "w": 720,
+          "h": 255
+        },
+        {
+          "tag": "SECTION",
+          "cls": "h-[600px]",
+          "text": "Sai's PhotographyProfessional Photography Package·INQ-B3E74CView supplierEvent · July 24, 2026Lyceum of the Philippines University - CaviteProposal ReceivedOriginal requesti need a",
+          "x": 24,
+          "y": 1494,
+          "w": 720,
+          "h": 600
+        },
+        {
+          "tag": "DIV",
+          "cls": "flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden h-full",
+          "text": "Sai's PhotographyProfessional Photography Package·INQ-B3E74CView supplierEvent · July 24, 2026Lyceum of the Philippines University - CaviteProposal ReceivedOriginal requesti need a",
+          "x": 24,
+          "y": 1494,
+          "w": 720,
+          "h": 600
+        },
+        {
+          "tag": "DIV",
+          "cls": "w-full max-w-lg rounded-2xl border border-blue-100 bg-white p-4 shadow-sm",
+          "text": "Original requesti need a lot of foodSubmitted July 16, 2026 at 12:04 PM",
+          "x": 128,
+          "y": 1666,
+          "w": 512,
+          "h": 109
+        },
+        {
+          "tag": "DIV",
+          "cls": "relative flex items-end gap-2 rounded-2xl border bg-white p-2 transition-colors border-slate-300 focus-within:border-blue-0",
+          "text": "",
+          "x": 41,
+          "y": 2015,
+          "w": 686,
+          "h": 62
+        },
+        {
+          "tag": "ASIDE",
+          "cls": "space-y-4 lg:sticky lg:top-[9.5rem]",
+          "text": "Next StepAccept ProposalDeclinePayment SummaryTotal Amount₱10,000Status TimelineDate not setDate not setDate not set",
+          "x": 24,
+          "y": 2134,
+          "w": 720,
+          "h": 517
+        },
+        {
+          "tag": "DIV",
+          "cls": "flex flex-col gap-5 rounded-[24px] border border-[#BFDBFE] bg-white p-6 shadow-sm shadow-blue-200/50",
+          "text": "Next StepAccept ProposalDecline",
+          "x": 24,
+          "y": 2134,
+          "w": 720,
+          "h": 206
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-5 h-12 text-sm font-bold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8] disabled:opacity-50",
+          "text": "Accept Proposal",
+          "x": 49,
+          "y": 2207,
+          "w": 670,
+          "h": 48
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white border border-[#E5E7EB] px-5 h-12 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50",
+          "text": "Decline",
+          "x": 49,
+          "y": 2267,
+          "w": 670,
+          "h": 48
+        },
+        {
+          "tag": "DIV",
+          "cls": "flex flex-col gap-4 rounded-[24px] border border-[#E5E7EB] bg-white p-6 shadow-sm shadow-slate-200/60",
+          "text": "Payment SummaryTotal Amount₱10,000Status TimelineDate not setDate not setDate not set",
+          "x": 24,
+          "y": 2356,
+          "w": 720,
+          "h": 295
+        },
+        {
+          "tag": "SECTION",
+          "cls": "",
+          "text": "",
+          "x": 0,
+          "y": 3009,
+          "w": 768,
+          "h": 0
+        }
+      ],
+      "actions": [
+        {
+          "tag": "A",
+          "cls": "justify-self-start text-xl font-black tracking-[-0.04em] text-[#2563EB] transition hover:text-[#1d4ed8]",
+          "text": "Venora",
+          "x": 24,
+          "y": 26,
+          "w": 67,
+          "h": 28
+        },
+        {
+          "tag": "A",
+          "cls": "rounded-full px-4 py-2 text-sm font-bold transition text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
+          "text": "Home",
+          "x": 202,
+          "y": 22,
+          "w": 72,
+          "h": 36
+        },
+        {
+          "tag": "A",
+          "cls": "rounded-full px-4 py-2 text-sm font-bold transition text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
+          "text": "Venues",
+          "x": 278,
+          "y": 22,
+          "w": 84,
+          "h": 36
+        },
+        {
+          "tag": "A",
+          "cls": "rounded-full px-4 py-2 text-sm font-bold transition text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
+          "text": "About",
+          "x": 366,
+          "y": 22,
+          "w": 74,
+          "h": 36
+        },
+        {
+          "tag": "A",
+          "cls": "rounded-full px-4 py-2 text-sm font-bold transition text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
+          "text": "Host a Venue",
+          "x": 443,
+          "y": 22,
+          "w": 122,
+          "h": 36
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-transparent text-slate-400 transition hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30",
+          "text": "9+",
+          "x": 648,
+          "y": 20,
+          "w": 40,
+          "h": 40
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E5E7EB] bg-[#EFF6FF] text-sm font-black text-[#2563EB] shadow-sm transition hover:border-[#2563EB]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 sm:h-11 sm:w-11",
+          "text": "",
+          "x": 700,
+          "y": 18,
+          "w": 44,
+          "h": 44
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-transparent text-slate-400 transition hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30",
+          "text": "9+",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E5E7EB] bg-[#EFF6FF] text-sm font-black text-[#2563EB] shadow-sm transition hover:border-[#2563EB]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 sm:h-11 sm:w-11",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#1D4ED8] transition hover:bg-[#EFF6FF]",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "A",
+          "cls": "min-w-[5.5rem] flex-1 whitespace-nowrap border-b-2 px-3 py-3 text-center text-sm font-bold transition sm:px-4 sm:py-3.5 border-transparent text-[#6B7280] hover:border-[#BFDBFE] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
+          "text": "Browse",
+          "x": 16,
+          "y": 81,
+          "w": 184,
+          "h": 50
+        },
+        {
+          "tag": "A",
+          "cls": "min-w-[5.5rem] flex-1 whitespace-nowrap border-b-2 px-3 py-3 text-center text-sm font-bold transition sm:px-4 sm:py-3.5 border-transparent text-[#6B7280] hover:border-[#BFDBFE] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
+          "text": "Suppliers",
+          "x": 200,
+          "y": 81,
+          "w": 184,
+          "h": 50
+        },
+        {
+          "tag": "A",
+          "cls": "min-w-[5.5rem] flex-1 whitespace-nowrap border-b-2 px-3 py-3 text-center text-sm font-bold transition sm:px-4 sm:py-3.5 border-transparent text-[#6B7280] hover:border-[#BFDBFE] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
+          "text": "Bookings",
+          "x": 384,
+          "y": 81,
+          "w": 184,
+          "h": 50
+        },
+        {
+          "tag": "A",
+          "cls": "min-w-[5.5rem] flex-1 whitespace-nowrap border-b-2 px-3 py-3 text-center text-sm font-bold transition sm:px-4 sm:py-3.5 border-transparent text-[#6B7280] hover:border-[#BFDBFE] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
+          "text": "Favorites",
+          "x": 568,
+          "y": 81,
+          "w": 184,
+          "h": 50
+        },
+        {
+          "tag": "A",
+          "cls": "inline-flex w-fit items-center gap-2 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-bold text-[#6B7280] shadow-sm transition hover:border-[#2563EB]/50 hover:bg-[#EFF6FF] hover:text-[#2563EB]",
+          "text": "Back to Supplier Inquiries",
+          "x": 24,
+          "y": 164,
+          "w": 232,
+          "h": 38
+        },
+        {
+          "tag": "A",
+          "cls": "inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 border border-[#E5E7EB] bg-white text-[#111827] shadow-sm hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]",
+          "text": "View Supplier Profile",
+          "x": 24,
+          "y": 564,
+          "w": 187,
+          "h": 48
+        },
+        {
+          "tag": "A",
+          "cls": "inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 border border-[#E5E7EB] bg-white text-[#111827] shadow-sm hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]",
+          "text": "View Venue Booking",
+          "x": 409,
+          "y": 957,
+          "w": 318,
+          "h": 48
+        },
+        {
+          "tag": "A",
+          "cls": "inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition",
+          "text": "View supplier",
+          "x": 597,
+          "y": 1524,
+          "w": 126,
+          "h": 30
+        },
+        {
+          "tag": "A",
+          "cls": "hover:text-blue-600 hover:underline",
+          "text": "Lyceum of the Philippines University - Cavite",
+          "x": 259,
+          "y": 1592,
+          "w": 299,
+          "h": 20
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white transition hover:bg-blue-700 disabled:opacity-50 disabled:bg-slate-100 disabled:text-slate-400",
+          "text": "",
+          "x": 674,
+          "y": 2024,
+          "w": 44,
+          "h": 44
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-5 h-12 text-sm font-bold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8] disabled:opacity-50",
+          "text": "Accept Proposal",
+          "x": 49,
+          "y": 2207,
+          "w": 670,
+          "h": 48
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white border border-[#E5E7EB] px-5 h-12 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50",
+          "text": "Decline",
+          "x": 49,
+          "y": 2267,
+          "w": 670,
+          "h": 48
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Help Center",
+          "x": 80,
+          "y": 2777,
+          "w": 73,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Safety Information",
+          "x": 80,
+          "y": 2804,
+          "w": 113,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Cancellation Options",
+          "x": 80,
+          "y": 2830,
+          "w": 127,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Venora your home",
+          "x": 293,
+          "y": 2777,
+          "w": 113,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Cover for Hosts",
+          "x": 293,
+          "y": 2804,
+          "w": 96,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Hosting Resources",
+          "x": 293,
+          "y": 2830,
+          "w": 116,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Newsroom",
+          "x": 507,
+          "y": 2777,
+          "w": 66,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "New Features",
+          "x": 507,
+          "y": 2804,
+          "w": 85,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Careers",
+          "x": 507,
+          "y": 2830,
+          "w": 48,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "font-semibold hover:text-[#2563EB]",
+          "text": "Privacy",
+          "x": 200,
+          "y": 2945,
+          "w": 43,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "font-semibold hover:text-[#2563EB]",
+          "text": "Terms",
+          "x": 263,
+          "y": 2945,
+          "w": 36,
+          "h": 16
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-brand-600)] text-white shadow-xl transition hover:bg-[var(--color-brand-700)] hover:scale-105",
+          "text": "",
+          "x": 692,
+          "y": 948,
+          "w": 56,
+          "h": 56
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "tsqd-open-btn",
+          "text": "",
+          "x": 712,
+          "y": 968,
+          "w": 40,
+          "h": 40
+        }
+      ],
+      "forms": [
+        {
+          "tag": "TEXTAREA",
+          "cls": "w-full resize-none bg-transparent py-2 pl-3 pr-2 text-sm sm:text-base font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 disabled:opacity-50",
+          "text": "",
+          "x": 50,
+          "y": 2024,
+          "w": 616,
+          "h": 44
+        }
+      ],
+      "fixedSticky": [
+        {
+          "tag": "DIV",
+          "cls": "sticky top-0 z-50 shrink-0",
+          "text": "VenoraHomeVenuesAboutHost a Venue9+9+BrowseSuppliersBookingsFavorites",
+          "x": 0,
+          "y": 0,
+          "w": 768,
+          "h": 132
+        },
+        {
+          "tag": "ASIDE",
+          "cls": "space-y-4 lg:sticky lg:top-[9.5rem]",
+          "text": "Next StepAccept ProposalDeclinePayment SummaryTotal Amount₱10,000Status TimelineDate not setDate not setDate not set",
+          "x": 24,
+          "y": 2134,
+          "w": 720,
+          "h": 517
+        },
+        {
+          "tag": "OL",
+          "cls": "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
+          "text": "",
+          "x": 348,
+          "y": 992,
+          "w": 420,
+          "h": 32
+        },
+        {
+          "tag": "DIV",
+          "cls": "fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3",
+          "text": "",
+          "x": 692,
+          "y": 948,
+          "w": 56,
+          "h": 56
+        }
+      ]
+    },
+    "overflow": false
+  },
+  {
+    "name": "mobile",
+    "width": 390,
+    "height": 844,
+    "path": "C:/venora/.codex-screenshots/inquiry-review-live-mobile.png",
+    "metrics": {
+      "url": "http://localhost:3000/inquiries/b3e74cbb-ce42-4ada-9c7d-abf1d84268ad",
+      "title": "Inquiry Details | Venora | Venora",
+      "bodyW": 390,
+      "viewportW": 390,
+      "docH": 3666,
+      "main": {
+        "tag": "MAIN",
+        "cls": "flex min-w-0 flex-1 flex-col",
+        "text": "Back to Supplier InquiriesSai's PhotographyInquiry for: Professional Photography Package - Submitted July 16, 2026Proposal ReceivedProposal ReceivedSupplier InformationSai's Photog",
+        "x": 0,
+        "y": 128,
+        "w": 390,
+        "h": 2901
+      },
+      "h1": [
+        {
+          "tag": "H1",
+          "cls": "max-w-3xl break-words text-3xl font-black leading-9 tracking-[-0.04em] text-slate-950 sm:text-4xl sm:leading-tight",
+          "text": "Sai's Photography",
+          "x": 37,
+          "y": 235,
+          "w": 316,
+          "h": 36
+        }
+      ],
+      "h2": [
+        {
+          "tag": "H2",
+          "cls": "text-lg font-black text-slate-900 leading-tight",
+          "text": "Sai's Photography",
+          "x": 97,
+          "y": 1865,
+          "w": 260,
+          "h": 23
+        },
+        {
+          "tag": "H2",
+          "cls": "text-xl font-black tracking-[-0.03em] text-slate-950",
+          "text": "Next Step",
+          "x": 41,
+          "y": 2513,
+          "w": 308,
+          "h": 28
+        },
+        {
+          "tag": "H2",
+          "cls": "text-xl font-black tracking-[-0.03em] text-slate-950",
+          "text": "Payment Summary",
+          "x": 41,
+          "y": 2735,
+          "w": 308,
+          "h": 28
+        }
+      ],
+      "h3": [
+        {
+          "tag": "H3",
+          "cls": "font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]",
+          "text": "Supplier Information",
+          "x": 16,
+          "y": 443,
+          "w": 358,
+          "h": 28
+        },
+        {
+          "tag": "H3",
+          "cls": "font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]",
+          "text": "Linked Event Details",
+          "x": 16,
+          "y": 696,
+          "w": 358,
+          "h": 28
+        },
+        {
+          "tag": "H3",
+          "cls": "font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]",
+          "text": "Service Proposal",
+          "x": 16,
+          "y": 1361,
+          "w": 358,
+          "h": 28
+        },
+        {
+          "tag": "H3",
+          "cls": "text-xs font-black uppercase tracking-wider text-blue-800 mb-2",
+          "text": "Original request",
+          "x": 50,
+          "y": 2142,
+          "w": 290,
+          "h": 16
+        },
+        {
+          "tag": "H3",
+          "cls": "text-xs font-bold uppercase tracking-wider text-slate-400",
+          "text": "Status Timeline",
+          "x": 41,
+          "y": 2832,
+          "w": 308,
+          "h": 16
+        }
+      ],
+      "cards": [
+        {
+          "tag": "DIV",
+          "cls": "overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/60 p-5 sm:p-7",
+          "text": "Sai's PhotographyInquiry for: Professional Photography Package - Submitted July 16, 2026Proposal ReceivedProposal Received",
+          "x": 16,
+          "y": 214,
+          "w": 358,
+          "h": 205
+        },
+        {
+          "tag": "SECTION",
+          "cls": "space-y-4",
+          "text": "Supplier InformationSai's PhotographyProfessional ServicesView Supplier Profile",
+          "x": 16,
+          "y": 443,
+          "w": 358,
+          "h": 172
+        },
+        {
+          "tag": "A",
+          "cls": "inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 border border-[#E5E7EB] bg-white text-[#111827] shadow-sm hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]",
+          "text": "View Supplier Profile",
+          "x": 16,
+          "y": 567,
+          "w": 187,
+          "h": 48
+        },
+        {
+          "tag": "SECTION",
+          "cls": "space-y-4",
+          "text": "Linked Event DetailsEvent DateJuly 24, 20265:00 AMVenueLyceum of the Philippines University - CaviteLyceum of the Philippines University - Cavite — General Trias, CaviteGuests140Vi",
+          "x": 16,
+          "y": 696,
+          "w": 358,
+          "h": 584
+        },
+        {
+          "tag": "DIV",
+          "cls": "rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4",
+          "text": "Event DateJuly 24, 20265:00 AM",
+          "x": 16,
+          "y": 740,
+          "w": 358,
+          "h": 129
+        },
+        {
+          "tag": "DIV",
+          "cls": "rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4",
+          "text": "VenueLyceum of the Philippines University - CaviteLyceum of the Philippines University - Cavite — General Trias, Cavite",
+          "x": 16,
+          "y": 885,
+          "w": 358,
+          "h": 177
+        },
+        {
+          "tag": "DIV",
+          "cls": "rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4",
+          "text": "Guests140",
+          "x": 16,
+          "y": 1077,
+          "w": 358,
+          "h": 105
+        },
+        {
+          "tag": "DIV",
+          "cls": "rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 flex flex-col justify-center",
+          "text": "View Venue Booking",
+          "x": 16,
+          "y": 1198,
+          "w": 358,
+          "h": 82
+        },
+        {
+          "tag": "A",
+          "cls": "inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 border border-[#E5E7EB] bg-white text-[#111827] shadow-sm hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]",
+          "text": "View Venue Booking",
+          "x": 33,
+          "y": 1215,
+          "w": 324,
+          "h": 48
+        },
+        {
+          "tag": "SECTION",
+          "cls": "space-y-4",
+          "text": "Service ProposalProfessional Photography Package Proposal for Jared BaquirinUnlimited Photos until the event ends₱10,000Proposed total priceLine ItemsProfessional Photography Packa",
+          "x": 16,
+          "y": 1361,
+          "w": 358,
+          "h": 407
+        },
+        {
+          "tag": "DIV",
+          "cls": "rounded-2xl border border-[#DBEAFE] bg-[#EFF6FF] p-5 shadow-sm",
+          "text": "Professional Photography Package Proposal for Jared BaquirinUnlimited Photos until the event ends₱10,000Proposed total priceLine ItemsProfessional Photography PackagePending quoteT",
+          "x": 16,
+          "y": 1405,
+          "w": 358,
+          "h": 363
+        },
+        {
+          "tag": "SECTION",
+          "cls": "h-[600px]",
+          "text": "Sai's PhotographyProfessional Photography Package·INQ-B3E74CView supplierEvent · July 24, 2026Lyceum of the Philippines University - CaviteProposal ReceivedOriginal requesti need a",
+          "x": 16,
+          "y": 1848,
+          "w": 358,
+          "h": 600
+        },
+        {
+          "tag": "DIV",
+          "cls": "flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden h-full",
+          "text": "Sai's PhotographyProfessional Photography Package·INQ-B3E74CView supplierEvent · July 24, 2026Lyceum of the Philippines University - CaviteProposal ReceivedOriginal requesti need a",
+          "x": 16,
+          "y": 1848,
+          "w": 358,
+          "h": 600
+        },
+        {
+          "tag": "DIV",
+          "cls": "w-full max-w-lg rounded-2xl border border-blue-100 bg-white p-4 shadow-sm",
+          "text": "Original requesti need a lot of foodSubmitted July 16, 2026 at 12:04 PM",
+          "x": 33,
+          "y": 2125,
+          "w": 324,
+          "h": 109
+        },
+        {
+          "tag": "DIV",
+          "cls": "relative flex items-end gap-2 rounded-2xl border bg-white p-2 transition-colors border-slate-300 focus-within:border-blue-0",
+          "text": "",
+          "x": 33,
+          "y": 2369,
+          "w": 324,
+          "h": 62
+        },
+        {
+          "tag": "ASIDE",
+          "cls": "space-y-4 lg:sticky lg:top-[9.5rem]",
+          "text": "Next StepAccept ProposalDeclinePayment SummaryTotal Amount₱10,000Status TimelineDate not setDate not setDate not set",
+          "x": 16,
+          "y": 2488,
+          "w": 358,
+          "h": 517
+        },
+        {
+          "tag": "DIV",
+          "cls": "flex flex-col gap-5 rounded-[24px] border border-[#BFDBFE] bg-white p-6 shadow-sm shadow-blue-200/50",
+          "text": "Next StepAccept ProposalDecline",
+          "x": 16,
+          "y": 2488,
+          "w": 358,
+          "h": 206
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-5 h-12 text-sm font-bold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8] disabled:opacity-50",
+          "text": "Accept Proposal",
+          "x": 41,
+          "y": 2561,
+          "w": 308,
+          "h": 48
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white border border-[#E5E7EB] px-5 h-12 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50",
+          "text": "Decline",
+          "x": 41,
+          "y": 2621,
+          "w": 308,
+          "h": 48
+        },
+        {
+          "tag": "DIV",
+          "cls": "flex flex-col gap-4 rounded-[24px] border border-[#E5E7EB] bg-white p-6 shadow-sm shadow-slate-200/60",
+          "text": "Payment SummaryTotal Amount₱10,000Status TimelineDate not setDate not setDate not set",
+          "x": 16,
+          "y": 2710,
+          "w": 358,
+          "h": 295
+        },
+        {
+          "tag": "SECTION",
+          "cls": "",
+          "text": "",
+          "x": 0,
+          "y": 3666,
+          "w": 390,
+          "h": 0
+        }
+      ],
+      "actions": [
+        {
+          "tag": "A",
+          "cls": "justify-self-start text-xl font-black tracking-[-0.04em] text-[#2563EB] transition hover:text-[#1d4ed8]",
+          "text": "Venora",
+          "x": 16,
+          "y": 26,
+          "w": 67,
+          "h": 28
+        },
+        {
+          "tag": "A",
+          "cls": "rounded-full px-4 py-2 text-sm font-bold transition text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
+          "text": "Home",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "A",
+          "cls": "rounded-full px-4 py-2 text-sm font-bold transition text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
+          "text": "Venues",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "A",
+          "cls": "rounded-full px-4 py-2 text-sm font-bold transition text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
+          "text": "About",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "A",
+          "cls": "rounded-full px-4 py-2 text-sm font-bold transition text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
+          "text": "Host a Venue",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-transparent text-slate-400 transition hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30",
+          "text": "9+",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E5E7EB] bg-[#EFF6FF] text-sm font-black text-[#2563EB] shadow-sm transition hover:border-[#2563EB]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 sm:h-11 sm:w-11",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-transparent text-slate-400 transition hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30",
+          "text": "9+",
+          "x": 234,
+          "y": 20,
+          "w": 40,
+          "h": 40
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E5E7EB] bg-[#EFF6FF] text-sm font-black text-[#2563EB] shadow-sm transition hover:border-[#2563EB]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 sm:h-11 sm:w-11",
+          "text": "",
+          "x": 282,
+          "y": 20,
+          "w": 40,
+          "h": 40
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#1D4ED8] transition hover:bg-[#EFF6FF]",
+          "text": "",
+          "x": 330,
+          "y": 18,
+          "w": 44,
+          "h": 44
+        },
+        {
+          "tag": "A",
+          "cls": "min-w-[5.5rem] flex-1 whitespace-nowrap border-b-2 px-3 py-3 text-center text-sm font-bold transition sm:px-4 sm:py-3.5 border-transparent text-[#6B7280] hover:border-[#BFDBFE] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
+          "text": "Browse",
+          "x": 8,
+          "y": 81,
+          "w": 94,
+          "h": 46
+        },
+        {
+          "tag": "A",
+          "cls": "min-w-[5.5rem] flex-1 whitespace-nowrap border-b-2 px-3 py-3 text-center text-sm font-bold transition sm:px-4 sm:py-3.5 border-transparent text-[#6B7280] hover:border-[#BFDBFE] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
+          "text": "Suppliers",
+          "x": 102,
+          "y": 81,
+          "w": 94,
+          "h": 46
+        },
+        {
+          "tag": "A",
+          "cls": "min-w-[5.5rem] flex-1 whitespace-nowrap border-b-2 px-3 py-3 text-center text-sm font-bold transition sm:px-4 sm:py-3.5 border-transparent text-[#6B7280] hover:border-[#BFDBFE] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
+          "text": "Bookings",
+          "x": 195,
+          "y": 81,
+          "w": 94,
+          "h": 46
+        },
+        {
+          "tag": "A",
+          "cls": "min-w-[5.5rem] flex-1 whitespace-nowrap border-b-2 px-3 py-3 text-center text-sm font-bold transition sm:px-4 sm:py-3.5 border-transparent text-[#6B7280] hover:border-[#BFDBFE] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
+          "text": "Favorites",
+          "x": 289,
+          "y": 81,
+          "w": 94,
+          "h": 46
+        },
+        {
+          "tag": "A",
+          "cls": "inline-flex w-fit items-center gap-2 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-bold text-[#6B7280] shadow-sm transition hover:border-[#2563EB]/50 hover:bg-[#EFF6FF] hover:text-[#2563EB]",
+          "text": "Back to Supplier Inquiries",
+          "x": 16,
+          "y": 152,
+          "w": 232,
+          "h": 38
+        },
+        {
+          "tag": "A",
+          "cls": "inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 border border-[#E5E7EB] bg-white text-[#111827] shadow-sm hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]",
+          "text": "View Supplier Profile",
+          "x": 16,
+          "y": 567,
+          "w": 187,
+          "h": 48
+        },
+        {
+          "tag": "A",
+          "cls": "inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-extrabold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 border border-[#E5E7EB] bg-white text-[#111827] shadow-sm hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]",
+          "text": "View Venue Booking",
+          "x": 33,
+          "y": 1215,
+          "w": 324,
+          "h": 48
+        },
+        {
+          "tag": "A",
+          "cls": "inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition",
+          "text": "View supplier",
+          "x": 33,
+          "y": 1952,
+          "w": 126,
+          "h": 30
+        },
+        {
+          "tag": "A",
+          "cls": "hover:text-blue-600 hover:underline",
+          "text": "Lyceum of the Philippines University - Cavite",
+          "x": 68,
+          "y": 2035,
+          "w": 257,
+          "h": 16
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white transition hover:bg-blue-700 disabled:opacity-50 disabled:bg-slate-100 disabled:text-slate-400",
+          "text": "",
+          "x": 304,
+          "y": 2378,
+          "w": 44,
+          "h": 44
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-5 h-12 text-sm font-bold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8] disabled:opacity-50",
+          "text": "Accept Proposal",
+          "x": 41,
+          "y": 2561,
+          "w": 308,
+          "h": 48
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white border border-[#E5E7EB] px-5 h-12 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50",
+          "text": "Decline",
+          "x": 41,
+          "y": 2621,
+          "w": 308,
+          "h": 48
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Help Center",
+          "x": 24,
+          "y": 3123,
+          "w": 73,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Safety Information",
+          "x": 24,
+          "y": 3150,
+          "w": 113,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Cancellation Options",
+          "x": 24,
+          "y": 3176,
+          "w": 127,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Venora your home",
+          "x": 24,
+          "y": 3263,
+          "w": 113,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Cover for Hosts",
+          "x": 24,
+          "y": 3290,
+          "w": 96,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Hosting Resources",
+          "x": 24,
+          "y": 3316,
+          "w": 116,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Newsroom",
+          "x": 24,
+          "y": 3403,
+          "w": 66,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "New Features",
+          "x": 24,
+          "y": 3429,
+          "w": 85,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "transition-all hover:text-[#2563EB] hover:underline",
+          "text": "Careers",
+          "x": 24,
+          "y": 3456,
+          "w": 48,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "font-semibold hover:text-[#2563EB]",
+          "text": "Privacy",
+          "x": 205,
+          "y": 3602,
+          "w": 43,
+          "h": 16
+        },
+        {
+          "tag": "A",
+          "cls": "font-semibold hover:text-[#2563EB]",
+          "text": "Terms",
+          "x": 268,
+          "y": 3602,
+          "w": 36,
+          "h": 16
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-brand-600)] text-white shadow-xl transition hover:bg-[var(--color-brand-700)] hover:scale-105",
+          "text": "",
+          "x": 314,
+          "y": 768,
+          "w": 56,
+          "h": 56
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "tsqd-open-btn",
+          "text": "",
+          "x": 334,
+          "y": 788,
+          "w": 40,
+          "h": 40
+        }
+      ],
+      "forms": [
+        {
+          "tag": "TEXTAREA",
+          "cls": "w-full resize-none bg-transparent py-2 pl-3 pr-2 text-sm sm:text-base font-medium text-slate-900 placeholder:text-slate-400 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 disabled:opacity-50",
+          "text": "",
+          "x": 42,
+          "y": 2378,
+          "w": 254,
+          "h": 44
+        }
+      ],
+      "fixedSticky": [
+        {
+          "tag": "DIV",
+          "cls": "sticky top-0 z-50 shrink-0",
+          "text": "VenoraHomeVenuesAboutHost a Venue9+9+BrowseSuppliersBookingsFavorites",
+          "x": 0,
+          "y": 0,
+          "w": 390,
+          "h": 128
+        },
+        {
+          "tag": "ASIDE",
+          "cls": "space-y-4 lg:sticky lg:top-[9.5rem]",
+          "text": "Next StepAccept ProposalDeclinePayment SummaryTotal Amount₱10,000Status TimelineDate not setDate not setDate not set",
+          "x": 16,
+          "y": 2488,
+          "w": 358,
+          "h": 517
+        },
+        {
+          "tag": "OL",
+          "cls": "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "w": 390,
+          "h": 32
+        },
+        {
+          "tag": "DIV",
+          "cls": "fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3",
+          "text": "",
+          "x": 314,
+          "y": 768,
+          "w": 56,
+          "h": 56
+        }
+      ]
+    },
+    "overflow": false
+  }
+]
