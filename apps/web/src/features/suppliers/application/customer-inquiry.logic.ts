@@ -20,6 +20,17 @@ export type CustomerInquiryTimelineItem = {
   actor: "customer" | "supplier" | "system";
 };
 
+export type CustomerInquiryDetailSection =
+  | "event_details"
+  | "selected_service"
+  | "supplier_details"
+  | "request_notes"
+  | "status_timeline"
+  | "conversation"
+  | "next_step"
+  | "proposal_summary"
+  | "supplier_trust";
+
 type SupplierProfileLike = {
   business_name?: string | null;
   supplier_categories?: { name?: string | null } | null;
@@ -281,6 +292,23 @@ export function canCustomerActOnQuote(
 
   const validThrough = new Date(`${quote.valid_until}T23:59:59.999`);
   return Number.isFinite(validThrough.getTime()) && validThrough >= now;
+}
+
+export function getCustomerInquiryDetailLayout(): {
+  main: CustomerInquiryDetailSection[];
+  sidebar: CustomerInquiryDetailSection[];
+} {
+  return {
+    main: [
+      "event_details",
+      "selected_service",
+      "supplier_details",
+      "request_notes",
+      "status_timeline",
+      "conversation",
+    ],
+    sidebar: ["next_step", "proposal_summary", "supplier_trust"],
+  };
 }
 
 export function buildInquiryTimeline(

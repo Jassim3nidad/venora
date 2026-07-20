@@ -62,9 +62,7 @@ export default async function AccountLayout({
 
             <div className="flex min-w-0 flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0">
-                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#2563EB]">
-                  Venora account center
-                </div>
+
 
                 <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl">
                   Account Center

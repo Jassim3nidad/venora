@@ -3,6 +3,7 @@ import {
   buildInquiryTimeline,
   canCustomerActOnQuote,
   filterCustomerInquiries,
+  getCustomerInquiryDetailLayout,
   getCustomerInquiryStats,
   getCustomerActivityHref,
   parseCustomerActivityView,
@@ -151,5 +152,19 @@ describe("customer supplier inquiry logic", () => {
       "Message sent",
       "Service Proposal sent",
     ]);
+  });
+
+  it("keeps inquiry detail sections aligned with booking detail layout", () => {
+    expect(getCustomerInquiryDetailLayout()).toEqual({
+      main: [
+        "event_details",
+        "selected_service",
+        "supplier_details",
+        "request_notes",
+        "status_timeline",
+        "conversation",
+      ],
+      sidebar: ["next_step", "proposal_summary", "supplier_trust"],
+    });
   });
 });
