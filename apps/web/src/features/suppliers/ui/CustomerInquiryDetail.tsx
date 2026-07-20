@@ -9,18 +9,16 @@ import {
   CalendarDays,
   CheckCircle2,
   Clock3,
+  ExternalLink,
   FileText,
   Loader2,
   MapPin,
-  MessageSquare,
-  ReceiptText,
   Store,
   Users,
   XCircle,
 } from "lucide-react";
 import {
   CustomerCard,
-  CustomerLinkButton,
   CustomerStatusBadge,
 } from "@/src/components/customer/CustomerUI";
 import {
@@ -379,147 +377,272 @@ export function CustomerInquiryDetail({
   };
 
   return (
-    <div className="bg-[#F8FAFC] font-sans text-[#111827]">
-      <div
-        className={cx(
-          "mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-6 sm:px-6 sm:py-8 lg:px-8",
-        )}
+    <main className="mx-auto max-w-7xl space-y-6 px-4 pb-28 pt-6 font-sans sm:px-6 sm:pt-8 lg:px-8 lg:pb-8">
+      <Link
+        href="/bookings?view=suppliers"
+        className="inline-flex w-fit items-center gap-2 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-bold text-[#6B7280] shadow-sm transition hover:border-[#2563EB]/50 hover:bg-[#EFF6FF] hover:text-[#2563EB]"
       >
-        <Link
-          href="/bookings?view=suppliers"
-          className="inline-flex w-fit items-center gap-2 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-bold text-[#6B7280] shadow-sm transition hover:border-[#2563EB]/50 hover:bg-[#EFF6FF] hover:text-[#2563EB]"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Supplier Inquiries
-        </Link>
+        <ArrowLeft className="h-4 w-4" />
+        Back to Supplier Inquiries
+      </Link>
 
-        <CustomerCard className="p-5 sm:p-6">
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
-            <div className="min-w-0">
-              <div className="mb-4 flex flex-wrap items-center gap-2">
-                <StatusPill
-                  label={displayStatus.label}
-                  tone={displayStatus.tone}
-                />
-                {quote?.valid_until && canActOnQuote ? (
-                  <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.12em] text-slate-500">
-                    Valid until {formatDate(quote.valid_until)}
-                  </span>
+      <CustomerCard className="p-5 sm:p-6">
+        <div className="flex flex-col justify-between gap-5 md:flex-row md:items-start">
+          <div className="min-w-0 space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusPill
+                label={displayStatus.label}
+                tone={displayStatus.tone}
+              />
+              {quote?.valid_until && canActOnQuote ? (
+                <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.12em] text-slate-500">
+                  Valid until {formatDate(quote.valid_until)}
+                </span>
+              ) : null}
+              <span className="text-xs font-semibold text-slate-400">
+                Ref: INQ-{inquiry.id.slice(0, 6).toUpperCase()}
+              </span>
+            </div>
+            <h1 className="max-w-3xl break-words text-3xl font-bold leading-tight tracking-[-0.04em] text-slate-950 md:text-4xl">
+              {supplierName}
+            </h1>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium text-[#6B7280]">
+              <span className="flex items-center gap-1.5">
+                <Store className="h-4 w-4 text-[#2563EB]" />
+                {serviceName}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <MapPin className="h-4 w-4 text-[#2563EB]" />
+                {venueLocation}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Users className="h-4 w-4 text-[#2563EB]" />
+                {guestCount} guests
+              </span>
+            </div>
+            <p className="text-sm font-medium text-[#6B7280]">
+              Submitted {formatDate(inquiry.created_at)}
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row md:justify-end">
+            {supplier?.slug ? (
+              <Link
+                href={`/suppliers/${supplier.slug}`}
+                className="flex h-11 whitespace-nowrap items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] px-4 text-sm font-bold text-[#111827] hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
+              >
+                <ExternalLink className="h-4 w-4" />
+                View Supplier
+              </Link>
+            ) : null}
+            {booking ? (
+              <Link
+                href={`/bookings/${booking.id}`}
+                className="flex h-11 whitespace-nowrap items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] px-4 text-sm font-bold text-[#111827] hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
+              >
+                <CalendarDays className="h-4 w-4" />
+                View Venue Booking
+              </Link>
+            ) : null}
+          </div>
+        </div>
+      </CustomerCard>
+
+      {error && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
+          {error}
+        </div>
+      )}
+
+      {inquiry.status === "declined" && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+          <h3 className="font-bold text-amber-900">Inquiry declined</h3>
+          <p className="mt-1 text-sm font-semibold text-amber-700">
+            The supplier was unable to continue with this request. You can
+            still review the details and conversation below.
+          </p>
+          {inquiry.decline_reason && (
+            <p className="mt-2 rounded-xl bg-white/50 p-3 text-sm font-medium text-amber-900">
+              Reason: {inquiry.decline_reason}
+            </p>
+          )}
+        </div>
+      )}
+
+      {inquiry.status === "cancelled" && (
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <h3 className="font-bold text-slate-900">Inquiry cancelled</h3>
+          <p className="mt-1 text-sm font-semibold text-slate-700">
+            This inquiry is closed, but its messages and service proposal
+            remain available for your records.
+          </p>
+        </div>
+      )}
+
+      {inquiry.status === "completed" && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+          <h3 className="font-bold text-emerald-900">Service completed</h3>
+          <p className="mt-1 text-sm font-semibold text-emerald-700">
+            This supplier engagement has been completed.
+          </p>
+        </div>
+      )}
+
+      {quoteStatus === "expired" && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+          <h3 className="font-bold text-amber-900">
+            Service proposal expired
+          </h3>
+          <p className="mt-1 text-sm font-semibold text-amber-700">
+            This proposal can no longer be accepted, but its pricing and terms
+            remain available.
+          </p>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-3">
+        <div className="space-y-10 lg:col-span-2">
+          <section className="space-y-4">
+            <h3 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
+              Event Details
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
+                <CustomerStatusBadge icon={CalendarDays}>
+                  Event Date
+                </CustomerStatusBadge>
+                <p className="mt-3 text-lg font-bold text-slate-950">
+                  {formatDate(eventDate)}
+                </p>
+                <p className="mt-1 text-sm font-semibold text-slate-500">
+                  {formatTime(eventTime)}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
+                <CustomerStatusBadge icon={MapPin}>Venue</CustomerStatusBadge>
+                <p className="mt-3 line-clamp-2 text-lg font-bold text-slate-950">
+                  {venueName}
+                </p>
+                <p className="mt-1 line-clamp-2 text-sm font-semibold text-slate-500">
+                  {venueLocation}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
+                <CustomerStatusBadge icon={Users}>Guests</CustomerStatusBadge>
+                <p className="mt-3 text-lg font-bold text-slate-950">
+                  {guestCount}
+                </p>
+                <p className="mt-1 text-sm font-semibold text-slate-500">
+                  Total attendees expected
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section className="space-y-4 border-t border-[#E5E7EB] pt-10">
+            <h3 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
+              Selected Service
+            </h3>
+            {quote ? (
+              <div className="rounded-2xl border border-[#DBEAFE] bg-[#EFF6FF] p-5 shadow-sm">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <h4 className="text-lg font-bold tracking-[-0.02em] text-[#1D4ED8]">
+                      {quote.title || `${serviceName} Proposal`}
+                    </h4>
+                    {quote.service_description ? (
+                      <p className="mt-2 text-sm font-medium leading-relaxed text-[#1E40AF]">
+                        {quote.service_description}
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="shrink-0 sm:text-right">
+                    <p className="text-lg font-bold text-[#1E3A8A]">
+                      {quoteTotal}
+                    </p>
+                    <p className="text-xs font-semibold text-[#3B82F6]">
+                      Proposed total
+                    </p>
+                  </div>
+                </div>
+
+                {quoteItems.length > 0 ? (
+                  <div className="mt-5 border-t border-blue-200/60 pt-4">
+                    <h4 className="mb-3 text-xs font-extrabold uppercase tracking-[0.12em] text-[#1E40AF]">
+                      Line items
+                    </h4>
+                    <div className="space-y-3">
+                      {quoteItems.map((item, index) => (
+                        <div
+                          key={item.id ?? index}
+                          className="flex items-start justify-between gap-4 rounded-2xl bg-white/55 px-4 py-3"
+                        >
+                          <div>
+                            <p className="text-sm font-bold text-[#1E3A8A]">
+                              {item.description || serviceName}
+                            </p>
+                            {Number(item.quantity) > 1 &&
+                            isFiniteAmount(item.unit_price) ? (
+                              <p className="text-xs font-medium text-[#1E40AF]">
+                                {item.quantity} x{" "}
+                                {formatCurrency(item.unit_price)}
+                              </p>
+                            ) : null}
+                          </div>
+                          <p className="shrink-0 text-sm font-bold text-[#1E3A8A]">
+                            {formatLineItemAmount(
+                              item,
+                              quote.total,
+                              quoteItems.length,
+                            )}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                {quote.terms ? (
+                  <div className="mt-5 border-t border-blue-200/60 pt-4">
+                    <h4 className="mb-2 text-xs font-extrabold uppercase tracking-[0.12em] text-[#1E40AF]">
+                      Terms and conditions
+                    </h4>
+                    <p className="whitespace-pre-wrap text-sm font-medium leading-6 text-[#1E40AF]">
+                      {quote.terms}
+                    </p>
+                  </div>
                 ) : null}
               </div>
-              <h1 className="max-w-3xl break-words text-3xl font-bold leading-tight tracking-[-0.04em] text-slate-950 md:text-4xl">
-                {supplierName}
-              </h1>
-              <p className="mt-2 text-sm font-medium leading-6 text-[#6B7280] sm:text-base">
-                Inquiry for{" "}
-                <span className="font-bold text-slate-800">{serviceName}</span>
-                {" - "}submitted {formatDate(inquiry.created_at)}
-              </p>
-              <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                  <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
-                    Event date
-                  </p>
-                  <p className="mt-1 text-sm font-bold text-slate-950">
-                    {formatDate(eventDate)}
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                  <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
-                    Venue
-                  </p>
-                  <p className="mt-1 truncate text-sm font-bold text-slate-950">
-                    {venueName}
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                  <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
-                    Guests
-                  </p>
-                  <p className="mt-1 text-sm font-bold text-slate-950">
-                    {guestCount}
-                  </p>
-                </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-6 text-center">
+                <FileText className="mx-auto mb-2 h-8 w-8 text-slate-400" />
+                <h3 className="text-base font-bold text-slate-900">
+                  No service proposal yet
+                </h3>
+                <p className="mt-1 text-sm font-medium text-slate-500">
+                  The supplier may send a service proposal after reviewing your
+                  inquiry.
+                </p>
               </div>
-            </div>
+            )}
+          </section>
 
-            <div className="rounded-3xl border border-[#DBEAFE] bg-[#EFF6FF] p-5">
-              <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#2563EB]">
-                Proposal amount
-              </p>
-              <p className="mt-2 text-3xl font-bold tracking-[-0.04em] text-slate-950">
-                {quoteTotal}
-              </p>
-              <p className="mt-1 text-sm font-medium leading-6 text-[#1D4ED8]">
-                Review the supplier proposal and decide if it fits your event.
-              </p>
-              {canActOnQuote ? (
-                <div className="mt-4 lg:hidden">
-                  <QuoteActionButtons
-                    isPending={isPending}
-                    onChoose={openActionDialog}
-                  />
-                </div>
+          <section className="space-y-4 border-t border-[#E5E7EB] pt-10">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <h3 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
+                Supplier Details
+              </h3>
+              {supplier?.slug ? (
+                <Link
+                  href={`/suppliers/${supplier.slug}`}
+                  className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white px-4 text-sm font-bold text-[#111827] hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] sm:w-auto"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  View Supplier Profile
+                </Link>
               ) : null}
             </div>
-          </div>
-        </CustomerCard>
-
-        {error && (
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
-            {error}
-          </div>
-        )}
-
-        {inquiry.status === "declined" && (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-            <h3 className="font-bold text-amber-900">Inquiry declined</h3>
-            <p className="mt-1 text-sm font-semibold text-amber-700">
-              The supplier was unable to continue with this request. You can
-              still review the details and conversation below.
-            </p>
-            {inquiry.decline_reason && (
-              <p className="mt-2 rounded-xl bg-white/50 p-3 text-sm font-medium text-amber-900">
-                Reason: {inquiry.decline_reason}
-              </p>
-            )}
-          </div>
-        )}
-
-        {inquiry.status === "cancelled" && (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <h3 className="font-bold text-slate-900">Inquiry cancelled</h3>
-            <p className="mt-1 text-sm font-semibold text-slate-700">
-              This inquiry is closed, but its messages and service proposal
-              remain available for your records.
-            </p>
-          </div>
-        )}
-
-        {inquiry.status === "completed" && (
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-            <h3 className="font-bold text-emerald-900">Service completed</h3>
-            <p className="mt-1 text-sm font-semibold text-emerald-700">
-              This supplier engagement has been completed.
-            </p>
-          </div>
-        )}
-
-        {quoteStatus === "expired" && (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-            <h3 className="font-bold text-amber-900">
-              Service proposal expired
-            </h3>
-            <p className="mt-1 text-sm font-semibold text-amber-700">
-              This proposal can no longer be accepted, but its pricing and terms
-              remain available.
-            </p>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="space-y-6">
-            <CustomerCard className="p-5 sm:p-6">
+            <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-5">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-center gap-4">
                   <img
@@ -539,15 +662,6 @@ export function CustomerInquiryDetail({
                     </p>
                   </div>
                 </div>
-                {supplier?.slug ? (
-                  <CustomerLinkButton
-                    href={`/suppliers/${supplier.slug}`}
-                    tone="secondary"
-                    className="w-full sm:w-auto"
-                  >
-                    View Supplier Profile
-                  </CustomerLinkButton>
-                ) : null}
               </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 {responseTime ? (
@@ -563,279 +677,205 @@ export function CustomerInquiryDetail({
                   </div>
                 ) : null}
               </div>
-            </CustomerCard>
+            </div>
+          </section>
 
-            {booking && (
-              <CustomerCard className="p-5 sm:p-6">
-                <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <CustomerStatusBadge icon={CalendarDays} className="mb-2">
-                      Linked event
-                    </CustomerStatusBadge>
-                    <h2 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
-                      Event Details
-                    </h2>
-                  </div>
-                  <CustomerLinkButton
-                    href={`/bookings/${booking.id}`}
-                    tone="secondary"
-                    className="w-full sm:w-auto"
-                  >
-                    View Venue Booking
-                  </CustomerLinkButton>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
-                    <CalendarDays className="mb-3 h-5 w-5 text-[#2563EB]" />
-                    <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
-                      Date and time
-                    </p>
-                    <p className="mt-1 text-lg font-bold text-slate-950">
-                      {formatDate(eventDate)}
-                    </p>
-                    <p className="mt-1 text-xs font-semibold text-slate-500">
-                      {formatTime(eventTime)}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 sm:col-span-1">
-                    <MapPin className="mb-3 h-5 w-5 text-[#2563EB]" />
-                    <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
-                      Venue
-                    </p>
-                    <p className="mt-1 line-clamp-2 text-lg font-bold text-slate-950">
-                      {venueName}
-                    </p>
-                    <p className="mt-1 line-clamp-2 text-xs font-semibold text-slate-500">
-                      {venueLocation}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
-                    <Users className="mb-3 h-5 w-5 text-[#2563EB]" />
-                    <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
-                      Guests
-                    </p>
-                    <p className="mt-1 text-lg font-bold text-slate-950">
-                      {guestCount}
-                    </p>
-                  </div>
-                </div>
-              </CustomerCard>
-            )}
-
-            <CustomerCard className="p-5 sm:p-6">
-              <div className="mb-5">
-                <div>
-                  <CustomerStatusBadge icon={ReceiptText} className="mb-2">
-                    Service proposal
-                  </CustomerStatusBadge>
-                  <h2 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
-                    Proposal Details
-                  </h2>
-                </div>
-              </div>
-
-              {quote ? (
-                <div className="rounded-3xl border border-[#DBEAFE] bg-[#EFF6FF] p-5">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="min-w-0">
-                      <h3 className="text-lg font-bold tracking-[-0.02em] text-[#1D4ED8]">
-                        {quote.title || `${serviceName} Proposal`}
-                      </h3>
-                      {quote.service_description ? (
-                        <p className="mt-2 text-sm font-medium leading-6 text-[#1E40AF]">
-                          {quote.service_description}
-                        </p>
-                      ) : null}
-                    </div>
-                    <div className="shrink-0 rounded-2xl bg-white/70 px-4 py-3 sm:text-right">
-                      <p className="text-lg font-bold text-[#1E3A8A]">
-                        {quoteTotal}
-                      </p>
-                      <p className="text-xs font-semibold text-[#3B82F6]">
-                        Proposed total
-                      </p>
-                    </div>
-                  </div>
-
-                  {quoteItems.length > 0 ? (
-                    <div className="mt-5 border-t border-blue-200/60 pt-4">
-                      <h4 className="mb-3 text-xs font-extrabold uppercase tracking-[0.12em] text-[#1E40AF]">
-                        Line items
-                      </h4>
-                      <div className="space-y-3">
-                        {quoteItems.map((item, index) => (
-                          <div
-                            key={item.id ?? index}
-                            className="flex items-start justify-between gap-4 rounded-2xl bg-white/55 px-4 py-3"
-                          >
-                            <div>
-                              <p className="text-sm font-bold text-[#1E3A8A]">
-                                {item.description || serviceName}
-                              </p>
-                              {Number(item.quantity) > 1 &&
-                              isFiniteAmount(item.unit_price) ? (
-                                <p className="text-xs font-medium text-[#1E40AF]">
-                                  {item.quantity} x{" "}
-                                  {formatCurrency(item.unit_price)}
-                                </p>
-                              ) : null}
-                            </div>
-                            <p className="shrink-0 text-sm font-bold text-[#1E3A8A]">
-                              {formatLineItemAmount(
-                                item,
-                                quote.total,
-                                quoteItems.length,
-                              )}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
-
-                  {quote.terms ? (
-                    <div className="mt-5 border-t border-blue-200/60 pt-4">
-                      <h4 className="mb-2 text-xs font-extrabold uppercase tracking-[0.12em] text-[#1E40AF]">
-                        Terms and conditions
-                      </h4>
-                      <p className="whitespace-pre-wrap text-sm font-medium leading-6 text-[#1E40AF]">
-                        {quote.terms}
-                      </p>
-                    </div>
-                  ) : null}
-                </div>
-              ) : (
-                <div className="rounded-2xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-6 text-center">
-                  <FileText className="mx-auto mb-2 h-8 w-8 text-slate-400" />
-                  <h3 className="text-base font-bold text-slate-900">
-                    No service proposal yet
-                  </h3>
-                  <p className="mt-1 text-sm font-medium text-slate-500">
-                    The supplier may send a service proposal after reviewing
-                    your inquiry.
-                  </p>
-                </div>
-              )}
-            </CustomerCard>
-
-            <section>
-              <InquiryConversation
-                currentUserId={inquiry.customer_id}
-                role="customer"
-                messages={messages}
-                originalRequest={{
-                  message:
-                    inquiry.message +
-                    (inquiry.special_requirements
-                      ? `\n\nSpecial Requirements:\n${inquiry.special_requirements}`
-                      : ""),
-                  createdAt: inquiry.created_at,
-                }}
-                header={{
-                  role: "customer",
-                  supplierName,
-                  supplierLogo: supplierImage,
-                  supplierSlug: supplier?.slug,
-                  serviceName,
-                  inquiryRef: `INQ-${inquiry.id.slice(0, 6).toUpperCase()}`,
-                  eventType: inquiry.event_type || "Event",
-                  eventDate: formatDate(eventDate),
-                  venueName,
-                  venueLink: booking ? `/bookings/${booking.id}` : undefined,
-                  statusLabel: displayStatus.label,
-                }}
-                compact
-                isReadOnly={conversationClosed}
-                onSendMessage={async (formData) => {
-                  const message = formData.get("message") as string;
-                  return sendCustomerInquiryMessageAction({
-                    inquiryId: inquiry.id,
-                    message,
-                  });
-                }}
-              />
-            </section>
-          </div>
-
-          <aside className="space-y-4 lg:sticky lg:top-[9.5rem]">
-            <CustomerCard className="p-5">
-              <div>
-                <h2 className="text-xl font-bold tracking-[-0.03em] text-slate-950">
-                  Proposal Summary
-                </h2>
-                <p className="mt-1 text-sm font-medium leading-6 text-slate-500">
-                  Review the quote before making a decision.
-                </p>
-              </div>
-
-              <div className="mt-5 rounded-3xl border border-slate-200 bg-slate-50 p-4">
+          <section className="space-y-4 border-t border-[#E5E7EB] pt-10">
+            <h3 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
+              Your Request & Notes
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
                 <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
-                  Total amount
+                  Original request
                 </p>
-                <p className="mt-1 text-lg font-bold text-slate-950">
-                  {quoteTotal}
+                <p className="mt-2 whitespace-pre-line text-sm font-medium leading-6 text-slate-600">
+                  {inquiry.message || "No message added."}
                 </p>
-                {quote?.valid_until ? (
-                  <p className="mt-2 text-xs font-semibold text-slate-500">
-                    Valid until {formatDate(quote.valid_until)}
-                  </p>
-                ) : null}
               </div>
+              <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
+                <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
+                  Special requirements
+                </p>
+                <p className="mt-2 whitespace-pre-line text-sm font-medium leading-6 text-slate-600">
+                  {inquiry.special_requirements || "No special requirements added."}
+                </p>
+              </div>
+            </div>
+          </section>
 
+          <section className="space-y-4 border-t border-[#E5E7EB] pt-10">
+            <h3 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
+              Status Timeline
+            </h3>
+            <div className="grid gap-0">
+              {timeline.length > 0 ? (
+                timeline.map((item, index) => (
+                  <div
+                    key={`${item.label}-${item.at}-${index}`}
+                    className="flex gap-4 border-l-2 border-[#DBEAFE] pb-6 last:border-transparent last:pb-0"
+                  >
+                    <span className="-ml-[13px] flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-4 border-white bg-[#2563EB] text-white">
+                      <Clock3 className="h-3 w-3" />
+                    </span>
+                    <div className="-mt-1.5">
+                      <p className="text-sm font-bold text-slate-950">
+                        {item.label}
+                      </p>
+                      <p className="mt-0.5 text-xs font-semibold text-slate-500">
+                        {formatTimelineDate(item.at)}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="rounded-2xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-semibold text-slate-500">
+                  No status updates yet.
+                </p>
+              )}
+            </div>
+          </section>
+
+          <section className="space-y-4 border-t border-[#E5E7EB] pt-10">
+            <div className="flex items-center gap-2">
+              <h3 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
+                Chat with Supplier
+              </h3>
+              {conversationClosed ? (
+                <span className="rounded-full border border-[#E5E7EB] bg-[#F3F4F6] px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#6B7280]">
+                  Read-only
+                </span>
+              ) : null}
+            </div>
+            <InquiryConversation
+              currentUserId={inquiry.customer_id}
+              role="customer"
+              messages={messages}
+              originalRequest={{
+                message:
+                  inquiry.message +
+                  (inquiry.special_requirements
+                    ? `\n\nSpecial Requirements:\n${inquiry.special_requirements}`
+                    : ""),
+                createdAt: inquiry.created_at,
+              }}
+              header={{
+                role: "customer",
+                supplierName,
+                supplierLogo: supplierImage,
+                supplierSlug: supplier?.slug,
+                serviceName,
+                inquiryRef: `INQ-${inquiry.id.slice(0, 6).toUpperCase()}`,
+                eventType: inquiry.event_type || "Event",
+                eventDate: formatDate(eventDate),
+                venueName,
+                venueLink: booking ? `/bookings/${booking.id}` : undefined,
+                statusLabel: displayStatus.label,
+              }}
+              compact
+              isReadOnly={conversationClosed}
+              onSendMessage={async (formData) => {
+                const message = formData.get("message") as string;
+                return sendCustomerInquiryMessageAction({
+                  inquiryId: inquiry.id,
+                  message,
+                });
+              }}
+            />
+          </section>
+        </div>
+
+        <aside className="space-y-4 lg:sticky lg:top-24">
+          <CustomerCard className="p-6">
+            <h2 className="text-xl font-bold tracking-[-0.03em] text-slate-950">
+              Next Step
+            </h2>
+            <div className="mt-5 grid gap-3">
               {canActOnQuote ? (
-                <div className="mt-5 hidden lg:block">
-                  <QuoteActionButtons
-                    isPending={isPending}
-                    onChoose={openActionDialog}
-                  />
+                <QuoteActionButtons
+                  isPending={isPending}
+                  onChoose={openActionDialog}
+                />
+              ) : (
+                <p className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-medium leading-6 text-slate-600">
+                  {displayStatus.description}
+                </p>
+              )}
+            </div>
+          </CustomerCard>
+
+          <CustomerCard className="p-6">
+            <h2 className="text-xl font-bold tracking-[-0.03em] text-slate-950">
+              Proposal Summary
+            </h2>
+            <div className="mt-5 space-y-3">
+              <div className="flex justify-between gap-4 text-sm font-medium text-slate-600">
+                <span>Total amount</span>
+                <span className="text-right font-bold text-slate-950">
+                  {quoteTotal}
+                </span>
+              </div>
+              <div className="flex justify-between gap-4 text-sm font-medium text-slate-600">
+                <span>Status</span>
+                <span className="text-right font-bold text-slate-950">
+                  {humanizeStatus(quote?.status) ?? displayStatus.label}
+                </span>
+              </div>
+              {quote?.valid_until ? (
+                <div className="flex justify-between gap-4 text-sm font-medium text-slate-600">
+                  <span>Valid until</span>
+                  <span className="text-right font-bold text-slate-950">
+                    {formatDate(quote.valid_until)}
+                  </span>
                 </div>
               ) : null}
-            </CustomerCard>
+            </div>
+          </CustomerCard>
 
-            {timeline.length > 0 ? (
-              <CustomerCard className="p-5">
-                <h2 className="text-xl font-bold tracking-[-0.03em] text-slate-950">
-                  Status Timeline
-                </h2>
-                <div className="mt-5 grid gap-0">
-                  {timeline.map((item, index) => (
-                    <div
-                      key={`${item.label}-${item.at}-${index}`}
-                      className="flex gap-4 border-l-2 border-[#DBEAFE] pb-5 last:border-transparent last:pb-0"
-                    >
-                      <span className="-ml-[13px] flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-4 border-white bg-[#2563EB] text-white">
-                        <Clock3 className="h-3 w-3" />
-                      </span>
-                      <div className="-mt-1.5">
-                        <p className="text-sm font-bold text-slate-950">
-                          {item.label}
-                        </p>
-                        <p className="mt-0.5 text-xs font-semibold text-slate-500">
-                          {formatTimelineDate(item.at)}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CustomerCard>
-            ) : null}
-
-            <CustomerCard className="p-5">
-              <div className="flex gap-3">
-                <MessageSquare className="mt-1 h-5 w-5 shrink-0 text-[#2563EB]" />
-                <div>
-                  <h2 className="text-xl font-bold tracking-[-0.03em] text-slate-950">
-                    Conversation
-                  </h2>
-                  <p className="mt-1 text-sm font-medium leading-6 text-slate-500">
-                    Messages remain attached to this supplier inquiry for your
-                    records.
-                  </p>
+          <CustomerCard className="p-6">
+            <h2 className="text-xl font-bold tracking-[-0.03em] text-slate-950">
+              Supplier
+            </h2>
+            <div className="mt-5 flex min-w-0 items-start gap-4">
+              <img
+                src={supplierImage}
+                alt={supplierName}
+                className="h-12 w-12 shrink-0 rounded-2xl border border-[#E5E7EB] object-cover"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="break-words text-base font-bold leading-snug text-slate-950">
+                  {supplierName}
+                </p>
+                <p className="mt-1 text-sm font-medium text-slate-500">
+                  {supplierCategory}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
+                  {responseTime ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-2.5 py-1 text-[#1D4ED8]">
+                      <Clock3 className="h-3.5 w-3.5" />
+                      {responseTime}
+                    </span>
+                  ) : null}
+                  {accreditationLabel ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-emerald-700">
+                      <BadgeCheck className="h-3.5 w-3.5" />
+                      {accreditationLabel}
+                    </span>
+                  ) : null}
                 </div>
               </div>
-            </CustomerCard>
-          </aside>
-        </div>
+            </div>
+            {supplier?.slug ? (
+              <Link
+                href={`/suppliers/${supplier.slug}`}
+                className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-[#BFDBFE] bg-[#EFF6FF] px-4 text-sm font-bold text-[#1D4ED8] transition hover:bg-[#DBEAFE]"
+              >
+                View supplier profile
+                <ExternalLink className="h-4 w-4" />
+              </Link>
+            ) : null}
+          </CustomerCard>
+        </aside>
       </div>
 
       <QuoteActionDialog
@@ -847,6 +887,6 @@ export function CustomerInquiryDetail({
         onClose={() => setPendingAction(null)}
         onConfirm={handleConfirmAction}
       />
-    </div>
+    </main>
   );
 }

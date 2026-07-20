@@ -61,9 +61,7 @@ export default function AccountMobileMenu() {
         <DialogTitle className="sr-only">Account menu</DialogTitle>
 
         <div className="border-b border-[#E5E7EB]/80 px-5 py-5">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#2563EB]">
-            Venora account center
-          </div>
+
           <h2 className="mt-3 text-xl font-bold tracking-[-0.03em] text-slate-950">
             Account Center
           </h2>
