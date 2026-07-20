@@ -29,6 +29,27 @@ export async function GET(request: NextRequest) {
   // Redirect token_hash to the /confirm route to prevent email scanners
   // from consuming the single-use token during pre-fetch.
   if (tokenHash && type) {
+    if (type === "recovery") {
+      const supabase = await createClient();
+      const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "recovery" });
+      
+      if (!error) {
+        const response = NextResponse.redirect(new URL("/reset-password", request.url));
+        response.cookies.set(PASSWORD_RECOVERY_COOKIE, "1", {
+          httpOnly: true,
+          sameSite: "lax",
+          secure: requestUrl.protocol === "https:",
+          maxAge: 10 * 60,
+          path: "/",
+        });
+        return response;
+      }
+      
+      const redirectUrl = new URL("/login", request.url);
+      redirectUrl.searchParams.set("error", "oauth_callback_failed");
+      return NextResponse.redirect(redirectUrl);
+    }
+
     const confirmUrl = new URL("/confirm", request.url);
     confirmUrl.searchParams.set("token_hash", tokenHash);
     confirmUrl.searchParams.set("type", type);
