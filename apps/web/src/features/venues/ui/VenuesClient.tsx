@@ -1098,7 +1098,7 @@ export default function VenuesClient({
 
       return a.name.localeCompare(b.name);
     });
-  }, [aiResultRank, favoriteIds, filters, dynamicVenues]);
+  }, [aiResultRank, favoriteIds, filters, dynamicVenues, aiSearchResult]);
 
   // Reset visible count whenever filters change the result set
   useEffect(() => {
