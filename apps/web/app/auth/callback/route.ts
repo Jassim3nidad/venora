@@ -45,9 +45,8 @@ export async function GET(request: NextRequest) {
         return response;
       }
       
-      const redirectUrl = new URL("/login", request.url);
-      redirectUrl.searchParams.set("error", "oauth_callback_failed");
-      return NextResponse.redirect(redirectUrl);
+      // If error, send to reset-password to show the native expired link UI
+      return NextResponse.redirect(new URL("/reset-password", request.url));
     }
 
     const confirmUrl = new URL("/confirm", request.url);
@@ -76,6 +75,10 @@ export async function GET(request: NextRequest) {
 
   // ── PKCE / OAuth code exchange ─────────────────────────────────────
   if (!code) {
+    if (next === "/reset-password") {
+      return NextResponse.redirect(new URL("/reset-password", request.url));
+    }
+
     const redirectUrl = new URL("/login", request.url);
     redirectUrl.searchParams.set("error", "oauth_callback_failed");
 
@@ -87,6 +90,10 @@ export async function GET(request: NextRequest) {
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
+    if (next === "/reset-password") {
+      return NextResponse.redirect(new URL("/reset-password", request.url));
+    }
+
     const redirectUrl = new URL("/login", request.url);
     redirectUrl.searchParams.set(
       "error",
