@@ -46,6 +46,7 @@ import CostEstimatorPanel from "@/features/ai/ui/CostEstimatorPanel";
 import RecommendedVenues from "@/features/ai/ui/RecommendedVenues";
 import { pickGalleryImages, pickPromotionalVideo } from "../utils/venue-media";
 import type { PublicOwnerProfile } from "@/src/features/owners/application/queries";
+import type { SmartVenueSearchVenue } from "@/features/search/schemas/search.schema";
 
 interface VenueDetailsProps {
   venue: any;
@@ -56,6 +57,7 @@ interface VenueDetailsProps {
   eligibleReviewBooking?: { id: string; event_date: string | null } | null;
   isOwnVenue?: boolean;
   ownerProfile?: PublicOwnerProfile | null;
+  recommendedFallbackVenues?: SmartVenueSearchVenue[];
 }
 
 function formatCurrency(value?: number | null) {
@@ -88,6 +90,7 @@ export default function VenueDetails({
   eligibleReviewBooking = null,
   isOwnVenue = false,
   ownerProfile = null,
+  recommendedFallbackVenues = [],
 }: VenueDetailsProps) {
   const [isFavorited, setIsFavorited] = useState(initialIsFavorited);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
@@ -738,7 +741,7 @@ export default function VenueDetails({
       )}
 
       {/* AI Recommendations */}
-      <RecommendedVenues />
+      <RecommendedVenues fallbackVenues={recommendedFallbackVenues} />
 
       {/* Global Toast component */}
       {toastOpen && (

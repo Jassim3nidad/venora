@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import VenueDetails from "@/src/features/venues/ui/VenueDetails";
 import {
+  getFallbackResearchVenueRecommendations,
   getNearbyResearchVenueDetails,
   getPublicResearchReviews,
   getResearchVenueBySlug,
@@ -16,6 +17,7 @@ import { resolveVenueMapCoordinates } from "@/src/lib/venue-map-coordinates";
 import { userOwnsVenue } from "@/src/lib/rbac/ownership";
 import { buildVenueImageUrl } from "@/src/features/venues/utils/venue-mappers";
 import { absoluteUrl } from "@/src/lib/site-url";
+import type { SmartVenueSearchVenue } from "@/features/search/schemas/search.schema";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -27,6 +29,24 @@ const VENUE_DETAIL_SELECT = `
   venue_images(*),
   venue_amenities(amenities(name)),
   organizations(*)
+`;
+
+const VENUE_RECOMMENDATION_SELECT = `
+  id,
+  name,
+  slug,
+  city,
+  province,
+  municipality,
+  base_price,
+  capacity_min,
+  capacity_max,
+  indoor_outdoor,
+  parking_available,
+  pet_friendly,
+  wheelchair_accessible,
+  avg_rating,
+  venue_images(storage_path, is_featured, display_order, media_type)
 `;
 
 function isUuid(value: string) {
@@ -82,6 +102,92 @@ async function getPublishedVenueByIdentifier(
 
   const { data } = await query.maybeSingle();
   return data ?? null;
+}
+
+function toRecommendationVenue(venue: any): SmartVenueSearchVenue {
+  const coverImage =
+    [...(venue.venue_images ?? [])]
+      .filter((item: any) => item.media_type !== "video")
+      .sort((a: any, b: any) => {
+        if (a.is_featured && !b.is_featured) return -1;
+        if (!a.is_featured && b.is_featured) return 1;
+        return (a.display_order ?? 0) - (b.display_order ?? 0);
+      })[0]?.storage_path ?? null;
+
+  return {
+    id: venue.id,
+    name: venue.name,
+    slug: venue.slug ?? null,
+    city: venue.city ?? null,
+    province: venue.province ?? null,
+    municipality: venue.municipality ?? venue.city ?? null,
+    basePrice:
+      venue.base_price == null || !Number.isFinite(Number(venue.base_price))
+        ? null
+        : Number(venue.base_price),
+    capacityMin: venue.capacity_min ?? null,
+    capacityMax: venue.capacity_max ?? null,
+    indoorOutdoor: venue.indoor_outdoor ?? null,
+    parkingAvailable:
+      venue.parking_available == null ? null : Boolean(venue.parking_available),
+    petFriendly:
+      venue.pet_friendly == null ? null : Boolean(venue.pet_friendly),
+    wheelchairAccessible:
+      venue.wheelchair_accessible == null
+        ? null
+        : Boolean(venue.wheelchair_accessible),
+    avgRating:
+      venue.avg_rating == null || !Number.isFinite(Number(venue.avg_rating))
+        ? null
+        : Number(venue.avg_rating),
+    similarity: null,
+    relevanceScore: null,
+    categories: [],
+    amenities: [],
+    eventTypes: [],
+    image: coverImage ? buildVenueImageUrl(coverImage) : null,
+  };
+}
+
+async function getPublishedFallbackRecommendations(
+  supabase: any,
+  currentVenueId: string | null,
+  limit = 4,
+): Promise<SmartVenueSearchVenue[]> {
+  let query = supabase
+    .from("venues")
+    .select(VENUE_RECOMMENDATION_SELECT)
+    .eq("status", "published")
+    .order("is_featured", { ascending: false })
+    .order("avg_rating", { ascending: false, nullsFirst: false })
+    .order("updated_at", { ascending: false })
+    .limit(limit);
+
+  if (currentVenueId) {
+    query = query.neq("id", currentVenueId);
+  }
+
+  const { data } = await query;
+  return (data ?? []).map(toRecommendationVenue);
+}
+
+function uniqueRecommendationVenues(
+  venues: SmartVenueSearchVenue[],
+  currentVenue: { id?: string | null; slug?: string | null },
+  limit = 4,
+) {
+  const seen = new Set<string>();
+  const currentKeys = new Set(
+    [currentVenue.id, currentVenue.slug].filter(Boolean).map(String),
+  );
+
+  return venues.filter((venue) => {
+    const keys = [venue.id, venue.slug].filter(Boolean).map(String);
+    if (keys.some((key) => currentKeys.has(key))) return false;
+    if (keys.some((key) => seen.has(key))) return false;
+    keys.forEach((key) => seen.add(key));
+    return true;
+  }).slice(0, limit);
 }
 
 function mergeVenueDetail(dbVenue: any, fallback?: ResearchVenue | null) {
@@ -245,6 +351,16 @@ export default async function VenueDetailPage({ params }: Props) {
   const nearbyVenues = datasetVenue
     ? getNearbyResearchVenueDetails(datasetVenue)
     : [];
+  const recommendedFallbackVenues = uniqueRecommendationVenues(
+    [
+      ...(await getPublishedFallbackRecommendations(
+        supabase,
+        dbVenue?.id ?? null,
+      )),
+      ...getFallbackResearchVenueRecommendations(datasetVenue),
+    ],
+    { id: venue.id, slug: venue.slug },
+  );
 
   let initialIsFavorited = false;
   if (user) {
@@ -283,6 +399,7 @@ export default async function VenueDetailPage({ params }: Props) {
         eligibleReviewBooking={eligibleReviewBooking}
         isOwnVenue={isOwnVenue}
         ownerProfile={ownerProfile}
+        recommendedFallbackVenues={recommendedFallbackVenues}
       />
     </>
   );
