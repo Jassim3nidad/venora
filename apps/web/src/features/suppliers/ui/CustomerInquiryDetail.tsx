@@ -407,7 +407,7 @@ export function CustomerInquiryDetail({
                   </span>
                 ) : null}
               </div>
-              <h1 className="max-w-3xl break-words text-3xl font-black leading-tight tracking-[-0.04em] text-slate-950 md:text-4xl">
+              <h1 className="max-w-3xl break-words text-3xl font-bold leading-tight tracking-[-0.04em] text-slate-950 md:text-4xl">
                 {supplierName}
               </h1>
               <p className="mt-2 text-sm font-medium leading-6 text-[#6B7280] sm:text-base">
@@ -420,7 +420,7 @@ export function CustomerInquiryDetail({
                   <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
                     Event date
                   </p>
-                  <p className="mt-1 text-sm font-black text-slate-950">
+                  <p className="mt-1 text-sm font-bold text-slate-950">
                     {formatDate(eventDate)}
                   </p>
                 </div>
@@ -428,7 +428,7 @@ export function CustomerInquiryDetail({
                   <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
                     Venue
                   </p>
-                  <p className="mt-1 truncate text-sm font-black text-slate-950">
+                  <p className="mt-1 truncate text-sm font-bold text-slate-950">
                     {venueName}
                   </p>
                 </div>
@@ -436,7 +436,7 @@ export function CustomerInquiryDetail({
                   <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
                     Guests
                   </p>
-                  <p className="mt-1 text-sm font-black text-slate-950">
+                  <p className="mt-1 text-sm font-bold text-slate-950">
                     {guestCount}
                   </p>
                 </div>
@@ -447,7 +447,7 @@ export function CustomerInquiryDetail({
               <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#2563EB]">
                 Proposal amount
               </p>
-              <p className="mt-2 text-3xl font-black tracking-[-0.04em] text-slate-950">
+              <p className="mt-2 text-3xl font-bold tracking-[-0.04em] text-slate-950">
                 {quoteTotal}
               </p>
               <p className="mt-1 text-sm font-medium leading-6 text-[#1D4ED8]">
@@ -473,7 +473,7 @@ export function CustomerInquiryDetail({
 
         {inquiry.status === "declined" && (
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-            <h3 className="font-black text-amber-900">Inquiry declined</h3>
+            <h3 className="font-bold text-amber-900">Inquiry declined</h3>
             <p className="mt-1 text-sm font-semibold text-amber-700">
               The supplier was unable to continue with this request. You can
               still review the details and conversation below.
@@ -488,7 +488,7 @@ export function CustomerInquiryDetail({
 
         {inquiry.status === "cancelled" && (
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <h3 className="font-black text-slate-900">Inquiry cancelled</h3>
+            <h3 className="font-bold text-slate-900">Inquiry cancelled</h3>
             <p className="mt-1 text-sm font-semibold text-slate-700">
               This inquiry is closed, but its messages and service proposal
               remain available for your records.
@@ -498,7 +498,7 @@ export function CustomerInquiryDetail({
 
         {inquiry.status === "completed" && (
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-            <h3 className="font-black text-emerald-900">Service completed</h3>
+            <h3 className="font-bold text-emerald-900">Service completed</h3>
             <p className="mt-1 text-sm font-semibold text-emerald-700">
               This supplier engagement has been completed.
             </p>
@@ -507,7 +507,7 @@ export function CustomerInquiryDetail({
 
         {quoteStatus === "expired" && (
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-            <h3 className="font-black text-amber-900">
+            <h3 className="font-bold text-amber-900">
               Service proposal expired
             </h3>
             <p className="mt-1 text-sm font-semibold text-amber-700">
@@ -531,7 +531,7 @@ export function CustomerInquiryDetail({
                     <CustomerStatusBadge icon={Store} className="mb-2">
                       Supplier
                     </CustomerStatusBadge>
-                    <h2 className="truncate text-lg font-black tracking-[-0.02em] text-slate-950">
+                    <h2 className="truncate text-lg font-bold tracking-[-0.02em] text-slate-950">
                       {supplierName}
                     </h2>
                     <p className="text-sm font-medium text-slate-500">
@@ -590,7 +590,7 @@ export function CustomerInquiryDetail({
                     <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
                       Date and time
                     </p>
-                    <p className="mt-1 text-lg font-black text-slate-950">
+                    <p className="mt-1 text-lg font-bold text-slate-950">
                       {formatDate(eventDate)}
                     </p>
                     <p className="mt-1 text-xs font-semibold text-slate-500">
@@ -602,7 +602,7 @@ export function CustomerInquiryDetail({
                     <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
                       Venue
                     </p>
-                    <p className="mt-1 line-clamp-2 text-lg font-black text-slate-950">
+                    <p className="mt-1 line-clamp-2 text-lg font-bold text-slate-950">
                       {venueName}
                     </p>
                     <p className="mt-1 line-clamp-2 text-xs font-semibold text-slate-500">
@@ -614,7 +614,7 @@ export function CustomerInquiryDetail({
                     <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
                       Guests
                     </p>
-                    <p className="mt-1 text-lg font-black text-slate-950">
+                    <p className="mt-1 text-lg font-bold text-slate-950">
                       {guestCount}
                     </p>
                   </div>
@@ -638,7 +638,7 @@ export function CustomerInquiryDetail({
                 <div className="rounded-3xl border border-[#DBEAFE] bg-[#EFF6FF] p-5">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
-                      <h3 className="text-lg font-black tracking-[-0.02em] text-[#1D4ED8]">
+                      <h3 className="text-lg font-bold tracking-[-0.02em] text-[#1D4ED8]">
                         {quote.title || `${serviceName} Proposal`}
                       </h3>
                       {quote.service_description ? (
@@ -648,7 +648,7 @@ export function CustomerInquiryDetail({
                       ) : null}
                     </div>
                     <div className="shrink-0 rounded-2xl bg-white/70 px-4 py-3 sm:text-right">
-                      <p className="text-lg font-black text-[#1E3A8A]">
+                      <p className="text-lg font-bold text-[#1E3A8A]">
                         {quoteTotal}
                       </p>
                       <p className="text-xs font-semibold text-[#3B82F6]">
@@ -707,7 +707,7 @@ export function CustomerInquiryDetail({
               ) : (
                 <div className="rounded-2xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-6 text-center">
                   <FileText className="mx-auto mb-2 h-8 w-8 text-slate-400" />
-                  <h3 className="text-base font-black text-slate-900">
+                  <h3 className="text-base font-bold text-slate-900">
                     No service proposal yet
                   </h3>
                   <p className="mt-1 text-sm font-medium text-slate-500">
@@ -760,7 +760,7 @@ export function CustomerInquiryDetail({
           <aside className="space-y-4 lg:sticky lg:top-[9.5rem]">
             <CustomerCard className="p-5">
               <div>
-                <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">
+                <h2 className="text-xl font-bold tracking-[-0.03em] text-slate-950">
                   Proposal Summary
                 </h2>
                 <p className="mt-1 text-sm font-medium leading-6 text-slate-500">
@@ -772,7 +772,7 @@ export function CustomerInquiryDetail({
                 <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
                   Total amount
                 </p>
-                <p className="mt-1 text-lg font-black text-slate-950">
+                <p className="mt-1 text-lg font-bold text-slate-950">
                   {quoteTotal}
                 </p>
                 {quote?.valid_until ? (
@@ -794,7 +794,7 @@ export function CustomerInquiryDetail({
 
             {timeline.length > 0 ? (
               <CustomerCard className="p-5">
-                <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">
+                <h2 className="text-xl font-bold tracking-[-0.03em] text-slate-950">
                   Status Timeline
                 </h2>
                 <div className="mt-5 grid gap-0">
@@ -807,7 +807,7 @@ export function CustomerInquiryDetail({
                         <Clock3 className="h-3 w-3" />
                       </span>
                       <div className="-mt-1.5">
-                        <p className="text-sm font-black text-slate-950">
+                        <p className="text-sm font-bold text-slate-950">
                           {item.label}
                         </p>
                         <p className="mt-0.5 text-xs font-semibold text-slate-500">
@@ -824,7 +824,7 @@ export function CustomerInquiryDetail({
               <div className="flex gap-3">
                 <MessageSquare className="mt-1 h-5 w-5 shrink-0 text-[#2563EB]" />
                 <div>
-                  <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">
+                  <h2 className="text-xl font-bold tracking-[-0.03em] text-slate-950">
                     Conversation
                   </h2>
                   <p className="mt-1 text-sm font-medium leading-6 text-slate-500">

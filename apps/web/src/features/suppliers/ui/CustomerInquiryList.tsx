@@ -265,7 +265,7 @@ export function CustomerInquiryList({
             <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#6B7280]">
               {label}
             </p>
-            <p className="mt-2 text-3xl font-black tracking-[-0.04em] text-[#111827]">
+            <p className="mt-2 text-3xl font-bold tracking-[-0.04em] text-[#111827]">
               {value}
             </p>
           </CustomerCard>
@@ -304,7 +304,7 @@ export function CustomerInquiryList({
                 {option.label}
                 <span
                   className={[
-                    "inline-flex min-w-6 items-center justify-center rounded-full px-2 py-0.5 text-[11px] font-black",
+                    "inline-flex min-w-6 items-center justify-center rounded-full px-2 py-0.5 text-[11px] font-bold",
                     isActive
                       ? "bg-[#2563EB] text-white"
                       : "bg-white text-slate-500",
@@ -438,7 +438,7 @@ export function CustomerInquiryList({
                         tone={displayStatus.tone}
                       />
 
-                      <h2 className="mt-3 truncate text-2xl font-black tracking-[-0.04em] text-[#111827]">
+                      <h2 className="mt-3 truncate text-2xl font-bold tracking-[-0.04em] text-[#111827]">
                         {supplier?.business_name ?? "Supplier"}
                       </h2>
                       <p className="mt-1 truncate text-sm font-bold text-[#6B7280]">
@@ -471,7 +471,7 @@ export function CustomerInquiryList({
                       <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">
                         Proposal
                       </p>
-                      <p className="mt-1 text-lg font-black text-[#111827]">
+                      <p className="mt-1 text-lg font-bold text-[#111827]">
                         {quote?.total
                           ? formatCurrency(quote.total)
                           : proposalLabel}

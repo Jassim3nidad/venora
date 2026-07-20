@@ -48,7 +48,7 @@ export function SupplierFavoriteButton({
           : `Save ${supplierName} to favorites`
       }
       className={[
-        "inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-black transition disabled:cursor-wait disabled:opacity-70",
+        "inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-bold transition disabled:cursor-wait disabled:opacity-70",
         isFavorited
           ? "border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
           : "border-white/20 bg-white/95 text-slate-950 hover:bg-white",

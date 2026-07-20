@@ -66,7 +66,7 @@ export default async function AccountLayout({
                   Venora account center
                 </div>
 
-                <h1 className="max-w-3xl text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl">
+                <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl">
                   Account Center
                 </h1>
 
@@ -77,7 +77,7 @@ export default async function AccountLayout({
               </div>
 
               <div className="flex w-full min-w-0 items-center gap-3 rounded-2xl border border-[#E5E7EB]/80 bg-white p-3 pr-5 shadow-sm sm:w-fit">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#EFF6FF] text-base font-black text-[#2563EB]">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#EFF6FF] text-base font-bold text-[#2563EB]">
                   {profile?.avatar_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -91,7 +91,7 @@ export default async function AccountLayout({
                 </div>
 
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-black tracking-[-0.02em] text-slate-950">
+                  <p className="truncate text-sm font-bold tracking-[-0.02em] text-slate-950">
                     {displayName}
                   </p>
                   <p className="mt-0.5 truncate text-xs font-medium text-slate-500">

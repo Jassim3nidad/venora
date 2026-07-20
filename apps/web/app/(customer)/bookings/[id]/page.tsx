@@ -17,6 +17,7 @@ import {
   ParkingCircle,
   Clock,
   ExternalLink,
+  ShieldCheck,
 } from "lucide-react";
 import { Badge, Separator, Button } from "@venora/ui";
 import { CustomerStatusBadge } from "@/src/components/customer/CustomerUI";
@@ -32,6 +33,11 @@ import { BookingConversation } from "@/src/features/booking/ui/BookingConversati
 import VenueGallery from "@/src/features/venues/ui/VenueGallery";
 import { pickGalleryImages } from "@/src/features/venues/utils/venue-media";
 import { resolveVenueMapCoordinates } from "@/src/lib/venue-map-coordinates";
+import {
+  getPublicOwnerProfileByVenue,
+  type PublicOwnerProfile,
+} from "@/src/features/owners/application/queries";
+import { getOwnerTrustCardLabels } from "@/src/features/owners/ui/owner-profile-presentation";
 
 import { BookingVenueMap } from "@/src/features/booking/ui/BookingVenueMap";
 
@@ -140,6 +146,82 @@ function locationLabel(venue: BookingDetail["venues"]) {
   if (!venue) return "Location unavailable";
   if (venue.city && venue.province) return `${venue.city}, ${venue.province}`;
   return venue.city || venue.province || "Location unavailable";
+}
+
+function initials(name: string) {
+  return (
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("") || "VO"
+  );
+}
+
+function VenueOwnerTrustCard({
+  ownerProfile,
+}: {
+  ownerProfile: PublicOwnerProfile;
+}) {
+  const labels = getOwnerTrustCardLabels({
+    isVerified: ownerProfile.isVerified,
+    venueCount: ownerProfile.venueCount,
+    reviewCount: ownerProfile.reviewCount,
+    avgRating: ownerProfile.avgRating,
+  });
+
+  return (
+    <div className="flex flex-col gap-5 rounded-[24px] border border-[#E5E7EB] bg-white p-6 shadow-sm shadow-slate-200/60">
+      <h2 className="text-xl font-bold tracking-[-0.03em] text-slate-950">
+        Venue Owner
+      </h2>
+      <div className="flex min-w-0 items-start gap-4">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#2563EB] text-lg font-bold text-white shadow-sm shadow-blue-200/70">
+          {initials(ownerProfile.name)}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#64748B]">
+            Managed by
+          </p>
+          <h2 className="mt-1 break-words text-base font-bold leading-snug text-slate-950">
+            {ownerProfile.name}
+          </h2>
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-[#64748B]">
+            <span className="inline-flex items-center gap-1.5">
+              <ShieldCheck
+                aria-hidden="true"
+                className={
+                  ownerProfile.isVerified
+                    ? "h-4 w-4 text-emerald-500"
+                    : "h-4 w-4 text-[#2563EB]"
+                }
+              />
+              {labels.verification}
+            </span>
+            <span>{labels.venues}</span>
+            {labels.reviews ? (
+              <span className="inline-flex items-center gap-1">
+                <Star
+                  aria-hidden="true"
+                  className="h-3.5 w-3.5 fill-amber-400 stroke-amber-400"
+                />
+                {labels.reviews}
+              </span>
+            ) : null}
+          </div>
+        </div>
+      </div>
+
+      <Link
+        href={`/owners/${ownerProfile.slug}`}
+        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-[#BFDBFE] bg-[#EFF6FF] px-4 text-sm font-bold text-[#1D4ED8] transition hover:bg-[#DBEAFE]"
+      >
+        View owner profile
+        <ExternalLink aria-hidden="true" className="h-4 w-4" />
+      </Link>
+    </div>
+  );
 }
 
 function getVenueResponse(booking: BookingDetail) {
@@ -319,6 +401,9 @@ export default async function BookingDetailPage({ params }: Props) {
   const isReadOnly = !MESSAGING_ALLOWED.has(typedBooking.status);
 
   const messages = await getBookingMessages(id);
+  const ownerProfile = typedBooking.venues?.slug
+    ? await getPublicOwnerProfileByVenue(supabase, typedBooking.venues.slug)
+    : null;
   const galleryImages = pickGalleryImages(
     typedBooking.venues?.venue_images ?? [],
   );
@@ -379,7 +464,7 @@ export default async function BookingDetailPage({ params }: Props) {
                 Ref: {typedBooking.id.split("-")[0]?.toUpperCase() ?? "N/A"}
               </span>
             </div>
-            <h1 className="max-w-3xl text-3xl font-black leading-tight tracking-[-0.04em] text-slate-950 md:text-4xl">
+            <h1 className="max-w-3xl text-3xl font-bold leading-tight tracking-[-0.04em] text-slate-950 md:text-4xl">
               {typedBooking.venues?.name ?? "Venue Booking"}
             </h1>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium text-[#6B7280]">
@@ -395,6 +480,17 @@ export default async function BookingDetailPage({ params }: Props) {
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row md:justify-end">
+            {ownerProfile ? (
+              <Link
+                href={`/owners/${ownerProfile.slug}`}
+                className="flex h-11 items-center gap-2 rounded-2xl border border-[#E5E7EB] px-4 text-sm font-bold text-[#111827] hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ShieldCheck className="h-4 w-4" />
+                View Owner
+              </Link>
+            ) : null}
             {typedBooking.venues?.slug && (
               <Link
                 href={`/venues/${typedBooking.venues.slug}`}
@@ -430,7 +526,7 @@ export default async function BookingDetailPage({ params }: Props) {
                 <CustomerStatusBadge icon={CalendarDays}>
                   Event Date
                 </CustomerStatusBadge>
-                <p className="mt-3 text-lg font-black text-slate-950">
+                <p className="mt-3 text-lg font-bold text-slate-950">
                   {formatDate(typedBooking.event_date)}
                 </p>
                 <p className="mt-1 text-sm font-semibold text-slate-500">
@@ -441,7 +537,7 @@ export default async function BookingDetailPage({ params }: Props) {
 
               <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
                 <CustomerStatusBadge icon={Users}>Guests</CustomerStatusBadge>
-                <p className="mt-3 text-lg font-black text-slate-950">
+                <p className="mt-3 text-lg font-bold text-slate-950">
                   {typedBooking.guest_count.toLocaleString("en-PH")}
                 </p>
                 <p className="mt-1 text-sm font-semibold text-slate-500">
@@ -462,7 +558,7 @@ export default async function BookingDetailPage({ params }: Props) {
               <div className="rounded-2xl border border-[#DBEAFE] bg-[#EFF6FF] p-5 shadow-sm">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div>
-                    <h4 className="text-lg font-black tracking-[-0.02em] text-[#1D4ED8]">
+                    <h4 className="text-lg font-bold tracking-[-0.02em] text-[#1D4ED8]">
                       {typedBooking.venue_packages.name}
                     </h4>
                     {typedBooking.venue_packages.description && (
@@ -472,7 +568,7 @@ export default async function BookingDetailPage({ params }: Props) {
                     )}
                   </div>
                   <div className="shrink-0 sm:text-right">
-                    <p className="text-lg font-black text-[#1E3A8A]">
+                    <p className="text-lg font-bold text-[#1E3A8A]">
                       {formatCurrency(typedBooking.total_amount)}
                     </p>
                     <p className="text-xs font-semibold text-[#3B82F6]">
@@ -493,7 +589,7 @@ export default async function BookingDetailPage({ params }: Props) {
                     </p>
                   </div>
                   <div className="shrink-0 sm:text-right">
-                    <p className="text-lg font-black text-slate-900">
+                    <p className="text-lg font-bold text-slate-900">
                       {formatCurrency(typedBooking.total_amount)}
                     </p>
                     <p className="text-xs font-semibold text-slate-500">
@@ -700,7 +796,7 @@ export default async function BookingDetailPage({ params }: Props) {
                     </span>
 
                     <div className="-mt-1.5">
-                      <p className="text-sm font-black capitalize text-slate-950">
+                      <p className="text-sm font-bold capitalize text-slate-950">
                         {item.status.replace(/_/g, " ")}
                       </p>
                       <p className="mt-0.5 text-xs font-semibold text-slate-500">
@@ -764,7 +860,7 @@ export default async function BookingDetailPage({ params }: Props) {
         <aside className="space-y-4 lg:sticky lg:top-24">
           {/* Action Card */}
           <div className="flex flex-col gap-5 rounded-[24px] border border-[#BFDBFE] bg-white p-6 shadow-sm shadow-blue-200/50">
-            <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">
+            <h2 className="text-xl font-bold tracking-[-0.03em] text-slate-950">
               Next Step
             </h2>
 
@@ -776,9 +872,13 @@ export default async function BookingDetailPage({ params }: Props) {
             </div>
           </div>
 
+          {ownerProfile ? (
+            <VenueOwnerTrustCard ownerProfile={ownerProfile} />
+          ) : null}
+
           {/* Pricing Summary */}
           <div className="flex flex-col gap-4 rounded-[24px] border border-[#E5E7EB] bg-white p-6 shadow-sm shadow-slate-200/60">
-            <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">
+            <h2 className="text-xl font-bold tracking-[-0.03em] text-slate-950">
               Payment Summary
             </h2>
 
@@ -810,7 +910,7 @@ export default async function BookingDetailPage({ params }: Props) {
                     className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-3"
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-black text-slate-950">
+                      <p className="text-sm font-bold text-slate-950">
                         {formatCurrency(transaction.amount)}
                       </p>
                       <span className="rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.08em] text-[#2563EB]">

@@ -82,7 +82,7 @@ export function CustomerPageHeader({
             </CustomerStatusBadge>
           ) : null}
 
-          <h1 className="max-w-3xl break-words text-3xl font-black leading-9 tracking-[-0.04em] text-slate-950 sm:text-4xl sm:leading-tight">
+          <h1 className="max-w-3xl break-words text-3xl font-bold leading-9 tracking-[-0.04em] text-slate-950 sm:text-4xl sm:leading-tight">
             {title}
           </h1>
 
@@ -166,7 +166,7 @@ export function CustomerEmptyState({
         </p>
       ) : null}
 
-      <h2 className="mx-auto mt-2 max-w-xl text-2xl font-black tracking-[-0.04em] text-[#111827]">
+      <h2 className="mx-auto mt-2 max-w-xl text-2xl font-bold tracking-[-0.04em] text-[#111827]">
         {title}
       </h2>
 

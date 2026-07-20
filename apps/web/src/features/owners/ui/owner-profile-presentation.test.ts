@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   getOwnerReviewLabels,
+  getOwnerTrustCardLabels,
   summarizeServiceAreas,
 } from "./owner-profile-presentation";
 
@@ -48,6 +49,38 @@ describe("getOwnerReviewLabels", () => {
     expect(getOwnerReviewLabels(1, 5)).toEqual({
       rating: "5.0 out of 5",
       reviews: "1 review",
+    });
+  });
+});
+
+describe("getOwnerTrustCardLabels", () => {
+  it("summarizes verified owners with venue and review evidence", () => {
+    expect(
+      getOwnerTrustCardLabels({
+        isVerified: true,
+        venueCount: 3,
+        reviewCount: 12,
+        avgRating: 4.76,
+      }),
+    ).toEqual({
+      verification: "Verified venue owner",
+      venues: "3 venues",
+      reviews: "4.8 from 12 reviews",
+    });
+  });
+
+  it("uses safe labels when public owner proof is limited", () => {
+    expect(
+      getOwnerTrustCardLabels({
+        isVerified: false,
+        venueCount: 1,
+        reviewCount: 0,
+        avgRating: 0,
+      }),
+    ).toEqual({
+      verification: "Venora venue owner",
+      venues: "1 venue",
+      reviews: null,
     });
   });
 });

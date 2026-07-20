@@ -65,7 +65,7 @@ export default function SupplierFavoritesGrid({
           No saved suppliers yet
         </p>
 
-        <h2 className="mx-auto mt-2 max-w-xl text-3xl font-black tracking-[-0.05em] text-[#111827]">
+        <h2 className="mx-auto mt-2 max-w-xl text-3xl font-bold tracking-[-0.05em] text-[#111827]">
           Build a supplier shortlist for your next event.
         </h2>
 
@@ -156,7 +156,7 @@ export default function SupplierFavoritesGrid({
 
                 <div className="flex items-end justify-between gap-4 border-t border-slate-100 pt-4">
                   <div className="min-w-0">
-                    <p className="text-lg font-black leading-6 text-slate-950">
+                    <p className="text-lg font-bold leading-6 text-slate-950">
                       {formatSupplierPrice(startingPrice)}
                     </p>
                     <p className="mt-0.5 text-xs font-semibold uppercase tracking-[0.1em] text-slate-400">

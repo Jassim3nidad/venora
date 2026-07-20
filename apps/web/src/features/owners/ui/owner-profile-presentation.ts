@@ -41,3 +41,24 @@ export function getOwnerReviewLabels(reviewCount: number, avgRating: number) {
     reviews: `${reviewCount.toLocaleString("en-PH")} ${reviewCount === 1 ? "review" : "reviews"}`,
   };
 }
+
+export function getOwnerTrustCardLabels({
+  isVerified,
+  venueCount,
+  reviewCount,
+  avgRating,
+}: {
+  isVerified: boolean;
+  venueCount: number;
+  reviewCount: number;
+  avgRating: number;
+}) {
+  return {
+    verification: isVerified ? "Verified venue owner" : "Venora venue owner",
+    venues: `${venueCount.toLocaleString("en-PH")} ${venueCount === 1 ? "venue" : "venues"}`,
+    reviews:
+      reviewCount > 0
+        ? `${avgRating.toFixed(1)} from ${reviewCount.toLocaleString("en-PH")} ${reviewCount === 1 ? "review" : "reviews"}`
+        : null,
+  };
+}

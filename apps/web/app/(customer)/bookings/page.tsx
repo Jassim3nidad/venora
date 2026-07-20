@@ -436,7 +436,7 @@ export default async function CustomerBookingsPage({
                   <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#6B7280]">
                     {label}
                   </p>
-                  <p className="mt-2 text-3xl font-black tracking-[-0.04em] text-[#111827]">
+                  <p className="mt-2 text-3xl font-bold tracking-[-0.04em] text-[#111827]">
                     {value}
                   </p>
                 </CustomerCard>
@@ -506,7 +506,7 @@ export default async function CustomerBookingsPage({
                           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                             <div>
                               <BookingStatusBadge status={booking.status} />
-                              <h2 className="mt-3 text-2xl font-black tracking-[-0.04em] text-[#111827]">
+                              <h2 className="mt-3 text-2xl font-bold tracking-[-0.04em] text-[#111827]">
                                 {venue?.name ?? "Untitled Venue"}
                               </h2>
 
@@ -535,7 +535,7 @@ export default async function CustomerBookingsPage({
                                   ? "Deposit due"
                                   : "Quote"}
                               </p>
-                              <p className="mt-1 text-lg font-black text-[#111827]">
+                              <p className="mt-1 text-lg font-bold text-[#111827]">
                                 {formatCurrency(quote)}
                               </p>
                             </div>

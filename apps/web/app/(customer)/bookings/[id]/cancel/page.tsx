@@ -128,7 +128,7 @@ export default async function CancelBookingPage({ params }: Props) {
           <p className="text-sm font-extrabold uppercase tracking-widest text-[#2563EB] mb-2">
             {eyebrow}
           </p>
-          <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
             {title}
           </h1>
           <p className="mt-3 text-base text-slate-600">

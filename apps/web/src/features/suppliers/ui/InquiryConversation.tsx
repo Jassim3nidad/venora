@@ -256,7 +256,7 @@ export function InquiryConversation({
               <h2
                 className={cx(
                   "leading-tight text-slate-900",
-                  compact ? "text-base font-bold" : "text-lg font-black",
+                  compact ? "text-base font-bold" : "text-lg font-bold",
                 )}
               >
                 {role === "customer"
@@ -336,7 +336,7 @@ export function InquiryConversation({
           {originalRequest && (
             <div className="flex justify-center mb-4">
               <div className="w-full max-w-lg rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
-                <h3 className="text-xs font-black uppercase tracking-wider text-blue-800 mb-2">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-blue-800 mb-2">
                   Original request
                 </h3>
                 <p className="text-sm font-medium leading-relaxed text-slate-700 whitespace-pre-wrap">
@@ -354,7 +354,7 @@ export function InquiryConversation({
 
           {groupedMessages.length === 0 && !originalRequest && (
             <div className="flex flex-col items-center justify-center py-10 text-center">
-              <p className="text-sm font-black text-slate-900">
+              <p className="text-sm font-bold text-slate-900">
                 No messages yet
               </p>
               <p className="mt-1 text-sm font-medium text-slate-500">

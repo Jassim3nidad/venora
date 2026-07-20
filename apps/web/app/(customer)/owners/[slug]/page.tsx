@@ -78,7 +78,7 @@ function StatItem({
       <p className="mt-4 text-xs font-extrabold uppercase tracking-[0.1em] text-[#64748B]">
         {label}
       </p>
-      <p className="mt-2 break-words text-xl font-black leading-tight text-slate-950 sm:text-2xl">
+      <p className="mt-2 break-words text-xl font-bold leading-tight text-slate-950 sm:text-2xl">
         {value}
       </p>
     </div>
@@ -110,7 +110,7 @@ function OwnerVenueCard({ venue }: { venue: PublicOwnerVenue }) {
 
       <div className="flex flex-1 flex-col gap-4 p-5">
         <div className="space-y-2">
-          <h3 className="line-clamp-2 text-lg font-black leading-tight text-slate-950 group-hover:text-[#1D4ED8]">
+          <h3 className="line-clamp-2 text-lg font-bold leading-tight text-slate-950 group-hover:text-[#1D4ED8]">
             {venue.name}
           </h3>
           <p className="flex items-center gap-1.5 text-sm font-semibold text-[#6B7280]">
@@ -126,7 +126,7 @@ function OwnerVenueCard({ venue }: { venue: PublicOwnerVenue }) {
             Up to {venue.capacityMax.toLocaleString("en-PH")} guests
           </div>
           <div className="text-right">
-            <p className="text-sm font-black text-slate-950">
+            <p className="text-sm font-bold text-slate-950">
               {formatCurrency(venue.basePrice)}
             </p>
             <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#94A3B8]">
@@ -155,7 +155,7 @@ function ReviewCard({ review }: { review: PublicOwnerReview }) {
     <article className="rounded-2xl border border-[#E5E7EB] bg-white p-5 sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#EFF6FF] text-sm font-black text-[#2563EB]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#EFF6FF] text-sm font-bold text-[#2563EB]">
             {review.customerAvatarUrl ? (
               <Image
                 src={review.customerAvatarUrl}
@@ -170,7 +170,7 @@ function ReviewCard({ review }: { review: PublicOwnerReview }) {
             )}
           </div>
           <div>
-            <h3 className="text-sm font-black text-slate-950">
+            <h3 className="text-sm font-bold text-slate-950">
               {review.customerName}
             </h3>
             <Link
@@ -181,7 +181,7 @@ function ReviewCard({ review }: { review: PublicOwnerReview }) {
             </Link>
           </div>
         </div>
-        <div className="flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-black text-amber-700">
+        <div className="flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">
           <Star aria-hidden="true" className="h-3.5 w-3.5 fill-amber-400 stroke-amber-400" />
           {review.overallRating.toFixed(1)}
         </div>
@@ -199,7 +199,7 @@ function ReviewCard({ review }: { review: PublicOwnerReview }) {
 
       {review.ownerReply ? (
         <div className="mt-4 rounded-2xl border border-[#DBEAFE] bg-[#EFF6FF] p-4">
-          <p className="text-xs font-black uppercase tracking-[0.12em] text-[#2563EB]">
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#2563EB]">
             Owner response
           </p>
           <p className="mt-2 text-sm font-medium leading-6 text-[#475569]">
@@ -223,7 +223,7 @@ function OwnerHero({ owner }: { owner: PublicOwnerProfile }) {
     >
       <div className="grid min-w-0 gap-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
         <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
-          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-[#2563EB] text-2xl font-black text-white shadow-sm shadow-blue-200/70">
+          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-[#2563EB] text-2xl font-bold text-white shadow-sm shadow-blue-200/70">
             {initials(owner.name) || "VO"}
           </div>
           <div className="min-w-0 flex-1">
@@ -245,7 +245,7 @@ function OwnerHero({ owner }: { owner: PublicOwnerProfile }) {
             </div>
             <h1
               id="owner-profile-heading"
-              className="mt-3 min-w-0 break-words text-[1.75rem] font-black leading-[1.12] text-slate-950 sm:text-4xl"
+              className="mt-3 min-w-0 break-words text-[1.75rem] font-bold leading-[1.12] text-slate-950 sm:text-4xl"
             >
               {owner.name}
             </h1>
@@ -290,7 +290,7 @@ function OwnerHero({ owner }: { owner: PublicOwnerProfile }) {
 
         <Link
           href="#venues"
-          className="inline-flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-5 text-sm font-black text-white shadow-sm shadow-blue-200/70 transition hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 sm:w-fit lg:justify-self-end"
+          className="inline-flex h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-5 text-sm font-bold text-white shadow-sm shadow-blue-200/70 transition hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 sm:w-fit lg:justify-self-end"
         >
           View venues
           <ArrowRight aria-hidden="true" className="h-4 w-4" />
@@ -379,7 +379,7 @@ export default async function OwnerProfilePage({ params }: Props) {
           <p className="text-xs font-extrabold uppercase tracking-[0.1em] text-[#2563EB]">
             About this owner
           </p>
-          <h2 className="mt-2 break-words text-2xl font-black leading-tight text-slate-950 sm:text-3xl">
+          <h2 className="mt-2 break-words text-2xl font-bold leading-tight text-slate-950 sm:text-3xl">
             Venue choices managed by {owner.name}
           </h2>
           <p className="mt-4 text-sm font-medium leading-7 text-[#475569] sm:text-base">
@@ -390,7 +390,7 @@ export default async function OwnerProfilePage({ params }: Props) {
         </div>
 
         <aside className="border-t border-[#E5E7EB] pt-7 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
-          <h2 className="text-base font-black text-slate-950">
+          <h2 className="text-base font-bold text-slate-950">
             Profile signals
           </h2>
           <ul className="mt-5 space-y-4 text-sm font-semibold text-[#475569]">
@@ -440,7 +440,7 @@ export default async function OwnerProfilePage({ params }: Props) {
             <p className="text-xs font-extrabold uppercase tracking-[0.1em] text-[#2563EB]">
               Managed venues
             </p>
-            <h2 className="mt-2 break-words text-2xl font-black leading-tight text-slate-950 sm:text-3xl">
+            <h2 className="mt-2 break-words text-2xl font-bold leading-tight text-slate-950 sm:text-3xl">
               Venues by {owner.name}
             </h2>
             <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-[#64748B]">
@@ -461,7 +461,7 @@ export default async function OwnerProfilePage({ params }: Props) {
           </div>
         ) : (
           <div className="rounded-2xl border border-dashed border-[#BFDBFE] bg-[#F8FAFC] px-6 py-12 text-center">
-            <h3 className="text-lg font-black text-slate-950">
+            <h3 className="text-lg font-bold text-slate-950">
               No published venues yet
             </h3>
             <p className="mt-2 text-sm font-medium text-[#64748B]">
@@ -476,7 +476,7 @@ export default async function OwnerProfilePage({ params }: Props) {
           <p className="text-xs font-extrabold uppercase tracking-[0.1em] text-[#2563EB]">
             Customer reviews
           </p>
-          <h2 className="mt-2 text-2xl font-black leading-tight text-slate-950 sm:text-3xl">
+          <h2 className="mt-2 text-2xl font-bold leading-tight text-slate-950 sm:text-3xl">
             Recent reviews across their venues
           </h2>
         </div>
@@ -489,7 +489,7 @@ export default async function OwnerProfilePage({ params }: Props) {
           </div>
         ) : (
           <div className="rounded-2xl border border-dashed border-[#E5E7EB] bg-[#F8FAFC] px-6 py-12 text-center">
-            <h3 className="text-lg font-black text-slate-950">
+            <h3 className="text-lg font-bold text-slate-950">
               No reviews yet
             </h3>
             <p className="mt-2 text-sm font-medium text-[#64748B]">

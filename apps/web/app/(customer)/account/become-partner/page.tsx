@@ -32,7 +32,7 @@ export default async function BecomePartnerPage() {
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
                 Application Setup
               </p>
-              <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-900">
+              <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
                 Submit a new application
               </h2>
               <p className="mt-2 max-w-2xl text-sm text-slate-500">

@@ -208,7 +208,7 @@ export function OwnerBookingDecisionForm({
         <button
           type="submit"
           disabled={isPending}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#1D4ED8] px-4 text-sm font-black text-white transition hover:bg-[#1E40AF] disabled:opacity-60"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#1D4ED8] px-4 text-sm font-bold text-white transition hover:bg-[#1E40AF] disabled:opacity-60"
         >
           {isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -246,7 +246,7 @@ export function OwnerBookingDecisionForm({
         <button
           type="submit"
           disabled={isPending}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 text-sm font-black text-red-700 transition hover:bg-red-100 disabled:opacity-60"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 text-sm font-bold text-red-700 transition hover:bg-red-100 disabled:opacity-60"
         >
           <XCircle className="h-4 w-4" />
           Decline
@@ -283,7 +283,7 @@ export function OwnerCompleteBookingButton({
             router.refresh();
           });
         }}
-        className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#1D4ED8] px-4 text-sm font-black text-white transition hover:bg-[#1E40AF] disabled:opacity-60"
+        className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#1D4ED8] px-4 text-sm font-bold text-white transition hover:bg-[#1E40AF] disabled:opacity-60"
       >
         {isPending ? (
           <Loader2 className="h-4 w-4 animate-spin" />

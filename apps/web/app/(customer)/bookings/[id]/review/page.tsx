@@ -95,7 +95,7 @@ export default async function BookingReviewPage({ params }: Props) {
                 <p className="text-xs font-extrabold uppercase tracking-[0.12em]">
                   Review submitted
                 </p>
-                <p className="mt-2 text-2xl font-black">
+                <p className="mt-2 text-2xl font-bold">
                   {existingReview.overall_rating} stars
                 </p>
                 {existingReview.comment ? (

@@ -69,7 +69,7 @@ export default function PrivacyPage() {
             Privacy and sharing
           </p>
 
-          <h1 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-950">
+          <h1 className="mt-1 text-2xl font-bold tracking-[-0.04em] text-slate-950">
             Communication and data preferences
           </h1>
 
@@ -114,7 +114,7 @@ export default function PrivacyPage() {
           <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
             Account data
           </p>
-          <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950">
+          <h2 className="mt-1 text-xl font-bold tracking-[-0.03em] text-slate-950">
             Manage your data
           </h2>
         </div>

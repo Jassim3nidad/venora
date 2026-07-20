@@ -25,7 +25,7 @@ function PageHeaderSkeleton({ view }: { view: "venues" | "suppliers" }) {
             )}
             {isSuppliers ? "Supplier Inquiries" : "Booking center"}
           </span>
-          <h1 className="max-w-3xl text-3xl font-black leading-9 tracking-[-0.04em] text-slate-950 sm:text-4xl sm:leading-tight">
+          <h1 className="max-w-3xl text-3xl font-bold leading-9 tracking-[-0.04em] text-slate-950 sm:text-4xl sm:leading-tight">
             {isSuppliers ? "Supplier Inquiries" : "Track every booking request."}
           </h1>
           <SkeletonBlock className="mt-3 h-5 w-full max-w-2xl" />

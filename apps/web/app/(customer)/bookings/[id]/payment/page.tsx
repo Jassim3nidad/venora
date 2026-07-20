@@ -166,7 +166,7 @@ export default async function BookingPaymentPage({ params }: Props) {
           <p className="text-sm font-extrabold uppercase tracking-widest text-[#2563EB]">
             Secure payment
           </p>
-          <h1 className="text-3xl font-black tracking-tight sm:text-4xl text-slate-950">
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl text-slate-950">
             Pay your reservation deposit
           </h1>
           <p className="mt-2 text-base font-medium text-slate-600">
@@ -203,15 +203,15 @@ export default async function BookingPaymentPage({ params }: Props) {
             
             {/* 6. Payment Summary */}
             <section>
-              <h2 className="text-xl font-black text-slate-950 mb-4">Payment summary</h2>
+              <h2 className="text-xl font-bold text-slate-950 mb-4">Payment summary</h2>
               <dl className="grid gap-3 text-sm">
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                   <dt className="font-medium text-slate-600">Booking total</dt>
-                  <dd className="font-black text-slate-900 tabular-nums">{formatCurrency(totalAmount)}</dd>
+                  <dd className="font-bold text-slate-900 tabular-nums">{formatCurrency(totalAmount)}</dd>
                 </div>
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                   <dt className="font-bold text-slate-900">Deposit required</dt>
-                  <dd className="font-black text-[#2563EB] tabular-nums text-base">
+                  <dd className="font-bold text-[#2563EB] tabular-nums text-base">
                     {formatCurrency(depositAmount)}
                     {depositPercentage && <span className="ml-2 text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">({depositPercentage}%)</span>}
                   </dd>
@@ -282,7 +282,7 @@ export default async function BookingPaymentPage({ params }: Props) {
             
             {/* 9. Billing documents */}
             <section className="rounded-3xl border border-[#E5E7EB] bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-black text-slate-950 mb-4">Billing documents</h2>
+              <h2 className="text-lg font-bold text-slate-950 mb-4">Billing documents</h2>
               
               {invoices && invoices.length > 0 ? (
                 <div className="grid gap-3">
@@ -311,7 +311,7 @@ export default async function BookingPaymentPage({ params }: Props) {
 
             {/* 10. Payment activity */}
             <section className="rounded-3xl border border-[#E5E7EB] bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-black text-slate-950 mb-4">Payment activity</h2>
+              <h2 className="text-lg font-bold text-slate-950 mb-4">Payment activity</h2>
               
               {activityItems.length > 0 ? (
                 <div className="relative border-l border-slate-200 ml-3 pl-5 grid gap-6 py-2">
@@ -342,7 +342,7 @@ export default async function BookingPaymentPage({ params }: Props) {
 
             {/* 11. Cancellation and refund policy */}
             <section className="rounded-3xl border border-[#E5E7EB] bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-black text-slate-950 mb-2">Cancellation & Refunds</h2>
+              <h2 className="text-lg font-bold text-slate-950 mb-2">Cancellation & Refunds</h2>
               <p className="text-sm text-slate-600 mb-3">
                 Review the venue's policy on deposit refunds before completing your payment.
               </p>

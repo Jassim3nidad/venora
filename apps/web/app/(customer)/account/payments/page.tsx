@@ -98,7 +98,7 @@ export default async function PaymentsPage() {
             Checkout options
           </p>
 
-          <h1 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-950">
+          <h1 className="mt-1 text-2xl font-bold tracking-[-0.04em] text-slate-950">
             Payment methods
           </h1>
 
@@ -155,7 +155,7 @@ export default async function PaymentsPage() {
           <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
             Ready for checkout
           </p>
-          <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950">
+          <h2 className="mt-1 text-xl font-bold tracking-[-0.03em] text-slate-950">
             Payable bookings
           </h2>
           <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-500">

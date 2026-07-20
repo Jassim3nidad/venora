@@ -54,7 +54,7 @@ export function BookingStatusFilterBar({
               {option.label}
               <span
                 className={[
-                  "inline-flex min-w-6 items-center justify-center rounded-full px-2 py-0.5 text-[11px] font-black",
+                  "inline-flex min-w-6 items-center justify-center rounded-full px-2 py-0.5 text-[11px] font-bold",
                   isActive
                     ? "bg-[#2563EB] text-white"
                     : "bg-white text-slate-500",

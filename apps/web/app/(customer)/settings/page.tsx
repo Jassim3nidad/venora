@@ -35,7 +35,7 @@ export default async function SettingsPage() {
             <SettingsIcon className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-3xl font-black tracking-[-0.03em] text-slate-950">
+            <h1 className="text-3xl font-bold tracking-[-0.03em] text-slate-950">
               Notification settings
             </h1>
             <p className="mt-1 text-sm font-medium text-slate-500">
@@ -50,7 +50,7 @@ export default async function SettingsPage() {
             <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
               Notifications
             </p>
-            <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950">
+            <h2 className="mt-1 text-xl font-bold tracking-[-0.03em] text-slate-950">
               Delivery preferences
             </h2>
             <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-500">

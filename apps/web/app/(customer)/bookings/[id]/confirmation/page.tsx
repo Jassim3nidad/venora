@@ -151,7 +151,7 @@ export default async function BookingConfirmationPage({ params }: Props) {
               <CustomerStatusBadge icon={TicketCheck}>
                 Booking ID
               </CustomerStatusBadge>
-              <p className="mt-3 break-all text-sm font-black text-slate-950">
+              <p className="mt-3 break-all text-sm font-bold text-slate-950">
                 {booking.id}
               </p>
             </div>
@@ -160,7 +160,7 @@ export default async function BookingConfirmationPage({ params }: Props) {
               <CustomerStatusBadge icon={CalendarDays}>
                 Event
               </CustomerStatusBadge>
-              <p className="mt-3 text-lg font-black text-slate-950">
+              <p className="mt-3 text-lg font-bold text-slate-950">
                 {formatDate(booking.event_date)}
               </p>
               <p className="mt-1 text-sm font-semibold text-slate-500">
@@ -171,7 +171,7 @@ export default async function BookingConfirmationPage({ params }: Props) {
 
             <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
               <CustomerStatusBadge icon={MapPin}>Venue</CustomerStatusBadge>
-              <p className="mt-3 text-lg font-black text-slate-950">
+              <p className="mt-3 text-lg font-bold text-slate-950">
                 {booking.venues?.name ?? "Venue"}
               </p>
               <p className="mt-1 text-sm font-semibold text-slate-500">
@@ -188,7 +188,7 @@ export default async function BookingConfirmationPage({ params }: Props) {
               >
                 Payment
               </CustomerStatusBadge>
-              <p className="mt-3 text-lg font-black">
+              <p className="mt-3 text-lg font-bold">
                 {paidTransaction
                   ? formatCurrency(paidTransaction.amount)
                   : formatCurrency(booking.deposit_amount)}

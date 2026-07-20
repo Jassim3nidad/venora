@@ -98,7 +98,7 @@ export default function SuppliersLoading() {
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0">
                   <SkeletonBadge className="mb-3 w-48" />
-                  <h1 className="max-w-3xl text-2xl font-black leading-8 tracking-[-0.04em] text-slate-950 sm:text-3xl sm:leading-tight">
+                  <h1 className="max-w-3xl text-2xl font-bold leading-8 tracking-[-0.04em] text-slate-950 sm:text-3xl sm:leading-tight">
                     Find trusted event suppliers
                   </h1>
                   <SkeletonBlock className="mt-3 h-5 w-full max-w-lg" />

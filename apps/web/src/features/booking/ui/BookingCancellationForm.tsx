@@ -119,7 +119,7 @@ export function BookingCancellationForm({
         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-600">
           <CheckCircle2 className="h-8 w-8" />
         </div>
-        <h2 className="mb-2 text-2xl font-black tracking-tight text-slate-900" tabIndex={-1}>
+        <h2 className="mb-2 text-2xl font-bold tracking-tight text-slate-900" tabIndex={-1}>
           {isPendingRequest ? "Booking request withdrawn" : "Booking cancelled"}
         </h2>
         <p className="mb-8 max-w-md text-base text-slate-600">

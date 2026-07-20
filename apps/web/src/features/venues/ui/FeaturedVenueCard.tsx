@@ -84,7 +84,7 @@ export default function FeaturedVenueCard({
 
         <div className="flex flex-1 flex-col p-5">
           <div className="mb-2 flex items-start justify-between gap-3">
-            <h3 className="text-lg font-black tracking-[-0.03em] text-[#111827]">
+            <h3 className="text-lg font-bold tracking-[-0.03em] text-[#111827]">
               {venue.name}
             </h3>
             <div className="flex shrink-0 items-center gap-1 text-sm font-extrabold text-[#111827]">
@@ -99,7 +99,7 @@ export default function FeaturedVenueCard({
             <span>{venue.location}</span>
           </p>
           <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-4">
-            <p className="text-base font-black text-[#111827]">{venue.price}</p>
+            <p className="text-base font-bold text-[#111827]">{venue.price}</p>
             <span className="text-sm font-extrabold text-[#2563EB]">
               View details
             </span>

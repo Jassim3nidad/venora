@@ -129,7 +129,7 @@ function SupplierCard({ supplier }: { supplier: SupplierMarketplaceProfile }) {
               </span>
             </div>
 
-            <h2 className="text-lg font-black leading-6 tracking-[-0.03em] text-[#111827] transition group-hover:text-[#1D4ED8]">
+            <h2 className="text-lg font-bold leading-6 tracking-[-0.03em] text-[#111827] transition group-hover:text-[#1D4ED8]">
               {supplier.businessName}
             </h2>
             {supplier.headline ? (
@@ -176,7 +176,7 @@ function SupplierCard({ supplier }: { supplier: SupplierMarketplaceProfile }) {
               <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">
                 Starts at
               </p>
-              <p className="text-lg font-black text-slate-950">
+              <p className="text-lg font-bold text-slate-950">
                 {formatSupplierPrice(startingPrice)}
               </p>
               {startingPrice ? (
@@ -185,7 +185,7 @@ function SupplierCard({ supplier }: { supplier: SupplierMarketplaceProfile }) {
                 </p>
               ) : null}
             </div>
-            <span className="inline-flex h-11 items-center justify-center rounded-2xl bg-[#2563EB] px-4 text-xs font-black uppercase tracking-[0.08em] text-white shadow-sm shadow-[#2563EB]/20 transition group-hover:bg-[#1D4ED8]">
+            <span className="inline-flex h-11 items-center justify-center rounded-2xl bg-[#2563EB] px-4 text-xs font-bold uppercase tracking-[0.08em] text-white shadow-sm shadow-[#2563EB]/20 transition group-hover:bg-[#1D4ED8]">
               View Details
             </span>
           </div>
@@ -326,7 +326,7 @@ export function SuppliersMarketplaceClient({
       <div className="shrink-0 border-b border-[#E5E7EB] bg-[#F9FAFB] px-4 pb-4 pt-4">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-xl font-black tracking-[-0.03em] text-[#111827]">
+            <h2 className="text-xl font-bold tracking-[-0.03em] text-[#111827]">
               Filters
             </h2>
             <p className="mt-1 text-sm font-medium text-[#6B7280]">
@@ -464,7 +464,7 @@ export function SuppliersMarketplaceClient({
           onClick={() => {
             if (presentation === "mobile") setMobileFiltersOpen(false);
           }}
-          className="flex h-12 w-full items-center justify-center rounded-2xl bg-[#2563EB] text-sm font-black text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
+          className="flex h-12 w-full items-center justify-center rounded-2xl bg-[#2563EB] text-sm font-bold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
         >
           View Results
         </button>
@@ -530,7 +530,7 @@ export function SuppliersMarketplaceClient({
                     </span>
                   </div>
 
-                  <h1 className="max-w-3xl break-words text-2xl font-black leading-8 tracking-[-0.04em] text-slate-950 sm:text-3xl sm:leading-tight">
+                  <h1 className="max-w-3xl break-words text-2xl font-bold leading-8 tracking-[-0.04em] text-slate-950 sm:text-3xl sm:leading-tight">
                     Find trusted event suppliers
                   </h1>
 
@@ -649,7 +649,7 @@ export function SuppliersMarketplaceClient({
               <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
                 No results
               </p>
-              <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-slate-950">
+              <h2 className="mt-2 text-2xl font-bold tracking-[-0.04em] text-slate-950">
                 No suppliers found
               </h2>
               <p className="mt-3 max-w-md text-sm font-medium leading-6 text-slate-500">
