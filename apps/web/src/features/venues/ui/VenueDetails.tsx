@@ -45,6 +45,7 @@ import { isOptimizableImageSrc } from "@/src/lib/image-host";
 import CostEstimatorPanel from "@/features/ai/ui/CostEstimatorPanel";
 import RecommendedVenues from "@/features/ai/ui/RecommendedVenues";
 import { pickGalleryImages, pickPromotionalVideo } from "../utils/venue-media";
+import type { PublicOwnerProfile } from "@/src/features/owners/application/queries";
 
 interface VenueDetailsProps {
   venue: any;
@@ -54,6 +55,7 @@ interface VenueDetailsProps {
   currentUser: any;
   eligibleReviewBooking?: { id: string; event_date: string | null } | null;
   isOwnVenue?: boolean;
+  ownerProfile?: PublicOwnerProfile | null;
 }
 
 function formatCurrency(value?: number | null) {
@@ -85,6 +87,7 @@ export default function VenueDetails({
   currentUser,
   eligibleReviewBooking = null,
   isOwnVenue = false,
+  ownerProfile = null,
 }: VenueDetailsProps) {
   const [isFavorited, setIsFavorited] = useState(initialIsFavorited);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
@@ -161,6 +164,14 @@ export default function VenueDetails({
     .filter(Boolean);
   const promotionalVideo = pickPromotionalVideo(venue.venue_images ?? []);
   const galleryImages = pickGalleryImages(venue.venue_images ?? []);
+  const hostName = ownerProfile?.name ?? venue.organizations?.name ?? "Venora Host";
+  const hostInitials =
+    hostName
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part: string) => part[0]?.toUpperCase())
+      .join("") || "VO";
 
   return (
     <main className="mx-auto max-w-7xl space-y-8 px-4 pb-28 pt-6 font-sans sm:px-6 sm:pt-8 lg:px-8 lg:pb-8">
@@ -487,32 +498,46 @@ export default function VenueDetails({
           <section className="flex flex-col items-start justify-between gap-5 rounded-[24px] border border-[#E5E7EB] bg-white p-6 shadow-sm shadow-slate-200/60 sm:flex-row sm:items-center">
             <div className="flex items-center gap-4">
               <div className="h-14 w-14 rounded-2xl bg-[var(--color-brand-600)] text-white font-sora font-extrabold flex items-center justify-center text-2xl shadow-md">
-                {venue.organizations?.name?.slice(0, 2).toUpperCase() || "VE"}
+                {hostInitials}
               </div>
               <div className="space-y-1">
                 <span className="text-xs font-bold text-[var(--color-brand-600)] tracking-wide uppercase">
                   Managed By
                 </span>
                 <h4 className="text-base font-bold text-[var(--text-primary)] font-sora">
-                  {venue.organizations?.name || "Venora Host"}
+                  {hostName}
                 </h4>
-                <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-medium">
-                  <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                  <span>Verified Organization Coordinator</span>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--text-secondary)] font-medium">
+                  <span className="inline-flex items-center gap-1.5">
+                    <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                    {ownerProfile?.isVerified
+                      ? "Verified venue owner"
+                      : "Venora venue owner"}
+                  </span>
+                  {ownerProfile ? (
+                    <>
+                      <span>{ownerProfile.venueCount} venue{ownerProfile.venueCount === 1 ? "" : "s"}</span>
+                      {ownerProfile.reviewCount > 0 ? (
+                        <span className="inline-flex items-center gap-1">
+                          <Star className="h-3.5 w-3.5 fill-amber-400 stroke-amber-400" />
+                          {ownerProfile.avgRating.toFixed(1)} from{" "}
+                          {ownerProfile.reviewCount} review{ownerProfile.reviewCount === 1 ? "" : "s"}
+                        </span>
+                      ) : null}
+                    </>
+                  ) : null}
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-4 items-center">
-              <div className="text-left sm:text-right text-xs">
-                <p className="text-[var(--text-muted)] font-medium">
-                  Response Rate
-                </p>
-                <p className="font-bold text-[var(--text-primary)] text-sm">
-                  98% / Fast Response
-                </p>
-              </div>
-            </div>
+            {ownerProfile ? (
+              <Link
+                href={`/owners/${ownerProfile.slug}`}
+                className="inline-flex h-11 items-center justify-center rounded-2xl border border-[#BFDBFE] bg-[#EFF6FF] px-4 text-sm font-bold text-[#1D4ED8] transition hover:bg-[#DBEAFE]"
+              >
+                View owner profile
+              </Link>
+            ) : null}
           </section>
 
           <Separator />

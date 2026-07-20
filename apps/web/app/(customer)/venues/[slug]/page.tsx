@@ -11,6 +11,7 @@ import {
   type ResearchVenue,
 } from "@/src/features/venues/data/research-venues";
 import { getPublishedVenueReviewsRaw } from "@/features/reviews/application/queries";
+import { getPublicOwnerProfileByVenue } from "@/src/features/owners/application/queries";
 import { resolveVenueMapCoordinates } from "@/src/lib/venue-map-coordinates";
 import { userOwnsVenue } from "@/src/lib/rbac/ownership";
 import { buildVenueImageUrl } from "@/src/features/venues/utils/venue-mappers";
@@ -208,6 +209,10 @@ export default async function VenueDetailPage({ params }: Props) {
       }
     : venue;
 
+  const ownerProfile = dbVenue?.slug
+    ? await getPublicOwnerProfileByVenue(supabase, dbVenue.slug)
+    : null;
+
   const reviews = dbVenue
     ? await getPublishedVenueReviewsRaw(supabase, venue.id)
     : getPublicResearchReviews();
@@ -277,6 +282,7 @@ export default async function VenueDetailPage({ params }: Props) {
         currentUser={user}
         eligibleReviewBooking={eligibleReviewBooking}
         isOwnVenue={isOwnVenue}
+        ownerProfile={ownerProfile}
       />
     </>
   );

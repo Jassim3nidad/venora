@@ -8,6 +8,8 @@ import {
   Bell,
   CalendarDays,
   Heart,
+  Home,
+  Info,
   LogOut,
   Menu,
   Search,
@@ -41,9 +43,9 @@ type MobileLink = {
 };
 
 const marketingNavLinks: MobileLink[] = [
-  { label: "Home", href: "/" },
-  { label: "Venues", href: "/venues" },
-  { label: "About", href: "/about" },
+  { label: "Home", href: "/", icon: Home },
+  { label: "Browse", href: "/venues", icon: Search },
+  { label: "About", href: "/about", icon: Info },
 ];
 
 const marketplaceMobileLinks: MobileLink[] = [
@@ -64,6 +66,7 @@ function getMarketingNavLinks(
       href: user
         ? "/account/become-partner"
         : "/login?redirectTo=/account/become-partner",
+      icon: Store,
     },
   ];
 }
@@ -147,11 +150,11 @@ export default function MarketingNavbar({
   const user = currentUser ? { email: currentUser.email } : null;
   const profile: MarketingNavbarProfile | null = currentUser
     ? {
-        full_name: currentUser.fullName,
-        avatar_url: currentUser.avatarUrl,
-        isVenueOwner: currentUser.roles.includes("venue_owner"),
-        isSupplier: currentUser.roles.includes("supplier"),
-      }
+      full_name: currentUser.fullName,
+      avatar_url: currentUser.avatarUrl,
+      isVenueOwner: currentUser.roles.includes("venue_owner"),
+      isSupplier: currentUser.roles.includes("supplier"),
+    }
     : null;
 
   const displayName =
@@ -187,20 +190,21 @@ export default function MarketingNavbar({
           className="hidden items-center justify-center gap-1 rounded-full border border-[#E5E7EB]/80 bg-white p-1 shadow-sm md:flex"
           aria-label="Main navigation"
         >
-          {navLinksForUser.map(({ label, href }) => {
+          {navLinksForUser.map(({ label, href, icon: Icon }) => {
             const active = isActive(pathname, href, label);
 
             return (
               <Link
                 key={label}
                 className={[
-                  "rounded-full px-4 py-2 text-sm font-bold transition",
+                  "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition",
                   active
                     ? "bg-[#EFF6FF] text-[#2563EB] font-extrabold"
                     : "text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
                 ].join(" ")}
                 href={href}
               >
+                {Icon ? <Icon className="h-4 w-4" /> : null}
                 {label}
               </Link>
             );

@@ -397,9 +397,8 @@ function getBudgetSummary(filters: {
   const max = Number(filters.maxBudget) || 0;
 
   if (min || max) {
-    return `${min ? formatCurrency(min) : "Any"} - ${
-      max ? formatCurrency(max) : "No limit"
-    }`;
+    return `${min ? formatCurrency(min) : "Any"} - ${max ? formatCurrency(max) : "No limit"
+      }`;
   }
 
   if (filters.budget === "under-100k") return "Standard (Under ₱100k)";
@@ -423,8 +422,8 @@ function getIntentSummary(intent: SmartVenueSearchIntent) {
       (venueType) => venueType.charAt(0).toUpperCase() + venueType.slice(1),
     ),
     intent.indoorOutdoor &&
-      intent.indoorOutdoor.charAt(0).toUpperCase() +
-        intent.indoorOutdoor.slice(1),
+    intent.indoorOutdoor.charAt(0).toUpperCase() +
+    intent.indoorOutdoor.slice(1),
     intent.parking && "Parking",
     intent.petFriendly && "Pet friendly",
     intent.wheelchairAccessible && "Wheelchair accessible",
@@ -513,19 +512,19 @@ function parseLocalSmartSearch(
     (text.includes("aircon") ||
       text.includes("air conditioned") ||
       text.includes("air-conditioned")) &&
-      "Aircon",
+    "Aircon",
     text.includes("pool") && "Pool",
     (text.includes("pet friendly") ||
       text.includes("pet-friendly") ||
       text.includes("pets")) &&
-      "Pet Friendly",
+    "Pet Friendly",
     (text.includes("wheelchair") || text.includes("accessible")) &&
-      "Wheelchair Accessible",
+    "Wheelchair Accessible",
     (text.includes("wifi") || text.includes("wi-fi")) && "WiFi",
     (text.includes("overnight") ||
       text.includes("rooms") ||
       text.includes("accommodation")) &&
-      "Overnight",
+    "Overnight",
   ].filter(Boolean) as string[];
   const eventType = [
     "wedding",
@@ -537,9 +536,9 @@ function parseLocalSmartSearch(
   ].find((event) => text.includes(event));
   const indoorOutdoor: IndoorOutdoorValue | undefined =
     text.includes("indoor and outdoor") ||
-    text.includes("indoor/outdoor") ||
-    text.includes("both indoor") ||
-    text.includes("both outdoor")
+      text.includes("indoor/outdoor") ||
+      text.includes("both indoor") ||
+      text.includes("both outdoor")
       ? "both"
       : text.includes("outdoor")
         ? "outdoor"
@@ -577,15 +576,15 @@ function parseLocalSmartSearch(
   const keyword =
     keywordHints.find((hint) => text.includes(hint)) ||
     (!locationHints.province &&
-    !locationHints.city &&
-    !locationHints.municipality &&
-    !eventType &&
-    !minBudget &&
-    !maxBudget &&
-    !capacity &&
-    venueTypes.length === 0 &&
-    !indoorOutdoor &&
-    amenities.length === 0
+      !locationHints.city &&
+      !locationHints.municipality &&
+      !eventType &&
+      !minBudget &&
+      !maxBudget &&
+      !capacity &&
+      venueTypes.length === 0 &&
+      !indoorOutdoor &&
+      amenities.length === 0
       ? query.trim().slice(0, 120)
       : undefined);
 
@@ -603,7 +602,7 @@ function parseLocalSmartSearch(
   venueTypes.forEach(pushSummary);
   pushSummary(
     indoorOutdoor &&
-      indoorOutdoor.charAt(0).toUpperCase() + indoorOutdoor.slice(1),
+    indoorOutdoor.charAt(0).toUpperCase() + indoorOutdoor.slice(1),
   );
   amenities.forEach(pushSummary);
   pushSummary(keyword && `Keyword: ${keyword}`);
@@ -676,8 +675,8 @@ function toSmartSearchFilters(filters: {
     venue_types: venueTypes,
     indoor_outdoor:
       filters.indoorOutdoor === "indoor" ||
-      filters.indoorOutdoor === "outdoor" ||
-      filters.indoorOutdoor === "both"
+        filters.indoorOutdoor === "outdoor" ||
+        filters.indoorOutdoor === "both"
         ? filters.indoorOutdoor
         : undefined,
     parking: filters.amenities.includes("Parking") || undefined,
@@ -818,9 +817,8 @@ const VenueCard = memo(function VenueCard({
         aria-pressed={isFavorited}
       >
         <Heart
-          className={`h-4 w-4 transition ${
-            isFavorited ? "fill-red-500 text-red-500" : ""
-          }`}
+          className={`h-4 w-4 transition ${isFavorited ? "fill-red-500 text-red-500" : ""
+            }`}
         />
       </button>
     </article>
@@ -1430,8 +1428,8 @@ export default function VenuesClient({
             <div className="grid gap-4 p-5 sm:p-6 lg:p-7">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0">
-                  <h1 className="max-w-3xl break-words text-2xl font-black leading-8 tracking-[-0.04em] text-slate-950 sm:text-3xl sm:leading-tight">
-                    Wedding & Event Venues
+                  <h1 className="max-w-3xl break-words text-2xl font-bold leading-8 tracking-[-0.04em] text-slate-950 sm:text-3xl sm:leading-tight">
+                    Browse for Event Venues
                   </h1>
 
                   <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-[#6B7280] sm:text-[15px]">
