@@ -1008,7 +1008,7 @@ export default function VenuesClient({
     const province = normalize(filters.province);
     const requestedCapacity = Number(filters.capacity) || 0;
     const source =
-      aiResultRank.size > 0
+      aiSearchResult !== null
         ? dynamicVenues.filter((venue) => aiResultRank.has(String(venue.id)))
         : dynamicVenues;
 
