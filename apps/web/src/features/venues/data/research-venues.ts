@@ -357,6 +357,56 @@ export function getNearbyResearchVenueDetails(venue: ResearchVenue, limit = 3) {
     .map(toVenueDetailRecord);
 }
 
+export function getFallbackResearchVenueRecommendations(
+  currentVenue: ResearchVenue | null,
+  limit = 4,
+) {
+  return researchVenues
+    .filter((candidate) => candidate.id !== currentVenue?.id)
+    .map((candidate) => {
+      const sameProvince =
+        currentVenue &&
+        candidate.location.province === currentVenue.location.province;
+      const sameCategory =
+        currentVenue && candidate.category === currentVenue.category;
+
+      return {
+        venue: candidate,
+        score: Number(sameProvince) * 3 + Number(sameCategory) * 2,
+      };
+    })
+    .sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return (
+        b.venue.pricing.starting_price_estimate -
+        a.venue.pricing.starting_price_estimate
+      );
+    })
+    .slice(0, limit)
+    .map(({ venue }) => ({
+      id: venue.id,
+      name: venue.name,
+      slug: venue.slug,
+      city: venue.location.city,
+      province: venue.location.province,
+      municipality: venue.location.city,
+      basePrice: venue.pricing.starting_price_estimate,
+      capacityMin: venue.capacity.minimum_guests ?? null,
+      capacityMax: venue.capacity.maximum_guests,
+      indoorOutdoor: toIndoorOutdoor(venue.capacity.indoor_outdoor),
+      parkingAvailable: Boolean(venue.search_filters.parking),
+      petFriendly: Boolean(venue.search_filters.pet_friendly),
+      wheelchairAccessible: venue.features.wheelchair_accessible === true,
+      avgRating: 0,
+      similarity: null,
+      relevanceScore: null,
+      categories: getResearchVenueCategories(venue),
+      amenities: venue.amenities,
+      eventTypes: venue.event_types_supported,
+      image: venue.photos.cover_image_url ?? venue.photos.image_urls?.[0] ?? null,
+    }));
+}
+
 export function getPublicResearchReviews() {
   return [];
 }

@@ -13,6 +13,8 @@ import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 import { useVenueRecommendations } from "../hooks/use-venue-recommendations";
 import { recordRecommendationClick } from "../api/ai-recommendation.client";
 import { isOptimizableImageSrc } from "@/src/lib/image-host";
+import { selectRecommendationDisplayVenues } from "../application/recommendation-display";
+import type { SmartVenueSearchVenue } from "@/features/search/schemas/search.schema";
 
 function formatCurrency(value: number | null) {
   if (!value || !Number.isFinite(value)) return "Price pending";
@@ -36,13 +38,23 @@ function RecommendedVenuesSkeleton() {
   );
 }
 
-export default function RecommendedVenues() {
+export default function RecommendedVenues({
+  fallbackVenues = [],
+}: {
+  fallbackVenues?: SmartVenueSearchVenue[];
+}) {
   const { user, loading: userLoading } = useCurrentUser();
   const { data, isLoading, isError, error, refetch, isFetching } =
     useVenueRecommendations(user?.id ?? null);
+  const display = selectRecommendationDisplayVenues({
+    aiVenues: data?.venues ?? null,
+    fallbackVenues,
+  });
+  const hasFallback = fallbackVenues.length > 0;
 
-  if (userLoading || !user) return null;
-  if (!isLoading && !isError && (data?.venues.length ?? 0) === 0) return null;
+  if (userLoading && !hasFallback) return null;
+  if (!user && !hasFallback) return null;
+  if (!isLoading && !isError && display.venues.length === 0) return null;
 
   return (
     <section className="space-y-6 pt-8 border-t border-[var(--border-default)]">
@@ -53,12 +65,14 @@ export default function RecommendedVenues() {
             Recommended for You
           </h3>
           <p className="text-xs font-medium text-[var(--text-muted)]">
-            {data?.mode === "cold_start"
+            {display.isFallback
+              ? "Popular venues to help you keep exploring."
+              : data?.mode === "cold_start"
               ? "Popular venues to help you get started."
               : "Based on venues you've booked and favorited."}
           </p>
         </div>
-        {isError && (
+        {isError && user && (
           <button
             type="button"
             onClick={() => refetch()}
@@ -73,16 +87,16 @@ export default function RecommendedVenues() {
         )}
       </div>
 
-      {isLoading ? (
+      {isLoading && user ? (
         <RecommendedVenuesSkeleton />
-      ) : isError ? (
+      ) : isError && display.venues.length === 0 ? (
         <div className="rounded-2xl border border-red-200/40 bg-red-500/5 p-4 text-xs font-medium text-red-600">
           {error?.message ?? "Could not load recommendations."}
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {data!.venues.map((venue) => {
-            const eventId = data!.recommendationEventIds[venue.id];
+          {display.venues.map((venue) => {
+            const eventId = data?.recommendationEventIds[venue.id];
 
             const imgUrl = venue.image
               ? venue.image.startsWith("http")
