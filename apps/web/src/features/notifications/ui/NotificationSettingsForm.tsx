@@ -73,7 +73,7 @@ function ToggleRow({
           <Icon className="h-4 w-4" />
         </span>
         <span className="min-w-0">
-          <span className="block text-sm font-black text-slate-950">
+          <span className="block text-sm font-bold text-slate-950">
             {title}
           </span>
           <span className="mt-1 block text-sm font-medium leading-6 text-slate-500">
@@ -217,7 +217,7 @@ export function NotificationSettingsForm() {
           <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#2563EB]">
             Channels
           </p>
-          <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950">
+          <h2 className="mt-1 text-xl font-bold tracking-[-0.03em] text-slate-950">
             Delivery methods
           </h2>
         </div>
@@ -266,7 +266,7 @@ export function NotificationSettingsForm() {
           <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#2563EB]">
             Categories
           </p>
-          <h2 className="mt-1 text-xl font-black tracking-[-0.03em] text-slate-950">
+          <h2 className="mt-1 text-xl font-bold tracking-[-0.03em] text-slate-950">
             Notification types
           </h2>
         </div>
@@ -309,7 +309,7 @@ export function NotificationSettingsForm() {
             <Clock className="h-4 w-4" />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-sm font-black text-slate-950">Quiet hours</h2>
+            <h2 className="text-sm font-bold text-slate-950">Quiet hours</h2>
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
               <label className="grid gap-1.5 text-xs font-bold text-slate-500">
                 Start

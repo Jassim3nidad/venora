@@ -193,7 +193,7 @@ export default function VenueDetails({
                 </Badge>
               )}
             </div>
-            <h1 className="max-w-3xl text-3xl font-black leading-tight tracking-[-0.04em] text-slate-950 md:text-4xl">
+            <h1 className="max-w-3xl text-3xl font-bold leading-tight tracking-[-0.04em] text-slate-950 md:text-4xl">
               {venue.name}
             </h1>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium text-[#6B7280]">
@@ -551,7 +551,7 @@ export default function VenueDetails({
                       <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                       Verified guest review
                     </div>
-                    <h3 className="mt-3 text-xl font-black tracking-[-0.03em] text-slate-950">
+                    <h3 className="mt-3 text-xl font-bold tracking-[-0.03em] text-slate-950">
                       Share your experience at {venue.name}
                     </h3>
                     <p className="mt-2 text-sm font-medium leading-6 text-[#6B7280]">
@@ -562,7 +562,7 @@ export default function VenueDetails({
                   </div>
                   <Link
                     href={`/bookings/${eligibleReviewBooking.id}/review`}
-                    className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-5 text-sm font-black text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8]"
+                    className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-5 text-sm font-bold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8]"
                   >
                     <Star className="h-4 w-4" />
                     Write a Review
@@ -588,7 +588,7 @@ export default function VenueDetails({
           {isOwnVenue ? (
             <div className="sticky top-[9.5rem] rounded-[32px] border border-[#BFDBFE] bg-[#EFF6FF] p-6 shadow-sm shadow-blue-200/50 flex flex-col gap-5">
               <div>
-                <h3 className="text-xl font-black tracking-[-0.03em] text-[#1D4ED8]">
+                <h3 className="text-xl font-bold tracking-[-0.03em] text-[#1D4ED8]">
                   This is your venue listing.
                 </h3>
                 <p className="mt-2 text-sm font-medium leading-relaxed text-[#3B82F6]">

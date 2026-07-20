@@ -134,14 +134,14 @@ export function SupplierContactForm({
       : "/login";
     return (
       <div className="min-w-0 rounded-[28px] border border-[#E5E7EB] bg-white p-4 shadow-sm shadow-slate-200/70 sm:p-5">
-        <h2 className="text-lg font-black text-[#111827]">Send Inquiry</h2>
+        <h2 className="text-lg font-bold text-[#111827]">Send Inquiry</h2>
         <p className="mt-2 break-words text-sm font-medium leading-6 text-[#6B7280]">
           Sign in as a customer to send an inquiry and keep supplier
           conversations tied to your Venora account.
         </p>
         <a
           href={redirectTo}
-          className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-2xl bg-[#2563EB] px-5 text-sm font-black text-white transition hover:bg-[#1D4ED8] sm:w-auto"
+          className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-2xl bg-[#2563EB] px-5 text-sm font-bold text-white transition hover:bg-[#1D4ED8] sm:w-auto"
         >
           Sign in to continue
         </a>
@@ -153,7 +153,7 @@ export function SupplierContactForm({
   if (!hasApprovedBookings) {
     return (
       <div className="min-w-0 rounded-[28px] border border-[#E5E7EB] bg-white p-4 shadow-sm shadow-slate-200/70 sm:p-5">
-        <h2 className="text-lg font-black text-[#111827]">Send Inquiry</h2>
+        <h2 className="text-lg font-bold text-[#111827]">Send Inquiry</h2>
 
         <div className="mt-4 rounded-2xl border border-dashed border-amber-300 bg-amber-50 p-5">
           <div className="flex items-start gap-3">
@@ -184,7 +184,7 @@ export function SupplierContactForm({
             {!hasOnlyPendingBookings && (
               <Link
                 href="/venues"
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-4 text-sm font-black text-white transition hover:bg-[#1D4ED8]"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-4 text-sm font-bold text-white transition hover:bg-[#1D4ED8]"
               >
                 <Building2 className="h-4 w-4" />
                 Browse Venues
@@ -194,8 +194,8 @@ export function SupplierContactForm({
               href="/bookings"
               className={
                 hasOnlyPendingBookings
-                  ? "inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-4 text-sm font-black text-white transition hover:bg-[#1D4ED8]"
-                  : "inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white px-4 text-sm font-black text-[#111827] transition hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
+                  ? "inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-4 text-sm font-bold text-white transition hover:bg-[#1D4ED8]"
+                  : "inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white px-4 text-sm font-bold text-[#111827] transition hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
               }
             >
               <TicketCheck className="h-4 w-4" />
@@ -213,7 +213,7 @@ export function SupplierContactForm({
       className="min-w-0 rounded-[28px] border border-[#E5E7EB] bg-white p-4 shadow-sm shadow-slate-200/70 sm:p-5"
     >
       <div className="mb-5">
-        <h2 className="text-lg font-black text-[#111827]">Send Inquiry</h2>
+        <h2 className="text-lg font-bold text-[#111827]">Send Inquiry</h2>
         <p className="mt-1 text-sm font-medium text-[#6B7280]">
           Sent from {userEmail}
         </p>
@@ -370,7 +370,7 @@ export function SupplierContactForm({
                   ? `/inquiries/${status.requestId}`
                   : "/bookings?view=suppliers"
               }
-              className="mt-2 inline-flex font-black text-emerald-800 underline-offset-4 hover:underline"
+              className="mt-2 inline-flex font-bold text-emerald-800 underline-offset-4 hover:underline"
             >
               View Inquiry
             </Link>
@@ -381,7 +381,7 @@ export function SupplierContactForm({
       <button
         type="submit"
         disabled={isPending}
-        className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-4 text-sm font-black text-white transition hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-70"
+        className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-4 text-sm font-bold text-white transition hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-70"
       >
         {isPending ? (
           <Loader2 className="h-4 w-4 animate-spin" />

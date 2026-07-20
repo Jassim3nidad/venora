@@ -89,7 +89,7 @@ export default function DeleteAccountDangerZone() {
           </div>
 
           <div>
-            <h2 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-950">
+            <h2 className="mt-1 text-2xl font-bold tracking-[-0.04em] text-slate-950">
               Delete Account
             </h2>
             <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-500">
@@ -114,7 +114,7 @@ export default function DeleteAccountDangerZone() {
           <DialogContent className="max-h-[90vh] overflow-y-auto rounded-3xl border-red-100 sm:max-w-[520px]">
             <form onSubmit={handleSubmit} className="space-y-5">
               <DialogHeader>
-                <DialogTitle className="text-xl font-black tracking-[-0.03em] text-slate-950">
+                <DialogTitle className="text-xl font-bold tracking-[-0.03em] text-slate-950">
                   Confirm Account Deletion
                 </DialogTitle>
                 <DialogDescription className="leading-6">

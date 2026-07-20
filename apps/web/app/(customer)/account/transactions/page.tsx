@@ -244,7 +244,7 @@ export default async function TransactionsPage() {
           Payment history
         </p>
 
-        <h1 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-950">
+        <h1 className="mt-1 text-2xl font-bold tracking-[-0.04em] text-slate-950">
           Transactions
         </h1>
 
@@ -352,7 +352,7 @@ export default async function TransactionsPage() {
                           {row.reference ?? "-"}
                         </span>
                       </td>
-                      <td className="px-5 py-4 text-sm font-black text-slate-950">
+                      <td className="px-5 py-4 text-sm font-bold text-slate-950">
                         {formatCurrency(row.amount, row.currency ?? "PHP")}
                       </td>
                       <td className="px-5 py-4">

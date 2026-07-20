@@ -24,7 +24,7 @@ export default function AccountSettingsList() {
           Account settings
         </div>
 
-        <h2 className="text-2xl font-black tracking-[-0.04em] text-slate-950">
+        <h2 className="text-2xl font-bold tracking-[-0.04em] text-slate-950">
           Personal Information
         </h2>
 

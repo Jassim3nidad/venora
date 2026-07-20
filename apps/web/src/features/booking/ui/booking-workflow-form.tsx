@@ -236,7 +236,7 @@ export function BookingWorkflowForm({
       <section className="grid gap-4 rounded-3xl border border-[#E5E7EB] bg-white p-5 shadow-sm sm:p-6">
         <div>
           <CustomerStatusBadge icon={CalendarDays}>Date</CustomerStatusBadge>
-          <h2 className="mt-3 text-xl font-black tracking-[-0.03em] text-slate-950">
+          <h2 className="mt-3 text-xl font-bold tracking-[-0.03em] text-slate-950">
             Choose your event date.
           </h2>
         </div>
@@ -349,7 +349,7 @@ export function BookingWorkflowForm({
       <section className="grid gap-4 rounded-3xl border border-[#E5E7EB] bg-white p-5 shadow-sm sm:p-6">
         <div>
           <CustomerStatusBadge icon={PackageCheck}>Package</CustomerStatusBadge>
-          <h2 className="mt-3 text-xl font-black tracking-[-0.03em] text-slate-950">
+          <h2 className="mt-3 text-xl font-bold tracking-[-0.03em] text-slate-950">
             Choose a package.
           </h2>
         </div>
@@ -379,7 +379,7 @@ export function BookingWorkflowForm({
                     {checked ? <Check className="h-3.5 w-3.5" /> : null}
                   </span>
                   <span className="min-w-0">
-                    <span className="block text-base font-black text-slate-950">
+                    <span className="block text-base font-bold text-slate-950">
                       {option.name}
                     </span>
                     <span className="mt-1 block text-sm font-medium leading-6 text-slate-500">
@@ -393,7 +393,7 @@ export function BookingWorkflowForm({
                 </span>
 
                 <span className="text-left sm:text-right">
-                  <span className="block text-lg font-black text-slate-950">
+                  <span className="block text-lg font-bold text-slate-950">
                     {formatCurrency(option.price)}
                   </span>
                   <span className="block text-xs font-bold text-slate-500">
@@ -431,7 +431,7 @@ export function BookingWorkflowForm({
       <section className="grid gap-4 rounded-3xl border border-[#E5E7EB] bg-white p-5 shadow-sm sm:p-6">
         <div>
           <CustomerStatusBadge icon={Users}>Inquiry</CustomerStatusBadge>
-          <h2 className="mt-3 text-xl font-black tracking-[-0.03em] text-slate-950">
+          <h2 className="mt-3 text-xl font-bold tracking-[-0.03em] text-slate-950">
             Add guest count and notes.
           </h2>
         </div>
@@ -492,7 +492,7 @@ export function BookingWorkflowForm({
             <span>Platform service fee</span>
             <span>{formatCurrency(serviceFee)}</span>
           </div>
-          <div className="flex items-center justify-between gap-4 border-t border-[#BFDBFE] pt-3 text-base font-black">
+          <div className="flex items-center justify-between gap-4 border-t border-[#BFDBFE] pt-3 text-base font-bold">
             <span>Estimated quote</span>
             <span>{formatCurrency(estimatedTotal)}</span>
           </div>

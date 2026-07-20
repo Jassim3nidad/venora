@@ -49,7 +49,7 @@ const marketingNavLinks: MobileLink[] = [
 ];
 
 const marketplaceMobileLinks: MobileLink[] = [
-  { label: "Venues", href: "/venues", icon: Search },
+  { label: "Venues", href: "/venues", icon: Home },
   { label: "Suppliers", href: "/suppliers", icon: Store },
   { label: "Bookings", href: "/bookings", icon: CalendarDays, authOnly: true },
   { label: "Favorites", href: "/favorites", icon: Heart, authOnly: true },
@@ -180,7 +180,7 @@ export default function MarketingNavbar({
     >
       <div className="mx-auto grid h-20 w-full max-w-7xl grid-cols-[1fr_auto] items-center gap-5 px-4 sm:px-6 md:grid-cols-[1fr_auto_1fr] lg:px-8">
         <Link
-          className="justify-self-start text-xl font-black tracking-[-0.04em] text-[#2563EB] transition hover:text-[#1d4ed8]"
+          className="justify-self-start text-xl font-bold tracking-[-0.04em] text-[#2563EB] transition hover:text-[#1d4ed8]"
           href="/"
         >
           Venora
@@ -296,7 +296,7 @@ export default function MarketingNavbar({
               <X className="h-5 w-5" />
             </button>
 
-            <p className="mb-5 text-xl font-black tracking-[-0.04em] text-[#2563EB]">
+            <p className="mb-5 text-xl font-bold tracking-[-0.04em] text-[#2563EB]">
               Venora
             </p>
 

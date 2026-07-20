@@ -131,7 +131,7 @@ export function NotificationBell({ className }: { className?: string }) {
         >
           <Bell className="h-4 w-4" />
           {unreadCount > 0 ? (
-            <span className="absolute -right-0.5 -top-0.5 min-w-5 rounded-full bg-[#EF4444] px-1.5 py-0.5 text-[10px] font-black leading-none text-white shadow-sm">
+            <span className="absolute -right-0.5 -top-0.5 min-w-5 rounded-full bg-[#EF4444] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white shadow-sm">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           ) : null}
@@ -145,7 +145,7 @@ export function NotificationBell({ className }: { className?: string }) {
       >
         <div className="flex items-center justify-between gap-3 px-2 py-2">
           <div>
-            <p className="text-sm font-black text-slate-950">Notifications</p>
+            <p className="text-sm font-bold text-slate-950">Notifications</p>
             <p className="text-xs font-semibold text-slate-500">
               {unreadCount > 0 ? `${unreadCount} unread` : "All caught up"}
             </p>
@@ -186,7 +186,7 @@ export function NotificationBell({ className }: { className?: string }) {
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB]">
               <Bell className="h-5 w-5" />
             </div>
-            <p className="mt-3 text-sm font-black text-slate-950">
+            <p className="mt-3 text-sm font-bold text-slate-950">
               No notifications yet
             </p>
             <p className="mt-1 text-xs font-medium leading-5 text-slate-500">

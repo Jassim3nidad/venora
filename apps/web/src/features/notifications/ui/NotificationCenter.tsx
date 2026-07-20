@@ -85,7 +85,7 @@ function NotificationRow({
               {!notification.isRead ? (
                 <span className="h-2 w-2 rounded-full bg-[#2563EB]" />
               ) : null}
-              <p className="text-sm font-black text-slate-950">
+              <p className="text-sm font-bold text-slate-950">
                 {notification.title}
               </p>
               <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.08em] text-slate-500">
@@ -221,7 +221,7 @@ export function NotificationCenter() {
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB]">
             <Bell className="h-6 w-6" />
           </div>
-          <h2 className="mt-4 text-xl font-black tracking-[-0.03em] text-slate-950">
+          <h2 className="mt-4 text-xl font-bold tracking-[-0.03em] text-slate-950">
             Nothing here yet
           </h2>
           <p className="mx-auto mt-2 max-w-md text-sm font-medium leading-6 text-slate-500">

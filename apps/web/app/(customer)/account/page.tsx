@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
@@ -85,7 +85,7 @@ export default async function AccountPage() {
           <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
             Role Count
           </p>
-          <p className="mt-1 text-xl font-black text-slate-950">
+          <p className="mt-1 text-xl font-bold text-slate-950">
             {userRoles.length}
           </p>
         </div>
@@ -97,7 +97,7 @@ export default async function AccountPage() {
           <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
             Status
           </p>
-          <p className="mt-1 text-xl font-black text-slate-950">Active</p>
+          <p className="mt-1 text-xl font-bold text-slate-950">Active</p>
         </div>
 
         <Link
@@ -110,7 +110,7 @@ export default async function AccountPage() {
           <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">
             Saved
           </p>
-          <p className="mt-1 text-xl font-black text-slate-950">
+          <p className="mt-1 text-xl font-bold text-slate-950">
             {favoriteVenues.length}
           </p>
         </Link>
@@ -129,7 +129,7 @@ export default async function AccountPage() {
               Saved for later
             </p>
 
-            <h2 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-950">
+            <h2 className="mt-1 text-2xl font-bold tracking-[-0.04em] text-slate-950">
               Favorite Venues
             </h2>
 
@@ -166,7 +166,7 @@ export default async function AccountPage() {
                     />
                   </div>
 
-                  <h3 className="line-clamp-1 text-base font-black tracking-[-0.02em] text-slate-950 transition group-hover:text-[#1D4ED8]">
+                  <h3 className="line-clamp-1 text-base font-bold tracking-[-0.02em] text-slate-950 transition group-hover:text-[#1D4ED8]">
                     {venue.name}
                   </h3>
 
@@ -175,7 +175,7 @@ export default async function AccountPage() {
                     <span className="line-clamp-1">{venue.location}</span>
                   </p>
 
-                  <p className="mt-3 text-sm font-black text-slate-950">
+                  <p className="mt-3 text-sm font-bold text-slate-950">
                     {venue.price}
                   </p>
                 </Link>
@@ -212,7 +212,7 @@ export default async function AccountPage() {
               Authorized access
             </p>
 
-            <h2 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-950">
+            <h2 className="mt-1 text-2xl font-bold tracking-[-0.04em] text-slate-950">
               Your dashboards
             </h2>
 
@@ -236,7 +236,7 @@ export default async function AccountPage() {
                     <Icon className="h-5 w-5" />
                   </div>
 
-                  <h3 className="text-base font-black tracking-[-0.02em] text-slate-950">
+                  <h3 className="text-base font-bold tracking-[-0.02em] text-slate-950">
                     {item.label}
                   </h3>
 

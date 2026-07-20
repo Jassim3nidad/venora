@@ -5,7 +5,13 @@ import {
 } from "./is-marketplace-route";
 
 describe("isMarketplaceRoute", () => {
-  it.each(["/venues", "/suppliers", "/bookings", "/favorites"])(
+  it.each([
+    "/venues",
+    "/suppliers",
+    "/bookings",
+    "/favorites",
+    "/owners/venora-research-venue-network",
+  ])(
     "recognizes %s as a marketplace subnavigation route",
     (pathname) => expect(isMarketplaceRoute(pathname)).toBe(true),
   );

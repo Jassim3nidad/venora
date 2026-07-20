@@ -84,7 +84,7 @@ function InfoCard({
         <p className="text-xs font-extrabold uppercase tracking-widest text-[#6B7280]">
           {label}
         </p>
-        <p className="mt-1 break-words text-sm font-black text-[#111827]">
+        <p className="mt-1 break-words text-sm font-bold text-[#111827]">
           {value}
         </p>
       </div>
@@ -136,7 +136,7 @@ function PortfolioProjectModal({
         <div className="flex flex-col h-[85vh] sm:h-[80vh]">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-slate-100">
-            <DialogTitle className="text-lg font-black text-slate-900 line-clamp-1 pr-8">
+            <DialogTitle className="text-lg font-bold text-slate-900 line-clamp-1 pr-8">
               {project.title || "Portfolio Project"}
             </DialogTitle>
             <DialogClose asChild>
@@ -384,7 +384,7 @@ export function SupplierDetail({
                   </Badge>
                 ) : null}
               </div>
-              <h1 className="mt-1 text-3xl font-black leading-tight tracking-[-0.04em] text-slate-950 md:text-4xl">
+              <h1 className="mt-1 text-3xl font-bold leading-tight tracking-[-0.04em] text-slate-950 md:text-4xl">
                 {supplier.businessName}
               </h1>
               {supplier.headline ? (
@@ -414,7 +414,7 @@ export function SupplierDetail({
 
           {/* About Section */}
           <section className="space-y-4">
-            <h2 className="text-2xl font-black tracking-[-0.04em] text-[#111827]">
+            <h2 className="text-2xl font-bold tracking-[-0.04em] text-[#111827]">
               About the supplier
             </h2>
             <div className="prose prose-slate max-w-none">
@@ -457,7 +457,7 @@ export function SupplierDetail({
           <section className="space-y-5">
             <div className="flex flex-col justify-between sm:flex-row sm:items-end">
               <div>
-                <h2 className="text-2xl font-black tracking-[-0.04em] text-[#111827]">
+                <h2 className="text-2xl font-bold tracking-[-0.04em] text-[#111827]">
                   Services and Pricing
                 </h2>
                 <p className="mt-1 text-sm font-medium text-[#6B7280]">
@@ -491,7 +491,7 @@ export function SupplierDetail({
                           {pkg.packageType.replace(/_/g, " ")}
                         </Badge>
                       </div>
-                      <h3 className="break-words text-lg font-black leading-tight text-[#111827]">
+                      <h3 className="break-words text-lg font-bold leading-tight text-[#111827]">
                         {pkg.name}
                       </h3>
                       <div className="mt-2 text-sm font-bold text-[#6B7280]">
@@ -551,7 +551,7 @@ export function SupplierDetail({
           {/* Portfolio Section */}
           <section className="space-y-5">
             <div>
-              <h2 className="text-2xl font-black tracking-[-0.04em] text-[#111827]">
+              <h2 className="text-2xl font-bold tracking-[-0.04em] text-[#111827]">
                 Portfolio
               </h2>
               <p className="mt-1 text-sm font-medium text-[#6B7280]">
@@ -641,7 +641,7 @@ export function SupplierDetail({
                       <div className="flex flex-col p-5 sm:p-6 flex-1">
                         <div className="flex-1">
                           <h3
-                            className="text-lg font-black text-[#111827] group-hover:text-[#2563EB] transition-colors cursor-pointer line-clamp-1"
+                            className="text-lg font-bold text-[#111827] group-hover:text-[#2563EB] transition-colors cursor-pointer line-clamp-1"
                             onClick={() => setSelectedProject(item)}
                           >
                             {item.title || "Portfolio Project"}
@@ -727,7 +727,7 @@ export function SupplierDetail({
           {/* Service Location & Coverage Section */}
           <section className="space-y-5">
             <div>
-              <h2 className="text-2xl font-black tracking-[-0.04em] text-[#111827]">
+              <h2 className="text-2xl font-bold tracking-[-0.04em] text-[#111827]">
                 Service Location & Coverage
               </h2>
             </div>
@@ -812,7 +812,7 @@ export function SupplierDetail({
               <Separator className="bg-slate-200/60" />
               <section className="space-y-3">
                 <div className="flex flex-col">
-                  <h2 className="text-2xl font-black tracking-[-0.04em] text-[#111827]">
+                  <h2 className="text-2xl font-bold tracking-[-0.04em] text-[#111827]">
                     Find This Business Online
                   </h2>
                   <p className="hidden">
@@ -881,7 +881,7 @@ export function SupplierDetail({
           <section className="space-y-5">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-black tracking-[-0.04em] text-[#111827]">
+                <h2 className="text-2xl font-bold tracking-[-0.04em] text-[#111827]">
                   Reviews
                 </h2>
                 {supplier.reviewCount > 0 && (
@@ -957,7 +957,7 @@ export function SupplierDetail({
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-500">
                 Starting at
               </span>
-              <span className="text-lg font-black text-slate-950">
+              <span className="text-lg font-bold text-slate-950">
                 {formatSupplierPrice(startingPrice) || "Price on request"}
               </span>
             </div>

@@ -70,7 +70,7 @@ export default function ProfileMenu({
         <button
           type="button"
           aria-label="Open account menu"
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E5E7EB] bg-[#EFF6FF] text-sm font-black text-[#2563EB] shadow-sm transition hover:border-[#2563EB]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 sm:h-11 sm:w-11"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#E5E7EB] bg-[#EFF6FF] text-sm font-bold text-[#2563EB] shadow-sm transition hover:border-[#2563EB]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 sm:h-11 sm:w-11"
         >
           {avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -91,7 +91,7 @@ export default function ProfileMenu({
         className="w-[260px] rounded-2xl p-2"
       >
         <div className="flex items-center gap-3 rounded-xl px-2 py-2">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#EFF6FF] text-sm font-black text-[#2563EB]">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#EFF6FF] text-sm font-bold text-[#2563EB]">
             {avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -104,7 +104,7 @@ export default function ProfileMenu({
             )}
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-black tracking-[-0.02em] text-slate-950">
+            <p className="truncate text-sm font-bold tracking-[-0.02em] text-slate-950">
               {displayName}
             </p>
             <p className="truncate text-xs font-medium text-slate-500">

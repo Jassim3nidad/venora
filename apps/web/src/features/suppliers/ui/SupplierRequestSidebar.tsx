@@ -232,7 +232,7 @@ export function SupplierRequestSidebar({
             Starting at
           </span>
           {formattedStartingPrice ? (
-            <p className="text-xl font-black tracking-tight text-[#111827]">
+            <p className="text-xl font-bold tracking-tight text-[#111827]">
               {formattedStartingPrice}
               <span className="ml-1.5 text-sm font-semibold tracking-normal text-[#6B7280]">
                 per event
@@ -313,7 +313,7 @@ export function SupplierRequestSidebar({
             Starting at
           </span>
           {formattedStartingPrice ? (
-            <p className="text-xl font-black tracking-tight text-[#111827]">
+            <p className="text-xl font-bold tracking-tight text-[#111827]">
               {formattedStartingPrice}
               <span className="ml-1.5 text-sm font-semibold tracking-normal text-[#6B7280]">
                 per event
@@ -386,7 +386,7 @@ export function SupplierRequestSidebar({
         id="supplier-request-card"
       >
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-xl font-black text-[#111827]">
+          <h2 className="text-xl font-bold text-[#111827]">
             Request Proposal
           </h2>
           <Button
@@ -448,7 +448,7 @@ export function SupplierRequestSidebar({
       id="supplier-request-card"
     >
       <div className="mb-5 flex shrink-0 items-center justify-between">
-        <h2 className="text-xl font-black text-[#111827]">Request Proposal</h2>
+        <h2 className="text-xl font-bold text-[#111827]">Request Proposal</h2>
         <Button
           variant="ghost"
           size="sm"

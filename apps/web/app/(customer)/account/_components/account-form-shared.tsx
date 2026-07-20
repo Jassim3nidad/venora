@@ -53,7 +53,7 @@ export function SectionHeader({
           <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
             {eyebrow}
           </p>
-          <h2 className="text-xl font-black tracking-[-0.03em] text-slate-950">
+          <h2 className="text-xl font-bold tracking-[-0.03em] text-slate-950">
             {title}
           </h2>
         </div>

@@ -126,7 +126,7 @@ export default async function BookVenuePage({ params, searchParams }: Props) {
               <p className="text-[11px] font-extrabold uppercase tracking-[0.14em]">
                 Starting price
               </p>
-              <p className="mt-1 text-xl font-black tracking-[-0.03em]">
+              <p className="mt-1 text-xl font-bold tracking-[-0.03em]">
                 {formatCurrency(venue.base_price)}
               </p>
             </div>
@@ -137,7 +137,7 @@ export default async function BookVenuePage({ params, searchParams }: Props) {
           {isOwnVenue ? (
             <div className="rounded-[32px] border border-[#BFDBFE] bg-[#EFF6FF] p-8 shadow-sm shadow-blue-200/50 flex flex-col items-center justify-center text-center gap-6 py-16">
               <div>
-                <h3 className="text-2xl font-black tracking-[-0.03em] text-[#1D4ED8]">
+                <h3 className="text-2xl font-bold tracking-[-0.03em] text-[#1D4ED8]">
                   You cannot book your own venue.
                 </h3>
                 <p className="mt-3 text-base font-medium leading-relaxed text-[#3B82F6] max-w-md mx-auto">
@@ -190,7 +190,7 @@ export default async function BookVenuePage({ params, searchParams }: Props) {
               <CustomerStatusBadge icon={ShieldCheck}>
                 Workflow
               </CustomerStatusBadge>
-              <h2 className="mt-3 text-xl font-black tracking-[-0.03em] text-slate-950">
+              <h2 className="mt-3 text-xl font-bold tracking-[-0.03em] text-slate-950">
                 From inquiry to review
               </h2>
             </div>
@@ -208,7 +208,7 @@ export default async function BookVenuePage({ params, searchParams }: Props) {
                   key={label}
                   className="flex gap-3 border-l border-[#DBEAFE] pb-5 last:border-transparent last:pb-0"
                 >
-                  <span className="-ml-[13px] flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#2563EB] text-xs font-black text-white">
+                  <span className="-ml-[13px] flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#2563EB] text-xs font-bold text-white">
                     {index + 1}
                   </span>
                   <span>{label}</span>

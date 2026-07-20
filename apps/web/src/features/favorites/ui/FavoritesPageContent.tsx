@@ -35,7 +35,7 @@ export default function FavoritesPageContent({
                 Saved shortlist
               </div>
 
-              <h1 className="max-w-3xl text-4xl font-black leading-tight tracking-[-0.05em] text-[#111827] sm:text-5xl">
+              <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-[-0.05em] text-[#111827] sm:text-5xl">
                 Your saved venues and suppliers, ready when you are.
               </h1>
 
@@ -51,7 +51,7 @@ export default function FavoritesPageContent({
                   <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#6B7280]">
                     Saved venues
                   </p>
-                  <p className="mt-1 text-3xl font-black tracking-[-0.04em] text-[#111827]">
+                  <p className="mt-1 text-3xl font-bold tracking-[-0.04em] text-[#111827]">
                     {venueCount}
                   </p>
                 </div>
@@ -59,7 +59,7 @@ export default function FavoritesPageContent({
                   <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#6B7280]">
                     Saved suppliers
                   </p>
-                  <p className="mt-1 text-3xl font-black tracking-[-0.04em] text-[#111827]">
+                  <p className="mt-1 text-3xl font-bold tracking-[-0.04em] text-[#111827]">
                     {supplierCount}
                   </p>
                 </div>
@@ -81,7 +81,7 @@ export default function FavoritesPageContent({
             <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
               Collection
             </p>
-            <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-[#111827]">
+            <h2 className="mt-2 text-2xl font-bold tracking-[-0.04em] text-[#111827]">
               {activeTab === "venues" ? "Saved venues" : "Saved suppliers"}
             </h2>
           </div>

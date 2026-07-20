@@ -237,7 +237,7 @@ export function BookingConversation({
                 <h2
                   className={cx(
                     "leading-tight text-slate-900",
-                    compact ? "text-base font-bold" : "text-lg font-black",
+                    compact ? "text-base font-bold" : "text-lg font-bold",
                   )}
                 >
                   {header.role === "customer"
@@ -316,7 +316,7 @@ export function BookingConversation({
         <div className="mx-auto max-w-[800px] flex flex-col gap-6">
           {groupedMessages.length === 0 && (
             <div className="flex flex-col items-center justify-center py-10 text-center">
-              <p className="text-sm font-black text-slate-900">No messages yet</p>
+              <p className="text-sm font-bold text-slate-900">No messages yet</p>
               <p className="mt-1 text-sm font-medium text-slate-500">
                 Start the conversation by sending a message below.
               </p>

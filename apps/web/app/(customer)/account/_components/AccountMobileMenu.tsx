@@ -44,7 +44,7 @@ export default function AccountMobileMenu() {
           <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#2563EB]">
             Account center
           </p>
-          <p className="truncate text-sm font-black text-slate-950">
+          <p className="truncate text-sm font-bold text-slate-950">
             {activeItem?.label ?? "Menu"}
           </p>
         </div>
@@ -64,7 +64,7 @@ export default function AccountMobileMenu() {
           <div className="inline-flex items-center gap-2 rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#2563EB]">
             Venora account center
           </div>
-          <h2 className="mt-3 text-xl font-black tracking-[-0.03em] text-slate-950">
+          <h2 className="mt-3 text-xl font-bold tracking-[-0.03em] text-slate-950">
             Account Center
           </h2>
         </div>

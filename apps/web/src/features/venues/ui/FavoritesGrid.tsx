@@ -57,7 +57,7 @@ export default function FavoritesGrid({ initialVenues }: FavoritesGridProps) {
           No favorites yet
         </p>
 
-        <h2 className="mx-auto mt-2 max-w-xl text-3xl font-black tracking-[-0.05em] text-[#111827]">
+        <h2 className="mx-auto mt-2 max-w-xl text-3xl font-bold tracking-[-0.05em] text-[#111827]">
           Build a venue shortlist you can return to.
         </h2>
 
@@ -143,7 +143,7 @@ export default function FavoritesGrid({ initialVenues }: FavoritesGridProps) {
                     </span>
                   </div>
 
-                  <h2 className="line-clamp-2 min-h-[48px] text-lg font-black leading-6 tracking-[-0.03em] text-[#111827] transition group-hover:text-[#1D4ED8]">
+                  <h2 className="line-clamp-2 min-h-[48px] text-lg font-bold leading-6 tracking-[-0.03em] text-[#111827] transition group-hover:text-[#1D4ED8]">
                     {venue.name}
                   </h2>
                 </div>
@@ -166,10 +166,10 @@ export default function FavoritesGrid({ initialVenues }: FavoritesGridProps) {
                     <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">
                       Starts at
                     </p>
-                    <p className="text-lg font-black text-slate-950">{venue.price}</p>
+                    <p className="text-lg font-bold text-slate-950">{venue.price}</p>
                   </div>
 
-                  <span className="inline-flex h-11 w-full items-center justify-center rounded-2xl bg-[#2563EB] px-4 text-center text-xs font-black uppercase tracking-[0.08em] text-white shadow-sm shadow-[#2563EB]/20 transition group-hover:bg-[#1D4ED8]">
+                  <span className="inline-flex h-11 w-full items-center justify-center rounded-2xl bg-[#2563EB] px-4 text-center text-xs font-bold uppercase tracking-[0.08em] text-white shadow-sm shadow-[#2563EB]/20 transition group-hover:bg-[#1D4ED8]">
                     View Details
                   </span>
                 </div>
