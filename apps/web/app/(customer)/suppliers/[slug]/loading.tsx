@@ -1,5 +1,10 @@
 function Pulse({ className }: { className: string }) {
-  return <div className={`animate-pulse rounded bg-slate-100 ${className}`} />;
+  return (
+    <div
+      aria-hidden="true"
+      className={`animate-pulse rounded bg-slate-100 ${className}`}
+    />
+  );
 }
 
 function InfoSkeleton() {
@@ -71,7 +76,11 @@ function RequestCardSkeleton() {
 
 export default function SupplierProfileLoading() {
   return (
-    <main className="mx-auto max-w-7xl space-y-8 bg-white px-4 pb-28 pt-6 font-sans sm:px-6 sm:pt-8 lg:px-8 lg:pb-12">
+    <main
+      aria-busy="true"
+      className="mx-auto max-w-7xl space-y-8 bg-white px-4 pb-28 pt-6 font-sans sm:px-6 sm:pt-8 lg:px-8 lg:pb-12"
+    >
+      <span className="sr-only">Loading supplier profile...</span>
       <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-end">
         <div className="hidden items-center gap-3 md:flex">
           <Pulse className="h-11 w-32 rounded-xl" />

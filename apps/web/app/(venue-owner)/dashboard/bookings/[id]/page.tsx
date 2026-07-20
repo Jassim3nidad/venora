@@ -284,8 +284,8 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
           </section>
 
           {/* Booking Conversation */}
-          <section className="rounded-[24px] border border-[#e5e7eb] bg-white p-5 shadow-sm shadow-slate-200/60 sm:p-6">
-            <div className="mb-5 flex items-center gap-2">
+          <section className="space-y-4 pb-8 sm:pb-10">
+            <div className="flex items-center gap-2 px-1">
               <h2 className="text-xl font-black tracking-tight text-[#0f172a]">
                 Booking Conversation
               </h2>

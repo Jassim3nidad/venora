@@ -1,0 +1,863 @@
+[
+  {
+    "name": "desktop",
+    "width": 1440,
+    "height": 900,
+    "status": 200,
+    "screenshotPath": "C:/venora/.codex-screenshots/inquiry-review-desktop.png",
+    "metrics": {
+      "url": "http://localhost:3000/login?redirectTo=/inquiries/b3e74cbb-ce42-4ada-9c7d-abf1d84268ad",
+      "title": "Venora — Find & Book Your Perfect Venue",
+      "bodyW": 1440,
+      "viewportW": 1440,
+      "docH": 900,
+      "main": {
+        "tag": "MAIN",
+        "cls": "flex h-screen w-full overflow-hidden bg-[#F9FAFB] text-[#111827]",
+        "text": "VenoraWhere extraordinary events begin.Sign in to manage bookings, compare favorites, and continue planning with Venora'",
+        "x": 0,
+        "y": 0,
+        "w": 1440,
+        "h": 900
+      },
+      "h1": [
+        {
+          "tag": "H1",
+          "cls": "text-5xl font-black leading-tight tracking-[-0.05em] text-white xl:text-6xl",
+          "text": "Where extraordinary events begin.",
+          "x": 64,
+          "y": 206,
+          "w": 576,
+          "h": 150
+        }
+      ],
+      "h2": [
+        {
+          "tag": "H2",
+          "cls": "text-3xl font-black leading-tight tracking-[-0.04em] text-[#111827]",
+          "text": "Sign in to Venora",
+          "x": 883,
+          "y": 219,
+          "w": 394,
+          "h": 38
+        }
+      ],
+      "cards": [
+        {
+          "tag": "SECTION",
+          "cls": "relative hidden h-screen w-1/2 overflow-hidden bg-[#111827] lg:flex",
+          "text": "VenoraWhere extraordinary events begin.Sign in to manage bookings, compare favorites, and continue planning with Venora'",
+          "x": 0,
+          "y": 0,
+          "w": 720,
+          "h": 900
+        },
+        {
+          "tag": "SPAN",
+          "cls": "flex h-7 w-7 items-center justify-center rounded-full bg-[#EFF6FF] text-[#1D4ED8]",
+          "text": "",
+          "x": 64,
+          "y": 496,
+          "w": 28,
+          "h": 28
+        },
+        {
+          "tag": "SPAN",
+          "cls": "flex h-7 w-7 items-center justify-center rounded-full bg-[#EFF6FF] text-[#1D4ED8]",
+          "text": "",
+          "x": 64,
+          "y": 540,
+          "w": 28,
+          "h": 28
+        },
+        {
+          "tag": "SPAN",
+          "cls": "flex h-7 w-7 items-center justify-center rounded-full bg-[#EFF6FF] text-[#1D4ED8]",
+          "text": "",
+          "x": 64,
+          "y": 584,
+          "w": 28,
+          "h": 28
+        },
+        {
+          "tag": "DIV",
+          "cls": "rounded-[28px] border border-white/20 bg-white/15 p-5 text-white shadow-2xl shadow-black/20 backdrop-blur-md",
+          "text": "Trusted marketplaceBrowse verified venues, confirm availability, and keep event details organized from one polished work",
+          "x": 64,
+          "y": 738,
+          "w": 592,
+          "h": 114
+        },
+        {
+          "tag": "SECTION",
+          "cls": "flex h-full w-full flex-col overflow-y-auto bg-[#F9FAFB] px-4 py-8 sm:px-6 lg:w-1/2 lg:px-12 xl:px-16",
+          "text": "VenoraWelcome backSign in to VenoraEnter your details to continue planning.Email addressPasswordForgot password?Continue",
+          "x": 720,
+          "y": 0,
+          "w": 720,
+          "h": 900
+        },
+        {
+          "tag": "DIV",
+          "cls": "rounded-[28px] border border-[#E5E7EB]/80 bg-white p-6 shadow-xl shadow-slate-200/60 sm:p-8",
+          "text": "Welcome backSign in to VenoraEnter your details to continue planning.Email addressPasswordForgot password?ContinueorCont",
+          "x": 850,
+          "y": 147,
+          "w": 460,
+          "h": 555
+        },
+        {
+          "tag": "P",
+          "cls": "mb-3 inline-flex rounded-full border border-[#E5E7EB] bg-[#EFF6FF] px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#1D4ED8]",
+          "text": "Welcome back",
+          "x": 1012,
+          "y": 181,
+          "w": 137,
+          "h": 27
+        },
+        {
+          "tag": "INPUT",
+          "cls": "h-12 w-full rounded-2xl border bg-[#F9FAFB] pl-11 pr-4 text-sm font-semibold text-[#111827] shadow-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60 border-[#E5E7EB] hover:border-[#2563EB]/60 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10",
+          "text": "",
+          "x": 883,
+          "y": 341,
+          "w": 394,
+          "h": 48
+        },
+        {
+          "tag": "INPUT",
+          "cls": "h-12 w-full rounded-2xl border bg-[#F9FAFB] pl-11 pr-12 text-sm font-semibold text-[#111827] shadow-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60 border-[#E5E7EB] hover:border-[#2563EB]/60 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10",
+          "text": "",
+          "x": 883,
+          "y": 437,
+          "w": 394,
+          "h": 48
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "absolute right-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[#6B7280] transition hover:bg-[#EFF6FF] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30",
+          "text": "",
+          "x": 1233,
+          "y": 445,
+          "w": 32,
+          "h": 32
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "h-12 w-full rounded-2xl bg-[#2563EB] text-sm font-extrabold text-white shadow-lg shadow-[#2563EB]/25 transition hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 disabled:cursor-not-allowed disabled:opacity-70",
+          "text": "Continue",
+          "x": 883,
+          "y": 505,
+          "w": 394,
+          "h": 48
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white text-sm font-extrabold text-[#111827] shadow-sm transition hover:border-[#2563EB]/60 hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 disabled:cursor-not-allowed disabled:opacity-70",
+          "text": "Continue with Google",
+          "x": 883,
+          "y": 621,
+          "w": 394,
+          "h": 48
+        },
+        {
+          "tag": "SECTION",
+          "cls": "",
+          "text": "",
+          "x": 0,
+          "y": 900,
+          "w": 1440,
+          "h": 0
+        }
+      ],
+      "buttons": [
+        {
+          "tag": "A",
+          "cls": "text-2xl font-black tracking-[-0.04em] text-white transition hover:text-[#EFF6FF]",
+          "text": "Venora",
+          "x": 64,
+          "y": 48,
+          "w": 592,
+          "h": 32
+        },
+        {
+          "tag": "A",
+          "cls": "text-2xl font-black tracking-[-0.04em] text-[#2563EB]",
+          "text": "Venora",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "A",
+          "cls": "text-sm font-bold text-[#2563EB] transition hover:text-[#1D4ED8]",
+          "text": "Forgot password?",
+          "x": 1154,
+          "y": 409,
+          "w": 123,
+          "h": 20
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "absolute right-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[#6B7280] transition hover:bg-[#EFF6FF] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30",
+          "text": "",
+          "x": 1233,
+          "y": 445,
+          "w": 32,
+          "h": 32
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "h-12 w-full rounded-2xl bg-[#2563EB] text-sm font-extrabold text-white shadow-lg shadow-[#2563EB]/25 transition hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 disabled:cursor-not-allowed disabled:opacity-70",
+          "text": "Continue",
+          "x": 883,
+          "y": 505,
+          "w": 394,
+          "h": 48
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white text-sm font-extrabold text-[#111827] shadow-sm transition hover:border-[#2563EB]/60 hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 disabled:cursor-not-allowed disabled:opacity-70",
+          "text": "Continue with Google",
+          "x": 883,
+          "y": 621,
+          "w": 394,
+          "h": 48
+        },
+        {
+          "tag": "A",
+          "cls": "font-extrabold text-[#2563EB] transition hover:text-[#1D4ED8]",
+          "text": "Create an account.",
+          "x": 1070,
+          "y": 733,
+          "w": 131,
+          "h": 17
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "tsqd-open-btn",
+          "text": "",
+          "x": 1384,
+          "y": 844,
+          "w": 40,
+          "h": 40
+        }
+      ],
+      "forms": [
+        {
+          "tag": "FORM",
+          "cls": "flex flex-col gap-5",
+          "text": "Email addressPasswordForgot password?Continue",
+          "x": 883,
+          "y": 317,
+          "w": 394,
+          "h": 236
+        },
+        {
+          "tag": "INPUT",
+          "cls": "h-12 w-full rounded-2xl border bg-[#F9FAFB] pl-11 pr-4 text-sm font-semibold text-[#111827] shadow-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60 border-[#E5E7EB] hover:border-[#2563EB]/60 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10",
+          "text": "",
+          "x": 883,
+          "y": 341,
+          "w": 394,
+          "h": 48
+        },
+        {
+          "tag": "INPUT",
+          "cls": "h-12 w-full rounded-2xl border bg-[#F9FAFB] pl-11 pr-12 text-sm font-semibold text-[#111827] shadow-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60 border-[#E5E7EB] hover:border-[#2563EB]/60 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10",
+          "text": "",
+          "x": 883,
+          "y": 437,
+          "w": 394,
+          "h": 48
+        }
+      ],
+      "fixed": [
+        {
+          "tag": "OL",
+          "cls": "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
+          "text": "",
+          "x": 1020,
+          "y": 868,
+          "w": 420,
+          "h": 32
+        }
+      ]
+    }
+  },
+  {
+    "name": "tablet",
+    "width": 768,
+    "height": 1024,
+    "status": 200,
+    "screenshotPath": "C:/venora/.codex-screenshots/inquiry-review-tablet.png",
+    "metrics": {
+      "url": "http://localhost:3000/login?redirectTo=/inquiries/b3e74cbb-ce42-4ada-9c7d-abf1d84268ad",
+      "title": "Venora — Find & Book Your Perfect Venue",
+      "bodyW": 768,
+      "viewportW": 768,
+      "docH": 1024,
+      "main": {
+        "tag": "MAIN",
+        "cls": "flex h-screen w-full overflow-hidden bg-[#F9FAFB] text-[#111827]",
+        "text": "VenoraWhere extraordinary events begin.Sign in to manage bookings, compare favorites, and continue planning with Venora'",
+        "x": 0,
+        "y": 0,
+        "w": 768,
+        "h": 1024
+      },
+      "h1": [
+        {
+          "tag": "H1",
+          "cls": "text-5xl font-black leading-tight tracking-[-0.05em] text-white xl:text-6xl",
+          "text": "Where extraordinary events begin.",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        }
+      ],
+      "h2": [
+        {
+          "tag": "H2",
+          "cls": "text-3xl font-black leading-tight tracking-[-0.04em] text-[#111827]",
+          "text": "Sign in to Venora",
+          "x": 187,
+          "y": 313,
+          "w": 394,
+          "h": 38
+        }
+      ],
+      "cards": [
+        {
+          "tag": "SECTION",
+          "cls": "relative hidden h-screen w-1/2 overflow-hidden bg-[#111827] lg:flex",
+          "text": "VenoraWhere extraordinary events begin.Sign in to manage bookings, compare favorites, and continue planning with Venora'",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "SPAN",
+          "cls": "flex h-7 w-7 items-center justify-center rounded-full bg-[#EFF6FF] text-[#1D4ED8]",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "SPAN",
+          "cls": "flex h-7 w-7 items-center justify-center rounded-full bg-[#EFF6FF] text-[#1D4ED8]",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "SPAN",
+          "cls": "flex h-7 w-7 items-center justify-center rounded-full bg-[#EFF6FF] text-[#1D4ED8]",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "DIV",
+          "cls": "rounded-[28px] border border-white/20 bg-white/15 p-5 text-white shadow-2xl shadow-black/20 backdrop-blur-md",
+          "text": "Trusted marketplaceBrowse verified venues, confirm availability, and keep event details organized from one polished work",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "SECTION",
+          "cls": "flex h-full w-full flex-col overflow-y-auto bg-[#F9FAFB] px-4 py-8 sm:px-6 lg:w-1/2 lg:px-12 xl:px-16",
+          "text": "VenoraWelcome backSign in to VenoraEnter your details to continue planning.Email addressPasswordForgot password?Continue",
+          "x": 0,
+          "y": 0,
+          "w": 768,
+          "h": 1024
+        },
+        {
+          "tag": "DIV",
+          "cls": "rounded-[28px] border border-[#E5E7EB]/80 bg-white p-6 shadow-xl shadow-slate-200/60 sm:p-8",
+          "text": "Welcome backSign in to VenoraEnter your details to continue planning.Email addressPasswordForgot password?ContinueorCont",
+          "x": 154,
+          "y": 241,
+          "w": 460,
+          "h": 555
+        },
+        {
+          "tag": "P",
+          "cls": "mb-3 inline-flex rounded-full border border-[#E5E7EB] bg-[#EFF6FF] px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#1D4ED8]",
+          "text": "Welcome back",
+          "x": 316,
+          "y": 275,
+          "w": 137,
+          "h": 27
+        },
+        {
+          "tag": "INPUT",
+          "cls": "h-12 w-full rounded-2xl border bg-[#F9FAFB] pl-11 pr-4 text-sm font-semibold text-[#111827] shadow-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60 border-[#E5E7EB] hover:border-[#2563EB]/60 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10",
+          "text": "",
+          "x": 187,
+          "y": 435,
+          "w": 394,
+          "h": 48
+        },
+        {
+          "tag": "INPUT",
+          "cls": "h-12 w-full rounded-2xl border bg-[#F9FAFB] pl-11 pr-12 text-sm font-semibold text-[#111827] shadow-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60 border-[#E5E7EB] hover:border-[#2563EB]/60 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10",
+          "text": "",
+          "x": 187,
+          "y": 531,
+          "w": 394,
+          "h": 48
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "absolute right-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[#6B7280] transition hover:bg-[#EFF6FF] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30",
+          "text": "",
+          "x": 537,
+          "y": 539,
+          "w": 32,
+          "h": 32
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "h-12 w-full rounded-2xl bg-[#2563EB] text-sm font-extrabold text-white shadow-lg shadow-[#2563EB]/25 transition hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 disabled:cursor-not-allowed disabled:opacity-70",
+          "text": "Continue",
+          "x": 187,
+          "y": 599,
+          "w": 394,
+          "h": 48
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white text-sm font-extrabold text-[#111827] shadow-sm transition hover:border-[#2563EB]/60 hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 disabled:cursor-not-allowed disabled:opacity-70",
+          "text": "Continue with Google",
+          "x": 187,
+          "y": 715,
+          "w": 394,
+          "h": 48
+        },
+        {
+          "tag": "SECTION",
+          "cls": "",
+          "text": "",
+          "x": 0,
+          "y": 1024,
+          "w": 768,
+          "h": 0
+        }
+      ],
+      "buttons": [
+        {
+          "tag": "A",
+          "cls": "text-2xl font-black tracking-[-0.04em] text-white transition hover:text-[#EFF6FF]",
+          "text": "Venora",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "A",
+          "cls": "text-2xl font-black tracking-[-0.04em] text-[#2563EB]",
+          "text": "Venora",
+          "x": 344,
+          "y": 177,
+          "w": 81,
+          "h": 32
+        },
+        {
+          "tag": "A",
+          "cls": "text-sm font-bold text-[#2563EB] transition hover:text-[#1D4ED8]",
+          "text": "Forgot password?",
+          "x": 458,
+          "y": 503,
+          "w": 123,
+          "h": 20
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "absolute right-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[#6B7280] transition hover:bg-[#EFF6FF] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30",
+          "text": "",
+          "x": 537,
+          "y": 539,
+          "w": 32,
+          "h": 32
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "h-12 w-full rounded-2xl bg-[#2563EB] text-sm font-extrabold text-white shadow-lg shadow-[#2563EB]/25 transition hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 disabled:cursor-not-allowed disabled:opacity-70",
+          "text": "Continue",
+          "x": 187,
+          "y": 599,
+          "w": 394,
+          "h": 48
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white text-sm font-extrabold text-[#111827] shadow-sm transition hover:border-[#2563EB]/60 hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 disabled:cursor-not-allowed disabled:opacity-70",
+          "text": "Continue with Google",
+          "x": 187,
+          "y": 715,
+          "w": 394,
+          "h": 48
+        },
+        {
+          "tag": "A",
+          "cls": "font-extrabold text-[#2563EB] transition hover:text-[#1D4ED8]",
+          "text": "Create an account.",
+          "x": 374,
+          "y": 827,
+          "w": 131,
+          "h": 17
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "tsqd-open-btn",
+          "text": "",
+          "x": 712,
+          "y": 968,
+          "w": 40,
+          "h": 40
+        }
+      ],
+      "forms": [
+        {
+          "tag": "FORM",
+          "cls": "flex flex-col gap-5",
+          "text": "Email addressPasswordForgot password?Continue",
+          "x": 187,
+          "y": 411,
+          "w": 394,
+          "h": 236
+        },
+        {
+          "tag": "INPUT",
+          "cls": "h-12 w-full rounded-2xl border bg-[#F9FAFB] pl-11 pr-4 text-sm font-semibold text-[#111827] shadow-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60 border-[#E5E7EB] hover:border-[#2563EB]/60 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10",
+          "text": "",
+          "x": 187,
+          "y": 435,
+          "w": 394,
+          "h": 48
+        },
+        {
+          "tag": "INPUT",
+          "cls": "h-12 w-full rounded-2xl border bg-[#F9FAFB] pl-11 pr-12 text-sm font-semibold text-[#111827] shadow-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60 border-[#E5E7EB] hover:border-[#2563EB]/60 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10",
+          "text": "",
+          "x": 187,
+          "y": 531,
+          "w": 394,
+          "h": 48
+        }
+      ],
+      "fixed": [
+        {
+          "tag": "OL",
+          "cls": "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
+          "text": "",
+          "x": 348,
+          "y": 992,
+          "w": 420,
+          "h": 32
+        }
+      ]
+    }
+  },
+  {
+    "name": "mobile",
+    "width": 390,
+    "height": 844,
+    "status": 200,
+    "screenshotPath": "C:/venora/.codex-screenshots/inquiry-review-mobile.png",
+    "metrics": {
+      "url": "http://localhost:3000/login?redirectTo=/inquiries/b3e74cbb-ce42-4ada-9c7d-abf1d84268ad",
+      "title": "Venora — Find & Book Your Perfect Venue",
+      "bodyW": 390,
+      "viewportW": 390,
+      "docH": 844,
+      "main": {
+        "tag": "MAIN",
+        "cls": "flex h-screen w-full overflow-hidden bg-[#F9FAFB] text-[#111827]",
+        "text": "VenoraWhere extraordinary events begin.Sign in to manage bookings, compare favorites, and continue planning with Venora'",
+        "x": 0,
+        "y": 0,
+        "w": 390,
+        "h": 844
+      },
+      "h1": [
+        {
+          "tag": "H1",
+          "cls": "text-5xl font-black leading-tight tracking-[-0.05em] text-white xl:text-6xl",
+          "text": "Where extraordinary events begin.",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        }
+      ],
+      "h2": [
+        {
+          "tag": "H2",
+          "cls": "text-3xl font-black leading-tight tracking-[-0.04em] text-[#111827]",
+          "text": "Sign in to Venora",
+          "x": 41,
+          "y": 223,
+          "w": 308,
+          "h": 38
+        }
+      ],
+      "cards": [
+        {
+          "tag": "SECTION",
+          "cls": "relative hidden h-screen w-1/2 overflow-hidden bg-[#111827] lg:flex",
+          "text": "VenoraWhere extraordinary events begin.Sign in to manage bookings, compare favorites, and continue planning with Venora'",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "SPAN",
+          "cls": "flex h-7 w-7 items-center justify-center rounded-full bg-[#EFF6FF] text-[#1D4ED8]",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "SPAN",
+          "cls": "flex h-7 w-7 items-center justify-center rounded-full bg-[#EFF6FF] text-[#1D4ED8]",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "SPAN",
+          "cls": "flex h-7 w-7 items-center justify-center rounded-full bg-[#EFF6FF] text-[#1D4ED8]",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "DIV",
+          "cls": "rounded-[28px] border border-white/20 bg-white/15 p-5 text-white shadow-2xl shadow-black/20 backdrop-blur-md",
+          "text": "Trusted marketplaceBrowse verified venues, confirm availability, and keep event details organized from one polished work",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "SECTION",
+          "cls": "flex h-full w-full flex-col overflow-y-auto bg-[#F9FAFB] px-4 py-8 sm:px-6 lg:w-1/2 lg:px-12 xl:px-16",
+          "text": "VenoraWelcome backSign in to VenoraEnter your details to continue planning.Email addressPasswordForgot password?Continue",
+          "x": 0,
+          "y": 0,
+          "w": 390,
+          "h": 844
+        },
+        {
+          "tag": "DIV",
+          "cls": "rounded-[28px] border border-[#E5E7EB]/80 bg-white p-6 shadow-xl shadow-slate-200/60 sm:p-8",
+          "text": "Welcome backSign in to VenoraEnter your details to continue planning.Email addressPasswordForgot password?ContinueorCont",
+          "x": 16,
+          "y": 159,
+          "w": 358,
+          "h": 539
+        },
+        {
+          "tag": "P",
+          "cls": "mb-3 inline-flex rounded-full border border-[#E5E7EB] bg-[#EFF6FF] px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#1D4ED8]",
+          "text": "Welcome back",
+          "x": 127,
+          "y": 185,
+          "w": 137,
+          "h": 27
+        },
+        {
+          "tag": "INPUT",
+          "cls": "h-12 w-full rounded-2xl border bg-[#F9FAFB] pl-11 pr-4 text-sm font-semibold text-[#111827] shadow-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60 border-[#E5E7EB] hover:border-[#2563EB]/60 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10",
+          "text": "",
+          "x": 41,
+          "y": 345,
+          "w": 308,
+          "h": 48
+        },
+        {
+          "tag": "INPUT",
+          "cls": "h-12 w-full rounded-2xl border bg-[#F9FAFB] pl-11 pr-12 text-sm font-semibold text-[#111827] shadow-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60 border-[#E5E7EB] hover:border-[#2563EB]/60 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10",
+          "text": "",
+          "x": 41,
+          "y": 441,
+          "w": 308,
+          "h": 48
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "absolute right-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[#6B7280] transition hover:bg-[#EFF6FF] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30",
+          "text": "",
+          "x": 305,
+          "y": 449,
+          "w": 32,
+          "h": 32
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "h-12 w-full rounded-2xl bg-[#2563EB] text-sm font-extrabold text-white shadow-lg shadow-[#2563EB]/25 transition hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 disabled:cursor-not-allowed disabled:opacity-70",
+          "text": "Continue",
+          "x": 41,
+          "y": 509,
+          "w": 308,
+          "h": 48
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white text-sm font-extrabold text-[#111827] shadow-sm transition hover:border-[#2563EB]/60 hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 disabled:cursor-not-allowed disabled:opacity-70",
+          "text": "Continue with Google",
+          "x": 41,
+          "y": 625,
+          "w": 308,
+          "h": 48
+        },
+        {
+          "tag": "SECTION",
+          "cls": "",
+          "text": "",
+          "x": 0,
+          "y": 844,
+          "w": 390,
+          "h": 0
+        }
+      ],
+      "buttons": [
+        {
+          "tag": "A",
+          "cls": "text-2xl font-black tracking-[-0.04em] text-white transition hover:text-[#EFF6FF]",
+          "text": "Venora",
+          "x": 0,
+          "y": 0,
+          "w": 0,
+          "h": 0
+        },
+        {
+          "tag": "A",
+          "cls": "text-2xl font-black tracking-[-0.04em] text-[#2563EB]",
+          "text": "Venora",
+          "x": 155,
+          "y": 95,
+          "w": 81,
+          "h": 32
+        },
+        {
+          "tag": "A",
+          "cls": "text-sm font-bold text-[#2563EB] transition hover:text-[#1D4ED8]",
+          "text": "Forgot password?",
+          "x": 226,
+          "y": 413,
+          "w": 123,
+          "h": 20
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "absolute right-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-[#6B7280] transition hover:bg-[#EFF6FF] hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30",
+          "text": "",
+          "x": 305,
+          "y": 449,
+          "w": 32,
+          "h": 32
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "h-12 w-full rounded-2xl bg-[#2563EB] text-sm font-extrabold text-white shadow-lg shadow-[#2563EB]/25 transition hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 disabled:cursor-not-allowed disabled:opacity-70",
+          "text": "Continue",
+          "x": 41,
+          "y": 509,
+          "w": 308,
+          "h": 48
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white text-sm font-extrabold text-[#111827] shadow-sm transition hover:border-[#2563EB]/60 hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 disabled:cursor-not-allowed disabled:opacity-70",
+          "text": "Continue with Google",
+          "x": 41,
+          "y": 625,
+          "w": 308,
+          "h": 48
+        },
+        {
+          "tag": "A",
+          "cls": "font-extrabold text-[#2563EB] transition hover:text-[#1D4ED8]",
+          "text": "Create an account.",
+          "x": 185,
+          "y": 729,
+          "w": 131,
+          "h": 17
+        },
+        {
+          "tag": "BUTTON",
+          "cls": "tsqd-open-btn",
+          "text": "",
+          "x": 334,
+          "y": 788,
+          "w": 40,
+          "h": 40
+        }
+      ],
+      "forms": [
+        {
+          "tag": "FORM",
+          "cls": "flex flex-col gap-5",
+          "text": "Email addressPasswordForgot password?Continue",
+          "x": 41,
+          "y": 321,
+          "w": 308,
+          "h": 236
+        },
+        {
+          "tag": "INPUT",
+          "cls": "h-12 w-full rounded-2xl border bg-[#F9FAFB] pl-11 pr-4 text-sm font-semibold text-[#111827] shadow-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60 border-[#E5E7EB] hover:border-[#2563EB]/60 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10",
+          "text": "",
+          "x": 41,
+          "y": 345,
+          "w": 308,
+          "h": 48
+        },
+        {
+          "tag": "INPUT",
+          "cls": "h-12 w-full rounded-2xl border bg-[#F9FAFB] pl-11 pr-12 text-sm font-semibold text-[#111827] shadow-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60 border-[#E5E7EB] hover:border-[#2563EB]/60 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10",
+          "text": "",
+          "x": 41,
+          "y": 441,
+          "w": 308,
+          "h": 48
+        }
+      ],
+      "fixed": [
+        {
+          "tag": "OL",
+          "cls": "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
+          "text": "",
+          "x": 0,
+          "y": 0,
+          "w": 390,
+          "h": 32
+        }
+      ]
+    }
+  }
+]

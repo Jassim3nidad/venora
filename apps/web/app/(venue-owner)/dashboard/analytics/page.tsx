@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import nextDynamic from "next/dynamic";
 import {
   DashButton,
-  DashboardSubPage,
+  DashboardPage,
   EmptyState,
   KpiCard,
   Panel,
@@ -86,7 +86,7 @@ export default async function AnalyticsPage(props: AnalyticsPageProps) {
     : null;
 
   return (
-    <div className="flex flex-col gap-6">
+    <DashboardPage className="flex flex-col gap-6">
       <AnalyticsHeader 
         venues={headerVenues}
         defaultVenue={venueParam}
@@ -283,6 +283,6 @@ export default async function AnalyticsPage(props: AnalyticsPageProps) {
           </div>
         </>
       )}
-    </div>
+    </DashboardPage>
   );
 }

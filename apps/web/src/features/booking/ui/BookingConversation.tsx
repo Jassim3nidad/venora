@@ -1,8 +1,22 @@
 "use client";
 
-import { useRef, useState, useTransition, useEffect, useOptimistic } from "react";
+import {
+  useEffect,
+  useOptimistic,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { useRouter } from "next/navigation";
-import { MessageSquare, Send, Loader2, AlertCircle, CalendarDays, MapPin, BriefcaseBusiness, ExternalLink } from "lucide-react";
+import {
+  AlertCircle,
+  BriefcaseBusiness,
+  CalendarDays,
+  ExternalLink,
+  Loader2,
+  MapPin,
+  Send,
+} from "lucide-react";
 import Link from "next/link";
 import { sendBookingMessageAction } from "../application/messages-actions";
 import type { BookingMessage } from "../application/messages-actions";
@@ -22,7 +36,10 @@ type BookingConversationHeaderProps = {
   statusLabel: string;
 };
 
-// Helpers
+function cx(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
+
 function formatMessageTime(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
@@ -51,6 +68,7 @@ export function BookingConversation({
   isReadOnly,
   header,
   counterpartLabel = "the other party",
+  compact = false,
 }: {
   bookingId: string;
   initialMessages: BookingMessage[];
@@ -59,13 +77,14 @@ export function BookingConversation({
   isReadOnly: boolean;
   header?: BookingConversationHeaderProps;
   counterpartLabel?: string;
+  compact?: boolean;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const [optimisticMessages, addOptimisticMessage] = useOptimistic(
     initialMessages,
@@ -125,8 +144,8 @@ export function BookingConversation({
   }
 
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
   }, [optimisticMessages]);
 
@@ -178,14 +197,29 @@ export function BookingConversation({
   };
 
   return (
-    <div className="flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden h-full min-h-[600px] max-h-[800px]">
+    <div
+      className={cx(
+        "flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm",
+        !compact && "h-full",
+      )}
+    >
       {/* ── Conversation Header ── */}
       {header && (
-        <div className="border-b border-slate-200 bg-slate-50/50 p-4 sm:p-5">
+        <div
+          className={cx(
+            "border-b border-slate-200 bg-slate-50/50",
+            compact ? "p-4" : "p-4 sm:p-5",
+          )}
+        >
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <div className="flex items-center gap-4">
               {header.role === "customer" && header.supplierLogo !== undefined && (
-                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-slate-200 bg-white">
+                <div
+                  className={cx(
+                    "shrink-0 overflow-hidden rounded-full border border-slate-200 bg-white",
+                    compact ? "h-10 w-10" : "h-12 w-12",
+                  )}
+                >
                   {header.supplierLogo ? (
                     <img
                       src={header.supplierLogo}
@@ -200,7 +234,12 @@ export function BookingConversation({
                 </div>
               )}
               <div>
-                <h2 className="text-lg font-black text-slate-900 leading-tight">
+                <h2
+                  className={cx(
+                    "leading-tight text-slate-900",
+                    compact ? "text-base font-bold" : "text-lg font-black",
+                  )}
+                >
                   {header.role === "customer"
                     ? header.supplierName || "Supplier"
                     : header.customerName || "Customer"}
@@ -223,7 +262,7 @@ export function BookingConversation({
             </div>
             {header.role === "customer" && header.supplierSlug && (
               <Link
-                href={`/suppliers/${header.supplierSlug}`}
+                href={`/venues/${header.supplierSlug}`}
                 className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
@@ -233,39 +272,47 @@ export function BookingConversation({
           </div>
 
           {/* Context Row */}
-          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl bg-white p-3 border border-slate-200 text-xs sm:text-sm font-medium text-slate-600">
-            {header.eventType && header.eventDate && (
-              <span className="flex items-center gap-1.5">
-                <CalendarDays className="h-4 w-4 text-slate-400 shrink-0" />
-                {header.eventType} &middot; {header.eventDate}
+          {!compact && (
+            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl bg-white p-3 border border-slate-200 text-xs sm:text-sm font-medium text-slate-600">
+              {header.eventType && header.eventDate && (
+                <span className="flex items-center gap-1.5">
+                  <CalendarDays className="h-4 w-4 text-slate-400 shrink-0" />
+                  {header.eventType} &middot; {header.eventDate}
+                </span>
+              )}
+              {header.venueName && (
+                <span className="flex items-center gap-1.5">
+                  <MapPin className="h-4 w-4 text-slate-400 shrink-0" />
+                  {header.venueLink ? (
+                    <Link
+                      href={header.venueLink}
+                      className="hover:text-blue-600 hover:underline"
+                    >
+                      {header.venueName}
+                    </Link>
+                  ) : (
+                    header.venueName
+                  )}
+                </span>
+              )}
+              <span className="flex items-center gap-1.5 ml-auto">
+                <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-700">
+                  {header.statusLabel}
+                </span>
               </span>
-            )}
-            {header.venueName && (
-              <span className="flex items-center gap-1.5">
-                <MapPin className="h-4 w-4 text-slate-400 shrink-0" />
-                {header.venueLink ? (
-                  <Link
-                    href={header.venueLink}
-                    className="hover:text-blue-600 hover:underline"
-                  >
-                    {header.venueName}
-                  </Link>
-                ) : (
-                  header.venueName
-                )}
-              </span>
-            )}
-            <span className="flex items-center gap-1.5 ml-auto">
-              <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-700">
-                {header.statusLabel}
-              </span>
-            </span>
-          </div>
+            </div>
+          )}
         </div>
       )}
 
       {/* ── Message History ── */}
-      <div className="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-5">
+      <div
+        ref={containerRef}
+        className={cx(
+          "overflow-y-auto bg-slate-50 p-4 sm:p-5",
+          compact ? "max-h-[420px]" : "h-[400px] flex-1 sm:h-[500px]",
+        )}
+      >
         <div className="mx-auto max-w-[800px] flex flex-col gap-6">
           {groupedMessages.length === 0 && (
             <div className="flex flex-col items-center justify-center py-10 text-center">
@@ -343,7 +390,6 @@ export function BookingConversation({
               })}
             </div>
           ))}
-          <div ref={messagesEndRef} className="h-1" />
         </div>
       </div>
 

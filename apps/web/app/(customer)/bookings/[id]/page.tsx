@@ -736,28 +736,27 @@ export default async function BookingDetailPage({ params }: Props) {
                 </span>
               )}
             </div>
-            <div className="overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm">
-              <BookingConversation
-                bookingId={typedBooking.id}
-                initialMessages={messages}
-                currentUserId={user.id}
-                currentRole="customer"
-                isReadOnly={isReadOnly}
-                header={{
-                  role: "customer",
-                  supplierName: typedBooking.venues?.name,
-                  supplierLogo: typedBooking.venues?.venue_images?.[0]?.url,
-                  supplierSlug: typedBooking.venues?.slug,
-                  serviceName: typedBooking.venue_packages?.name,
-                  inquiryRef: `Booking #${typedBooking.id.substring(0, 8)}`,
-                  eventType: "Event",
-                  eventDate: formatDate(typedBooking.event_date),
-                  venueName: locationLabel(typedBooking.venues),
-                  venueLink: `/venues/${(typedBooking.venues as any)?.slug}`,
-                  statusLabel: String(typedBooking.status).replace(/_/g, " "),
-                }}
-              />
-            </div>
+            <BookingConversation
+              bookingId={typedBooking.id}
+              initialMessages={messages}
+              currentUserId={user.id}
+              currentRole="customer"
+              isReadOnly={isReadOnly}
+              compact
+              header={{
+                role: "customer",
+                supplierName: typedBooking.venues?.name,
+                supplierLogo: typedBooking.venues?.venue_images?.[0]?.url,
+                supplierSlug: typedBooking.venues?.slug,
+                serviceName: typedBooking.venue_packages?.name,
+                inquiryRef: `Booking #${typedBooking.id.substring(0, 8)}`,
+                eventType: "Event",
+                eventDate: formatDate(typedBooking.event_date),
+                venueName: locationLabel(typedBooking.venues),
+                venueLink: `/venues/${(typedBooking.venues as any)?.slug}`,
+                statusLabel: String(typedBooking.status).replace(/_/g, " "),
+              }}
+            />
           </section>
         </div>
 
