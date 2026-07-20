@@ -10,9 +10,10 @@ async function run() {
   console.log("Connected to database.");
 
   const files = [
-    'supabase/migrations/072_harden_public_auth_role_assignment.sql',
-    'supabase/migrations/073_lock_ai_to_openrouter_hy3.sql',
-    'supabase/migrations/076_admin_disputes.sql'
+    'supabase/migrations/20260717013034_fix_smart_search_venues.sql',
+    'supabase/migrations/20260717031107_fix_coordinator_invitation_flow.sql',
+    'supabase/migrations/20260717143000_ensure_organization_owner_membership.sql',
+    'supabase/migrations/20260720063605_public_owner_profiles.sql'
   ];
 
   for (const f of files) {
@@ -26,6 +27,8 @@ async function run() {
     }
   }
 
+  console.log("Reloading PostgREST schema cache...");
+  await client.query("NOTIFY pgrst, 'reload schema';");
   await client.end();
 }
 

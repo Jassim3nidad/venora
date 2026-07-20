@@ -1,9 +1,17 @@
-export const MARKETPLACE_NAV_LINKS = [
-  { label: "Browse", href: "/venues" },
-  { label: "Suppliers", href: "/suppliers" },
-  { label: "Bookings", href: "/bookings" },
-  { label: "Favorites", href: "/favorites" },
-] as const;
+import { CalendarDays, Heart, Search, Store, type LucideIcon } from "lucide-react";
+
+export type MarketplaceNavLink = {
+  label: string;
+  href: string;
+  icon: LucideIcon;
+};
+
+export const MARKETPLACE_NAV_LINKS: MarketplaceNavLink[] = [
+  { label: "Venues", href: "/venues", icon: Search },
+  { label: "Suppliers", href: "/suppliers", icon: Store },
+  { label: "Bookings", href: "/bookings", icon: CalendarDays },
+  { label: "Favorites", href: "/favorites", icon: Heart },
+];
 
 const MARKETPLACE_PREFIXES = MARKETPLACE_NAV_LINKS.map((item) => item.href);
 

@@ -95,12 +95,13 @@ export function CustomerNavbar({
                 key={item.href}
                 href={resolveMarketplaceNavHref(item.href, isAuthenticated)}
                 className={[
-                  "min-w-[5.5rem] flex-1 whitespace-nowrap border-b-2 px-3 py-3 text-center text-sm font-bold transition sm:px-4 sm:py-3.5",
+                  "inline-flex min-w-[5.5rem] flex-1 items-center justify-center gap-2 whitespace-nowrap border-b-2 px-3 py-3 text-center text-sm font-bold transition sm:px-4 sm:py-3.5",
                   active
                     ? "border-[#2563EB] bg-[#EFF6FF]/60 text-[#1D4ED8]"
                     : "border-transparent text-[#6B7280] hover:border-[#BFDBFE] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
                 ].join(" ")}
               >
+                {item.icon ? <item.icon className="h-4 w-4" /> : null}
                 {item.label}
               </Link>
             );
@@ -143,12 +144,13 @@ export function CustomerNavbar({
                   key={item.href}
                   href={resolveMarketplaceNavHref(item.href, isAuthenticated)}
                   className={[
-                    "rounded-full px-4 py-2 text-sm font-bold transition",
+                    "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition",
                     active
                       ? "bg-[#EFF6FF] text-[#1D4ED8] shadow-[inset_0_0_0_1px_rgba(37,99,235,0.08)] hover:text-[#1D4ED8]"
                       : "text-[#6B7280] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
                   ].join(" ")}
                 >
+                  {item.icon ? <item.icon className="h-4 w-4" /> : null}
                   {item.label}
                 </Link>
               );
@@ -215,29 +217,29 @@ export function CustomerNavbar({
                         isAuthenticated || item.href !== "/notifications",
                     )
                     .map((item) => {
-                    const Icon = item.icon ?? Search;
-                    const active = isMarketplaceNavItemActive(pathname, item.href);
-                    const itemClassName = [
-                      "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold transition",
-                      item.mobileOnly ? "" : "",
-                      active
-                        ? "bg-[#EFF6FF] text-[#2563EB]"
-                        : "text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]",
-                    ].join(" ");
+                      const Icon = item.icon ?? Search;
+                      const active = isMarketplaceNavItemActive(pathname, item.href);
+                      const itemClassName = [
+                        "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold transition",
+                        item.mobileOnly ? "" : "",
+                        active
+                          ? "bg-[#EFF6FF] text-[#2563EB]"
+                          : "text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]",
+                      ].join(" ");
 
-                    return (
-                      <Link
-                        key={item.href}
-                        href={resolveMarketplaceNavHref(item.href, isAuthenticated)}
-                        role="menuitem"
-                        onClick={closeMenu}
-                        className={itemClassName}
-                      >
-                        <Icon className="h-5 w-5" />
-                        {item.label}
-                      </Link>
-                    );
-                  })}
+                      return (
+                        <Link
+                          key={item.href}
+                          href={resolveMarketplaceNavHref(item.href, isAuthenticated)}
+                          role="menuitem"
+                          onClick={closeMenu}
+                          className={itemClassName}
+                        >
+                          <Icon className="h-5 w-5" />
+                          {item.label}
+                        </Link>
+                      );
+                    })}
 
                   {user ? (
                     <>
