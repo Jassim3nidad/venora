@@ -33,10 +33,10 @@
     "recharts": "^2.15.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.0.0",
+    "@eslint/eslintrc": "^3.3.6",
     "@types/react": "^19",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.65.0",
+    "@typescript-eslint/parser": "^8.65.0",
     "@venora/config": "workspace:*",
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^9.0.0",
