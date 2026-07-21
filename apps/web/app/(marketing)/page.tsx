@@ -35,6 +35,12 @@ import {
   buildLandingSearchSuggestions,
   mergeLandingSearchSuggestionSources,
 } from "@/src/features/venues/utils/landing-search-suggestions";
+import {
+  RevealGroup,
+  RevealItem,
+  ScrollReveal,
+  ScrollRevealGroup,
+} from "@/src/components/animations/RevealAnimations";
 
 const trustItems = [
   {
@@ -223,129 +229,138 @@ export default async function MarketingHomePage() {
             <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent via-white/70 to-white sm:h-40 lg:h-48" />
           </div>
 
-          <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 sm:px-6 lg:min-h-[560px] lg:justify-between lg:px-8">
+          <RevealGroup className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 sm:px-6 lg:min-h-[560px] lg:justify-between lg:px-8" staggerDelay={0.08}>
             <div className="max-w-4xl pt-4">
-              <div className="mb-6 flex flex-wrap gap-2 sm:gap-3 lg:mb-8">
+              <RevealItem yOffset={8} className="mb-6 flex flex-wrap gap-2 sm:gap-3 lg:mb-8">
                 {categoryLinks.slice(0, 3).map((category) => (
                   <Link
                     key={category.label}
                     href={category.href}
-                    className="rounded-2xl border border-white/20 bg-white/14 px-4 py-2.5 text-xs font-bold text-white shadow-sm backdrop-blur-md transition hover:bg-white/22 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 sm:px-5 sm:py-3 sm:text-sm"
+                    className="rounded-2xl border border-white/20 bg-white/14 px-4 py-2.5 text-xs font-bold text-white shadow-sm backdrop-blur-md transition-all duration-200 hover:-translate-y-[1px] hover:bg-white/22 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 sm:px-5 sm:py-3 sm:text-sm"
                   >
                     {category.label}
                   </Link>
                 ))}
-              </div>
+              </RevealItem>
 
-              <h1 className="max-w-4xl text-4xl font-bold leading-[1.04] text-white sm:text-5xl lg:text-7xl">
-                Where Extraordinary Events Begin
-              </h1>
-              <p className="mt-4 max-w-2xl text-base font-medium leading-7 text-white/86 sm:text-lg lg:mt-6 lg:text-xl lg:leading-8">
-                Discover, compare, and book the perfect space for your next
-                event. The premier marketplace for curated, high-quality venues.
-              </p>
+              <RevealItem yOffset={12}>
+                <h1 className="max-w-4xl text-4xl font-bold leading-[1.04] text-white sm:text-5xl lg:text-7xl">
+                  Where Extraordinary Events Begin
+                </h1>
+              </RevealItem>
+              <RevealItem yOffset={12}>
+                <p className="mt-4 max-w-2xl text-base font-medium leading-7 text-white/86 sm:text-lg lg:mt-6 lg:text-xl lg:leading-8">
+                  Discover, compare, and book the perfect space for your next
+                  event. The premier marketplace for curated, high-quality venues.
+                </p>
+              </RevealItem>
             </div>
 
-            <div className="relative z-10 mt-8 w-full sm:mt-16 lg:mt-16 lg:-mb-36 lg:translate-y-8">
+            <RevealItem yOffset={16} className="relative z-10 mt-8 w-full sm:mt-16 lg:mt-16 lg:-mb-36 lg:translate-y-8">
               <LandingSegmentedSearch
                 {...searchSuggestions}
                 variant="hero-panel"
               />
               <div className="hidden">
                 <Link
-                  className="inline-flex h-11 items-center justify-center rounded-2xl bg-white px-6 text-sm font-bold text-[#1D4ED8] shadow-sm transition hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                  className="inline-flex h-11 items-center justify-center rounded-2xl bg-white px-6 text-sm font-bold text-[#1D4ED8] shadow-sm transition-all duration-200 hover:-translate-y-[1px] hover:bg-[#EFF6FF] hover:shadow-md active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                   href="/venues"
                 >
                   Browse Venues
                 </Link>
                 <Link
-                  className="inline-flex h-11 items-center justify-center rounded-2xl border border-white/35 bg-white/16 px-6 text-sm font-bold text-white shadow-sm backdrop-blur transition hover:bg-white/24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                  className="inline-flex h-11 items-center justify-center rounded-2xl border border-white/35 bg-white/16 px-6 text-sm font-bold text-white shadow-sm backdrop-blur transition-all duration-200 hover:-translate-y-[1px] hover:bg-white/24 hover:shadow-md active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                   href="/account/become-partner"
                 >
                   List Your Venue
                 </Link>
               </div>
-            </div>
-          </div>
+            </RevealItem>
+          </RevealGroup>
         </section>
 
         <section className="w-full border-b border-[#E5E7EB] bg-white py-5 lg:pb-5 lg:pt-32">
-          <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-3 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
-            {trustItems.map((item) => {
-              const Icon = item.icon;
+          <ScrollReveal yOffset={16}>
+            <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-3 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
+              {trustItems.map((item) => {
+                const Icon = item.icon;
 
-              return (
-                <div
-                  key={item.title}
-                  className="flex min-w-0 items-start gap-3 rounded-2xl border border-slate-100 bg-[#F8FAFC] p-4"
-                >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#EFF6FF] text-[#2563EB]">
-                    <Icon className="h-5 w-5" />
+                return (
+                  <div
+                    key={item.title}
+                    className="flex min-w-0 items-start gap-3 rounded-2xl border border-slate-100 bg-[#F8FAFC] p-4"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-slate-950">
+                        {item.title}
+                      </p>
+                      <p className="mt-1 text-sm font-medium leading-5 text-slate-500">
+                        {item.text}
+                      </p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-slate-950">
-                      {item.title}
-                    </p>
-                    <p className="mt-1 text-sm font-medium leading-5 text-slate-500">
-                      {item.text}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          </ScrollReveal>
         </section>
 
         <section className="w-full bg-white py-12 md:py-16">
           <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2 className="text-2xl font-bold leading-tight text-slate-950 md:text-3xl">
-                  Explore by event or venue type
-                </h2>
-                <p className="mt-2 text-sm font-medium leading-6 text-slate-500 sm:text-base">
-                  Start with the kind of celebration you are planning.
-                </p>
+            <ScrollReveal yOffset={12}>
+              <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold leading-tight text-slate-950 md:text-3xl">
+                    Explore by event or venue type
+                  </h2>
+                  <p className="mt-2 text-sm font-medium leading-6 text-slate-500 sm:text-base">
+                    Start with the kind of celebration you are planning.
+                  </p>
+                </div>
+                <Link
+                  href="/venues"
+                  className="group inline-flex items-center gap-2 text-sm font-bold text-[#2563EB] transition-all hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
+                >
+                  Browse all
+                  <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                </Link>
               </div>
-              <Link
-                href="/venues"
-                className="inline-flex items-center gap-2 text-sm font-bold text-[#2563EB] transition hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
-              >
-                Browse all
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
+            </ScrollReveal>
 
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+            <ScrollRevealGroup staggerDelay={0.06} className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
               {categoryLinks.map((category) => {
                 const Icon = category.icon;
 
                 return (
-                  <Link
-                    key={category.label}
-                    href={category.href}
-                    className="group overflow-hidden rounded-[20px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/40 transition hover:-translate-y-0.5 hover:border-[#BFDBFE] hover:shadow-lg hover:shadow-slate-200/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
-                  >
-                    <div className="relative h-20 bg-[#EFF6FF] sm:h-24">
-                      <img
-                        src={category.image}
-                        alt={`${category.label} category venue preview`}
-                        className="h-full w-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/30 via-slate-950/5 to-transparent" />
-                      <span className="absolute bottom-3 left-3 flex h-8 w-8 items-center justify-center rounded-xl bg-white/92 text-[#2563EB] shadow-sm backdrop-blur">
-                        <Icon className="h-4 w-4" />
-                      </span>
-                    </div>
-                    <div className="px-4 py-3">
-                      <span className="text-sm font-bold leading-5 text-slate-950 transition group-hover:text-[#1D4ED8]">
-                        {category.label}
-                      </span>
-                    </div>
-                  </Link>
+                  <RevealItem key={category.label} yOffset={8}>
+                    <Link
+                      href={category.href}
+                      className="group block overflow-hidden rounded-[20px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/40 transition-all duration-200 hover:-translate-y-[2px] hover:border-[#BFDBFE] hover:shadow-lg hover:shadow-slate-200/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 active:scale-[0.99]"
+                    >
+                      <div className="relative h-20 bg-[#EFF6FF] sm:h-24">
+                        <img
+                          src={category.image}
+                          alt={`${category.label} category venue preview`}
+                          className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.025]"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/30 via-slate-950/5 to-transparent" />
+                        <span className="absolute bottom-3 left-3 flex h-8 w-8 items-center justify-center rounded-xl bg-white/92 text-[#2563EB] shadow-sm backdrop-blur transition-transform duration-200">
+                          <Icon className="h-4 w-4" />
+                        </span>
+                      </div>
+                      <div className="px-4 py-3">
+                        <span className="text-sm font-bold leading-5 text-slate-950 transition group-hover:text-[#1D4ED8]">
+                          {category.label}
+                        </span>
+                      </div>
+                    </Link>
+                  </RevealItem>
                 );
               })}
-            </div>
+            </ScrollRevealGroup>
           </div>
         </section>
 
@@ -354,44 +369,49 @@ export default async function MarketingHomePage() {
           className="w-full bg-[#F8FAFC] py-14 md:py-20"
         >
           <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2
-                  id="featured-venues-heading"
-                  className="text-2xl font-bold leading-tight text-[#111827] md:text-3xl"
+            <ScrollReveal yOffset={12}>
+              <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h2
+                    id="featured-venues-heading"
+                    className="text-2xl font-bold leading-tight text-[#111827] md:text-3xl"
+                  >
+                    Featured Venues
+                  </h2>
+                  <p className="mt-2 text-base font-medium text-[#6B7280]">
+                    Popular spaces with the details customers compare first.
+                  </p>
+                </div>
+                <Link
+                  className="group hidden items-center gap-2 text-sm font-bold text-[#2563EB] transition-all hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 md:flex"
+                  href="/venues"
                 >
-                  Featured Venues
-                </h2>
-                <p className="mt-2 text-base font-medium text-[#6B7280]">
-                  Popular spaces with the details customers compare first.
-                </p>
+                  View All Venues
+                  <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                </Link>
               </div>
+            </ScrollReveal>
+
+            <ScrollRevealGroup staggerDelay={0.08} className="grid grid-cols-1 gap-6 md:grid-cols-3">
+              {featuredVenues.map((venue) => (
+                <RevealItem key={String(venue.id)} yOffset={16}>
+                  <FeaturedVenueCard
+                    venue={venue}
+                    isAuthenticated={Boolean(user)}
+                  />
+                </RevealItem>
+              ))}
+            </ScrollRevealGroup>
+
+            <ScrollReveal yOffset={12}>
               <Link
-                className="hidden items-center gap-2 text-sm font-bold text-[#2563EB] transition hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 md:flex"
+                className="group mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white text-sm font-bold text-[#2563EB] transition-all duration-200 hover:-translate-y-[1px] hover:bg-[#EFF6FF] hover:shadow-md active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 md:hidden"
                 href="/venues"
               >
                 View All Venues
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
               </Link>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-              {featuredVenues.map((venue) => (
-                <FeaturedVenueCard
-                  key={String(venue.id)}
-                  venue={venue}
-                  isAuthenticated={Boolean(user)}
-                />
-              ))}
-            </div>
-
-            <Link
-              className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white text-sm font-bold text-[#2563EB] transition hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 md:hidden"
-              href="/venues"
-            >
-              View All Venues
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+            </ScrollReveal>
           </div>
         </section>
 
@@ -400,42 +420,43 @@ export default async function MarketingHomePage() {
           className="w-full border-y border-[#DBEAFE] bg-[#F5F9FF] py-14 md:py-20"
         >
           <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="mx-auto mb-8 max-w-2xl text-center">
-              <h2 className="text-2xl font-bold leading-tight text-slate-950 md:text-3xl">
-                How Venora Works
-              </h2>
-              <p className="mt-3 text-sm font-medium leading-6 text-slate-500 sm:text-base">
-                A simpler path from shortlist to confirmed event space.
-              </p>
-            </div>
+            <ScrollReveal yOffset={12}>
+              <div className="mx-auto mb-8 max-w-2xl text-center">
+                <h2 className="text-2xl font-bold leading-tight text-slate-950 md:text-3xl">
+                  How Venora Works
+                </h2>
+                <p className="mt-3 text-sm font-medium leading-6 text-slate-500 sm:text-base">
+                  A simpler path from shortlist to confirmed event space.
+                </p>
+              </div>
+            </ScrollReveal>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <ScrollRevealGroup staggerDelay={0.08} className="grid gap-4 md:grid-cols-3">
               {workflowSteps.map((step) => {
                 const Icon = step.icon;
 
                 return (
-                  <div
-                    key={step.title}
-                    className="rounded-[20px] border border-[#E5E7EB] bg-white p-5 shadow-sm shadow-slate-200/50"
-                  >
-                    <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB]">
-                      <Icon className="h-5 w-5" />
+                  <RevealItem key={step.title} yOffset={12}>
+                    <div className="h-full rounded-[20px] border border-[#E5E7EB] bg-white p-5 shadow-sm shadow-slate-200/50">
+                      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB]">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <h3 className="text-lg font-bold text-slate-950">
+                        {step.title}
+                      </h3>
+                      <p className="mt-2 text-sm font-medium leading-6 text-slate-500">
+                        {step.text}
+                      </p>
                     </div>
-                    <h3 className="text-lg font-bold text-slate-950">
-                      {step.title}
-                    </h3>
-                    <p className="mt-2 text-sm font-medium leading-6 text-slate-500">
-                      {step.text}
-                    </p>
-                  </div>
+                  </RevealItem>
                 );
               })}
-            </div>
+            </ScrollRevealGroup>
           </div>
         </section>
 
         <section className="w-full bg-[#F8FAFC] px-4 py-14 sm:px-6 md:py-20 lg:px-8">
-          <div className="mx-auto grid max-w-7xl overflow-hidden rounded-[28px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+          <ScrollReveal yOffset={16} className="mx-auto grid max-w-7xl overflow-hidden rounded-[28px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
             <div className="flex flex-col justify-center p-6 sm:p-8 lg:p-10">
               <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#2563EB]">
                 For venue owners
@@ -450,13 +471,13 @@ export default async function MarketingHomePage() {
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 <Link
                   href="/account/become-partner"
-                  className="inline-flex h-12 items-center justify-center rounded-2xl bg-[#2563EB] px-6 text-sm font-bold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
+                  className="inline-flex h-12 items-center justify-center rounded-2xl bg-[#2563EB] px-6 text-sm font-bold text-white shadow-sm shadow-[#2563EB]/20 transition-all duration-200 hover:-translate-y-[1px] hover:bg-[#1D4ED8] hover:shadow-md active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
                 >
                   List Your Venue
                 </Link>
                 <Link
                   href="/venues"
-                  className="inline-flex h-12 items-center justify-center rounded-2xl border border-[#DBEAFE] bg-white px-6 text-sm font-bold text-[#1D4ED8] transition hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
+                  className="inline-flex h-12 items-center justify-center rounded-2xl border border-[#DBEAFE] bg-white px-6 text-sm font-bold text-[#1D4ED8] transition-all duration-200 hover:-translate-y-[1px] hover:bg-[#EFF6FF] hover:shadow-md active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
                 >
                   See the marketplace
                 </Link>
@@ -473,7 +494,7 @@ export default async function MarketingHomePage() {
                 <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-slate-950/20" />
               </div>
             ) : null}
-          </div>
+          </ScrollReveal>
         </section>
       </main>
     </div>
