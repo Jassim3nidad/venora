@@ -202,7 +202,7 @@ function FilterAccordion({
   icon: React.ElementType;
   open: boolean;
   activeCount: number;
-  summary?: string;
+  summary?: string | undefined;
   onToggle: (id: AccordionId) => void;
   children: ReactNode;
 }) {
