@@ -25,12 +25,12 @@ export default async function SupplierCalendarPage({
   if (!profile)
     return (
       <DashboardSubPage
-        title="Availability"
+        title="Calendar"
         description="Manage the dates your business can accept work."
       >
         <EmptyState
           title="Create your supplier profile first"
-          description="Availability belongs to your supplier business profile."
+          description="Calendar dates belong to your supplier business profile."
         />
       </DashboardSubPage>
     );
@@ -46,12 +46,12 @@ export default async function SupplierCalendarPage({
     console.error("[supplier/calendar] Availability fetch failed:", error);
     return (
       <DashboardSubPage
-        title="Availability"
+        title="Calendar"
         description="Manage the dates your business can accept work."
       >
         <EmptyState
           icon="error"
-          title="Could not load availability"
+          title="Could not load calendar"
           description="Refresh the page or try another month. Your existing records were not changed."
         />
       </DashboardSubPage>
@@ -59,7 +59,7 @@ export default async function SupplierCalendarPage({
   }
   return (
     <DashboardSubPage
-      title="Availability Calendar"
+      title="Calendar"
       description="Control which dates customers can request. Confirmed supplier jobs are shown automatically."
     >
       <SupplierAvailabilityCalendar
