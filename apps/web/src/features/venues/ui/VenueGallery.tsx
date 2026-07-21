@@ -83,11 +83,11 @@ export default function VenueGallery({
   return (
     <div className="space-y-4">
       {/* Grid Layout (Airbnb inspired) */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-3 h-[300px] md:h-[450px] w-full rounded-3xl overflow-hidden border border-[var(--border-default)] relative group">
+      <div className="relative grid h-[300px] w-full grid-cols-1 gap-2 overflow-hidden rounded-xl md:h-[500px] md:grid-cols-4 md:grid-rows-2">
         {/* Left Featured Block */}
         <div
           onClick={() => openLightbox(sortedMedia.indexOf(featured))}
-          className="md:col-span-2 h-full relative overflow-hidden cursor-pointer bg-slate-100"
+          className="relative h-full cursor-pointer overflow-hidden bg-slate-100 md:col-span-2 md:row-span-2"
         >
           <Image
             src={getMediaUrl(featured.storage_path)}
@@ -98,7 +98,7 @@ export default function VenueGallery({
               !isOptimizableImageSrc(getMediaUrl(featured.storage_path))
             }
             sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover hover:scale-[1.03] transition-transform duration-500"
+            className="object-cover transition-transform duration-500 hover:scale-[1.03]"
           />
           {featured.media_type === "video" && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/20">
@@ -110,14 +110,14 @@ export default function VenueGallery({
         </div>
 
         {/* Right Smaller Blocks (Hidden on mobile) */}
-        <div className="hidden md:grid grid-cols-2 col-span-2 gap-3 h-full">
+        <div className="col-span-2 hidden h-full grid-cols-2 gap-2 md:row-span-2 md:grid">
           {Array.from({ length: 4 }).map((_, i) => {
             const item = gridMedia[i];
             if (!item) {
               return (
                 <div
                   key={`empty-${i}`}
-                  className="bg-slate-50 border border-dashed border-[var(--border-default)] rounded-xl flex items-center justify-center"
+                  className="flex items-center justify-center bg-slate-50"
                 >
                   <ImageIcon className="h-5 w-5 text-slate-300" />
                 </div>
@@ -128,7 +128,7 @@ export default function VenueGallery({
               <div
                 key={item.id}
                 onClick={() => openLightbox(sortedMedia.indexOf(item))}
-                className="relative overflow-hidden cursor-pointer bg-slate-100 h-full w-full"
+                className="relative h-full w-full cursor-pointer overflow-hidden bg-slate-100"
               >
                 <Image
                   src={getMediaUrl(item.storage_path)}
@@ -138,7 +138,7 @@ export default function VenueGallery({
                     !isOptimizableImageSrc(getMediaUrl(item.storage_path))
                   }
                   sizes="25vw"
-                  className="object-cover hover:scale-[1.05] transition-transform duration-500"
+                  className="object-cover transition-transform duration-500 hover:scale-[1.05]"
                 />
                 {item.media_type === "video" && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/20">
@@ -156,10 +156,10 @@ export default function VenueGallery({
         <Button
           onClick={() => openLightbox(0)}
           variant="outline"
-          className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm border-[var(--border-default)] text-[var(--text-primary)] hover:bg-white rounded-xl h-10 px-4 font-semibold shadow-md flex items-center gap-2 text-xs"
+          className="absolute bottom-4 right-4 flex h-12 items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white/90 px-5 text-sm font-bold text-[#151C27] shadow-sm backdrop-blur transition-colors hover:bg-white"
         >
           <Grid className="h-4 w-4" />
-          Show all photos
+          View all photos
         </Button>
       </div>
 

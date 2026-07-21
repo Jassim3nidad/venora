@@ -9,6 +9,7 @@ interface SuggestionInputProps {
   name: string;
   options: string[];
   placeholder: string;
+  variant?: "compact" | "panel";
   withDivider?: boolean;
 }
 
@@ -17,6 +18,7 @@ function SuggestionInput({
   name,
   options,
   placeholder,
+  variant = "compact",
   withDivider = false,
 }: SuggestionInputProps) {
   const inputId = useId();
@@ -38,9 +40,13 @@ function SuggestionInput({
 
   return (
     <div
-      className={`relative min-w-0 border-b border-[#E5E7EB] px-4 py-3 md:border-b-0 ${
-        withDivider ? "md:border-r" : ""
-      }`}
+      className={
+        variant === "panel"
+          ? "relative min-w-0"
+          : `relative min-w-0 border-b border-[#E5E7EB] px-4 py-3 md:border-b-0 ${
+              withDivider ? "md:border-r" : ""
+            }`
+      }
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) {
           setIsOpen(false);
@@ -49,7 +55,11 @@ function SuggestionInput({
       }}
     >
       <label
-        className="block text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#1D4ED8]"
+        className={
+          variant === "panel"
+            ? "mb-1.5 block text-xs font-bold text-slate-950 sm:mb-2 sm:text-sm"
+            : "block text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#1D4ED8]"
+        }
         htmlFor={inputId}
       >
         {label}
@@ -65,7 +75,11 @@ function SuggestionInput({
           activeIndex >= 0 ? `${listboxId}-option-${activeIndex}` : undefined
         }
         autoComplete="off"
-        className="mt-1 w-full min-w-0 border-none bg-transparent p-0 text-sm font-semibold text-[#111827] outline-none placeholder:text-slate-400"
+        className={
+          variant === "panel"
+            ? "h-10 w-full min-w-0 rounded-xl border border-transparent bg-[#F4F6F8] px-3 text-sm font-semibold text-[#111827] outline-none transition placeholder:text-slate-400 hover:bg-slate-100 focus:border-[#93C5FD] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10 sm:h-14 sm:rounded-2xl sm:px-4"
+            : "mt-1 w-full min-w-0 border-none bg-transparent p-0 text-sm font-semibold text-[#111827] outline-none placeholder:text-slate-400"
+        }
         placeholder={placeholder}
         type="text"
         value={value}
@@ -106,7 +120,11 @@ function SuggestionInput({
           id={listboxId}
           role="listbox"
           aria-label={`${label} suggestions`}
-          className="absolute left-2 right-2 top-[calc(100%-0.25rem)] z-30 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-xl"
+          className={
+            variant === "panel"
+              ? "absolute left-0 right-0 top-[calc(100%+0.35rem)] z-30 overflow-hidden rounded-2xl border border-slate-200 bg-white py-1 shadow-xl"
+              : "absolute left-2 right-2 top-[calc(100%-0.25rem)] z-30 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-xl"
+          }
         >
           {filteredOptions.map((option, index) => (
             <button
@@ -135,12 +153,70 @@ function SuggestionInput({
 interface LandingSegmentedSearchProps {
   locations: string[];
   eventTypes: string[];
+  variant?: "compact" | "hero-panel";
 }
 
 export default function LandingSegmentedSearch({
   locations,
   eventTypes,
+  variant = "compact",
 }: LandingSegmentedSearchProps) {
+  if (variant === "hero-panel") {
+    return (
+      <form
+        action="/venues"
+        method="GET"
+        data-testid="landing-hero-search-panel"
+        className="w-full rounded-[22px] border border-white/80 bg-white p-4 shadow-2xl shadow-slate-950/20 sm:rounded-[28px] sm:p-6 lg:p-7"
+      >
+        <h2 className="mb-3 text-xl font-bold leading-tight text-slate-950 sm:mb-5 sm:text-3xl">
+          Find Your Perfect Venue
+        </h2>
+
+        <div className="grid grid-cols-1 gap-2 sm:gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,0.75fr)_auto] lg:items-end">
+          <SuggestionInput
+            label="Location"
+            name="location"
+            options={locations}
+            placeholder="Choose a city or province"
+            variant="panel"
+          />
+          <SuggestionInput
+            label="Event Type"
+            name="event"
+            options={eventTypes}
+            placeholder="Wedding, Corporate..."
+            variant="panel"
+          />
+          <div className="min-w-0">
+            <label
+              htmlFor="landing-capacity"
+              className="mb-1.5 block text-xs font-bold text-slate-950 sm:mb-2 sm:text-sm"
+            >
+              Guests
+            </label>
+            <input
+              id="landing-capacity"
+              name="capacity"
+              type="number"
+              min="1"
+              inputMode="numeric"
+              placeholder="150 pax"
+              className="h-10 w-full rounded-xl border border-transparent bg-[#F4F6F8] px-3 text-sm font-semibold text-[#111827] outline-none transition placeholder:text-slate-400 hover:bg-slate-100 focus:border-[#93C5FD] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10 sm:h-14 sm:rounded-2xl sm:px-4"
+            />
+          </div>
+          <button
+            type="submit"
+            className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-6 text-sm font-bold text-white transition hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#2563EB] sm:h-14 sm:rounded-2xl sm:px-8"
+          >
+            <Search className="h-4 w-4" />
+            Search
+          </button>
+        </div>
+      </form>
+    );
+  }
+
   return (
     <form
       action="/venues"

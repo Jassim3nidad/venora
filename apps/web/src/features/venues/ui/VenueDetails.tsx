@@ -3,50 +3,52 @@
 import { useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import {
-  Heart,
-  Share2,
-  MapPin,
-  Users,
-  Compass,
-  Check,
-  ShieldCheck,
-  Calendar,
-  AlertCircle,
-  FileText,
-  Clock,
-  Sparkles,
-  ParkingCircle,
-  Star,
-  Flame,
-  Image as ImageIcon,
-} from "lucide-react";
 import Image from "next/image";
 import {
-  Badge,
+  AlertCircle,
+  Check,
+  ChevronRight,
+  Clock,
+  Compass,
+  FileText,
+  Heart,
+  Image as ImageIcon,
+  MapPin,
+  ParkingCircle,
+  Share2,
+  ShieldCheck,
+  Snowflake,
+  Sparkles,
+  Star,
+  TreePine,
+  Users,
+  Wifi,
+} from "lucide-react";
+import {
   Button,
   Separator,
   Toast,
   ToastDescription,
   ToastTitle,
 } from "@venora/ui";
-import VenueGallery from "./VenueGallery";
-import VenuePromotionalVideo from "./VenuePromotionalVideo";
+import CostEstimatorPanel from "@/features/ai/ui/CostEstimatorPanel";
+import RecommendedVenues from "@/features/ai/ui/RecommendedVenues";
+import { isOptimizableImageSrc } from "@/src/lib/image-host";
+import type { PublicOwnerProfile } from "@/src/features/owners/application/queries";
+import type { SmartVenueSearchVenue } from "@/features/search/schemas/search.schema";
+import { toggleFavoriteAction } from "../application/actions";
+import { pickGalleryImages, pickPromotionalVideo } from "../utils/venue-media";
 import BookingSidebar from "./BookingSidebar";
 import ReviewsSection from "./ReviewsSection";
+import VenueGallery from "./VenueGallery";
+import VenuePromotionalVideo from "./VenuePromotionalVideo";
+
 const VenueMap = dynamic(() => import("@/src/components/VenueMap"), {
   ssr: false,
   loading: () => (
-    <div className="h-[350px] md:h-[450px] w-full rounded-3xl bg-slate-100 animate-pulse" />
+    <div className="h-[300px] w-full animate-pulse rounded-xl bg-slate-100 md:h-[360px]" />
   ),
 });
-import { toggleFavoriteAction } from "../application/actions";
-import { isOptimizableImageSrc } from "@/src/lib/image-host";
-import CostEstimatorPanel from "@/features/ai/ui/CostEstimatorPanel";
-import RecommendedVenues from "@/features/ai/ui/RecommendedVenues";
-import { pickGalleryImages, pickPromotionalVideo } from "../utils/venue-media";
-import type { PublicOwnerProfile } from "@/src/features/owners/application/queries";
-import type { SmartVenueSearchVenue } from "@/features/search/schemas/search.schema";
 
 interface VenueDetailsProps {
   venue: any;
@@ -94,14 +96,14 @@ export default function VenueDetails({
 }: VenueDetailsProps) {
   const [isFavorited, setIsFavorited] = useState(initialIsFavorited);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
-  const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    "https://szmjjkywcsnzkgqevinz.supabase.co";
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState({
     title: "",
     description: "",
   });
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    "https://szmjjkywcsnzkgqevinz.supabase.co";
 
   const triggerToast = (title: string, description: string) => {
     setToastMessage({ title, description });
@@ -114,7 +116,6 @@ export default function VenueDetails({
       return;
     }
 
-    // Optimistic update
     setIsFavorited((prev) => !prev);
     setIsTogglingFavorite(true);
 
@@ -122,14 +123,11 @@ export default function VenueDetails({
     setIsTogglingFavorite(false);
 
     if (result.error) {
-      // Revert if error
       setIsFavorited((prev) => !prev);
       triggerToast("Error", result.error.message);
     } else {
       triggerToast(
-        result.data.isFavorited
-          ? "Saved to Favorites"
-          : "Removed from Favorites",
+        result.data.isFavorited ? "Saved to Favorites" : "Removed from Favorites",
         result.data.isFavorited
           ? "You can view this venue anytime in your account dashboard."
           : "This venue has been removed from your saved list.",
@@ -138,8 +136,7 @@ export default function VenueDetails({
   };
 
   const handleShare = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url);
+    navigator.clipboard.writeText(window.location.href);
     triggerToast(
       "Link Copied",
       "The venue page link has been copied to your clipboard.",
@@ -167,7 +164,8 @@ export default function VenueDetails({
     .filter(Boolean);
   const promotionalVideo = pickPromotionalVideo(venue.venue_images ?? []);
   const galleryImages = pickGalleryImages(venue.venue_images ?? []);
-  const hostName = ownerProfile?.name ?? venue.organizations?.name ?? "Venora Host";
+  const hostName =
+    ownerProfile?.name ?? venue.organizations?.name ?? "Venora Host";
   const hostInitials =
     hostName
       .split(/\s+/)
@@ -175,74 +173,112 @@ export default function VenueDetails({
       .slice(0, 2)
       .map((part: string) => part[0]?.toUpperCase())
       .join("") || "VO";
+  const cityLabel = [venue.city, venue.province].filter(Boolean).join(", ");
+  const quickFacts = [
+    {
+      label: `Up to ${Number(venue.capacity_max ?? 0).toLocaleString("en-PH")} pax`,
+      icon: Users,
+      show: Boolean(venue.capacity_max),
+    },
+    {
+      label: venue.parking_available ? "Parking available" : "Nearby parking",
+      icon: ParkingCircle,
+      show: true,
+    },
+    {
+      label: "High-speed WiFi",
+      icon: Wifi,
+      show: amenitiesList.some((amenity: string) =>
+        /wifi|wi-fi|internet/i.test(amenity),
+      ),
+    },
+    {
+      label: "Fully Air-conditioned",
+      icon: Snowflake,
+      show: Boolean(venue.air_conditioned),
+    },
+    {
+      label:
+        venue.indoor_outdoor === "both"
+          ? "Indoor & Outdoor"
+          : venue.indoor_outdoor === "outdoor"
+            ? "Outdoor"
+            : "Indoor",
+      icon: TreePine,
+      show: Boolean(venue.indoor_outdoor),
+    },
+  ].filter((item) => item.show);
 
   return (
-    <main className="mx-auto max-w-7xl space-y-8 px-4 pb-28 pt-6 font-sans sm:px-6 sm:pt-8 lg:px-8 lg:pb-8">
-      {/* Top Header info */}
-      <div className="rounded-[24px] border border-[#E5E7EB] bg-white p-5 shadow-sm shadow-slate-200/60 sm:p-6">
-        <div className="flex flex-col justify-between gap-5 md:flex-row md:items-start">
-          <div className="min-w-0 space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge
-                variant="outline"
-                className="border-[#DBEAFE] bg-[#EFF6FF] text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#2563EB]"
-              >
-                {venue.indoor_outdoor}
-              </Badge>
-              {venue.is_featured && (
-                <Badge className="bg-amber-500 text-white font-semibold flex items-center gap-1 text-[10px]">
-                  <Flame className="h-3 w-3 fill-current" />
-                  Featured
-                </Badge>
-              )}
-            </div>
-            <h1 className="max-w-3xl text-3xl font-bold leading-tight tracking-[-0.04em] text-slate-950 md:text-4xl">
-              {venue.name}
-            </h1>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium text-[#6B7280]">
-              <span className="flex items-center gap-1.5">
-                <MapPin className="h-4 w-4 text-[#2563EB]" />
-                {venue.address}, {venue.city}, {venue.province}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Users className="h-4 w-4 text-[#2563EB]" />
-                Up to {venue.capacity_max} guests
-              </span>
-            </div>
-          </div>
+    <main className="mx-auto max-w-7xl space-y-8 px-4 pb-28 pt-8 font-sans text-[#151C27] sm:px-6 lg:px-8 lg:pb-8">
+      <nav
+        aria-label="Breadcrumb"
+        className="flex flex-wrap items-center gap-2 text-sm font-semibold text-[#434654]"
+      >
+        <Link href="/" className="transition-colors hover:text-[#0052CC]">
+          Home
+        </Link>
+        <ChevronRight className="h-4 w-4" />
+        <Link href="/venues" className="transition-colors hover:text-[#0052CC]">
+          Venues
+        </Link>
+        <ChevronRight className="h-4 w-4" />
+        <span className="text-[#151C27]">{venue.name}</span>
+      </nav>
 
-          {/* Action Controls */}
-          <div className="flex flex-col gap-3 sm:flex-row md:justify-end">
-            <Button
-              onClick={handleShare}
-              variant="outline"
-              className="flex h-11 items-center gap-2 rounded-2xl border-[#E5E7EB] px-4 text-sm font-bold text-[#111827] hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
-            >
-              <Share2 className="h-4 w-4" />
-              Share
-            </Button>
-            {!isOwnVenue && (
-              <Button
-                onClick={handleFavoriteToggle}
-                variant="outline"
-                disabled={isTogglingFavorite}
-                className={`flex h-11 items-center gap-2 rounded-2xl border-[#E5E7EB] px-4 text-sm font-bold transition-all hover:border-[#BFDBFE] hover:bg-[#EFF6FF] ${
-                  isFavorited
-                    ? "text-red-500 border-red-200 bg-red-50/50"
-                    : "text-[var(--text-primary)]"
-                }`}
-              >
-                <Heart
-                  className={`h-4 w-4 ${isFavorited ? "fill-current" : ""}`}
-                />
-                {isFavorited ? "Favorited" : "Favorite"}
-              </Button>
-            )}
+      <header className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
+        <div className="min-w-0">
+          <h1 className="max-w-4xl break-words text-5xl font-bold leading-[1.1] tracking-[-0.04em] text-[#151C27] md:text-6xl">
+            {venue.name}
+          </h1>
+          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-semibold text-[#434654]">
+            <span className="inline-flex items-center gap-1.5">
+              <Star className="h-5 w-5 fill-[#F59E0B] text-[#F59E0B]" />
+              <span className="font-bold text-[#151C27]">
+                {Number(venue.avg_rating ?? 0).toFixed(1)}
+              </span>
+              <span className="underline underline-offset-2">
+                ({Number(venue.review_count ?? 0)} reviews)
+              </span>
+            </span>
+            <span className="hidden text-[#E5E7EB] sm:inline">|</span>
+            <span className="inline-flex items-center gap-1.5 text-emerald-500">
+              <ShieldCheck className="h-5 w-5" />
+              Verified
+            </span>
+            <span className="hidden text-[#E5E7EB] sm:inline">|</span>
+            <span className="inline-flex items-center gap-1.5">
+              <MapPin className="h-5 w-5" />
+              {venue.city}
+            </span>
           </div>
         </div>
-      </div>
 
-      {/* Gallery Section */}
+        <div className="flex gap-3">
+          <Button
+            onClick={handleShare}
+            variant="outline"
+            className="flex h-12 items-center gap-2 rounded-xl border-[#E5E7EB] bg-white px-5 text-sm font-bold text-[#151C27] hover:bg-[#F9FAFB]"
+          >
+            <Share2 className="h-5 w-5" />
+            Share
+          </Button>
+          {!isOwnVenue && (
+            <Button
+              onClick={handleFavoriteToggle}
+              variant="outline"
+              disabled={isTogglingFavorite}
+              className={`flex h-12 items-center gap-2 rounded-xl border-[#E5E7EB] bg-white px-5 text-sm font-bold transition-colors hover:bg-[#F9FAFB] ${
+                isFavorited ? "border-red-200 bg-red-50/50 text-red-500" : ""
+              }`}
+            >
+              <Heart className={`h-5 w-5 ${isFavorited ? "fill-current" : ""}`} />
+              {isFavorited ? "Saved" : "Save"}
+            </Button>
+          )}
+        </div>
+      </header>
+
       <VenueGallery media={galleryImages} venueName={venue.name} />
 
       {promotionalVideo ? (
@@ -252,52 +288,92 @@ export default function VenueDetails({
         />
       ) : null}
 
-      {/* Main Details Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
-        {/* Left Columns - Details Info */}
-        <div className="lg:col-span-2 space-y-10">
-          {/* About Section */}
-          <section className="space-y-4">
-            <h3 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
-              About the Venue
-            </h3>
-            <p className="text-[var(--text-secondary)] text-sm leading-relaxed whitespace-pre-line">
+      <div className="relative grid grid-cols-1 items-start gap-12 lg:grid-cols-3">
+        <div className="space-y-12 lg:col-span-2">
+          {quickFacts.length > 0 ? (
+            <div className="grid gap-x-8 gap-y-5 border-b border-[#E5E7EB] pb-8 sm:grid-cols-2 lg:grid-cols-3">
+              {quickFacts.map(({ label, icon: Icon }) => (
+                <div
+                  key={label}
+                  className="flex items-center gap-3 text-base font-bold text-[#151C27]"
+                >
+                  <Icon className="h-6 w-6 shrink-0 text-[#434654]" />
+                  <span>{label}</span>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          <section className="space-y-5">
+            <h2 className="text-3xl font-bold tracking-[-0.02em] text-[#151C27]">
+              About this venue
+            </h2>
+            <p className="whitespace-pre-line text-lg font-normal leading-8 text-[#434654]">
               {venue.description || "No description provided for this venue."}
             </p>
-            {venue.ai_generated_description && (
-              <div className="space-y-2 rounded-[24px] border border-[#DBEAFE] bg-[#EFF6FF] p-5">
-                <span className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-[0.12em] text-[#2563EB]">
+            {venue.ai_generated_description ? (
+              <div className="space-y-2 rounded-xl border border-[#DCE2F3] bg-white p-5">
+                <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.12em] text-[#0052CC]">
                   <Sparkles className="h-4 w-4" />
                   AI Generated Overview
                 </span>
-                <p className="text-sm font-medium leading-6 text-[#4B5563]">
+                <p className="text-base font-normal leading-7 text-[#434654]">
                   "{venue.ai_generated_description}"
                 </p>
+              </div>
+            ) : null}
+          </section>
+
+          <Separator />
+
+          <section className="space-y-5">
+            <div>
+              <h2 className="text-3xl font-bold tracking-[-0.02em] text-[#151C27]">
+                Location
+              </h2>
+              <p className="mt-3 text-base font-normal text-[#434654]">
+                {cityLabel || venue.address}
+              </p>
+            </div>
+            {!hasMap ? (
+              <div className="flex h-[300px] flex-col items-center justify-center rounded-xl border border-[#E5E7EB] bg-[#F0F3FF] p-4 text-center">
+                <Compass className="mb-2 h-8 w-8 text-[#737685]" />
+                <p className="text-sm font-semibold text-[#151C27]">
+                  Map details unavailable
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-hidden rounded-xl">
+                <VenueMap
+                  latitude={Number(mapLatitude)}
+                  longitude={Number(mapLongitude)}
+                  zoom={venue.mapZoom ?? 14}
+                  markerLabel={venue.name}
+                />
               </div>
             )}
           </section>
 
           <Separator />
 
-          {/* Amenities grid */}
-          <section className="space-y-4">
-            <h3 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
+          <section className="space-y-5">
+            <h2 className="text-3xl font-bold tracking-[-0.02em] text-[#151C27]">
               Amenities & Features
-            </h3>
+            </h2>
             {amenitiesList.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {amenitiesList.map((amenity: string) => (
                   <div
                     key={amenity}
-                    className="flex items-center gap-2 text-sm text-[var(--text-secondary)] bg-[var(--bg-subtle)] border border-[var(--border-default)] p-3.5 rounded-2xl font-medium"
+                    className="flex items-center gap-3 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 text-base font-medium text-[#434654]"
                   >
-                    <Check className="h-4 w-4 text-emerald-500 flex-shrink-0" />
+                    <Check className="h-5 w-5 flex-shrink-0 text-emerald-500" />
                     <span>{amenity}</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--bg-subtle)] p-4 text-sm font-medium text-[var(--text-secondary)]">
+              <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-medium text-[#434654]">
                 Amenities have not been added for this venue yet.
               </div>
             )}
@@ -305,81 +381,89 @@ export default function VenueDetails({
 
           <Separator />
 
-          {/* Packages Section */}
-          {activePackages && activePackages.length > 0 && (
+          {activePackages.length > 0 ? (
             <>
-              <section className="space-y-4">
-                <h3 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
+              <section className="space-y-5">
+                <h2 className="text-3xl font-bold tracking-[-0.02em] text-[#151C27]">
                   Available Packages
-                </h3>
-                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-                  Choose from our carefully curated packages designed to fit your event needs.
+                </h2>
+                <p className="text-lg font-normal leading-8 text-[#434654]">
+                  Choose from our carefully curated packages designed to fit your
+                  event needs.
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {activePackages.map((pkg: any) => (
-                    <div 
-                      key={pkg.id} 
-                      className="group flex flex-col border border-[var(--border-default)] rounded-3xl p-5 shadow-sm hover:shadow-xl hover:shadow-[var(--color-brand-500)]/10 hover:border-[var(--color-brand-200)] transition-all duration-300 bg-white relative overflow-hidden"
+                    <div
+                      key={pkg.id}
+                      className="group relative flex flex-col overflow-hidden rounded-xl border border-[#E5E7EB] bg-white p-5 shadow-sm transition-colors hover:border-[#0052CC]"
                     >
-                      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[var(--color-brand-400)] to-[var(--color-brand-600)] opacity-0 group-hover:opacity-100 transition-opacity" />
-                      
-                      <div className="flex justify-between items-start gap-4 mb-3">
-                        <h4 className="font-sora font-bold text-base text-[var(--text-primary)] group-hover:text-[var(--color-brand-600)] transition-colors">{pkg.name}</h4>
-                        <div className="text-right shrink-0">
-                          <span className="font-bold text-[var(--color-brand-600)] block">
+                      <div className="mb-3 flex items-start justify-between gap-4">
+                        <h4 className="text-base font-bold text-[#151C27] transition-colors group-hover:text-[#0052CC]">
+                          {pkg.name}
+                        </h4>
+                        <div className="shrink-0 text-right">
+                          <span className="block font-bold text-[#0052CC]">
                             {formatCurrency(pkg.price)}
                           </span>
-                          <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-[#737685]">
                             / {pkg.price_unit.replace("per_", "")}
                           </span>
                         </div>
                       </div>
-                      
-                      {pkg.description && (
-                        <p className="text-sm text-[var(--text-secondary)] mb-5 leading-relaxed flex-grow">
+
+                      {pkg.description ? (
+                        <p className="mb-5 flex-grow text-sm leading-relaxed text-[#434654]">
                           {pkg.description}
                         </p>
-                      )}
-                      
-                      {(pkg.min_guests || pkg.max_guests) && (
-                        <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-semibold mb-4 bg-[var(--bg-subtle)] w-max px-3 py-1.5 rounded-full border border-[var(--border-default)]">
-                          <Users className="h-3.5 w-3.5 text-[var(--color-brand-500)]" />
-                          <span>{pkg.min_guests ?? 1} - {pkg.max_guests ?? "Any"} guests</span>
-                        </div>
-                      )}
+                      ) : null}
 
-                      {pkg.inclusions && pkg.inclusions.length > 0 && (
-                        <div className="mt-auto pt-4 border-t border-[var(--border-default)]">
-                          <span className="text-[10px] font-bold tracking-widest uppercase text-[var(--text-muted)] mb-3 block">Inclusions</span>
+                      {pkg.min_guests || pkg.max_guests ? (
+                        <div className="mb-4 flex w-max items-center gap-2 rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-3 py-1.5 text-xs font-semibold text-[#737685]">
+                          <Users className="h-3.5 w-3.5 text-[#0052CC]" />
+                          <span>
+                            {pkg.min_guests ?? 1} - {pkg.max_guests ?? "Any"} guests
+                          </span>
+                        </div>
+                      ) : null}
+
+                      {pkg.inclusions?.length > 0 ? (
+                        <div className="mt-auto border-t border-[#E5E7EB] pt-4">
+                          <span className="mb-3 block text-[10px] font-bold uppercase tracking-widest text-[#737685]">
+                            Inclusions
+                          </span>
                           <ul className="space-y-2">
                             {pkg.inclusions.map((inclusion: string, i: number) => (
-                              <li key={i} className="flex items-start gap-2.5 text-xs font-medium text-[var(--text-secondary)]">
-                                <div className="mt-0.5 rounded-full bg-emerald-100 p-0.5 shrink-0">
-                                  <Check className="h-2.5 w-2.5 text-emerald-600" strokeWidth={3} />
+                              <li
+                                key={i}
+                                className="flex items-start gap-2.5 text-xs font-medium text-[#434654]"
+                              >
+                                <div className="mt-0.5 shrink-0 rounded-full bg-emerald-100 p-0.5">
+                                  <Check
+                                    className="h-2.5 w-2.5 text-emerald-600"
+                                    strokeWidth={3}
+                                  />
                                 </div>
                                 <span>{inclusion}</span>
                               </li>
                             ))}
                           </ul>
                         </div>
-                      )}
+                      ) : null}
                     </div>
                   ))}
                 </div>
               </section>
+              <Separator />
             </>
-          )}
+          ) : null}
 
-          <Separator />
-
-          {/* Parking, Rules, and Policies */}
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <section className="grid grid-cols-1 gap-8 md:grid-cols-2">
             <div className="space-y-3">
-              <span className="flex items-center gap-1.5 text-xs font-bold tracking-wider text-[var(--text-primary)] uppercase">
-                <ParkingCircle className="h-4.5 w-4.5 text-[var(--color-brand-600)]" />
+              <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#151C27]">
+                <ParkingCircle className="h-[18px] w-[18px] text-[#0052CC]" />
                 Parking & Accessibility
               </span>
-              <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-medium leading-6 text-[#6B7280]">
+              <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-medium leading-6 text-[#434654]">
                 <div className="flex gap-3">
                   {venue.parking_available ? (
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
@@ -393,48 +477,46 @@ export default function VenueDetails({
                   </p>
                 </div>
 
-                {venue.wheelchair_accessible && (
+                {venue.wheelchair_accessible ? (
                   <div className="mt-3 flex gap-3 border-t border-[#E5E7EB] pt-3">
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                    <p>
-                      Accessible routes and ramps are fully prepared on-site.
-                    </p>
+                    <p>Accessible routes and ramps are fully prepared on-site.</p>
                   </div>
-                )}
-                {venue.overnight_accommodation && (
+                ) : null}
+                {venue.overnight_accommodation ? (
                   <div className="mt-3 flex gap-3 border-t border-[#E5E7EB] pt-3">
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
                     <p>Overnight accommodation is available.</p>
                   </div>
-                )}
-                {venue.pet_friendly && (
+                ) : null}
+                {venue.pet_friendly ? (
                   <div className="mt-3 flex gap-3 border-t border-[#E5E7EB] pt-3">
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
                     <p>Pet-friendly arrangements are supported.</p>
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
 
             <div className="space-y-3">
-              <span className="flex items-center gap-1.5 text-xs font-bold tracking-wider text-[var(--text-primary)] uppercase">
-                <Clock className="h-4.5 w-4.5 text-[var(--color-brand-600)]" />
+              <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#151C27]">
+                <Clock className="h-[18px] w-[18px] text-[#0052CC]" />
                 Venue Rules
               </span>
               {rulesList.length > 0 ? (
-                <ul className="space-y-2 rounded-2xl border border-[var(--border-default)] bg-[var(--bg-subtle)] p-4">
+                <ul className="space-y-2 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
                   {rulesList.map((rule) => (
                     <li
                       key={rule}
-                      className="flex gap-2 text-xs leading-relaxed text-[var(--text-secondary)]"
+                      className="flex gap-2 text-xs leading-relaxed text-[#434654]"
                     >
-                      <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#2563EB]" />
+                      <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#0052CC]" />
                       <span>{rule}</span>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                <p className="text-xs leading-relaxed text-[#434654]">
                   Standard booking policies apply. Respect operating hours,
                   maximum guest capacity constraints, and municipal noise
                   ordinances.
@@ -443,11 +525,11 @@ export default function VenueDetails({
             </div>
 
             <div className="space-y-3 md:col-span-2">
-              <span className="flex items-center gap-1.5 text-xs font-bold tracking-wider text-[var(--text-primary)] uppercase">
-                <FileText className="h-4.5 w-4.5 text-[var(--color-brand-600)]" />
+              <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#151C27]">
+                <FileText className="h-[18px] w-[18px] text-[#0052CC]" />
                 Cancellation Policy
               </span>
-              <p className="text-xs text-[var(--text-secondary)] leading-relaxed bg-[var(--bg-subtle)] p-4 rounded-2xl border border-[var(--border-default)]">
+              <p className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 text-xs leading-relaxed text-[#434654]">
                 {venue.cancellation_policy ||
                   "Full refund is supported for cancellations requested at least 14 days before the event schedule date. Cancellations inside 14 days forfeit the initial deposit amount."}
               </p>
@@ -456,61 +538,22 @@ export default function VenueDetails({
 
           <Separator />
 
-          {/* Location / Map Section */}
-          <section className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <h3 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
-                Location & Accessibility
-              </h3>
-              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--text-muted)]">
-                <MapPin className="h-3.5 w-3.5 text-[#2563EB]" />
-                {venue.address}, {venue.city}
-              </span>
-            </div>
-            {!hasMap ? (
-              <div className="h-[300px] bg-[var(--bg-subtle)] border border-[var(--border-default)] rounded-3xl flex flex-col items-center justify-center text-center p-4">
-                <Compass className="h-8 w-8 text-[var(--text-muted)] mb-2" />
-                <p className="text-sm font-semibold text-[var(--text-primary)]">
-                  Map details unavailable
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {venue.mapPrecision && venue.mapPrecision !== "exact" ? (
-                  <p className="text-xs font-medium text-[var(--text-muted)]">
-                    Approximate location shown (
-                    {venue.mapPrecision === "city"
-                      ? venue.city
-                      : venue.province}
-                    )
-                  </p>
-                ) : null}
-                <VenueMap
-                  latitude={Number(mapLatitude)}
-                  longitude={Number(mapLongitude)}
-                  zoom={venue.mapZoom ?? 14}
-                  markerLabel={venue.name}
-                />
-              </div>
-            )}
-          </section>
-
-          <Separator />
-
-          {/* Host/Organization Info */}
-          <section className="flex flex-col items-start justify-between gap-5 rounded-[24px] border border-[#E5E7EB] bg-white p-6 shadow-sm shadow-slate-200/60 sm:flex-row sm:items-center">
+          <section
+            id="venue-owner"
+            className="flex flex-col items-start justify-between gap-5 rounded-xl border border-[#E5E7EB] bg-white p-6 shadow-sm sm:flex-row sm:items-center"
+          >
             <div className="flex items-center gap-4">
-              <div className="h-14 w-14 rounded-2xl bg-[var(--color-brand-600)] text-white font-sora font-extrabold flex items-center justify-center text-2xl shadow-md">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-[#0052CC] text-2xl font-bold text-white shadow-md">
                 {hostInitials}
               </div>
               <div className="space-y-1">
-                <span className="text-xs font-bold text-[var(--color-brand-600)] tracking-wide uppercase">
+                <span className="text-xs font-bold uppercase tracking-wide text-[#0052CC]">
                   Managed By
                 </span>
-                <h4 className="text-base font-bold text-[var(--text-primary)] font-sora">
+                <h4 className="text-base font-bold text-[#151C27]">
                   {hostName}
                 </h4>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--text-secondary)] font-medium">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-[#434654]">
                   <span className="inline-flex items-center gap-1.5">
                     <ShieldCheck className="h-4 w-4 text-emerald-500" />
                     {ownerProfile?.isVerified
@@ -519,12 +562,16 @@ export default function VenueDetails({
                   </span>
                   {ownerProfile ? (
                     <>
-                      <span>{ownerProfile.venueCount} venue{ownerProfile.venueCount === 1 ? "" : "s"}</span>
+                      <span>
+                        {ownerProfile.venueCount} venue
+                        {ownerProfile.venueCount === 1 ? "" : "s"}
+                      </span>
                       {ownerProfile.reviewCount > 0 ? (
                         <span className="inline-flex items-center gap-1">
                           <Star className="h-3.5 w-3.5 fill-amber-400 stroke-amber-400" />
                           {ownerProfile.avgRating.toFixed(1)} from{" "}
-                          {ownerProfile.reviewCount} review{ownerProfile.reviewCount === 1 ? "" : "s"}
+                          {ownerProfile.reviewCount} review
+                          {ownerProfile.reviewCount === 1 ? "" : "s"}
                         </span>
                       ) : null}
                     </>
@@ -536,7 +583,7 @@ export default function VenueDetails({
             {ownerProfile ? (
               <Link
                 href={`/owners/${ownerProfile.slug}`}
-                className="inline-flex h-11 items-center justify-center rounded-2xl border border-[#BFDBFE] bg-[#EFF6FF] px-4 text-sm font-bold text-[#1D4ED8] transition hover:bg-[#DBEAFE]"
+                className="inline-flex h-11 items-center justify-center rounded-xl border border-[#DCE2F3] bg-[#F0F3FF] px-4 text-sm font-bold text-[#0052CC] transition hover:bg-[#DAE2FF]"
               >
                 View owner profile
               </Link>
@@ -547,17 +594,17 @@ export default function VenueDetails({
 
           {!isOwnVenue && eligibleReviewBooking ? (
             <>
-              <section className="rounded-[24px] border border-[#DBEAFE] bg-[#EFF6FF] p-5 shadow-sm shadow-slate-200/60 sm:p-6">
+              <section className="rounded-xl border border-[#DCE2F3] bg-[#F0F3FF] p-5 shadow-sm sm:p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#2563EB]">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#0052CC]">
                       <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                       Verified guest review
                     </div>
-                    <h3 className="mt-3 text-xl font-bold tracking-[-0.03em] text-slate-950">
+                    <h3 className="mt-3 text-xl font-bold tracking-[-0.03em] text-[#151C27]">
                       Share your experience at {venue.name}
                     </h3>
-                    <p className="mt-2 text-sm font-medium leading-6 text-[#6B7280]">
+                    <p className="mt-2 text-sm font-medium leading-6 text-[#434654]">
                       You can review this venue because your booking on{" "}
                       {formatDate(eligibleReviewBooking.event_date)} is marked
                       completed.
@@ -565,19 +612,17 @@ export default function VenueDetails({
                   </div>
                   <Link
                     href={`/bookings/${eligibleReviewBooking.id}/review`}
-                    className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-5 text-sm font-bold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8]"
+                    className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#0052CC] px-5 text-sm font-bold text-white transition hover:bg-[#003D9B]"
                   >
                     <Star className="h-4 w-4" />
                     Write a Review
                   </Link>
                 </div>
               </section>
-
               <Separator />
             </>
           ) : null}
 
-          {/* Reviews Section */}
           <ReviewsSection
             reviews={reviews}
             avgRating={venue.avg_rating}
@@ -586,15 +631,14 @@ export default function VenueDetails({
           />
         </div>
 
-        {/* Right Sticky Column - Booking Card Widget */}
         <div className="space-y-4 lg:col-span-1 lg:self-stretch">
           {isOwnVenue ? (
-            <div className="sticky top-[9.5rem] rounded-[32px] border border-[#BFDBFE] bg-[#EFF6FF] p-6 shadow-sm shadow-blue-200/50 flex flex-col gap-5">
+            <div className="sticky top-[9.5rem] flex flex-col gap-5 rounded-2xl border border-[#DCE2F3] bg-[#F0F3FF] p-6 shadow-[0px_4px_20px_rgba(0,0,0,0.05)]">
               <div>
-                <h3 className="text-xl font-bold tracking-[-0.03em] text-[#1D4ED8]">
+                <h3 className="text-xl font-bold tracking-[-0.03em] text-[#0052CC]">
                   This is your venue listing.
                 </h3>
-                <p className="mt-2 text-sm font-medium leading-relaxed text-[#3B82F6]">
+                <p className="mt-2 text-sm font-medium leading-relaxed text-[#434654]">
                   You are viewing your venue as customers see it. Manage
                   bookings, availability, packages, and listing details from
                   your Venue Owner Dashboard.
@@ -604,76 +648,72 @@ export default function VenueDetails({
               <div className="flex flex-col gap-3">
                 <Link
                   href="/dashboard/venues"
-                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-5 text-sm font-bold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8]"
+                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#0052CC] px-5 text-sm font-bold text-white transition hover:bg-[#003D9B]"
                 >
                   Manage Venue
                 </Link>
                 <Link
                   href={`/dashboard/venues/${venue.id}/edit`}
-                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#93C5FD] bg-white px-5 text-sm font-bold text-[#1D4ED8] transition hover:bg-[#DBEAFE]"
+                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#B2C5FF] bg-white px-5 text-sm font-bold text-[#0052CC] transition hover:bg-[#DAE2FF]"
                 >
                   Edit Venue
                 </Link>
                 <Link
                   href="/dashboard/bookings"
-                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#93C5FD] bg-white px-5 text-sm font-bold text-[#1D4ED8] transition hover:bg-[#DBEAFE]"
+                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#B2C5FF] bg-white px-5 text-sm font-bold text-[#0052CC] transition hover:bg-[#DAE2FF]"
                 >
                   View Bookings
                 </Link>
                 <Link
                   href="/dashboard/venue-owner"
-                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#93C5FD] bg-white px-5 text-sm font-bold text-[#1D4ED8] transition hover:bg-[#DBEAFE]"
+                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#B2C5FF] bg-white px-5 text-sm font-bold text-[#0052CC] transition hover:bg-[#DAE2FF]"
                 >
                   View Dashboard
                 </Link>
               </div>
             </div>
           ) : (
-            <>
-              <BookingSidebar
-                venueId={venue.id}
-                venueSlug={venue.slug}
-                venueName={venue.name}
-                basePrice={venue.base_price}
-                priceUnit={venue.price_unit}
-                capacityMin={venue.capacity_min ?? 1}
-                capacityMax={venue.capacity_max}
-                packages={activePackages}
-              >
-                {(guestCount) => (
-                  <CostEstimatorPanel
-                    venueId={venue.id}
-                    venueName={venue.name}
-                    initialGuestCount={guestCount}
-                    capacityMin={venue.capacity_min}
-                    capacityMax={venue.capacity_max}
-                  />
-                )}
-              </BookingSidebar>
-            </>
+            <BookingSidebar
+              venueId={venue.id}
+              venueSlug={venue.slug}
+              venueName={venue.name}
+              basePrice={venue.base_price}
+              priceUnit={venue.price_unit}
+              capacityMin={venue.capacity_min ?? 1}
+              capacityMax={venue.capacity_max}
+              packages={activePackages}
+            >
+              {(guestCount) => (
+                <CostEstimatorPanel
+                  venueId={venue.id}
+                  venueName={venue.name}
+                  initialGuestCount={guestCount}
+                  capacityMin={venue.capacity_min}
+                  capacityMax={venue.capacity_max}
+                />
+              )}
+            </BookingSidebar>
           )}
         </div>
       </div>
 
-      {/* Nearby Venues Section */}
-      {nearbyVenues.length > 0 && (
-        <section className="space-y-6 pt-8 border-t border-[var(--border-default)]">
+      {nearbyVenues.length > 0 ? (
+        <section className="space-y-6 border-t border-[#E5E7EB] pt-8">
           <div className="space-y-1">
-            <h3 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
+            <h3 className="text-3xl font-bold tracking-[-0.02em] text-[#151C27]">
               Explore Nearby Venues
             </h3>
-            <p className="text-xs text-[var(--text-muted)] font-medium">
+            <p className="text-xs font-medium text-[#737685]">
               Stunning event venues closest to this location.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {nearbyVenues.map((item) => {
               const coverImg =
                 item.venue_images?.find(
                   (i: any) => i.is_featured && i.media_type !== "video",
-                ) ??
-                item.venue_images?.find((i: any) => i.media_type !== "video");
+                ) ?? item.venue_images?.find((i: any) => i.media_type !== "video");
               const imgUrl = coverImg
                 ? String(coverImg.storage_path).startsWith("http")
                   ? coverImg.storage_path
@@ -684,7 +724,7 @@ export default function VenueDetails({
                 <Link
                   key={item.id}
                   href={`/venues/${item.slug}`}
-                  className="group flex h-full flex-col overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/50 transition-all hover:-translate-y-1 hover:border-[#BFDBFE] hover:shadow-xl hover:shadow-slate-200/70"
+                  className="group flex h-full flex-col overflow-hidden rounded-xl border border-[#E5E7EB] bg-white shadow-sm transition-all hover:-translate-y-1 hover:border-[#0052CC]"
                 >
                   <div className="relative aspect-[16/10] w-full flex-shrink-0 overflow-hidden bg-slate-100">
                     {imgUrl ? (
@@ -694,10 +734,10 @@ export default function VenueDetails({
                         fill
                         unoptimized={!isOptimizableImageSrc(imgUrl)}
                         sizes="(max-width: 768px) 100vw, 33vw"
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     ) : (
-                      <div className="h-full w-full bg-slate-100 flex items-center justify-center">
+                      <div className="flex h-full w-full items-center justify-center bg-slate-100">
                         <ImageIcon className="h-8 w-8 text-slate-300" />
                       </div>
                     )}
@@ -705,11 +745,11 @@ export default function VenueDetails({
 
                   <div className="flex flex-1 flex-col justify-between space-y-4 p-5">
                     <div className="space-y-1">
-                      <h4 className="line-clamp-2 text-base font-extrabold leading-snug tracking-[-0.02em] text-slate-950 transition-colors group-hover:text-[#1D4ED8]">
+                      <h4 className="line-clamp-2 text-base font-bold leading-snug tracking-[-0.02em] text-[#151C27] transition-colors group-hover:text-[#0052CC]">
                         {item.name}
                       </h4>
-                      <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
-                        <MapPin className="h-3.5 w-3.5 shrink-0 text-[#2563EB]" />
+                      <p className="flex items-center gap-1.5 text-xs font-semibold text-[#737685]">
+                        <MapPin className="h-3.5 w-3.5 shrink-0 text-[#0052CC]" />
                         <span className="line-clamp-1">
                           {item.city}, {item.province}
                         </span>
@@ -719,15 +759,15 @@ export default function VenueDetails({
                     <div className="flex items-center justify-between text-sm font-semibold">
                       <div className="flex items-center gap-1">
                         <Star className="h-4 w-4 fill-amber-400 stroke-amber-400" />
-                        <span className="text-[var(--text-primary)]">
-                          {item.avg_rating.toFixed(1)}
+                        <span className="text-[#151C27]">
+                          {Number(item.avg_rating ?? 0).toFixed(1)}
                         </span>
                       </div>
                       <div className="text-right">
-                        <span className="text-[var(--text-primary)]">
+                        <span className="text-[#151C27]">
                           {formatCurrency(item.base_price)}
                         </span>
-                        <span className="text-xs font-normal text-[var(--text-muted)]">
+                        <span className="text-xs font-normal text-[#737685]">
                           /day
                         </span>
                       </div>
@@ -738,20 +778,18 @@ export default function VenueDetails({
             })}
           </div>
         </section>
-      )}
+      ) : null}
 
-      {/* AI Recommendations */}
       <RecommendedVenues fallbackVenues={recommendedFallbackVenues} />
 
-      {/* Global Toast component */}
-      {toastOpen && (
+      {toastOpen ? (
         <Toast onOpenChange={setToastOpen}>
           <div className="flex flex-col gap-1">
             <ToastTitle>{toastMessage.title}</ToastTitle>
             <ToastDescription>{toastMessage.description}</ToastDescription>
           </div>
         </Toast>
-      )}
+      ) : null}
     </main>
   );
 }
