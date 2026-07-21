@@ -2,7 +2,7 @@ import type { Config } from "tailwindcss";
 import defaultTheme from "tailwindcss/defaultTheme";
 
 /**
- * Shared Tailwind CSS preset for 7TH SOUTH STREET.
+ * Shared Tailwind CSS preset for all Venora apps.
  * Extend this in your app's tailwind.config.ts.
  */
 const preset: Partial<Config> = {
@@ -10,27 +10,27 @@ const preset: Partial<Config> = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-dm-sans)", ...defaultTheme.fontFamily.sans],
-        display: ["var(--font-cormorant-garamond)", ...defaultTheme.fontFamily.serif],
+        sans: ["var(--font-inter)", ...defaultTheme.fontFamily.sans],
+        display: ["var(--font-sora)", ...defaultTheme.fontFamily.sans],
       },
       colors: {
         brand: {
-          50: "#FCFBF9",
-          100: "#F5F2EE",
-          200: "#EBE3D5",
-          300: "#DFC5A8",
-          400: "#D4B68D",
-          500: "#C9A96E",
-          600: "#B89659",
-          700: "#9A7C46",
-          800: "#7E6539",
-          900: "#65502E",
-          950: "#362A17",
+          50: "hsl(217 91% 97%)",
+          100: "hsl(217 91% 93%)",
+          200: "hsl(217 91% 85%)",
+          300: "hsl(217 91% 74%)",
+          400: "hsl(217 91% 63%)",
+          500: "hsl(217 91% 55%)",
+          600: "hsl(217 91% 47%)",
+          700: "hsl(217 91% 39%)",
+          800: "hsl(217 91% 31%)",
+          900: "hsl(217 91% 23%)",
+          950: "hsl(217 91% 15%)",
         },
         accent: {
-          50: "#FCFBF9",
-          400: "#D4B68D",
-          500: "#C9A96E",
+          50: "hsl(45 100% 97%)",
+          400: "hsl(45 96% 65%)",
+          500: "hsl(45 96% 54%)",
         },
       },
       borderRadius: {
