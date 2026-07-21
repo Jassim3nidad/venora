@@ -205,7 +205,7 @@ export default function LandingSegmentedSearch({
           </div>
           <button
             type="submit"
-            className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-6 text-sm font-bold text-white transition hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#2563EB] sm:h-14 sm:rounded-2xl sm:px-8"
+            className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-6 text-sm font-bold text-white transition-all duration-200 hover:bg-[#1d4ed8] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#2563EB] sm:h-14 sm:rounded-2xl sm:px-8"
           >
             <Search className="h-4 w-4" />
             Search
@@ -238,7 +238,7 @@ export default function LandingSegmentedSearch({
         />
         <button
           type="submit"
-          className="m-2 inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-6 text-sm font-extrabold text-white transition hover:bg-[#1d4ed8] md:self-center"
+          className="m-2 inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-6 text-sm font-extrabold text-white transition-all duration-200 hover:bg-[#1d4ed8] active:scale-[0.99] md:self-center"
         >
           <Search className="h-4 w-4" />
           Search

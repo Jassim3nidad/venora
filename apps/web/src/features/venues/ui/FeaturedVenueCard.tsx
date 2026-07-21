@@ -67,7 +67,7 @@ export default function FeaturedVenueCard({
   };
 
   return (
-    <article className="group relative flex h-full overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70 transition duration-300 hover:-translate-y-1 hover:border-[#BFDBFE] hover:shadow-xl hover:shadow-slate-200/80">
+    <article className="group relative flex h-full overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70 transition duration-300 hover:-translate-y-[2px] hover:border-[#BFDBFE] hover:shadow-xl hover:shadow-slate-200/80">
       <Link
         className="flex min-w-0 flex-1 flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
         href={`/venues/${venue.slug ?? venue.id}`}
@@ -82,7 +82,7 @@ export default function FeaturedVenueCard({
               priority
               unoptimized={!isOptimizableImageSrc(venue.image)}
               sizes="(max-width: 768px) 100vw, 33vw"
-              className="object-cover transition duration-500 group-hover:scale-[1.03]"
+              className="object-cover transition duration-500 group-hover:scale-[1.02]"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center">
@@ -144,7 +144,7 @@ export default function FeaturedVenueCard({
             ? `Remove ${venue.name} from favorites`
             : `Add ${venue.name} to favorites`
         }
-        className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-500 shadow-sm backdrop-blur transition hover:scale-105 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 disabled:cursor-wait disabled:opacity-70"
+        className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-500 shadow-sm backdrop-blur transition-all duration-150 hover:text-red-500 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 disabled:cursor-wait disabled:opacity-70"
       >
         <Heart
           className={`h-4 w-4 transition ${
