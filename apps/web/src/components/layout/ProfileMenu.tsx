@@ -33,6 +33,7 @@ interface ProfileMenuProps {
   exitDashboardHref?: string | undefined;
   showEnterVenueDashboard?: boolean | undefined;
   showEnterSupplierDashboard?: boolean | undefined;
+  showAdminDashboard?: boolean | undefined;
 }
 
 function SoonBadge() {
@@ -58,6 +59,7 @@ export default function ProfileMenu({
   exitDashboardHref = "/venues",
   showEnterVenueDashboard = false,
   showEnterSupplierDashboard = false,
+  showAdminDashboard = false,
 }: ProfileMenuProps) {
   const avatarInitial =
     displayName?.charAt(0)?.toUpperCase() ||
@@ -136,6 +138,19 @@ export default function ProfileMenu({
               </div>
               <span className="font-bold text-[#1D4ED8]">
                 Enter Supplier Dashboard
+              </span>
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
+
+        {showAdminDashboard ? (
+          <DropdownMenuItem asChild>
+            <Link href="/admin" className="cursor-pointer">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-500/10 text-brand-500">
+                <Store className="h-4 w-4" />
+              </div>
+              <span className="font-bold text-brand-500">
+                The Vault (Admin)
               </span>
             </Link>
           </DropdownMenuItem>
