@@ -83,7 +83,7 @@ export const NAV_BY_ROLE: Record<EnterpriseRole, NavItem[]> = {
       icon: "request_quote",
     },
     {
-      label: "Availability",
+      label: "Calendar",
       href: "/dashboard/supplier/calendar",
       icon: "calendar_month",
     },
