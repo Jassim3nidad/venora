@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import {
@@ -9,29 +9,23 @@ import {
   getMunicipalitiesForProvince,
 } from "@/data/luzon-locations";
 import {
-  Bed,
   Building2,
   CalendarDays,
-  Car,
-  Check as CheckIcon,
   ChevronDown,
   Crosshair,
-  Accessibility,
-  Landmark,
   MapPin,
-  PawPrint,
-  House,
-  Search,
-  Snowflake,
-  Trees,
-  Umbrella,
   Users,
   WalletCards,
-  Waves,
-  Wifi,
 } from "lucide-react";
 
 type FilterUpdate = Record<string, string | number | null | undefined>;
+
+type AccordionId =
+  | "location"
+  | "event"
+  | "budgetCapacity"
+  | "venueType"
+  | "amenities";
 
 interface VenueFilterSource {
   id: string | number;
@@ -80,70 +74,56 @@ const indoorOutdoorModes = [
   { label: "Both", value: "both" },
 ];
 
-// Fixed budget tiers, keyed to the preset values matchesBudgetPreset()
-// already understands in VenuesClient.tsx (under-100k / 100k-300k / luxury).
-const budgetTabs = [
-  { label: "Standard", value: "under-100k", range: "Under ₱100k" },
-  { label: "Deluxe", value: "100k-300k", range: "₱100k - ₱300k" },
-  { label: "Luxury", value: "luxury", range: "₱300k+" },
-];
-
-function normalize(value: unknown) {
-  return String(value ?? "")
-    .trim()
-    .toLowerCase();
-}
-
 function uniqueStrings(values: Array<string | null | undefined>) {
   return [
     ...new Set(values.filter((value): value is string => Boolean(value))),
   ];
 }
 
-function getVenueTypeIcon(label: string) {
-  const value = normalize(label);
-
-  if (value.includes("garden")) return Trees;
-  if (value.includes("beach")) return Umbrella;
-  if (value.includes("resort")) return Waves;
-  if (value.includes("hotel")) return Building2;
-  if (value.includes("restaurant")) return House;
-  if (value.includes("church")) return Landmark;
-
-  return Building2;
-}
-
-function getAmenityIcon(label: string) {
-  const value = normalize(label);
-
-  if (value.includes("park")) return Car;
-  if (value.includes("air")) return Snowflake;
-  if (value.includes("pool") || value.includes("beach")) return Waves;
-  if (value.includes("pet")) return PawPrint;
-  if (value.includes("wheelchair") || value.includes("accessible")) {
-    return Accessibility;
-  }
-  if (value.includes("wifi") || value.includes("wi-fi")) return Wifi;
-  if (value.includes("overnight") || value.includes("accommodation")) {
-    return Bed;
-  }
-
-  return CheckIcon;
-}
-
-function SectionTitle({
-  icon: Icon,
-  title,
+function CheckboxColumn({
+  options,
+  selected,
+  namePrefix,
+  onToggle,
 }: {
-  icon: React.ElementType;
-  title: string;
+  options: string[];
+  selected: string[];
+  namePrefix: string;
+  onToggle: (value: string) => void;
 }) {
   return (
-    <div className="mb-3.5 flex items-center gap-2">
-      <Icon className="h-4 w-4 text-[#2563EB]" strokeWidth={2.4} />
-      <h3 className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#6B7280]">
-        {title}
-      </h3>
+    <div className="flex flex-col gap-1">
+      {options.map((label) => {
+        const checked = selected.includes(label);
+        const inputId = `${namePrefix}-${label.replace(/\s+/g, "-").toLowerCase()}`;
+
+        return (
+          <label
+            key={label}
+            htmlFor={inputId}
+            className={[
+              "flex cursor-pointer items-start gap-2.5 rounded-xl px-2 py-2 transition",
+              checked ? "bg-[#EFF6FF]" : "hover:bg-[#F8FAFC]",
+            ].join(" ")}
+          >
+            <input
+              id={inputId}
+              type="checkbox"
+              checked={checked}
+              onChange={() => onToggle(label)}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#D1D5DB] text-[#2563EB] accent-[#2563EB] focus:ring-[#2563EB]/30"
+            />
+            <span
+              className={[
+                "text-sm font-medium leading-5",
+                checked ? "text-[#1D4ED8]" : "text-[#111827]",
+              ].join(" ")}
+            >
+              {label}
+            </span>
+          </label>
+        );
+      })}
     </div>
   );
 }
@@ -207,6 +187,76 @@ function OptionButton({
   );
 }
 
+function FilterAccordion({
+  id,
+  title,
+  icon: Icon,
+  open,
+  activeCount,
+  summary,
+  onToggle,
+  children,
+}: {
+  id: AccordionId;
+  title: string;
+  icon: React.ElementType;
+  open: boolean;
+  activeCount: number;
+  summary?: string;
+  onToggle: (id: AccordionId) => void;
+  children: ReactNode;
+}) {
+  return (
+    <section className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={`filter-panel-${id}`}
+        id={`filter-trigger-${id}`}
+        onClick={() => onToggle(id)}
+        className="flex w-full items-start gap-3 px-3.5 py-3.5 text-left transition hover:bg-[#F8FAFC]"
+      >
+        <Icon
+          className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB]"
+          strokeWidth={2.4}
+        />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-extrabold text-[#111827]">{title}</h3>
+            {activeCount > 0 && (
+              <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#EFF6FF] px-1.5 text-[10px] font-extrabold text-[#1D4ED8]">
+                {activeCount}
+              </span>
+            )}
+          </div>
+          {!open && summary ? (
+            <p className="mt-0.5 truncate text-xs font-medium text-[#6B7280]">
+              {summary}
+            </p>
+          ) : null}
+        </div>
+        <ChevronDown
+          className={[
+            "mt-0.5 h-4 w-4 shrink-0 text-[#6B7280] transition-transform",
+            open ? "rotate-180" : "",
+          ].join(" ")}
+        />
+      </button>
+
+      {open ? (
+        <div
+          id={`filter-panel-${id}`}
+          role="region"
+          aria-labelledby={`filter-trigger-${id}`}
+          className="border-t border-[#E5E7EB] px-3.5 pb-3.5 pt-3"
+        >
+          {children}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
   const radius = 6371;
   const dLat = (lat2 - lat1) * (Math.PI / 180);
@@ -232,6 +282,9 @@ export default function Sidebar({
   const queryString = searchParams.toString();
   const params = useMemo(() => new URLSearchParams(queryString), [queryString]);
   const [locationStatus, setLocationStatus] = useState("");
+  const [openAccordion, setOpenAccordion] = useState<AccordionId | null>(
+    "location",
+  );
 
   const searchQuery = params.get("q") ?? "";
   const selectedProvince = params.get("province") ?? "";
@@ -239,7 +292,6 @@ export default function Sidebar({
   const selectedMunicipality = params.get("municipality") ?? "";
   const selectedLocation = params.get("location") ?? "";
   const selectedEventType = params.get("event") ?? "";
-  const selectedBudget = params.get("budget") ?? "";
   const selectedMinBudget = params.get("minBudget") ?? "";
   const selectedMaxBudget = params.get("maxBudget") ?? "";
   const selectedCapacity = params.get("capacity") ?? "";
@@ -270,38 +322,22 @@ export default function Sidebar({
 
   const venueTypes = useMemo(
     () =>
-      uniqueStrings(venues.flatMap((venue) => venue.categories ?? [])).map(
-        (label) => ({
-          label,
-          icon: getVenueTypeIcon(label),
-        }),
-      ),
+      uniqueStrings(venues.flatMap((venue) => venue.categories ?? [])).sort(),
     [venues],
   );
 
   const amenities = useMemo(
     () =>
-      uniqueStrings(venues.flatMap((venue) => venue.amenities ?? [])).map(
-        (label) => ({
-          label,
-          icon: getAmenityIcon(label),
-        }),
-      ),
+      uniqueStrings(venues.flatMap((venue) => venue.amenities ?? [])).sort(),
     [venues],
   );
 
-  const capacityBounds = useMemo(() => {
+  const capacityMaxBound = useMemo(() => {
     const capacities = venues
       .map((venue) => venue.capacityMax)
       .filter((value): value is number => typeof value === "number");
-
-    const min = Math.min(...capacities);
     const max = Math.max(...capacities);
-
-    return {
-      min: Number.isFinite(min) ? Math.max(1, Math.floor(min / 10) * 10) : 1,
-      max: Number.isFinite(max) ? Math.ceil(max / 50) * 50 : 1000,
-    };
+    return Number.isFinite(max) ? Math.ceil(max / 50) * 50 : 1000;
   }, [venues]);
 
   const provinceOptions = LUZON_PROVINCE_NAMES;
@@ -325,8 +361,7 @@ export default function Sidebar({
             ? `₱${maxBudgetValue.toLocaleString("en-PH")}`
             : "No limit"
         }`
-      : (budgetTabs.find((budget) => budget.value === selectedBudget)?.range ??
-        "Any budget");
+      : "Any budget";
 
   const updateFilters = (updates: FilterUpdate) => {
     const nextParams = new URLSearchParams(queryString);
@@ -338,6 +373,11 @@ export default function Sidebar({
         nextParams.set(key, String(value));
       }
     });
+
+    // Clear legacy budget presets when using min/max inputs.
+    if ("minBudget" in updates || "maxBudget" in updates) {
+      nextParams.delete("budget");
+    }
 
     const nextQuery = nextParams.toString();
     router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, {
@@ -467,6 +507,26 @@ export default function Sidebar({
     );
   };
 
+  const locationActiveCount = [
+    selectedProvince,
+    selectedCity,
+    selectedMunicipality,
+    selectedLocation,
+  ].filter(Boolean).length;
+
+  const eventActiveCount = selectedEventType ? 1 : 0;
+
+  const budgetCapacityActiveCount = [
+    selectedMinBudget,
+    selectedMaxBudget,
+    selectedCapacity,
+  ].filter(Boolean).length;
+
+  const venueTypeActiveCount =
+    selectedVenueTypes.length + (selectedIndoorOutdoor ? 1 : 0);
+
+  const amenitiesActiveCount = selectedAmenities.length;
+
   const activeFilterCount =
     [
       searchQuery,
@@ -475,12 +535,40 @@ export default function Sidebar({
       selectedMunicipality,
       selectedLocation,
       selectedEventType,
-      selectedBudget || selectedMinBudget || selectedMaxBudget,
+      selectedMinBudget || selectedMaxBudget,
       selectedCapacity,
       selectedIndoorOutdoor,
     ].filter(Boolean).length +
     selectedVenueTypes.length +
     selectedAmenities.length;
+
+  const locationSummary =
+    [selectedProvince, selectedCity, selectedMunicipality]
+      .filter(Boolean)
+      .join(" · ") || undefined;
+
+  const budgetCapacitySummary = [
+    selectedMinBudget || selectedMaxBudget ? activeBudgetLabel : null,
+    capacityDraftValue ? `≥ ${capacityDraftValue} guests` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  const venueTypeSummary = [
+    selectedVenueTypes.length
+      ? `${selectedVenueTypes.length} type${selectedVenueTypes.length === 1 ? "" : "s"}`
+      : null,
+    selectedIndoorOutdoor
+      ? indoorOutdoorModes.find((mode) => mode.value === selectedIndoorOutdoor)
+          ?.label
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  const toggleAccordion = (id: AccordionId) => {
+    setOpenAccordion((current) => (current === id ? null : id));
+  };
 
   return (
     <aside
@@ -515,10 +603,16 @@ export default function Sidebar({
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 [scrollbar-gutter:stable] [&>section:not(:last-child)]:mb-4">
-        <section>
-          <SectionTitle icon={MapPin} title="Location" />
-
+      <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto overscroll-contain px-4 py-4 [scrollbar-gutter:stable]">
+        <FilterAccordion
+          id="location"
+          title="Location"
+          icon={MapPin}
+          open={openAccordion === "location"}
+          activeCount={locationActiveCount}
+          summary={locationSummary}
+          onToggle={toggleAccordion}
+        >
           <div className="flex flex-col gap-2.5">
             <SelectBox
               label="Province"
@@ -568,248 +662,208 @@ export default function Sidebar({
               </p>
             )}
           </div>
-        </section>
+        </FilterAccordion>
 
-        <section>
-          <SectionTitle icon={CalendarDays} title="Event Type" />
-
-          <div className="grid grid-cols-2 gap-2.5">
-            {eventTypes.map((type) => (
-              <OptionButton
-                key={type}
-                active={selectedEventType === type}
-                onClick={() =>
-                  updateFilters({
-                    event: selectedEventType === type ? "" : type,
-                  })
-                }
-              >
-                {type}
-              </OptionButton>
-            ))}
-          </div>
-        </section>
-
-        <section>
-          <SectionTitle icon={WalletCards} title="Budget" />
-
-          <div className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white">
-            <div className="grid grid-cols-3">
-              {budgetTabs.map((budget, index) => (
-                <button
-                  key={budget.value}
-                  type="button"
-                  onClick={() =>
-                    updateFilters({
-                      budget:
-                        selectedBudget === budget.value ? "" : budget.value,
-                      minBudget: "",
-                      maxBudget: "",
-                    })
-                  }
-                  className={[
-                    "h-10 text-xs font-bold transition",
-                    index !== budgetTabs.length - 1
-                      ? "border-r border-[#E5E7EB]"
-                      : "",
-                    selectedBudget === budget.value
-                      ? "bg-[#EFF6FF] text-[#2563EB]"
-                      : "bg-white text-[#6B7280] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
-                  ].join(" ")}
-                >
-                  {budget.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <p className="mt-3 rounded-2xl bg-[#F8FAFC] px-3 py-2 text-center text-sm font-extrabold text-[#111827]">
-            {activeBudgetLabel}
-          </p>
-
-          <div className="mt-3 grid grid-cols-2 gap-2.5">
-            <div>
-              <label
-                className="mb-1 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400"
-                htmlFor="min-budget-input"
-              >
-                Min
-              </label>
-              <input
-                id="min-budget-input"
-                type="number"
-                min={0}
-                step={5000}
-                value={minBudgetDraft}
-                onChange={(event) => setMinBudgetDraft(event.target.value)}
-                className="h-10 w-full rounded-2xl border border-[#E5E7EB] bg-white px-3 text-sm font-semibold text-[#111827] outline-none transition hover:border-[#BFDBFE] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
-                placeholder="₱ min"
-              />
-            </div>
-
-            <div>
-              <label
-                className="mb-1 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400"
-                htmlFor="max-budget-input"
-              >
-                Max
-              </label>
-              <input
-                id="max-budget-input"
-                type="number"
-                min={0}
-                step={5000}
-                value={maxBudgetDraft}
-                onChange={(event) => setMaxBudgetDraft(event.target.value)}
-                className="h-10 w-full rounded-2xl border border-[#E5E7EB] bg-white px-3 text-sm font-semibold text-[#111827] outline-none transition hover:border-[#BFDBFE] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
-                placeholder="₱ max"
-              />
-            </div>
-          </div>
-        </section>
-
-        <section>
-          <SectionTitle icon={Users} title="Capacity" />
-
-          <div className="flex items-center justify-between text-sm font-semibold text-[#6B7280]">
-            <span>{capacityBounds.min}</span>
-            <span>{capacityBounds.max}+</span>
-          </div>
-
-          <input
-            type="range"
-            min={capacityBounds.min}
-            max={capacityBounds.max}
-            step={10}
-            value={capacityDraftValue || Math.min(150, capacityBounds.max)}
-            onChange={(event) => setCapacityDraft(event.target.value)}
-            className="mt-3 h-2 w-full accent-[#2563EB]"
-            aria-label="Minimum guest capacity"
+        <FilterAccordion
+          id="event"
+          title="Event Type"
+          icon={CalendarDays}
+          open={openAccordion === "event"}
+          activeCount={eventActiveCount}
+          summary={selectedEventType || undefined}
+          onToggle={toggleAccordion}
+        >
+          <CheckboxColumn
+            options={eventTypes}
+            selected={selectedEventType ? [selectedEventType] : []}
+            namePrefix="event-type"
+            onToggle={(type) =>
+              updateFilters({
+                event: selectedEventType === type ? "" : type,
+              })
+            }
           />
+        </FilterAccordion>
 
-          <div className="mt-3 flex items-center gap-3">
-            <label
-              className="min-w-[90px] text-sm font-medium text-[#6B7280]"
-              htmlFor="capacity-input"
-            >
-              Capacity
-            </label>
-            <input
-              id="capacity-input"
-              type="number"
-              min={0}
-              max={capacityBounds.max}
-              step={10}
-              value={capacityDraftValue || ""}
-              onChange={(event) => setCapacityDraft(event.target.value)}
-              className="h-11 w-full rounded-2xl border border-[#E5E7EB] bg-white px-3 text-sm font-semibold text-[#111827] outline-none transition hover:border-[#BFDBFE] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
-              placeholder="Any"
-            />
-          </div>
+        <FilterAccordion
+          id="budgetCapacity"
+          title="Budget & Capacity"
+          icon={WalletCards}
+          open={openAccordion === "budgetCapacity"}
+          activeCount={budgetCapacityActiveCount}
+          summary={budgetCapacitySummary || undefined}
+          onToggle={toggleAccordion}
+        >
+          <div className="space-y-4">
+            <div>
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                Budget
+              </p>
+              <p className="mb-2.5 rounded-2xl bg-[#F8FAFC] px-3 py-2 text-center text-sm font-extrabold text-[#111827]">
+                {activeBudgetLabel}
+              </p>
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label
+                    className="mb-1 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400"
+                    htmlFor="min-budget-input"
+                  >
+                    Min
+                  </label>
+                  <input
+                    id="min-budget-input"
+                    type="number"
+                    min={0}
+                    step={5000}
+                    value={minBudgetDraft}
+                    onChange={(event) => setMinBudgetDraft(event.target.value)}
+                    className="h-10 w-full rounded-2xl border border-[#E5E7EB] bg-white px-3 text-sm font-semibold text-[#111827] outline-none transition hover:border-[#BFDBFE] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                    placeholder="₱ min"
+                  />
+                </div>
 
-          <div className="mt-2 flex items-center justify-between gap-3">
-            <p className="text-sm font-medium text-[#6B7280]">
-              {capacityDraftValue ? (
-                <>
-                  At least{" "}
-                  <span className="font-extrabold text-[#111827]">
-                    {capacityDraftValue}
-                  </span>{" "}
-                  guests
-                </>
-              ) : (
-                "Any capacity"
-              )}
-            </p>
+                <div>
+                  <label
+                    className="mb-1 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400"
+                    htmlFor="max-budget-input"
+                  >
+                    Max
+                  </label>
+                  <input
+                    id="max-budget-input"
+                    type="number"
+                    min={0}
+                    step={5000}
+                    value={maxBudgetDraft}
+                    onChange={(event) => setMaxBudgetDraft(event.target.value)}
+                    className="h-10 w-full rounded-2xl border border-[#E5E7EB] bg-white px-3 text-sm font-semibold text-[#111827] outline-none transition hover:border-[#BFDBFE] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                    placeholder="₱ max"
+                  />
+                </div>
+              </div>
+            </div>
 
-            {capacityDraftValue > 0 && (
-              <button
-                type="button"
-                onClick={() => setCapacityDraft("")}
-                className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#1D4ED8] hover:text-[#2563EB]"
-              >
-                Reset
-              </button>
-            )}
-          </div>
-        </section>
-
-        <section>
-          <SectionTitle icon={Building2} title="Venue Type" />
-
-          <div className="grid grid-cols-2 gap-3">
-            {venueTypes.map(({ label, icon: Icon }) => {
-              const active = selectedVenueTypes.includes(label);
-
-              return (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={() => toggleVenueType(label)}
-                  className={[
-                    "flex aspect-[1.35] flex-col items-center justify-center gap-2 rounded-2xl border bg-white px-2 text-center transition",
-                    active
-                      ? "border-[#BFDBFE] bg-[#EFF6FF] text-[#2563EB] shadow-[inset_0_0_0_1px_rgba(37,99,235,0.12)]"
-                      : "border-[#E5E7EB] text-[#111827] hover:border-[#BFDBFE] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
-                  ].join(" ")}
+            <div>
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                Capacity
+              </p>
+              <div className="flex items-center gap-3">
+                <label
+                  className="min-w-[72px] text-sm font-medium text-[#6B7280]"
+                  htmlFor="capacity-input"
                 >
-                  <Icon className="h-7 w-7" strokeWidth={2.3} />
-                  <span className="line-clamp-2 text-sm font-semibold leading-4">
-                    {label}
-                  </span>
-                </button>
-              );
-            })}
+                  Guests
+                </label>
+                <input
+                  id="capacity-input"
+                  type="number"
+                  min={0}
+                  max={capacityMaxBound}
+                  step={10}
+                  value={capacityDraftValue || ""}
+                  onChange={(event) => setCapacityDraft(event.target.value)}
+                  className="h-11 w-full rounded-2xl border border-[#E5E7EB] bg-white px-3 text-sm font-semibold text-[#111827] outline-none transition hover:border-[#BFDBFE] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                  placeholder="Any"
+                />
+              </div>
+
+              <div className="mt-2 flex items-center justify-between gap-3">
+                <p className="text-sm font-medium text-[#6B7280]">
+                  {capacityDraftValue ? (
+                    <>
+                      At least{" "}
+                      <span className="font-extrabold text-[#111827]">
+                        {capacityDraftValue}
+                      </span>{" "}
+                      guests
+                    </>
+                  ) : (
+                    "Any capacity"
+                  )}
+                </p>
+
+                {capacityDraftValue > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setCapacityDraft("")}
+                    className="text-xs font-extrabold uppercase tracking-[0.08em] text-[#1D4ED8] hover:text-[#2563EB]"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
-        </section>
+        </FilterAccordion>
 
-        <section>
-          <SectionTitle icon={Umbrella} title="Indoor / Outdoor" />
+        <FilterAccordion
+          id="venueType"
+          title="Venue Type & Indoor/Outdoor"
+          icon={Building2}
+          open={openAccordion === "venueType"}
+          activeCount={venueTypeActiveCount}
+          summary={venueTypeSummary || undefined}
+          onToggle={toggleAccordion}
+        >
+          <div className="space-y-4">
+            <div>
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                Venue Type
+              </p>
+              <CheckboxColumn
+                options={venueTypes}
+                selected={selectedVenueTypes}
+                namePrefix="venue-type"
+                onToggle={toggleVenueType}
+              />
+            </div>
 
-          <div className="grid grid-cols-3 gap-2.5">
-            {indoorOutdoorModes.map((mode) => (
-              <OptionButton
-                key={mode.value}
-                active={selectedIndoorOutdoor === mode.value}
-                onClick={() =>
-                  updateFilters({
-                    indoorOutdoor:
-                      selectedIndoorOutdoor === mode.value ? "" : mode.value,
-                  })
-                }
-              >
-                {mode.label}
-              </OptionButton>
-            ))}
+            <div>
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                Indoor / Outdoor
+              </p>
+              <div className="grid grid-cols-3 gap-2.5">
+                {indoorOutdoorModes.map((mode) => (
+                  <OptionButton
+                    key={mode.value}
+                    active={selectedIndoorOutdoor === mode.value}
+                    onClick={() =>
+                      updateFilters({
+                        indoorOutdoor:
+                          selectedIndoorOutdoor === mode.value
+                            ? ""
+                            : mode.value,
+                      })
+                    }
+                  >
+                    {mode.label}
+                  </OptionButton>
+                ))}
+              </div>
+            </div>
           </div>
-        </section>
+        </FilterAccordion>
 
-        <section>
-          <SectionTitle icon={Users} title="Amenities" />
-
-          <div className="flex flex-wrap gap-2.5">
-            {amenities.map(({ label, icon: Icon }) => {
-              const active = selectedAmenities.includes(label);
-
-              return (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={() => toggleAmenity(label)}
-                  className={[
-                    "flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-bold transition",
-                    active
-                      ? "border-[#BFDBFE] bg-[#EFF6FF] text-[#2563EB]"
-                      : "border-[#E5E7EB] bg-white text-[#6B7280] hover:border-[#BFDBFE] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
-                  ].join(" ")}
-                >
-                  <Icon className="h-4 w-4" strokeWidth={2.5} />
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-        </section>
+        <FilterAccordion
+          id="amenities"
+          title="Amenities"
+          icon={Users}
+          open={openAccordion === "amenities"}
+          activeCount={amenitiesActiveCount}
+          summary={
+            amenitiesActiveCount
+              ? `${amenitiesActiveCount} selected`
+              : undefined
+          }
+          onToggle={toggleAccordion}
+        >
+          <CheckboxColumn
+            options={amenities}
+            selected={selectedAmenities}
+            namePrefix="amenity"
+            onToggle={toggleAmenity}
+          />
+        </FilterAccordion>
       </div>
 
       <div className="sticky bottom-0 z-10 shrink-0 border-t border-[#E5E7EB] bg-white/95 px-4 py-3 backdrop-blur">
