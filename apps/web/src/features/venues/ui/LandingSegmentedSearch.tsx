@@ -43,9 +43,8 @@ function SuggestionInput({
       className={
         variant === "panel"
           ? "relative min-w-0"
-          : `relative min-w-0 border-b border-[#E5E7EB] px-4 py-3 md:border-b-0 ${
-              withDivider ? "md:border-r" : ""
-            }`
+          : `relative min-w-0 border-b border-[#E5E7EB] px-4 py-3 md:border-b-0 ${withDivider ? "md:border-r" : ""
+          }`
       }
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) {
@@ -133,11 +132,10 @@ function SuggestionInput({
               type="button"
               role="option"
               aria-selected={index === activeIndex}
-              className={`block w-full px-3 py-2 text-left text-sm font-semibold transition ${
-                index === activeIndex
+              className={`block w-full px-3 py-2 text-left text-sm font-semibold transition ${index === activeIndex
                   ? "bg-blue-50 text-blue-700"
                   : "text-slate-700 hover:bg-slate-50"
-              }`}
+                }`}
               onMouseDown={(event) => event.preventDefault()}
               onClick={() => selectOption(option)}
             >

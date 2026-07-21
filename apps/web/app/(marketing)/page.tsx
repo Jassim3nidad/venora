@@ -64,31 +64,43 @@ const categoryLinks = [
     label: "Weddings",
     href: "/venues?event=Wedding",
     icon: PartyPopper,
+    image:
+      "https://images.pexels.com/photos/14703685/pexels-photo-14703685.jpeg?auto=compress&cs=tinysrgb&w=900",
   },
   {
     label: "Debuts",
     href: "/venues?event=Debut",
     icon: Star,
+    image:
+      "https://images.unsplash.com/photo-1745569470313-244808b99ee5?auto=format&fit=crop&w=900&q=80",
   },
   {
     label: "Corporate Events",
     href: "/venues?event=Corporate",
     icon: BriefcaseBusiness,
+    image:
+      "https://images.unsplash.com/photo-1559223607-a43c990c692c?auto=format&fit=crop&w=900&q=80",
   },
   {
     label: "Garden Venues",
     href: "/venues?venueTypes=garden",
     icon: TreePine,
+    image:
+      "https://images.pexels.com/photos/35985252/pexels-photo-35985252.jpeg?auto=compress&cs=tinysrgb&w=900",
   },
   {
     label: "Resorts",
     href: "/venues?venueTypes=resort",
     icon: Waves,
+    image:
+      "https://images.unsplash.com/photo-1760943013869-65a30a4fafd1?auto=format&fit=crop&w=900&q=80",
   },
   {
     label: "Indoor Venues",
     href: "/venues?indoorOutdoor=indoor",
     icon: DoorOpen,
+    image:
+      "https://images.unsplash.com/photo-1537600175206-a1f0c734dceb?auto=format&fit=crop&w=900&q=80",
   },
 ];
 
@@ -193,15 +205,13 @@ export default async function MarketingHomePage() {
       );
   const searchSuggestions = buildLandingSearchSuggestions(suggestionVenues);
   const heroVenues = featuredVenues.slice(0, 3);
-  const categoryVisualVenues =
-    featuredVenues.length > 0 ? featuredVenues : fallbackVenues;
 
   return (
     <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-[#F8FAFC] text-[#111827] antialiased">
       <MarketingNavbar />
 
       <main className="w-full flex-grow">
-        <section className="relative isolate w-full overflow-hidden bg-slate-950 pb-20 pt-10 sm:pb-28 sm:pt-14 md:pb-32 lg:pb-36 lg:pt-20">
+        <section className="relative isolate w-full overflow-visible bg-slate-950 pb-20 pt-10 sm:pb-28 sm:pt-14 md:pb-32 lg:pb-28 lg:pt-16">
           <div className="absolute inset-0 -z-10">
             <img
               src={landingHeroBackgroundSrc}
@@ -213,7 +223,7 @@ export default async function MarketingHomePage() {
             <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent via-white/70 to-white sm:h-40 lg:h-48" />
           </div>
 
-          <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 sm:px-6 lg:min-h-[650px] lg:justify-between lg:px-8">
+          <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 sm:px-6 lg:min-h-[560px] lg:justify-between lg:px-8">
             <div className="max-w-4xl pt-4">
               <div className="mb-6 flex flex-wrap gap-2 sm:gap-3 lg:mb-8">
                 {categoryLinks.slice(0, 3).map((category) => (
@@ -236,12 +246,12 @@ export default async function MarketingHomePage() {
               </p>
             </div>
 
-            <div className="relative z-10 w-full lg:-mb-48">
+            <div className="relative z-10 mt-8 w-full sm:mt-16 lg:mt-16 lg:-mb-36 lg:translate-y-8">
               <LandingSegmentedSearch
                 {...searchSuggestions}
                 variant="hero-panel"
               />
-              <div className="mt-4 hidden gap-3 lg:flex">
+              <div className="hidden">
                 <Link
                   className="inline-flex h-11 items-center justify-center rounded-2xl bg-white px-6 text-sm font-bold text-[#1D4ED8] shadow-sm transition hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                   href="/venues"
@@ -307,10 +317,8 @@ export default async function MarketingHomePage() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
-              {categoryLinks.map((category, index) => {
+              {categoryLinks.map((category) => {
                 const Icon = category.icon;
-                const visualVenue =
-                  categoryVisualVenues[index % categoryVisualVenues.length];
 
                 return (
                   <Link
@@ -319,13 +327,11 @@ export default async function MarketingHomePage() {
                     className="group overflow-hidden rounded-[20px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/40 transition hover:-translate-y-0.5 hover:border-[#BFDBFE] hover:shadow-lg hover:shadow-slate-200/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
                   >
                     <div className="relative h-20 bg-[#EFF6FF] sm:h-24">
-                      {visualVenue?.image ? (
-                        <img
-                          src={visualVenue.image}
-                          alt={`${category.label} category venue preview`}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : null}
+                      <img
+                        src={category.image}
+                        alt={`${category.label} category venue preview`}
+                        className="h-full w-full object-cover"
+                      />
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/30 via-slate-950/5 to-transparent" />
                       <span className="absolute bottom-3 left-3 flex h-8 w-8 items-center justify-center rounded-xl bg-white/92 text-[#2563EB] shadow-sm backdrop-blur">
                         <Icon className="h-4 w-4" />
