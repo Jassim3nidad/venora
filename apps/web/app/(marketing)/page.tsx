@@ -1,16 +1,23 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import {
   ArrowRight,
-  MapPin,
+  BadgeCheck,
+  Banknote,
+  BriefcaseBusiness,
+  CalendarCheck,
+  DoorOpen,
+  PartyPopper,
+  Search,
+  ShieldCheck,
   Sparkles,
   Star,
-  Users,
+  TreePine,
+  Waves,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import MarketingNavbar from "@/components/layout/MarketingNavbar";
 import {
   getMarketplaceResearchVenues,
-  researchVenueImageCount,
   researchVenues,
 } from "@/src/features/venues/data/research-venues";
 import {
@@ -28,16 +35,82 @@ import {
   buildLandingSearchSuggestions,
   mergeLandingSearchSuggestionSources,
 } from "@/src/features/venues/utils/landing-search-suggestions";
-const provinceCount = new Set(
-  researchVenues.map((venue) => venue.location.province),
-).size;
 
-const stats = [
-  { value: String(researchVenues.length), label: "Research Venues" },
-  { value: String(provinceCount), label: "Regions Covered" },
-  { value: String(researchVenueImageCount), label: "Linked Images" },
-  { value: "100%", label: "Source Checked" },
+const trustItems = [
+  {
+    icon: BadgeCheck,
+    title: "Verified venue details",
+    text: "Clear essentials before you inquire.",
+  },
+  {
+    icon: Banknote,
+    title: "Transparent starting prices",
+    text: "Compare budgets with less back-and-forth.",
+  },
+  {
+    icon: Sparkles,
+    title: "Curated local venues",
+    text: "Browse spaces selected for real events.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Secure booking through Venora",
+    text: "Keep requests and next steps in one place.",
+  },
 ];
+
+const categoryLinks = [
+  {
+    label: "Weddings",
+    href: "/venues?event=Wedding",
+    icon: PartyPopper,
+  },
+  {
+    label: "Debuts",
+    href: "/venues?event=Debut",
+    icon: Star,
+  },
+  {
+    label: "Corporate Events",
+    href: "/venues?event=Corporate",
+    icon: BriefcaseBusiness,
+  },
+  {
+    label: "Garden Venues",
+    href: "/venues?venueTypes=garden",
+    icon: TreePine,
+  },
+  {
+    label: "Resorts",
+    href: "/venues?venueTypes=resort",
+    icon: Waves,
+  },
+  {
+    label: "Indoor Venues",
+    href: "/venues?indoorOutdoor=indoor",
+    icon: DoorOpen,
+  },
+];
+
+const workflowSteps = [
+  {
+    icon: Search,
+    title: "Discover venues",
+    text: "Search by location, event type, capacity, and venue style.",
+  },
+  {
+    icon: CalendarCheck,
+    title: "Compare details",
+    text: "Review photos, pricing, amenities, and booking signals.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Request your booking",
+    text: "Send a request and keep the conversation organized.",
+  },
+];
+
+const landingHeroBackgroundSrc = "/images/landing-hero-venue-bg.png";
 
 export default async function MarketingHomePage() {
   const supabase = await createClient();
@@ -119,124 +192,176 @@ export default async function MarketingHomePage() {
         fallbackVenues,
       );
   const searchSuggestions = buildLandingSearchSuggestions(suggestionVenues);
-  const heroVenue = featuredVenues[0]!;
+  const heroVenues = featuredVenues.slice(0, 3);
+  const categoryVisualVenues =
+    featuredVenues.length > 0 ? featuredVenues : fallbackVenues;
 
   return (
-    <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-[#F9FAFB] text-[#111827] antialiased">
+    <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-[#F8FAFC] text-[#111827] antialiased">
       <MarketingNavbar />
 
       <main className="w-full flex-grow">
-        {/* Hero Section */}
-        <section className="relative w-full py-14 md:py-24">
-          <div className="mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-            <div className="min-w-0">
-              <h1 className="max-w-3xl text-4xl font-black leading-tight tracking-[-0.05em] text-[#111827] sm:text-5xl md:text-6xl">
+        <section className="relative isolate w-full overflow-hidden bg-slate-950 pb-20 pt-10 sm:pb-28 sm:pt-14 md:pb-32 lg:pb-36 lg:pt-20">
+          <div className="absolute inset-0 -z-10">
+            <img
+              src={landingHeroBackgroundSrc}
+              alt="Venora event venue hero background"
+              className="h-full w-full object-cover opacity-90"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-slate-950/35 to-slate-950/5" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/30 via-transparent to-slate-950/10" />
+            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent via-white/70 to-white sm:h-40 lg:h-48" />
+          </div>
+
+          <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 sm:px-6 lg:min-h-[650px] lg:justify-between lg:px-8">
+            <div className="max-w-4xl pt-4">
+              <div className="mb-6 flex flex-wrap gap-2 sm:gap-3 lg:mb-8">
+                {categoryLinks.slice(0, 3).map((category) => (
+                  <Link
+                    key={category.label}
+                    href={category.href}
+                    className="rounded-2xl border border-white/20 bg-white/14 px-4 py-2.5 text-xs font-bold text-white shadow-sm backdrop-blur-md transition hover:bg-white/22 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 sm:px-5 sm:py-3 sm:text-sm"
+                  >
+                    {category.label}
+                  </Link>
+                ))}
+              </div>
+
+              <h1 className="max-w-4xl text-4xl font-bold leading-[1.04] text-white sm:text-5xl lg:text-7xl">
                 Where Extraordinary Events Begin
               </h1>
-              <p className="mt-5 max-w-xl text-base font-medium leading-7 text-[#6B7280] sm:text-lg">
+              <p className="mt-4 max-w-2xl text-base font-medium leading-7 text-white/86 sm:text-lg lg:mt-6 lg:text-xl lg:leading-8">
                 Discover, compare, and book the perfect space for your next
                 event. The premier marketplace for curated, high-quality venues.
               </p>
+            </div>
 
-              <div className="flex flex-col gap-3 pt-7 sm:flex-row">
+            <div className="relative z-10 w-full lg:-mb-48">
+              <LandingSegmentedSearch
+                {...searchSuggestions}
+                variant="hero-panel"
+              />
+              <div className="mt-4 hidden gap-3 lg:flex">
                 <Link
-                  className="inline-flex h-12 items-center justify-center rounded-2xl bg-[#2563EB] px-7 text-sm font-extrabold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1d4ed8]"
+                  className="inline-flex h-11 items-center justify-center rounded-2xl bg-white px-6 text-sm font-bold text-[#1D4ED8] shadow-sm transition hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                   href="/venues"
                 >
                   Browse Venues
                 </Link>
                 <Link
-                  className="inline-flex h-12 items-center justify-center rounded-2xl border border-[#E5E7EB] bg-white px-7 text-sm font-extrabold text-[#1D4ED8] shadow-sm transition hover:bg-[#EFF6FF]"
+                  className="inline-flex h-11 items-center justify-center rounded-2xl border border-white/35 bg-white/16 px-6 text-sm font-bold text-white shadow-sm backdrop-blur transition hover:bg-white/24 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                   href="/account/become-partner"
                 >
                   List Your Venue
                 </Link>
               </div>
-
-              <LandingSegmentedSearch {...searchSuggestions} />
-            </div>
-
-            {/* Hero Visual Card */}
-            <div className="relative hidden min-h-[420px] items-center justify-center overflow-hidden lg:flex">
-              <div className="w-full max-w-md rotate-2 rounded-[28px] border border-[#E5E7EB] bg-white p-4 shadow-2xl shadow-slate-200/70 transition-transform duration-300 hover:rotate-0">
-                <div className="relative mb-4 h-64 w-full overflow-hidden rounded-[22px]">
-                  <img
-                    className="h-full w-full object-cover"
-                    alt={`${heroVenue.name} in ${heroVenue.location}`}
-                    src={heroVenue.image}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent" />
-                  <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full bg-white/90 px-3 py-1.5 text-xs font-extrabold text-[#111827] shadow-sm backdrop-blur">
-                    <Star className="h-3.5 w-3.5 fill-[#F59E0B] text-[#F59E0B]" />
-                    {typeof heroVenue.rating === "number"
-                      ? heroVenue.rating.toFixed(1)
-                      : "New"}
-                  </div>
-                </div>
-
-                <h3 className="mb-1 text-xl font-black tracking-[-0.03em] text-[#111827]">
-                  {heroVenue.name}
-                </h3>
-                <p className="mb-4 flex items-center gap-1.5 text-sm font-semibold text-[#6B7280]">
-                  <MapPin className="h-4 w-4" />
-                  {heroVenue.location}
-                </p>
-
-                <div className="flex items-end justify-between border-t border-slate-100 pt-4">
-                  <div>
-                    <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-slate-500">
-                      Starting at
-                    </p>
-                    <p className="text-lg font-black text-[#111827]">
-                      {heroVenue.price}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1.5 rounded-2xl bg-slate-100 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.08em] text-slate-600">
-                    <Users className="h-3.5 w-3.5" />
-                    {heroVenue.capacity}
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </section>
 
-        {/* Trust Strip */}
-        <section className="w-full border-y border-[#E5E7EB] bg-[#F8FAFC] py-6">
-          <div className="mx-auto grid w-full max-w-7xl grid-cols-2 gap-6 px-4 text-center sm:px-6 md:grid-cols-4 lg:px-8">
-            {stats.map((stat) => (
-              <div key={stat.label}>
-                <p className="text-2xl font-black tracking-[-0.03em] text-[#111827]">
-                  {stat.value}
-                </p>
-                <p className="mt-1 text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">
-                  {stat.label}
-                </p>
-              </div>
-            ))}
+        <section className="w-full border-b border-[#E5E7EB] bg-white py-5 lg:pb-5 lg:pt-32">
+          <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-3 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
+            {trustItems.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <div
+                  key={item.title}
+                  className="flex min-w-0 items-start gap-3 rounded-2xl border border-slate-100 bg-[#F8FAFC] p-4"
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#EFF6FF] text-[#2563EB]">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-slate-950">
+                      {item.title}
+                    </p>
+                    <p className="mt-1 text-sm font-medium leading-5 text-slate-500">
+                      {item.text}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
 
-        {/* Featured Venues */}
+        <section className="w-full bg-white py-12 md:py-16">
+          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="text-2xl font-bold leading-tight text-slate-950 md:text-3xl">
+                  Explore by event or venue type
+                </h2>
+                <p className="mt-2 text-sm font-medium leading-6 text-slate-500 sm:text-base">
+                  Start with the kind of celebration you are planning.
+                </p>
+              </div>
+              <Link
+                href="/venues"
+                className="inline-flex items-center gap-2 text-sm font-bold text-[#2563EB] transition hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
+              >
+                Browse all
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+              {categoryLinks.map((category, index) => {
+                const Icon = category.icon;
+                const visualVenue =
+                  categoryVisualVenues[index % categoryVisualVenues.length];
+
+                return (
+                  <Link
+                    key={category.label}
+                    href={category.href}
+                    className="group overflow-hidden rounded-[20px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/40 transition hover:-translate-y-0.5 hover:border-[#BFDBFE] hover:shadow-lg hover:shadow-slate-200/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
+                  >
+                    <div className="relative h-20 bg-[#EFF6FF] sm:h-24">
+                      {visualVenue?.image ? (
+                        <img
+                          src={visualVenue.image}
+                          alt={`${category.label} category venue preview`}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : null}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/30 via-slate-950/5 to-transparent" />
+                      <span className="absolute bottom-3 left-3 flex h-8 w-8 items-center justify-center rounded-xl bg-white/92 text-[#2563EB] shadow-sm backdrop-blur">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                    </div>
+                    <div className="px-4 py-3">
+                      <span className="text-sm font-bold leading-5 text-slate-950 transition group-hover:text-[#1D4ED8]">
+                        {category.label}
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
         <section
           aria-labelledby="featured-venues-heading"
-          className="w-full py-14 md:py-20"
+          className="w-full bg-[#F8FAFC] py-14 md:py-20"
         >
           <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-7 flex items-end justify-between gap-6">
+            <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <h2
                   id="featured-venues-heading"
-                  className="text-3xl font-black tracking-[-0.04em] text-[#111827] md:text-4xl"
+                  className="text-2xl font-bold leading-tight text-[#111827] md:text-3xl"
                 >
                   Featured Venues
                 </h2>
                 <p className="mt-2 text-base font-medium text-[#6B7280]">
-                  Discover our most sought-after spaces.
+                  Popular spaces with the details customers compare first.
                 </p>
               </div>
               <Link
-                className="hidden items-center gap-2 text-sm font-extrabold text-[#2563EB] transition hover:text-[#1D4ED8] md:flex"
+                className="hidden items-center gap-2 text-sm font-bold text-[#2563EB] transition hover:text-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 md:flex"
                 href="/venues"
               >
                 View All Venues
@@ -255,12 +380,93 @@ export default async function MarketingHomePage() {
             </div>
 
             <Link
-              className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white text-sm font-extrabold text-[#2563EB] transition hover:bg-[#EFF6FF] md:hidden"
+              className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white text-sm font-bold text-[#2563EB] transition hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 md:hidden"
               href="/venues"
             >
               View All Venues
               <ArrowRight className="h-4 w-4" />
             </Link>
+          </div>
+        </section>
+
+        <section
+          data-testid="landing-how-it-works"
+          className="w-full border-y border-[#DBEAFE] bg-[#F5F9FF] py-14 md:py-20"
+        >
+          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto mb-8 max-w-2xl text-center">
+              <h2 className="text-2xl font-bold leading-tight text-slate-950 md:text-3xl">
+                How Venora Works
+              </h2>
+              <p className="mt-3 text-sm font-medium leading-6 text-slate-500 sm:text-base">
+                A simpler path from shortlist to confirmed event space.
+              </p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              {workflowSteps.map((step) => {
+                const Icon = step.icon;
+
+                return (
+                  <div
+                    key={step.title}
+                    className="rounded-[20px] border border-[#E5E7EB] bg-white p-5 shadow-sm shadow-slate-200/50"
+                  >
+                    <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB]">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-950">
+                      {step.title}
+                    </h3>
+                    <p className="mt-2 text-sm font-medium leading-6 text-slate-500">
+                      {step.text}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="w-full bg-[#F8FAFC] px-4 py-14 sm:px-6 md:py-20 lg:px-8">
+          <div className="mx-auto grid max-w-7xl overflow-hidden rounded-[28px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+            <div className="flex flex-col justify-center p-6 sm:p-8 lg:p-10">
+              <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#2563EB]">
+                For venue owners
+              </p>
+              <h2 className="mt-3 text-2xl font-bold leading-tight text-slate-950 md:text-3xl">
+                Have a venue worth discovering?
+              </h2>
+              <p className="mt-3 max-w-xl text-sm font-medium leading-6 text-slate-500 sm:text-base">
+                List your space, manage inquiries, and give customers the
+                details they need to book with confidence.
+              </p>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href="/account/become-partner"
+                  className="inline-flex h-12 items-center justify-center rounded-2xl bg-[#2563EB] px-6 text-sm font-bold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
+                >
+                  List Your Venue
+                </Link>
+                <Link
+                  href="/venues"
+                  className="inline-flex h-12 items-center justify-center rounded-2xl border border-[#DBEAFE] bg-white px-6 text-sm font-bold text-[#1D4ED8] transition hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
+                >
+                  See the marketplace
+                </Link>
+              </div>
+            </div>
+
+            {heroVenues[0] ? (
+              <div className="relative min-h-64 bg-slate-200 lg:min-h-[360px]">
+                <img
+                  src={heroVenues[0].image}
+                  alt={`${heroVenues[0].name} hosted event venue`}
+                  className="h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-slate-950/20" />
+              </div>
+            ) : null}
           </div>
         </section>
       </main>

@@ -7,7 +7,7 @@ import {
   Calendar as CalendarIcon,
   Check,
   HelpCircle,
-  Info,
+  Lock,
   Loader2,
 } from "lucide-react";
 import {
@@ -205,10 +205,10 @@ export default function BookingSidebar({
       {/* Price section */}
       <div className="space-y-1">
         <div className="flex items-baseline gap-1">
-          <span className="font-sora text-2xl font-bold tracking-tight text-[var(--text-primary)]">
+          <span className="text-3xl font-bold tracking-[-0.02em] text-[#151C27]">
             {formatCurrency(currentPrice)}
           </span>
-          <span className="text-sm font-medium text-[var(--text-muted)]">
+          <span className="text-base font-medium text-[#434654]">
             / {getUnitText(currentUnit)}
           </span>
         </div>
@@ -219,25 +219,27 @@ export default function BookingSidebar({
         )}
       </div>
 
-      <Separator className="my-5" />
-
       {/* Booking Form Fields */}
-      <div className="space-y-4">
+      <div className="mt-6 space-y-4">
         {/* Date Selector */}
         <div className="space-y-1.5 relative">
-          <label className="text-[10px] font-bold text-[var(--text-primary)] tracking-wide uppercase">
+          <label className="sr-only">
             Event Date
           </label>
           <button
             type="button"
             onClick={() => setShowCalendar(!showCalendar)}
-            className="w-full flex items-center justify-between h-11 px-4 border border-[var(--border-default)] bg-[var(--bg-subtle)] rounded-xl text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-subtle)] transition-all"
+            className="flex min-h-[72px] w-full items-center justify-between rounded-xl border border-[#E5E7EB] bg-white px-4 py-3 text-left text-[#151C27] transition-colors hover:border-[#0052CC]"
           >
-            <span className="flex items-center gap-2">
-              <CalendarIcon className="h-4 w-4 text-[var(--text-muted)]" />
-              {selectedDate
-                ? format(selectedDate, "MMMM d, yyyy")
-                : "Select date"}
+            <span>
+              <span className="block text-xs font-medium uppercase tracking-wide text-[#434654]">
+                Event Date
+              </span>
+              <span className="mt-0.5 block text-base font-medium">
+                {selectedDate
+                  ? format(selectedDate, "MMMM d, yyyy")
+                  : "Select date"}
+              </span>
             </span>
             {isCheckingAvailability ? (
               <Loader2 className="h-4 w-4 animate-spin text-[var(--color-brand-500)]" />
@@ -275,7 +277,7 @@ export default function BookingSidebar({
         {/* Package Selector */}
         {packages.length > 0 && (
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-[var(--text-primary)] tracking-wide uppercase">
+            <label className="sr-only">
               Select Package
             </label>
             <Select
@@ -284,9 +286,16 @@ export default function BookingSidebar({
             >
               <SelectTrigger
                 aria-label="Select Package"
-                className="w-full h-11 px-4 border border-[var(--border-default)] bg-[var(--bg-subtle)] rounded-xl text-sm font-medium"
+                className="min-h-[72px] w-full rounded-xl border border-[#E5E7EB] bg-white px-4 py-3 text-left text-[#151C27] hover:border-[#0052CC]"
               >
-                <SelectValue placeholder="Custom (Base Price)" />
+                <span className="block">
+                  <span className="block text-xs font-medium uppercase tracking-wide text-[#434654]">
+                    Package
+                  </span>
+                  <span className="mt-0.5 block text-base font-medium">
+                    <SelectValue placeholder="Custom (Base Price)" />
+                  </span>
+                </span>
               </SelectTrigger>
               <SelectContent className="rounded-xl border-[var(--border-default)]">
                 <SelectItem value="none" className="text-sm font-medium">
@@ -307,9 +316,9 @@ export default function BookingSidebar({
         )}
 
         {/* Guest Selector */}
-        <div className="space-y-1.5">
+        <div className="space-y-2 rounded-xl border border-[#E5E7EB] bg-white p-4">
           <div className="flex items-center justify-between">
-            <label className="text-[10px] font-bold text-[var(--text-primary)] tracking-wide uppercase">
+            <label className="text-xs font-medium uppercase tracking-wide text-[#434654]">
               Guests count
             </label>
             <span className="text-xs font-medium text-[var(--text-muted)]">
@@ -345,7 +354,7 @@ export default function BookingSidebar({
                   setGuests(0);
                 }
               }}
-              className="text-sm font-bold text-[var(--text-primary)] bg-[var(--bg-subtle)] border border-[var(--border-default)] px-2 py-1.5 rounded-xl w-[70px] text-center outline-none focus:border-[var(--color-brand-600)]"
+              className="w-[70px] rounded-xl border border-[#E5E7EB] bg-white px-2 py-1.5 text-center text-sm font-bold text-[#151C27] outline-none focus:border-[#0052CC]"
             />
           </div>
           {guests > activeMaxGuests && (
@@ -444,16 +453,27 @@ export default function BookingSidebar({
             guests > activeMaxGuests
           }
           onClick={handleBook}
-          className="w-full h-12 rounded-2xl font-bold bg-[var(--color-brand-600)] text-white hover:bg-[var(--color-brand-700)] shadow-lg shadow-[var(--color-brand-500)]/20 transition-all flex items-center justify-center gap-2"
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#0052CC] font-bold text-white shadow-none transition-colors hover:bg-[#003D9B]"
         >
-          Book This Venue
+          Book Now
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            const target = document.getElementById("venue-owner");
+            target?.scrollIntoView({ behavior: "smooth", block: "center" });
+          }}
+          className="h-12 w-full rounded-xl border-[#E5E7EB] bg-white font-bold text-[#151C27] hover:bg-[#F9FAFB]"
+        >
+          Contact Venue
         </Button>
         {typeof children === "function" ? children(guests) : children}
       </div>
 
-      <div className="mt-4 flex items-center gap-2 justify-center text-xs text-[var(--text-muted)] font-medium">
-        <Info className="h-3.5 w-3.5" />
-        <span>You won't be charged yet</span>
+      <div className="mt-6 flex items-center justify-center gap-2 text-xs font-medium text-[#434654]">
+        <Lock className="h-4 w-4 text-emerald-500" />
+        <span>Secure booking via Venora</span>
       </div>
     </>
   );
@@ -463,7 +483,7 @@ export default function BookingSidebar({
       {/* Desktop: sticky sidebar card */}
       <div
         data-testid="venue-booking-sidebar"
-        className="sticky top-[9.5rem] hidden w-full max-h-[calc(100vh-10.5rem)] overflow-y-auto rounded-[24px] border border-[#E5E7EB] bg-white p-6 shadow-sm shadow-slate-200/60 lg:block"
+        className="sticky top-[9.5rem] hidden w-full max-h-[calc(100vh-10.5rem)] overflow-y-auto rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-[0px_4px_20px_rgba(0,0,0,0.05)] lg:block"
       >
         {bookingForm}
       </div>

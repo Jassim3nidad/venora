@@ -5,6 +5,7 @@ import {
   useMemo,
   useState,
   type ChangeEventHandler,
+  type FormEvent,
   type ReactNode,
 } from "react";
 import Link from "next/link";
@@ -103,7 +104,6 @@ function SupplierCard({ supplier }: { supplier: SupplierMarketplaceProfile }) {
             className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
             loading="lazy"
           />
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#111827]/55 to-transparent" />
           <div className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-extrabold text-emerald-700 shadow-sm">
             <BadgeCheck className="h-3.5 w-3.5" />
             Accredited
@@ -115,34 +115,21 @@ function SupplierCard({ supplier }: { supplier: SupplierMarketplaceProfile }) {
           ) : null}
         </div>
 
-        <div className="flex flex-1 flex-col gap-4 p-5">
-          <div>
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-              {supplier.category ? (
-                <span className="rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1 text-xs font-extrabold text-[#1D4ED8]">
-                  {supplier.category.name}
-                </span>
-              ) : null}
-              <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700">
-                <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+        <div className="flex flex-1 flex-col gap-3 p-4">
+          <div className="space-y-2.5">
+            <div className="flex items-start justify-between gap-3">
+              <h2 className="line-clamp-2 text-lg font-bold leading-6 tracking-[-0.03em] text-[#111827] transition group-hover:text-[#1D4ED8]">
+                {supplier.businessName}
+              </h2>
+              <span className="inline-flex shrink-0 items-center gap-1 text-sm font-bold text-[#111827]">
+                <Star className="h-4 w-4 fill-[#111827] text-[#111827]" />
                 {formatRating(supplier.avgRating, supplier.reviewCount)}
               </span>
             </div>
 
-            <h2 className="text-lg font-bold leading-6 tracking-[-0.03em] text-[#111827] transition group-hover:text-[#1D4ED8]">
-              {supplier.businessName}
-            </h2>
-            {supplier.headline ? (
-              <p className="mt-2 line-clamp-2 text-sm font-medium leading-6 text-[#6B7280]">
-                {supplier.headline}
-              </p>
-            ) : null}
-          </div>
-
-          <div className="grid gap-2.5 text-sm text-[#6B7280]">
-            <div className="flex min-w-0 items-start gap-2">
-              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB]" />
-              <span className="min-w-0 truncate font-semibold">
+            <div className="flex min-w-0 items-center gap-1.5 text-sm text-[#434654]">
+              <MapPin className="h-4 w-4 shrink-0 text-[#2563EB]" />
+              <span className="min-w-0 truncate font-medium">
                 {supplier.publicLocationLabel
                   ? supplier.publicLocationLabel
                   : [supplier.city, supplier.province].filter(Boolean).length >
@@ -155,39 +142,42 @@ function SupplierCard({ supplier }: { supplier: SupplierMarketplaceProfile }) {
                       : "Service area on request"}
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <Clock3 className="h-4 w-4 text-[#2563EB]" />
-              <span className="font-semibold">
-                {formatResponseTime(supplier.responseTimeHours)}
+
+            <div className="flex flex-wrap gap-1.5">
+              {supplier.category ? (
+                <span className="inline-flex max-w-full items-center rounded-lg bg-[#F0F3FF] px-2.5 py-1.5 text-xs font-medium text-[#434654]">
+                  <span className="truncate">{supplier.category.name}</span>
+                </span>
+              ) : null}
+              <span className="inline-flex max-w-full items-center gap-1.5 rounded-lg bg-[#F0F3FF] px-2.5 py-1.5 text-xs font-medium text-[#434654]">
+                <Clock3 className="h-4 w-4 shrink-0 text-[#2563EB]" />
+                <span className="truncate">
+                  {formatResponseTime(supplier.responseTimeHours)}
+                </span>
               </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <BriefcaseBusiness className="h-4 w-4 text-[#2563EB]" />
-              <span className="font-semibold">
-                {supplier.yearsInBusiness
-                  ? `${supplier.yearsInBusiness}+ years in business`
-                  : "Flexible packages"}
+              <span className="inline-flex max-w-full items-center gap-1.5 rounded-lg bg-[#F0F3FF] px-2.5 py-1.5 text-xs font-medium text-[#434654]">
+                <BriefcaseBusiness className="h-4 w-4 shrink-0 text-[#2563EB]" />
+                <span className="truncate">
+                  {supplier.yearsInBusiness
+                    ? `${supplier.yearsInBusiness}+ years in business`
+                    : "Flexible packages"}
+                </span>
               </span>
             </div>
           </div>
 
-          <div className="mt-auto flex items-end justify-between gap-3 border-t border-[#E5E7EB] pt-4">
-            <div>
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">
-                Starts at
-              </p>
-              <p className="text-lg font-bold text-slate-950">
+          <div className="mt-auto border-t border-[#E5E7EB] pt-3">
+            <p className="flex flex-wrap items-baseline gap-x-1 text-base font-medium text-[#434654]">
+              <span>Starting at</span>
+              <span className="text-xl font-bold tracking-[-0.03em] text-[#111827]">
                 {formatSupplierPrice(startingPrice)}
-              </p>
+              </span>
               {startingPrice ? (
-                <p className="text-xs font-semibold text-slate-500">
-                  {formatPriceUnit(priceUnit)}
-                </p>
+                <span className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">
+                  / {formatPriceUnit(priceUnit)}
+                </span>
               ) : null}
-            </div>
-            <span className="inline-flex h-11 items-center justify-center rounded-2xl bg-[#2563EB] px-4 text-xs font-bold uppercase tracking-[0.08em] text-white shadow-sm shadow-[#2563EB]/20 transition group-hover:bg-[#1D4ED8]">
-              View Details
-            </span>
+            </p>
           </div>
         </div>
       </Link>
@@ -200,6 +190,7 @@ export function SuppliersMarketplaceClient({
   categories,
 }: SuppliersMarketplaceClientProps) {
   const [query, setQuery] = useState("");
+  const [supplierPrompt, setSupplierPrompt] = useState("");
   const [category, setCategory] = useState("all");
   const [location, setLocation] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
@@ -287,11 +278,17 @@ export function SuppliersMarketplaceClient({
 
   const clearFilters = () => {
     setQuery("");
+    setSupplierPrompt("");
     setCategory("all");
     setLocation("");
     setMaxPrice("");
     setMinRating("0");
     setSort("recommended");
+  };
+
+  const handleSupplierPromptSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setQuery(supplierPrompt.trim());
   };
 
   const visibleSuppliers = filteredSuppliers.slice(0, visibleCount);
@@ -523,13 +520,6 @@ export function SuppliersMarketplaceClient({
             <div className="grid gap-4 p-5 sm:p-6 lg:p-7">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0">
-                  <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1.5 text-[#2563EB]">
-                    <BriefcaseBusiness className="h-3.5 w-3.5" />
-                    <span className="text-[11px] font-extrabold uppercase tracking-[0.14em]">
-                      Supplier marketplace
-                    </span>
-                  </div>
-
                   <h1 className="max-w-3xl break-words text-2xl font-bold leading-8 tracking-[-0.04em] text-slate-950 sm:text-3xl sm:leading-tight">
                     Find trusted event suppliers
                   </h1>
@@ -567,6 +557,49 @@ export function SuppliersMarketplaceClient({
                   ) : null}
                 </button>
               </div>
+
+              <form
+                onSubmit={handleSupplierPromptSearch}
+                className="grid gap-3 rounded-[18px] border border-slate-200 bg-[#F9FAFB] p-3 sm:p-4"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-slate-500">
+                    Optional supplier search
+                  </p>
+                  <p className="text-xs font-medium text-slate-500">
+                    Use keywords when filters feel too narrow.
+                  </p>
+                </div>
+
+                <div className="grid gap-2 lg:grid-cols-[minmax(0,1fr)_auto]">
+                  <div className="relative min-w-0">
+                    <label htmlFor="supplier-prompt-search" className="sr-only">
+                      Supplier search prompt
+                    </label>
+                    <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#2563EB]" />
+                    <input
+                      id="supplier-prompt-search"
+                      name="supplierPrompt"
+                      type="search"
+                      value={supplierPrompt}
+                      onChange={(event) =>
+                        setSupplierPrompt(event.target.value)
+                      }
+                      placeholder="Try: photographer in Cavite for weddings"
+                      className="h-11 w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-[#93C5FD] focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={!supplierPrompt.trim()}
+                    className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-[#BFDBFE] bg-white px-4 text-sm font-extrabold text-[#1D4ED8] shadow-sm transition hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    <Search className="h-4 w-4" />
+                    Search
+                  </button>
+                </div>
+              </form>
 
               <div className="grid gap-2 lg:grid-cols-[minmax(0,1fr)_auto]">
                 <div className="relative min-w-0">

@@ -33,6 +33,119 @@ test("landing search suggestions support keyboard selection and GET filters", as
   ).toBeVisible();
 });
 
+test("landing page presents customer discovery sections and venue-style featured cards", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+
+  await expect(
+    page.getByRole("heading", {
+      name: "Where Extraordinary Events Begin",
+      level: 1,
+    }),
+  ).toBeVisible();
+  const heroHeadingColor = await page
+    .getByRole("heading", {
+      name: "Where Extraordinary Events Begin",
+      level: 1,
+    })
+    .evaluate((element) => getComputedStyle(element).color);
+  expect(heroHeadingColor).toBe("rgb(255, 255, 255)");
+  await expect(
+    page.getByRole("link", { name: "Weddings", exact: true }).first(),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("img", { name: "Venora event venue hero background" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("img", { name: "Venora event venue hero background" }),
+  ).toHaveAttribute("src", /\/images\/landing-hero-venue-bg\.png/);
+  const heroBackgroundOpacity = await page
+    .getByRole("img", { name: "Venora event venue hero background" })
+    .evaluate((element) => Number(getComputedStyle(element).opacity));
+  expect(heroBackgroundOpacity).toBeGreaterThanOrEqual(0.35);
+  await expect(
+    page.getByTestId("landing-hero-search-panel"),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Find Your Perfect Venue" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Verified venue details", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Explore by event or venue type" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "How Venora Works" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Have a venue worth discovering?" }),
+  ).toBeVisible();
+
+  const categoryLink = page.getByRole("link", {
+    name: "Weddings category venue",
+  });
+  await expect(categoryLink).toHaveAttribute("href", /\/venues\?event=/);
+  await expect(
+    categoryLink.getByRole("img", { name: "Weddings category venue preview" }),
+  ).toBeVisible();
+
+  const howItWorksBackground = await page
+    .getByTestId("landing-how-it-works")
+    .evaluate((element) => getComputedStyle(element).backgroundColor);
+  expect(howItWorksBackground).not.toBe("rgb(255, 255, 255)");
+
+  const featuredRegion = page.getByRole("region", {
+    name: "Featured Venues",
+  });
+  const firstCard = featuredRegion.getByRole("article").first();
+  await expect(firstCard.getByText("Starting at")).toBeVisible();
+  await expect(firstCard.getByText(/pax/i).first()).toBeVisible();
+  await expect(firstCard.getByText("View details")).toHaveCount(0);
+});
+
+for (const viewport of [
+  { name: "desktop", width: 1440, height: 900 },
+  { name: "laptop", width: 1280, height: 800 },
+  { name: "tablet", width: 768, height: 1024 },
+  { name: "mobile", width: 390, height: 844 },
+  { name: "small mobile", width: 360, height: 800 },
+] as const) {
+  test(`landing page has no horizontal overflow at ${viewport.name}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({
+      width: viewport.width,
+      height: viewport.height,
+    });
+    await page.goto("/");
+
+    await expect(
+      page.getByRole("heading", {
+        name: "Where Extraordinary Events Begin",
+        level: 1,
+      }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("region", { name: "Featured Venues" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Have a venue worth discovering?" }),
+    ).toBeVisible();
+
+    const layout = await page.evaluate(() => ({
+      clientWidth: document.documentElement.clientWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+      bodyScrollWidth: document.body.scrollWidth,
+    }));
+
+    expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth + 1);
+    expect(layout.bodyScrollWidth).toBeLessThanOrEqual(layout.clientWidth + 1);
+  });
+}
+
 test("featured venue card identity matches its destination", async ({ page }) => {
   await page.goto("/");
 

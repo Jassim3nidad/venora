@@ -102,29 +102,29 @@ export default function ReviewsSection({
   const ratingPercentage = (val: number) => `${(val / 5) * 100}%`;
 
   return (
-    <section className="space-y-8">
-      <div className="flex items-center gap-2 border-b border-[var(--border-default)] pb-4">
-        <h2 className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
+    <section className="space-y-6">
+      <div className="flex flex-wrap items-center gap-3 border-b border-[#E5E7EB] pb-5">
+        <h2 className="text-3xl font-bold tracking-[-0.02em] text-[#151C27]">
           Reviews
         </h2>
-        <div className="flex items-center gap-1.5 ml-4 bg-[var(--bg-subtle)] px-3 py-1 rounded-full text-sm font-semibold">
-          <Star className="h-4 w-4 fill-amber-400 stroke-amber-400" />
-          <span className="text-[var(--text-primary)]">
+        <div className="flex items-center gap-2 text-base font-semibold text-[#434654]">
+          <Star className="h-5 w-5 fill-amber-400 stroke-amber-400" />
+          <span className="text-[#151C27]">
             {avgRating.toFixed(2)}
           </span>
-          <span className="text-[var(--text-muted)] font-normal">
+          <span className="font-normal text-[#A1A4B2]">
             ({reviewCount} reviews)
           </span>
         </div>
       </div>
 
       {reviews.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 px-4 rounded-3xl border border-dashed border-[var(--border-default)] bg-[var(--bg-subtle)] text-center">
-          <MessageSquare className="h-10 w-10 text-[var(--text-muted)] mb-3" />
-          <p className="text-sm font-semibold text-[var(--text-primary)]">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-4 py-14 text-center">
+          <MessageSquare className="mb-3 h-10 w-10 text-[#A1A4B2]" />
+          <p className="text-base font-bold text-[#151C27]">
             No reviews yet
           </p>
-          <p className="text-xs text-[var(--text-muted)] mt-1 max-w-[280px]">
+          <p className="mt-2 max-w-[320px] text-sm leading-6 text-[#A1A4B2]">
             Bookings that are completed will appear here once guests leave their
             feedback.
           </p>
@@ -132,7 +132,7 @@ export default function ReviewsSection({
       ) : (
         <>
           {/* Dimensions grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 bg-[var(--bg-subtle)] p-6 rounded-3xl border border-[var(--border-default)]">
+          <div className="grid grid-cols-1 gap-x-12 gap-y-4 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-6 md:grid-cols-2">
             {dimensions.map((dim) => (
               <div
                 key={dim.label}
@@ -171,7 +171,7 @@ export default function ReviewsSection({
               return (
                 <div
                   key={review.id}
-                  className="p-6 rounded-3xl border border-[var(--border-default)] bg-[var(--bg-base)] space-y-4"
+              className="space-y-4 rounded-xl border border-[#E5E7EB] bg-white p-6"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
