@@ -9,43 +9,43 @@
 @source "../../../packages/lib/src";
 
 @theme {
-  --font-sans: "Inter", sans-serif;
-  --font-display: "Sora", sans-serif;
+  --font-sans: "DM Sans", sans-serif;
+  --font-display: "Cormorant Garamond", serif;
 
-  --color-brand-50: #eff6ff;
-  --color-brand-100: #dbeafe;
-  --color-brand-200: #bfdbfe;
-  --color-brand-300: #93c5fd;
-  --color-brand-400: #60a5fa;
-  --color-brand-500: #3b82f6;
-  --color-brand-600: #2563eb;
-  --color-brand-700: #1d4ed8;
-  --color-brand-800: #1e40af;
-  --color-brand-900: #1e3a8a;
-  --color-brand-950: #172554;
+  --color-brand-50: #FCFBF9;
+  --color-brand-100: #F5F2EE;
+  --color-brand-200: #EBE3D5;
+  --color-brand-300: #DFC5A8;
+  --color-brand-400: #D4B68D;
+  --color-brand-500: #C9A96E;
+  --color-brand-600: #B89659;
+  --color-brand-700: #9A7C46;
+  --color-brand-800: #7E6539;
+  --color-brand-900: #65502E;
+  --color-brand-950: #362A17;
 
-  --color-accent-400: #37bcf1;
-  --color-accent-500: #37bcf1;
+  --color-accent-400: #D4B68D;
+  --color-accent-500: #C9A96E;
 }
 
 /* --- CSS Custom Properties (Design Tokens) -------------------------------- */
 :root {
-  /* Brand (blue) */
-  --color-brand-50: #eff6ff;
-  --color-brand-100: #dbeafe;
-  --color-brand-200: #bfdbfe;
-  --color-brand-300: #93c5fd;
-  --color-brand-400: #60a5fa;
-  --color-brand-500: #3b82f6;
-  --color-brand-600: #2563eb;
-  --color-brand-700: #1d4ed8;
-  --color-brand-800: #1e40af;
-  --color-brand-900: #1e3a8a;
-  --color-brand-950: #172554;
+  /* Brand (warm gold) */
+  --color-brand-50: #FCFBF9;
+  --color-brand-100: #F5F2EE;
+  --color-brand-200: #EBE3D5;
+  --color-brand-300: #DFC5A8;
+  --color-brand-400: #D4B68D;
+  --color-brand-500: #C9A96E;
+  --color-brand-600: #B89659;
+  --color-brand-700: #9A7C46;
+  --color-brand-800: #7E6539;
+  --color-brand-900: #65502E;
+  --color-brand-950: #362A17;
 
-  /* Accent (cyan) */
-  --color-accent-400: #37bcf1;
-  --color-accent-500: #37bcf1;
+  /* Accent (warm gold) */
+  --color-accent-400: #D4B68D;
+  --color-accent-500: #C9A96E;
 
   /* Backgrounds */
   --bg-base: #ffffff;
@@ -75,8 +75,8 @@
   --radius-2xl: 2rem;
 
   /* Font families */
-  --font-sans:    "Inter", system-ui, sans-serif;
-  --font-display: "Sora", "Inter", system-ui, sans-serif;
+  --font-sans:    "DM Sans", system-ui, sans-serif;
+  --font-display: "Cormorant Garamond", "DM Sans", system-ui, serif;
 
   /* Transitions */
   --transition-fast:    150ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -96,14 +96,14 @@
 
 /* Dark mode */
 .dark {
-  --bg-base:     hsl(240 10% 7%);
-  --bg-subtle:   hsl(240 8% 10%);
-  --bg-muted:    hsl(240 6% 14%);
-  --text-primary:   hsl(0 0% 95%);
-  --text-secondary: hsl(240 5% 65%);
-  --text-muted:     hsl(240 5% 50%);
-  --border-default: hsl(240 6% 20%);
-  --border-strong:  hsl(240 6% 28%);
+  --bg-base:     #080808;
+  --bg-subtle:   #121212;
+  --bg-muted:    #1a1a1a;
+  --text-primary:   #F5F2EE;
+  --text-secondary: #a3a3a3;
+  --text-muted:     #737373;
+  --border-default: #262626;
+  --border-strong:  #404040;
 
   --color-success-bg: #064e3b;
   --color-warning-bg: #78350f;

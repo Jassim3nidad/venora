@@ -1,38 +1,38 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Sora } from "next/font/google";
+import { DM_Sans, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/src/components/providers";
 import { SITE_URL } from "@/src/lib/site-url";
 
-const inter = Inter({
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-dm-sans",
   display: "swap",
 });
 
-const sora = Sora({
+const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  variable: "--font-sora",
+  variable: "--font-cormorant-garamond",
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "Venora — Find & Book Your Perfect Venue",
-    template: "%s | Venora",
+    default: "7TH SOUTH STREET — Nonchalant Luxury. Underground Culture.",
+    template: "%s | 7TH SOUTH STREET",
   },
   description:
-    "Discover and book stunning event venues across the Philippines. Weddings, corporate events, debuts, and more — all in one place.",
+    "Premium underground streetwear e-commerce and brand platform based in the Philippines.",
   keywords: [
-    "venue booking",
-    "event venues",
+    "streetwear",
+    "fashion",
     "Philippines",
-    "wedding venue",
-    "corporate events",
+    "underground culture",
+    "7TH SOUTH STREET",
   ],
-  authors: [{ name: "Venora" }],
-  creator: "Venora",
+  authors: [{ name: "7TH SOUTH STREET" }],
+  creator: "7TH SOUTH STREET",
   metadataBase: new URL(SITE_URL),
   icons: {
     icon: "/venora-logo.png",
@@ -42,16 +42,16 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_PH",
-    siteName: "Venora",
-    title: "Venora — Find & Book Your Perfect Venue",
+    siteName: "7TH SOUTH STREET",
+    title: "7TH SOUTH STREET — Nonchalant Luxury. Underground Culture.",
     description:
-      "Discover and book stunning event venues across the Philippines.",
+      "Premium underground streetwear e-commerce and brand platform based in the Philippines.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Venora — Find & Book Your Perfect Venue",
+    title: "7TH SOUTH STREET — Nonchalant Luxury. Underground Culture.",
     description:
-      "Discover and book stunning event venues across the Philippines.",
+      "Premium underground streetwear e-commerce and brand platform based in the Philippines.",
   },
   robots: {
     index: true,
@@ -61,8 +61,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "hsl(217 75% 55%)" },
-    { media: "(prefers-color-scheme: dark)", color: "hsl(217 50% 15%)" },
+    { media: "(prefers-color-scheme: light)", color: "#080808" },
+    { media: "(prefers-color-scheme: dark)", color: "#080808" },
   ],
 };
 
@@ -72,14 +72,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className={`${inter.variable} ${sora.variable} font-sans`}>
+      <body className={`${dmSans.variable} ${cormorant.variable} font-sans`}>
         <Providers>{children}</Providers>
       </body>
     </html>
