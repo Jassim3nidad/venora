@@ -410,7 +410,20 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 
 ---
 
+### FIX-012 — Supplier Filter Sidebar Redesign (July 21, 2026)
 
+- **Area:** Suppliers Page — Filter Sidebar (`/suppliers`)
+- **Status:** Implemented
+- **Description:** Matched the venues filter accordion design on the supplier marketplace. Converted stacked filter sections into categorized accordions; Category and Rating use vertical checkbox columns; Budget uses Min + Max inputs.
+- **Accordion categories:**
+  - Search
+  - Location
+  - Category (checkbox column, single-select)
+  - Budget & Rating (Min/Max ₱ + rating checkboxes)
+- **Files:**
+  - `apps/web/src/features/suppliers/ui/SuppliersMarketplaceClient.tsx`
+
+---
 
 ## Change Log — July 21, 2026 (This Session)
 
@@ -419,6 +432,7 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 | ------------- | ---------------- | ------------------------------------------------------------------------------- |
 | FIX-010       | Enhancement / UX | Venue filter accordion redesign + checkbox columns                              |
 | FIX-011       | Copy / UX        | Supplier Calendar label fix (BUG-022)                                           |
+| FIX-012       | Enhancement / UX | Supplier filter accordion redesign (match venues)                               |
 | Env / tooling | Local setup      | Node/`pnpm` PATH setup notes from local machine (not committed as product code) |
 | Docs          | QA               | Manual pass report + this bug report checked into `docs/testing/`               |
 
