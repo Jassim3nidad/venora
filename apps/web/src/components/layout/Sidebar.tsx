@@ -264,9 +264,9 @@ function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * (Math.PI / 180)) *
-      Math.cos(lat2 * (Math.PI / 180)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
 
   return radius * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
 }
@@ -356,11 +356,10 @@ export default function Sidebar({
   const maxBudgetValue = Number(selectedMaxBudget) || 0;
   const activeBudgetLabel =
     minBudgetValue || maxBudgetValue
-      ? `${minBudgetValue ? `₱${minBudgetValue.toLocaleString("en-PH")}` : "Any"} - ${
-          maxBudgetValue
-            ? `₱${maxBudgetValue.toLocaleString("en-PH")}`
-            : "No limit"
-        }`
+      ? `${minBudgetValue ? `₱${minBudgetValue.toLocaleString("en-PH")}` : "Any"} - ${maxBudgetValue
+        ? `₱${maxBudgetValue.toLocaleString("en-PH")}`
+        : "No limit"
+      }`
       : "Any budget";
 
   const updateFilters = (updates: FilterUpdate) => {
@@ -560,7 +559,7 @@ export default function Sidebar({
       : null,
     selectedIndoorOutdoor
       ? indoorOutdoorModes.find((mode) => mode.value === selectedIndoorOutdoor)
-          ?.label
+        ?.label
       : null,
   ]
     .filter(Boolean)
@@ -582,9 +581,9 @@ export default function Sidebar({
       <div className="shrink-0 border-b border-[#E5E7EB] bg-[#F9FAFB] px-4 pb-4 pt-4">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-xl font-black tracking-[-0.03em] text-[#111827]">
+            <h2 className="text-xl font-black tracking-[-0.03em] text-[#111827]">
               Filters
-            </h1>
+            </h2>
 
             <p className="mt-1 text-sm font-medium text-[#6B7280]">
               Refine your venue search

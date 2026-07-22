@@ -1400,11 +1400,11 @@ export default function VenuesClient({
 
       <aside
         className={[
-          "hidden shrink-0 transition-[width,opacity] duration-300 ease-out lg:sticky lg:top-[9.5rem] lg:block lg:h-[calc(100dvh-10.5rem)] lg:max-h-[calc(100dvh-10.5rem)] lg:self-start lg:overflow-hidden",
-          desktopFiltersOpen
-            ? "w-[300px] opacity-100"
-            : "pointer-events-none w-0 opacity-0",
+          "sticky top-0 hidden h-[100dvh] shrink-0 self-start overflow-hidden transition-all duration-300 lg:block",
+          desktopFiltersOpen ? "w-[300px] opacity-100" : "w-0 opacity-0",
         ].join(" ")}
+        aria-hidden={!desktopFiltersOpen}
+        inert={!desktopFiltersOpen ? true : undefined}
         aria-label="Venue filters"
       >
         <Sidebar venues={initialVenues} />

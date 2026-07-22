@@ -8,10 +8,10 @@ const client = new Client({
 
 async function run() {
   await client.connect();
-  const sql = fs.readFileSync(path.join(__dirname, 'supabase/migrations/0790_fix_promotion_video_rls.sql'), 'utf-8');
+  const sql = fs.readFileSync(path.join(__dirname, 'supabase/migrations/0795_business_profiles.sql'), 'utf-8');
   try {
     await client.query(sql);
-    console.log("Success: applied 0790_fix_promotion_video_rls.sql");
+    console.log("Success: applied 0795_business_profiles.sql");
     await client.query("NOTIFY pgrst, 'reload schema';");
   } catch (err) {
     console.error(err);
