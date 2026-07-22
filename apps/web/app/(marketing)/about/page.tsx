@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowDown,
+  ArrowRight,
   BadgeCheck,
   Bot,
   BrainCircuit,
   Building2,
   CalendarCheck,
-  CalendarDays,
   CheckCircle2,
   ClipboardList,
   Handshake,
-  LayoutDashboard,
   MessageCircle,
   Search,
+  ShieldCheck,
   Sparkles,
   Store,
   UsersRound,
@@ -21,126 +22,131 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import MarketingNavbar from "@/components/layout/MarketingNavbar";
+import {
+  RevealGroup,
+  RevealItem,
+  ScrollReveal,
+  ScrollRevealGroup,
+} from "@/src/components/animations/RevealAnimations";
 
 export const metadata: Metadata = { title: "About Venora" };
 
-type Card = {
+type RolePanel = {
   title: string;
   description: string;
   icon: LucideIcon;
 };
 
-const problems: Card[] = [
-  {
-    title: "Scattered venue information",
-    description:
-      "Customers often jump between social pages, messages, posts, and referrals just to build a shortlist.",
-    icon: Search,
-  },
-  {
-    title: "Manual inquiries",
-    description:
-      "Availability, package details, and pricing can take too many conversations before planning can move forward.",
-    icon: MessageCircle,
-  },
-  {
-    title: "Hard-to-compare options",
-    description:
-      "Different formats make it difficult to compare venues, suppliers, budgets, and booking readiness.",
-    icon: ClipboardList,
-  },
-];
+type Transformation = {
+  problem: string;
+  solution: string;
+};
 
-const solutions: Card[] = [
-  {
-    title: "Discover venues",
-    description:
-      "Browse venue profiles by location, event type, capacity, and style.",
-    icon: Search,
-  },
-  {
-    title: "Compare packages",
-    description:
-      "Review pricing, inclusions, capacities, and policies in one place.",
-    icon: WalletCards,
-  },
-  {
-    title: "Check availability",
-    description:
-      "Plan around venue calendars and booking status with more confidence.",
-    icon: CalendarCheck,
-  },
-  {
-    title: "Submit booking requests",
-    description:
-      "Send structured requests that help venues respond with the right details.",
-    icon: CheckCircle2,
-  },
-  {
-    title: "Connect with suppliers",
-    description:
-      "Find event professionals who can support the full experience.",
-    icon: Store,
-  },
-  {
-    title: "Track booking status",
-    description:
-      "Keep requests, confirmations, and next steps easier to follow.",
-    icon: LayoutDashboard,
-  },
-];
+type JourneyStep = {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+};
 
-const connectedRoles: Card[] = [
+type TrustPoint = {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+};
+
+const roles: RolePanel[] = [
   {
     title: "Customers",
     description:
-      "Discover venues and trusted event services in one place.",
+      "Discover venues and trusted event services without jumping across scattered pages and messages.",
     icon: UsersRound,
   },
   {
     title: "Venue owners",
     description:
-      "Manage listings, availability, packages, and bookings with modern tools.",
+      "Manage listings, packages, availability, bookings, and venue teams from one marketplace surface.",
     icon: Building2,
   },
   {
     title: "Event suppliers",
     description:
-      "Showcase services and receive qualified event inquiries.",
+      "Showcase services and receive qualified inquiries from customers already planning an event.",
     icon: Store,
   },
 ];
 
-const trustItems: Card[] = [
+const transformations: Transformation[] = [
+  {
+    problem:
+      "Venue information is scattered across posts, referrals, social pages, and private messages.",
+    solution:
+      "Venora brings profile details, photos, capacity, location, amenities, packages, and policies into one venue page.",
+  },
+  {
+    problem:
+      "Customers spend too much time asking for availability, pricing, and inclusions before they can decide.",
+    solution:
+      "Structured venue profiles and booking requests help customers compare options and help venues respond with context.",
+  },
+  {
+    problem:
+      "Venue owners and suppliers often receive incomplete inquiries that are hard to organize and follow up.",
+    solution:
+      "Dashboard tools keep requests, calendars, supplier inquiries, and next steps easier for business teams to manage.",
+  },
+];
+
+const journeySteps: JourneyStep[] = [
+  {
+    title: "Discover",
+    description: "Search by location, event type, capacity, and venue style.",
+    icon: Search,
+  },
+  {
+    title: "Compare",
+    description: "Review photos, inclusions, policies, pricing, and amenities.",
+    icon: ClipboardList,
+  },
+  {
+    title: "Check availability",
+    description: "Plan around venue calendars and booking status with confidence.",
+    icon: CalendarCheck,
+  },
+  {
+    title: "Request",
+    description: "Send structured booking requests with the details venues need.",
+    icon: MessageCircle,
+  },
+  {
+    title: "Coordinate",
+    description: "Connect with venue teams and suppliers as the plan takes shape.",
+    icon: Handshake,
+  },
+  {
+    title: "Confirm",
+    description: "Track booking status, next steps, and event readiness in one place.",
+    icon: CheckCircle2,
+  },
+];
+
+const trustPoints: TrustPoint[] = [
   {
     title: "Verified venue listings",
     description:
-      "Venue profiles are built to show the details customers need before booking.",
+      "Venue profiles are designed to show the essentials customers need before booking.",
     icon: BadgeCheck,
   },
   {
-    title: "AI-powered search",
-    description:
-      "Search naturally by event needs, location, guest count, budget, and preferences.",
-    icon: BrainCircuit,
-  },
-  {
-    title: "Transparent booking process",
+    title: "Transparent booking",
     description:
       "Structured requests make expectations clearer for customers and venue teams.",
-    icon: ClipboardList,
+    icon: ShieldCheck,
   },
   {
     title: "Accredited suppliers",
     description:
       "Supplier profiles help customers connect with trusted event service providers.",
-    icon: Handshake,
-  },
-  {
-    title: "Business tools for owners",
-    description:
-      "Owners get modern tools for profiles, calendars, bookings, packages, and teams.",
-    icon: LayoutDashboard,
+    icon: Store,
   },
   {
     title: "Reviews and ratings",
@@ -150,37 +156,11 @@ const trustItems: Card[] = [
   },
 ];
 
-const aiFeatures: Card[] = [
-  {
-    title: "AI venue recommendations",
-    description:
-      "Match event needs with venues that fit the occasion and planning context.",
-    icon: Sparkles,
-  },
-  {
-    title: "Smart search",
-    description:
-      "Search by budget, guest count, event type, location, and preferences.",
-    icon: Search,
-  },
-  {
-    title: "Package comparison",
-    description:
-      "Review venue options and package details without losing the planning thread.",
-    icon: WalletCards,
-  },
-  {
-    title: "Cost estimation",
-    description:
-      "Understand likely costs earlier so planning conversations stay grounded.",
-    icon: WalletCards,
-  },
-  {
-    title: "Customer assistant",
-    description:
-      "Guide customers toward relevant venues, suppliers, and next steps.",
-    icon: Bot,
-  },
+const discoveryPreview = [
+  "Garden venue in Tagaytay for 150 guests",
+  "Recommended venues by capacity, setting, and budget",
+  "Compare packages, inclusions, and booking signals",
+  "Estimate likely costs before starting conversations",
 ];
 
 function SectionHeading({
@@ -188,339 +168,434 @@ function SectionHeading({
   title,
   description,
   centered = false,
+  light = false,
 }: {
   eyebrow: string;
   title: string;
-  description: string;
+  description?: string;
   centered?: boolean;
+  light?: boolean;
 }) {
   return (
     <div className={centered ? "mx-auto max-w-3xl text-center" : "max-w-3xl"}>
-      <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
+      <p
+        className={[
+          "text-xs font-bold uppercase",
+          light ? "text-blue-100" : "text-[#2563EB]",
+        ].join(" ")}
+      >
         {eyebrow}
       </p>
-      <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-[#111827] sm:text-4xl">
+      <h2
+        className={[
+          "mt-3 text-3xl font-bold leading-tight sm:text-4xl",
+          light ? "text-white" : "text-[#111827]",
+        ].join(" ")}
+      >
         {title}
       </h2>
-      <p className="mt-4 text-base font-medium leading-7 text-[#6B7280]">
-        {description}
-      </p>
+      {description ? (
+        <p
+          className={[
+            "mt-4 text-base font-medium leading-7",
+            light ? "text-blue-50" : "text-[#4B5563]",
+          ].join(" ")}
+        >
+          {description}
+        </p>
+      ) : null}
     </div>
   );
 }
 
-function FeatureCard({ item }: { item: Card }) {
-  const Icon = item.icon;
+function RolePanelCard({ role }: { role: RolePanel }) {
+  const Icon = role.icon;
 
   return (
-    <div className="rounded-[24px] border border-[#E5E7EB] bg-white p-5 shadow-sm shadow-slate-200/60 transition hover:-translate-y-1 hover:border-[#BFDBFE] hover:shadow-xl hover:shadow-slate-200/70">
-      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB]">
-        <Icon className="h-5 w-5" />
+    <div className="h-full rounded-lg border border-[#E5E7EB] bg-white p-5 shadow-sm shadow-slate-200/50 transition duration-200 ease-out hover:-translate-y-px hover:border-[#BFDBFE] hover:shadow-md">
+      <div className="flex items-start gap-4">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#EFF6FF] text-[#2563EB]">
+          <Icon className="h-5 w-5" aria-hidden="true" />
+        </div>
+        <div>
+          <h3 className="text-lg font-bold text-[#111827]">{role.title}</h3>
+          <p className="mt-2 text-sm font-medium leading-6 text-[#4B5563]">
+            {role.description}
+          </p>
+        </div>
       </div>
-      <h3 className="text-lg font-black tracking-[-0.03em] text-[#111827]">
-        {item.title}
-      </h3>
-      <p className="mt-2 text-sm font-medium leading-6 text-[#6B7280]">
-        {item.description}
-      </p>
     </div>
   );
 }
 
-function VenoraEcosystemVisual() {
-  const roles = [
-    {
-      title: "Customers",
-      description: "Find venues and event services.",
-      icon: UsersRound,
-      className: "lg:col-start-2 lg:row-start-1",
-    },
-    {
-      title: "Venue owners",
-      description: "Manage venues and bookings.",
-      icon: Building2,
-      className: "lg:col-start-1 lg:row-start-2",
-    },
-    {
-      title: "Event suppliers",
-      description: "Offer services and receive inquiries.",
-      icon: Store,
-      className: "col-span-2 lg:col-span-1 lg:col-start-3 lg:row-start-2",
-    },
-  ];
+function TrustPointCard({ point }: { point: TrustPoint }) {
+  const Icon = point.icon;
 
   return (
-    <div
-      className="relative overflow-hidden rounded-[28px] border border-[#DBEAFE] bg-white p-5 shadow-xl shadow-slate-200/60 sm:p-6"
-      aria-label="Venora connects customers, venue owners, and event suppliers."
-    >
-      <div
-        className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(37,99,235,0.12),_transparent_32%),radial-gradient(circle_at_bottom_right,_rgba(191,219,254,0.42),_transparent_30%)]"
-        aria-hidden="true"
-      />
-      <div
-        className="absolute bottom-28 left-1/2 top-36 hidden w-px -translate-x-1/2 bg-[#BFDBFE] lg:block"
-        aria-hidden="true"
-      />
-      <div
-        className="absolute left-[18%] right-[18%] top-[62%] hidden h-px bg-[#BFDBFE] lg:block"
-        aria-hidden="true"
-      />
-
-      <div className="relative">
-        <div className="mb-5 flex items-center justify-between gap-4">
-          <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#2563EB]">
-              Venora ecosystem
-            </p>
-            <h2 className="mt-2 text-xl font-black tracking-[-0.03em] text-[#111827]">
-              One place for event planning to connect.
-            </h2>
-          </div>
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB]">
-            <CalendarDays className="h-6 w-6" aria-hidden="true" />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 lg:items-center">
-          <div className="relative z-10 col-span-2 rounded-[24px] border border-[#BFDBFE] bg-[#EFF6FF] p-4 shadow-sm shadow-blue-100/70 lg:col-span-1 lg:col-start-2 lg:row-start-2">
-            <div className="flex items-start gap-3">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#2563EB] text-white">
-                <Sparkles className="h-6 w-6" aria-hidden="true" />
-              </div>
-              <div>
-                <h3 className="text-lg font-black tracking-[-0.03em] text-[#111827]">
-                  Venora
-                </h3>
-                <p className="mt-1 text-sm font-semibold leading-6 text-[#4B5563]">
-                  One platform for venues, services, and event coordination.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {roles.map((role) => {
-            const Icon = role.icon;
-
-            return (
-              <div
-                key={role.title}
-                className={[
-                  "relative z-10 rounded-[22px] border border-[#E5E7EB] bg-white p-4 shadow-sm shadow-slate-200/60",
-                  role.className,
-                ].join(" ")}
-              >
-                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F8FAFC] text-[#2563EB] ring-1 ring-[#DBEAFE]">
-                  <Icon className="h-5 w-5" aria-hidden="true" />
-                </div>
-                <h3 className="text-base font-black tracking-[-0.03em] text-[#111827]">
-                  {role.title}
-                </h3>
-                <p className="mt-1 text-sm font-medium leading-6 text-[#6B7280]">
-                  {role.description}
-                </p>
-              </div>
-            );
-          })}
-        </div>
+    <div className="rounded-lg border border-[#DDE7F7] bg-white p-5">
+      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-[#EFF6FF] text-[#2563EB]">
+        <Icon className="h-5 w-5" aria-hidden="true" />
       </div>
+      <h3 className="text-base font-bold text-[#111827]">{point.title}</h3>
+      <p className="mt-2 text-sm font-medium leading-6 text-[#5B6678]">
+        {point.description}
+      </p>
     </div>
   );
 }
 
 export default function AboutPage() {
   return (
-    <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-[#F9FAFB] text-[#111827] antialiased">
+    <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-[#F6F8FB] text-[#111827] antialiased">
       <MarketingNavbar />
 
       <main className="w-full flex-grow">
-        <section className="relative overflow-hidden border-b border-[#E5E7EB] bg-gradient-to-br from-white via-[#F8FAFC] to-[#EFF6FF] py-12 sm:py-14 lg:py-16">
-          <div className="absolute right-0 top-10 h-56 w-56 rounded-full bg-[#DBEAFE]/50 blur-3xl" />
-          <div className="relative mx-auto grid w-full max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
+        <section className="relative isolate overflow-hidden bg-slate-950">
+          <Image
+            src="/images/about/about-hero-background.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="absolute inset-0 -z-20 object-cover"
+            aria-hidden="true"
+          />
+          <div
+            className="absolute inset-0 -z-10 bg-gradient-to-r from-slate-950/88 via-slate-950/62 to-slate-950/32"
+            aria-hidden="true"
+          />
+          <div
+            className="absolute inset-x-0 bottom-0 -z-10 h-36 bg-gradient-to-t from-white via-white/55 to-transparent"
+            aria-hidden="true"
+          />
+          <RevealGroup
+            className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:px-8 lg:py-20"
+            staggerDelay={0.08}
+          >
             <div className="min-w-0">
-              <p className="text-sm font-extrabold text-[#2563EB]">
-                About Venora
-              </p>
-              <h1 className="mt-4 max-w-2xl text-4xl font-black leading-tight tracking-[-0.045em] text-[#111827] sm:text-5xl lg:text-[3.5rem]">
-                Planning an event should feel exciting, not overwhelming.
-              </h1>
-              <p className="mt-6 max-w-xl text-base font-medium leading-7 text-[#4B5563] sm:text-lg">
-                Venora brings customers, venue owners, and event suppliers together in one platform—making it easier to discover venues, coordinate services, and manage every stage of an event.
-              </p>
-              <a
-                href="#how-venora-works"
-                className="mt-8 inline-flex h-11 w-fit items-center justify-center gap-2 rounded-2xl border border-[#DBEAFE] bg-white px-5 text-sm font-extrabold text-[#1D4ED8] shadow-sm transition hover:bg-[#EFF6FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
-              >
-                Explore how Venora works
-                <ArrowDown className="h-4 w-4" aria-hidden="true" />
-              </a>
+              <RevealItem yOffset={8}>
+                <p className="text-sm font-bold text-blue-100">
+                  About Venora
+                </p>
+              </RevealItem>
+              <RevealItem yOffset={12}>
+                <h1 className="mt-4 max-w-2xl text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-[3.4rem]">
+                  Planning an event should feel exciting, not overwhelming.
+                </h1>
+              </RevealItem>
+              <RevealItem yOffset={12}>
+                <p className="mt-5 max-w-xl text-base font-medium leading-7 text-blue-50 sm:text-lg">
+                  Venora brings customers, venue owners, and event suppliers
+                  together in one platform, making it easier to discover
+                  venues, coordinate services, and manage every stage of an
+                  event.
+                </p>
+              </RevealItem>
+              <RevealItem yOffset={16}>
+                <a
+                  href="#how-venora-works"
+                  className="mt-7 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-5 text-sm font-bold text-white shadow-sm shadow-[#2563EB]/20 transition duration-200 ease-out hover:-translate-y-px hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30"
+                >
+                  Explore how Venora works
+                  <ArrowDown className="h-4 w-4" aria-hidden="true" />
+                </a>
+              </RevealItem>
             </div>
 
-            <VenoraEcosystemVisual />
+            <RevealItem yOffset={16}>
+              <div className="relative overflow-hidden rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] shadow-lg shadow-slate-200/60">
+                <Image
+                  src="/images/about/wedding-venue-table.jpg"
+                  alt="Wedding reception table inside a bright venue."
+                  width={1600}
+                  height={1067}
+                  priority
+                  sizes="(min-width: 1024px) 560px, 100vw"
+                  className="aspect-[4/3] w-full object-cover transition duration-500 ease-out hover:scale-[1.02]"
+                />
+                <div className="absolute bottom-4 left-4 right-4 rounded-lg bg-white/92 p-4 shadow-sm backdrop-blur">
+                  <p className="text-sm font-bold text-[#111827]">
+                    One marketplace for venues, suppliers, and booking clarity.
+                  </p>
+                  <p className="mt-1 text-xs font-medium text-[#4B5563]">
+                    Built for customers planning events and businesses managing
+                    them.
+                  </p>
+                </div>
+              </div>
+            </RevealItem>
+          </RevealGroup>
+        </section>
+
+        <section className="border-b border-[#E5E7EB] bg-white py-12 sm:py-16">
+          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+            <ScrollReveal yOffset={12}>
+              <SectionHeading
+                eyebrow="Ecosystem"
+                title="Who Venora connects"
+                description="Venora creates a more connected experience for everyone involved in planning and delivering an event."
+                centered
+              />
+            </ScrollReveal>
+
+            <ScrollRevealGroup
+              className="mt-8 grid gap-4 md:grid-cols-3"
+              staggerDelay={0.07}
+            >
+              {roles.map((role) => (
+                <RevealItem key={role.title} yOffset={12}>
+                  <RolePanelCard role={role} />
+                </RevealItem>
+              ))}
+            </ScrollRevealGroup>
+          </div>
+        </section>
+
+        <section className="bg-[#F6F8FB] py-14 sm:py-20">
+          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+            <ScrollReveal yOffset={12}>
+              <SectionHeading
+                eyebrow="The transformation"
+                title="From scattered planning to clearer decisions"
+                description="The problem and solution belong side by side: every pain point in the old planning flow maps to a cleaner Venora workflow."
+                centered
+              />
+            </ScrollReveal>
+
+            <div className="mt-10 grid gap-4">
+              {transformations.map((item, index) => (
+                <ScrollReveal
+                  key={item.problem}
+                  yOffset={12}
+                  className="grid gap-3 rounded-lg border border-[#E5E7EB] bg-white p-4 shadow-sm shadow-slate-200/50 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-stretch md:p-5"
+                >
+                  <div className="rounded-lg bg-[#F8FAFC] p-4">
+                    <p className="text-xs font-bold uppercase text-[#9CA3AF]">
+                      Planning friction {index + 1}
+                    </p>
+                    <p className="mt-2 text-base font-bold leading-7 text-[#111827]">
+                      {item.problem}
+                    </p>
+                  </div>
+                  <div className="hidden items-center px-1 text-[#2563EB] md:flex">
+                    <ArrowRight className="h-5 w-5" aria-hidden="true" />
+                  </div>
+                  <div className="rounded-lg border border-[#BFDBFE] bg-[#EFF6FF] p-4">
+                    <p className="text-xs font-bold uppercase text-[#1D4ED8]">
+                      Venora response
+                    </p>
+                    <p className="mt-2 text-base font-bold leading-7 text-[#1F2937]">
+                      {item.solution}
+                    </p>
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
           </div>
         </section>
 
         <section
           id="how-venora-works"
-          className="scroll-mt-28 bg-white py-12 sm:py-16"
+          className="scroll-mt-28 bg-[#EAF2FF] py-14 sm:py-20"
         >
           <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-            <SectionHeading
-              eyebrow="Ecosystem"
-              title="Who Venora connects"
-              description="Venora creates a more connected experience for everyone involved in planning and delivering an event."
-              centered
-            />
-            <div className="mt-8 grid gap-5 md:grid-cols-3">
-              {connectedRoles.map((item) => (
-                <FeatureCard key={item.title} item={item} />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-14 sm:py-20">
-          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-            <SectionHeading
-              eyebrow="The problem"
-              title="Event venue discovery should not be difficult."
-              description="Planning an event should feel exciting, not scattered. Venora brings venue details, packages, suppliers, and booking steps into a cleaner discovery experience."
-              centered
-            />
-            <div className="mt-10 grid gap-5 md:grid-cols-3">
-              {problems.map((item) => (
-                <FeatureCard key={item.title} item={item} />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-white py-14 sm:py-20">
-          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
+            <ScrollReveal yOffset={12}>
               <SectionHeading
-                eyebrow="The solution"
-                title="A smarter way to discover and book venues."
-                description="Venora turns the venue search into a guided marketplace experience where customers can compare options and venue teams can respond with better context."
+                eyebrow="How Venora works"
+                title="A guided journey from discovery to confirmation"
+                description="The marketplace is designed around the way people actually plan events: search, compare, ask, coordinate, and confirm."
+                centered
               />
-              <div className="grid gap-5 sm:grid-cols-2">
-                {solutions.map((item) => (
-                  <FeatureCard key={item.title} item={item} />
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
+            </ScrollReveal>
 
-        <section className="bg-white py-14 sm:py-20">
-          <div className="mx-auto grid w-full max-w-7xl gap-5 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-            <div className="rounded-[28px] border border-[#DBEAFE] bg-[#EFF6FF] p-6 shadow-sm shadow-slate-200/60 sm:p-8">
-              <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
-                Mission
-              </p>
-              <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-[#111827]">
-                Make venue booking trusted and intelligent.
-              </h2>
-              <p className="mt-4 text-base font-medium leading-7 text-[#4B5563]">
-                To transform the venue booking experience by creating a trusted
-                and intelligent platform that connects customers with
-                outstanding venues and event services.
-              </p>
-            </div>
-            <div className="rounded-[28px] border border-[#E5E7EB] bg-white p-6 shadow-sm shadow-slate-200/60 sm:p-8">
-              <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
-                Vision
-              </p>
-              <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-[#111827]">
-                Lead AI-powered event discovery in the region.
-              </h2>
-              <p className="mt-4 text-base font-medium leading-7 text-[#6B7280]">
-                To become the leading AI-powered venue marketplace in the
-                Philippines and Southeast Asia.
-              </p>
-            </div>
-          </div>
-        </section>
+            <ScrollRevealGroup
+              className="relative mt-10 grid gap-4 md:grid-cols-3 lg:grid-cols-6"
+              staggerDelay={0.07}
+            >
+              {journeySteps.map((step, index) => {
+                const Icon = step.icon;
 
-        <section className="py-14 sm:py-20">
-          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-            <SectionHeading
-              eyebrow="Why choose Venora"
-              title="Trust-building tools for every side of the booking."
-              description="Venora is designed to make venue discovery clearer for customers and marketplace operations easier for businesses."
-              centered
-            />
-            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {trustItems.map((item) => (
-                <FeatureCard key={item.title} item={item} />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-white py-14 sm:py-20">
-          <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
-            <div className="rounded-[32px] bg-gradient-to-br from-[#1D4ED8] to-[#2563EB] p-7 text-white shadow-xl shadow-[#2563EB]/20 sm:p-9">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15">
-                <BrainCircuit className="h-6 w-6" />
-              </div>
-              <h2 className="mt-6 text-3xl font-black tracking-[-0.04em] sm:text-4xl">
-                Powered by intelligent event discovery
-              </h2>
-              <p className="mt-4 text-base font-medium leading-7 text-blue-50">
-                Venora helps users search naturally, compare options, and
-                discover venues based on event type, budget, guest count,
-                location, and preferences.
-              </p>
-            </div>
-            <div className="grid gap-5 sm:grid-cols-2">
-              {aiFeatures.map((item) => (
-                <FeatureCard key={item.title} item={item} />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-14 sm:py-20">
-          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="overflow-hidden rounded-[32px] border border-[#DBEAFE] bg-white shadow-xl shadow-slate-200/60">
-              <div className="grid gap-0 lg:grid-cols-[0.9fr_1.1fr]">
-                <div className="bg-[#EFF6FF] p-6 sm:p-8 lg:p-10">
-                  <SectionHeading
-                    eyebrow="Marketplace ecosystem"
-                    title="More than a venue directory"
-                    description="Venora connects the people and businesses behind every event, from the first search to venue booking, supplier inquiry, and the final guest experience."
-                  />
-                </div>
-                <div className="grid gap-4 p-6 sm:p-8 lg:p-10">
-                  {[
-                    "Customers discover and request venues.",
-                    "Venue teams manage listings, packages, calendars, and bookings.",
-                    "Suppliers receive relevant inquiries from event customers.",
-                    "Coordinators and administrators keep operations organized.",
-                  ].map((item) => (
-                    <div
-                      key={item}
-                      className="flex items-start gap-3 rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4"
-                    >
-                      <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#2563EB]" />
-                      <p className="text-sm font-semibold leading-6 text-[#374151]">
-                        {item}
+                return (
+                  <RevealItem key={step.title} yOffset={14}>
+                    <div className="h-full rounded-lg border border-[#C7DAF5] bg-white p-4 shadow-sm shadow-blue-100/60">
+                      <div className="mb-4 flex items-center justify-between gap-3">
+                        <span className="text-sm font-bold text-[#2563EB]">
+                          0{index + 1}
+                        </span>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#EFF6FF] text-[#2563EB]">
+                          <Icon className="h-5 w-5" aria-hidden="true" />
+                        </div>
+                      </div>
+                      <h3 className="text-base font-bold text-[#111827]">
+                        {step.title}
+                      </h3>
+                      <p className="mt-2 text-sm font-medium leading-6 text-[#4B5563]">
+                        {step.description}
                       </p>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+                  </RevealItem>
+                );
+              })}
+            </ScrollRevealGroup>
           </div>
         </section>
 
-        <section className="px-4 pb-16 sm:px-6 sm:pb-20 lg:px-8">
-          <div className="mx-auto max-w-7xl rounded-[32px] bg-gradient-to-br from-[#2563EB] via-[#1D4ED8] to-[#1E40AF] p-7 text-center text-white shadow-2xl shadow-[#2563EB]/20 sm:p-10 lg:p-14">
-            <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-blue-100">
+        <section className="bg-white py-14 sm:py-20">
+          <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:px-8">
+            <ScrollReveal yOffset={16} className="min-h-full">
+              <div className="h-full overflow-hidden rounded-lg">
+                <Image
+                  src="/images/about/outdoor-wedding-reception.jpg"
+                  alt="Outdoor wedding reception arranged for guests."
+                  width={1600}
+                  height={1067}
+                  sizes="(min-width: 1024px) 520px, 100vw"
+                  className="h-full min-h-[320px] w-full object-cover transition duration-500 ease-out hover:scale-[1.02]"
+                />
+              </div>
+            </ScrollReveal>
+
+            <ScrollReveal
+              yOffset={16}
+              className="flex min-h-full flex-col justify-center rounded-lg bg-[#F8FAFC] p-6 sm:p-8 lg:p-10"
+            >
+              <p className="text-xs font-bold uppercase text-[#2563EB]">
+                Mission and vision
+              </p>
+              <h2 className="mt-3 text-3xl font-bold leading-tight text-[#111827] sm:text-4xl">
+                Make venue booking trusted, intelligent, and easier to act on.
+              </h2>
+              <p className="mt-5 text-base font-medium leading-7 text-[#374151]">
+                Venora exists to transform the venue booking experience by
+                creating a trusted platform that connects customers with
+                outstanding venues and event services.
+              </p>
+              <p className="mt-4 text-base font-medium leading-7 text-[#4B5563]">
+                The vision is to become a leading AI-powered venue marketplace
+                in the Philippines and Southeast Asia while keeping the planning
+                experience human, credible, and practical.
+              </p>
+            </ScrollReveal>
+          </div>
+        </section>
+
+        <section className="bg-[#F6F8FB] py-14 sm:py-20">
+          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+            <ScrollReveal yOffset={12}>
+              <SectionHeading
+                eyebrow="Trust"
+                title="Credibility at the moments that matter"
+                description="Venora is designed to make discovery clearer for customers and marketplace operations easier for event businesses."
+                centered
+              />
+            </ScrollReveal>
+            <ScrollRevealGroup
+              className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+              staggerDelay={0.07}
+            >
+              {trustPoints.map((point) => (
+                <RevealItem key={point.title} yOffset={12}>
+                  <TrustPointCard point={point} />
+                </RevealItem>
+              ))}
+            </ScrollRevealGroup>
+          </div>
+        </section>
+
+        <section className="bg-[#172554] py-14 text-white sm:py-20">
+          <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-8 px-4 sm:px-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:px-8">
+            <ScrollReveal yOffset={12} className="min-w-0">
+              <SectionHeading
+                eyebrow="Intelligent discovery"
+                title="Search that understands the planning context"
+                description="Venora helps users search naturally, compare options, and discover venues based on event type, budget, guest count, location, and preferences."
+                light
+              />
+            </ScrollReveal>
+
+            <ScrollReveal yOffset={16} className="min-w-0">
+              <div className="rounded-lg border border-white/15 bg-white/8 p-4 shadow-xl shadow-blue-950/30">
+                <div className="rounded-lg bg-white p-4 text-[#111827]">
+                  <div className="flex items-center gap-3 rounded-lg border border-[#DBEAFE] bg-[#F8FAFC] px-4 py-3">
+                    <Search className="h-5 w-5 shrink-0 text-[#2563EB]" />
+                    <p className="min-w-0 truncate text-sm font-bold text-[#4B5563]">
+                      Garden venue in Tagaytay for 150 guests under budget
+                    </p>
+                  </div>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    {discoveryPreview.map((item, index) => (
+                      <div
+                        key={item}
+                        className="rounded-lg border border-[#E5E7EB] bg-white p-4"
+                      >
+                        <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-[#EFF6FF] text-[#2563EB]">
+                          {index === 0 ? (
+                            <Bot className="h-4 w-4" aria-hidden="true" />
+                          ) : index === 1 ? (
+                            <Sparkles
+                              className="h-4 w-4"
+                              aria-hidden="true"
+                            />
+                          ) : index === 2 ? (
+                            <WalletCards
+                              className="h-4 w-4"
+                              aria-hidden="true"
+                            />
+                          ) : (
+                            <BrainCircuit
+                              className="h-4 w-4"
+                              aria-hidden="true"
+                            />
+                          )}
+                        </div>
+                        <p className="text-sm font-bold leading-6 text-[#111827]">
+                          {item}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </ScrollReveal>
+          </div>
+        </section>
+
+        <section className="bg-white py-14 sm:py-20">
+          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+            <ScrollReveal yOffset={12} className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+              <SectionHeading
+                eyebrow="Marketplace ecosystem"
+                title="More than a venue directory"
+                description="Venora connects the people and businesses behind every event, from the first search to venue booking, supplier inquiry, and the final guest experience."
+              />
+              <div className="grid gap-3">
+                {[
+                  "Customers discover venues and send booking requests.",
+                  "Venue teams manage listings, packages, calendars, and bookings.",
+                  "Suppliers receive relevant inquiries from event customers.",
+                  "Coordinators and administrators keep operations organized.",
+                ].map((item) => (
+                  <div key={item} className="flex items-start gap-3">
+                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#2563EB]" />
+                    <p className="text-sm font-bold leading-6 text-[#374151]">
+                      {item}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </ScrollReveal>
+          </div>
+        </section>
+
+        <section className="bg-[#F6F8FB] px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
+          <ScrollReveal
+            yOffset={16}
+            className="mx-auto max-w-7xl rounded-lg bg-[#2563EB] p-7 text-center text-white shadow-lg shadow-[#2563EB]/20 sm:p-10 lg:p-12"
+          >
+            <p className="text-xs font-bold uppercase text-blue-100">
               Start with Venora
             </p>
-            <h2 className="mx-auto mt-3 max-w-3xl text-3xl font-black tracking-[-0.04em] sm:text-4xl">
+            <h2 className="mx-auto mt-3 max-w-3xl text-3xl font-bold leading-tight sm:text-4xl">
               Start planning your next event with Venora.
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-base font-medium leading-7 text-blue-50">
@@ -530,18 +605,18 @@ export default function AboutPage() {
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <Link
                 href="/venues"
-                className="inline-flex h-12 items-center justify-center rounded-2xl bg-white px-7 text-sm font-extrabold text-[#1D4ED8] transition hover:bg-[#EFF6FF]"
+                className="inline-flex min-h-12 items-center justify-center rounded-lg bg-white px-7 text-sm font-bold text-[#1D4ED8] transition duration-200 ease-out hover:-translate-y-px hover:bg-[#EFF6FF]"
               >
                 Browse Venues
               </Link>
               <Link
                 href="/account/become-partner"
-                className="inline-flex h-12 items-center justify-center rounded-2xl border border-white/30 px-7 text-sm font-extrabold text-white transition hover:bg-white/10"
+                className="inline-flex min-h-12 items-center justify-center rounded-lg border border-white/35 px-7 text-sm font-bold text-white transition duration-200 ease-out hover:-translate-y-px hover:bg-white/10"
               >
                 Become a Venue Partner
               </Link>
             </div>
-          </div>
+          </ScrollReveal>
         </section>
       </main>
     </div>
