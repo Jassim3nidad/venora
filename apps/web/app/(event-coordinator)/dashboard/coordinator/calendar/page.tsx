@@ -5,7 +5,10 @@ import {
   EmptyState,
 } from "@/components/dashboard/enterprise";
 import BookingCalendar from "@/src/features/calendar/ui/BookingCalendar";
-import { getOwnerDashboardContext } from "@/lib/dashboard/org-dashboard-data";
+import {
+  getOwnerDashboardContext,
+  getOwnerVenueIds,
+} from "@/lib/dashboard/org-dashboard-data";
 
 export const metadata: Metadata = {
   title: "Event Calendar - Coordinator Dashboard",
@@ -21,17 +24,19 @@ type CalendarVenue = {
 };
 
 export default async function CoordinatorCalendarPage() {
-  const { supabase, orgIds, isAdmin } = await getOwnerDashboardContext();
+  const context = await getOwnerDashboardContext();
+  const { supabase, isAdmin } = context;
+  const venueIds = await getOwnerVenueIds(context);
 
   let venuesQuery = supabase
     .from("venues")
     .select("id, name, city, province")
     .order("name", { ascending: true });
 
-  if (!isAdmin) venuesQuery = venuesQuery.in("organization_id", orgIds);
+  if (!isAdmin) venuesQuery = venuesQuery.in("id", venueIds);
 
   const { data: venues, error } =
-    isAdmin || orgIds.length > 0
+    isAdmin || venueIds.length > 0
       ? await venuesQuery
       : { data: [], error: null };
 

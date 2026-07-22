@@ -16,7 +16,7 @@ import {
   lastNMonthsRange,
 } from "@/features/analytics/application/queries";
 
-const ACCEPTED_BOOKING_STATUSES = ["approved", "confirmed", "completed"];
+const ACCEPTED_BOOKING_STATUSES = ["confirmed", "completed"];
 const CLOSED_BOOKING_STATUSES = ["cancelled", "declined", "expired"];
 
 function formatPeso(amount: number) {

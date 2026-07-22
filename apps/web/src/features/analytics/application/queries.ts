@@ -21,7 +21,7 @@ export type AnalyticsScope =
 
 export type DateRange = { from: string; to: string };
 
-export const ACCEPTED_BOOKING_STATUSES = ["approved", "confirmed", "completed"];
+export const ACCEPTED_BOOKING_STATUSES = ["confirmed", "completed"];
 
 // ── Date helpers ────────────────────────────────────────────────────────────
 
