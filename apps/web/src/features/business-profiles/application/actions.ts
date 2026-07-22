@@ -173,6 +173,8 @@ export async function publishBusinessProfile(rawInput: unknown) {
       });
 
       revalidatePath("/dashboard/business-profile");
+      revalidatePath("/dashboard/business-profile/preview");
+      revalidatePath(`/owners/${draft.slug}`);
       revalidatePath(`/partners/${draft.slug}`);
       
       return { success: true };

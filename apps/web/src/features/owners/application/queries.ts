@@ -5,6 +5,7 @@ type VenoraSupabase = any;
 export type PublicOwnerProfile = {
   slug: string;
   name: string;
+  organizationName: string;
   createdAt: string;
   isVerified: boolean;
   venueCount: number;
@@ -12,6 +13,19 @@ export type PublicOwnerProfile = {
   avgRating: number;
   reviewCount: number;
   serviceArea: string | null;
+  tagline: string | null;
+  shortDescription: string | null;
+  about: string | null;
+  yearEstablished: number | null;
+  logoPath: string | null;
+  coverImagePath: string | null;
+  city: string | null;
+  province: string | null;
+  countryCode: string | null;
+  publicEmail: string | null;
+  publicPhone: string | null;
+  websiteUrl: string | null;
+  verificationStatus: string | null;
 };
 
 export type PublicOwnerVenue = {
@@ -42,12 +56,20 @@ export type PublicOwnerReview = {
   createdAt: string;
 };
 
-function normalizeProfile(row: any): PublicOwnerProfile | null {
+function nullableString(value: unknown) {
+  return typeof value === "string" && value.trim() ? value : null;
+}
+
+export function normalizeProfile(row: any): PublicOwnerProfile | null {
   if (!row?.slug || !row?.name) return null;
+
+  const organizationName = String(row.name);
+  const displayName = nullableString(row.display_name);
 
   return {
     slug: String(row.slug),
-    name: String(row.name),
+    name: displayName ?? organizationName,
+    organizationName,
     createdAt: String(row.created_at),
     isVerified: Boolean(row.is_verified),
     venueCount: Number(row.venue_count) || 0,
@@ -55,6 +77,22 @@ function normalizeProfile(row: any): PublicOwnerProfile | null {
     avgRating: Number(row.avg_rating) || 0,
     reviewCount: Number(row.review_count) || 0,
     serviceArea: row.service_area ? String(row.service_area) : null,
+    tagline: nullableString(row.tagline),
+    shortDescription: nullableString(row.short_description),
+    about: nullableString(row.about),
+    yearEstablished:
+      row.year_established == null || !Number.isFinite(Number(row.year_established))
+        ? null
+        : Number(row.year_established),
+    logoPath: nullableString(row.logo_path),
+    coverImagePath: nullableString(row.cover_image_path),
+    city: nullableString(row.city),
+    province: nullableString(row.province),
+    countryCode: nullableString(row.country_code),
+    publicEmail: nullableString(row.public_email),
+    publicPhone: nullableString(row.public_phone),
+    websiteUrl: nullableString(row.website_url),
+    verificationStatus: nullableString(row.verification_status),
   };
 }
 

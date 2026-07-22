@@ -67,7 +67,12 @@ export function calculateProfileCompleteness(draft: BusinessProfileDraft): Compl
   }
 
   // At least one visible published venue: 15%
-  const hasVisibleVenue = draft.venues && draft.venues.length > 0 && draft.venues.some(v => v.is_visible);
+  const hasConnectedVisibleVenue =
+    draft.venues && draft.venues.length > 0 && draft.venues.some(v => v.is_visible);
+  const hasPublishedOwnedVenue =
+    draft.published_venues &&
+    draft.published_venues.length > 0;
+  const hasVisibleVenue = Boolean(hasConnectedVisibleVenue || hasPublishedOwnedVenue);
   if (hasVisibleVenue) {
     percentage += 15;
   } else {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type UseFormRegisterReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Save,
@@ -9,10 +9,13 @@ import {
   AlertCircle,
   Image as ImageIcon,
   Building2,
+  Loader2,
+  UploadCloud,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Toast, ToastDescription, ToastTitle } from "@venora/ui";
+import { createClient } from "@/lib/supabase/client";
 import { BusinessProfileDraft } from "../types/business-profile.types";
 import {
   saveBusinessIdentity,
@@ -24,6 +27,13 @@ import {
   businessAboutSchema,
   businessContactSchema,
 } from "../schemas/business-profile.schema";
+import {
+  BUSINESS_PROFILE_IMAGE_ACCEPTED_TYPES,
+  BUSINESS_PROFILE_IMAGE_BUCKET,
+  buildBusinessProfileImagePath,
+  validateBusinessProfileImage,
+  type BusinessProfileImageKind,
+} from "../utils/profile-image-upload";
 import { z } from "zod";
 
 const fullProfileSchema = z.object({
@@ -69,9 +79,123 @@ function SectionCard({
   );
 }
 
+function ImageUploadRow({
+  kind,
+  title,
+  description,
+  currentUrl,
+  inputProps,
+  errorMessage,
+  uploadError,
+  isUploading,
+  onUpload,
+}: {
+  kind: BusinessProfileImageKind;
+  title: string;
+  description: string;
+  currentUrl: string | null | undefined;
+  inputProps: UseFormRegisterReturn;
+  errorMessage: string | undefined;
+  uploadError?: string | null;
+  isUploading: boolean;
+  onUpload: (kind: BusinessProfileImageKind, file: File) => void | Promise<void>;
+}) {
+  const inputId = `business-profile-${kind}-upload`;
+
+  return (
+    <div className="grid gap-4 rounded-2xl border border-slate-200 bg-slate-50/70 p-4 sm:grid-cols-[150px_1fr] sm:items-start">
+      <div
+        className={`relative flex overflow-hidden rounded-xl border border-slate-200 bg-white ${
+          kind === "cover" ? "aspect-[16/9] sm:aspect-[4/3]" : "h-24 w-24"
+        }`}
+      >
+        {currentUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={currentUrl} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-slate-300">
+            {kind === "logo" ? (
+              <Building2 className="h-8 w-8" />
+            ) : (
+              <ImageIcon className="h-8 w-8" />
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="min-w-0">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-sm font-bold text-slate-800">{title}</p>
+            <p className="mt-1 text-sm leading-5 text-slate-500">{description}</p>
+          </div>
+
+          <label
+            htmlFor={inputId}
+            className={`inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 ${
+              isUploading ? "pointer-events-none opacity-60" : ""
+            }`}
+          >
+            {isUploading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <UploadCloud className="h-4 w-4" />
+            )}
+            {isUploading ? "Uploading..." : "Upload image"}
+          </label>
+        </div>
+
+        <input
+          id={inputId}
+          type="file"
+          accept={BUSINESS_PROFILE_IMAGE_ACCEPTED_TYPES.join(",")}
+          className="hidden"
+          disabled={isUploading}
+          onChange={(event) => {
+            const file = event.currentTarget.files?.[0];
+            event.currentTarget.value = "";
+            if (file) onUpload(kind, file);
+          }}
+        />
+
+        <label className="mt-4 grid gap-1.5">
+          <span className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
+            Or paste image URL
+          </span>
+          <input
+            {...inputProps}
+            placeholder={
+              kind === "logo"
+                ? "https://example.com/logo.png"
+                : "https://example.com/cover.jpg"
+            }
+            className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold outline-none transition-all placeholder:text-slate-400 focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
+          />
+        </label>
+
+        <FieldError message={errorMessage} />
+        {uploadError ? (
+          <p className="mt-1.5 flex items-center gap-1 text-xs font-semibold text-red-600">
+            <AlertCircle className="h-3.5 w-3.5" />
+            {uploadError}
+          </p>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [uploadingImage, setUploadingImage] =
+    useState<BusinessProfileImageKind | null>(null);
+  const [imageUploadErrors, setImageUploadErrors] = useState<
+    Record<BusinessProfileImageKind, string | null>
+  >({
+    logo: null,
+    cover: null,
+  });
   const [formMessage, setFormMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -113,12 +237,86 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
     formState: { errors, isDirty },
     watch,
     reset,
+    setValue,
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(fullProfileSchema),
     defaultValues,
   });
 
   const formValues = watch();
+
+  const setImageUploadError = (
+    kind: BusinessProfileImageKind,
+    message: string | null,
+  ) => {
+    setImageUploadErrors((current) => ({ ...current, [kind]: message }));
+  };
+
+  const handleImageUpload = async (
+    kind: BusinessProfileImageKind,
+    file: File,
+  ) => {
+    setImageUploadError(kind, null);
+    const validationError = validateBusinessProfileImage(file);
+
+    if (validationError) {
+      setImageUploadError(kind, validationError);
+      return;
+    }
+
+    setUploadingImage(kind);
+
+    try {
+      const supabase = createClient();
+      const uniqueId =
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `${Date.now()}`;
+      const storagePath = buildBusinessProfileImagePath({
+        organizationId,
+        kind,
+        fileName: file.name,
+        mimeType: file.type,
+        uniqueId,
+      });
+
+      const { error: uploadError } = await supabase.storage
+        .from(BUSINESS_PROFILE_IMAGE_BUCKET)
+        .upload(storagePath, file, {
+          cacheControl: "3600",
+          contentType: file.type,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        throw new Error(uploadError.message);
+      }
+
+      const { data } = supabase.storage
+        .from(BUSINESS_PROFILE_IMAGE_BUCKET)
+        .getPublicUrl(storagePath);
+      const fieldName = kind === "logo" ? "logo_path" : "cover_image_path";
+
+      setValue(fieldName, data.publicUrl, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      setToastMessage({
+        title: "Image uploaded",
+        description: "The image URL was added. Save changes to publish it.",
+      });
+      setToastOpen(true);
+    } catch (uploadError) {
+      setImageUploadError(
+        kind,
+        uploadError instanceof Error
+          ? uploadError.message
+          : "Could not upload image.",
+      );
+    } finally {
+      setUploadingImage(null);
+    }
+  };
 
   const onSubmit = (values: ProfileFormValues) => {
     setFormMessage(null);
@@ -236,7 +434,7 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
                   <span className="text-sm font-bold text-slate-700">Profile URL Slug</span>
                   <div className="flex">
                     <span className="inline-flex h-11 items-center rounded-l-lg border border-r-0 border-slate-200 bg-slate-100 px-3 text-sm font-semibold text-slate-500">
-                      venora.ph/partners/
+                      venora.ph/owners/
                     </span>
                     <input
                       {...register("slug")}
@@ -272,25 +470,29 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
 
             <SectionCard title="Images and Branding" description="Use high-quality images to represent your business.">
               <div className="grid gap-6">
-                <label className="grid gap-1.5">
-                  <span className="text-sm font-bold text-slate-700">Logo Image URL</span>
-                  <input
-                    {...register("logo_path")}
-                    placeholder="https://example.com/logo.png"
-                    className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
-                  />
-                  <FieldError message={errors.logo_path?.message} />
-                </label>
+                <ImageUploadRow
+                  kind="logo"
+                  title="Logo image"
+                  description="Upload a square brand mark or paste an image URL."
+                  currentUrl={formValues.logo_path}
+                  inputProps={register("logo_path")}
+                  errorMessage={errors.logo_path?.message}
+                  uploadError={imageUploadErrors.logo}
+                  isUploading={uploadingImage === "logo"}
+                  onUpload={handleImageUpload}
+                />
 
-                <label className="grid gap-1.5">
-                  <span className="text-sm font-bold text-slate-700">Cover Image URL</span>
-                  <input
-                    {...register("cover_image_path")}
-                    placeholder="https://example.com/cover.jpg"
-                    className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
-                  />
-                  <FieldError message={errors.cover_image_path?.message} />
-                </label>
+                <ImageUploadRow
+                  kind="cover"
+                  title="Cover image"
+                  description="Upload a wide image that represents your venue business."
+                  currentUrl={formValues.cover_image_path}
+                  inputProps={register("cover_image_path")}
+                  errorMessage={errors.cover_image_path?.message}
+                  uploadError={imageUploadErrors.cover}
+                  isUploading={uploadingImage === "cover"}
+                  onUpload={handleImageUpload}
+                />
               </div>
             </SectionCard>
 
@@ -451,7 +653,7 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
               <div className="p-4 bg-slate-50 border-t border-slate-100 pointer-events-auto">
                 {formValues.slug ? (
                   <Link
-                    href={`/partners/${formValues.slug}`}
+                    href={`/owners/${formValues.slug}`}
                     target="_blank"
                     className="w-full h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition"
                   >
@@ -510,7 +712,7 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
                 type="submit"
                 form="profile-form"
                 disabled={!isDirty || isPending}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-6 text-sm font-black text-white transition hover:bg-[#1D4ED8] disabled:bg-slate-300 disabled:cursor-not-allowed min-w-[140px]"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-6 text-sm font-bold text-white transition hover:bg-[#1D4ED8] disabled:bg-slate-300 disabled:cursor-not-allowed min-w-[140px]"
               >
                 {isPending ? (
                   "Saving..."

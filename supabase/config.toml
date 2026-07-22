@@ -33,3 +33,10 @@ enable_signup = true
 enable_signup = true
 double_confirm_changes = false
 enable_confirmations = true
+
+
+[mcp_servers.stitch]
+url = "https://stitch.googleapis.com/mcp"
+
+[mcp_servers.stitch.http_headers]
+"X-Goog-Api-Key" = "env(GCP_API_KEY)"

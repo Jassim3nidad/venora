@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { BusinessProfileRepository } from "@/src/features/business-profiles/data/business-profile.repository";
-import { BusinessProfileView } from "@/src/features/business-profiles/ui/BusinessProfileView";
+import { getPublicOwnerProfile } from "@/src/features/owners/application/queries";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -10,9 +9,8 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = await createClient();
-  const repo = new BusinessProfileRepository(supabase as any);
-  const profile = await repo.getPublishedProfileBySlug(slug);
+  const supabase = (await createClient()) as any;
+  const profile = await getPublicOwnerProfile(supabase, slug);
 
   if (!profile) {
     return {
@@ -22,22 +20,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${profile.displayName} - Venora Partner`,
-    description: profile.shortDescription || profile.tagline || `View venues and portfolio for ${profile.displayName} on Venora.`,
-    alternates: { canonical: `/partners/${profile.slug}` },
+    title: `${profile.name} - Venue Owner on Venora`,
+    description: profile.shortDescription || profile.tagline || `View venues and reviews for ${profile.name} on Venora.`,
+    alternates: { canonical: `/owners/${profile.slug}` },
   };
 }
 
 export default async function PartnerProfilePage({ params }: Props) {
   const { slug } = await params;
-  const supabase = await createClient();
-  const repo = new BusinessProfileRepository(supabase as any);
-  
-  const profile = await repo.getPublishedProfileBySlug(slug);
+  const supabase = (await createClient()) as any;
+  const profile = await getPublicOwnerProfile(supabase, slug);
 
   if (!profile) {
     notFound();
   }
 
-  return <BusinessProfileView profile={profile} />;
+  redirect(`/owners/${profile.slug}`);
 }

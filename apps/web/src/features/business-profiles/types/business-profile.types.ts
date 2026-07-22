@@ -16,6 +16,11 @@ export type BusinessProfilePublicationRow = Database["public"]["Tables"]["busine
 
 export type BusinessProfileDraft = BusinessProfileRow & {
   venues?: BusinessProfileVenueRow[];
+  published_venues?: Array<{
+    id: string;
+    name: string;
+    slug: string | null;
+  }>;
   portfolio?: BusinessPortfolioItemRow[];
   team?: BusinessTeamMemberRow[];
   social_links?: BusinessSocialLinkRow[];

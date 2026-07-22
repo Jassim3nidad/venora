@@ -161,8 +161,10 @@ function initials(name: string) {
 
 function VenueOwnerTrustCard({
   ownerProfile,
+  ownerProfileHref,
 }: {
   ownerProfile: PublicOwnerProfile;
+  ownerProfileHref: string;
 }) {
   const labels = getOwnerTrustCardLabels({
     isVerified: ownerProfile.isVerified,
@@ -214,7 +216,7 @@ function VenueOwnerTrustCard({
       </div>
 
       <Link
-        href={`/owners/${ownerProfile.slug}`}
+        href={ownerProfileHref}
         className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-[#BFDBFE] bg-[#EFF6FF] px-4 text-sm font-bold text-[#1D4ED8] transition hover:bg-[#DBEAFE]"
       >
         View owner profile
@@ -404,6 +406,9 @@ export default async function BookingDetailPage({ params }: Props) {
   const ownerProfile = typedBooking.venues?.slug
     ? await getPublicOwnerProfileByVenue(supabase, typedBooking.venues.slug)
     : null;
+  const ownerProfileHref = ownerProfile
+    ? `/owners/${ownerProfile.slug}?from=booking&bookingId=${typedBooking.id}`
+    : null;
   const galleryImages = pickGalleryImages(
     typedBooking.venues?.venue_images ?? [],
   );
@@ -482,7 +487,7 @@ export default async function BookingDetailPage({ params }: Props) {
           <div className="flex flex-col gap-3 sm:flex-row md:justify-end">
             {ownerProfile ? (
               <Link
-                href={`/owners/${ownerProfile.slug}`}
+                href={ownerProfileHref ?? `/owners/${ownerProfile.slug}`}
                 className="flex h-11 items-center gap-2 rounded-2xl border border-[#E5E7EB] px-4 text-sm font-bold text-[#111827] hover:border-[#BFDBFE] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -873,7 +878,10 @@ export default async function BookingDetailPage({ params }: Props) {
           </div>
 
           {ownerProfile ? (
-            <VenueOwnerTrustCard ownerProfile={ownerProfile} />
+            <VenueOwnerTrustCard
+              ownerProfile={ownerProfile}
+              ownerProfileHref={ownerProfileHref ?? `/owners/${ownerProfile.slug}`}
+            />
           ) : null}
 
           {/* Pricing Summary */}
