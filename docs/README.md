@@ -1,8 +1,9 @@
 # Venora Documentation
 
 This index separates current, code-backed guidance from historical planning.
-Start with [Getting started](getting-started.md), then use the focused guide for
-the system you are changing.
+Start with the repository [Technical System Guide (README)](../README.md) or
+[Getting started](getting-started.md), then use the focused guide for the system
+you are changing.
 
 ## Engineering
 

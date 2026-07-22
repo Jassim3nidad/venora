@@ -1,9 +1,10 @@
 # Database
 
 Venora uses Supabase PostgreSQL in the `public` schema plus Supabase-managed
-`auth` and `storage` schemas. At this baseline, 71 SQL files build the schema;
-the API inventory documents 94 callable database functions. Migration history,
-not generated TypeScript, is authoritative.
+`auth` and `storage` schemas. Ordered SQL files under `supabase/migrations/`
+build the schema (file count changes as history grows; treat the directory as
+source of truth). The API inventory documents callable database functions.
+Migration history, not generated TypeScript, is authoritative.
 
 ## Main domains
 
