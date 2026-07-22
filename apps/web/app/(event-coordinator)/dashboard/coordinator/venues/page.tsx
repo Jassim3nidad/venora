@@ -12,6 +12,7 @@ import {
 import {
   formatPeso,
   getOwnerDashboardContext,
+  getOwnerVenueIds,
 } from "@/lib/dashboard/org-dashboard-data";
 
 export const metadata: Metadata = { title: "Venues - Coordinator Dashboard" };
@@ -41,7 +42,9 @@ type VenueDisplayRow = {
 };
 
 export default async function CoordinatorVenuesPage() {
-  const { supabase, orgIds, isAdmin } = await getOwnerDashboardContext();
+  const context = await getOwnerDashboardContext();
+  const { supabase, isAdmin } = context;
+  const venueIds = await getOwnerVenueIds(context);
 
   let venuesQuery = supabase
     .from("venues")
@@ -49,10 +52,10 @@ export default async function CoordinatorVenuesPage() {
       "id, name, status, city, province, capacity_min, capacity_max, base_price, avg_rating, review_count",
     )
     .order("name", { ascending: true });
-  if (!isAdmin) venuesQuery = venuesQuery.in("organization_id", orgIds);
+  if (!isAdmin) venuesQuery = venuesQuery.in("id", venueIds);
 
   const { data: venues } =
-    isAdmin || orgIds.length > 0 ? await venuesQuery : { data: [] };
+    isAdmin || venueIds.length > 0 ? await venuesQuery : { data: [] };
 
   const rows: VenueDisplayRow[] = ((venues ?? []) as VenueRow[]).map(
     (venue) => ({

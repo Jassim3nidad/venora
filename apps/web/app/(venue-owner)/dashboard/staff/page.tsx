@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import {
+  DashboardPage,
   DashboardSubPage,
   DashButton,
   EmptyState,
@@ -30,8 +31,21 @@ type InvitationRow = {
   organization_id: string;
   email: string;
   status: string;
+  venue_ids: string[] | null;
   expires_at: string;
   created_at: string;
+};
+
+type VenueRow = {
+  id: string;
+  organization_id: string;
+  name: string;
+};
+
+type AssignmentRow = {
+  organization_id: string;
+  user_id: string;
+  venue_id: string;
 };
 
 export default async function StaffPage() {
@@ -75,7 +89,12 @@ export default async function StaffPage() {
     );
   }
 
-  const [{ data: members }, { data: invitations }] = await Promise.all([
+  const [
+    { data: members },
+    { data: invitations },
+    { data: venues },
+    { data: assignments },
+  ] = await Promise.all([
     supabase
       .from("organization_members")
       .select("organization_id, user_id, role, invited_at, status")
@@ -83,14 +102,28 @@ export default async function StaffPage() {
       .order("invited_at", { ascending: false }),
     supabase
       .from("organization_member_invitations")
-      .select("id, organization_id, email, status, expires_at, created_at")
+      .select("id, organization_id, email, status, venue_ids, expires_at, created_at")
       .in("organization_id", managedOrgIds)
       .order("created_at", { ascending: false }),
+    supabase
+      .from("venues")
+      .select("id, organization_id, name")
+      .in("organization_id", managedOrgIds)
+      .order("name", { ascending: true }),
+    supabase
+      .from("venue_coordinator_assignments")
+      .select("organization_id, user_id, venue_id")
+      .in("organization_id", managedOrgIds),
   ]);
 
   const memberRows = (members ?? []) as MemberRow[];
+  const coordinatorRows = memberRows.filter(
+    (member) => member.role === "coordinator",
+  );
+  const venueRows = (venues ?? []) as VenueRow[];
+  const assignmentRows = (assignments ?? []) as AssignmentRow[];
   const memberUserIds = [
-    ...new Set(memberRows.map((member) => member.user_id)),
+    ...new Set(coordinatorRows.map((member) => member.user_id)),
   ];
 
   const { data: profiles } =
@@ -113,8 +146,20 @@ export default async function StaffPage() {
       organization.name,
     ]),
   );
+  const venueById = new Map<string, VenueRow>(
+    venueRows.map((venue) => [venue.id, venue]),
+  );
+  const assignmentByMember = new Map<string, string[]>();
 
-  const staffRows: StaffDisplayRow[] = memberRows.map((member) => ({
+  for (const assignment of assignmentRows) {
+    const key = `${assignment.organization_id}-${assignment.user_id}`;
+    assignmentByMember.set(key, [
+      ...(assignmentByMember.get(key) ?? []),
+      assignment.venue_id,
+    ]);
+  }
+
+  const staffRows: StaffDisplayRow[] = coordinatorRows.map((member) => ({
     id: `${member.organization_id}-${member.user_id}`,
     organizationId: member.organization_id,
     userId: member.user_id,
@@ -122,6 +167,16 @@ export default async function StaffPage() {
     organization: organizationById.get(member.organization_id) ?? "Organization",
     role: member.role,
     status: member.status ?? "active",
+    assignedVenueIds:
+      assignmentByMember.get(`${member.organization_id}-${member.user_id}`) ??
+      [],
+    assignedVenues: (
+      assignmentByMember.get(`${member.organization_id}-${member.user_id}`) ??
+      []
+    )
+      .map((venueId) => venueById.get(venueId)?.name)
+      .filter(Boolean)
+      .join(", "),
     joined: formatDate(member.invited_at),
   }));
 
@@ -133,20 +188,39 @@ export default async function StaffPage() {
     organization:
       organizationById.get(invitation.organization_id) ?? "Organization",
     status: invitation.status,
+    assignedVenues: (invitation.venue_ids ?? [])
+      .map((venueId) => venueById.get(venueId)?.name)
+      .filter(Boolean)
+      .join(", "),
     expiresAt: formatDate(invitation.expires_at),
     createdAt: formatDate(invitation.created_at),
   }));
 
   return (
-    <DashboardSubPage
-      title="Staff Management"
-      description="Invite coordinators, review pending invitations, and control dashboard access."
-    >
+    <DashboardPage className="space-y-5">
+      <div className="rounded-2xl border border-[#e5e7eb] bg-white p-5 shadow-sm shadow-slate-200/60">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="font-display text-2xl font-bold tracking-tight text-[#0f172a]">
+              Staff Management
+            </h1>
+            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-[#64748b]">
+              Invite coordinators, review pending invitations, and control
+              dashboard access.
+            </p>
+          </div>
+          <p className="text-sm font-semibold text-[#64748b]">
+            {organizationOptions.length} organization
+            {organizationOptions.length === 1 ? "" : "s"}
+          </p>
+        </div>
+      </div>
       <StaffManagementClient
         organizations={organizationOptions}
+        venues={venueRows}
         staffRows={staffRows}
         invitationRows={invitationRows}
       />
-    </DashboardSubPage>
+    </DashboardPage>
   );
 }

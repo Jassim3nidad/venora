@@ -76,9 +76,7 @@ export default async function VenueOwnerDashboardPage() {
   const monthlyRevenue = (bookingsRaw ?? [])
     .filter(
       (b: { status: string; total_amount: number | null }) =>
-        b.status === "approved" ||
-        b.status === "confirmed" ||
-        b.status === "completed",
+        b.status === "confirmed" || b.status === "completed",
     )
     .reduce(
       (sum: number, b: { total_amount: number | null }) =>

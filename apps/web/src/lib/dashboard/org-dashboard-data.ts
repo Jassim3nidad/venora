@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { getCurrentAuthUser } from "@/src/lib/supabase/current-user";
+import { resolveScopedVenueIds } from "./venue-scope";
 
 /**
  * Shared across every dashboard route group that operates on
@@ -60,7 +61,7 @@ export const getOwnerDashboardContext = cache(
 );
 
 export async function getOwnerVenueIds(context: OwnerDashboardContext) {
-  const { supabase, orgIds, isAdmin } = context;
+  const { supabase, user, orgIds, roles, isAdmin } = context;
 
   if (!isAdmin && orgIds.length === 0) return [];
 
@@ -68,7 +69,42 @@ export async function getOwnerVenueIds(context: OwnerDashboardContext) {
   if (!isAdmin) query = query.in("organization_id", orgIds);
 
   const { data } = await query;
-  return (data ?? []).map((venue: { id: string }) => venue.id);
+  const organizationVenueIds = (data ?? []).map(
+    (venue: { id: string }) => venue.id,
+  );
+
+  if (isAdmin || roles.includes("venue_owner")) {
+    return resolveScopedVenueIds({
+      isAdmin,
+      roles,
+      organizationVenueIds,
+      assignedVenueIds: organizationVenueIds,
+    });
+  }
+
+  const { data: assignments } =
+    orgIds.length > 0
+      ? await supabase
+          .from("venue_coordinator_assignments")
+          .select("venue_id")
+          .eq("user_id", user.id)
+          .in("organization_id", orgIds)
+      : { data: [] };
+
+  const assignedVenueIds = [
+    ...new Set(
+      ((assignments ?? []) as Array<{ venue_id: string }>).map(
+        (assignment) => assignment.venue_id,
+      ),
+    ),
+  ];
+
+  return resolveScopedVenueIds({
+    isAdmin,
+    roles,
+    organizationVenueIds,
+    assignedVenueIds,
+  });
 }
 
 export async function getOwnerVenueById(
@@ -76,12 +112,13 @@ export async function getOwnerVenueById(
   id: string,
   select = "*",
 ) {
-  const { supabase, orgIds, isAdmin } = context;
+  const { supabase, isAdmin } = context;
 
-  if (!isAdmin && orgIds.length === 0) return null;
+  const scopedVenueIds = await getOwnerVenueIds(context);
+  if (!isAdmin && scopedVenueIds.length === 0) return null;
 
   let query = supabase.from("venues").select(select).eq("id", id);
-  if (!isAdmin) query = query.in("organization_id", orgIds);
+  if (!isAdmin) query = query.in("id", scopedVenueIds);
 
   const { data } = await query.maybeSingle();
   return data ?? null;

@@ -8,7 +8,10 @@ import {
   MessageSquareText,
   Users,
 } from "lucide-react";
-import { createClient } from "@/src/lib/supabase/server";
+import {
+  getOwnerDashboardContext,
+  getOwnerVenueIds,
+} from "@/src/lib/dashboard/org-dashboard-data";
 import {
   DashboardSubPage,
   StatusBadge,
@@ -103,11 +106,12 @@ function formatCurrency(value?: number | null) {
 
 export default async function CoordinatorEventDetailPage({ params }: Props) {
   const { id } = await params;
-  const supabase = (await createClient()) as any;
+  const context = await getOwnerDashboardContext();
+  const { supabase, user, isAdmin } = context;
   const {
-    data: { user },
+    data: { user: authUser },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!authUser) redirect("/login");
 
   const { data: booking } = await supabase
     .from("bookings")
@@ -148,32 +152,13 @@ export default async function CoordinatorEventDetailPage({ params }: Props) {
   if (!booking) notFound();
   const typedBooking = booking as BookingRow;
 
-  const organizationId = typedBooking.venues?.organization_id;
-  if (!organizationId) redirect("/unauthorized");
-
-  const [{ data: roles }, { data: membership }, { data: organization }] =
-    await Promise.all([
-      supabase.from("user_roles").select("role").eq("user_id", user.id),
-      supabase
-        .from("organization_members")
-        .select("organization_id")
-        .eq("user_id", user.id)
-        .eq("organization_id", organizationId)
-        .eq("status", "active")
-        .maybeSingle(),
-      supabase
-        .from("organizations")
-        .select("id")
-        .eq("id", organizationId)
-        .eq("owner_id", user.id)
-        .maybeSingle(),
-    ]);
-
-  const isAdmin = (roles ?? []).some(
-    (row: { role: string }) => row.role === "admin",
-  );
-
-  if (!isAdmin && !membership && !organization) redirect("/unauthorized");
+  const scopedVenueIds = await getOwnerVenueIds(context);
+  if (
+    !isAdmin &&
+    (!typedBooking.venues?.id || !scopedVenueIds.includes(typedBooking.venues.id))
+  ) {
+    redirect("/unauthorized");
+  }
 
   const suggestedTotal =
     typedBooking.total_amount ??

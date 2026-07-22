@@ -19,6 +19,7 @@ function formatDate(value?: string | null) {
 export default async function CoordinatorDashboardPage() {
   const context = await getOwnerDashboardContext();
   const { supabase, user, orgIds, isAdmin } = context;
+  const venueIds = await getOwnerVenueIds(context);
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -36,11 +37,10 @@ export default async function CoordinatorDashboardPage() {
       : { data: [] };
 
   let venuesQuery = supabase.from("venues").select("id, name, status");
-  if (!isAdmin) venuesQuery = venuesQuery.in("organization_id", orgIds);
+  if (!isAdmin) venuesQuery = venuesQuery.in("id", venueIds);
   const { data: venues } =
-    isAdmin || orgIds.length > 0 ? await venuesQuery : { data: [] };
+    isAdmin || venueIds.length > 0 ? await venuesQuery : { data: [] };
 
-  const venueIds = await getOwnerVenueIds(context);
   const { data: bookingsRaw } =
     venueIds.length > 0
       ? await supabase

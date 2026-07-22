@@ -9,6 +9,10 @@ import { createClient } from "@/src/lib/supabase/server";
 import { createAdminClient } from "@/src/lib/supabase/admin";
 import { absoluteUrl } from "@/src/lib/site-url";
 import {
+  resolveCoordinatorEmailFlow,
+  type CoordinatorEmailFlow,
+} from "@/src/features/staff/invitation-email-flow";
+import {
   ForbiddenError,
   UnauthorizedError,
   ValidationError,
@@ -17,6 +21,7 @@ import {
 const inviteCoordinatorSchema = z.object({
   organizationId: z.string().uuid(),
   email: z.string().email().transform((value) => value.trim().toLowerCase()),
+  venueIds: z.array(z.string().uuid()).min(1, "Choose at least one venue."),
 });
 
 const updateStaffStatusSchema = z.object({
@@ -27,6 +32,12 @@ const updateStaffStatusSchema = z.object({
 
 const revokeInvitationSchema = z.object({
   invitationId: z.string().uuid(),
+});
+
+const updateStaffVenueAssignmentsSchema = z.object({
+  organizationId: z.string().uuid(),
+  userId: z.string().uuid(),
+  venueIds: z.array(z.string().uuid()).min(1, "Choose at least one venue."),
 });
 
 async function requireOrganizationOwner(
@@ -60,6 +71,26 @@ async function requireOrganizationOwner(
   }
 
   return user;
+}
+
+async function assertVenuesBelongToOrganization(
+  supabase: any,
+  organizationId: string,
+  venueIds: string[],
+) {
+  const uniqueVenueIds = [...new Set(venueIds)];
+
+  const { data: venues, error } = await supabase
+    .from("venues")
+    .select("id")
+    .eq("organization_id", organizationId)
+    .in("id", uniqueVenueIds);
+
+  if (error || (venues ?? []).length !== uniqueVenueIds.length) {
+    throw new ValidationError("Choose venues owned by this organization.");
+  }
+
+  return uniqueVenueIds;
 }
 
 function hashToken(token: string) {
@@ -96,13 +127,13 @@ async function findAuthUserByEmail(admin: any, email: string) {
 async function sendInvitationEmail({
   email,
   acceptUrl,
-  existingUser,
+  flow,
 }: {
   email: string;
   acceptUrl: string;
-  existingUser: boolean;
-}) {
-  if (existingUser) {
+  flow: CoordinatorEmailFlow;
+}): Promise<CoordinatorEmailFlow> {
+  const sendMagicLink = async () => {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -118,7 +149,7 @@ async function sendInvitationEmail({
       email,
       options: {
         emailRedirectTo: acceptUrl,
-        shouldCreateUser: false,
+        shouldCreateUser: true,
       },
     });
 
@@ -126,7 +157,11 @@ async function sendInvitationEmail({
       throw new ValidationError("Unable to send the coordinator email.");
     }
 
-    return;
+    return "magic_link" as const;
+  };
+
+  if (flow === "magic_link") {
+    return sendMagicLink();
   }
 
   const admin = createAdminClient();
@@ -135,8 +170,10 @@ async function sendInvitationEmail({
   });
 
   if (error) {
-    throw new ValidationError("Unable to send the coordinator invitation.");
+    return sendMagicLink();
   }
+
+  return "invite";
 }
 
 function revalidateStaffViews() {
@@ -157,8 +194,19 @@ export async function inviteCoordinatorAction(rawInput: unknown) {
         supabase,
         input.organizationId,
       );
-      const admin = createAdminClient() as any;
-      const existingUser = await findAuthUserByEmail(admin, input.email);
+      const venueIds = await assertVenuesBelongToOrganization(
+        supabase,
+        input.organizationId,
+        input.venueIds,
+      );
+      let existingUser: boolean | null = null;
+      try {
+        const admin = createAdminClient() as any;
+        existingUser = Boolean(await findAuthUserByEmail(admin, input.email));
+      } catch {
+        existingUser = null;
+      }
+      const requestedFlow = resolveCoordinatorEmailFlow(existingUser);
       const token = randomBytes(32).toString("base64url");
       const tokenHash = hashToken(token);
       const acceptPath = `/staff/accept?token=${encodeURIComponent(token)}`;
@@ -166,7 +214,7 @@ export async function inviteCoordinatorAction(rawInput: unknown) {
         `/auth/session?next=${encodeURIComponent(acceptPath)}`,
       );
 
-      const { data: existingInvitation } = await admin
+      const { data: existingInvitation } = await supabase
         .from("organization_member_invitations")
         .select("id")
         .eq("organization_id", input.organizationId)
@@ -180,6 +228,7 @@ export async function inviteCoordinatorAction(rawInput: unknown) {
         token_hash: tokenHash,
         role: "coordinator",
         status: "pending",
+        venue_ids: venueIds,
         invited_by: owner.id,
         expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         accepted_by: null,
@@ -187,24 +236,27 @@ export async function inviteCoordinatorAction(rawInput: unknown) {
       };
 
       const writeResult = existingInvitation
-        ? await admin
+        ? await supabase
             .from("organization_member_invitations")
             .update(payload)
             .eq("id", existingInvitation.id)
-        : await admin.from("organization_member_invitations").insert(payload);
+        : await supabase
+            .from("organization_member_invitations")
+            .insert(payload);
 
       if (writeResult.error) {
         throw new ValidationError("Unable to create the staff invitation.");
       }
 
+      let deliveredFlow: CoordinatorEmailFlow;
       try {
-        await sendInvitationEmail({
+        deliveredFlow = await sendInvitationEmail({
           email: input.email,
           acceptUrl,
-          existingUser: !!existingUser,
+          flow: requestedFlow,
         });
       } catch (error) {
-        await admin
+        await supabase
           .from("organization_member_invitations")
           .update({ status: "revoked" })
           .eq("token_hash", tokenHash);
@@ -214,7 +266,7 @@ export async function inviteCoordinatorAction(rawInput: unknown) {
       revalidateStaffViews();
       return {
         email: input.email,
-        flow: existingUser ? "magic_link" : "invite",
+        flow: deliveredFlow,
       };
     },
     rawInput,
@@ -247,6 +299,66 @@ export async function updateStaffStatusAction(rawInput: unknown) {
 
       revalidateStaffViews();
       return { userId: input.userId, status: input.status };
+    },
+    rawInput,
+  );
+}
+
+export async function updateStaffVenueAssignmentsAction(rawInput: unknown) {
+  return createServerAction(
+    updateStaffVenueAssignmentsSchema,
+    async (input) => {
+      const supabase = (await createClient()) as any;
+      const owner = await requireOrganizationOwner(
+        supabase,
+        input.organizationId,
+      );
+      const venueIds = await assertVenuesBelongToOrganization(
+        supabase,
+        input.organizationId,
+        input.venueIds,
+      );
+
+      const { data: member } = await supabase
+        .from("organization_members")
+        .select("user_id")
+        .eq("organization_id", input.organizationId)
+        .eq("user_id", input.userId)
+        .eq("role", "coordinator")
+        .eq("status", "active")
+        .maybeSingle();
+
+      if (!member) {
+        throw new ValidationError("Only active coordinators can be assigned.");
+      }
+
+      const deleteResult = await supabase
+        .from("venue_coordinator_assignments")
+        .delete()
+        .eq("organization_id", input.organizationId)
+        .eq("user_id", input.userId);
+
+      if (deleteResult.error) {
+        throw new ValidationError("Unable to update venue assignments.");
+      }
+
+      const insertResult = await supabase
+        .from("venue_coordinator_assignments")
+        .insert(
+          venueIds.map((venueId) => ({
+            organization_id: input.organizationId,
+            venue_id: venueId,
+            user_id: input.userId,
+            assigned_by: owner.id,
+          })),
+        );
+
+      if (insertResult.error) {
+        throw new ValidationError("Unable to save venue assignments.");
+      }
+
+      revalidateStaffViews();
+      return { userId: input.userId, venueIds };
     },
     rawInput,
   );
