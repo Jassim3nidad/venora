@@ -582,7 +582,7 @@ export default function VenueDetails({
 
             {ownerProfile ? (
               <Link
-                href={`/partners/${ownerProfile.slug}`}
+                href={`/owners/${ownerProfile.slug}?from=venue&venueSlug=${venue.slug}`}
                 className="inline-flex h-11 items-center justify-center rounded-xl border border-[#DCE2F3] bg-[#F0F3FF] px-4 text-sm font-bold text-[#0052CC] transition hover:bg-[#DAE2FF]"
               >
                 View owner profile

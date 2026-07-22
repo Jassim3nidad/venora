@@ -36,8 +36,8 @@ describe("summarizeServiceAreas", () => {
 describe("getOwnerReviewLabels", () => {
   it("uses meaningful copy when the owner has no public reviews", () => {
     expect(getOwnerReviewLabels(0, 0)).toEqual({
-      rating: "Not rated yet",
-      reviews: "No reviews yet",
+      rating: "New on Venora",
+      reviews: "No customer reviews yet",
     });
   });
 

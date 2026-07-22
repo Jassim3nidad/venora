@@ -26,7 +26,21 @@ export class BusinessProfileRepository {
       if (error.code === "PGRST116") return null;
       throw error;
     }
-    return profile as unknown as BusinessProfileDraft;
+
+    const { data: ownedVenues, error: venuesError } = await (this.supabase as any)
+      .from("venues")
+      .select("id, name, slug")
+      .eq("organization_id", organizationId)
+      .eq("status", "published")
+      .order("is_featured", { ascending: false })
+      .order("created_at", { ascending: false });
+
+    if (venuesError) throw venuesError;
+
+    return {
+      ...profile,
+      published_venues: ownedVenues ?? [],
+    } as unknown as BusinessProfileDraft;
   }
 
   async getPublishedProfileBySlug(slug: string): Promise<BusinessProfilePublicView | null> {

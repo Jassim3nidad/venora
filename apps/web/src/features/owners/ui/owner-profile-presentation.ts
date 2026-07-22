@@ -31,8 +31,8 @@ export function summarizeServiceAreas(
 export function getOwnerReviewLabels(reviewCount: number, avgRating: number) {
   if (reviewCount <= 0) {
     return {
-      rating: "Not rated yet",
-      reviews: "No reviews yet",
+      rating: "New on Venora",
+      reviews: "No customer reviews yet",
     };
   }
 
