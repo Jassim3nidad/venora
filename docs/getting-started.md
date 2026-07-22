@@ -3,10 +3,14 @@
 ## Supported setup
 
 Development is supported on current Windows, macOS, and Linux versions that can
-run Node.js 20+, pnpm 9, Git, and—when using local Supabase—Docker. The repository
-pins pnpm 9.15.0. A hosted Supabase project can serve the app without Docker,
-but local resets, migration rehearsal, and local type generation require the
-Supabase CLI and Docker.
+run Node.js 20+, pnpm 9+, Git, and—when using local Supabase—Docker. The
+repository pins pnpm via `packageManager` in the root `package.json` (currently
+`pnpm@11.13.1`; use Corepack to activate that exact version). A hosted Supabase
+project can serve the app without Docker, but local resets, migration rehearsal,
+and local type generation require the Supabase CLI and Docker.
+
+For the full Technical System Guide (architecture, prerequisites checklist,
+env matrix, and troubleshooting), see the repository [README](../README.md).
 
 ## Setup sequence
 
@@ -20,8 +24,10 @@ Supabase CLI and Docker.
 6. Configure optional integrations, then start the app.
 
 ```bash
-git clone <repository-url> venora
+git clone https://github.com/Jassim3nidad/venora.git venora
 cd venora
+corepack enable
+corepack prepare pnpm@11.13.1 --activate
 pnpm install --frozen-lockfile
 cp .env.example apps/web/.env.local
 pnpm dev
@@ -30,19 +36,24 @@ pnpm dev
 PowerShell equivalent for the copy step:
 
 ```powershell
-Copy-Item .env.example apps/web/.env.local
+Copy-Item .env.example apps/web\.env.local
 ```
+
+Next.js loads environment variables from **`apps/web/.env.local`** (not a
+repo-root `.env`). Set at least `NEXT_PUBLIC_SUPABASE_URL` and
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` before starting the app.
 
 Expected: pnpm installs from `pnpm-lock.yaml`, then the web app becomes available
 at `http://localhost:3000`. Common failures are an unsupported Node version,
-Corepack/pnpm not installed, a lockfile mismatch, occupied port, or missing
-Supabase public variables.
+Corepack/pnpm not installed, a lockfile mismatch, occupied port, env file in
+the wrong path, or missing Supabase public variables.
 
 ## Supabase and database
 
-The repository contains `supabase/config.toml`, 71 SQL migration files, and a
-local seed with four non-password fixture identities and 11 venues. For a local
-stack, run from the repository root:
+The repository contains `supabase/config.toml`, ordered SQL migrations under
+`supabase/migrations/` (count evolves with history; list the directory for the
+current set), and a local seed with non-password fixture identities and sample
+venues. For a local stack, run from the repository root:
 
 ```bash
 supabase start
