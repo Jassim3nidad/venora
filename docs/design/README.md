@@ -14,6 +14,8 @@ from source only because no test credentials or private data were used.
 - [User flows](user-flows.md) — 32 required journeys with Mermaid flowcharts.
 - [Overall system user flow](overall-system-user-flow.md) — end-to-end system map with real-life scenarios.
 - [Marketplace relationships & overall user flow](marketplace-relationships-user-flow.md) — customer / venue / supplier / coordinator relationships and whether clients hire ECs.
+- [Project Brief role checklist](project-brief-role-checklist.md) — Target Users capabilities vs current system (Satisfied / Partial / Missing).
+- [What to fix](what-to-fix.md) — prioritized rundown of open gaps (P0–P3) and suggested fix order.
 - [Wireframes](wireframes.md) — low-fidelity layouts for 25 screen families.
 - [Responsive behavior](responsive-behavior.md) — tested viewports and source-based risks.
 - [Accessibility requirements](accessibility-requirements.md) — implementation and QA criteria.
