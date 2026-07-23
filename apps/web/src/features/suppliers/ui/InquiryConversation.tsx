@@ -122,7 +122,7 @@ export function InquiryConversation({
     const msgDate = formatDateSeparator(msg.created_at);
     if (msgDate !== currentDate) {
       if (currentGroup.length > 0) {
-        let lastDateGroup = groupedMessages[groupedMessages.length - 1];
+        const lastDateGroup = groupedMessages[groupedMessages.length - 1];
         if (!lastDateGroup || lastDateGroup.date !== currentDate) {
           groupedMessages.push({ date: currentDate, items: [currentGroup] });
         } else {
@@ -145,7 +145,7 @@ export function InquiryConversation({
       if (isSameSender && timeDiff < 5 * 60 * 1000) {
         currentGroup.push(msg);
       } else {
-        let lastDateGroup = groupedMessages[groupedMessages.length - 1];
+        const lastDateGroup = groupedMessages[groupedMessages.length - 1];
         if (!lastDateGroup || lastDateGroup.date !== currentDate) {
           groupedMessages.push({ date: currentDate, items: [currentGroup] });
         } else {
@@ -157,7 +157,7 @@ export function InquiryConversation({
   });
 
   if (currentGroup.length > 0) {
-    let lastDateGroup = groupedMessages[groupedMessages.length - 1];
+    const lastDateGroup = groupedMessages[groupedMessages.length - 1];
     if (!lastDateGroup || lastDateGroup.date !== currentDate) {
       groupedMessages.push({ date: currentDate, items: [currentGroup] });
     } else {
