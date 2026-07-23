@@ -6,6 +6,8 @@ export type MarketplaceNavLink = {
   icon: LucideIcon;
 };
 
+export type AuthPromptKind = "bookings" | "favorites" | "host" | "generic";
+
 export const MARKETPLACE_NAV_LINKS: MarketplaceNavLink[] = [
   { label: "Venues", href: "/venues", icon: Search },
   { label: "Suppliers", href: "/suppliers", icon: Store },
@@ -25,18 +27,28 @@ export function isMarketplaceNavItemActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+export function authPromptKindForHref(href: string): AuthPromptKind | null {
+  if (href === "/bookings" || href.startsWith("/bookings/")) return "bookings";
+  if (href === "/favorites" || href.startsWith("/favorites/")) {
+    return "favorites";
+  }
+  if (
+    href === "/account/become-partner" ||
+    href.startsWith("/account/become-partner/")
+  ) {
+    return "host";
+  }
+  return null;
+}
+
+export function requiresAuthPrompt(href: string) {
+  return authPromptKindForHref(href) !== null;
+}
+
+/** Always return the destination href; gated routes open an auth prompt instead of /login. */
 export function resolveMarketplaceNavHref(
   href: string,
-  isAuthenticated: boolean,
+  _isAuthenticated: boolean,
 ) {
-  if (isAuthenticated || (href !== "/bookings" && href !== "/favorites")) {
-    return href;
-  }
-
-  const params = new URLSearchParams({
-    redirectTo: href,
-    prompt: href === "/bookings" ? "bookings" : "favorites",
-  });
-
-  return `/login?${params.toString()}`;
+  return href;
 }

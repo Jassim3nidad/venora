@@ -1400,7 +1400,9 @@ export default function VenuesClient({
 
       <aside
         className={[
-          "sticky top-0 hidden h-[100dvh] shrink-0 self-start overflow-hidden transition-all duration-300 lg:block",
+          // Full remaining viewport under marketplace chrome; inner list scrolls
+          // when many filter sections are expanded.
+          "sticky top-[8.5rem] hidden h-[calc(100dvh-8.5rem)] shrink-0 self-start overflow-hidden transition-all duration-300 lg:block",
           desktopFiltersOpen ? "w-[300px] opacity-100" : "w-0 opacity-0",
         ].join(" ")}
         aria-hidden={!desktopFiltersOpen}
