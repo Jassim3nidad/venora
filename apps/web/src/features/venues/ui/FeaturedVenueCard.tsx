@@ -3,11 +3,12 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, Image as ImageIcon, MapPin, Star, Users } from "lucide-react";
+import { Heart, Image as ImageIcon, MapPin, Scale, Star, Users } from "lucide-react";
 import { useAuthRequiredPrompt } from "@/components/layout/AuthRequiredPrompt";
 import { toggleFavoriteAction } from "../application/actions";
 import type { Venue } from "../utils/venue-mappers";
 import { isOptimizableImageSrc } from "@/src/lib/image-host";
+import { useVenueComparison } from "../hooks/useVenueComparison";
 
 interface FeaturedVenueCardProps {
   venue: Venue;
@@ -19,6 +20,8 @@ export default function FeaturedVenueCard({
   isAuthenticated,
 }: FeaturedVenueCardProps) {
   const { openAuthPrompt, authPrompt } = useAuthRequiredPrompt("/", "favorites");
+  const { addVenueId, removeVenueId, isInComparison } = useVenueComparison();
+  const isCompared = isInComparison(String(venue.id));
   const [isFavorited, setIsFavorited] = useState(
     Boolean(venue.isFavorited),
   );
@@ -134,24 +137,53 @@ export default function FeaturedVenueCard({
         </div>
       </Link>
 
-      <button
-        type="button"
-        onClick={handleFavoriteToggle}
-        disabled={isPending}
-        aria-pressed={isFavorited}
-        aria-label={
-          isFavorited
-            ? `Remove ${venue.name} from favorites`
-            : `Add ${venue.name} to favorites`
-        }
-        className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-500 shadow-sm backdrop-blur transition-all duration-150 hover:text-red-500 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 disabled:cursor-wait disabled:opacity-70"
-      >
-        <Heart
-          className={`h-4 w-4 transition ${
-            isFavorited ? "fill-red-500 text-red-500" : ""
+      <div className="absolute right-3 top-3 z-10 flex items-center gap-1.5">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (isCompared) {
+              removeVenueId(String(venue.id));
+            } else {
+              addVenueId(String(venue.id));
+            }
+          }}
+          aria-pressed={isCompared}
+          aria-label={
+            isCompared
+              ? `Remove ${venue.name} from comparison`
+              : `Add ${venue.name} to comparison`
+          }
+          className={`flex h-10 items-center gap-1.5 rounded-full px-3 text-xs font-semibold shadow-sm backdrop-blur transition-all duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 ${
+            isCompared
+              ? "bg-rose-600 text-white"
+              : "bg-white/90 text-slate-700 hover:bg-slate-100"
           }`}
-        />
-      </button>
+        >
+          <Scale className="h-3.5 w-3.5" />
+          <span>{isCompared ? "Comparing" : "Compare"}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={handleFavoriteToggle}
+          disabled={isPending}
+          aria-pressed={isFavorited}
+          aria-label={
+            isFavorited
+              ? `Remove ${venue.name} from favorites`
+              : `Add ${venue.name} to favorites`
+          }
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-slate-500 shadow-sm backdrop-blur transition-all duration-150 hover:text-red-500 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 disabled:cursor-wait disabled:opacity-70"
+        >
+          <Heart
+            className={`h-4 w-4 transition ${
+              isFavorited ? "fill-red-500 text-red-500" : ""
+            }`}
+          />
+        </button>
+      </div>
 
       {favoriteError ? (
         <p

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { MarketplaceLayout } from "@/components/layout/MarketplaceLayout";
 import { getCurrentAuthUser } from "@/lib/supabase/current-user";
 import { getNavbarProfile } from "@/lib/get-navbar-profile";
+import { VenueComparisonBar } from "@/features/venues/ui/VenueComparisonBar";
 
 export default async function CustomerLayout({
   children,
@@ -14,6 +15,7 @@ export default async function CustomerLayout({
   return (
     <MarketplaceLayout user={user} profile={profile}>
       {children}
+      <VenueComparisonBar />
     </MarketplaceLayout>
   );
 }
