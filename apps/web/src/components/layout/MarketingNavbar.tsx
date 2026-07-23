@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type MouseEvent } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -17,10 +17,12 @@ import {
   UserRound,
   X,
 } from "lucide-react";
+import { AuthRequiredPrompt } from "@/components/layout/AuthRequiredPrompt";
 import ProfileMenu from "@/components/layout/ProfileMenu";
 import {
   isMarketplaceNavItemActive,
   isMarketplaceParentActive,
+  requiresAuthPrompt,
   resolveMarketplaceNavHref,
 } from "@/components/layout/marketplace-navigation";
 import { NotificationBell } from "@/features/notifications/ui/NotificationBell";
@@ -51,21 +53,17 @@ const marketingNavLinks: MobileLink[] = [
 const marketplaceMobileLinks: MobileLink[] = [
   { label: "Venues", href: "/venues", icon: Home },
   { label: "Suppliers", href: "/suppliers", icon: Store },
-  { label: "Bookings", href: "/bookings", icon: CalendarDays, authOnly: true },
-  { label: "Favorites", href: "/favorites", icon: Heart, authOnly: true },
+  { label: "Bookings", href: "/bookings", icon: CalendarDays },
+  { label: "Favorites", href: "/favorites", icon: Heart },
   { label: "Notifications", href: "/notifications", icon: Bell, authOnly: true },
 ];
 
-function getMarketingNavLinks(
-  user?: { email?: string | null } | null,
-): MobileLink[] {
+function getMarketingNavLinks(): MobileLink[] {
   return [
     ...marketingNavLinks,
     {
       label: "Host a Venue",
-      href: user
-        ? "/account/become-partner"
-        : "/login?redirectTo=/account/become-partner",
+      href: HOST_VENUE_PATH,
       icon: Store,
     },
   ];
@@ -82,7 +80,7 @@ export function getMarketingMobileLinks({
     return marketplaceMobileLinks.filter((item) => user || !item.authOnly);
   }
 
-  return getMarketingNavLinks(user);
+  return getMarketingNavLinks();
 }
 
 export function resolveMarketingMobileHref({
@@ -145,6 +143,8 @@ export default function MarketingNavbar({
 }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [authPromptOpen, setAuthPromptOpen] = useState(false);
+  const [authRedirectTo, setAuthRedirectTo] = useState(HOST_VENUE_PATH);
   const { user: currentUser } = useCurrentUser();
 
   const user = currentUser ? { email: currentUser.email } : null;
@@ -163,13 +163,25 @@ export default function MarketingNavbar({
   const isAuthenticated = Boolean(user);
 
   const closeMenu = () => setMenuOpen(false);
-  const navLinksForUser = getMarketingNavLinks(user);
+  const navLinksForUser = getMarketingNavLinks();
   const mobileLinks = getMarketingMobileLinks({ user, mobileContext });
   const mobilePanelPosition = embedded
     ? "top-[8.75rem] max-h-[calc(100dvh-9.25rem)]"
     : "top-24 max-h-[calc(100dvh-6.5rem)]";
 
+  const handleGatedNavClick = (
+    event: MouseEvent<HTMLAnchorElement>,
+    href: string,
+  ) => {
+    if (isAuthenticated || !requiresAuthPrompt(href)) return;
+    event.preventDefault();
+    setAuthRedirectTo(href);
+    setAuthPromptOpen(true);
+    closeMenu();
+  };
+
   return (
+    <>
     <header
       className={[
         "w-full bg-white/90 backdrop-blur-xl",
@@ -203,7 +215,8 @@ export default function MarketingNavbar({
                     : "text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
                 ].join(" ")}
                 href={href}
-              >
+                  onClick={(event) => handleGatedNavClick(event, href)}
+                >
                 {Icon ? <Icon className="h-4 w-4" /> : null}
                 {label}
               </Link>
@@ -322,7 +335,12 @@ export default function MarketingNavbar({
                         ? "bg-[#EFF6FF] text-[#2563EB]"
                         : "text-[#111827] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
                     ].join(" ")}
-                    onClick={closeMenu}
+                    onClick={(event) => {
+                      handleGatedNavClick(event, href);
+                      if (isAuthenticated || !requiresAuthPrompt(href)) {
+                        closeMenu();
+                      }
+                    }}
                   >
                     {Icon ? <Icon className="h-5 w-5" /> : null}
                     {label}
@@ -396,5 +414,12 @@ export default function MarketingNavbar({
         </>
       ) : null}
     </header>
+
+      <AuthRequiredPrompt
+        open={authPromptOpen}
+        onOpenChange={setAuthPromptOpen}
+        redirectTo={authRedirectTo}
+      />
+    </>
   );
 }
