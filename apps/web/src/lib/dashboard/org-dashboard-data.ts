@@ -1,6 +1,8 @@
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { getCurrentAuthUser } from "@/src/lib/supabase/current-user";
+import { ForbiddenError } from "@/src/lib/errors";
+import type { CoordinatorPermission } from "@/src/lib/rbac/coordinator-permissions";
 import { resolveScopedVenueIds } from "./venue-scope";
 
 /**
@@ -18,6 +20,7 @@ export type OwnerDashboardContext = {
   user: { id: string; email?: string | null };
   orgIds: string[];
   roles: string[];
+  permissions: string[];
   isAdmin: boolean;
 };
 
@@ -35,11 +38,16 @@ export const getOwnerDashboardContext = cache(
 
     const { data: members } = await supabase
       .from("organization_members")
-      .select("organization_id")
+      .select("organization_id, permissions")
       .eq("user_id", user.id)
       .eq("status", "active");
     const memberOrgs = (members ?? []).map(
       (m: { organization_id: string }) => m.organization_id,
+    );
+    const permissions = Array.from(
+      new Set(
+        (members ?? []).flatMap((m: { permissions: string[] | null }) => m.permissions ?? [])
+      )
     );
 
     const { data: owned } = await supabase
@@ -55,6 +63,7 @@ export const getOwnerDashboardContext = cache(
       user,
       orgIds,
       roles,
+      permissions,
       isAdmin: roles.includes("admin"),
     };
   },
@@ -131,4 +140,25 @@ export function formatPeso(amount: number | null | undefined) {
 
 export function formatDate(value: string) {
   return new Date(value).toLocaleDateString("en-PH", { dateStyle: "medium" });
+}
+
+export function hasCoordinatorPermission(
+  permission: CoordinatorPermission,
+  context: OwnerDashboardContext,
+): boolean {
+  if (context.isAdmin || context.roles.includes("venue_owner")) {
+    return true; // Admins and Venue Owners implicitly have all permissions
+  }
+  return context.permissions.includes(permission);
+}
+
+export function requireCoordinatorPermission(
+  permission: CoordinatorPermission,
+  context: OwnerDashboardContext,
+) {
+  if (!hasCoordinatorPermission(permission, context)) {
+    throw new ForbiddenError(
+      `You do not have the required permission (${permission}) to perform this action.`,
+    );
+  }
 }

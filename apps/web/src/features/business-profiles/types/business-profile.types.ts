@@ -1,4 +1,4 @@
-import { Database } from "@venora/database/types/generated";
+import type { Database } from "@venora/database/types/generated";
 
 export type BusinessProfileRow = Database["public"]["Tables"]["business_profiles"]["Row"];
 export type BusinessProfileInsert = Database["public"]["Tables"]["business_profiles"]["Insert"];

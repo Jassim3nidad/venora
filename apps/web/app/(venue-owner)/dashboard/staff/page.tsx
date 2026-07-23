@@ -24,6 +24,7 @@ type MemberRow = {
   role: string;
   invited_at: string;
   status?: StaffDisplayRow["status"] | null;
+  permissions?: string[];
 };
 
 type InvitationRow = {
@@ -32,6 +33,7 @@ type InvitationRow = {
   email: string;
   status: string;
   venue_ids: string[] | null;
+  permissions: string[] | null;
   expires_at: string;
   created_at: string;
 };
@@ -91,18 +93,18 @@ export default async function StaffPage() {
 
   const [
     { data: members },
-    { data: invitations },
+    { data: invitations, error: invitationsError },
     { data: venues },
     { data: assignments },
   ] = await Promise.all([
     supabase
       .from("organization_members")
-      .select("organization_id, user_id, role, invited_at, status")
+      .select("organization_id, user_id, role, invited_at, status, permissions")
       .in("organization_id", managedOrgIds)
       .order("invited_at", { ascending: false }),
     supabase
       .from("organization_member_invitations")
-      .select("id, organization_id, email, status, venue_ids, expires_at, created_at")
+      .select("id, organization_id, email, status, venue_ids, permissions, expires_at, created_at")
       .in("organization_id", managedOrgIds)
       .order("created_at", { ascending: false }),
     supabase
@@ -115,6 +117,7 @@ export default async function StaffPage() {
       .select("organization_id, user_id, venue_id")
       .in("organization_id", managedOrgIds),
   ]);
+
 
   const memberRows = (members ?? []) as MemberRow[];
   const coordinatorRows = memberRows.filter(
@@ -178,6 +181,7 @@ export default async function StaffPage() {
       .filter(Boolean)
       .join(", "),
     joined: formatDate(member.invited_at),
+    permissions: (member.permissions as any) ?? [],
   }));
 
   const invitationRows: InvitationDisplayRow[] = (
@@ -195,6 +199,7 @@ export default async function StaffPage() {
       .join(", "),
     expiresAt: formatDate(invitation.expires_at),
     createdAt: formatDate(invitation.created_at),
+    permissions: invitation.permissions ?? [],
   }));
 
   return (

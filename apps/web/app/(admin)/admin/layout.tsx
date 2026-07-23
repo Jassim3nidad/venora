@@ -35,7 +35,7 @@ export default async function AdminLayout({
   const navItems = (
     await Promise.all(
       NAV_BY_ROLE.admin.map(async (item) =>
-        !item.permission || (await hasPermission(item.permission))
+        !item.permission || (await hasPermission(item.permission as any))
           ? item
           : null,
       ),

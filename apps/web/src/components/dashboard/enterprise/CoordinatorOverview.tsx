@@ -33,9 +33,13 @@ export type CoordinatorOverviewProps = {
   coordinatorName: string;
   organizationName?: string | null;
   venueCount: number;
-  activeEventCount: number;
+  upcomingEventCount: number;
   pendingEventCount: number;
-  completedEventCount: number;
+  eventsTodayCount: number;
+  unreadMessageCount: number;
+  calendarConflictCount: number;
+  accreditedSupplierCount: number;
+  approvalRate: string;
   upcomingEvents: CoordinatorEventRow[];
   managedVenues: CoordinatorVenueRow[];
   pendingInvitations?: CoordinatorInvitationRow[];
@@ -43,9 +47,9 @@ export type CoordinatorOverviewProps = {
 
 const QUICK_LINKS = [
   {
-    label: "Manage Events",
-    href: "/dashboard/coordinator/events",
-    icon: "celebration",
+    label: "Manage Bookings",
+    href: "/dashboard/coordinator/bookings",
+    icon: "calendar_month",
   },
   {
     label: "Review Venues",
@@ -68,34 +72,58 @@ export function CoordinatorOverview({
   coordinatorName,
   organizationName,
   venueCount,
-  activeEventCount,
+  upcomingEventCount,
   pendingEventCount,
-  completedEventCount,
+  eventsTodayCount,
+  unreadMessageCount,
+  calendarConflictCount,
+  accreditedSupplierCount,
+  approvalRate,
   upcomingEvents,
   managedVenues,
   pendingInvitations = [],
 }: CoordinatorOverviewProps) {
   const kpis = [
     {
-      label: "Active Events",
-      value: String(activeEventCount),
-      icon: "celebration",
+      label: "Upcoming Bookings",
+      value: String(upcomingEventCount),
+      icon: "event",
       highlight: true,
     },
     {
-      label: "Pending Requests",
+      label: "Awaiting Action",
       value: String(pendingEventCount),
       icon: "pending_actions",
     },
     {
-      label: "Completed Events",
-      value: String(completedEventCount),
-      icon: "task_alt",
+      label: "Events Today",
+      value: String(eventsTodayCount),
+      icon: "today",
     },
     {
-      label: "Venues Managed",
+      label: "Assigned Venues",
       value: String(venueCount),
       icon: "location_city",
+    },
+    {
+      label: "Unread Messages",
+      value: String(unreadMessageCount),
+      icon: "forum",
+    },
+    {
+      label: "Calendar Conflicts",
+      value: String(calendarConflictCount),
+      icon: "event_busy",
+    },
+    {
+      label: "Accredited Suppliers",
+      value: String(accreditedSupplierCount),
+      icon: "storefront",
+    },
+    {
+      label: "Approval Rate",
+      value: approvalRate,
+      icon: "trending_up",
     },
   ];
 

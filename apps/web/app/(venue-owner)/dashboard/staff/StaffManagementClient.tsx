@@ -21,8 +21,14 @@ import {
   revokeInvitationAction,
   updateStaffVenueAssignmentsAction,
   updateStaffStatusAction,
+  updateStaffPermissionsAction,
 } from "./actions";
 import { ChevronDown } from "lucide-react";
+import {
+  COORDINATOR_PERMISSIONS,
+  DEFAULT_COORDINATOR_PERMISSIONS,
+  type CoordinatorPermission,
+} from "@/src/lib/rbac/coordinator-permissions";
 
 export type OrganizationOption = {
   id: string;
@@ -46,6 +52,7 @@ export type StaffDisplayRow = {
   assignedVenueIds: string[];
   assignedVenues: string;
   joined: string;
+  permissions?: CoordinatorPermission[];
 };
 
 export type InvitationDisplayRow = {
@@ -80,13 +87,18 @@ export function StaffManagementClient({
   );
   const [email, setEmail] = useState("");
   const [selectedVenueIds, setSelectedVenueIds] = useState<string[]>([]);
+  const [selectedPermissions, setSelectedPermissions] = useState<CoordinatorPermission[]>([...DEFAULT_COORDINATOR_PERMISSIONS]);
   const [assignmentDrafts, setAssignmentDrafts] = useState<
     Record<string, string[]>
+  >({});
+  const [permissionDrafts, setPermissionDrafts] = useState<
+    Record<string, CoordinatorPermission[]>
   >({});
   const [invitePending, startInviteTransition] = useTransition();
   const [statusPending, startStatusTransition] = useTransition();
   const [invitationPending, startInvitationTransition] = useTransition();
   const [assignmentPending, startAssignmentTransition] = useTransition();
+  const [permissionsPending, startPermissionsTransition] = useTransition();
 
   const selectedOrganization = useMemo(
     () =>
@@ -121,6 +133,11 @@ export function StaffManagementClient({
         staffRows.map((row) => [row.id, row.assignedVenueIds]),
       ),
     );
+    setPermissionDrafts(
+      Object.fromEntries(
+        staffRows.map((row) => [row.id, (row.permissions as CoordinatorPermission[]) ?? []]),
+      ),
+    );
   }, [staffRows]);
 
   const toggleInviteVenue = (venueId: string) => {
@@ -128,6 +145,14 @@ export function StaffManagementClient({
       current.includes(venueId)
         ? current.filter((id) => id !== venueId)
         : [...current, venueId],
+    );
+  };
+
+  const toggleInvitePermission = (permission: CoordinatorPermission) => {
+    setSelectedPermissions((current) =>
+      current.includes(permission)
+        ? current.filter((p) => p !== permission)
+        : [...current, permission],
     );
   };
 
@@ -139,6 +164,18 @@ export function StaffManagementClient({
         [row.id]: selected.includes(venueId)
           ? selected.filter((id) => id !== venueId)
           : [...selected, venueId],
+      };
+    });
+  };
+
+  const toggleStaffPermission = (row: StaffDisplayRow, permission: CoordinatorPermission) => {
+    setPermissionDrafts((current) => {
+      const selected = current[row.id] ?? row.permissions ?? [];
+      return {
+        ...current,
+        [row.id]: selected.includes(permission)
+          ? selected.filter((p) => p !== permission)
+          : [...selected, permission],
       };
     });
   };
@@ -161,6 +198,7 @@ export function StaffManagementClient({
         organizationId: selectedOrganizationId,
         email,
         venueIds: selectedVenueIds,
+        permissions: selectedPermissions,
       });
 
       if (result.error) {
@@ -169,6 +207,7 @@ export function StaffManagementClient({
       }
 
       setEmail("");
+      setSelectedPermissions([...DEFAULT_COORDINATOR_PERMISSIONS]);
       toast.success(
         result.data.flow === "magic_link"
           ? `Coordinator sign-in email sent to ${result.data.email}.`
@@ -198,6 +237,25 @@ export function StaffManagementClient({
       }
 
       toast.success(`Venue access updated for ${row.name}.`);
+    });
+  };
+
+  const savePermissions = (row: StaffDisplayRow) => {
+    const permissions = permissionDrafts[row.id] ?? row.permissions ?? [];
+
+    startPermissionsTransition(async () => {
+      const result = await updateStaffPermissionsAction({
+        organizationId: row.organizationId,
+        userId: row.userId,
+        permissions,
+      });
+
+      if (result.error) {
+        toast.error(result.error.message);
+        return;
+      }
+
+      toast.success(`Permissions updated for ${row.name}.`);
     });
   };
 
@@ -533,6 +591,31 @@ export function StaffManagementClient({
                 Add a venue before inviting a coordinator.
               </p>
             )}
+
+            <div className="mt-6 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm font-bold text-[#0f172a]">Permissions</p>
+              <p className="text-xs font-semibold text-[#64748b]">
+                {selectedPermissions.length} selected
+              </p>
+            </div>
+            <div className="mt-3 grid max-h-[260px] gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
+              {COORDINATOR_PERMISSIONS.map((permission) => (
+                <label
+                  key={permission}
+                  className="flex min-h-10 items-start gap-2 rounded-lg border border-[#dbe3ef] bg-white px-3 py-2 text-sm font-semibold text-[#0f172a]"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedPermissions.includes(permission)}
+                    onChange={() => toggleInvitePermission(permission)}
+                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#cbd5e1] text-[#2563eb]"
+                  />
+                  <span className="min-w-0 text-[13px] leading-snug">
+                    {permission.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                  </span>
+                </label>
+              ))}
+            </div>
           </div>
         </div>
       </Panel>
@@ -552,64 +635,25 @@ export function StaffManagementClient({
 
       <Panel className="rounded-2xl">
         <PanelHeader
-          title="Venue Access"
-          description="Choose the specific venues each active coordinator can manage."
+          title="Venue Access & Permissions"
+          description="Select a coordinator to modify the venues they manage and their permissions."
         />
-        {staffRows.length > 0 ? (
-          <div className="grid gap-4">
-            {staffRows.map((row) => {
-              const rowVenues = venues.filter(
-                (venue) => venue.organization_id === row.organizationId,
-              );
-              const selected = assignmentDrafts[row.id] ?? [];
-
-              return (
-                <div
-                  key={row.id}
-                  className="rounded-xl border border-[#e5e7eb] bg-white p-4"
-                >
-                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                    <div>
-                      <p className="font-bold text-[#111827]">{row.name}</p>
-                      <p className="text-xs font-semibold text-[#64748b]">
-                        {row.organization}
-                      </p>
-                    </div>
-                    <DashButton
-                      variant="secondary"
-                      disabled={assignmentPending || row.status !== "active"}
-                      onClick={() => saveVenueAssignments(row)}
-                    >
-                      Save venues
-                    </DashButton>
-                  </div>
-                  <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {rowVenues.map((venue) => (
-                      <label
-                        key={venue.id}
-                        className="flex min-h-10 items-start gap-2 rounded-lg border border-[#dbe3ef] bg-[#f8fafc] px-3 py-2 text-sm font-semibold text-[#0f172a]"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selected.includes(venue.id)}
-                          onChange={() => toggleStaffVenue(row, venue.id)}
-                          disabled={row.status !== "active"}
-                          className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#cbd5e1] text-[#2563eb]"
-                        />
-                        <span className="min-w-0 text-[13px] leading-snug">
-                          {venue.name}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+        {currentStaffRows.length > 0 ? (
+          <StaffAccessEditor 
+            staffRows={currentStaffRows}
+            venues={venues}
+            assignmentDrafts={assignmentDrafts}
+            permissionDrafts={permissionDrafts}
+            assignmentPending={assignmentPending}
+            permissionsPending={permissionsPending}
+            saveVenueAssignments={saveVenueAssignments}
+            savePermissions={savePermissions}
+            toggleStaffVenue={toggleStaffVenue}
+            toggleStaffPermission={toggleStaffPermission}
+          />
         ) : (
           <p className="rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-4 text-sm font-semibold text-[#64748b]">
-            Accepted coordinators will appear here after they accept an
-            invitation.
+            Accepted coordinators for this organization will appear here after they accept an invitation.
           </p>
         )}
       </Panel>
@@ -626,6 +670,148 @@ export function StaffManagementClient({
           emptyMessage="No pending coordinator invitations."
         />
       </Panel>
+    </div>
+  );
+}
+
+function StaffAccessEditor({
+  staffRows,
+  venues,
+  assignmentDrafts,
+  permissionDrafts,
+  assignmentPending,
+  permissionsPending,
+  saveVenueAssignments,
+  savePermissions,
+  toggleStaffVenue,
+  toggleStaffPermission
+}: {
+  staffRows: StaffDisplayRow[];
+  venues: VenueOption[];
+  assignmentDrafts: Record<string, string[]>;
+  permissionDrafts: Record<string, CoordinatorPermission[]>;
+  assignmentPending: boolean;
+  permissionsPending: boolean;
+  saveVenueAssignments: (row: StaffDisplayRow) => void;
+  savePermissions: (row: StaffDisplayRow) => void;
+  toggleStaffVenue: (row: StaffDisplayRow, venueId: string) => void;
+  toggleStaffPermission: (row: StaffDisplayRow, permission: CoordinatorPermission) => void;
+}) {
+  const [selectedStaffId, setSelectedStaffId] = useState<string>(staffRows[0]?.id ?? "");
+
+  // Update selection if the selected staff goes away
+  useEffect(() => {
+    const firstRow = staffRows[0];
+    if (firstRow && !staffRows.find(r => r.id === selectedStaffId)) {
+      setSelectedStaffId(firstRow.id);
+    }
+  }, [staffRows, selectedStaffId]);
+
+  const selectedRow = staffRows.find(r => r.id === selectedStaffId);
+
+  if (!selectedRow) return null;
+
+  const rowVenues = venues.filter(
+    (venue) => venue.organization_id === selectedRow.organizationId,
+  );
+  const selectedVenues = assignmentDrafts[selectedRow.id] ?? [];
+  const selectedPerms = permissionDrafts[selectedRow.id] ?? selectedRow.permissions ?? [];
+
+  return (
+    <div className="grid gap-4 mt-4">
+      <label className="flex flex-col gap-2 text-sm font-bold text-[#0f172a]">
+        Select Coordinator
+        <div className="relative max-w-sm">
+          <select
+            value={selectedStaffId}
+            onChange={(e) => setSelectedStaffId(e.target.value)}
+            className="appearance-none h-11 w-full rounded-xl border border-[#dbe3ef] bg-[#f8fafc] pl-3 pr-10 text-sm font-semibold text-[#0f172a] outline-none transition focus:border-[#2563eb] focus:ring-4 focus:ring-[#dbeafe]"
+          >
+            {staffRows.map((row) => (
+              <option key={row.id} value={row.id}>
+                {row.name}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#94a3b8]" />
+        </div>
+      </label>
+
+      <div className="rounded-xl border border-[#e5e7eb] bg-white p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <p className="font-bold text-[#111827]">{selectedRow.name}</p>
+            <p className="text-xs font-semibold text-[#64748b]">
+              {selectedRow.organization}
+            </p>
+          </div>
+          <DashButton
+            variant="secondary"
+            disabled={assignmentPending || selectedRow.status !== "active"}
+            onClick={() => saveVenueAssignments(selectedRow)}
+          >
+            Save venues
+          </DashButton>
+        </div>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {rowVenues.map((venue) => (
+            <label
+              key={venue.id}
+              className="flex min-h-10 items-start gap-2 rounded-lg border border-[#dbe3ef] bg-[#f8fafc] px-3 py-2 text-sm font-semibold text-[#0f172a]"
+            >
+              <input
+                type="checkbox"
+                checked={selectedVenues.includes(venue.id)}
+                onChange={() => toggleStaffVenue(selectedRow, venue.id)}
+                disabled={selectedRow.status !== "active"}
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#cbd5e1] text-[#2563eb]"
+              />
+              <span className="min-w-0 text-[13px] leading-snug">
+                {venue.name}
+              </span>
+            </label>
+          ))}
+        </div>
+        
+        <div className="mt-6 border-t border-[#e5e7eb] pt-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p className="font-bold text-[#111827]">Permissions</p>
+              <p className="text-xs font-semibold text-[#64748b]">
+                Select the actions this coordinator can perform.
+              </p>
+            </div>
+            <DashButton
+              variant="secondary"
+              disabled={permissionsPending || selectedRow.status !== "active"}
+              onClick={() => savePermissions(selectedRow)}
+            >
+              Save permissions
+            </DashButton>
+          </div>
+          <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {COORDINATOR_PERMISSIONS.map((permission) => {
+              return (
+                <label
+                  key={permission}
+                  className="flex min-h-10 items-start gap-2 rounded-lg border border-[#dbe3ef] bg-[#f8fafc] px-3 py-2 text-sm font-semibold text-[#0f172a]"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedPerms.includes(permission)}
+                    onChange={() => toggleStaffPermission(selectedRow, permission)}
+                    disabled={selectedRow.status !== "active"}
+                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#cbd5e1] text-[#2563eb]"
+                  />
+                  <span className="min-w-0 text-[13px] leading-snug">
+                    {permission.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

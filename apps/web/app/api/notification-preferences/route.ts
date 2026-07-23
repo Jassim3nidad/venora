@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { notificationPreferencesSchema } from "@/features/notifications/schemas/notification.schema";
 import { mapNotificationPreferences } from "@/features/notifications/application/mappers";

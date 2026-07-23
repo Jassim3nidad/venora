@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 const customEasing: [number, number, number, number] = [0.22, 1, 0.36, 1];
 

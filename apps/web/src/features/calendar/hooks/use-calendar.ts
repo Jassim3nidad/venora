@@ -11,7 +11,7 @@ import {
   parseISO,
   isSameDay,
 } from "date-fns";
-import {
+import type {
   BookingStatusValue,
   AvailabilityStatusValue,
 } from "../types/calendar.types";

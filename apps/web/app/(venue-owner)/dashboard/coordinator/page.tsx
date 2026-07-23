@@ -11,15 +11,26 @@ export const dynamic = "force-dynamic";
 
 function formatDate(value?: string | null) {
   if (!value) return "Date not set";
-  const date = new Date(`${value}T00:00:00`);
+  const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Date not set";
   return new Intl.DateTimeFormat("en-PH", { dateStyle: "medium" }).format(date);
 }
 
-export default async function CoordinatorDashboardPage() {
+export default async function CoordinatorDashboardPage(props: {
+  searchParams: Promise<{ venue?: string }>;
+}) {
+  const searchParams = await props.searchParams;
   const context = await getOwnerDashboardContext();
   const { supabase, user, orgIds, isAdmin } = context;
-  const venueIds = await getOwnerVenueIds(context);
+  const assignedVenueIds = await getOwnerVenueIds(context);
+  const todayStr = new Date().toISOString().split("T")[0] ?? "";
+
+  let venueIds = assignedVenueIds;
+  if (searchParams.venue && searchParams.venue !== "all") {
+    if (assignedVenueIds.includes(searchParams.venue)) {
+      venueIds = [searchParams.venue];
+    }
+  }
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -40,6 +51,7 @@ export default async function CoordinatorDashboardPage() {
     .from("organization_member_invitations")
     .select("id, organization_id, organizations(name), created_at")
     .eq("status", "pending")
+    .eq("email", user.email)
     .order("created_at", { ascending: false });
 
   const pendingInvitations = (pendingInvitationsRaw ?? []).map((inv: any) => ({
@@ -52,6 +64,15 @@ export default async function CoordinatorDashboardPage() {
   if (!isAdmin) venuesQuery = venuesQuery.in("id", venueIds);
   const { data: venues } =
     isAdmin || venueIds.length > 0 ? await venuesQuery : { data: [] };
+
+  const { data: todayBookings } =
+    venueIds.length > 0
+      ? await supabase
+          .from("bookings")
+          .select("id, event_date, status, venues(name)")
+          .in("venue_id", venueIds)
+          .eq("event_date", todayStr)
+      : { data: [] };
 
   const { data: bookingsRaw } =
     venueIds.length > 0
@@ -71,21 +92,33 @@ export default async function CoordinatorDashboardPage() {
     venues: { name: string } | null;
   };
   const bookings = (bookingsRaw ?? []) as BookingRow[];
+  
+  const upcomingEventCount = bookings.filter(
+    (b) =>
+      ["approved", "payment_pending", "confirmed"].includes(b.status) &&
+      b.event_date >= todayStr
+  ).length;
 
-  const activeEventCount = bookings.filter((b) =>
-    ["approved", "payment_pending", "confirmed"].includes(b.status),
-  ).length;
   const pendingEventCount = bookings.filter(
-    (b) => b.status === "pending",
+    (b) => b.status === "pending" || b.status === "inquiry"
   ).length;
-  const completedEventCount = bookings.filter(
-    (b) => b.status === "completed",
+
+  const eventsTodayCount = bookings.filter(
+    (b) => b.event_date.startsWith(todayStr)
   ).length;
+
+  const totalDecided = bookings.filter(b => ["approved", "confirmed", "declined", "cancelled"].includes(b.status)).length;
+  const totalApproved = bookings.filter(b => ["approved", "confirmed", "completed"].includes(b.status)).length;
+  
+  const approvalRate = totalDecided > 0 
+    ? `${Math.round((totalApproved / totalDecided) * 100)}%` 
+    : "N/A";
 
   const upcomingEvents = bookings
     .filter(
       (b) =>
-        !["completed", "cancelled", "declined", "expired"].includes(b.status),
+        !["completed", "cancelled", "declined", "expired"].includes(b.status) &&
+        b.event_date >= todayStr
     )
     .slice(0, 6)
     .map((b) => ({
@@ -121,14 +154,26 @@ export default async function CoordinatorDashboardPage() {
     status: venue.status,
   }));
 
+  // Fetch accredited supplier count
+  const { count: accreditedSupplierCount } = venueIds.length > 0 
+    ? await supabase
+        .from("venue_preferred_suppliers")
+        .select("supplier_id", { count: "exact", head: true })
+        .in("venue_id", venueIds)
+    : { count: 0 };
+
   return (
     <CoordinatorOverview
       coordinatorName={profile?.full_name ?? "Event Coordinator"}
       organizationName={orgs?.[0]?.name}
       venueCount={venues?.length ?? 0}
-      activeEventCount={activeEventCount}
+      upcomingEventCount={upcomingEventCount}
       pendingEventCount={pendingEventCount}
-      completedEventCount={completedEventCount}
+      eventsTodayCount={eventsTodayCount}
+      unreadMessageCount={0}
+      calendarConflictCount={0}
+      accreditedSupplierCount={accreditedSupplierCount ?? 0}
+      approvalRate={approvalRate}
       upcomingEvents={upcomingEvents}
       managedVenues={managedVenues}
       pendingInvitations={pendingInvitations}

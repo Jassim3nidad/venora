@@ -9,11 +9,12 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { queryKeys } from "@/lib/query-keys";
 import { updateAvailability } from "../application/calendar-actions";
+import type {
+  UpdateAvailabilityInput} from "../schemas/calendar.schema";
 import {
-  UpdateAvailabilityInput,
   updateAvailabilitySchema,
 } from "../schemas/calendar.schema";
-import { Booking, VenueAvailability } from "../hooks/use-calendar";
+import type { Booking, VenueAvailability } from "../hooks/use-calendar";
 import {
   AVAILABILITY_DESCRIPTIONS,
   AVAILABILITY_LABELS,

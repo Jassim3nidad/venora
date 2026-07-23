@@ -13,6 +13,7 @@ import {
   formatPeso,
   getOwnerDashboardContext,
   getOwnerVenueIds,
+  requireCoordinatorPermission,
 } from "@/lib/dashboard/org-dashboard-data";
 
 export const metadata: Metadata = { title: "Venues - Coordinator Dashboard" };
@@ -43,6 +44,7 @@ type VenueDisplayRow = {
 
 export default async function CoordinatorVenuesPage() {
   const context = await getOwnerDashboardContext();
+  requireCoordinatorPermission("view_assigned_venues", context);
   const { supabase, isAdmin } = context;
   const venueIds = await getOwnerVenueIds(context);
 

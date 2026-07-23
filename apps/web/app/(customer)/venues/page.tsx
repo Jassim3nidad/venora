@@ -10,8 +10,9 @@ import {
   type VenueSearchParams,
 } from "@/src/features/venues/application/queries";
 
+import type {
+  Venue} from "@/src/features/venues/utils/venue-mappers";
 import {
-  Venue,
   toLiveMarketplaceVenue,
 } from "@/src/features/venues/utils/venue-mappers";
 

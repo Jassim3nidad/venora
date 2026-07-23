@@ -8,7 +8,7 @@ import { CategorySelection } from "./CategorySelection";
 import { AddressConfirmation } from "./AddressConfirmation";
 import { VerificationUpload } from "./VerificationUpload";
 import { submitPartnerApplicationAction } from "../actions/partner.actions";
-import { PartnerApplicationInput } from "../schemas/partner.schema";
+import type { PartnerApplicationInput } from "../schemas/partner.schema";
 import { Loader2 } from "lucide-react";
 
 type Step = "guidance" | "role" | "category" | "address" | "documents";

@@ -16,7 +16,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Toast, ToastDescription, ToastTitle } from "@venora/ui";
 import { createClient } from "@/lib/supabase/client";
-import { BusinessProfileDraft } from "../types/business-profile.types";
+import type { BusinessProfileDraft } from "../types/business-profile.types";
 import {
   saveBusinessIdentity,
   saveBusinessAbout,

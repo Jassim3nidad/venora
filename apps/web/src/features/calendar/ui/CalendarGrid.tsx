@@ -1,8 +1,9 @@
 "use client";
 
+import type {
+  DragEndEvent} from "@dnd-kit/core";
 import {
   DndContext,
-  DragEndEvent,
   closestCenter,
   useSensor,
   useSensors,
@@ -16,7 +17,8 @@ import {
   endOfMonth,
   parseISO,
 } from "date-fns";
-import { useCalendar, Booking } from "../hooks/use-calendar";
+import type { Booking } from "../hooks/use-calendar";
+import { useCalendar } from "../hooks/use-calendar";
 import { CalendarCell } from "./CalendarCell";
 import { moveBookingDate } from "../application/calendar-actions";
 import { Loader2 } from "lucide-react";

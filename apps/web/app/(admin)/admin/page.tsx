@@ -94,7 +94,7 @@ export default async function AdminDashboardPage() {
   // only if its corresponding nav item has no permission requirement, or
   // the current admin holds that permission.
   const permissionByHref = new Map(
-    NAV_BY_ROLE.admin.map((item) => [item.href, item.permission]),
+    NAV_BY_ROLE.admin.map((item) => [item.href, item.permission as any]),
   );
   async function hrefVisible(href: string): Promise<boolean> {
     const permission = permissionByHref.get(href);

@@ -1,6 +1,6 @@
-import { SupabaseClient } from "@supabase/supabase-js";
-import { Database } from "@venora/database/types/generated";
-import {
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@venora/database/types/generated";
+import type {
   BusinessProfileDraft,
   BusinessProfilePublicView,
 } from "../types/business-profile.types";

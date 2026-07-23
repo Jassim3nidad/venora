@@ -1,6 +1,7 @@
 "use client";
 
-import { InquiryConversation, Message } from "@/src/features/suppliers/ui/InquiryConversation";
+import type { Message } from "@/src/features/suppliers/ui/InquiryConversation";
+import { InquiryConversation } from "@/src/features/suppliers/ui/InquiryConversation";
 import { sendSupplierInquiryMessageAction } from "@/src/features/suppliers/application/dashboard-actions";
 
 export function InquiryMessageThread({

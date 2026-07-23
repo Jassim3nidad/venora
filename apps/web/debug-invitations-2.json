@@ -1,0 +1,80 @@
+{
+  "invitations": [
+    {
+      "id": "840fed91-9db2-4930-b7b8-e3933e334f26",
+      "organization_id": "80000000-0000-0000-0000-000000000001",
+      "email": "jared.baquirin112@gmail.com",
+      "status": "pending",
+      "venue_ids": [
+        "d131d99a-5300-4de4-a23f-03abf6c61c1d"
+      ],
+      "expires_at": "2026-07-30T03:32:24.231+00:00",
+      "created_at": "2026-07-23T03:32:24.688129+00:00"
+    },
+    {
+      "id": "15921f33-6d80-4094-8ecc-2c0f5f83adf6",
+      "organization_id": "80000000-0000-0000-0000-000000000001",
+      "email": "jaredfahad@gmail.com",
+      "status": "pending",
+      "venue_ids": [
+        "d131d99a-5300-4de4-a23f-03abf6c61c1d",
+        "d836ba8d-64af-436e-a91d-f7e46d5e79ee"
+      ],
+      "expires_at": "2026-07-30T03:18:51.848+00:00",
+      "created_at": "2026-07-23T03:18:52.341859+00:00"
+    },
+    {
+      "id": "317f486b-e0c5-466f-be67-fdb330bf8243",
+      "organization_id": "80000000-0000-0000-0000-000000000001",
+      "email": "coordinator@venora.local",
+      "status": "accepted",
+      "venue_ids": [
+        "03894748-3793-4702-8a99-c44c93d1d32b"
+      ],
+      "expires_at": "2026-07-30T02:15:00.486+00:00",
+      "created_at": "2026-07-23T02:15:00.486+00:00"
+    },
+    {
+      "id": "a0c43f20-094b-4d12-a0a0-7b54d0b10c02",
+      "organization_id": "80000000-0000-0000-0000-000000000001",
+      "email": "remote-postgrest-test-1784703471572@example.com",
+      "status": "revoked",
+      "venue_ids": [
+        "758c437f-6a9c-434a-a5aa-e6290787bd7f"
+      ],
+      "expires_at": "2026-07-29T06:57:51.572+00:00",
+      "created_at": "2026-07-22T06:57:51.330468+00:00"
+    },
+    {
+      "id": "7d908b46-eb3e-41f8-8b14-078072b518dd",
+      "organization_id": "80000000-0000-0000-0000-000000000001",
+      "email": "jelcyruzporcopio.startuplab@gmail.com",
+      "status": "pending",
+      "venue_ids": [
+        "758c437f-6a9c-434a-a5aa-e6290787bd7f",
+        "1c138672-bffe-4462-abd9-728ccef680b8",
+        "7cb27866-7040-4572-b7d2-cef957f7a2c6",
+        "62cdce36-9589-484f-9141-734930861b1b",
+        "1481ff16-7ad3-4781-bfd6-08c367c5948a",
+        "31359e89-5719-483c-93ae-eb04ccf64a6f",
+        "d131d99a-5300-4de4-a23f-03abf6c61c1d",
+        "6de70c44-e4bc-4bcd-8d0b-dad05c0f9b47",
+        "c06641ac-96a6-4705-8520-a6f8707346da",
+        "d836ba8d-64af-436e-a91d-f7e46d5e79ee",
+        "03894748-3793-4702-8a99-c44c93d1d32b"
+      ],
+      "expires_at": "2026-07-27T04:56:39.079+00:00",
+      "created_at": "2026-07-20T04:56:39.290882+00:00"
+    },
+    {
+      "id": "2a822663-0013-4793-ab01-7d767bac69ad",
+      "organization_id": "80000000-0000-0000-0000-000000000001",
+      "email": "jaredfahad@gmail.com",
+      "status": "revoked",
+      "venue_ids": [],
+      "expires_at": "2026-07-27T03:59:51.212+00:00",
+      "created_at": "2026-07-20T03:59:51.268376+00:00"
+    }
+  ],
+  "invitationsError": null
+}
