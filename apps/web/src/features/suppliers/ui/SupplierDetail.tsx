@@ -64,6 +64,8 @@ type SupplierDetailProps = {
   currentUser: User | null;
   bookings?: CustomerBookingOption[];
   isFavorited?: boolean;
+  viewMode?: "customer" | "coordinator";
+  sidebarNode?: React.ReactNode;
 };
 
 function InfoCard({
@@ -269,6 +271,8 @@ export function SupplierDetail({
   currentUser,
   bookings = [],
   isFavorited = false,
+  viewMode = "customer",
+  sidebarNode,
 }: SupplierDetailProps) {
   const isOwner = currentUser?.id === supplier.profileId;
   const startingPrice = getSupplierStartingPrice(supplier);
@@ -329,7 +333,7 @@ export function SupplierDetail({
       <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-end">
         {/* Action Controls */}
         <div className="hidden items-center gap-3 md:flex">
-          {!isOwner && (
+          {!isOwner && viewMode !== "coordinator" && (
             <SupplierFavoriteButton
               supplierId={supplier.id}
               supplierName={supplier.businessName}
@@ -531,7 +535,7 @@ export function SupplierDetail({
                       ) : null}
                     </div>
 
-                    {!isOwner && (
+                    {!isOwner && viewMode !== "coordinator" && (
                       <Button
                         variant="outline"
                         className="mt-6 w-full rounded-xl border-[#E5E7EB] font-bold text-[#111827] hover:border-[#2563EB] hover:bg-[#EFF6FF] hover:text-[#1D4ED8]"
@@ -936,21 +940,32 @@ export function SupplierDetail({
         </div>
 
         {/* Right Column - Sidebar (sticky container on lg) */}
-        <aside className="w-full lg:w-auto lg:self-stretch">
-          <div className="lg:sticky lg:top-[9.5rem] lg:self-start">
-            <SupplierRequestSidebar
-              supplier={supplier}
-              supplierSlug={supplier.slug}
-              userEmail={currentUser?.email}
-              bookings={bookings}
-              isOwner={isOwner}
-            />
-          </div>
-        </aside>
+        {viewMode !== "coordinator" ? (
+          <aside className="w-full lg:w-auto lg:self-stretch">
+            <div className="lg:sticky lg:top-[9.5rem] lg:self-start">
+              <SupplierRequestSidebar
+                supplier={supplier}
+                supplierSlug={supplier.slug}
+                userEmail={currentUser?.email}
+                bookings={bookings}
+                isOwner={isOwner}
+              />
+            </div>
+          </aside>
+        ) : (
+          sidebarNode && (
+            <aside className="w-full lg:w-auto lg:self-stretch">
+              <div className="lg:sticky lg:top-[9.5rem] lg:self-start">
+                {sidebarNode}
+              </div>
+            </aside>
+          )
+        )}
       </div>
 
       {/* Mobile sticky action */}
-      {!isOwner && (
+      {/* Mobile sticky action */}
+      {!isOwner && viewMode !== "coordinator" && (
         <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white p-4 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] lg:hidden">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
             <div className="flex flex-col">

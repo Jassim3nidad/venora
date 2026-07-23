@@ -12,6 +12,7 @@ import {
   getOwnerVenueIds,
   requireCoordinatorPermission,
 } from "@/lib/dashboard/org-dashboard-data";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Suppliers - Coordinator Dashboard",
@@ -48,7 +49,7 @@ export default async function CoordinatorSuppliersPage({
   const { data: venueSuppliers } = venueIds.length > 0 
     ? await supabase
         .from("venue_suppliers")
-        .select("supplier_id")
+        .select("id, supplier_id, status")
         .in("venue_id", venueIds)
     : { data: [] };
 
@@ -66,19 +67,10 @@ export default async function CoordinatorSuppliersPage({
     .select(
       "id, business_name, description, base_price, price_unit, avg_rating, review_count, supplier_categories(name, slug)",
     )
-    .eq("accreditation_status", "accredited")
     .order("avg_rating", { ascending: false });
 
-  const canSeeAllSuppliers = context.isAdmin || context.roles.includes("venue_owner");
-
-  if (!canSeeAllSuppliers) {
-    if (supplierIds.length > 0) {
-      query = query.in("id", supplierIds);
-    } else {
-      // Force empty result if no suppliers are assigned to the user's venues
-      query = query.in("id", [crypto.randomUUID()]); 
-    }
-  }
+  // Coordinators and Venue Owners can both browse the global directory of suppliers
+  // to find new partners to invite to their venues.
 
   if (q) query = query.ilike("business_name", `%${q}%`);
 
@@ -86,37 +78,24 @@ export default async function CoordinatorSuppliersPage({
 
   // Filtering by an embedded relation's column isn't reliable through the
   // PostgREST query builder here, so the category filter is applied in JS
-  // once the (small) accredited supplier list has been fetched.
   let suppliers = ((suppliersRaw ?? []) as SupplierRow[]).filter((s) =>
     category ? s.supplier_categories?.slug === category : true,
   );
-
-  // FALLBACK FOR LOCAL TESTING: If the database is completely empty (no suppliers assigned),
-  // we fallback to the sample suppliers so the UI can be tested.
-  if (suppliers.length === 0 && process.env.NODE_ENV === "development") {
-    const { sampleSuppliers } = await import("@/src/features/suppliers/data/sample-suppliers");
-    suppliers = sampleSuppliers
-      .filter((s) => s.accreditationStatus === "accredited")
-      .filter((s) => (category ? s.category?.slug === category : true))
-      .map((s) => ({
-        id: s.id,
-        business_name: s.businessName,
-        description: s.description,
-        base_price: s.basePrice,
-        price_unit: s.priceUnit,
-        avg_rating: s.avgRating,
-        review_count: s.reviewCount,
-        supplier_categories: s.category
-          ? { name: s.category.name, slug: s.category.slug }
-          : null,
-      }));
-  }
 
   return (
     <DashboardSubPage
       title="Suppliers"
       description="Discover accredited suppliers to recommend for your coordinated events."
     >
+      <div className="mb-6 flex items-center justify-end">
+        <Link
+          href="/dashboard/coordinator/suppliers/requests"
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-xl bg-amber-50 px-4 text-sm font-bold text-amber-700 transition hover:bg-amber-100 border border-amber-200"
+        >
+          <MaterialIcon name="pending_actions" className="text-lg" />
+          Review Incoming Requests
+        </Link>
+      </div>
       <Panel>
         <form
           className="flex flex-col gap-3 sm:flex-row sm:items-center"
@@ -210,7 +189,7 @@ export default async function CoordinatorSuppliersPage({
         <EmptyState
           icon="storefront"
           title="No suppliers found"
-          description="Try a different search term or category. Only accredited suppliers appear in this directory."
+          description="Try a different search term or category. Registered suppliers will appear in this directory."
         />
       )}
     </DashboardSubPage>

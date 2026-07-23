@@ -416,7 +416,7 @@ export async function getPublicSupplierList(
 }
 
 function isUuid(value: string) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{12}$/i.test(
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
     value,
   );
 }
@@ -424,13 +424,17 @@ function isUuid(value: string) {
 export async function getPublicSupplierBySlug(
   supabase: VenoraSupabase,
   identifier: string,
+  includeUnaccredited = false
 ): Promise<SupplierMarketplaceProfile | null> {
   const categories = await getSupplierCategories(supabase);
 
   let query = supabase
     .from("supplier_profiles")
-    .select(SUPPLIER_PROFILE_SELECT)
-    .eq("accreditation_status", "accredited");
+    .select(SUPPLIER_PROFILE_SELECT);
+    
+  if (!includeUnaccredited) {
+    query = query.eq("accreditation_status", "accredited");
+  }
 
   if (isUuid(identifier)) {
     query = query.eq("id", identifier);
@@ -439,6 +443,7 @@ export async function getPublicSupplierBySlug(
   }
 
   const { data, error } = await query.maybeSingle();
+  console.log("DEBUG getPublicSupplierBySlug query:", { identifier, data: !!data, error });
 
   if (!error && data) {
     const { services, portfolioItems, reviews } = await getSupplierRelations(

@@ -17,6 +17,7 @@ export interface VenueSearchParams {
   venueIds?: string[] | undefined;
   page?: number | undefined;
   limit?: number | undefined;
+  includeUnpublished?: boolean | undefined;
 }
 
 function parseMoney(value: string | undefined): number {
@@ -59,8 +60,11 @@ export async function searchMarketplaceVenues(
       venue_event_types${params.event ? "!inner" : ""}(event_types${params.event ? "!inner" : ""}(name, slug)),
       venue_amenities${params.amenities?.length ? "!inner" : ""}(amenities${params.amenities?.length ? "!inner" : ""}(name))
     `,
-    )
-    .eq("status", "published");
+    );
+
+  if (!params.includeUnpublished) {
+    query = query.eq("status", "published");
+  }
 
   if (params.venueIds?.length) {
     query = query.in("id", params.venueIds);
