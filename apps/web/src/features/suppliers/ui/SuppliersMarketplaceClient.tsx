@@ -328,8 +328,8 @@ export function SuppliersMarketplaceClient({
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [desktopFiltersOpen, setDesktopFiltersOpen] = useState(true);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const [openAccordion, setOpenAccordion] = useState<AccordionId | null>(
-    "search",
+  const [openAccordions, setOpenAccordions] = useState<Set<AccordionId>>(
+    () => new Set<AccordionId>(["search"]),
   );
 
   const locations = useMemo(
@@ -478,7 +478,12 @@ export function SuppliersMarketplaceClient({
   ].filter((chip): chip is string => Boolean(chip));
 
   const toggleAccordion = (id: AccordionId) => {
-    setOpenAccordion((current) => (current === id ? null : id));
+    setOpenAccordions((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
 
   const filterPanel = (presentation: "desktop" | "mobile") => (
@@ -518,7 +523,7 @@ export function SuppliersMarketplaceClient({
           id="search"
           title="Search"
           icon={Search}
-          open={openAccordion === "search"}
+          open={openAccordions.has("search")}
           activeCount={query ? 1 : 0}
           summary={query || undefined}
           onToggle={toggleAccordion}
@@ -539,7 +544,7 @@ export function SuppliersMarketplaceClient({
           id="location"
           title="Location"
           icon={MapPin}
-          open={openAccordion === "location"}
+          open={openAccordions.has("location")}
           activeCount={location ? 1 : 0}
           summary={selectedLocationName || undefined}
           onToggle={toggleAccordion}
@@ -569,7 +574,7 @@ export function SuppliersMarketplaceClient({
           id="category"
           title="Category"
           icon={BriefcaseBusiness}
-          open={openAccordion === "category"}
+          open={openAccordions.has("category")}
           activeCount={category !== "all" ? 1 : 0}
           summary={selectedCategoryName || undefined}
           onToggle={toggleAccordion}
@@ -590,7 +595,7 @@ export function SuppliersMarketplaceClient({
           id="budgetRating"
           title="Budget & Rating"
           icon={WalletCards}
-          open={openAccordion === "budgetRating"}
+          open={openAccordions.has("budgetRating")}
           activeCount={
             [minPrice, maxPrice, minRating !== "0" ? minRating : ""].filter(
               Boolean,
@@ -670,24 +675,24 @@ export function SuppliersMarketplaceClient({
         </FilterAccordion>
       </div>
 
-      <div className="sticky bottom-0 z-10 shrink-0 border-t border-[#E5E7EB] bg-white/95 px-4 py-3 backdrop-blur">
-        <button
-          type="button"
-          onClick={() => {
-            if (presentation === "mobile") setMobileFiltersOpen(false);
-          }}
-          className={[
-            "h-12 w-full rounded-2xl py-3 text-base font-extrabold transition active:scale-[0.98]",
-            activeFilterCount > 0
-              ? "bg-[#2563EB] text-white shadow-sm shadow-[#2563EB]/20 hover:bg-[#1D4ED8]"
-              : "border border-[#DBEAFE] bg-[#EFF6FF] text-[#1D4ED8] hover:bg-[#DBEAFE]",
-          ].join(" ")}
-        >
-          {activeFilterCount > 0
-            ? `View Results (${activeFilterCount})`
-            : "View Results"}
-        </button>
-      </div>
+      {presentation === "mobile" ? (
+        <div className="sticky bottom-0 z-10 shrink-0 border-t border-[#E5E7EB] bg-white/95 px-4 py-3 backdrop-blur">
+          <button
+            type="button"
+            onClick={() => setMobileFiltersOpen(false)}
+            className={[
+              "h-12 w-full rounded-2xl py-3 text-base font-extrabold transition active:scale-[0.98]",
+              activeFilterCount > 0
+                ? "bg-[#2563EB] text-white shadow-sm shadow-[#2563EB]/20 hover:bg-[#1D4ED8]"
+                : "border border-[#DBEAFE] bg-[#EFF6FF] text-[#1D4ED8] hover:bg-[#DBEAFE]",
+            ].join(" ")}
+          >
+            {activeFilterCount > 0
+              ? `View Results (${activeFilterCount})`
+              : "View Results"}
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 
@@ -727,7 +732,9 @@ export function SuppliersMarketplaceClient({
 
       <aside
         className={[
-          "sticky top-0 hidden h-[100dvh] shrink-0 self-start overflow-hidden transition-all duration-300 lg:block",
+          // Full remaining viewport under marketplace chrome; inner list scrolls
+          // when many filter sections are expanded.
+          "sticky top-[8.5rem] hidden h-[calc(100dvh-8.5rem)] shrink-0 self-start overflow-hidden transition-all duration-300 lg:block",
           desktopFiltersOpen ? "w-[300px] opacity-100" : "w-0 opacity-0",
         ].join(" ")}
         aria-hidden={!desktopFiltersOpen}
@@ -779,22 +786,6 @@ export function SuppliersMarketplaceClient({
                     </span>
                   ) : null}
                 </button>
-
-                <div className="flex h-11 items-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white px-3">
-                  <ArrowUpDown className="h-4 w-4 text-[#2563EB]" />
-                  <FilterSelect
-                    value={sort}
-                    onChange={(event) =>
-                      setSort(event.target.value as SortValue)
-                    }
-                    bold
-                  >
-                    <option value="recommended">Recommended</option>
-                    <option value="rating">Highest rated</option>
-                    <option value="price">Lowest starting price</option>
-                    <option value="newest">Newest</option>
-                  </FilterSelect>
-                </div>
 
                 <button
                   type="button"

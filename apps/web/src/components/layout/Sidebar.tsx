@@ -282,8 +282,8 @@ export default function Sidebar({
   const queryString = searchParams.toString();
   const params = useMemo(() => new URLSearchParams(queryString), [queryString]);
   const [locationStatus, setLocationStatus] = useState("");
-  const [openAccordion, setOpenAccordion] = useState<AccordionId | null>(
-    "location",
+  const [openAccordions, setOpenAccordions] = useState<Set<AccordionId>>(
+    () => new Set<AccordionId>(["location"]),
   );
 
   const searchQuery = params.get("q") ?? "";
@@ -566,7 +566,12 @@ export default function Sidebar({
     .join(" · ");
 
   const toggleAccordion = (id: AccordionId) => {
-    setOpenAccordion((current) => (current === id ? null : id));
+    setOpenAccordions((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
 
   return (
@@ -607,7 +612,7 @@ export default function Sidebar({
           id="location"
           title="Location"
           icon={MapPin}
-          open={openAccordion === "location"}
+          open={openAccordions.has("location")}
           activeCount={locationActiveCount}
           summary={locationSummary}
           onToggle={toggleAccordion}
@@ -667,7 +672,7 @@ export default function Sidebar({
           id="event"
           title="Event Type"
           icon={CalendarDays}
-          open={openAccordion === "event"}
+          open={openAccordions.has("event")}
           activeCount={eventActiveCount}
           summary={selectedEventType || undefined}
           onToggle={toggleAccordion}
@@ -688,7 +693,7 @@ export default function Sidebar({
           id="budgetCapacity"
           title="Budget & Capacity"
           icon={WalletCards}
-          open={openAccordion === "budgetCapacity"}
+          open={openAccordions.has("budgetCapacity")}
           activeCount={budgetCapacityActiveCount}
           summary={budgetCapacitySummary || undefined}
           onToggle={toggleAccordion}
@@ -799,7 +804,7 @@ export default function Sidebar({
           id="venueType"
           title="Venue Type & Indoor/Outdoor"
           icon={Building2}
-          open={openAccordion === "venueType"}
+          open={openAccordions.has("venueType")}
           activeCount={venueTypeActiveCount}
           summary={venueTypeSummary || undefined}
           onToggle={toggleAccordion}
@@ -847,7 +852,7 @@ export default function Sidebar({
           id="amenities"
           title="Amenities"
           icon={Users}
-          open={openAccordion === "amenities"}
+          open={openAccordions.has("amenities")}
           activeCount={amenitiesActiveCount}
           summary={
             amenitiesActiveCount
@@ -865,22 +870,24 @@ export default function Sidebar({
         </FilterAccordion>
       </div>
 
-      <div className="sticky bottom-0 z-10 shrink-0 border-t border-[#E5E7EB] bg-white/95 px-4 py-3 backdrop-blur">
-        <button
-          type="button"
-          onClick={onApply}
-          className={[
-            "h-12 w-full rounded-2xl py-3 text-base font-extrabold transition active:scale-[0.98]",
-            activeFilterCount > 0
-              ? "bg-[#2563EB] text-white shadow-sm shadow-[#2563EB]/20 hover:bg-[#1D4ED8]"
-              : "border border-[#DBEAFE] bg-[#EFF6FF] text-[#1D4ED8] hover:bg-[#DBEAFE]",
-          ].join(" ")}
-        >
-          {activeFilterCount > 0
-            ? `View Results (${activeFilterCount})`
-            : "View Results"}
-        </button>
-      </div>
+      {presentation === "mobile" ? (
+        <div className="sticky bottom-0 z-10 shrink-0 border-t border-[#E5E7EB] bg-white/95 px-4 py-3 backdrop-blur">
+          <button
+            type="button"
+            onClick={onApply}
+            className={[
+              "h-12 w-full rounded-2xl py-3 text-base font-extrabold transition active:scale-[0.98]",
+              activeFilterCount > 0
+                ? "bg-[#2563EB] text-white shadow-sm shadow-[#2563EB]/20 hover:bg-[#1D4ED8]"
+                : "border border-[#DBEAFE] bg-[#EFF6FF] text-[#1D4ED8] hover:bg-[#DBEAFE]",
+            ].join(" ")}
+          >
+            {activeFilterCount > 0
+              ? `View Results (${activeFilterCount})`
+              : "View Results"}
+          </button>
+        </div>
+      ) : null}
     </aside>
   );
 }
