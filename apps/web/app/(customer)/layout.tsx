@@ -3,6 +3,7 @@ import { MarketplaceLayout } from "@/components/layout/MarketplaceLayout";
 import { getCurrentAuthUser } from "@/lib/supabase/current-user";
 import { getNavbarProfile } from "@/lib/get-navbar-profile";
 import { VenueComparisonBar } from "@/features/venues/ui/VenueComparisonBar";
+import { AIConciergeWidget } from "@/features/ai/ui/AIConciergeWidget";
 
 export default async function CustomerLayout({
   children,
@@ -16,6 +17,7 @@ export default async function CustomerLayout({
     <MarketplaceLayout user={user} profile={profile}>
       {children}
       <VenueComparisonBar />
+      <AIConciergeWidget />
     </MarketplaceLayout>
   );
 }
