@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import {
   Dialog,
@@ -171,4 +171,31 @@ export function AuthRequiredPrompt({
       </DialogContent>
     </Dialog>
   );
+}
+
+export function useAuthRequiredPrompt(
+  defaultRedirectTo = "/favorites",
+  kind: AuthPromptKind = "favorites",
+) {
+  const [open, setOpen] = useState(false);
+  const [redirectTo, setRedirectTo] = useState(defaultRedirectTo);
+
+  const openAuthPrompt = useCallback(
+    (nextRedirectTo = defaultRedirectTo) => {
+      setRedirectTo(nextRedirectTo);
+      setOpen(true);
+    },
+    [defaultRedirectTo],
+  );
+
+  const authPrompt = (
+    <AuthRequiredPrompt
+      open={open}
+      onOpenChange={setOpen}
+      redirectTo={redirectTo}
+      kind={kind}
+    />
+  );
+
+  return { openAuthPrompt, authPrompt };
 }
