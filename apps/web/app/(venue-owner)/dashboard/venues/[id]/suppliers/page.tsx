@@ -17,11 +17,13 @@ export default async function VenueSuppliersPage({ params }: Props) {
   const { id: venueId } = await params;
   const supabase = await createClient();
 
-  const { data: venue } = await supabase
+  const { data: venueData } = await supabase
     .from("venues")
     .select("id, name, slug, organization_id")
     .eq("id", venueId)
     .single();
+
+  const venue = venueData as { id: string; name: string; slug: string | null; organization_id: string } | null;
 
   if (!venue) {
     notFound();
