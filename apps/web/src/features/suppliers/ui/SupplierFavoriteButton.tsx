@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { Heart } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { useAuthRequiredPrompt } from "@/components/layout/AuthRequiredPrompt";
+import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 import { toggleSupplierFavoriteAction } from "../application/actions";
 
 type SupplierFavoriteButtonProps = {
@@ -17,10 +20,21 @@ export function SupplierFavoriteButton({
   initialIsFavorited = false,
   className = "",
 }: SupplierFavoriteButtonProps) {
+  const pathname = usePathname();
+  const { user } = useCurrentUser();
+  const { openAuthPrompt, authPrompt } = useAuthRequiredPrompt(
+    pathname || "/suppliers",
+    "favorites",
+  );
   const [isFavorited, setIsFavorited] = useState(initialIsFavorited);
   const [isPending, setIsPending] = useState(false);
 
   const handleToggle = async () => {
+    if (!user) {
+      openAuthPrompt(pathname || `/suppliers`);
+      return;
+    }
+
     setIsFavorited((current) => !current);
     setIsPending(true);
 
@@ -37,26 +51,29 @@ export function SupplierFavoriteButton({
   };
 
   return (
-    <button
-      type="button"
-      onClick={handleToggle}
-      disabled={isPending}
-      aria-pressed={isFavorited}
-      aria-label={
-        isFavorited
-          ? `Remove ${supplierName} from favorites`
-          : `Save ${supplierName} to favorites`
-      }
-      className={[
-        "inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-bold transition disabled:cursor-wait disabled:opacity-70",
-        isFavorited
-          ? "border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
-          : "border-white/20 bg-white/95 text-slate-950 hover:bg-white",
-        className,
-      ].join(" ")}
-    >
-      <Heart className={`h-4 w-4 ${isFavorited ? "fill-current" : ""}`} />
-      {isFavorited ? "Saved" : "Save supplier"}
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={handleToggle}
+        disabled={isPending}
+        aria-pressed={isFavorited}
+        aria-label={
+          isFavorited
+            ? `Remove ${supplierName} from favorites`
+            : `Save ${supplierName} to favorites`
+        }
+        className={[
+          "inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-bold transition disabled:cursor-wait disabled:opacity-70",
+          isFavorited
+            ? "border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
+            : "border-white/20 bg-white/95 text-slate-950 hover:bg-white",
+          className,
+        ].join(" ")}
+      >
+        <Heart className={`h-4 w-4 ${isFavorited ? "fill-current" : ""}`} />
+        {isFavorited ? "Saved" : "Save supplier"}
+      </button>
+      {authPrompt}
+    </>
   );
 }

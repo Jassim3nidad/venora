@@ -20,6 +20,20 @@ describe("MarketingNavbar mobile links", () => {
     ]);
   });
 
+  it("shows bookings and favorites to anonymous marketplace visitors", () => {
+    const links = getMarketingMobileLinks({
+      user: null,
+      mobileContext: "marketplace",
+    });
+
+    expect(links.map((link) => link.label)).toEqual([
+      "Venues",
+      "Suppliers",
+      "Bookings",
+      "Favorites",
+    ]);
+  });
+
   it("keeps marketing routes in default mobile mode", () => {
     const links = getMarketingMobileLinks({
       user: { email: "customer@example.com" },
@@ -27,20 +41,20 @@ describe("MarketingNavbar mobile links", () => {
 
     expect(links.map((link) => [link.label, link.href])).toEqual([
       ["Home", "/"],
-      ["Venues", "/venues"],
+      ["Browse", "/venues"],
       ["About", "/about"],
       ["Host a Venue", "/account/become-partner"],
     ]);
   });
 
-  it("redirects anonymous auth-only marketplace routes to login", () => {
+  it("keeps bookings/favorites as real routes for anonymous users", () => {
     expect(
       resolveMarketingMobileHref({
         href: "/bookings",
         isAuthenticated: false,
         mobileContext: "marketplace",
       }),
-    ).toContain("/login?");
+    ).toBe("/bookings");
     expect(
       resolveMarketingMobileHref({
         href: "/notifications",

@@ -33,6 +33,7 @@ import {
 } from "@venora/ui";
 import CostEstimatorPanel from "@/features/ai/ui/CostEstimatorPanel";
 import RecommendedVenues from "@/features/ai/ui/RecommendedVenues";
+import { useAuthRequiredPrompt } from "@/components/layout/AuthRequiredPrompt";
 import { isOptimizableImageSrc } from "@/src/lib/image-host";
 import type { PublicOwnerProfile } from "@/src/features/owners/application/queries";
 import type { SmartVenueSearchVenue } from "@/features/search/schemas/search.schema";
@@ -97,6 +98,10 @@ export default function VenueDetails({
   const [isFavorited, setIsFavorited] = useState(initialIsFavorited);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
   const [toastOpen, setToastOpen] = useState(false);
+  const { openAuthPrompt, authPrompt } = useAuthRequiredPrompt(
+    `/venues/${venue.slug ?? venue.id}`,
+    "favorites",
+  );
   const [toastMessage, setToastMessage] = useState({
     title: "",
     description: "",
@@ -112,7 +117,7 @@ export default function VenueDetails({
 
   const handleFavoriteToggle = async () => {
     if (!currentUser) {
-      triggerToast("Sign In Required", "Please log in to save favorites.");
+      openAuthPrompt(`/venues/${venue.slug ?? venue.id}`);
       return;
     }
 
@@ -790,6 +795,8 @@ export default function VenueDetails({
           </div>
         </Toast>
       ) : null}
+
+      {authPrompt}
     </main>
   );
 }

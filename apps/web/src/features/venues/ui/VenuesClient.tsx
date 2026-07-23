@@ -28,6 +28,8 @@ import {
   X,
 } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
+import { useAuthRequiredPrompt } from "@/components/layout/AuthRequiredPrompt";
+import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useSmartVenueSearch } from "@/features/search/hooks/use-smart-venue-search";
 import type {
@@ -824,6 +826,11 @@ export default function VenuesClient({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const queryString = searchParams.toString();
+  const { user: currentUser } = useCurrentUser();
+  const { openAuthPrompt, authPrompt } = useAuthRequiredPrompt(
+    `${pathname}${queryString ? `?${queryString}` : ""}` || "/venues",
+    "favorites",
+  );
   const smartSearch = useSmartVenueSearch();
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [desktopFiltersOpen, setDesktopFiltersOpen] = useState(true);
@@ -1256,6 +1263,13 @@ export default function VenuesClient({
       event.preventDefault();
       event.stopPropagation();
 
+      if (!currentUser) {
+        openAuthPrompt(
+          `${pathname}${queryString ? `?${queryString}` : ""}` || "/venues",
+        );
+        return;
+      }
+
       const id = String(venueId);
       let previousFavoriteIds = new Set<string>();
 
@@ -1294,7 +1308,7 @@ export default function VenuesClient({
         return nextFavoriteIds;
       });
     },
-    [],
+    [currentUser, openAuthPrompt, pathname, queryString],
   );
 
   const budgetSummary = getBudgetSummary(filters);
@@ -1400,7 +1414,9 @@ export default function VenuesClient({
 
       <aside
         className={[
-          "sticky top-0 hidden h-[100dvh] shrink-0 self-start overflow-hidden transition-all duration-300 lg:block",
+          // Full remaining viewport under marketplace chrome; inner list scrolls
+          // when many filter sections are expanded.
+          "sticky top-[8.5rem] hidden h-[calc(100dvh-8.5rem)] shrink-0 self-start overflow-hidden transition-all duration-300 lg:block",
           desktopFiltersOpen ? "w-[300px] opacity-100" : "w-0 opacity-0",
         ].join(" ")}
         aria-hidden={!desktopFiltersOpen}
@@ -1697,6 +1713,7 @@ export default function VenuesClient({
           )}
         </div>
       </main>
+      {authPrompt}
     </div>
   );
 }
