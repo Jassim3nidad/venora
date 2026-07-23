@@ -91,6 +91,16 @@ export const NAV_BY_ROLE: Record<EnterpriseRole, NavItem[]> = {
       icon: "storefront",
     },
     {
+      label: "Discover Venues",
+      href: "/dashboard/supplier/venues",
+      icon: "travel_explore",
+    },
+    {
+      label: "Partnerships",
+      href: "/dashboard/supplier/partnerships",
+      icon: "handshake",
+    },
+    {
       label: "Services",
       href: "/dashboard/supplier/services",
       icon: "design_services",

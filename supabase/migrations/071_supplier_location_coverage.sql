@@ -16,6 +16,8 @@ ALTER TABLE public.supplier_profiles
   ADD COLUMN IF NOT EXISTS travel_fee_note text;
 
 -- Add constraints
+ALTER TABLE public.supplier_profiles DROP CONSTRAINT IF EXISTS supplier_profiles_location_visibility_check;
+ALTER TABLE public.supplier_profiles DROP CONSTRAINT IF EXISTS supplier_profiles_business_location_type_check;
 ALTER TABLE public.supplier_profiles
   ADD CONSTRAINT supplier_profiles_location_visibility_check 
   CHECK (location_visibility IN ('exact', 'approximate', 'service_area_only')),
