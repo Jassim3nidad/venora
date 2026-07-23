@@ -22,6 +22,7 @@ import {
   updateStaffVenueAssignmentsAction,
   updateStaffStatusAction,
 } from "./actions";
+import { ChevronDown } from "lucide-react";
 
 export type OrganizationOption = {
   id: string;
@@ -409,10 +410,20 @@ export function StaffManagementClient({
     },
   ];
 
-  const activeCoordinatorCount = staffRows.filter(
+  const currentStaffRows = useMemo(
+    () => staffRows.filter((row) => row.organizationId === selectedOrganizationId),
+    [staffRows, selectedOrganizationId]
+  );
+
+  const currentInvitationRows = useMemo(
+    () => invitationRows.filter((row) => (row as any).organizationId === selectedOrganizationId),
+    [invitationRows, selectedOrganizationId]
+  );
+
+  const activeCoordinatorCount = currentStaffRows.filter(
     (row) => row.status === "active",
   ).length;
-  const pendingInvitationCount = invitationRows.filter(
+  const pendingInvitationCount = currentInvitationRows.filter(
     (row) => row.status === "pending",
   ).length;
   const selectedVenueCount = selectedVenueIds.length;
@@ -449,19 +460,22 @@ export function StaffManagementClient({
           <form onSubmit={handleInvite} className="space-y-4">
             <label className="flex flex-col gap-2 text-sm font-bold text-[#0f172a]">
               Organization
-              <select
-                value={selectedOrganizationId}
-                onChange={(event) =>
-                  setSelectedOrganizationId(event.target.value)
-                }
-                className="h-11 rounded-xl border border-[#dbe3ef] bg-white px-3 text-sm font-semibold text-[#0f172a] outline-none transition focus:border-[#2563eb] focus:ring-4 focus:ring-[#dbeafe]"
-              >
-                {organizations.map((organization) => (
-                  <option key={organization.id} value={organization.id}>
-                    {organization.name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  value={selectedOrganizationId}
+                  onChange={(event) =>
+                    setSelectedOrganizationId(event.target.value)
+                  }
+                  className="appearance-none h-11 w-full rounded-xl border border-[#dbe3ef] bg-white pl-3 pr-10 text-sm font-semibold text-[#0f172a] outline-none transition focus:border-[#2563eb] focus:ring-4 focus:ring-[#dbeafe]"
+                >
+                  {organizations.map((organization) => (
+                    <option key={organization.id} value={organization.id}>
+                      {organization.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#94a3b8]" />
+              </div>
             </label>
             <label className="flex flex-col gap-2 text-sm font-bold text-[#0f172a]">
               Coordinator email
@@ -606,7 +620,7 @@ export function StaffManagementClient({
           description="Invitation links expire after 7 days and can be revoked anytime."
         />
         <DataTable
-          rows={invitationRows}
+          rows={invitationRows.filter((row) => row.status === "pending")}
           columns={invitationColumns}
           keyFn={(row) => row.id}
           emptyMessage="No pending coordinator invitations."

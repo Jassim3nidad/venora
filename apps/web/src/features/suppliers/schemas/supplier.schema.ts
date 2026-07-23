@@ -195,6 +195,12 @@ export const supplierQuoteActionSchema = z.object({
   quoteId: z.string().uuid(),
 });
 
+export const supplierReviewSchema = z.object({
+  inquiryId: z.string().uuid(),
+  overallRating: z.coerce.number().int().min(1).max(5),
+  comment: optionalText(1500),
+});
+
 export type SupplierSearchInput = z.infer<typeof supplierSearchSchema>;
 export type SupplierProfileInput = z.infer<typeof supplierProfileSchema>;
 export type SupplierPackageInput = z.infer<typeof supplierPackageSchema>;
@@ -208,3 +214,4 @@ export type SupplierContactRequestInput = z.infer<
 export type SupplierQuoteActionInput = z.infer<
   typeof supplierQuoteActionSchema
 >;
+export type SupplierReviewInput = z.infer<typeof supplierReviewSchema>;

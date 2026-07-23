@@ -15,11 +15,6 @@ export default async function CoordinatorDashboardLayout({
 
   if (!user) redirect("/login?redirectTo=/dashboard/coordinator");
   const isAdmin = await hasRole(ROLES.ADMIN);
-  const isCoordinator = await hasRole(ROLES.EVENT_COORDINATOR);
-
-  if (!isAdmin && !isCoordinator) {
-    redirect("/unauthorized");
-  }
 
   if (!isAdmin) {
     const { data: activeMembership } = await supabase
@@ -32,7 +27,16 @@ export default async function CoordinatorDashboardLayout({
       .maybeSingle();
 
     if (!activeMembership) {
-      redirect("/unauthorized");
+      const { data: pendingInvitation } = await supabase
+        .from("organization_member_invitations")
+        .select("id")
+        .eq("status", "pending")
+        .limit(1)
+        .maybeSingle();
+
+      if (!pendingInvitation) {
+        redirect("/unauthorized");
+      }
     }
   }
 

@@ -3,6 +3,7 @@ import {
   acceptSupplierQuoteAction,
   createSupplierContactRequestAction,
   declineSupplierQuoteAction,
+  submitSupplierReviewAction,
 } from "./actions";
 import { createClient } from "@/lib/supabase/server";
 
@@ -13,6 +14,26 @@ vi.mock("@/lib/supabase/server", () => ({
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
+
+function createMaybeSingleQuery(result: unknown) {
+  const query: any = {};
+  Object.assign(query, {
+    select: vi.fn(() => query),
+    eq: vi.fn(() => query),
+    maybeSingle: vi.fn().mockResolvedValue(result),
+  });
+  return query;
+}
+
+function createInsertSingleQuery(result: unknown) {
+  const query: any = {};
+  Object.assign(query, {
+    insert: vi.fn(() => query),
+    select: vi.fn(() => query),
+    single: vi.fn().mockResolvedValue(result),
+  });
+  return query;
+}
 
 describe("createSupplierContactRequestAction", () => {
   const userId = "00000000-0000-4000-8000-000000000001";
@@ -221,5 +242,149 @@ describe("createSupplierContactRequestAction", () => {
         p_status: "declined",
       },
     );
+  });
+
+  it("submits a supplier review for a confirmed supplier job after the booking is completed", async () => {
+    const inquiryId = "00000000-0000-4000-8000-000000000007";
+    const supplierId = "00000000-0000-4000-8000-000000000002";
+    const bookingSupplierId = "00000000-0000-4000-8000-000000000009";
+
+    const inquiryQuery = createMaybeSingleQuery({
+      data: {
+        id: inquiryId,
+        supplier_id: supplierId,
+        booking_id: bookingId,
+        supplier_profiles: { slug: "sai-s-photography" },
+      },
+      error: null,
+    });
+    const jobQuery = createMaybeSingleQuery({
+      data: {
+        id: bookingSupplierId,
+        status: "confirmed",
+        supplier_id: supplierId,
+        booking_id: bookingId,
+        bookings: { status: "completed" },
+        supplier_reviews: [],
+      },
+      error: null,
+    });
+    const reviewQuery = createInsertSingleQuery({
+      data: { id: "00000000-0000-4000-8000-000000000010" },
+      error: null,
+    });
+
+    mockSupabase.from = vi.fn((table: string) => {
+      if (table === "supplier_contact_requests") return inquiryQuery;
+      if (table === "booking_suppliers") return jobQuery;
+      if (table === "supplier_reviews") return reviewQuery;
+      throw new Error(`Unexpected table ${table}`);
+    });
+
+    const result = await submitSupplierReviewAction({
+      inquiryId,
+      overallRating: 5,
+      comment: "Excellent supplier support.",
+    });
+
+    expect(result.error).toBeNull();
+    expect(reviewQuery.insert).toHaveBeenCalledWith({
+      booking_supplier_id: bookingSupplierId,
+      customer_id: userId,
+      supplier_id: supplierId,
+      overall_rating: 5,
+      comment: "Excellent supplier support.",
+      status: "published",
+    });
+  });
+
+  it("blocks supplier reviews until the linked venue booking is completed", async () => {
+    const inquiryId = "00000000-0000-4000-8000-000000000007";
+    const supplierId = "00000000-0000-4000-8000-000000000002";
+
+    mockSupabase.from = vi.fn((table: string) => {
+      if (table === "supplier_contact_requests") {
+        return createMaybeSingleQuery({
+          data: {
+            id: inquiryId,
+            supplier_id: supplierId,
+            booking_id: bookingId,
+            supplier_profiles: { slug: "sai-s-photography" },
+          },
+          error: null,
+        });
+      }
+      if (table === "booking_suppliers") {
+        return createMaybeSingleQuery({
+          data: {
+            id: "00000000-0000-4000-8000-000000000009",
+            status: "confirmed",
+            supplier_id: supplierId,
+            booking_id: bookingId,
+            bookings: { status: "confirmed" },
+            supplier_reviews: [],
+          },
+          error: null,
+        });
+      }
+      if (table === "supplier_reviews") {
+        return createInsertSingleQuery({ data: { id: "review" }, error: null });
+      }
+      throw new Error(`Unexpected table ${table}`);
+    });
+
+    const result = await submitSupplierReviewAction({
+      inquiryId,
+      overallRating: 5,
+      comment: "Excellent supplier support.",
+    });
+
+    expect(result.error?.message).toContain("completed");
+    expect(mockSupabase.from).not.toHaveBeenCalledWith("supplier_reviews");
+  });
+
+  it("blocks duplicate supplier reviews for the same supplier job", async () => {
+    const inquiryId = "00000000-0000-4000-8000-000000000007";
+    const supplierId = "00000000-0000-4000-8000-000000000002";
+
+    mockSupabase.from = vi.fn((table: string) => {
+      if (table === "supplier_contact_requests") {
+        return createMaybeSingleQuery({
+          data: {
+            id: inquiryId,
+            supplier_id: supplierId,
+            booking_id: bookingId,
+            supplier_profiles: { slug: "sai-s-photography" },
+          },
+          error: null,
+        });
+      }
+      if (table === "booking_suppliers") {
+        return createMaybeSingleQuery({
+          data: {
+            id: "00000000-0000-4000-8000-000000000009",
+            status: "confirmed",
+            supplier_id: supplierId,
+            booking_id: bookingId,
+            bookings: { status: "completed" },
+            supplier_reviews: [{ id: "00000000-0000-4000-8000-000000000011" }],
+          },
+          error: null,
+        });
+      }
+      if (table === "supplier_reviews") {
+        return createInsertSingleQuery({ data: { id: "review" }, error: null });
+      }
+      throw new Error(`Unexpected table ${table}`);
+    });
+
+    const result = await submitSupplierReviewAction({
+      inquiryId,
+      overallRating: 5,
+      comment: "Excellent supplier support.",
+    });
+
+    expect(result.error?.message).toContain("already reviewed");
+    expect(mockSupabase.from).not.toHaveBeenCalledWith("supplier_reviews");
   });
 });

@@ -102,10 +102,39 @@ export async function getCustomerInquiryDetails(
       inquiry: null,
       messages: [],
       quote: null,
+      supplierJob: null,
     };
   }
 
-  const [messagesResult, quoteResult] = await Promise.all([
+  const inquiry = inquiryResult.data as any;
+  const supplierJobPromise =
+    inquiry.booking_id && inquiry.supplier_id
+      ? supabase
+          .from("booking_suppliers")
+          .select(
+            `
+            id,
+            status,
+            supplier_id,
+            booking_id,
+            bookings (
+              status
+            ),
+            supplier_reviews (
+              id,
+              overall_rating,
+              comment,
+              status,
+              created_at
+            )
+            `,
+          )
+          .eq("booking_id", inquiry.booking_id)
+          .eq("supplier_id", inquiry.supplier_id)
+          .maybeSingle()
+      : Promise.resolve({ data: null, error: null });
+
+  const [messagesResult, quoteResult, supplierJobResult] = await Promise.all([
     supabase
       .from("supplier_inquiry_messages")
       .select("id, sender_id, message, created_at")
@@ -116,6 +145,7 @@ export async function getCustomerInquiryDetails(
       .select("*, supplier_quote_items(*)")
       .eq("inquiry_id", inquiryId)
       .maybeSingle(),
+    supplierJobPromise,
   ]);
 
   if (messagesResult.error) {
@@ -134,9 +164,18 @@ export async function getCustomerInquiryDetails(
     throw new Error("Failed to fetch service proposal.");
   }
 
+  if (supplierJobResult.error) {
+    console.error(
+      "[getCustomerInquiryDetails] Supplier job error:",
+      supplierJobResult.error.message,
+    );
+    throw new Error("Failed to fetch supplier review status.");
+  }
+
   return {
     inquiry: inquiryResult.data,
     messages: messagesResult.data ?? [],
     quote: quoteResult.data ?? null,
+    supplierJob: supplierJobResult.data ?? null,
   };
 }

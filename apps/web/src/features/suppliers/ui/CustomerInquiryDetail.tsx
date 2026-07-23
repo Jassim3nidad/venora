@@ -13,6 +13,7 @@ import {
   FileText,
   Loader2,
   MapPin,
+  Star,
   Store,
   Users,
   XCircle,
@@ -38,6 +39,7 @@ import {
   buildInquiryTimeline,
   canCustomerActOnQuote,
   getInquiryDisplayStatus,
+  getSupplierReviewState,
   type CustomerInquiryTone,
 } from "../application/customer-inquiry.logic";
 import { formatResponseTime } from "../utils/supplier-format";
@@ -114,6 +116,11 @@ function humanizeStatus(value?: string | null) {
 function getQuoteItems(quote: any) {
   const items = quote?.supplier_quote_items;
   return Array.isArray(items) ? items : [];
+}
+
+function getFirstRelated(value: any) {
+  if (Array.isArray(value)) return value[0] ?? null;
+  return value ?? null;
 }
 
 function formatLineItemAmount(
@@ -299,11 +306,13 @@ export function CustomerInquiryDetail({
   inquiry,
   messages,
   quote,
+  supplierJob,
   isPreviewMode = false,
 }: {
   inquiry: any;
   messages: any[];
   quote: any;
+  supplierJob?: any;
   isPreviewMode?: boolean;
 }) {
   const router = useRouter();
@@ -332,6 +341,15 @@ export function CustomerInquiryDetail({
   const timeline = buildInquiryTimeline(inquiry, messages, quote).filter(
     (item) => item.label && formatTimelineDate(item.at),
   );
+  const supplierJobBooking = getFirstRelated(supplierJob?.bookings);
+  const supplierJobReview = getFirstRelated(supplierJob?.supplier_reviews);
+  const supplierReviewState = getSupplierReviewState({
+    quoteStatus: quote?.status,
+    jobStatus: supplierJob?.status,
+    bookingStatus: supplierJobBooking?.status ?? booking?.status,
+    reviewId: supplierJobReview?.id,
+    hasLinkedBooking: Boolean(inquiry.booking_id ?? booking?.id),
+  });
   const quoteItems = getQuoteItems(quote);
   const canActOnQuote = canCustomerActOnQuote(quote);
   const quoteTotal = formatCurrency(quote?.total);
@@ -442,6 +460,15 @@ export function CustomerInquiryDetail({
               >
                 <CalendarDays className="h-4 w-4" />
                 View Venue Booking
+              </Link>
+            ) : null}
+            {supplierReviewState.canReview || supplierReviewState.hasReview ? (
+              <Link
+                href={`/inquiries/${inquiry.id}/review`}
+                className="flex h-11 whitespace-nowrap items-center justify-center gap-2 rounded-2xl border border-[#BFDBFE] bg-[#EFF6FF] px-4 text-sm font-bold text-[#1D4ED8] hover:bg-[#DBEAFE]"
+              >
+                <Star className="h-4 w-4" />
+                {supplierReviewState.hasReview ? "View Review" : "Review Supplier"}
               </Link>
             ) : null}
           </div>
@@ -796,9 +823,28 @@ export function CustomerInquiryDetail({
                   isPending={isPending}
                   onChoose={openActionDialog}
                 />
+              ) : supplierReviewState.canReview ||
+                supplierReviewState.hasReview ? (
+                <>
+                  <p className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-medium leading-6 text-slate-600">
+                    {supplierReviewState.description}
+                  </p>
+                  <Link
+                    href={`/inquiries/${inquiry.id}/review`}
+                    className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#2563EB] px-5 text-sm font-bold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1D4ED8]"
+                  >
+                    <Star className="h-4 w-4" />
+                    {supplierReviewState.hasReview
+                      ? "View supplier review"
+                      : "Review supplier"}
+                  </Link>
+                </>
               ) : (
                 <p className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-medium leading-6 text-slate-600">
-                  {displayStatus.description}
+                  {supplierReviewState.state === "waiting_for_completion" ||
+                  supplierReviewState.state === "waiting_for_acceptance"
+                    ? supplierReviewState.description
+                    : displayStatus.description}
                 </p>
               )}
             </div>

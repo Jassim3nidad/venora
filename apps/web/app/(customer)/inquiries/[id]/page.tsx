@@ -48,6 +48,7 @@ export default async function CustomerInquiryDetailPage({
       inquiry={data.inquiry}
       messages={data.messages}
       quote={data.quote}
+      supplierJob={data.supplierJob}
     />
   );
 }

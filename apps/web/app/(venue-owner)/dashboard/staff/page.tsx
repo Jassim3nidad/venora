@@ -184,6 +184,7 @@ export default async function StaffPage() {
     (invitations ?? []) as InvitationRow[]
   ).map((invitation) => ({
     id: invitation.id,
+    organizationId: invitation.organization_id,
     email: invitation.email,
     organization:
       organizationById.get(invitation.organization_id) ?? "Organization",
