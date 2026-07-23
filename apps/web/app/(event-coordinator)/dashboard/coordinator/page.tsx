@@ -36,6 +36,18 @@ export default async function CoordinatorDashboardPage() {
           .limit(1)
       : { data: [] };
 
+  const { data: pendingInvitationsRaw } = await supabase
+    .from("organization_member_invitations")
+    .select("id, organization_id, organizations(name), created_at")
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+
+  const pendingInvitations = (pendingInvitationsRaw ?? []).map((inv: any) => ({
+    id: inv.id,
+    organizationName: inv.organizations?.name ?? "Unknown Organization",
+    date: formatDate(inv.created_at),
+  }));
+
   let venuesQuery = supabase.from("venues").select("id, name, status");
   if (!isAdmin) venuesQuery = venuesQuery.in("id", venueIds);
   const { data: venues } =
@@ -119,6 +131,7 @@ export default async function CoordinatorDashboardPage() {
       completedEventCount={completedEventCount}
       upcomingEvents={upcomingEvents}
       managedVenues={managedVenues}
+      pendingInvitations={pendingInvitations}
     />
   );
 }

@@ -48,6 +48,21 @@ type QuoteLike = {
   updated_at?: string | null;
 };
 
+export type SupplierReviewState =
+  | "ready"
+  | "submitted"
+  | "waiting_for_completion"
+  | "waiting_for_acceptance"
+  | "unavailable";
+
+export type SupplierReviewStateResult = {
+  state: SupplierReviewState;
+  canReview: boolean;
+  hasReview: boolean;
+  label: string;
+  description: string;
+};
+
 type InquiryLike = {
   id?: string | null;
   customer_id?: string | null;
@@ -292,6 +307,71 @@ export function canCustomerActOnQuote(
 
   const validThrough = new Date(`${quote.valid_until}T23:59:59.999`);
   return Number.isFinite(validThrough.getTime()) && validThrough >= now;
+}
+
+export function getSupplierReviewState({
+  quoteStatus,
+  jobStatus,
+  bookingStatus,
+  reviewId,
+  hasLinkedBooking,
+}: {
+  quoteStatus?: string | null;
+  jobStatus?: string | null;
+  bookingStatus?: string | null;
+  reviewId?: string | null;
+  hasLinkedBooking?: boolean | null;
+}): SupplierReviewStateResult {
+  if (reviewId) {
+    return {
+      state: "submitted",
+      canReview: false,
+      hasReview: true,
+      label: "Review submitted",
+      description: "Your supplier review has already been submitted.",
+    };
+  }
+
+  if (normalize(quoteStatus) !== "accepted" || !hasLinkedBooking) {
+    return {
+      state: "unavailable",
+      canReview: false,
+      hasReview: false,
+      label: "Review unavailable",
+      description:
+        "Supplier reviews are available after you accept a proposal linked to a venue booking.",
+    };
+  }
+
+  if (normalize(jobStatus) !== "confirmed") {
+    return {
+      state: "waiting_for_acceptance",
+      canReview: false,
+      hasReview: false,
+      label: "Waiting for supplier",
+      description:
+        "Reviews open after the supplier engagement is confirmed for this booking.",
+    };
+  }
+
+  if (["completed", "reviewed"].includes(normalize(bookingStatus))) {
+    return {
+      state: "ready",
+      canReview: true,
+      hasReview: false,
+      label: "Review supplier",
+      description: "Share feedback about this supplier engagement.",
+    };
+  }
+
+  return {
+    state: "waiting_for_completion",
+    canReview: false,
+    hasReview: false,
+    label: "Review opens later",
+    description:
+      "Supplier reviews open after the linked venue booking is completed.",
+  };
 }
 
 export function getCustomerInquiryDetailLayout(): {

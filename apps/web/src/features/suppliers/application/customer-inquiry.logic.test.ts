@@ -6,6 +6,7 @@ import {
   getCustomerInquiryDetailLayout,
   getCustomerInquiryStats,
   getCustomerActivityHref,
+  getSupplierReviewState,
   parseCustomerActivityView,
   getInquiryDisplayStatus,
 } from "./customer-inquiry.logic";
@@ -165,6 +166,47 @@ describe("customer supplier inquiry logic", () => {
         "conversation",
       ],
       sidebar: ["next_step", "proposal_summary", "supplier_trust"],
+    });
+  });
+
+  it("opens supplier reviews only after an accepted confirmed job has a completed booking", () => {
+    expect(
+      getSupplierReviewState({
+        quoteStatus: "accepted",
+        jobStatus: "confirmed",
+        bookingStatus: "completed",
+        hasLinkedBooking: true,
+      }),
+    ).toMatchObject({
+      canReview: true,
+      hasReview: false,
+      state: "ready",
+    });
+
+    expect(
+      getSupplierReviewState({
+        quoteStatus: "accepted",
+        jobStatus: "confirmed",
+        bookingStatus: "confirmed",
+        hasLinkedBooking: true,
+      }),
+    ).toMatchObject({
+      canReview: false,
+      state: "waiting_for_completion",
+    });
+
+    expect(
+      getSupplierReviewState({
+        quoteStatus: "accepted",
+        jobStatus: "confirmed",
+        bookingStatus: "completed",
+        hasLinkedBooking: true,
+        reviewId: "review-1",
+      }),
+    ).toMatchObject({
+      canReview: false,
+      hasReview: true,
+      state: "submitted",
     });
   });
 });

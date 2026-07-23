@@ -7,6 +7,8 @@ import { createServerAction } from "@/src/lib/server-action";
 import {
   ForbiddenError,
   NotFoundError,
+  SupplierReviewAlreadyExistsError,
+  SupplierReviewNotAllowedError,
   UnauthorizedError,
   ValidationError,
 } from "@/src/lib/errors";
@@ -18,6 +20,7 @@ import {
   supplierProfileSchema,
   toggleSupplierFavoriteSchema,
   supplierQuoteActionSchema,
+  supplierReviewSchema,
 } from "../schemas/supplier.schema";
 
 function normalizeOptionalString(value?: string | null) {
@@ -29,6 +32,11 @@ function normalizeOptionalString(value?: string | null) {
 function normalizeOptionalNumber(value?: number | null) {
   if (typeof value !== "number" || !Number.isFinite(value)) return null;
   return value;
+}
+
+function firstRelated<T>(value: T | T[] | null | undefined): T | null {
+  if (Array.isArray(value)) return value[0] ?? null;
+  return value ?? null;
 }
 
 function throwIfSupabaseError(error: { message?: string } | null | undefined) {
@@ -565,6 +573,133 @@ export async function declineSupplierQuoteAction(rawInput: unknown) {
       }
 
       return { success: true };
+    },
+    rawInput,
+  );
+}
+
+export async function submitSupplierReviewAction(rawInput: unknown) {
+  return createServerAction(
+    supplierReviewSchema,
+    async (input) => {
+      const { supabase, user } = await requireUser();
+
+      const { data: inquiry, error: inquiryError } = await supabase
+        .from("supplier_contact_requests")
+        .select(
+          `
+          id,
+          supplier_id,
+          booking_id,
+          supplier_profiles (
+            slug
+          )
+          `,
+        )
+        .eq("id", input.inquiryId)
+        .eq("customer_id", user.id)
+        .maybeSingle();
+
+      throwIfSupabaseError(inquiryError);
+
+      if (!inquiry) {
+        throw new NotFoundError("Supplier inquiry");
+      }
+
+      if (!inquiry.booking_id) {
+        throw new SupplierReviewNotAllowedError(
+          "Supplier reviews are available only for supplier work linked to a venue booking.",
+        );
+      }
+
+      const { data: job, error: jobError } = await supabase
+        .from("booking_suppliers")
+        .select(
+          `
+          id,
+          status,
+          supplier_id,
+          booking_id,
+          bookings (
+            status
+          ),
+          supplier_reviews (
+            id
+          )
+          `,
+        )
+        .eq("booking_id", inquiry.booking_id)
+        .eq("supplier_id", inquiry.supplier_id)
+        .maybeSingle();
+
+      throwIfSupabaseError(jobError);
+
+      if (!job) {
+        throw new SupplierReviewNotAllowedError(
+          "Accept the supplier proposal before reviewing this supplier.",
+        );
+      }
+
+      if (job.status !== "confirmed") {
+        throw new SupplierReviewNotAllowedError(
+          "Supplier reviews open after the supplier engagement is confirmed.",
+        );
+      }
+
+      const booking = firstRelated(job.bookings as { status?: string } | null);
+      const bookingStatus = String(booking?.status ?? "");
+
+      if (!["completed", "reviewed"].includes(bookingStatus)) {
+        throw new SupplierReviewNotAllowedError(
+          "Supplier reviews open after the linked venue booking is completed.",
+        );
+      }
+
+      const existingReviews = Array.isArray(job.supplier_reviews)
+        ? job.supplier_reviews
+        : job.supplier_reviews
+          ? [job.supplier_reviews]
+          : [];
+
+      if (existingReviews.length > 0) {
+        throw new SupplierReviewAlreadyExistsError();
+      }
+
+      const { data, error } = await supabase
+        .from("supplier_reviews")
+        .insert({
+          booking_supplier_id: job.id,
+          customer_id: user.id,
+          supplier_id: inquiry.supplier_id,
+          overall_rating: input.overallRating,
+          comment: normalizeOptionalString(input.comment),
+          status: "published",
+        })
+        .select("id")
+        .single();
+
+      throwIfSupabaseError(error);
+
+      const supplierProfile = firstRelated(
+        inquiry.supplier_profiles as { slug?: string | null } | null,
+      );
+
+      revalidatePath("/bookings");
+      revalidatePath("/inquiries");
+      revalidatePath(`/inquiries/${input.inquiryId}`);
+      revalidatePath(`/inquiries/${input.inquiryId}/review`);
+      revalidatePath("/suppliers");
+      if (supplierProfile?.slug) {
+        revalidatePath(`/suppliers/${supplierProfile.slug}`);
+      }
+      if (inquiry.booking_id) {
+        revalidatePath(`/bookings/${inquiry.booking_id}`);
+      }
+
+      return {
+        reviewId: data.id as string,
+        inquiryId: input.inquiryId,
+      };
     },
     rawInput,
   );

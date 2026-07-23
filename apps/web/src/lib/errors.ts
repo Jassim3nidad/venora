@@ -99,6 +99,17 @@ export class ReviewAlreadyExistsError extends VenoraError {
   }
 }
 
+export class SupplierReviewAlreadyExistsError extends VenoraError {
+  readonly httpStatus = 409;
+
+  constructor() {
+    super(
+      "SUPPLIER_REVIEW_ALREADY_EXISTS",
+      "You have already reviewed this supplier.",
+    );
+  }
+}
+
 // ── 402 ──────────────────────────────────────────────────────
 
 export class PaymentError extends VenoraError {
@@ -163,6 +174,16 @@ export class ReviewBookingNotCompletedError extends VenoraError {
   }
 }
 
+export class SupplierReviewNotAllowedError extends VenoraError {
+  readonly httpStatus = 400;
+
+  constructor(
+    message = "You can review this supplier after the linked venue booking is completed.",
+  ) {
+    super("SUPPLIER_REVIEW_NOT_ALLOWED", message);
+  }
+}
+
 export class ReviewNotFoundError extends VenoraError {
   readonly httpStatus = 404;
 
@@ -215,6 +236,10 @@ export const ERROR_MESSAGES: Record<string, string> = {
   REVIEW_BOOKING_NOT_COMPLETED:
     "You can review this venue once your event has taken place.",
   REVIEW_ALREADY_EXISTS: "You've already submitted a review for this booking.",
+  SUPPLIER_REVIEW_ALREADY_EXISTS:
+    "You've already submitted a review for this supplier.",
+  SUPPLIER_REVIEW_NOT_ALLOWED:
+    "You can review this supplier after the linked booking is completed.",
   REVIEW_NOT_FOUND: "This review could not be found.",
   PHOTO_LIMIT_EXCEEDED: "You can attach up to 5 photos per review.",
   ALREADY_FLAGGED: "You've already reported this review.",

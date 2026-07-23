@@ -185,6 +185,14 @@ function revalidateStaffViews() {
   revalidatePath("/dashboard/coordinator/reports");
 }
 
+function isAuthUsersPermissionError(error: { message?: string } | null) {
+  const message = error?.message?.toLowerCase() ?? "";
+  return (
+    message.includes("permission denied") &&
+    message.includes("table users")
+  );
+}
+
 export async function inviteCoordinatorAction(rawInput: unknown) {
   return createServerAction(
     inviteCoordinatorSchema,
@@ -214,14 +222,6 @@ export async function inviteCoordinatorAction(rawInput: unknown) {
         `/auth/session?next=${encodeURIComponent(acceptPath)}`,
       );
 
-      const { data: existingInvitation } = await supabase
-        .from("organization_member_invitations")
-        .select("id")
-        .eq("organization_id", input.organizationId)
-        .eq("email", input.email)
-        .eq("status", "pending")
-        .maybeSingle();
-
       const payload = {
         organization_id: input.organizationId,
         email: input.email,
@@ -235,17 +235,43 @@ export async function inviteCoordinatorAction(rawInput: unknown) {
         accepted_at: null,
       };
 
-      const writeResult = existingInvitation
+      const { data: existingInvitation, error: selectError } =
+        await supabase
+          .from("organization_member_invitations")
+          .select("id")
+          .eq("organization_id", input.organizationId)
+          .eq("email", input.email)
+          .eq("status", "pending")
+          .maybeSingle();
+
+      if (selectError && !isAuthUsersPermissionError(selectError)) {
+        throw new ValidationError(
+          `Error fetching existing invitation: ${selectError.message}`,
+        );
+      }
+
+      const writeResult = !selectError && existingInvitation
         ? await supabase
             .from("organization_member_invitations")
-            .update(payload)
+            .update({ ...payload, created_at: new Date().toISOString() })
             .eq("id", existingInvitation.id)
         : await supabase
             .from("organization_member_invitations")
             .insert(payload);
 
       if (writeResult.error) {
-        throw new ValidationError("Unable to create the staff invitation.");
+        if (
+          isAuthUsersPermissionError(selectError) &&
+          writeResult.error.code === "23505"
+        ) {
+          throw new ValidationError(
+            "A pending invitation already exists for this email. Apply the latest coordinator invitation migration so existing invitations can be refreshed.",
+          );
+        }
+
+        throw new ValidationError(
+          `Unable to create the staff invitation: ${writeResult.error.message}`,
+        );
       }
 
       let deliveredFlow: CoordinatorEmailFlow;

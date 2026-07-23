@@ -27,6 +27,8 @@ export type CoordinatorVenueRow = {
   status: string;
 };
 
+import { CoordinatorInvitations, type CoordinatorInvitationRow } from "./CoordinatorInvitations";
+
 export type CoordinatorOverviewProps = {
   coordinatorName: string;
   organizationName?: string | null;
@@ -36,6 +38,7 @@ export type CoordinatorOverviewProps = {
   completedEventCount: number;
   upcomingEvents: CoordinatorEventRow[];
   managedVenues: CoordinatorVenueRow[];
+  pendingInvitations?: CoordinatorInvitationRow[];
 };
 
 const QUICK_LINKS = [
@@ -70,6 +73,7 @@ export function CoordinatorOverview({
   completedEventCount,
   upcomingEvents,
   managedVenues,
+  pendingInvitations = [],
 }: CoordinatorOverviewProps) {
   const kpis = [
     {
@@ -110,6 +114,8 @@ export function CoordinatorOverview({
           View Events
         </DashButton>
       </div>
+
+      <CoordinatorInvitations invitations={pendingInvitations} />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {kpis.map((kpi) => (
