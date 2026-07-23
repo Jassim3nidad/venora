@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PartnerApplicationInput } from "../schemas/partner.schema";
+import type { PartnerApplicationInput } from "../schemas/partner.schema";
 
 export function AddressConfirmation({
   onNext,

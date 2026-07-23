@@ -2,7 +2,7 @@
 
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { Booking } from "../hooks/use-calendar";
+import type { Booking } from "../hooks/use-calendar";
 import { Users, Building2 } from "lucide-react";
 
 interface BookingDraggableProps {

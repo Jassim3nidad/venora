@@ -1,4 +1,5 @@
 import type { AdminPermission } from "@/lib/rbac/permissions";
+import type { CoordinatorPermission } from "@/lib/rbac/coordinator-permissions";
 
 export type EnterpriseRole =
   "venue_owner" | "coordinator" | "supplier" | "admin";
@@ -9,13 +10,13 @@ export type NavItem = {
   icon: string;
   badge?: string;
   /**
-   * Admin nav only: the permission required to see this item. Undefined
-   * means "visible to any admin-role account" (the pre-existing default).
+   * Admin/Coordinator nav only: the permission required to see this item. Undefined
+   * means "visible to any role-account" (the pre-existing default).
    * This only hides the link — the destination page/action still enforces
    * the same permission server-side; see EnterpriseShell's navItems prop
-   * and app/(admin)/admin/layout.tsx for where this is applied.
+   * and layouts for where this is applied.
    */
-  permission?: AdminPermission;
+  permission?: AdminPermission | CoordinatorPermission;
 };
 
 export const ROLE_LABELS: Record<EnterpriseRole, string> = {
@@ -40,29 +41,46 @@ export const NAV_BY_ROLE: Record<EnterpriseRole, NavItem[]> = {
   coordinator: [
     { label: "Overview", href: "/dashboard/coordinator", icon: "dashboard" },
     {
-      label: "Events",
-      href: "/dashboard/coordinator/events",
-      icon: "celebration",
+      label: "Venues",
+      href: "/dashboard/coordinator/venues",
+      icon: "location_city",
+      permission: "view_assigned_venues",
+    },
+    {
+      label: "Bookings",
+      href: "/dashboard/coordinator/bookings",
+      icon: "calendar_month",
+      permission: "view_assigned_bookings",
     },
     {
       label: "Calendar",
       href: "/dashboard/coordinator/calendar",
       icon: "event",
+      permission: "view_assigned_calendars",
     },
     {
-      label: "Venues",
-      href: "/dashboard/coordinator/venues",
-      icon: "location_city",
+      label: "Messages",
+      href: "/dashboard/coordinator/messages",
+      icon: "forum",
+      permission: "message_assigned_customers",
     },
     {
       label: "Suppliers",
       href: "/dashboard/coordinator/suppliers",
       icon: "storefront",
+      permission: "view_accredited_suppliers",
+    },
+    {
+      label: "Performance",
+      href: "/dashboard/coordinator/performance",
+      icon: "trending_up",
+      permission: "view_booking_performance",
     },
     {
       label: "Reports",
       href: "/dashboard/coordinator/reports",
       icon: "assessment",
+      permission: "generate_operational_reports",
     },
   ],
   supplier: [

@@ -103,6 +103,10 @@ export default async function EditVenuePage({
   const { id } = await params;
   const query = (await searchParams) ?? {};
   const context = await getOwnerDashboardContext();
+  const { roles, permissions, isAdmin } = context;
+  const isOwner = isAdmin || roles.includes("venue_owner");
+  const canEditDetails = isOwner || permissions.includes("manage_assigned_venue_listings");
+  const canEditPricing = isOwner;
   const venue = await getOwnerVenueById(context, id);
 
   if (!venue) notFound();
@@ -148,6 +152,8 @@ export default async function EditVenuePage({
   async function deleteVenueAction() {
     "use server";
     const actionContext = await getOwnerDashboardContext();
+    const isOwner = actionContext.isAdmin || actionContext.roles.includes("venue_owner");
+    if (!isOwner) return { error: "Only owners can delete venues." };
     const existingVenue = await getOwnerVenueById(
       actionContext,
       id,
@@ -180,6 +186,13 @@ export default async function EditVenuePage({
     "use server";
 
     const actionContext = await getOwnerDashboardContext();
+    const isOwner = actionContext.isAdmin || actionContext.roles.includes("venue_owner");
+    const canEditDetails = isOwner || actionContext.permissions.includes("manage_assigned_venue_listings");
+
+    if (!canEditDetails) {
+      errorRedirect(id, "You do not have permission to edit venue details.");
+    }
+
     const existingVenue = await getOwnerVenueById(
       actionContext,
       id,
@@ -273,8 +286,8 @@ export default async function EditVenuePage({
         municipality: fieldValue(formData, "municipality") || null,
         address,
         description: fieldValue(formData, "description") || null,
-        base_price: basePrice,
-        price_unit: priceUnit,
+        base_price: isOwner ? basePrice : existingVenue.base_price,
+        price_unit: isOwner ? priceUnit : existingVenue.price_unit,
         capacity_min: capacityMin,
         capacity_max: capacityMax,
         indoor_outdoor: indoorOutdoor,
@@ -339,10 +352,11 @@ export default async function EditVenuePage({
       }
     }
 
-    const packageIds = formData
-      .getAll("package_id")
-      .map((value) => String(value));
-    for (const packageId of packageIds) {
+    if (isOwner) {
+      const packageIds = formData
+        .getAll("package_id")
+        .map((value) => String(value));
+      for (const packageId of packageIds) {
       const packageName = fieldValue(formData, `package_${packageId}_name`);
       const packageDescription =
         fieldValue(formData, `package_${packageId}_description`) || null;
@@ -470,11 +484,12 @@ export default async function EditVenuePage({
           is_active: booleanValue(formData, "new_package_is_active"),
         });
 
-      if (newPackageError) {
-        errorRedirect(
-          id,
-          newPackageError.message || "Unable to create package.",
-        );
+        if (newPackageError) {
+          errorRedirect(
+            id,
+            newPackageError.message || "Unable to create package.",
+          );
+        }
       }
     }
 
@@ -532,6 +547,12 @@ export default async function EditVenuePage({
                 Changes here update the venue profile used throughout the
                 marketplace and owner dashboard.
               </p>
+              {!canEditPricing && (
+                <div className="mt-4 flex items-center gap-2 rounded-xl bg-amber-50 p-3 text-sm font-semibold text-amber-800">
+                  <AlertTriangle className="h-5 w-5" />
+                  You have permission to edit venue details, but sensitive pricing and package settings are locked to venue owners only.
+                </div>
+              )}
             </div>
 
             {query.created ? (
@@ -551,6 +572,7 @@ export default async function EditVenuePage({
             ) : null}
 
             <form action={updateVenueAction} className="space-y-5">
+              <fieldset disabled={!canEditDetails} className="space-y-5">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex flex-col gap-2 sm:col-span-2">
                   <label htmlFor="edit-venue-name" className={topLabelClass}>
@@ -620,8 +642,9 @@ export default async function EditVenuePage({
                     step="1"
                     name="base_price"
                     required
+                    disabled={!canEditPricing}
                     defaultValue={venue.base_price}
-                    className={topInputClass}
+                    className={`${topInputClass} ${!canEditPricing ? 'opacity-60 bg-gray-100 cursor-not-allowed' : ''}`}
                   />
                 </div>
 
@@ -635,8 +658,9 @@ export default async function EditVenuePage({
                   <select
                     id="edit-venue-price-unit"
                     name="price_unit"
+                    disabled={!canEditPricing}
                     defaultValue={venue.price_unit}
-                    className={topInputClass}
+                    className={`${topInputClass} ${!canEditPricing ? 'opacity-60 bg-gray-100 cursor-not-allowed' : ''}`}
                   >
                     <option value="per_event">Per event</option>
                     <option value="per_pax">Per guest</option>
@@ -782,7 +806,7 @@ export default async function EditVenuePage({
                   </p>
                 </div>
 
-                <div className="mt-5 space-y-4">
+                <fieldset disabled={!canEditPricing} className="mt-5 space-y-4">
                   {packages.length > 0 ? (
                     packages.map((pkg, index) => (
                       <div
@@ -1074,7 +1098,7 @@ export default async function EditVenuePage({
                       </div>
                     </div>
                   </div>
-                </div>
+                </fieldset>
               </section>
 
               <section className="grid gap-5 rounded-2xl border border-[#e5e7eb] bg-white p-5 lg:grid-cols-2">
@@ -1158,33 +1182,40 @@ export default async function EditVenuePage({
                   Save Changes
                 </button>
               </div>
+              </fieldset>
             </form>
           </div>
         </Panel>
 
         <div className="space-y-6">
-          <VenueVideoUpload
-            venueId={venue.id}
-            organizationId={venue.organization_id}
-          />
-          <VenuePhotoUpload
-            venueId={venue.id}
-            organizationId={venue.organization_id}
-          />
-          <div className="w-full border border-[var(--border-default)] shadow-md overflow-hidden bg-[var(--bg-base)] rounded-3xl mt-6">
-            <div className="flex flex-col space-y-1.5 border-b border-[var(--border-default)] bg-[var(--color-danger-bg)]/30 p-6 pb-4">
-              <h3 className="text-xl font-bold font-display text-[var(--color-danger)] flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5" />
-                Danger Zone
-              </h3>
-              <p className="text-sm text-[var(--text-secondary)] mt-1">
-                Permanently delete this venue and all associated data, packages, and images.
-              </p>
-            </div>
-            <div className="p-6">
-              <DeleteVenueButton onDelete={deleteVenueAction} />
-            </div>
+          <div className={!canEditDetails ? "pointer-events-none opacity-60" : ""}>
+            <VenueVideoUpload
+              venueId={venue.id}
+              organizationId={venue.organization_id}
+            />
           </div>
+          <div className={!canEditDetails ? "pointer-events-none opacity-60 mt-6" : "mt-6"}>
+            <VenuePhotoUpload
+              venueId={venue.id}
+              organizationId={venue.organization_id}
+            />
+          </div>
+          {isOwner && (
+            <div className="w-full border border-[var(--border-default)] shadow-md overflow-hidden bg-[var(--bg-base)] rounded-3xl mt-6">
+              <div className="flex flex-col space-y-1.5 border-b border-[var(--border-default)] bg-[var(--color-danger-bg)]/30 p-6 pb-4">
+                <h3 className="text-xl font-bold font-display text-[var(--color-danger)] flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5" />
+                  Danger Zone
+                </h3>
+                <p className="text-sm text-[var(--text-secondary)] mt-1">
+                  Permanently delete this venue and all associated data, packages, and images.
+                </p>
+              </div>
+              <div className="p-6">
+                <DeleteVenueButton onDelete={deleteVenueAction} />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </DashboardSubPage>

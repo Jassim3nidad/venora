@@ -1,4 +1,4 @@
-import { BusinessProfileDraft } from "../types/business-profile.types";
+import type { BusinessProfileDraft } from "../types/business-profile.types";
 
 export type CompletenessResult = {
   percentage: number;

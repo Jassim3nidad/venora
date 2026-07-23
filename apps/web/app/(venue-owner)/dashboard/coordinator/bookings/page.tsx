@@ -13,6 +13,7 @@ import {
   formatPeso,
   getOwnerDashboardContext,
   getOwnerVenueIds,
+  requireCoordinatorPermission,
 } from "@/lib/dashboard/org-dashboard-data";
 
 export const metadata: Metadata = { title: "Events - Coordinator Dashboard" };
@@ -47,11 +48,12 @@ function formatDate(value?: string | null) {
 
 export default async function CoordinatorEventsPage() {
   const context = await getOwnerDashboardContext();
-  const { supabase } = context;
+  requireCoordinatorPermission("view_assigned_bookings", context);
+  const { supabase, isAdmin } = context;
   const venueIds = await getOwnerVenueIds(context);
 
   const { data: bookings } =
-    venueIds.length > 0
+    isAdmin || venueIds.length > 0
       ? await supabase
           .from("bookings")
           .select(
@@ -111,7 +113,7 @@ export default async function CoordinatorEventsPage() {
       header: "",
       cell: (row) => (
         <DashButton
-          href={`/dashboard/coordinator/events/${row.id}`}
+          href={`/dashboard/coordinator/bookings/${row.id}`}
           variant="secondary"
           icon="visibility"
           className="px-3 py-2 text-xs"

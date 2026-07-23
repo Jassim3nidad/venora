@@ -8,6 +8,7 @@ import BookingCalendar from "@/src/features/calendar/ui/BookingCalendar";
 import {
   getOwnerDashboardContext,
   getOwnerVenueIds,
+  requireCoordinatorPermission,
 } from "@/lib/dashboard/org-dashboard-data";
 
 export const metadata: Metadata = {
@@ -25,6 +26,7 @@ type CalendarVenue = {
 
 export default async function CoordinatorCalendarPage() {
   const context = await getOwnerDashboardContext();
+  requireCoordinatorPermission("view_assigned_calendars", context);
   const { supabase, isAdmin } = context;
   const venueIds = await getOwnerVenueIds(context);
 

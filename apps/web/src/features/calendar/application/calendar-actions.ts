@@ -2,10 +2,11 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import {
+import type {
   UpdateAvailabilityInput,
+  MoveBookingInput} from "../schemas/calendar.schema";
+import {
   updateAvailabilitySchema,
-  MoveBookingInput,
   moveBookingSchema,
 } from "../schemas/calendar.schema";
 import { ACTIVE_BOOKING_STATUSES } from "../utils/availability";

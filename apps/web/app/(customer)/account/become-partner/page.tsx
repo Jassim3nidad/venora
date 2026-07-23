@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { getLatestPartnerApplicationForUser } from "@/features/partner-applications/application/get-partner-application-for-user";
 import { PartnerApplicationProgress } from "@/features/partner-applications/ui/PartnerApplicationProgress";
 import { PartnerWizard } from "@/features/partner-applications/ui/PartnerWizard";

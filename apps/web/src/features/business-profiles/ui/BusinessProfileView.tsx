@@ -11,7 +11,7 @@ import {
   Mail,
   Phone,
 } from "lucide-react";
-import { BusinessProfilePublicView } from "../types/business-profile.types";
+import type { BusinessProfilePublicView } from "../types/business-profile.types";
 import { isOptimizableImageSrc } from "@/src/lib/image-host";
 
 export function BusinessProfileView({

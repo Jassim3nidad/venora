@@ -17,11 +17,13 @@ import {
   UnauthorizedError,
   ValidationError,
 } from "@/src/lib/errors";
+import { DEFAULT_COORDINATOR_PERMISSIONS } from "@/src/lib/rbac/coordinator-permissions";
 
 const inviteCoordinatorSchema = z.object({
   organizationId: z.string().uuid(),
   email: z.string().email().transform((value) => value.trim().toLowerCase()),
   venueIds: z.array(z.string().uuid()).min(1, "Choose at least one venue."),
+  permissions: z.array(z.string()).optional(),
 });
 
 const updateStaffStatusSchema = z.object({
@@ -38,6 +40,12 @@ const updateStaffVenueAssignmentsSchema = z.object({
   organizationId: z.string().uuid(),
   userId: z.string().uuid(),
   venueIds: z.array(z.string().uuid()).min(1, "Choose at least one venue."),
+});
+
+const updateStaffPermissionsSchema = z.object({
+  organizationId: z.string().uuid(),
+  userId: z.string().uuid(),
+  permissions: z.array(z.string()),
 });
 
 async function requireOrganizationOwner(
@@ -229,6 +237,7 @@ export async function inviteCoordinatorAction(rawInput: unknown) {
         role: "coordinator",
         status: "pending",
         venue_ids: venueIds,
+        permissions: input.permissions ?? DEFAULT_COORDINATOR_PERMISSIONS,
         invited_by: owner.id,
         expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         accepted_by: null,
@@ -423,3 +432,32 @@ export async function revokeInvitationAction(rawInput: unknown) {
     rawInput,
   );
 }
+
+export async function updateStaffPermissionsAction(rawInput: unknown) {
+  return createServerAction(
+    updateStaffPermissionsSchema,
+    async (input) => {
+      const supabase = (await createClient()) as any;
+      await requireOrganizationOwner(supabase, input.organizationId);
+
+      const { error } = await supabase
+        .from("organization_members")
+        .update({
+          permissions: input.permissions,
+        })
+        .eq("organization_id", input.organizationId)
+        .eq("user_id", input.userId)
+        .eq("role", "coordinator")
+        .eq("status", "active");
+
+      if (error) {
+        throw new ValidationError("Unable to update permissions.");
+      }
+
+      revalidateStaffViews();
+      return { userId: input.userId, permissions: input.permissions };
+    },
+    rawInput,
+  );
+}
+

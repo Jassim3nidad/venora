@@ -11,6 +11,7 @@ import {
 import {
   getOwnerDashboardContext,
   getOwnerVenueIds,
+  requireCoordinatorPermission,
 } from "@/src/lib/dashboard/org-dashboard-data";
 import {
   DashboardSubPage,
@@ -68,6 +69,15 @@ type BookingRow = {
     note: string | null;
     created_at: string;
   }> | null;
+  booking_supplier_coordinations: Array<{
+    id: string;
+    supplier_id: string;
+    status: string;
+    service_date: string | null;
+    arrival_time: string | null;
+    notes: string | null;
+    supplier_profiles: { business_name: string; avg_rating: number } | null;
+  }> | null;
 };
 
 function formatDate(value?: string | null) {
@@ -107,12 +117,12 @@ function formatCurrency(value?: number | null) {
 export default async function CoordinatorEventDetailPage({ params }: Props) {
   const { id } = await params;
   const context = await getOwnerDashboardContext();
+  requireCoordinatorPermission("view_assigned_bookings", context);
   const { supabase, user, isAdmin } = context;
   const {
     data: { user: authUser },
   } = await supabase.auth.getUser();
   if (!authUser) redirect("/login");
-
   const { data: booking } = await supabase
     .from("bookings")
     .select(
@@ -143,6 +153,15 @@ export default async function CoordinatorEventDetailPage({ params }: Props) {
         status,
         note,
         created_at
+      ),
+      booking_supplier_coordinations(
+        id,
+        supplier_id,
+        status,
+        service_date,
+        arrival_time,
+        notes,
+        supplier_profiles!supplier_id(business_name, avg_rating)
       )
     `,
     )
@@ -184,7 +203,7 @@ export default async function CoordinatorEventDetailPage({ params }: Props) {
       description={`${typedBooking.profiles?.full_name ?? "Customer"} - ${formatDate(typedBooking.event_date)}`}
       action={
         <Link
-          href="/dashboard/coordinator/events"
+          href="/dashboard/coordinator/bookings"
           className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-[#dbe3ef] bg-white px-4 text-sm font-bold text-[#0f172a] shadow-sm shadow-slate-200/60 transition hover:border-[#93c5fd] hover:text-[#1d4ed8]"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -328,6 +347,49 @@ export default async function CoordinatorEventDetailPage({ params }: Props) {
                   </div>
                 </div>
               ))}
+            </div>
+          </section>
+
+          <section className="rounded-[24px] border border-[#e5e7eb] bg-white p-5 shadow-sm shadow-slate-200/60 sm:p-6">
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="text-xl font-black tracking-tight text-[#0f172a]">
+                Supplier Coordination
+              </h2>
+              <Link
+                href={`/dashboard/coordinator/bookings/${typedBooking.id}/assign-supplier`}
+                className="inline-flex items-center gap-1 text-sm font-bold text-[#1d4ed8] hover:underline"
+              >
+                Assign supplier
+              </Link>
+            </div>
+            <div className="mt-4 grid gap-3">
+              {(typedBooking.booking_supplier_coordinations ?? []).length > 0 ? (
+                typedBooking.booking_supplier_coordinations?.map((coord) => (
+                  <div
+                    key={coord.id}
+                    className="rounded-2xl border border-[#e5e7eb] bg-[#f8fbff] p-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-base font-black text-[#0f172a]">
+                          {coord.supplier_profiles?.business_name ?? "Unknown Supplier"}
+                        </p>
+                        <p className="mt-1 text-xs font-semibold text-[#64748b]">
+                          Arrival: {coord.arrival_time ? formatDate(coord.service_date + 'T' + coord.arrival_time) : "Not set"}
+                        </p>
+                        {coord.notes && (
+                          <p className="mt-2 text-sm text-[#475569]">{coord.notes}</p>
+                        )}
+                      </div>
+                      <StatusBadge status={coord.status} />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="rounded-2xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-4 text-sm font-semibold text-[#475569]">
+                  No suppliers assigned to this booking yet.
+                </p>
+              )}
             </div>
           </section>
         </div>

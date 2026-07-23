@@ -4,7 +4,7 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { DashButton } from "./ui";
 import { MaterialIcon } from "./MaterialIcon";
-import { respondToInvitationAction } from "../../../../app/(event-coordinator)/dashboard/coordinator/actions";
+import { respondToInvitationAction } from "../../../../app/(venue-owner)/dashboard/coordinator/actions";
 import { toast } from "sonner";
 
 export type CoordinatorInvitationRow = {

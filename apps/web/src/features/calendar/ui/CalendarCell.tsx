@@ -2,7 +2,7 @@
 
 import { useDroppable } from "@dnd-kit/core";
 import { format, isSameMonth, isToday } from "date-fns";
-import { Booking, VenueAvailability } from "../hooks/use-calendar";
+import type { Booking, VenueAvailability } from "../hooks/use-calendar";
 import {
   AVAILABILITY_BADGE_CLASSES,
   AVAILABILITY_CELL_CLASSES,

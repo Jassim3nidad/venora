@@ -14,6 +14,7 @@ import {
   formatPeso,
   getOwnerDashboardContext,
   getOwnerVenueIds,
+  requireCoordinatorPermission,
 } from "@/lib/dashboard/org-dashboard-data";
 import {
   getBookingDemographics,
@@ -38,6 +39,7 @@ type ReportBooking = {
 
 export default async function CoordinatorReportsPage() {
   const context = await getOwnerDashboardContext();
+  requireCoordinatorPermission("generate_operational_reports", context);
   const { supabase } = context;
   const venueIds = await getOwnerVenueIds(context);
 

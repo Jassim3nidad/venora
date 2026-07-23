@@ -9,6 +9,8 @@ import {
 import {
   formatPeso,
   getOwnerDashboardContext,
+  getOwnerVenueIds,
+  requireCoordinatorPermission,
 } from "@/lib/dashboard/org-dashboard-data";
 
 export const metadata: Metadata = {
@@ -37,7 +39,22 @@ export default async function CoordinatorSuppliersPage({
   searchParams,
 }: Props) {
   const { q, category } = await searchParams;
-  const { supabase } = await getOwnerDashboardContext();
+  const context = await getOwnerDashboardContext();
+  requireCoordinatorPermission("view_accredited_suppliers", context);
+  const { supabase } = context;
+
+  const venueIds = await getOwnerVenueIds(context);
+
+  const { data: venueSuppliers } = venueIds.length > 0 
+    ? await supabase
+        .from("venue_suppliers")
+        .select("supplier_id")
+        .in("venue_id", venueIds)
+    : { data: [] };
+
+  const supplierIds = Array.from(
+    new Set((venueSuppliers ?? []).map((vs: any) => vs.supplier_id))
+  );
 
   const { data: categories } = await supabase
     .from("supplier_categories")
@@ -52,6 +69,17 @@ export default async function CoordinatorSuppliersPage({
     .eq("accreditation_status", "accredited")
     .order("avg_rating", { ascending: false });
 
+  const canSeeAllSuppliers = context.isAdmin || context.roles.includes("venue_owner");
+
+  if (!canSeeAllSuppliers) {
+    if (supplierIds.length > 0) {
+      query = query.in("id", supplierIds);
+    } else {
+      // Force empty result if no suppliers are assigned to the user's venues
+      query = query.in("id", [crypto.randomUUID()]); 
+    }
+  }
+
   if (q) query = query.ilike("business_name", `%${q}%`);
 
   const { data: suppliersRaw } = await query;
@@ -59,9 +87,30 @@ export default async function CoordinatorSuppliersPage({
   // Filtering by an embedded relation's column isn't reliable through the
   // PostgREST query builder here, so the category filter is applied in JS
   // once the (small) accredited supplier list has been fetched.
-  const suppliers = ((suppliersRaw ?? []) as SupplierRow[]).filter((s) =>
+  let suppliers = ((suppliersRaw ?? []) as SupplierRow[]).filter((s) =>
     category ? s.supplier_categories?.slug === category : true,
   );
+
+  // FALLBACK FOR LOCAL TESTING: If the database is completely empty (no suppliers assigned),
+  // we fallback to the sample suppliers so the UI can be tested.
+  if (suppliers.length === 0 && process.env.NODE_ENV === "development") {
+    const { sampleSuppliers } = await import("@/src/features/suppliers/data/sample-suppliers");
+    suppliers = sampleSuppliers
+      .filter((s) => s.accreditationStatus === "accredited")
+      .filter((s) => (category ? s.category?.slug === category : true))
+      .map((s) => ({
+        id: s.id,
+        business_name: s.businessName,
+        description: s.description,
+        base_price: s.basePrice,
+        price_unit: s.priceUnit,
+        avg_rating: s.avgRating,
+        review_count: s.reviewCount,
+        supplier_categories: s.category
+          ? { name: s.category.name, slug: s.category.slug }
+          : null,
+      }));
+  }
 
   return (
     <DashboardSubPage
@@ -146,11 +195,13 @@ export default async function CoordinatorSuppliersPage({
                     ? formatPeso(supplier.base_price)
                     : "Contact for price"}
                 </span>
-                {supplier.price_unit ? (
-                  <span className="text-xs text-[#6b7280]">
-                    {supplier.price_unit.replace(/_/g, " ")}
-                  </span>
-                ) : null}
+                <a
+                  href={`/dashboard/coordinator/suppliers/${supplier.id}`}
+                  className="inline-flex items-center gap-1 text-sm font-bold text-[#1d4ed8] hover:underline"
+                >
+                  View details
+                  <MaterialIcon name="arrow_forward" className="text-sm" />
+                </a>
               </div>
             </Panel>
           ))}
