@@ -16,9 +16,8 @@ const REQUIREMENTS: Record<string, string[]> = {
   ],
   event_coordinator: [
     "Valid Government-Issued ID",
-    "Business Registration (DTI/SEC) or Freelance Proof",
-    "BIR Certificate of Registration (Form 2303)",
-    "Portfolio Link / PDF Deck",
+    "Resume or references for venue operations experience",
+    "Business Registration (DTI/SEC) if you operate as a company",
   ],
   supplier: [
     "Business Registration (DTI/SEC)",
@@ -155,7 +154,9 @@ export function VerificationUpload({
         Verification Documents
       </h2>
       <p className="text-slate-500 mb-8">
-        Please upload the required documents for your business type.
+        {role === "event_coordinator"
+          ? "Upload documents that show you can operate as venue organization staff. Event Coordinators are not hired by customers on Venora."
+          : "Please upload the required documents for your business type."}
       </p>
 
       {error && (

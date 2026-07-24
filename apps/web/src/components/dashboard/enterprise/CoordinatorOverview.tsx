@@ -43,6 +43,7 @@ export type CoordinatorOverviewProps = {
   upcomingEvents: CoordinatorEventRow[];
   managedVenues: CoordinatorVenueRow[];
   pendingInvitations?: CoordinatorInvitationRow[];
+  invitationAccepted?: boolean;
 };
 
 const QUICK_LINKS = [
@@ -82,6 +83,7 @@ export function CoordinatorOverview({
   upcomingEvents,
   managedVenues,
   pendingInvitations = [],
+  invitationAccepted = false,
 }: CoordinatorOverviewProps) {
   const kpis = [
     {
@@ -138,12 +140,19 @@ export function CoordinatorOverview({
             Welcome back, {coordinatorName}
           </h1>
         </div>
-        <DashButton href="/dashboard/coordinator/events" icon="celebration">
+        <DashButton href="/dashboard/coordinator/bookings" icon="celebration">
           View Events
         </DashButton>
       </div>
 
       <CoordinatorInvitations invitations={pendingInvitations} />
+
+      {invitationAccepted ? (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
+          Invitation accepted. You now have access to this organization&apos;s
+          assigned venues and bookings.
+        </div>
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {kpis.map((kpi) => (

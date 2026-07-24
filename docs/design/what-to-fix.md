@@ -27,9 +27,9 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 - [ ] **EC booking “View” links** — Events table still may deep-link into
   venue-owner `/dashboard/bookings/...` and hit unauthorized. Mirror calendar
   fix: coordinator-owned booking detail routes (or shared pages under EC shell).
-- [ ] **Org membership for coordinators** — Finish staff invite / accept so EC
-  role + org attach works without manual/SQL setup
-  (`/dashboard/staff`, `/staff/accept`).
+- [x] **Org membership for coordinators** — Staff invite / accept path is live:
+  VO `/dashboard/staff` → email → `/staff/accept` (or in-dashboard accept).
+  Remaining: runtime email delivery depends on Supabase Auth config.
 - [ ] **Venue card identity** — Card ID/name/slug/detail/favorite must agree
   (UX-02 / known limitations). Prevents wrong venue booked or favorited.
 
@@ -53,16 +53,21 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 
 ### Event Coordinator (largest role gap)
 
-- [ ] Scope or ship **EC MVP**: event detail, coordination actions, messaging,
-  notifications, settings (UX-12).
-- [ ] **Communicate with customers** as a first-class flow (not only partial
-  booking conversation).
-- [ ] Clarify product rule in UI: EC is **org staff**, not customer-hired
-  (avoid become-partner copy overselling “manage clients”).
+- [x] Scope or ship **EC MVP**: event detail, coordination actions, messaging,
+  notifications, settings (UX-12). Booking detail/actions live under
+  `/dashboard/coordinator/bookings/[id]`; Messages inbox; NotificationBell;
+  Settings at `/dashboard/coordinator/settings`. Approve/decline gated by
+  `manage_booking_decisions` (not default for coordinators).
+- [x] **Communicate with customers** as a first-class flow for venue ops:
+  unified EC Messages inbox covers booking chats + replyable venue inquiry
+  threads (`venue_inquiry_messages`). Still not a global CRM / Phase 2 suite.
+- [x] Clarify product rule in UI: EC is **org staff**, not customer-hired
+  (become-partner copy updated; Settings role card already states staff model).
 
 ### Venue Owner
 
-- [ ] Complete **staff invite + permissions** end-to-end (brief: Manage staff).
+- [x] Complete **staff invite + permissions** end-to-end (brief: Manage staff).
+  Invite, venues, permissions, revoke/suspend, accept link + dashboard accept.
 
 ### Supplier ↔ Venue (Phase 2, but brief already lists it)
 
@@ -94,9 +99,10 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 
 ### Messaging & notifications
 
-- [ ] Unified **customer messaging** suite (Phase 2).
-- [ ] Dedicated notification/settings routes for owner / supplier / EC where
-  missing.
+- [ ] Unified **customer messaging** suite across all commercial surfaces (Phase 2;
+  EC booking + venue inquiry threads already shipped).
+- [~] Dedicated notification/settings routes for owner / supplier / EC — EC Settings
+  shipped; owner/supplier gaps may remain.
 
 ### Payments
 
@@ -134,12 +140,10 @@ Do **not** block Phase 1 release on these unless product explicitly expands scop
 | Order | Item | Why |
 | ----: | ---- | --- |
 | 1 | Venue identity + supplier fallback honesty | Stops wrong bookings / fake inventory |
-| 2 | EC booking routes + org invite | Makes coordinator role usable as brief describes |
-| 3 | Staff invite completion (VO) | Unblocks EC attachment |
-| 4 | Payment monitor + disputes decision | Admin brief + ops trust |
-| 5 | Venue↔supplier associate / booking attach | Brief supplier “participate in packages” |
-| 6 | Venue compare + calendar richness | Customer brief polish |
-| 7 | Messaging / notifications / a11y P2 | Ecosystem quality |
+| 2 | Payment monitor + disputes decision | Admin brief + ops trust |
+| 3 | Venue↔supplier associate / booking attach | Brief supplier “participate in packages” |
+| 4 | Venue compare + calendar richness | Customer brief polish |
+| 5 | Messaging / notifications / a11y P2 | Ecosystem quality |
 
 ---
 
@@ -151,6 +155,7 @@ Keep for regression only:
 - [x] Sticky multi-open marketplace filters; View Results mobile-only
 - [x] Duplicate supplier “Recommended” sort removed
 - [x] Auth popup for Bookings / Favorites / Host a Venue + favorite hearts
+- [x] Staff invite + permissions E2E (VO Staff → accept → org membership)
 
 ---
 

@@ -1,6 +1,21 @@
 # Venora API
 
-Code-backed API reference for branch `main`, commit `15e6173b6f695f6d9f5f4a29517badf0b3a3a016`, inspected 2026-07-14.
+Code-backed API reference for the current `main` branch. Regenerate the machine
+contract with `pnpm docs:generate` and verify coverage with `pnpm docs:validate`.
+
+## Start here
+
+| Document                                    | Use when                                                                                                          |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **[API Specification](specification.md)**   | Developer-friendly guide: every active endpoint with methods, auth, params, example JSON, and status/error tables |
+| **[OpenAPI 3.1](openapi.json)**             | Tooling, codegen, Redocly/Swagger UI                                                                              |
+| [Authentication](authentication.md)         | Session cookies, Edge bearers, role matrix                                                                        |
+| [Error handling](error-handling.md)         | Envelopes, HTTP statuses, application error codes                                                                 |
+| [Endpoint inventory](endpoint-inventory.md) | Coverage matrix vs source files                                                                                   |
+| [Webhooks](webhooks.md)                     | PayMongo / Maya receivers                                                                                         |
+| [Server Actions](server-actions.md)         | Non-REST Server Action entry points                                                                               |
+| [Supabase RPC](supabase-rpc.md)             | Database function inventory                                                                                       |
+| [Storage](storage.md)                       | Bucket upload contracts                                                                                           |
 
 ## Scope and authority
 
@@ -8,10 +23,11 @@ This reference covers every confirmed Next.js Route Handler, Next.js Server Acti
 
 Contract precedence:
 
-1. deployed database and code at the inspected commit;
+1. deployed database and code on the inspected branch;
 2. [OpenAPI 3.1](openapi.json) for HTTP surfaces;
-3. this directory for non-REST surfaces;
-4. older design documents only as background.
+3. [API Specification](specification.md) for human examples and auth notes;
+4. this directory for non-REST surfaces;
+5. older design documents only as background.
 
 Base URLs:
 
@@ -43,7 +59,7 @@ or:
 }
 ```
 
-Venue and supplier handlers instead use `{ "success": true, "data": ... }` or `{ "success": false, "error": ... }`. Webhooks use provider-specific acknowledgements. See [error handling](error-handling.md).
+Venue and supplier handlers instead use `{ "success": true, "data": ... }` or `{ "success": false, "error": ... }`. Webhooks use provider-specific acknowledgements. See [error handling](error-handling.md) and the full tables in [API Specification](specification.md).
 
 Browser Route Handlers authenticate with Supabase session cookies. Edge Functions accept `Authorization: Bearer <Supabase access token>`; some allow anonymous use and only attach a user when a valid token exists. Never send service-role keys from a browser.
 
@@ -78,7 +94,7 @@ Browser Route Handlers authenticate with Supabase session cookies. Edge Function
 | `GET /logout`                                  | Sign out and clear Supabase auth cookies              | Session optional                                                                                       | None                                                                                                             | Calls Supabase sign-out, clears auth cookies, redirects `/`                                                                                   | Yes                                                                                                 | None                     |
 | `GET /api/debug`                               | Disabled diagnostic route                             | Public 404                                                                                             | None                                                                                                             | Always returns an empty `404`; no user, inquiry, environment, stack, or configuration data                                                    | Safe and side-effect free                                                                           | None                     |
 
-Detailed request/response schemas, examples, headers, path/query parameters, status codes, and security declarations are in [openapi.json](openapi.json).
+Detailed request/response schemas, examples, headers, path/query parameters, status codes, and security declarations are in [API Specification](specification.md) and [openapi.json](openapi.json).
 
 ## Supabase Edge Functions
 
@@ -96,8 +112,8 @@ All accept `POST` and CORS `OPTIONS`. Their OpenAPI operations use the Edge Func
 
 ## Non-REST references
 
-- [Server Actions](server-actions.md): 78 confirmed action entry points, including six route-local adapters.
-- [Supabase RPC functions](supabase-rpc.md): 94 final database function names, including callable RPCs and internal trigger/helpers.
+- [Server Actions](server-actions.md): confirmed action entry points, including route-local adapters.
+- [Supabase RPC functions](supabase-rpc.md): final database function names, including callable RPCs and internal trigger/helpers.
 - [Storage](storage.md): four buckets and signed/direct upload flows.
 - [Webhooks](webhooks.md): PayMongo reconciliation and Maya limitation.
 - [Endpoint inventory](endpoint-inventory.md): documented/undocumented coverage.

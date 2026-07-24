@@ -118,7 +118,11 @@ erDiagram
 3. A **Venue Owner’s organization** adds them as `organization_members.role = coordinator`.
 4. EC dashboard then scopes to that org’s **venues and bookings** (same org-scoped data helpers as venue owners for discovery/lists).
 
-**Gap:** Staff invite / permission UI is **not active yet** in the venue-owner Staff screen (“Invite and permission workflows are not active yet”). Membership can exist in data (and RLS allows owner insert), but product invite is incomplete. Without org membership, the EC dashboard empty-states ask them to be added by the organization owner.
+**Staff path:** Venue Owner invites from `/dashboard/staff` (org + email + venues +
+permissions). Invitee accepts via email link (`/staff/accept`) or pending banner on
+`/dashboard/coordinator`. Membership writes `organization_members`,
+`venue_coordinator_assignments`, and grants `event_coordinator` role. Owners can
+later change venues, permissions, suspend, or revoke.
 
 ### What is *not* a relationship today
 
@@ -245,7 +249,7 @@ flowchart LR
 - Own a public profile clients browse.
 - Be hired or messaged as a service provider by customers.
 - Full booking detail / messaging / notifications / settings as a first-class EC experience (matrix marks coordinator **PARTIALLY IMPLEMENTED**).
-- Reliable self-serve org attach (invite UI incomplete).
+- Reliable self-serve org attach (staff invite / accept live; email delivery depends on Supabase Auth).
 - End-to-end “I coordinate suppliers onto this booking” product (Phase 2 schema).
 
 ### How EC relates to each actor
@@ -294,7 +298,7 @@ If Lina is not in `organization_members`, she cannot usefully “pick up” Ana�
 | Venue marketplace + booking + deposit | **Yes** (broadly implemented) |
 | Supplier marketplace + inquiry + quotes | **Yes** (broadly implemented) |
 | Customer hires Event Coordinator | **No** |
-| EC as org staff on venues | **Intended yes; invite UX incomplete** |
+| EC as org staff on venues | **Yes** — invite + accept + venue/permission scope |
 | Suppliers attached as jobs on a venue booking | **Schema Phase 2; no finished attach UI** |
 | EC full client-management product | **No (partial dashboard only)** |
 

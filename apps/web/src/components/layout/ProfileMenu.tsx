@@ -33,6 +33,7 @@ interface ProfileMenuProps {
   exitDashboardHref?: string | undefined;
   showEnterVenueDashboard?: boolean | undefined;
   showEnterSupplierDashboard?: boolean | undefined;
+  settingsHref?: string | undefined;
 }
 
 function SoonBadge() {
@@ -58,6 +59,7 @@ export default function ProfileMenu({
   exitDashboardHref = "/venues",
   showEnterVenueDashboard = false,
   showEnterSupplierDashboard = false,
+  settingsHref = "/settings",
 }: ProfileMenuProps) {
   const avatarInitial =
     displayName?.charAt(0)?.toUpperCase() ||
@@ -151,7 +153,7 @@ export default function ProfileMenu({
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
-          <Link href="/settings" className="cursor-pointer">
+          <Link href={settingsHref} className="cursor-pointer">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#F9FAFB] text-[#2563EB]">
               <Settings className="h-4 w-4" />
             </div>

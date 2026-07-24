@@ -25,7 +25,8 @@ you are changing.
 
 ## Contract and product references
 
-- [API documentation](api/README.md) and [OpenAPI 3.1](api/openapi.json)
+- [API documentation](api/README.md), [API Specification](api/specification.md),
+  and [OpenAPI 3.1](api/openapi.json)
 - [UI/UX documentation](design/README.md)
 - [API conventions](conventions/api-conventions.md)
 - [Error conventions](conventions/error-handling.md)

@@ -36,8 +36,9 @@ export default async function BecomePartnerPage() {
                 Submit a new application
               </h2>
               <p className="mt-2 max-w-2xl text-sm text-slate-500">
-                Complete the steps below to apply again as a venue owner, event
-                coordinator, or supplier.
+                Complete the steps below to apply again as a venue owner,
+                supplier, or event coordinator (venue organization staff—not a
+                customer-hired planner).
               </p>
             </header>
           ) : null}

@@ -191,7 +191,6 @@ export async function createInquiryAction(rawInput: unknown) {
         );
       }
 
-      // Insert inquiry record
       const { data, error } = await supabase
         .from("inquiries")
         .insert({
@@ -200,10 +199,54 @@ export async function createInquiryAction(rawInput: unknown) {
           message,
           status: "new",
         })
-        .select()
+        .select("id, venue_id, customer_id, message, status, created_at")
         .single();
 
       if (error) throw error;
+
+      const { error: messageError } = await supabase
+        .from("venue_inquiry_messages")
+        .insert({
+          inquiry_id: data.id,
+          sender_id: user.id,
+          message,
+        });
+
+      if (messageError) {
+        console.error(
+          "[venue_inquiry_messages] seed error:",
+          messageError.message,
+        );
+      }
+
+      try {
+        const { data: venue } = await supabase
+          .from("venues")
+          .select("organization_id, organizations:organization_id(owner_id)")
+          .eq("id", venueId)
+          .maybeSingle();
+
+        const org = venue?.organizations
+          ? Array.isArray(venue.organizations)
+            ? venue.organizations[0]
+            : venue.organizations
+          : null;
+
+        const { notifyVenueTeamOfInquiry } = await import(
+          "./inquiry-messages-actions"
+        );
+        await notifyVenueTeamOfInquiry(supabase, {
+          inquiryId: data.id,
+          venueId,
+          organizationId: venue?.organization_id ?? null,
+          venueOrgOwnerId: org?.owner_id ?? null,
+          preview: message,
+          excludeUserId: user.id,
+        });
+      } catch {
+        // Notification failure must not block inquiry create
+      }
+
       return data;
     },
     rawInput,

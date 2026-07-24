@@ -26,9 +26,11 @@ import {
 import { ChevronDown } from "lucide-react";
 import {
   COORDINATOR_PERMISSIONS,
+  COORDINATOR_PERMISSION_LABELS,
   DEFAULT_COORDINATOR_PERMISSIONS,
   type CoordinatorPermission,
 } from "@/src/lib/rbac/coordinator-permissions";
+import { useRouter } from "next/navigation";
 
 export type OrganizationOption = {
   id: string;
@@ -57,6 +59,7 @@ export type StaffDisplayRow = {
 
 export type InvitationDisplayRow = {
   id: string;
+  organizationId: string;
   email: string;
   organization: string;
   status: string;
@@ -82,6 +85,7 @@ export function StaffManagementClient({
   staffRows,
   invitationRows,
 }: StaffManagementClientProps) {
+  const router = useRouter();
   const [selectedOrganizationId, setSelectedOrganizationId] = useState(
     organizations[0]?.id ?? "",
   );
@@ -213,6 +217,7 @@ export function StaffManagementClient({
           ? `Coordinator sign-in email sent to ${result.data.email}.`
           : `Coordinator invitation sent to ${result.data.email}.`,
       );
+      router.refresh();
     });
   };
 
@@ -237,6 +242,7 @@ export function StaffManagementClient({
       }
 
       toast.success(`Venue access updated for ${row.name}.`);
+      router.refresh();
     });
   };
 
@@ -256,6 +262,7 @@ export function StaffManagementClient({
       }
 
       toast.success(`Permissions updated for ${row.name}.`);
+      router.refresh();
     });
   };
 
@@ -276,6 +283,7 @@ export function StaffManagementClient({
       }
 
       toast.success(`${row.name} is now ${status}.`);
+      router.refresh();
     });
   };
 
@@ -289,6 +297,7 @@ export function StaffManagementClient({
       }
 
       toast.success(`Invitation for ${row.email} revoked.`);
+      router.refresh();
     });
   };
 
@@ -469,28 +478,32 @@ export function StaffManagementClient({
   ];
 
   const currentStaffRows = useMemo(
-    () => staffRows.filter((row) => row.organizationId === selectedOrganizationId),
-    [staffRows, selectedOrganizationId]
+    () =>
+      staffRows.filter((row) => row.organizationId === selectedOrganizationId),
+    [staffRows, selectedOrganizationId],
   );
 
   const currentInvitationRows = useMemo(
-    () => invitationRows.filter((row) => (row as any).organizationId === selectedOrganizationId),
-    [invitationRows, selectedOrganizationId]
+    () =>
+      invitationRows.filter(
+        (row) =>
+          row.organizationId === selectedOrganizationId &&
+          row.status === "pending",
+      ),
+    [invitationRows, selectedOrganizationId],
   );
 
   const activeCoordinatorCount = currentStaffRows.filter(
     (row) => row.status === "active",
   ).length;
-  const pendingInvitationCount = currentInvitationRows.filter(
-    (row) => row.status === "pending",
-  ).length;
+  const pendingInvitationCount = currentInvitationRows.length;
   const selectedVenueCount = selectedVenueIds.length;
 
   return (
     <div className="space-y-5">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[
-          ["Coordinators", staffRows.length.toString()],
+          ["Coordinators", currentStaffRows.length.toString()],
           ["Active access", activeCoordinatorCount.toString()],
           ["Pending invites", pendingInvitationCount.toString()],
           ["Managed venues", selectedOrganizationVenues.length.toString()],
@@ -512,7 +525,7 @@ export function StaffManagementClient({
       <Panel className="rounded-2xl">
         <PanelHeader
           title="Invite coordinator"
-          description="Choose an organization, enter the coordinator email, then assign the venues they can manage."
+          description="Choose an organization, enter the coordinator email, assign venues, and set permissions. Approve/decline stays off unless you grant it."
         />
         <div className="grid gap-5 xl:grid-cols-[minmax(280px,380px)_1fr]">
           <form onSubmit={handleInvite} className="space-y-4">
@@ -611,7 +624,7 @@ export function StaffManagementClient({
                     className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#cbd5e1] text-[#2563eb]"
                   />
                   <span className="min-w-0 text-[13px] leading-snug">
-                    {permission.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                    {COORDINATOR_PERMISSION_LABELS[permission]}
                   </span>
                 </label>
               ))}
@@ -626,10 +639,10 @@ export function StaffManagementClient({
           description="Active coordinators can use the coordinator dashboard for assigned organization work."
         />
         <DataTable
-          rows={staffRows}
+          rows={currentStaffRows}
           columns={staffColumns}
           keyFn={(row) => row.id}
-          emptyMessage="No coordinators have accepted an invitation yet."
+          emptyMessage="No coordinators have accepted an invitation for this organization yet."
         />
       </Panel>
 
@@ -661,13 +674,13 @@ export function StaffManagementClient({
       <Panel className="rounded-2xl">
         <PanelHeader
           title="Pending Invitations"
-          description="Invitation links expire after 7 days and can be revoked anytime."
+          description="Invitation links expire after 7 days and can be revoked anytime. Existing users can also accept from the coordinator dashboard."
         />
         <DataTable
-          rows={invitationRows.filter((row) => row.status === "pending")}
+          rows={currentInvitationRows}
           columns={invitationColumns}
           keyFn={(row) => row.id}
-          emptyMessage="No pending coordinator invitations."
+          emptyMessage="No pending coordinator invitations for this organization."
         />
       </Panel>
     </div>
@@ -804,7 +817,7 @@ function StaffAccessEditor({
                     className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#cbd5e1] text-[#2563eb]"
                   />
                   <span className="min-w-0 text-[13px] leading-snug">
-                    {permission.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                    {COORDINATOR_PERMISSION_LABELS[permission]}
                   </span>
                 </label>
               );

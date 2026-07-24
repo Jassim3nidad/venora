@@ -24,8 +24,8 @@ Related: [role experience matrix](role-experience-matrix.md),
 | Role | Brief fit |
 | ---- | --------- |
 | Customer | Mostly satisfied (compare is the main gap) |
-| Venue Owner | Mostly satisfied (staff invite depth partial) |
-| Event Coordinator | Only partially aligned |
+| Venue Owner | Mostly satisfied |
+| Event Coordinator | Mostly aligned (MVP + messaging + org staff invite path) |
 | Accredited Supplier | Profile/marketplace yes; venue-package association no |
 | Platform Administrator | Mostly satisfied (payment monitor / disputes gaps) |
 
@@ -57,12 +57,13 @@ Related: [role experience matrix](role-experience-matrix.md),
 - [x] Manage booking calendars — `/dashboard/calendar`
 - [x] Receive inquiries — `/dashboard/bookings` pending pipeline
 - [x] Accept or decline bookings — owner booking decision RPCs/UI
-- [~] Manage staff — `/dashboard/staff` exists; invite/org-attach incomplete
+- [x] Manage staff — `/dashboard/staff` invite + venue assignment + permissions;
+  accept via `/staff/accept` or coordinator dashboard; owner-only mutate
 - [x] Monitor business analytics — `/dashboard/analytics`
 
 **Backlog (Venue Owner)**
 
-- [ ] Complete staff invite / membership workflows end-to-end
+- [x] Complete staff invite / membership workflows end-to-end
 
 ---
 
@@ -72,25 +73,32 @@ Brief: operational manager for one or more venue accounts (listings, bookings,
 calendars, customer communication, suppliers, performance, reports).
 
 - [~] Managing venue listings — org venue list/discovery; not full owner CRUD
-- [~] Coordinating bookings — Events list/detail; coordination product incomplete
+- [x] Coordinating bookings — `/dashboard/coordinator/bookings` list + detail;
+  approve/decline/complete when `manage_booking_decisions` is granted
 - [x] Managing calendars — `/dashboard/coordinator/calendar`
-- [~] Communicating with customers — some booking conversation; no full messaging CRM
-- [~] Coordinating accredited suppliers — discovery only; attach-to-booking unfinished
-- [~] Monitoring booking performance — overview/pipeline; not full analytics suite
+- [x] Communicating with customers — Messages inbox with booking chats + venue
+  inquiry threads (`/dashboard/coordinator/messages`, `/account/venue-inquiries`)
+- [~] Coordinating accredited suppliers — discovery + assign UI; `booking_suppliers` path unfinished
+- [~] Monitoring booking performance — `/dashboard/coordinator/performance`
 - [x] Generating operational reports — `/dashboard/coordinator/reports`
+- [x] Settings / notifications — `/dashboard/coordinator/settings` + shell NotificationBell
 
 **Notes**
 
 - Customers **cannot hire** an Event Coordinator on Venora; EC is org staff after
-  partner approval + organization membership.
-- Role overall remains **PARTIALLY IMPLEMENTED** in the experience matrix.
+  partner approval + organization membership. Become-partner and Settings copy
+  state this explicitly.
+- Role overall remains **PARTIALLY IMPLEMENTED** in the experience matrix
+  (supplier attach + admin depth gaps).
 
 **Backlog (Event Coordinator)**
 
-- [ ] Reliable org membership / invite onboarding
-- [ ] First-class booking coordination + messaging
+- [x] Reliable org membership / invite onboarding (`/dashboard/staff` → email →
+  `/staff/accept` or in-dashboard accept)
+- [x] First-class booking + venue-inquiry customer messaging (ops-scoped; not global CRM)
 - [ ] Attach suppliers to venue bookings (Phase 2)
 - [ ] Deeper booking-performance analytics
+- [x] Fix become-partner copy (EC = org staff, not hired)
 
 ---
 
