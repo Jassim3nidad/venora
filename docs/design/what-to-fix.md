@@ -53,12 +53,17 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 
 ### Event Coordinator (largest role gap)
 
-- [ ] Scope or ship **EC MVP**: event detail, coordination actions, messaging,
-  notifications, settings (UX-12).
-- [ ] **Communicate with customers** as a first-class flow (not only partial
-  booking conversation).
+- [x] Scope or ship **EC MVP**: event detail, coordination actions, messaging,
+  notifications, settings (UX-12). Booking detail/actions live under
+  `/dashboard/coordinator/bookings/[id]`; Messages inbox; NotificationBell;
+  Settings at `/dashboard/coordinator/settings`. Approve/decline gated by
+  `manage_booking_decisions` (not default for coordinators).
+- [x] **Communicate with customers** as a first-class flow for venue ops:
+  unified EC Messages inbox covers booking chats + replyable venue inquiry
+  threads (`venue_inquiry_messages`). Still not a global CRM / Phase 2 suite.
 - [ ] Clarify product rule in UI: EC is **org staff**, not customer-hired
-  (avoid become-partner copy overselling “manage clients”).
+  (avoid become-partner copy overselling “manage clients”). Settings role card
+  clarifies org-staff model; become-partner copy still needs fix.
 
 ### Venue Owner
 
@@ -94,9 +99,10 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 
 ### Messaging & notifications
 
-- [ ] Unified **customer messaging** suite (Phase 2).
-- [ ] Dedicated notification/settings routes for owner / supplier / EC where
-  missing.
+- [ ] Unified **customer messaging** suite across all commercial surfaces (Phase 2;
+  EC booking + venue inquiry threads already shipped).
+- [~] Dedicated notification/settings routes for owner / supplier / EC — EC Settings
+  shipped; owner/supplier gaps may remain.
 
 ### Payments
 

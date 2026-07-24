@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   Lock,
   Mail,
+  MessageSquareText,
   Receipt,
   UserRound,
   type LucideIcon,
@@ -41,6 +42,12 @@ export const ACCOUNT_NAV_ITEMS: AccountNavItem[] = [
     label: "Supplier Inquiries",
     description: "Messages and service proposals",
     icon: Mail,
+  },
+  {
+    href: "/account/venue-inquiries",
+    label: "Venue Inquiries",
+    description: "Pre-booking questions to venues",
+    icon: MessageSquareText,
   },
   {
     href: "/account/payments",

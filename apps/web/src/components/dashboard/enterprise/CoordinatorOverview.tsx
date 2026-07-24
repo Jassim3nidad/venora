@@ -138,7 +138,7 @@ export function CoordinatorOverview({
             Welcome back, {coordinatorName}
           </h1>
         </div>
-        <DashButton href="/dashboard/coordinator/events" icon="celebration">
+        <DashButton href="/dashboard/coordinator/bookings" icon="celebration">
           View Events
         </DashButton>
       </div>

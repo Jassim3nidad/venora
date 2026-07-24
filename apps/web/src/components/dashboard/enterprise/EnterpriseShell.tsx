@@ -190,6 +190,11 @@ function TopBar({
           email={userEmail ?? ""}
           avatarUrl={userAvatar}
           showExitDashboard
+          settingsHref={
+            role === "coordinator"
+              ? "/dashboard/coordinator/settings"
+              : "/settings"
+          }
         />
       </div>
     </header>
@@ -238,6 +243,11 @@ function DesktopTopBar({
           email={userEmail ?? ""}
           avatarUrl={userAvatar}
           showExitDashboard
+          settingsHref={
+            role === "coordinator"
+              ? "/dashboard/coordinator/settings"
+              : "/settings"
+          }
         />
       </div>
     </div>

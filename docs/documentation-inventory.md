@@ -40,7 +40,8 @@ external environment. Historical documents remain useful only for provenance.
 
 | File                                        | Purpose                     | Audience                   | Accuracy / relevance   | Duplicate or conflict                | Missing / broken / unsafe         | Action               |
 | ------------------------------------------- | --------------------------- | -------------------------- | ---------------------- | ------------------------------------ | --------------------------------- | -------------------- |
-| `docs/api/README.md`                        | HTTP overview/index         | API consumers              | CURRENT / API audit    | None                                 | Seven semantic warnings elsewhere | Retain authoritative |
+| `docs/api/README.md`                        | HTTP overview/index         | API consumers              | CURRENT / API audit    | Points to specification              | Seven semantic warnings elsewhere | Retain authoritative |
+| `docs/api/specification.md`                 | Full HTTP examples/spec     | API consumers              | CURRENT / API audit    | Complements OpenAPI                  | None                              | Retain authoritative |
 | `docs/api/authentication.md`                | API auth requirements       | API consumers              | CURRENT / API audit    | Canonical auth adds lifecycle        | None                              | Retain               |
 | `docs/api/endpoint-inventory.md`            | 31 HTTP operations          | API consumers              | CURRENT / API audit    | OpenAPI mirrors contracts            | None                              | Retain               |
 | `docs/api/error-handling.md`                | Implemented API errors      | API consumers              | CURRENT / API audit    | Old proposed envelope conflicts      | Mixed envelopes are documented    | Retain               |
