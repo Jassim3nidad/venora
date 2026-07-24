@@ -27,7 +27,7 @@ Related: [role experience matrix](role-experience-matrix.md),
 | Venue Owner | Mostly satisfied |
 | Event Coordinator | Mostly aligned (MVP + messaging + org staff invite path) |
 | Accredited Supplier | Profile/marketplace yes; venue-package association no |
-| Platform Administrator | Mostly satisfied (payment monitor / disputes gaps) |
+| Platform Administrator | Mostly satisfied (disputes depth gap) |
 
 ---
 
@@ -131,12 +131,12 @@ calendars, customer communication, suppliers, performance, reports).
 - [x] Reports — `/admin/reports` (+ audit logs)
 - [x] AI settings — `/admin/ai-configuration`
 - [x] Marketplace administration — `/admin/marketplace`
-- [~] Payment monitoring — no dedicated module; signals elsewhere; Maya incomplete
-- [~] Disputes — placeholder route (not full case management)
+- [x] Payment monitoring — `/admin/payments` transactions, refunds, webhook attention
+- [~] Disputes — list/detail exist; thin lifecycle vs full case management
 
 **Backlog (Admin)**
 
-- [ ] Dedicated payment / refund monitoring workspace
+- [x] Dedicated payment / refund monitoring workspace
 - [ ] Complete disputes case management
 - [ ] Finish Maya (or keep disabled) before production enablement
 

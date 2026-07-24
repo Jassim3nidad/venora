@@ -210,6 +210,12 @@ export const NAV_BY_ROLE: Record<EnterpriseRole, NavItem[]> = {
       permission: "commissions.view",
     },
     {
+      label: "Payments",
+      href: "/admin/payments",
+      icon: "account_balance_wallet",
+      permission: "commissions.view",
+    },
+    {
       label: "Marketplace",
       href: "/admin/marketplace",
       icon: "storefront",
