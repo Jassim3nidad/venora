@@ -107,6 +107,13 @@ export async function middleware(request: NextRequest) {
       ["POST", "PUT", "DELETE", "PATCH"].includes(method)
     ) {
       maxRequests = 50; // Admin mutations limit
+    } else if (
+      method === "POST" &&
+      /^\/api\/suppliers\/[^/]+\/contact$/.test(path)
+    ) {
+      maxRequests = 10; // Supplier contact: 10 per minute per IP
+    } else if (method === "GET" && path === "/api/admin/reports/export") {
+      maxRequests = 5; // Admin report export: 5 per minute per IP
     }
 
     // Check Rate Limit (1 minute window)
