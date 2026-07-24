@@ -11,10 +11,10 @@ const CATEGORIES = {
     "Other",
   ],
   event_coordinator: [
-    "Full-Service Planning",
-    "On-the-Day Coordination",
-    "Destination Weddings",
-    "Corporate Events",
+    "Venue operations support",
+    "Booking coordination",
+    "On-site event day staffing",
+    "Multi-venue organization staff",
     "Other",
   ],
   supplier: [
@@ -46,7 +46,9 @@ export function CategorySelection({
         Which of these best describes your service?
       </h2>
       <p className="text-slate-500 mb-8">
-        This helps us categorize your profile for our customers.
+        {role === "event_coordinator"
+          ? "This helps venue organizations understand how you support their operations."
+          : "This helps us categorize your profile for our customers."}
       </p>
 
       <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 mb-10">

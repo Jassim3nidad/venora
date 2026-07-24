@@ -85,9 +85,10 @@ calendars, customer communication, suppliers, performance, reports).
 **Notes**
 
 - Customers **cannot hire** an Event Coordinator on Venora; EC is org staff after
-  partner approval + organization membership. Settings page states this; become-partner
-  marketing copy may still oversell “manage clients”.
-- Role overall remains **PARTIALLY IMPLEMENTED** in the experience matrix (partner copy + supplier attach gaps).
+  partner approval + organization membership. Become-partner and Settings copy
+  state this explicitly.
+- Role overall remains **PARTIALLY IMPLEMENTED** in the experience matrix
+  (supplier attach + admin depth gaps).
 
 **Backlog (Event Coordinator)**
 
@@ -95,7 +96,7 @@ calendars, customer communication, suppliers, performance, reports).
 - [x] First-class booking + venue-inquiry customer messaging (ops-scoped; not global CRM)
 - [ ] Attach suppliers to venue bookings (Phase 2)
 - [ ] Deeper booking-performance analytics
-- [ ] Fix become-partner copy (EC = org staff, not hired)
+- [x] Fix become-partner copy (EC = org staff, not hired)
 
 ---
 

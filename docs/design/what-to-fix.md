@@ -61,9 +61,8 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 - [x] **Communicate with customers** as a first-class flow for venue ops:
   unified EC Messages inbox covers booking chats + replyable venue inquiry
   threads (`venue_inquiry_messages`). Still not a global CRM / Phase 2 suite.
-- [ ] Clarify product rule in UI: EC is **org staff**, not customer-hired
-  (avoid become-partner copy overselling “manage clients”). Settings role card
-  clarifies org-staff model; become-partner copy still needs fix.
+- [x] Clarify product rule in UI: EC is **org staff**, not customer-hired
+  (become-partner copy updated; Settings role card already states staff model).
 
 ### Venue Owner
 

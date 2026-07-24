@@ -12,7 +12,7 @@ const ROLES = [
     value: "event_coordinator",
     label: "Event Coordinator",
     icon: ClipboardCheck,
-    desc: "Manage clients and plan events.",
+    desc: "Help run assigned venues as organization staff—not a customer-hired planner.",
   },
   {
     value: "supplier",
@@ -31,10 +31,12 @@ export function RoleSelection({ onNext }: { onNext: (role: string) => void }) {
         What type of partner are you?
       </h2>
       <p className="text-slate-500 mb-8">
-        Select the account type that best describes your business.
+        Select the account type that best describes your business. Customers
+        book venues and suppliers on Venora—they do not hire Event Coordinators
+        here.
       </p>
 
-      <div className="grid gap-4 sm:grid-cols-3 mb-10">
+      <div className="grid gap-4 sm:grid-cols-3">
         {ROLES.map((r) => {
           const Icon = r.icon;
           const isSelected = selected === r.value;
@@ -73,7 +75,15 @@ export function RoleSelection({ onNext }: { onNext: (role: string) => void }) {
         })}
       </div>
 
-      <div className="flex justify-end">
+      {selected === "event_coordinator" ? (
+        <div className="mt-6 rounded-2xl border border-[#DBEAFE] bg-[#EFF6FF] px-4 py-3 text-sm font-medium leading-6 text-[#1D4ED8]">
+          Event Coordinators work for a venue organization after approval and
+          staff invitation. You coordinate that org&apos;s bookings and venues—you
+          are not listed for customers to hire independently.
+        </div>
+      ) : null}
+
+      <div className="mt-10 flex justify-end">
         <button
           onClick={() => selected && onNext(selected)}
           disabled={!selected}
