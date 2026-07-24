@@ -184,7 +184,7 @@ export async function submitPartnershipRequest({
     const { data: supplierCheck } = await supabase
       .from("supplier_profiles")
       .select("id")
-      .eq("user_id", user.id)
+      .eq("profile_id", user.id)
       .eq("id", supplierId)
       .maybeSingle();
 

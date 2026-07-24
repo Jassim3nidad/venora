@@ -1,7 +1,7 @@
 const fs = require('fs');
 const { execSync } = require('child_process');
 
-const sql = fs.readFileSync('supabase/migrations/20260723200000_supplier_partnerships.sql', 'utf8');
+const sql = fs.readFileSync('supabase/migrations/20260723300000_supplier_agreements.sql', 'utf8');
 
 const stmts = sql
   .split(/;(?=(?:[^']*'[^']*')*[^']*$)/)

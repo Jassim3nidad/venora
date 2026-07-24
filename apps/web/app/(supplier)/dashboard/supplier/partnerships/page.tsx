@@ -7,6 +7,9 @@ import {
 } from "@/components/dashboard/enterprise";
 import { getRequiredSupplierDashboardContext } from "../_lib/supplier-dashboard-data";
 
+import { SupplierAgreementsList } from "@/src/features/suppliers/ui/SupplierAgreementsList";
+import { ActivePartnershipCard } from "@/src/features/suppliers/ui/ActivePartnershipCard";
+
 export const metadata: Metadata = {
   title: "Venue Partnerships - Supplier Dashboard",
 };
@@ -38,6 +41,7 @@ export default async function SupplierPartnershipsPage() {
     .from("venue_suppliers")
     .select(`
       is_preferred,
+      status,
       venues (
         id,
         name,
@@ -46,6 +50,15 @@ export default async function SupplierPartnershipsPage() {
       )
     `)
     .eq("supplier_id", profile.id);
+
+  const { data: agreements } = await supabase
+    .from("venue_supplier_agreements")
+    .select(`
+      *,
+      venues (name)
+    `)
+    .eq("supplier_id", profile.id)
+    .order("created_at", { ascending: false });
 
   if (error) {
     console.error("[SupplierPartnerships] failed to fetch:", error.message);
@@ -63,6 +76,10 @@ export default async function SupplierPartnershipsPage() {
       description="Venues that have added you as a preferred partner for their clients."
     >
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-12">
+        {agreements && agreements.length > 0 && (
+          <SupplierAgreementsList agreements={agreements} />
+        )}
+        
         {/* Invitations Section */}
         {invitations.length > 0 && (
           <section>
@@ -114,33 +131,18 @@ export default async function SupplierPartnershipsPage() {
               {activePartnerships.map((partnership, idx) => {
                 const venue = partnership.venues;
                 if (!venue) return null;
+                
+                // Find the active agreement for this venue
+                const agreement = agreements?.find(a => 
+                  a.venue_id === venue.id && a.status === 'active'
+                );
+
                 return (
-                  <Panel key={venue.id || idx} className="flex flex-col gap-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#eff6ff] text-[#1d4ed8]">
-                        <MaterialIcon name="business" />
-                      </div>
-                      {partnership.is_preferred ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-700">
-                          <MaterialIcon name="star" className="text-xs" filled />
-                          Preferred
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
-                          <MaterialIcon name="handshake" className="text-xs" />
-                          Partner
-                        </span>
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-display text-lg font-bold text-[#111827]">
-                        {venue.name}
-                      </p>
-                      <p className="text-sm font-medium text-[#6b7280]">
-                        {[venue.city, venue.province].filter(Boolean).join(", ") || "Location unlisted"}
-                      </p>
-                    </div>
-                  </Panel>
+                  <ActivePartnershipCard 
+                    key={partnership.id || idx}
+                    partnership={partnership}
+                    agreement={agreement}
+                  />
                 );
               })}
             </div>

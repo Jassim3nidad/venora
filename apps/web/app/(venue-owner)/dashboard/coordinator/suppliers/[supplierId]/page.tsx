@@ -14,6 +14,8 @@ import { isSupplierFavoritedByUser } from "@/src/features/suppliers/application/
 import { DashboardSubPage } from "@/components/dashboard/enterprise";
 import { InviteAsVenuePartnerButton } from "@/src/features/suppliers/ui/InviteAsVenuePartnerButton";
 
+import { CommercialAgreementsList } from "@/src/features/suppliers/ui/CommercialAgreementsList";
+
 export const dynamic = "force-dynamic";
 
 type Props = {
@@ -73,6 +75,17 @@ export default async function CoordinatorSupplierDetailPage({ params }: Props) {
   const currentPartnerVenueIds = (existingLinks ?? []).map(
     (l: any) => l.venue_id,
   );
+  
+  // Fetch commercial agreements
+  const { data: agreements } =
+    canManagePartnerships && venueIds.length > 0
+      ? await supabase
+          .from("venue_supplier_agreements")
+          .select("*")
+          .eq("supplier_id", supplier.id)
+          .in("venue_id", venueIds)
+          .order("created_at", { ascending: false })
+      : { data: [] };
 
   const [bookings, isFavorited] = user
     ? await Promise.all([
@@ -126,6 +139,22 @@ export default async function CoordinatorSupplierDetailPage({ params }: Props) {
             ) : null
           }
         />
+        
+        {canManagePartnerships && ownerVenues.length > 0 && (
+          <CommercialAgreementsList 
+            agreements={agreements || []}
+            supplierId={supplier.id}
+            supplierName={supplier.businessName}
+            supplierServices={(supplier.packages || []).map(p => ({
+              id: p.id,
+              name: p.name,
+              basePrice: p.price
+            }))}
+            venueId={ownerVenues[0]?.id} // Use primary selected venue
+            venueName={ownerVenues[0]?.name}
+            canManage={canManagePartnerships}
+          />
+        )}
       </div>
     </DashboardSubPage>
   );

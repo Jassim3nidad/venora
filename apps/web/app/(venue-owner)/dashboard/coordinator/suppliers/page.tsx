@@ -29,6 +29,8 @@ type SupplierRow = {
   price_unit: string | null;
   avg_rating: number;
   review_count: number;
+  hero_image_url: string | null;
+  profile_image_url: string | null;
   supplier_categories: { name: string; slug: string } | null;
 };
 
@@ -65,7 +67,7 @@ export default async function CoordinatorSuppliersPage({
   let query = supabase
     .from("supplier_profiles")
     .select(
-      "id, business_name, description, base_price, price_unit, avg_rating, review_count, supplier_categories(name, slug)",
+      "id, business_name, description, base_price, price_unit, avg_rating, review_count, hero_image_url, profile_image_url, supplier_categories(name, slug)",
     )
     .order("avg_rating", { ascending: false });
 
@@ -136,53 +138,85 @@ export default async function CoordinatorSuppliersPage({
       </Panel>
 
       {suppliers.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {suppliers.map((supplier) => (
-            <Panel key={supplier.id} className="flex flex-col gap-3">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#eff6ff] text-[#1d4ed8]">
-                  <MaterialIcon name="storefront" />
-                </div>
-                {supplier.review_count > 0 ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-800">
-                    <MaterialIcon name="star" className="text-sm" filled />
-                    {Number(supplier.avg_rating).toFixed(1)} (
-                    {supplier.review_count})
-                  </span>
+            <Link 
+              key={supplier.id}
+              href={`/dashboard/coordinator/suppliers/${supplier.id}`}
+              className="group relative flex flex-col rounded-[24px] bg-white border border-slate-200 overflow-hidden shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/20"
+            >
+              {/* Image Section */}
+              <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+                {(supplier.hero_image_url || supplier.profile_image_url) ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={supplier.hero_image_url || supplier.profile_image_url || ""}
+                    alt={supplier.business_name}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
                 ) : (
-                  <StatusBadge status="active" label="New" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+                    <MaterialIcon name="storefront" className="text-4xl text-slate-300" />
+                  </div>
                 )}
+                
+                {/* Overlay Gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/0 to-black/0 pointer-events-none" />
+
+                {/* Badges */}
+                <div className="absolute top-4 left-4 flex gap-2">
+                  {supplier.supplier_categories ? (
+                    <div className="rounded-full bg-white/95 backdrop-blur-md px-3 py-1 text-[10px] font-black uppercase tracking-wider text-slate-900 shadow-sm">
+                      {supplier.supplier_categories.name}
+                    </div>
+                  ) : null}
+                </div>
+                
+                <div className="absolute top-4 right-4">
+                  {supplier.review_count > 0 ? (
+                    <div className="flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-xs font-black text-amber-950 shadow-md">
+                      <MaterialIcon name="star" className="text-[14px]" filled />
+                      {Number(supplier.avg_rating).toFixed(1)}
+                    </div>
+                  ) : (
+                    <div className="rounded-full bg-blue-500 px-2.5 py-1 text-[10px] font-black text-white shadow-md uppercase tracking-wider">
+                      New
+                    </div>
+                  )}
+                </div>
               </div>
-              <div>
-                <p className="font-display text-lg font-bold text-[#111827]">
-                  {supplier.business_name}
-                </p>
-                {supplier.supplier_categories ? (
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[#6b7280]">
-                    {supplier.supplier_categories.name}
+
+              {/* Content Section */}
+              <div className="flex flex-1 flex-col p-5">
+                <div className="mb-2 flex items-start justify-between gap-2">
+                  <h3 className="font-display text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                    {supplier.business_name}
+                  </h3>
+                </div>
+
+                {supplier.description ? (
+                  <p className="line-clamp-2 text-sm text-slate-500 font-medium leading-relaxed">
+                    {supplier.description}
                   </p>
-                ) : null}
+                ) : (
+                  <p className="text-sm text-slate-400 italic">No description provided.</p>
+                )}
+
+                <div className="mt-auto pt-5">
+                  <div className="flex items-center justify-between border-t border-slate-100 pt-4">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Starting at</span>
+                      <span className="text-base font-black text-slate-900">
+                        {supplier.base_price ? formatPeso(supplier.base_price) : "Custom Quote"}
+                      </span>
+                    </div>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white">
+                      <MaterialIcon name="arrow_forward" className="text-xl" />
+                    </div>
+                  </div>
+                </div>
               </div>
-              {supplier.description ? (
-                <p className="line-clamp-3 text-sm text-[#4b5563]">
-                  {supplier.description}
-                </p>
-              ) : null}
-              <div className="mt-auto flex items-center justify-between border-t border-[#e5e7eb] pt-3">
-                <span className="text-sm font-bold text-[#111827]">
-                  {supplier.base_price
-                    ? formatPeso(supplier.base_price)
-                    : "Contact for price"}
-                </span>
-                <a
-                  href={`/dashboard/coordinator/suppliers/${supplier.id}`}
-                  className="inline-flex items-center gap-1 text-sm font-bold text-[#1d4ed8] hover:underline"
-                >
-                  View details
-                  <MaterialIcon name="arrow_forward" className="text-sm" />
-                </a>
-              </div>
-            </Panel>
+            </Link>
           ))}
         </div>
       ) : (

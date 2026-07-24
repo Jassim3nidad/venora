@@ -9,6 +9,7 @@ import {
   StatusBadge,
   type DataTableColumn,
 } from "@/components/dashboard/enterprise";
+import Link from "next/link";
 import {
   formatPeso,
   getOwnerDashboardContext,
@@ -104,15 +105,24 @@ export default async function PackagesPage() {
       title="Packages"
       description="Review venue packages, pricing, inclusions, and guest capacity."
       action={
-        rows.length > 0 ? (
-          <DashButton
-            href="/dashboard/venues"
-            variant="secondary"
-            icon="location_city"
+        <div className="flex gap-3">
+          {rows.length > 0 && (
+            <DashButton
+              href="/dashboard/venues"
+              variant="secondary"
+              icon="location_city"
+            >
+              Review Venues
+            </DashButton>
+          )}
+          <Link
+            href="/dashboard/packages/new"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl bg-[#1d4ed8] px-4 text-sm font-bold text-white shadow-sm transition hover:bg-[#1e40af]"
           >
-            Review Venues
-          </DashButton>
-        ) : null
+            <span className="material-symbols-outlined text-[18px]">add</span>
+            New Package
+          </Link>
+        </div>
       }
     >
       {rows.length > 0 ? (
@@ -126,16 +136,16 @@ export default async function PackagesPage() {
       ) : (
         <EmptyState
           icon="inventory_2"
-          title="No packages configured"
-          description="Packages connected to your venues will appear here. Add package records once your venue setup flow is available."
+          title="No packages yet"
+          description="Create your first venue package — include pricing, amenities, and accredited suppliers."
           action={
-            <DashButton
-              href="/dashboard/venues"
-              variant="secondary"
-              icon="location_city"
+            <Link
+              href="/dashboard/packages/new"
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl bg-[#1d4ed8] px-4 text-sm font-bold text-white shadow-sm transition hover:bg-[#1e40af]"
             >
-              Review Venues
-            </DashButton>
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              Create First Package
+            </Link>
           }
         />
       )}

@@ -104,7 +104,7 @@ export default async function SupplierVenueDetailPage({
 
         {/* Hero image + gallery */}
         {venue.venue_images && venue.venue_images.length > 0 && (
-          <div className="overflow-hidden rounded-2xl">
+          <div className="-mx-4 sm:mx-0">
             <VenueGallery media={venue.venue_images} venueName={venue.name} />
           </div>
         )}
@@ -243,51 +243,57 @@ export default async function SupplierVenueDetailPage({
 
             {/* Partnership CTA */}
             {profile && (
-              <Panel className="sticky top-4">
+              <Panel className="sticky top-24">
                 <h3 className="mb-1 font-display text-base font-bold text-[#111827]">Become a Preferred Supplier</h3>
                 <p className="mb-4 text-sm text-[#6b7280]">
                   Request to partner with this venue and get featured for their events.
                 </p>
 
                 {partnershipStatus === "active" ? (
-                  <div className="rounded-xl bg-emerald-50 p-3 text-center">
-                    <div className="flex items-center justify-center gap-1.5 text-sm font-bold text-emerald-700">
-                      <MaterialIcon name="check_circle" className="text-base" />
-                      Active Partner
+                  <Link
+                    href="/dashboard/supplier/partnerships"
+                    className="group flex items-center gap-4 rounded-xl border border-emerald-100 bg-emerald-50 p-4 transition-all hover:border-emerald-200 hover:bg-emerald-100/50 hover:shadow-sm"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                      <MaterialIcon name="check_circle" className="text-xl" />
                     </div>
-                    <Link
-                      href="/dashboard/supplier/partnerships"
-                      className="mt-2 block text-xs font-semibold text-emerald-600 hover:underline"
-                    >
-                      View partnership details →
-                    </Link>
-                  </div>
+                    <div className="text-left">
+                      <p className="text-sm font-bold text-emerald-950">Active Partner</p>
+                      <p className="text-xs font-medium text-emerald-700 transition-colors group-hover:text-emerald-800">
+                        View partnership details &rarr;
+                      </p>
+                    </div>
+                  </Link>
                 ) : partnershipStatus === "application_submitted" || partnershipStatus === "under_review" ? (
-                  <div className="rounded-xl bg-amber-50 p-3 text-center">
-                    <div className="flex items-center justify-center gap-1.5 text-sm font-bold text-amber-700">
-                      <MaterialIcon name="pending" className="text-base" />
-                      Application Pending
+                  <Link
+                    href="/dashboard/supplier/partnerships"
+                    className="group flex items-center gap-4 rounded-xl border border-amber-100 bg-amber-50 p-4 transition-all hover:border-amber-200 hover:bg-amber-100/50 hover:shadow-sm"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+                      <MaterialIcon name="pending" className="text-xl" />
                     </div>
-                    <Link
-                      href="/dashboard/supplier/partnerships"
-                      className="mt-2 block text-xs font-semibold text-amber-600 hover:underline"
-                    >
-                      Track your request →
-                    </Link>
-                  </div>
+                    <div className="text-left">
+                      <p className="text-sm font-bold text-amber-950">Application Pending</p>
+                      <p className="text-xs font-medium text-amber-700 transition-colors group-hover:text-amber-800">
+                        Track your request &rarr;
+                      </p>
+                    </div>
+                  </Link>
                 ) : partnershipStatus === "invited" ? (
-                  <div className="rounded-xl bg-blue-50 p-3 text-center">
-                    <div className="flex items-center justify-center gap-1.5 text-sm font-bold text-blue-700">
-                      <MaterialIcon name="mail" className="text-base" />
-                      You Have an Invitation
+                  <Link
+                    href="/dashboard/supplier/partnerships"
+                    className="group flex items-center gap-4 rounded-xl border border-blue-100 bg-blue-50 p-4 transition-all hover:border-blue-200 hover:bg-blue-100/50 hover:shadow-sm"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                      <MaterialIcon name="mail" className="text-xl" />
                     </div>
-                    <Link
-                      href="/dashboard/supplier/partnerships"
-                      className="mt-2 block text-xs font-semibold text-blue-600 hover:underline"
-                    >
-                      Respond to invite →
-                    </Link>
-                  </div>
+                    <div className="text-left">
+                      <p className="text-sm font-bold text-blue-950">Invited to Partner</p>
+                      <p className="text-xs font-medium text-blue-700 transition-colors group-hover:text-blue-800">
+                        Review and respond &rarr;
+                      </p>
+                    </div>
+                  </Link>
                 ) : (
                   <RequestPartnershipModal
                     venueId={venue.id}

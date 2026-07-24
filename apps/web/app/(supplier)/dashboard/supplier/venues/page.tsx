@@ -8,7 +8,9 @@ import {
 import { getRequiredSupplierDashboardContext } from "../_lib/supplier-dashboard-data";
 import { searchMarketplaceVenues } from "@/features/venues/application/queries";
 import Link from "next/link";
+import Image from "next/image";
 import { RequestPartnershipModal } from "./RequestPartnershipModal";
+import { buildVenueImageUrl, firstVenueImage } from "@/src/features/venues/utils/venue-mappers";
 
 export const metadata: Metadata = {
   title: "Discover Venues - Supplier Dashboard",
@@ -178,67 +180,87 @@ export default async function SupplierDiscoverVenuesPage({
             {venues.map((venue: any) => {
               const status = partnershipMap.get(venue.id);
               return (
-                <Panel key={venue.id} className="flex flex-col gap-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#eff6ff] text-[#1d4ed8]">
-                      <MaterialIcon name="business" />
-                    </div>
-                    {status === "active" ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
-                        <MaterialIcon name="check_circle" className="text-xs" />
-                        Active Partner
-                      </span>
-                    ) : status === "application_submitted" || status === "under_review" ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-700">
-                        <MaterialIcon name="pending" className="text-xs" />
-                        Pending Request
-                      </span>
-                    ) : status === "invited" ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-blue-700">
-                        <MaterialIcon name="mail" className="text-xs" />
-                        Invited
-                      </span>
-                    ) : null}
-                  </div>
-                  <div>
-                    <p className="font-display text-lg font-bold text-[#111827]">
-                      {venue.name}
-                    </p>
-                    <p className="text-sm font-medium text-[#6b7280]">
-                      {[venue.city, venue.province].filter(Boolean).join(", ") || "Location unlisted"}
-                    </p>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                    <Link
-                      href={`/dashboard/supplier/venues/${venue.id}`}
-                      className="text-sm font-semibold text-[#374151] hover:text-[#1d4ed8] hover:underline"
-                    >
-                      View details
-                    </Link>
-                    {!status ? (
-                      <RequestPartnershipModal
-                        venueId={venue.id}
-                        venueName={venue.name}
-                        supplierId={profile.id}
-                        supplierServices={profile.packages}
+                <div key={venue.id} className="flex flex-col overflow-hidden rounded-2xl border border-[#dbe3ef] bg-white shadow-sm transition hover:shadow-md">
+                  <div className="relative h-48 w-full bg-slate-100">
+                    {firstVenueImage(venue)?.storage_path ? (
+                      <Image
+                        src={buildVenueImageUrl(firstVenueImage(venue).storage_path)}
+                        alt={venue.name}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
-                    ) : status === "invited" ? (
-                      <Link
-                        href="/dashboard/supplier/partnerships"
-                        className="text-sm font-bold text-[#1d4ed8] hover:underline"
-                      >
-                        Respond to Invite
-                      </Link>
                     ) : (
-                      <Link
-                        href="/dashboard/supplier/partnerships"
-                        className="text-sm font-bold text-[#4b5563] hover:underline"
-                      >
-                        View Status
-                      </Link>
+                      <div className="flex h-full w-full items-center justify-center text-slate-300">
+                        <MaterialIcon name="business" className="text-5xl" />
+                      </div>
+                    )}
+                    
+                    {/* Status Badge Overlaid on Image */}
+                    {status && (
+                      <div className="absolute right-3 top-3">
+                        {status === "active" ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700 shadow-sm">
+                            <MaterialIcon name="check_circle" className="text-xs" />
+                            Active Partner
+                          </span>
+                        ) : status === "application_submitted" || status === "under_review" ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-700 shadow-sm">
+                            <MaterialIcon name="pending" className="text-xs" />
+                            Pending Request
+                          </span>
+                        ) : status === "invited" ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-blue-700 shadow-sm">
+                            <MaterialIcon name="mail" className="text-xs" />
+                            Invited
+                          </span>
+                        ) : null}
+                      </div>
                     )}
                   </div>
-                </Panel>
+                  
+                  <div className="flex flex-col flex-1 p-5">
+                    <div className="mb-4">
+                      <p className="font-display text-lg font-bold text-[#111827] line-clamp-2">
+                        {venue.name}
+                      </p>
+                      <p className="text-sm font-medium text-[#6b7280]">
+                        {[venue.city, venue.province].filter(Boolean).join(", ") || "Location unlisted"}
+                      </p>
+                    </div>
+                    
+                    <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
+                      <Link
+                        href={`/dashboard/supplier/venues/${venue.id}`}
+                        className="text-sm font-semibold text-[#374151] hover:text-[#1d4ed8] hover:underline"
+                      >
+                        View details
+                      </Link>
+                      {!status ? (
+                        <RequestPartnershipModal
+                          venueId={venue.id}
+                          venueName={venue.name}
+                          supplierId={profile.id}
+                          supplierServices={profile.packages}
+                        />
+                      ) : status === "invited" ? (
+                        <Link
+                          href="/dashboard/supplier/partnerships"
+                          className="text-sm font-bold text-[#1d4ed8] hover:underline"
+                        >
+                          Respond to Invite
+                        </Link>
+                      ) : (
+                        <Link
+                          href="/dashboard/supplier/partnerships"
+                          className="text-sm font-bold text-[#4b5563] hover:underline"
+                        >
+                          View Status
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                </div>
               );
             })}
           </div>
