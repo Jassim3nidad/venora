@@ -398,7 +398,7 @@ describe("PayMongoGateway.createCheckoutSession", () => {
           quantity: 1,
         },
       ],
-      payment_method_types: ["card", "gcash", "paymaya", "grab_pay"],
+      payment_method_types: ["card", "gcash", "grab_pay"],
       reference_number: "transaction-1",
       success_url:
         "https://venora-web.vercel.app/bookings/booking-1/confirmation",

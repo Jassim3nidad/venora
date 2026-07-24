@@ -19,7 +19,7 @@ const PROVIDER_DETAILS: Record<
 > = {
   paymongo: {
     name: "PayMongo",
-    methods: ["Cards", "GCash", "Maya", "GrabPay"],
+    methods: ["Cards", "GCash", "GrabPay"],
     note: "Methods are selected on PayMongo's hosted checkout page.",
   },
   maya: {
