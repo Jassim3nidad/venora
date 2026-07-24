@@ -1,33 +1,68 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { DashboardSubPage, Panel } from "@/components/dashboard/enterprise";
-import {
-  getOwnerDashboardContext,
-  requireCoordinatorPermission,
-} from "@/src/lib/dashboard/org-dashboard-data";
+import { createClient } from "@/src/lib/supabase/server";
 import { AssignSupplierForm } from "@/src/features/booking/ui/AssignSupplierForm";
 
 type Props = {
   params: Promise<{ id: string }>;
 };
 
-export default async function AssignSupplierPage({ params }: Props) {
+export default async function OwnerAssignSupplierPage({ params }: Props) {
   const { id } = await params;
-  const context = await getOwnerDashboardContext();
-  requireCoordinatorPermission("coordinate_accredited_suppliers", context);
-
-  const { supabase } = context;
+  const supabase = (await createClient()) as any;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
   const { data: booking } = await supabase
     .from("bookings")
-    .select("id, venue_id, event_date")
+    .select("id, venue_id, venues(organization_id)")
     .eq("id", id)
     .single();
 
-  if (!booking || !booking.venue_id) {
-    notFound();
-  }
+  if (!booking?.venue_id) notFound();
+
+  const venue = Array.isArray(booking.venues)
+    ? booking.venues[0]
+    : booking.venues;
+  const organizationId = venue?.organization_id as string | undefined;
+  if (!organizationId) redirect("/unauthorized");
+
+  const [{ data: roles }, { data: organization }, { data: membership }] =
+    await Promise.all([
+      supabase.from("user_roles").select("role").eq("user_id", user.id),
+      supabase
+        .from("organizations")
+        .select("id")
+        .eq("id", organizationId)
+        .eq("owner_id", user.id)
+        .maybeSingle(),
+      supabase
+        .from("organization_members")
+        .select("role, permissions, status")
+        .eq("organization_id", organizationId)
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .maybeSingle(),
+    ]);
+
+  const isAdmin = (roles ?? []).some(
+    (row: { role: string }) => row.role === "admin",
+  );
+  const isOwner = Boolean(organization);
+  const memberPermissions = Array.isArray(membership?.permissions)
+    ? (membership.permissions as string[])
+    : [];
+  const canAttach =
+    isAdmin ||
+    isOwner ||
+    (membership?.role === "coordinator" &&
+      memberPermissions.includes("coordinate_accredited_suppliers"));
+
+  if (!canAttach) redirect("/unauthorized");
 
   const [{ data: venueSuppliers }, { data: attached }] = await Promise.all([
     supabase
@@ -57,7 +92,7 @@ export default async function AssignSupplierPage({ params }: Props) {
       a.businessName.localeCompare(b.businessName),
     );
 
-  const returnTo = `/dashboard/coordinator/bookings/${id}`;
+  const returnTo = `/dashboard/bookings/${id}`;
 
   return (
     <DashboardSubPage

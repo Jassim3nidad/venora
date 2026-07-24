@@ -139,12 +139,7 @@ export default async function VenueOwnerDashboardPage() {
         revenue: formatPeso(b.total_amount),
         suggestedTotal,
         suggestedDeposit: b.deposit_amount ?? Math.round(suggestedTotal * 0.5),
-        status:
-          b.status === "approved" || b.status === "confirmed"
-            ? "approved"
-            : b.status === "declined"
-              ? "declined"
-              : "pending",
+        status: b.status,
       };
     },
   );

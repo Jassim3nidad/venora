@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import {
+  ClipboardCheck,
   Clock,
   DoorOpen,
   HelpCircle,
@@ -33,6 +34,7 @@ interface ProfileMenuProps {
   exitDashboardHref?: string | undefined;
   showEnterVenueDashboard?: boolean | undefined;
   showEnterSupplierDashboard?: boolean | undefined;
+  showEnterCoordinatorDashboard?: boolean | undefined;
   settingsHref?: string | undefined;
 }
 
@@ -59,6 +61,7 @@ export default function ProfileMenu({
   exitDashboardHref = "/venues",
   showEnterVenueDashboard = false,
   showEnterSupplierDashboard = false,
+  showEnterCoordinatorDashboard = false,
   settingsHref = "/settings",
 }: ProfileMenuProps) {
   const avatarInitial =
@@ -125,6 +128,19 @@ export default function ProfileMenu({
               </div>
               <span className="font-bold text-[#1D4ED8]">
                 Enter Venue Owner Dashboard
+              </span>
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
+
+        {showEnterCoordinatorDashboard ? (
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard/coordinator" className="cursor-pointer">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#EFF6FF] text-[#1D4ED8]">
+                <ClipboardCheck className="h-4 w-4" />
+              </div>
+              <span className="font-bold text-[#1D4ED8]">
+                Enter Coordinator Dashboard
               </span>
             </Link>
           </DropdownMenuItem>
