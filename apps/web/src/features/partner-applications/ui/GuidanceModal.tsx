@@ -13,9 +13,11 @@ export function GuidanceModal({
         Become a Venora Partner
       </h2>
       <p className="max-w-xl text-lg text-slate-500 mb-12">
-        Join our marketplace as a Venue Owner, Event Coordinator, or Supplier.
-        We require some basic business details and verification documents to
-        ensure a safe and high-quality environment for our customers.
+        Join Venora as a Venue Owner or Supplier on the marketplace, or as an
+        Event Coordinator who operates venues as organization staff. Customers
+        hire venues and suppliers—not independent coordinators. We ask for basic
+        business details and verification documents to keep the marketplace safe
+        and high quality.
       </p>
 
       <div className="grid w-full max-w-2xl gap-6 sm:grid-cols-2">
