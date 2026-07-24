@@ -22,18 +22,20 @@ export type InboxThread = {
   id: string;
   customerName: string;
   venueName: string;
-  venueSlug?: string;
+  venueSlug?: string | undefined;
   eventDate: string;
   status: string;
-  serviceName?: string;
-  latestMessage?: {
-    message: string;
-    created_at: string;
-    sender_role: "customer" | "venue_team";
-    sender_name: string | null;
-  };
-  needsReply?: boolean;
-  isUnread?: boolean;
+  serviceName?: string | undefined;
+  latestMessage?:
+    | {
+        message: string;
+        created_at: string;
+        sender_role: "customer" | "venue_team";
+        sender_name: string | null;
+      }
+    | undefined;
+  needsReply?: boolean | undefined;
+  isUnread?: boolean | undefined;
 };
 
 type FilterValue = "all" | "needs_reply" | "bookings" | "inquiries";
@@ -112,9 +114,9 @@ export function CoordinatorInboxClient({
         ? import("@/src/features/booking/application/messages-actions").then(
             (mod) => mod.getBookingMessages(selectedThread.id),
           )
-        : import(
-            "@/src/features/venues/application/inquiry-messages-actions"
-          ).then((mod) => mod.getVenueInquiryMessages(selectedThread.id));
+        : import("@/src/features/venues/application/inquiry-messages-actions").then(
+            (mod) => mod.getVenueInquiryMessages(selectedThread.id),
+          );
 
     load
       .then((data) => {

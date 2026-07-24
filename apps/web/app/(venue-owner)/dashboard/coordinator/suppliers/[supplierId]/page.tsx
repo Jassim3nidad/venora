@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const context = await getOwnerDashboardContext();
   const { supabase } = context;
 
-  const supplier = await getPublicSupplierBySlug(supabase, supplierId, true);
+  const supplier = await getPublicSupplierBySlug(supabase, supplierId);
 
   return {
     title: supplier
@@ -42,9 +42,11 @@ export default async function CoordinatorSupplierDetailPage({ params }: Props) {
 
   const { supabase, user } = context;
   const canManagePartnerships =
-    context.isAdmin || context.roles.includes("venue_owner") || context.orgIds.length > 0;
+    context.isAdmin ||
+    context.roles.includes("venue_owner") ||
+    context.orgIds.length > 0;
 
-  const supplier = await getPublicSupplierBySlug(supabase, supplierId, true);
+  const supplier = await getPublicSupplierBySlug(supabase, supplierId);
   if (!supplier) notFound();
 
   const venueIds = await getOwnerVenueIds(context);
@@ -109,9 +111,12 @@ export default async function CoordinatorSupplierDetailPage({ params }: Props) {
           sidebarNode={
             canManagePartnerships && ownerVenues.length > 0 ? (
               <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-6 shadow-sm shadow-slate-200/60">
-                <h3 className="mb-2 text-lg font-bold text-slate-900">Manage Partnership</h3>
+                <h3 className="mb-2 text-lg font-bold text-slate-900">
+                  Manage Partnership
+                </h3>
                 <p className="mb-6 text-sm text-slate-500">
-                  Invite this supplier to become a preferred partner for your venues.
+                  Invite this supplier to become a preferred partner for your
+                  venues.
                 </p>
                 <div className="w-full">
                   <InviteAsVenuePartnerButton
