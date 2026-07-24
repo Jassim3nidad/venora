@@ -44,6 +44,13 @@ export const ADMIN_MODULES: AdminModule[] = [
     icon: "payments",
   },
   {
+    title: "Payments & Refunds",
+    description:
+      "Monitor deposits, refunds, and payment webhook reconciliation.",
+    href: "/admin/payments",
+    icon: "account_balance_wallet",
+  },
+  {
     title: "Reports",
     description: "Platform analytics, booking trends, and activity.",
     href: "/admin/reports",

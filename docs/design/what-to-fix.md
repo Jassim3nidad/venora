@@ -83,10 +83,10 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 
 ### Administrator
 
-- [ ] **Dedicated payment / refund monitoring** workspace (brief: Payment
-  monitoring).
-- [ ] **Disputes** — replace placeholder with scoped case management or hide
-  until ready (UX-13).
+- [x] **Dedicated payment / refund monitoring** workspace (brief: Payment
+  monitoring) — `/admin/payments` with transactions, refunds, webhook attention;
+  Maya remains disabled until complete.
+- [ ] **Disputes** — deepen case management beyond current list/detail (UX-13).
 
 ---
 
@@ -140,7 +140,7 @@ Do **not** block Phase 1 release on these unless product explicitly expands scop
 | Order | Item | Why |
 | ----: | ---- | --- |
 | 1 | Venue identity + supplier fallback honesty | Stops wrong bookings / fake inventory |
-| 2 | Payment monitor + disputes decision | Admin brief + ops trust |
+| 2 | Disputes case management depth | Admin ops trust |
 | 3 | Venue↔supplier listing association | Brief supplier “participate in packages” |
 | 4 | Venue compare + calendar richness | Customer brief polish |
 | 5 | Messaging / notifications / a11y P2 | Ecosystem quality |
@@ -157,6 +157,7 @@ Keep for regression only:
 - [x] Auth popup for Bookings / Favorites / Host a Venue + favorite hearts
 - [x] Staff invite + permissions E2E (VO Staff → accept → org membership)
 - [x] Attach suppliers to booking (`booking_suppliers` VO/EC jobs path)
+- [x] Admin payments & refunds monitoring workspace (`/admin/payments`)
 
 ---
 
