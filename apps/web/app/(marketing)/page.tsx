@@ -178,8 +178,8 @@ export default async function MarketingHomePage() {
     );
   }
 
-  const researchVenueById = new Map(
-    researchVenues.map((venue) => [venue.id, venue]),
+  const researchVenueBySlug = new Map(
+    researchVenues.filter(v => v.slug).map((venue) => [venue.slug, venue]),
   );
   const liveVenues = (error ? [] : ((dbVenues ?? []) as any[]))
     .filter((venue) => venue.status === "published")
@@ -187,7 +187,7 @@ export default async function MarketingHomePage() {
       toLiveMarketplaceVenue(
         venue,
         favoriteVenueIds,
-        researchVenueById.get(String(venue.id)),
+        researchVenueBySlug.get(venue.slug),
       ),
     );
   const featuredVenues = resolveFeaturedMarketplaceVenues(
