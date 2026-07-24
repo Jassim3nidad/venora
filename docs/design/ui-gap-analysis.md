@@ -20,7 +20,7 @@ enhancement. No P0 exposure was confirmed in this anonymous/source audit.
 | UX-10 | P2       | Public/auth/footer                  | Password toggles are 32 × 32 px and many visible links about 16 px high                                                                                         | Robust touch activation areas                                                      | Increase hit area while preserving layout                                                  |
 | UX-11 | P2       | Global                              | No route-level `error.tsx` or custom `not-found.tsx`; default 404 has no Venora recovery and no main landmark                                                   | Safe branded retry/home/browse recovery                                            | Add canonical error and not-found states after product copy review                         |
 | UX-12 | P2       | Coordinator                         | Overview/events/venues/suppliers/reports exist, but dedicated booking detail, messaging, notifications, and settings do not                                     | Role scope is explicit or end-to-end coordination is implemented                   | Define coordinator MVP; do not advertise absent workflows                                  |
-| UX-13 | P2       | `/admin/disputes`                   | Guarded route always presents a future-workflow empty placeholder                                                                                               | Navigation reflects availability or usable dispute cases exist                     | Feature-flag/hide until enabled or implement scoped case lifecycle                         |
+| UX-13 | P2       | `/admin/disputes`                   | Scoped case management shipped: customer raise, account list, admin lifecycle via `update_dispute_status`                                                                 | Navigation reflects availability or usable dispute cases exist                     | Done (scoped; not full evidence suite)                                                 |
 | UX-14 | P2       | `/account/privacy`                  | Every preference/data operation is marked “Coming soon”                                                                                                         | Page offers supported controls or clearly routes to support                        | Remove inactive controls or implement supported privacy workflow                           |
 | UX-15 | P2       | Customer payments                   | Receipts, invoices, transactions, and refunds are distributed; no receipt/invoice/refund detail route                                                           | Booking state links clearly to owned document/refund detail                        | Define one payment-history information architecture and consistent status copy             |
 | UX-16 | P2       | Global async states                 | Six loading routes and zero route error files; empty/error/pending UI is page-local                                                                             | Predictable announced loading, empty, error, and retry states                      | Create canonical patterns and adopt incrementally                                          |
@@ -62,8 +62,8 @@ These are not counted as App Router page files:
 
 ## Confirmed non-findings and limits
 
-- Admin navigation destinations resolve to real page routes; disputes is explicit
-  about being a placeholder.
+- Admin navigation destinations resolve to real page routes; disputes uses
+  scoped case management (`disputes.*`), not a placeholder.
 - Footer destinations inspected in source resolve to implemented routes.
 - Page and action permission checks exist in addition to admin navigation hiding.
 - No protected-data exposure, horizontal document overflow, unnamed sampled

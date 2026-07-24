@@ -201,7 +201,7 @@ export const NAV_BY_ROLE: Record<EnterpriseRole, NavItem[]> = {
       label: "Disputes",
       href: "/admin/disputes",
       icon: "gavel",
-      permission: "reports.view",
+      permission: "disputes.view",
     },
     {
       label: "Commissions",

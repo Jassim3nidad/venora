@@ -262,13 +262,13 @@ per-user permission editor is not evidenced.
 This is a gap diagram, not a proposed implemented route. Payment evidence exists
 in backend and adjacent modules.
 
-## 19. Admin disputes — guarded placeholder
+## 19. Admin disputes — scoped case list
 
 ```text
 ┌ Admin shell │ Disputes ──────────────────────────────┐
-│             │ Empty illustration/message            │
-│             │ “Cases appear when escalation is on”  │
-│             │ [Return to reports/overview]           │
+│             │ KPIs: open / under review / resolved   │
+│             │ Status filter + cases table            │
+│             │ Row → Open case (detail + actions)     │
 └─────────────┴─────────────────────────────────────────┘
 ```
 

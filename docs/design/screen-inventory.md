@@ -115,7 +115,8 @@ marketplace, AI configuration, settings, administrators, and audit logs map to
 real routes. Mutating review controls are permission-gated in addition to the
 page guard.
 
-`/admin/disputes` requires `reports.view` but intentionally shows an empty future
-workflow. Payment/refund visibility is distributed across bookings, reports, and
-commissions; there is no dedicated payment-monitoring page. Runtime permission
+`/admin/disputes` requires `disputes.view` and lists scoped cases with
+lifecycle actions (`disputes.manage` / `disputes.resolve`). Customers raise
+disputes from eligible bookings and track them at `/account/disputes`.
+Payment/refund monitoring lives at `/admin/payments`. Runtime permission
 tiers, confirmations, and destructive-action feedback were not exercised.

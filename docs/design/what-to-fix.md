@@ -86,7 +86,9 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 - [x] **Dedicated payment / refund monitoring** workspace (brief: Payment
   monitoring) — `/admin/payments` with transactions, refunds, webhook attention;
   Maya remains disabled until complete.
-- [ ] **Disputes** — deepen case management beyond current list/detail (UX-13).
+- [x] **Disputes** — scoped case management: customer raise from eligible
+  booking, admin list/detail lifecycle (`open` → `under_review` →
+  `resolved`/`rejected`), gated by `disputes.*` (UX-13).
 
 ---
 
