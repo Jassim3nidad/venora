@@ -13,13 +13,18 @@ export type InboxThread = {
   venueSlug?: string | undefined;
   eventDate: string;
   status: string;
-  serviceName?: string;
-  latestMessage?: {
-    message: string;
-    created_at: string;
-    sender_role: "customer" | "venue_owner";
-    sender_name: string | null;
-  };
+  kind?: "booking" | "inquiry";
+  serviceName?: string | undefined;
+  latestMessage?:
+    | {
+        message: string;
+        created_at: string;
+        sender_role: "customer" | "venue_owner" | "venue_team";
+        sender_name: string | null;
+      }
+    | undefined;
+  needsReply?: boolean | undefined;
+  isUnread?: boolean | undefined;
 };
 
 export function CoordinatorInboxClient({
@@ -62,8 +67,16 @@ export function CoordinatorInboxClient({
     let isMounted = true;
     setIsLoadingMessages(true);
 
-    import("@/src/features/booking/application/messages-actions")
-      .then((m) => m.getBookingMessages(selectedThreadId))
+    const load =
+      selectedThread.kind === "inquiry"
+        ? import("@/src/features/venues/application/inquiry-messages-actions").then(
+            (mod) => mod.getVenueInquiryMessages(selectedThread.id),
+          )
+        : import("@/src/features/booking/application/messages-actions").then(
+            (mod) => mod.getBookingMessages(selectedThread.id),
+          );
+
+    load
       .then((data) => {
         if (isMounted) {
           setMessages(data);
