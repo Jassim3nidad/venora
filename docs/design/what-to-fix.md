@@ -27,9 +27,9 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 - [ ] **EC booking “View” links** — Events table still may deep-link into
   venue-owner `/dashboard/bookings/...` and hit unauthorized. Mirror calendar
   fix: coordinator-owned booking detail routes (or shared pages under EC shell).
-- [ ] **Org membership for coordinators** — Finish staff invite / accept so EC
-  role + org attach works without manual/SQL setup
-  (`/dashboard/staff`, `/staff/accept`).
+- [x] **Org membership for coordinators** — Staff invite / accept path is live:
+  VO `/dashboard/staff` → email → `/staff/accept` (or in-dashboard accept).
+  Remaining: runtime email delivery depends on Supabase Auth config.
 - [ ] **Venue card identity** — Card ID/name/slug/detail/favorite must agree
   (UX-02 / known limitations). Prevents wrong venue booked or favorited.
 
@@ -66,7 +66,8 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 
 ### Venue Owner
 
-- [ ] Complete **staff invite + permissions** end-to-end (brief: Manage staff).
+- [x] Complete **staff invite + permissions** end-to-end (brief: Manage staff).
+  Invite, venues, permissions, revoke/suspend, accept link + dashboard accept.
 
 ### Supplier ↔ Venue (Phase 2, but brief already lists it)
 
@@ -139,12 +140,10 @@ Do **not** block Phase 1 release on these unless product explicitly expands scop
 | Order | Item | Why |
 | ----: | ---- | --- |
 | 1 | Venue identity + supplier fallback honesty | Stops wrong bookings / fake inventory |
-| 2 | EC booking routes + org invite | Makes coordinator role usable as brief describes |
-| 3 | Staff invite completion (VO) | Unblocks EC attachment |
-| 4 | Payment monitor + disputes decision | Admin brief + ops trust |
-| 5 | Venue↔supplier associate / booking attach | Brief supplier “participate in packages” |
-| 6 | Venue compare + calendar richness | Customer brief polish |
-| 7 | Messaging / notifications / a11y P2 | Ecosystem quality |
+| 2 | Payment monitor + disputes decision | Admin brief + ops trust |
+| 3 | Venue↔supplier associate / booking attach | Brief supplier “participate in packages” |
+| 4 | Venue compare + calendar richness | Customer brief polish |
+| 5 | Messaging / notifications / a11y P2 | Ecosystem quality |
 
 ---
 
@@ -156,6 +155,7 @@ Keep for regression only:
 - [x] Sticky multi-open marketplace filters; View Results mobile-only
 - [x] Duplicate supplier “Recommended” sort removed
 - [x] Auth popup for Bookings / Favorites / Host a Venue + favorite hearts
+- [x] Staff invite + permissions E2E (VO Staff → accept → org membership)
 
 ---
 

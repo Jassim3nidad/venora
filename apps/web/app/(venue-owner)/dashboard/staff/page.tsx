@@ -181,7 +181,7 @@ export default async function StaffPage() {
       .filter(Boolean)
       .join(", "),
     joined: formatDate(member.invited_at),
-    permissions: (member.permissions as any) ?? [],
+    permissions: (member.permissions as StaffDisplayRow["permissions"]) ?? [],
   }));
 
   const invitationRows: InvitationDisplayRow[] = (
@@ -199,7 +199,6 @@ export default async function StaffPage() {
       .join(", "),
     expiresAt: formatDate(invitation.expires_at),
     createdAt: formatDate(invitation.created_at),
-    permissions: invitation.permissions ?? [],
   }));
 
   return (

@@ -185,7 +185,7 @@ Priya books Lakeview for her company’s offsite. Lina is Diego’s on-site coor
 **End-to-end**
 
 1. **Earlier (partners)**  
-   Diego and Lina each applied via **Become a partner**. Admin approved Diego as `venue_owner` and Lina as `event_coordinator`. Diego’s org lists Lina as an `organization_members` coordinator *(invite UI is still incomplete in product; membership may need direct/org-side setup)*.
+   Diego and Lina each applied via **Become a partner**. Admin approved Diego as `venue_owner` and Lina as `event_coordinator`. Diego invites Lina from **Staff Management**; she accepts via email link or the coordinator dashboard and becomes an `organization_members` coordinator with assigned venues and permissions.
 
 2. **Customer booking**  
    Priya registers as customer, requests Lakeview for both dates (or primary event date per current booking UX), Diego’s team approves and she pays → **`confirmed`**.
@@ -337,7 +337,7 @@ Customers experience **two commerce apps** (venue booking + supplier inquiries).
 | Clients find and book venues on Venora | **Yes** |
 | Clients find and quote suppliers on Venora | **Yes** |
 | Clients hire Event Coordinators on Venora | **No** |
-| Coordinators help run an org’s venues/events | **Partially** (dashboard exists; invite + deep workflow incomplete) |
+| Coordinators help run an org’s venues/events | **Yes** (invite + scoped dashboard; supplier attach still Phase 2) |
 | Venue “packs” suppliers onto a booking in-app | **Not finished** (schema Phase 2) |
 | Admin verifies partners before they operate | **Yes** |
 | PayMongo deposit confirms via webhook | **Yes** |
