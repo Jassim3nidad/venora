@@ -82,6 +82,11 @@ export const NAV_BY_ROLE: Record<EnterpriseRole, NavItem[]> = {
       icon: "assessment",
       permission: "generate_operational_reports",
     },
+    {
+      label: "Settings",
+      href: "/dashboard/coordinator/settings",
+      icon: "settings",
+    },
   ],
   supplier: [
     { label: "Overview", href: "/dashboard/supplier", icon: "dashboard" },

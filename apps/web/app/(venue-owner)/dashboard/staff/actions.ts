@@ -17,7 +17,11 @@ import {
   UnauthorizedError,
   ValidationError,
 } from "@/src/lib/errors";
-import { DEFAULT_COORDINATOR_PERMISSIONS } from "@/src/lib/rbac/coordinator-permissions";
+import {
+  DEFAULT_COORDINATOR_PERMISSIONS,
+  isCoordinatorPermission,
+  sanitizeCoordinatorPermissions,
+} from "@/src/lib/rbac/coordinator-permissions";
 
 const inviteCoordinatorSchema = z.object({
   organizationId: z.string().uuid(),
@@ -188,9 +192,21 @@ function revalidateStaffViews() {
   revalidatePath("/dashboard/staff");
   revalidatePath("/dashboard/coordinator");
   revalidatePath("/dashboard/coordinator/venues");
-  revalidatePath("/dashboard/coordinator/events");
+  revalidatePath("/dashboard/coordinator/bookings");
   revalidatePath("/dashboard/coordinator/calendar");
   revalidatePath("/dashboard/coordinator/reports");
+}
+
+function parseCoordinatorPermissions(permissions: string[] | undefined) {
+  if (permissions === undefined) {
+    return [...DEFAULT_COORDINATOR_PERMISSIONS];
+  }
+
+  if (permissions.some((permission) => !isCoordinatorPermission(permission))) {
+    throw new ValidationError("One or more permissions are invalid.");
+  }
+
+  return sanitizeCoordinatorPermissions(permissions, []);
 }
 
 function isAuthUsersPermissionError(error: { message?: string } | null) {
@@ -237,7 +253,7 @@ export async function inviteCoordinatorAction(rawInput: unknown) {
         role: "coordinator",
         status: "pending",
         venue_ids: venueIds,
-        permissions: input.permissions ?? DEFAULT_COORDINATOR_PERMISSIONS,
+        permissions: parseCoordinatorPermissions(input.permissions),
         invited_by: owner.id,
         expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         accepted_by: null,
@@ -440,10 +456,12 @@ export async function updateStaffPermissionsAction(rawInput: unknown) {
       const supabase = (await createClient()) as any;
       await requireOrganizationOwner(supabase, input.organizationId);
 
+      const permissions = parseCoordinatorPermissions(input.permissions);
+
       const { error } = await supabase
         .from("organization_members")
         .update({
-          permissions: input.permissions,
+          permissions,
         })
         .eq("organization_id", input.organizationId)
         .eq("user_id", input.userId)
@@ -455,7 +473,7 @@ export async function updateStaffPermissionsAction(rawInput: unknown) {
       }
 
       revalidateStaffViews();
-      return { userId: input.userId, permissions: input.permissions };
+      return { userId: input.userId, permissions };
     },
     rawInput,
   );

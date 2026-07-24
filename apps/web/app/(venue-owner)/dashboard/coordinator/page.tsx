@@ -17,13 +17,14 @@ function formatDate(value?: string | null) {
 }
 
 export default async function CoordinatorDashboardPage(props: {
-  searchParams: Promise<{ venue?: string }>;
+  searchParams: Promise<{ venue?: string; invitation?: string }>;
 }) {
   const searchParams = await props.searchParams;
   const context = await getOwnerDashboardContext();
   const { supabase, user, orgIds, isAdmin } = context;
   const assignedVenueIds = await getOwnerVenueIds(context);
   const todayStr = new Date().toISOString().split("T")[0] ?? "";
+  const invitationAccepted = searchParams.invitation === "accepted";
 
   let venueIds = assignedVenueIds;
   if (searchParams.venue && searchParams.venue !== "all") {
@@ -47,12 +48,15 @@ export default async function CoordinatorDashboardPage(props: {
           .limit(1)
       : { data: [] };
 
-  const { data: pendingInvitationsRaw } = await supabase
-    .from("organization_member_invitations")
-    .select("id, organization_id, organizations(name), created_at")
-    .eq("status", "pending")
-    .eq("email", user.email)
-    .order("created_at", { ascending: false });
+  const inviteEmail = user.email?.trim().toLowerCase() ?? "";
+  const { data: pendingInvitationsRaw } = inviteEmail
+    ? await supabase
+        .from("organization_member_invitations")
+        .select("id, organization_id, organizations(name), created_at")
+        .eq("status", "pending")
+        .eq("email", inviteEmail)
+        .order("created_at", { ascending: false })
+    : { data: [] };
 
   const pendingInvitations = (pendingInvitationsRaw ?? []).map((inv: any) => ({
     id: inv.id,
@@ -177,6 +181,7 @@ export default async function CoordinatorDashboardPage(props: {
       upcomingEvents={upcomingEvents}
       managedVenues={managedVenues}
       pendingInvitations={pendingInvitations}
+      invitationAccepted={invitationAccepted}
     />
   );
 }

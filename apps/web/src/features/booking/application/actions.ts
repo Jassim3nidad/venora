@@ -130,7 +130,7 @@ async function assertCanManageBooking(
   ] = await Promise.all([
     supabase
       .from("organization_members")
-      .select("organization_id")
+      .select("organization_id, permissions, role")
       .eq("user_id", user.id)
       .eq("organization_id", organizationId)
       .eq("status", "active")
@@ -146,9 +146,39 @@ async function assertCanManageBooking(
   throwIfSupabaseError(membershipError);
   throwIfSupabaseError(ownerError);
 
-  if (!membership && !organization) {
+  if (organization) {
+    return { booking };
+  }
+
+  if (!membership) {
     throw new ForbiddenError(
       "You do not have permission to manage this booking.",
+    );
+  }
+
+  const memberPermissions = Array.isArray(membership.permissions)
+    ? (membership.permissions as string[])
+    : [];
+
+  if (!memberPermissions.includes("manage_booking_decisions")) {
+    throw new ForbiddenError(
+      "You do not have permission to approve, decline, or complete bookings.",
+    );
+  }
+
+  const { data: assignment, error: assignmentError } = await supabase
+    .from("venue_coordinator_assignments")
+    .select("venue_id")
+    .eq("user_id", user.id)
+    .eq("organization_id", organizationId)
+    .eq("venue_id", booking.venue_id)
+    .maybeSingle();
+
+  throwIfSupabaseError(assignmentError);
+
+  if (!assignment) {
+    throw new ForbiddenError(
+      "You are not assigned to this venue and cannot manage its bookings.",
     );
   }
 
@@ -183,8 +213,9 @@ function revalidateBookingViews(bookingId: string, venueSlug?: string | null) {
   revalidatePath("/dashboard/bookings");
   revalidatePath(`/dashboard/bookings/${bookingId}`);
   revalidatePath("/dashboard/coordinator");
-  revalidatePath("/dashboard/coordinator/events");
-  revalidatePath(`/dashboard/coordinator/events/${bookingId}`);
+  revalidatePath("/dashboard/coordinator/bookings");
+  revalidatePath(`/dashboard/coordinator/bookings/${bookingId}`);
+  revalidatePath("/dashboard/coordinator/messages");
   revalidatePath("/dashboard/coordinator/calendar");
   revalidatePath("/dashboard/coordinator/reports");
   revalidatePath("/bookings");

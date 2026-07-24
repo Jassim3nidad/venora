@@ -19,6 +19,7 @@ const errors = [];
 const requiredDocs = [
   "README.md",
   "api/README.md",
+  "api/specification.md",
   "api/authentication.md",
   "api/endpoint-inventory.md",
   "api/error-handling.md",

@@ -55,7 +55,7 @@ export default async function CoordinatorCalendarPage() {
       description="Review and manage availability across the venues your organization coordinates."
       action={
         <DashButton
-          href="/dashboard/coordinator/events"
+          href="/dashboard/coordinator/bookings"
           variant="secondary"
           icon="celebration"
         >

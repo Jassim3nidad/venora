@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -44,6 +45,7 @@ export default function InquiryDialog({
   trigger,
   onSuccess,
 }: InquiryDialogProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,10 +67,15 @@ export default function InquiryDialog({
 
     if (result.error) {
       setError(result.error.message);
-    } else {
-      form.reset();
-      setOpen(false);
-      if (onSuccess) onSuccess();
+      return;
+    }
+
+    const inquiryId = (result.data as { id?: string } | null)?.id;
+    form.reset();
+    setOpen(false);
+    if (onSuccess) onSuccess();
+    if (inquiryId) {
+      router.push(`/account/venue-inquiries/${inquiryId}`);
     }
   }
 
@@ -91,8 +98,8 @@ export default function InquiryDialog({
             Inquire About {venueName}
           </DialogTitle>
           <DialogDescription className="text-sm text-[var(--text-secondary)] mt-1">
-            Send a direct inquiry message to the venue coordinator. They will
-            respond to you via notifications and email.
+            Send a question to the venue team. You can continue the conversation
+            from your Venue Inquiries inbox.
           </DialogDescription>
         </DialogHeader>
 
