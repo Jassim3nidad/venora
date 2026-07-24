@@ -195,7 +195,7 @@ Priya books Lakeview for her company’s offsite. Lina is Diego’s on-site coor
    - **Events** — sees Priya’s booking in the org pipeline  
    - **Calendar** — `/dashboard/coordinator/calendar` for availability across org venues  
    - **Venues** — Lakeview details  
-   - **Suppliers** — browses for AV/catering ideas (discovery; attaching suppliers to the booking as jobs is not a finished UI)  
+   - **Suppliers** — browses for AV/catering ideas; venue/EC can also attach accredited venue suppliers onto the booking as jobs  
    - **Reports** — org-oriented reporting  
 
 4. **Priya’s parallel path**  

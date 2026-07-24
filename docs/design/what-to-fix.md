@@ -73,8 +73,8 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 
 - [ ] **Venues associate accredited suppliers** with listings (product UI for
   `venue_suppliers` or equivalent).
-- [ ] **Attach suppliers to a booking** (`booking_suppliers`) — jobs path
-  currently schema/Phase 2 without finished attach UI.
+- [x] **Attach suppliers to a booking** (`booking_suppliers`) — VO/EC booking
+  detail attach form writes confirmed jobs; supplier Jobs lists them.
 
 ### Customer
 
@@ -141,7 +141,7 @@ Do **not** block Phase 1 release on these unless product explicitly expands scop
 | ----: | ---- | --- |
 | 1 | Venue identity + supplier fallback honesty | Stops wrong bookings / fake inventory |
 | 2 | Payment monitor + disputes decision | Admin brief + ops trust |
-| 3 | Venue↔supplier associate / booking attach | Brief supplier “participate in packages” |
+| 3 | Venue↔supplier listing association | Brief supplier “participate in packages” |
 | 4 | Venue compare + calendar richness | Customer brief polish |
 | 5 | Messaging / notifications / a11y P2 | Ecosystem quality |
 
@@ -156,6 +156,7 @@ Keep for regression only:
 - [x] Duplicate supplier “Recommended” sort removed
 - [x] Auth popup for Bookings / Favorites / Host a Venue + favorite hearts
 - [x] Staff invite + permissions E2E (VO Staff → accept → org membership)
+- [x] Attach suppliers to booking (`booking_suppliers` VO/EC jobs path)
 
 ---
 

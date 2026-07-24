@@ -111,13 +111,25 @@ async function assertCanManageBooking(
     throw new ValidationError("Booking not found.");
   }
 
+  const venueRelation = Array.isArray(booking.venues)
+    ? booking.venues[0] ?? null
+    : (booking.venues ?? null);
+
+  const normalizedBooking = {
+    ...booking,
+    venues: venueRelation as {
+      organization_id: string;
+      slug: string | null;
+    } | null,
+  };
+
   const isAdmin = await isAdminUser(supabase, user.id);
 
   if (isAdmin) {
-    return { booking };
+    return { booking: normalizedBooking };
   }
 
-  const organizationId = booking.venues?.organization_id;
+  const organizationId = venueRelation?.organization_id;
   if (!organizationId) {
     throw new ForbiddenError(
       "You do not have permission to manage this booking.",
@@ -147,7 +159,7 @@ async function assertCanManageBooking(
   throwIfSupabaseError(ownerError);
 
   if (organization) {
-    return { booking };
+    return { booking: normalizedBooking };
   }
 
   if (!membership) {
@@ -182,7 +194,7 @@ async function assertCanManageBooking(
     );
   }
 
-  return { booking };
+  return { booking: normalizedBooking };
 }
 
 async function getVenueSlug(supabase: any, venueId: string) {
@@ -244,6 +256,12 @@ export async function approveBookingAction(rawInput: unknown) {
         supabase,
         input.bookingId,
       );
+
+      if (booking.status !== "pending") {
+        throw new ValidationError(
+          `Only pending bookings can be approved (current status: ${booking.status}).`,
+        );
+      }
 
       const { data, error } = await supabase.rpc("approve_booking_quote", {
         p_booking_id: input.bookingId,
