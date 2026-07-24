@@ -12,7 +12,7 @@ import {
 } from "@/lib/dashboard/org-dashboard-data";
 import Link from "next/link";
 import { formatPeso } from "@/lib/dashboard/org-dashboard-data";
-import { ReviewPartnershipModal } from "./ReviewPartnershipModal";
+import { ReviewPartnershipActions } from "./ReviewPartnershipActions";
 
 export const metadata: Metadata = {
   title: "Pending Requests - Coordinator Dashboard",
@@ -44,8 +44,7 @@ export default async function CoordinatorSupplierRequestsPage() {
       supplier:supplier_profiles (
         id,
         business_name,
-        description,
-        user:users!supplier_profiles_user_id_fkey(email)
+        description
       ),
       venue:venues(name)
     `)
@@ -86,10 +85,16 @@ export default async function CoordinatorSupplierRequestsPage() {
                     </span>
                   </div>
                   <div>
-                    <p className="font-display text-lg font-bold text-slate-900">
-                      {supplier.business_name}
-                    </p>
-                    <p className="text-sm font-medium text-slate-500">
+                    <Link
+                      href={`/suppliers/${supplier.id}`}
+                      target="_blank"
+                      title="View supplier profile"
+                      className="group flex w-fit items-center gap-1.5 font-display text-lg font-bold text-slate-900 transition hover:text-blue-700"
+                    >
+                      <span className="group-hover:underline">{supplier.business_name}</span>
+                      <MaterialIcon name="open_in_new" className="text-[16px] text-slate-400 transition group-hover:text-blue-700" />
+                    </Link>
+                    <p className="mt-0.5 text-sm font-medium text-slate-500">
                       For venue: {request.venue?.name}
                     </p>
                   </div>
@@ -98,8 +103,8 @@ export default async function CoordinatorSupplierRequestsPage() {
                       "{request.commercial_terms}"
                     </div>
                   )}
-                  <div className="mt-4 pt-3 border-t border-amber-100 flex items-center justify-end gap-2">
-                    <ReviewPartnershipModal requestId={request.id} supplierName={supplier.business_name} />
+                  <div className="mt-4 flex items-center justify-end gap-2 border-t border-amber-100 pt-3">
+                    <ReviewPartnershipActions requestId={request.id} supplierId={supplier.id} />
                   </div>
                 </Panel>
               );

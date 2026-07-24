@@ -67,7 +67,7 @@ CREATE POLICY "Suppliers can view their own partnerships"
   USING (
     EXISTS (
       SELECT 1 FROM public.supplier_profiles s
-      WHERE s.id = venue_suppliers.supplier_id AND s.user_id = auth.uid()
+      WHERE s.id = venue_suppliers.supplier_id AND s.profile_id = auth.uid()
     )
   );
 
@@ -77,7 +77,7 @@ CREATE POLICY "Suppliers can insert partnership requests"
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM public.supplier_profiles s
-      WHERE s.id = venue_suppliers.supplier_id AND s.user_id = auth.uid()
+      WHERE s.id = venue_suppliers.supplier_id AND s.profile_id = auth.uid()
     )
   );
 
@@ -87,7 +87,7 @@ CREATE POLICY "Suppliers can update their own partnerships"
   USING (
     EXISTS (
       SELECT 1 FROM public.supplier_profiles s
-      WHERE s.id = venue_suppliers.supplier_id AND s.user_id = auth.uid()
+      WHERE s.id = venue_suppliers.supplier_id AND s.profile_id = auth.uid()
     )
   );
 

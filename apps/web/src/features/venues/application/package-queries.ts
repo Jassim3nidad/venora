@@ -1,0 +1,123 @@
+import { createClient } from "@/lib/supabase/server";
+
+export type EligibleSupplier = {
+  supplier_id: string;
+  business_name: string;
+  category_name: string | null;
+  province: string | null;
+  avg_rating: number;
+  review_count: number;
+  slug: string | null;
+  profile_image_url: string | null;
+  // From the active agreement
+  agreement_id: string;
+  supplier_base_rate: number;
+  venue_markup_fee: number;
+  custom_service_name: string | null;
+  max_guest_count: number | null;
+  // First active service for display
+  service_name: string | null;
+};
+
+/**
+ * Returns suppliers eligible to be added to a package for a given venue.
+ *
+ * Eligibility requires ALL of:
+ * 1. Supplier is `accredited`
+ * 2. Active `venue_suppliers` row for this venue (status = 'active')
+ * 3. Active `venue_supplier_agreements` row for this venue (status = 'active')
+ * 4. Supplier has at least one active `supplier_services` row
+ *
+ * Optionally filtered by guest capacity (max_guest_count >= required if set).
+ */
+export async function getEligiblePackageSuppliers(
+  venueId: string,
+  requiredGuestCapacity?: number
+): Promise<EligibleSupplier[]> {
+  const supabase = (await createClient()) as any;
+
+  const { data, error } = await supabase
+    .from("venue_supplier_agreements")
+    .select(
+      `
+      id,
+      supplier_base_rate,
+      venue_markup_fee,
+      custom_service_name,
+      max_guest_count,
+      supplier_profiles!inner (
+        id,
+        business_name,
+        accreditation_status,
+        avg_rating,
+        review_count,
+        slug,
+        profile_image_url,
+        province,
+        supplier_categories ( name ),
+        supplier_services ( id, name )
+      )
+    `
+    )
+    .eq("venue_id", venueId)
+    .eq("status", "active");
+
+  if (error) {
+    console.error("[getEligiblePackageSuppliers] query error:", error.message);
+    return [];
+  }
+
+  const rows = (data ?? []) as any[];
+
+  // Filter: supplier must be accredited AND have an active venue_suppliers row AND have at least 1 service
+  const venuePartnerIds = await getActivePartnerSupplierIds(supabase, venueId);
+
+  return rows
+    .filter((row) => {
+      const sp = row.supplier_profiles;
+      if (!sp) return false;
+      if (sp.accreditation_status !== "accredited") return false;
+      if (!venuePartnerIds.has(sp.id)) return false;
+      if (!sp.supplier_services || sp.supplier_services.length === 0)
+        return false;
+      if (
+        requiredGuestCapacity &&
+        row.max_guest_count &&
+        row.max_guest_count < requiredGuestCapacity
+      )
+        return false;
+      return true;
+    })
+    .map((row) => {
+      const sp = row.supplier_profiles;
+      return {
+        supplier_id: sp.id,
+        business_name: sp.business_name,
+        category_name: sp.supplier_categories?.name ?? null,
+        province: sp.province ?? null,
+        avg_rating: sp.avg_rating ?? 0,
+        review_count: sp.review_count ?? 0,
+        slug: sp.slug ?? null,
+        profile_image_url: sp.profile_image_url ?? null,
+        agreement_id: row.id,
+        supplier_base_rate: Number(row.supplier_base_rate),
+        venue_markup_fee: Number(row.venue_markup_fee),
+        custom_service_name: row.custom_service_name ?? null,
+        max_guest_count: row.max_guest_count ?? null,
+        service_name: sp.supplier_services?.[0]?.name ?? null,
+      } satisfies EligibleSupplier;
+    });
+}
+
+async function getActivePartnerSupplierIds(
+  supabase: any,
+  venueId: string
+): Promise<Set<string>> {
+  const { data } = await supabase
+    .from("venue_suppliers")
+    .select("supplier_id")
+    .eq("venue_id", venueId)
+    .eq("status", "active");
+
+  return new Set(((data ?? []) as { supplier_id: string }[]).map((r) => r.supplier_id));
+}
