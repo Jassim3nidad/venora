@@ -10,9 +10,8 @@ import {
   type VenueSearchParams,
 } from "@/src/features/venues/application/queries";
 
-import type {
-  Venue} from "@/src/features/venues/utils/venue-mappers";
 import {
+  Venue,
   toLiveMarketplaceVenue,
 } from "@/src/features/venues/utils/venue-mappers";
 
@@ -82,11 +81,11 @@ export default async function VenuesMarketplacePage({
     }
   }
 
-  const researchVenueById = new Map(
-    researchVenues.map((venue) => [venue.id, venue]),
+  const researchVenueBySlug = new Map(
+    researchVenues.filter(v => v.slug).map((venue) => [venue.slug, venue]),
   );
   const dbRows = error ? [] : ((dbVenues ?? []) as any[]);
-  const dbIds = new Set(dbRows.map((venue) => String(venue.id)));
+  const dbSlugs = new Set(dbRows.map((venue) => venue.slug).filter(Boolean));
   const livePublishedVenues = dbRows
     .filter(
       (venue) =>
@@ -98,12 +97,12 @@ export default async function VenuesMarketplacePage({
       toLiveMarketplaceVenue(
         venue,
         favoriteVenueIds,
-        researchVenueById.get(String(venue.id)),
+        researchVenueBySlug.get(venue.slug),
       ),
     );
 
   const fallbackVenues = researchVenues
-    .filter((venue) => !dbIds.has(venue.id))
+    .filter((venue) => !dbSlugs.has(venue.slug))
     .map((venue) => toMarketplaceVenue(venue, favoriteVenueIds));
 
   const venues: Venue[] =

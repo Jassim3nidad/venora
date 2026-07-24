@@ -101,14 +101,16 @@ export async function loadMoreVenuesAction(rawInput: unknown) {
 
       if (error) throw error;
 
-      const researchVenueById = new Map(researchVenues.map((v) => [v.id, v]));
+      const researchVenueBySlug = new Map(
+        researchVenues.filter(v => v.slug).map((v) => [v.slug, v])
+      );
       const dbRows = (dbVenues ?? []) as any[];
 
       const mapped = dbRows.map((venue) =>
         toLiveMarketplaceVenue(
           venue,
           favoriteVenueIds,
-          researchVenueById.get(String(venue.id)),
+          researchVenueBySlug.get(venue.slug),
         ),
       );
 
@@ -191,6 +193,7 @@ export async function createInquiryAction(rawInput: unknown) {
         );
       }
 
+      // Insert inquiry record
       const { data, error } = await supabase
         .from("inquiries")
         .insert({
@@ -199,54 +202,10 @@ export async function createInquiryAction(rawInput: unknown) {
           message,
           status: "new",
         })
-        .select("id, venue_id, customer_id, message, status, created_at")
+        .select()
         .single();
 
       if (error) throw error;
-
-      const { error: messageError } = await supabase
-        .from("venue_inquiry_messages")
-        .insert({
-          inquiry_id: data.id,
-          sender_id: user.id,
-          message,
-        });
-
-      if (messageError) {
-        console.error(
-          "[venue_inquiry_messages] seed error:",
-          messageError.message,
-        );
-      }
-
-      try {
-        const { data: venue } = await supabase
-          .from("venues")
-          .select("organization_id, organizations:organization_id(owner_id)")
-          .eq("id", venueId)
-          .maybeSingle();
-
-        const org = venue?.organizations
-          ? Array.isArray(venue.organizations)
-            ? venue.organizations[0]
-            : venue.organizations
-          : null;
-
-        const { notifyVenueTeamOfInquiry } = await import(
-          "./inquiry-messages-actions"
-        );
-        await notifyVenueTeamOfInquiry(supabase, {
-          inquiryId: data.id,
-          venueId,
-          organizationId: venue?.organization_id ?? null,
-          venueOrgOwnerId: org?.owner_id ?? null,
-          preview: message,
-          excludeUserId: user.id,
-        });
-      } catch {
-        // Notification failure must not block inquiry create
-      }
-
       return data;
     },
     rawInput,
