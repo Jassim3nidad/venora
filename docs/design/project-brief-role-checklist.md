@@ -24,8 +24,8 @@ Related: [role experience matrix](role-experience-matrix.md),
 | Role | Brief fit |
 | ---- | --------- |
 | Customer | Mostly satisfied (compare is the main gap) |
-| Venue Owner | Mostly satisfied (staff invite depth partial) |
-| Event Coordinator | Mostly aligned (MVP shipped; messaging still booking-scoped; partner copy gap) |
+| Venue Owner | Mostly satisfied |
+| Event Coordinator | Mostly aligned (MVP + messaging + org staff invite path) |
 | Accredited Supplier | Profile/marketplace yes; venue-package association no |
 | Platform Administrator | Mostly satisfied (payment monitor / disputes gaps) |
 
@@ -57,12 +57,13 @@ Related: [role experience matrix](role-experience-matrix.md),
 - [x] Manage booking calendars — `/dashboard/calendar`
 - [x] Receive inquiries — `/dashboard/bookings` pending pipeline
 - [x] Accept or decline bookings — owner booking decision RPCs/UI
-- [~] Manage staff — `/dashboard/staff` exists; invite/org-attach incomplete
+- [x] Manage staff — `/dashboard/staff` invite + venue assignment + permissions;
+  accept via `/staff/accept` or coordinator dashboard; owner-only mutate
 - [x] Monitor business analytics — `/dashboard/analytics`
 
 **Backlog (Venue Owner)**
 
-- [ ] Complete staff invite / membership workflows end-to-end
+- [x] Complete staff invite / membership workflows end-to-end
 
 ---
 
@@ -92,7 +93,8 @@ calendars, customer communication, suppliers, performance, reports).
 
 **Backlog (Event Coordinator)**
 
-- [~] Reliable org membership / invite onboarding
+- [x] Reliable org membership / invite onboarding (`/dashboard/staff` → email →
+  `/staff/accept` or in-dashboard accept)
 - [x] First-class booking + venue-inquiry customer messaging (ops-scoped; not global CRM)
 - [ ] Attach suppliers to venue bookings (Phase 2)
 - [ ] Deeper booking-performance analytics
