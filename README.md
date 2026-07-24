@@ -50,31 +50,31 @@ flowchart LR
   GitHub["GitHub repository"] -. "external integration" .-> Vercel
 ```
 
-| Layer                        | Role                                                                 |
-| ---------------------------- | -------------------------------------------------------------------- |
-| Browser                      | Untrusted client; only `NEXT_PUBLIC_*` values may ship here          |
-| Next.js (`apps/web`)         | UI, SSR, Server Actions, Route Handlers, PayMongo webhook            |
-| Supabase Auth                | Identity, sessions, email verification/reset                         |
-| PostgreSQL + RLS             | Durable state; final row-level authorization                         |
-| Supabase Storage             | Public/private object storage with path and MIME policies            |
-| Edge Functions               | AI generation and some notification compute                          |
-| PayMongo / Resend / Web Push | Checkout, email, push delivery                                       |
-| MapLibre / OpenFreeMap / OSM | Maps and geocoding (no Google Maps key)                              |
+| Layer                        | Role                                                        |
+| ---------------------------- | ----------------------------------------------------------- |
+| Browser                      | Untrusted client; only `NEXT_PUBLIC_*` values may ship here |
+| Next.js (`apps/web`)         | UI, SSR, Server Actions, Route Handlers, PayMongo webhook   |
+| Supabase Auth                | Identity, sessions, email verification/reset                |
+| PostgreSQL + RLS             | Durable state; final row-level authorization                |
+| Supabase Storage             | Public/private object storage with path and MIME policies   |
+| Edge Functions               | AI generation and some notification compute                 |
+| PayMongo / Resend / Web Push | Checkout, email, push delivery                              |
+| MapLibre / OpenFreeMap / OSM | Maps and geocoding (no Google Maps key)                     |
 
 Full lifecycles (auth, booking, payment, storage, AI) are in
 [docs/architecture.md](docs/architecture.md).
 
 ### 1.2 Stack
 
-| Area        | Technology                                                              |
-| ----------- | ----------------------------------------------------------------------- |
-| App         | Next.js 16, React 19, TypeScript, Tailwind CSS 4, TanStack Query, Zod   |
-| Workspace   | pnpm workspaces + Turborepo                                             |
-| Backend     | Supabase Auth, PostgreSQL, RLS, Storage, Edge Functions (Deno)          |
-| Payments    | PayMongo (active); Maya/Stripe are not registered gateways              |
-| Messaging   | Resend (email), Web Push (VAPID); SMS disabled                          |
-| AI          | OpenRouter only; model locked to `tencent/hy3:free`                     |
-| Maps        | MapLibre / OpenFreeMap / OSM Nominatim                                  |
+| Area      | Technology                                                            |
+| --------- | --------------------------------------------------------------------- |
+| App       | Next.js 16, React 19, TypeScript, Tailwind CSS 4, TanStack Query, Zod |
+| Workspace | pnpm workspaces + Turborepo                                           |
+| Backend   | Supabase Auth, PostgreSQL, RLS, Storage, Edge Functions (Deno)        |
+| Payments  | PayMongo (active); Maya/Stripe are not registered gateways            |
+| Messaging | Resend (email), Web Push (VAPID); SMS disabled                        |
+| AI        | OpenRouter only; model locked to `tencent/hy3:free`                   |
+| Maps      | MapLibre / OpenFreeMap / OSM Nominatim                                |
 
 ### 1.3 Trust boundaries
 
@@ -127,15 +127,15 @@ flowchart LR
 Feature code lives under `apps/web/src/features/<feature>/` (UI, schemas,
 actions, queries). Route groups under `apps/web/app/` include:
 
-| Route group           | Audience                                              |
-| --------------------- | ----------------------------------------------------- |
-| `(marketing)`         | Public landing and marketing pages                    |
-| `(auth)`              | Login, register, password reset                       |
-| `(customer)`          | Bookings, favorites, venues, suppliers, account       |
-| `(venue-owner)`       | Venue dashboard, calendar, staff, analytics           |
-| `(supplier)`          | Supplier dashboard, inquiries, availability           |
-| `(event-coordinator)` | Coordinator/org staff flows                           |
-| `(admin)`             | Marketplace moderation, disputes, audits              |
+| Route group           | Audience                                        |
+| --------------------- | ----------------------------------------------- |
+| `(marketing)`         | Public landing and marketing pages              |
+| `(auth)`              | Login, register, password reset                 |
+| `(customer)`          | Bookings, favorites, venues, suppliers, account |
+| `(venue-owner)`       | Venue dashboard, calendar, staff, analytics     |
+| `(supplier)`          | Supplier dashboard, inquiries, availability     |
+| `(event-coordinator)` | Coordinator/org staff flows                     |
+| `(admin)`             | Marketplace moderation, disputes, audits        |
 
 Placement rules and ownership: [docs/repository-structure.md](docs/repository-structure.md).
 
@@ -145,12 +145,12 @@ Migrations under `supabase/migrations/` define identity, venues, bookings,
 suppliers, payments, notifications, reviews, analytics/admin, and AI tables.
 Storage buckets created by migrations:
 
-| Bucket               | Visibility | Purpose                                      |
-| -------------------- | ---------- | -------------------------------------------- |
-| `venue-images`       | Public     | Venue gallery media                          |
-| `avatars`            | Public     | User avatars / supplier portfolio assets     |
-| `verification-docs`  | Private    | Partner verification (signed access)         |
-| `review-photos`      | Public     | Review evidence photos                       |
+| Bucket              | Visibility | Purpose                                  |
+| ------------------- | ---------- | ---------------------------------------- |
+| `venue-images`      | Public     | Venue gallery media                      |
+| `avatars`           | Public     | User avatars / supplier portfolio assets |
+| `verification-docs` | Private    | Partner verification (signed access)     |
+| `review-photos`     | Public     | Review evidence photos                   |
 
 Details: [docs/database.md](docs/database.md), [docs/storage.md](docs/storage.md).
 
@@ -163,12 +163,12 @@ Install **all** of the following before a clean setup. Versions match
 
 ### 3.1 Required for app development
 
-| Dependency     | Version / notes                                                                 | Verify                         |
-| -------------- | ------------------------------------------------------------------------------- | ------------------------------ |
-| Git            | Any current release                                                             | `git --version`                |
-| Node.js        | **20 or newer** (LTS recommended; CI/dev commonly uses 20–24)                   | `node --version`               |
-| pnpm           | **Pinned: 11.13.1** via `packageManager` (engines allow `>=9`)                  | `pnpm --version`               |
-| Network access | npm registry (`registry.npmjs.org`) and your Supabase project URL               | Browser or `curl`              |
+| Dependency     | Version / notes                                                   | Verify            |
+| -------------- | ----------------------------------------------------------------- | ----------------- |
+| Git            | Any current release                                               | `git --version`   |
+| Node.js        | **20 or newer** (LTS recommended; CI/dev commonly uses 20–24)     | `node --version`  |
+| pnpm           | **Pinned: 11.13.1** via `packageManager` (engines allow `>=9`)    | `pnpm --version`  |
+| Network access | npm registry (`registry.npmjs.org`) and your Supabase project URL | Browser or `curl` |
 
 Enable the pinned pnpm with Corepack (recommended):
 
@@ -180,20 +180,20 @@ pnpm --version
 
 ### 3.2 Required credentials (minimum to boot the web app)
 
-| Variable                        | Where to get it                         | Notes                                      |
-| ------------------------------- | --------------------------------------- | ------------------------------------------ |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Supabase project → Settings → API       | Project URL                                |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Same                                    | Publishable / anon key only                |
+| Variable                        | Where to get it                   | Notes                       |
+| ------------------------------- | --------------------------------- | --------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Supabase project → Settings → API | Project URL                 |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Same                              | Publishable / anon key only |
 
 Without these two, middleware and Supabase clients fail at startup
 (“URL and Key are required”).
 
 ### 3.3 Optional — full local Supabase stack
 
-| Dependency    | When needed                                                    | Verify              |
-| ------------- | -------------------------------------------------------------- | ------------------- |
-| Docker Desktop| Local Postgres, Auth, Storage, Studio, Edge Function serving   | `docker info`       |
-| Supabase CLI  | `supabase start`, `db reset --local`, local type generation    | `supabase --version`|
+| Dependency     | When needed                                                  | Verify               |
+| -------------- | ------------------------------------------------------------ | -------------------- |
+| Docker Desktop | Local Postgres, Auth, Storage, Studio, Edge Function serving | `docker info`        |
+| Supabase CLI   | `supabase start`, `db reset --local`, local type generation  | `supabase --version` |
 
 You can develop against a **hosted** non-production Supabase project without
 Docker. Local resets, migration rehearsal, and `pnpm db:types` need Docker +
@@ -201,15 +201,15 @@ CLI.
 
 ### 3.4 Optional — tests and providers
 
-| Dependency / tool     | When needed                                      |
-| --------------------- | ------------------------------------------------ |
-| Playwright browsers   | E2E / a11y: `pnpm --filter @venora/web exec playwright install` |
-| Deno                  | AI Edge unit tests: `pnpm test:ai`               |
-| PayMongo test keys    | Checkout and webhook work                        |
-| Resend test key       | Outbound email                                   |
-| VAPID key pair        | Web Push                                         |
-| OpenRouter API key    | AI Edge Functions                                |
-| `E2E_*` fixtures      | Authenticated Playwright roles                   |
+| Dependency / tool   | When needed                                                     |
+| ------------------- | --------------------------------------------------------------- |
+| Playwright browsers | E2E / a11y: `pnpm --filter @venora/web exec playwright install` |
+| Deno                | AI Edge unit tests: `pnpm test:ai`                              |
+| PayMongo test keys  | Checkout and webhook work                                       |
+| Resend test key     | Outbound email                                                  |
+| VAPID key pair      | Web Push                                                        |
+| OpenRouter API key  | AI Edge Functions                                               |
+| `E2E_*` fixtures    | Authenticated Playwright roles                                  |
 
 ### 3.5 Platform matrix
 
@@ -281,12 +281,12 @@ pnpm db:types
 
 Copy the printed local URL and anon key into `apps/web/.env.local`.
 
-| Command                         | Effect                                                                 |
-| ------------------------------- | ---------------------------------------------------------------------- |
-| `supabase start`                | Starts local stack (needs Docker)                                      |
-| `supabase db reset --local`     | **Destroys local DB only**, reapplies migrations, runs `seed.sql`      |
-| `pnpm db:types`                 | Regenerates `packages/database/types/generated.ts` from local schema   |
-| `supabase stop`                 | Stops local stack                                                      |
+| Command                     | Effect                                                               |
+| --------------------------- | -------------------------------------------------------------------- |
+| `supabase start`            | Starts local stack (needs Docker)                                    |
+| `supabase db reset --local` | **Destroys local DB only**, reapplies migrations, runs `seed.sql`    |
+| `pnpm db:types`             | Regenerates `packages/database/types/generated.ts` from local schema |
+| `supabase stop`             | Stops local stack                                                    |
 
 Never omit `--local` on `db reset`. Never hand-edit generated types.
 
@@ -323,13 +323,13 @@ pnpm --filter @venora/web start
 
 ### 5.1 Scopes
 
-| File / scope                         | Purpose                                              |
-| ------------------------------------ | ---------------------------------------------------- |
-| `.env.example`                       | Safe cross-service inventory (committed)             |
-| `apps/web/.env.example`              | Web-focused template (committed)                     |
-| `apps/web/.env.local`                | **Actual local Next.js env** (ignored; required)     |
-| `supabase/.env.example`              | Edge Function / local Supabase secret names          |
-| Vercel / hosted Supabase secrets     | Preview and production scopes                        |
+| File / scope                     | Purpose                                          |
+| -------------------------------- | ------------------------------------------------ |
+| `.env.example`                   | Safe cross-service inventory (committed)         |
+| `apps/web/.env.example`          | Web-focused template (committed)                 |
+| `apps/web/.env.local`            | **Actual local Next.js env** (ignored; required) |
+| `supabase/.env.example`          | Edge Function / local Supabase secret names      |
+| Vercel / hosted Supabase secrets | Preview and production scopes                    |
 
 Rules:
 
@@ -341,15 +341,15 @@ Full matrix: [docs/environment-variables.md](docs/environment-variables.md).
 
 ### 5.2 Core application variables
 
-| Variable                        | Required for                | Class        |
-| ------------------------------- | --------------------------- | ------------ |
-| `NEXT_PUBLIC_APP_URL`           | Canonical URLs, callbacks   | Public       |
-| `NEXT_PUBLIC_SITE_URL`          | Optional URL fallback       | Public       |
-| `APP_URL` / `APP_BASE_URL`      | Edge / Playwright targets   | Server/test  |
-| `NEXT_PUBLIC_SUPABASE_URL`      | All Supabase clients        | Public       |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | All Supabase clients        | Public       |
-| `SUPABASE_URL` / `SUPABASE_ANON_KEY` | Scripts / Edge aliases | Server       |
-| `SUPABASE_SERVICE_ROLE_KEY`     | Webhooks, refunds, privileged scripts | Server-only |
+| Variable                             | Required for                          | Class       |
+| ------------------------------------ | ------------------------------------- | ----------- |
+| `NEXT_PUBLIC_APP_URL`                | Canonical URLs, callbacks             | Public      |
+| `NEXT_PUBLIC_SITE_URL`               | Optional URL fallback                 | Public      |
+| `APP_URL` / `APP_BASE_URL`           | Edge / Playwright targets             | Server/test |
+| `NEXT_PUBLIC_SUPABASE_URL`           | All Supabase clients                  | Public      |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`      | All Supabase clients                  | Public      |
+| `SUPABASE_URL` / `SUPABASE_ANON_KEY` | Scripts / Edge aliases                | Server      |
+| `SUPABASE_SERVICE_ROLE_KEY`          | Webhooks, refunds, privileged scripts | Server-only |
 
 ### 5.3 Integration variables (capability-required)
 
@@ -386,17 +386,17 @@ dedicated fixtures.
 
 ### 6.1 Everyday commands
 
-| Command                  | Purpose                                      |
-| ------------------------ | -------------------------------------------- |
-| `pnpm dev`               | Start development servers (Turborepo)        |
-| `pnpm build`             | Production build for all packages            |
-| `pnpm lint`              | ESLint across workspace                      |
-| `pnpm type-check`        | TypeScript `--noEmit`                        |
-| `pnpm test`              | Vitest suite (`@venora/web`)                 |
-| `pnpm format`            | Prettier write                               |
-| `pnpm format:check`      | Prettier check on changed files              |
-| `pnpm docs:all:validate` | Docs / OpenAPI / design / technical checks   |
-| `pnpm clean`             | Clean package outputs and `node_modules`     |
+| Command                  | Purpose                                    |
+| ------------------------ | ------------------------------------------ |
+| `pnpm dev`               | Start development servers (Turborepo)      |
+| `pnpm build`             | Production build for all packages          |
+| `pnpm lint`              | ESLint across workspace                    |
+| `pnpm type-check`        | TypeScript `--noEmit`                      |
+| `pnpm test`              | Vitest suite (`@venora/web`)               |
+| `pnpm format`            | Prettier write                             |
+| `pnpm format:check`      | Prettier check on changed files            |
+| `pnpm docs:all:validate` | Docs / OpenAPI / design / technical checks |
+| `pnpm clean`             | Clean package outputs and `node_modules`   |
 
 ### 6.2 Definition of done (before PR)
 
@@ -413,16 +413,16 @@ contracts, Edge validation, secret scan, audit).
 
 ### 6.3 Focused test commands
 
-| Command                | Scope                                      |
-| ---------------------- | ------------------------------------------ |
-| `pnpm test:unit`       | Fast Vitest subset                         |
-| `pnpm test:integration`| Booking / calendar / payment / supplier    |
-| `pnpm test:database`   | Migration / contract validators            |
-| `pnpm test:security`   | Security + RBAC tests                      |
-| `pnpm test:e2e:smoke`  | Customer / venue / supplier auth smoke     |
-| `pnpm test:e2e`        | Full Playwright suite                      |
-| `pnpm test:ai`         | Deno AI config tests                       |
-| `pnpm test:secrets`    | Scan changed content for secrets           |
+| Command                 | Scope                                   |
+| ----------------------- | --------------------------------------- |
+| `pnpm test:unit`        | Fast Vitest subset                      |
+| `pnpm test:integration` | Booking / calendar / payment / supplier |
+| `pnpm test:database`    | Migration / contract validators         |
+| `pnpm test:security`    | Security + RBAC tests                   |
+| `pnpm test:e2e:smoke`   | Customer / venue / supplier auth smoke  |
+| `pnpm test:e2e`         | Full Playwright suite                   |
+| `pnpm test:ai`          | Deno AI config tests                    |
+| `pnpm test:secrets`     | Scan changed content for secrets        |
 
 Install Playwright browsers once before E2E:
 
@@ -432,13 +432,13 @@ pnpm --filter @venora/web exec playwright install
 
 ### 6.4 Database and Edge helpers
 
-| Command                    | Purpose                                      | Safety                         |
-| -------------------------- | -------------------------------------------- | ------------------------------ |
-| `pnpm db:types`            | Regenerate DB types from **local** Supabase  | Overwrites generated file      |
-| `pnpm db:types:validate`   | Validate type contracts without regen        | Read-only                      |
-| `pnpm edge:validate`       | Edge Function packaging checks               | Read-only                      |
-| `supabase migration list --linked` | Compare linked hosted history         | Needs linked project           |
-| `supabase db push --dry-run --linked` | Preview hosted SQL                 | Preview only; not apply        |
+| Command                               | Purpose                                     | Safety                    |
+| ------------------------------------- | ------------------------------------------- | ------------------------- |
+| `pnpm db:types`                       | Regenerate DB types from **local** Supabase | Overwrites generated file |
+| `pnpm db:types:validate`              | Validate type contracts without regen       | Read-only                 |
+| `pnpm edge:validate`                  | Edge Function packaging checks              | Read-only                 |
+| `supabase migration list --linked`    | Compare linked hosted history               | Needs linked project      |
+| `supabase db push --dry-run --linked` | Preview hosted SQL                          | Preview only; not apply   |
 
 ---
 
@@ -447,14 +447,14 @@ pnpm --filter @venora/web exec playwright install
 Configure only what you need. Missing optional keys disable that capability;
 they do not block marketing pages if Supabase public vars are set.
 
-| Integration   | Local setup summary                                                                 |
-| ------------- | ----------------------------------------------------------------------------------- |
+| Integration   | Local setup summary                                                                |
+| ------------- | ---------------------------------------------------------------------------------- |
 | Supabase Auth | Site URL + `http://localhost:3000/auth/callback` allow-list; enable email provider |
-| PayMongo      | Test-mode secret + webhook secret; webhook path `/api/webhooks/paymongo`             |
-| Resend        | Test API key + allowed `RESEND_FROM` domain                                          |
-| Web Push      | Generate VAPID pair; keep private key server-only                                    |
-| Maps          | No API key; MapLibre / OpenFreeMap / Nominatim                                       |
-| AI            | `OPENROUTER_API_KEY` via Edge secrets / `supabase/.env`; model fixed                 |
+| PayMongo      | Test-mode secret + webhook secret; webhook path `/api/webhooks/paymongo`           |
+| Resend        | Test API key + allowed `RESEND_FROM` domain                                        |
+| Web Push      | Generate VAPID pair; keep private key server-only                                  |
+| Maps          | No API key; MapLibre / OpenFreeMap / Nominatim                                     |
+| AI            | `OPENROUTER_API_KEY` via Edge secrets / `supabase/.env`; model fixed               |
 
 Edge Function secrets: copy names from `supabase/.env.example`, then
 `supabase secrets set` only for a confirmed project. Details:
@@ -467,19 +467,19 @@ Edge Function secrets: copy names from `supabase/.env.example`, then
 
 ## 8. Troubleshooting
 
-| Symptom                                         | Likely cause                                      | Safe fix                                                                 |
-| ----------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------ |
-| `URL and Key are required to create a Supabase client` | Env not in `apps/web/.env.local`           | Copy example into `apps/web/.env.local`; restart `pnpm dev`              |
-| `pnpm install` fails / lockfile mismatch        | Wrong pnpm/Node or dirty lock                     | Use Node 20+, pnpm 11.13.1, `--frozen-lockfile`                          |
-| Port 3000 in use                                | Another process                                   | Stop the other process or set Next port                                  |
-| Auth redirect loop / wrong host                 | App URL or Supabase allow-list                    | Align `NEXT_PUBLIC_APP_URL` and Auth redirect URLs                       |
-| RLS / Storage upload denied                     | Missing org membership, path, MIME, policy        | Confirm role + path `{org}/{venue}/…`; see Storage runbook               |
-| Stale TypeScript DB types                       | Types older than migrations                       | Local: `supabase db reset --local` then `pnpm db:types`                  |
-| Migration fails                                 | Order / duplicate version / drift                 | Stop; preserve evidence; [runbook 03](docs/runbooks/03-supabase-migration-failure.md) |
-| PayMongo webhook rejects                        | Wrong secret or body parsing                      | [runbook 10](docs/runbooks/10-paymongo-webhook-signature.md)             |
-| Build fails                                     | Missing env, TS, or route error                   | Reproduce with `pnpm build`; [runbook 26](docs/runbooks/26-production-build-failure.md) |
-| Google Maps “missing key”                       | Feature not used                                  | Use MapLibre path; do not add Google keys                                |
-| OpenRouter / AI errors                          | Missing Edge secret or model unavailable          | Set `OPENROUTER_API_KEY`; keep model `tencent/hy3:free`                  |
+| Symptom                                                | Likely cause                               | Safe fix                                                                                |
+| ------------------------------------------------------ | ------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `URL and Key are required to create a Supabase client` | Env not in `apps/web/.env.local`           | Copy example into `apps/web/.env.local`; restart `pnpm dev`                             |
+| `pnpm install` fails / lockfile mismatch               | Wrong pnpm/Node or dirty lock              | Use Node 20+, pnpm 11.13.1, `--frozen-lockfile`                                         |
+| Port 3000 in use                                       | Another process                            | Stop the other process or set Next port                                                 |
+| Auth redirect loop / wrong host                        | App URL or Supabase allow-list             | Align `NEXT_PUBLIC_APP_URL` and Auth redirect URLs                                      |
+| RLS / Storage upload denied                            | Missing org membership, path, MIME, policy | Confirm role + path `{org}/{venue}/…`; see Storage runbook                              |
+| Stale TypeScript DB types                              | Types older than migrations                | Local: `supabase db reset --local` then `pnpm db:types`                                 |
+| Migration fails                                        | Order / duplicate version / drift          | Stop; preserve evidence; [runbook 03](docs/runbooks/03-supabase-migration-failure.md)   |
+| PayMongo webhook rejects                               | Wrong secret or body parsing               | [runbook 10](docs/runbooks/10-paymongo-webhook-signature.md)                            |
+| Build fails                                            | Missing env, TS, or route error            | Reproduce with `pnpm build`; [runbook 26](docs/runbooks/26-production-build-failure.md) |
+| Google Maps “missing key”                              | Feature not used                           | Use MapLibre path; do not add Google keys                                               |
+| OpenRouter / AI errors                                 | Missing Edge secret or model unavailable   | Set `OPENROUTER_API_KEY`; keep model `tencent/hy3:free`                                 |
 
 Do **not** bypass RLS, expose the service-role key, or apply unreviewed SQL to
 production to unblock local setup.
@@ -491,23 +491,23 @@ playbooks: [docs/runbooks/README.md](docs/runbooks/README.md).
 
 ## 9. Documentation map
 
-| Topic                         | Document                                              |
-| ----------------------------- | ----------------------------------------------------- |
-| Doc index                     | [docs/README.md](docs/README.md)                      |
-| Getting started (expanded)    | [docs/getting-started.md](docs/getting-started.md)    |
-| Architecture                  | [docs/architecture.md](docs/architecture.md)          |
-| Environment variables         | [docs/environment-variables.md](docs/environment-variables.md) |
-| Repository structure          | [docs/repository-structure.md](docs/repository-structure.md) |
-| Database / migrations         | [docs/database.md](docs/database.md), [docs/migrations.md](docs/migrations.md) |
-| Storage                       | [docs/storage.md](docs/storage.md)                    |
-| Auth / RBAC                   | [docs/authentication.md](docs/authentication.md), [docs/authorization.md](docs/authorization.md) |
-| Bookings / payments / notify  | [docs/bookings.md](docs/bookings.md), [docs/payments.md](docs/payments.md), [docs/notifications.md](docs/notifications.md) |
-| Testing                       | [docs/testing.md](docs/testing.md)                    |
-| Deployment / CI               | [docs/deployment.md](docs/deployment.md), [docs/ci-cd.md](docs/ci-cd.md) |
-| Contributing                  | [CONTRIBUTING.md](CONTRIBUTING.md)                    |
-| Security reporting            | [SECURITY.md](SECURITY.md)                            |
-| API / OpenAPI                 | [docs/api/README.md](docs/api/README.md)               |
-| UI/UX inventory               | [docs/design/README.md](docs/design/README.md)         |
+| Topic                        | Document                                                                                                                   |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Doc index                    | [docs/README.md](docs/README.md)                                                                                           |
+| Getting started (expanded)   | [docs/getting-started.md](docs/getting-started.md)                                                                         |
+| Architecture                 | [docs/architecture.md](docs/architecture.md)                                                                               |
+| Environment variables        | [docs/environment-variables.md](docs/environment-variables.md)                                                             |
+| Repository structure         | [docs/repository-structure.md](docs/repository-structure.md)                                                               |
+| Database / migrations        | [docs/database.md](docs/database.md), [docs/migrations.md](docs/migrations.md)                                             |
+| Storage                      | [docs/storage.md](docs/storage.md)                                                                                         |
+| Auth / RBAC                  | [docs/authentication.md](docs/authentication.md), [docs/authorization.md](docs/authorization.md)                           |
+| Bookings / payments / notify | [docs/bookings.md](docs/bookings.md), [docs/payments.md](docs/payments.md), [docs/notifications.md](docs/notifications.md) |
+| Testing                      | [docs/testing.md](docs/testing.md)                                                                                         |
+| Deployment / CI              | [docs/deployment.md](docs/deployment.md), [docs/ci-cd.md](docs/ci-cd.md)                                                   |
+| Contributing                 | [CONTRIBUTING.md](CONTRIBUTING.md)                                                                                         |
+| Security reporting           | [SECURITY.md](SECURITY.md)                                                                                                 |
+| API / OpenAPI                | [docs/api/specification.md](docs/api/specification.md), [docs/api/README.md](docs/api/README.md)                           |
+| UI/UX inventory              | [docs/design/README.md](docs/design/README.md)                                                                             |
 
 ---
 

@@ -11,6 +11,7 @@ import {
 import {
   getOwnerDashboardContext,
   getOwnerVenueIds,
+  hasCoordinatorPermission,
   requireCoordinatorPermission,
 } from "@/src/lib/dashboard/org-dashboard-data";
 import {
@@ -187,13 +188,20 @@ export default async function CoordinatorEventDetailPage({ params }: Props) {
   const suggestedDeposit =
     typedBooking.deposit_amount ?? Math.round(suggestedTotal * 0.5);
 
+  const canManageBookingDecisions = hasCoordinatorPermission(
+    "manage_booking_decisions",
+    context,
+  );
+
   const MESSAGING_ALLOWED = new Set([
     "pending",
     "approved",
     "payment_pending",
     "confirmed",
   ]);
-  const isReadOnly = !MESSAGING_ALLOWED.has(typedBooking.status);
+  const isReadOnly =
+    !MESSAGING_ALLOWED.has(typedBooking.status) ||
+    !hasCoordinatorPermission("message_assigned_customers", context);
 
   const messages = await getBookingMessages(id);
 
@@ -400,7 +408,16 @@ export default async function CoordinatorEventDetailPage({ params }: Props) {
               Coordinator action
             </h2>
             <div className="mt-4">
-              {typedBooking.status === "pending" ? (
+              {!canManageBookingDecisions ? (
+                <p className="rounded-2xl border border-[#e5e7eb] bg-[#f8fbff] p-4 text-sm font-semibold text-[#475569]">
+                  Approve, decline, and complete actions are controlled by the
+                  venue owner. Ask them to grant{" "}
+                  <span className="font-extrabold text-[#0f172a]">
+                    manage booking decisions
+                  </span>{" "}
+                  if you need this permission.
+                </p>
+              ) : typedBooking.status === "pending" ? (
                 <OwnerBookingDecisionForm
                   bookingId={typedBooking.id}
                   suggestedTotal={suggestedTotal}

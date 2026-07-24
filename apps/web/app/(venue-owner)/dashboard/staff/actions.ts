@@ -188,7 +188,7 @@ function revalidateStaffViews() {
   revalidatePath("/dashboard/staff");
   revalidatePath("/dashboard/coordinator");
   revalidatePath("/dashboard/coordinator/venues");
-  revalidatePath("/dashboard/coordinator/events");
+  revalidatePath("/dashboard/coordinator/bookings");
   revalidatePath("/dashboard/coordinator/calendar");
   revalidatePath("/dashboard/coordinator/reports");
 }

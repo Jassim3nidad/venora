@@ -188,7 +188,7 @@ export function CustomerNavbar({
           </nav>
 
           <div className="ml-auto flex min-w-0 items-center justify-end gap-1.5 sm:gap-3">
-            {user ? <NotificationBell className="hidden lg:inline-flex" /> : null}
+            {user ? <NotificationBell /> : null}
 
             <button
               type="button"

@@ -25,7 +25,7 @@ Related: [role experience matrix](role-experience-matrix.md),
 | ---- | --------- |
 | Customer | Mostly satisfied (compare is the main gap) |
 | Venue Owner | Mostly satisfied (staff invite depth partial) |
-| Event Coordinator | Only partially aligned |
+| Event Coordinator | Mostly aligned (MVP shipped; messaging still booking-scoped; partner copy gap) |
 | Accredited Supplier | Profile/marketplace yes; venue-package association no |
 | Platform Administrator | Mostly satisfied (payment monitor / disputes gaps) |
 
@@ -72,25 +72,30 @@ Brief: operational manager for one or more venue accounts (listings, bookings,
 calendars, customer communication, suppliers, performance, reports).
 
 - [~] Managing venue listings — org venue list/discovery; not full owner CRUD
-- [~] Coordinating bookings — Events list/detail; coordination product incomplete
+- [x] Coordinating bookings — `/dashboard/coordinator/bookings` list + detail;
+  approve/decline/complete when `manage_booking_decisions` is granted
 - [x] Managing calendars — `/dashboard/coordinator/calendar`
-- [~] Communicating with customers — some booking conversation; no full messaging CRM
-- [~] Coordinating accredited suppliers — discovery only; attach-to-booking unfinished
-- [~] Monitoring booking performance — overview/pipeline; not full analytics suite
+- [x] Communicating with customers — Messages inbox with booking chats + venue
+  inquiry threads (`/dashboard/coordinator/messages`, `/account/venue-inquiries`)
+- [~] Coordinating accredited suppliers — discovery + assign UI; `booking_suppliers` path unfinished
+- [~] Monitoring booking performance — `/dashboard/coordinator/performance`
 - [x] Generating operational reports — `/dashboard/coordinator/reports`
+- [x] Settings / notifications — `/dashboard/coordinator/settings` + shell NotificationBell
 
 **Notes**
 
 - Customers **cannot hire** an Event Coordinator on Venora; EC is org staff after
-  partner approval + organization membership.
-- Role overall remains **PARTIALLY IMPLEMENTED** in the experience matrix.
+  partner approval + organization membership. Settings page states this; become-partner
+  marketing copy may still oversell “manage clients”.
+- Role overall remains **PARTIALLY IMPLEMENTED** in the experience matrix (partner copy + supplier attach gaps).
 
 **Backlog (Event Coordinator)**
 
-- [ ] Reliable org membership / invite onboarding
-- [ ] First-class booking coordination + messaging
+- [~] Reliable org membership / invite onboarding
+- [x] First-class booking + venue-inquiry customer messaging (ops-scoped; not global CRM)
 - [ ] Attach suppliers to venue bookings (Phase 2)
 - [ ] Deeper booking-performance analytics
+- [ ] Fix become-partner copy (EC = org staff, not hired)
 
 ---
 
