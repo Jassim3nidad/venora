@@ -73,7 +73,7 @@ Accounts have **one application role** at a time. Partner approval **replaces** 
 | Enter | Register → verify → login | Become partner → wait | Become partner → wait | Become partner → wait | Approves/denies applications |
 | Transact | Booking inquiry; supplier inquiry | Approve/decline + quote | Sees org events if member | Quote on inquiries | Oversight / moderation |
 | Pay / confirm | PayMongo checkout | Availability, calendar, packages | Calendar / events views | Jobs when rows exist (Phase 2 attach incomplete) | Payment/reporting tools |
-| After event | Review; cancel/refund when eligible | Mark complete; respond to reviews | Reports / events list | Portfolio / reviews | Disputes placeholder |
+| After event | Review; cancel/refund when eligible; raise dispute when eligible | Mark complete; respond to reviews | Reports / events list | Portfolio / reviews | Disputes case review |
 
 ---
 
@@ -237,7 +237,8 @@ If the payment deadline passes while unpaid, scheduled jobs can move the booking
 
 1. Booking is **`confirmed`** with recorded payment.
 2. Customer requests cancellation where policy allows → cancellation RPC + refund workflow as applicable.
-3. Venue/admin paths exist for authorized cancellation; disputes UI is still a **placeholder** — not full case management.
+3. Venue/admin paths exist for authorized cancellation; disputes have **scoped
+   case management** (raise → review → resolve/reject), not a full evidence suite.
 
 Use payment/refund runbooks for money mismatches; do not hand-edit booking status to “fix” payments.
 

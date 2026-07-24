@@ -51,6 +51,13 @@ export const ADMIN_MODULES: AdminModule[] = [
     icon: "account_balance_wallet",
   },
   {
+    title: "Disputes",
+    description:
+      "Review customer cases: open → under review → resolve or reject.",
+    href: "/admin/disputes",
+    icon: "gavel",
+  },
+  {
     title: "Reports",
     description: "Platform analytics, booking trends, and activity.",
     href: "/admin/reports",
