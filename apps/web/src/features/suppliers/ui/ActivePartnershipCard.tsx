@@ -315,7 +315,7 @@ export function ActivePartnershipCard({
                 currentUserName={currentUserName}
                 initialMessages={messages ?? []}
                 counterpartLabel={venue?.name ?? "Venue"}
-                counterpartRole={counterpartRole}
+                counterpartRole={counterpartRole ?? "Venue"}
                 revalidatePath="/dashboard/supplier/partnerships"
               />
             ) : (
