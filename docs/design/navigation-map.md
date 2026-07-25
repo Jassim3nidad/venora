@@ -52,7 +52,8 @@ flowchart TD
 | Suppliers and details  | `suppliers.view`       |
 | Bookings and inquiries | `marketplace.view`     |
 | Reviews                | `marketplace.moderate` |
-| Reports and disputes   | `reports.view`         |
+| Reports                | `reports.view`         |
+| Disputes               | `disputes.view`        |
 | Commissions            | `commissions.view`     |
 | Marketplace            | `marketplace.view`     |
 | AI configuration       | `ai_config.view`       |

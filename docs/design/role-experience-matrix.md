@@ -11,7 +11,7 @@
 | Notifications           | None                          | Inbox/preferences                          | Shared notification infrastructure     | Shared notification infrastructure                 | No dedicated route    | No dedicated management route             |
 | Permission model        | Public                        | Authenticated resource ownership           | Role + ownership                       | Role + supplier scope                              | Role guard            | Role + granular permissions               |
 | Runtime evidence        | Public pages checked          | None authenticated                         | None authenticated                     | None authenticated                                 | None authenticated    | None authenticated                        |
-| Overall completeness    | Implemented                   | Broadly implemented, unverified            | Broadly implemented, unverified        | Broadly implemented, unverified                    | PARTIALLY IMPLEMENTED | Broadly implemented; disputes placeholder |
+| Overall completeness    | Implemented                   | Broadly implemented, unverified            | Broadly implemented, unverified        | Broadly implemented, unverified                    | PARTIALLY IMPLEMENTED | Broadly implemented; disputes scoped |
 
 ## Access outcomes
 
@@ -42,5 +42,5 @@ flowchart LR
   dedicated notification/settings pages.
 - Coordinator: booking detail, communication, notifications, and settings are
   missing; current product stops at overview/discovery/reports.
-- Administrator: disputes are a guarded placeholder; payment/refund monitoring
-  has no dedicated module; permission tier behavior was not runtime-tested.
+- Administrator: disputes have scoped case management; payment/refund monitoring
+  at `/admin/payments`; permission tier behavior was not runtime-tested.

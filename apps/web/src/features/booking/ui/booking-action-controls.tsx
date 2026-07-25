@@ -47,7 +47,7 @@ export function CustomerCancelBookingButton({
 }
 
 const PROVIDER_LABELS: Record<string, string> = {
-  paymongo: "PayMongo — Cards, GCash, Maya, GrabPay",
+  paymongo: "PayMongo — Cards, GCash, GrabPay",
   maya: "Maya",
   stripe: "Stripe",
 };

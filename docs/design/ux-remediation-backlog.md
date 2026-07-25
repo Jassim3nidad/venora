@@ -26,7 +26,7 @@ not changed during this audit.
 |    12 | UX-15 payment document IA                  | Customer booking/account                | Customer can find owned invoice, receipt, transaction, and refund state from booking and payment history                         |
 |    13 | UX-17 admin finance requirements           | Admin product/RBAC                      | Approved role/permissions, data minimization, reconciliation states, audit needs, and route decision are documented before build |
 |    14 | UX-12 coordinator MVP                      | Coordinator product/RBAC                | Product explicitly scopes or implements event detail, coordination, messaging, notifications, and settings                       |
-|    15 | UX-13 disputes availability                | Admin navigation/module                 | Placeholder is feature-flagged out or usable scoped cases/actions/statuses exist with audit feedback                             |
+|    15 | UX-13 disputes availability                | Admin navigation/module                 | **Done** — scoped cases: raise from booking, `/account/disputes`, admin list/detail + `update_dispute_status` lifecycle (`disputes.*`) |
 |    16 | UX-14 privacy page                         | Account privacy                         | Only supported operations are actionable; unavailable operations have honest support/recovery copy                               |
 |    17 | UX-18 provider capability                  | Payment selector/copy                   | Only registered PayMongo appears; unregistered providers cannot be selected; provider contract test passes                       |
 

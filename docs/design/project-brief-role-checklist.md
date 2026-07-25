@@ -27,7 +27,7 @@ Related: [role experience matrix](role-experience-matrix.md),
 | Venue Owner | Mostly satisfied |
 | Event Coordinator | Mostly aligned (MVP + messaging + org staff invite path) |
 | Accredited Supplier | Profile/marketplace yes; venue-package association no |
-| Platform Administrator | Mostly satisfied (payment monitor / disputes gaps) |
+| Platform Administrator | Satisfied for Phase 1 admin surfaces |
 
 ---
 
@@ -78,7 +78,8 @@ calendars, customer communication, suppliers, performance, reports).
 - [x] Managing calendars — `/dashboard/coordinator/calendar`
 - [x] Communicating with customers — Messages inbox with booking chats + venue
   inquiry threads (`/dashboard/coordinator/messages`, `/account/venue-inquiries`)
-- [~] Coordinating accredited suppliers — discovery + assign UI; `booking_suppliers` path unfinished
+- [x] Coordinating accredited suppliers — discovery + attach to booking
+  (`booking_suppliers` jobs path on VO/EC booking detail)
 - [~] Monitoring booking performance — `/dashboard/coordinator/performance`
 - [x] Generating operational reports — `/dashboard/coordinator/reports`
 - [x] Settings / notifications — `/dashboard/coordinator/settings` + shell NotificationBell
@@ -96,7 +97,7 @@ calendars, customer communication, suppliers, performance, reports).
 - [x] Reliable org membership / invite onboarding (`/dashboard/staff` → email →
   `/staff/accept` or in-dashboard accept)
 - [x] First-class booking + venue-inquiry customer messaging (ops-scoped; not global CRM)
-- [ ] Attach suppliers to venue bookings (Phase 2)
+- [x] Attach suppliers to venue bookings (`booking_suppliers` attach UI)
 - [ ] Deeper booking-performance analytics
 - [x] Fix become-partner copy (EC = org staff, not hired)
 
@@ -117,7 +118,7 @@ calendars, customer communication, suppliers, performance, reports).
 **Backlog (Supplier / Phase 2)**
 
 - [ ] Venue listing association (`venue_suppliers` or equivalent product UI)
-- [ ] Attach suppliers onto a venue booking (`booking_suppliers`) as finished flow
+- [x] Attach suppliers onto a venue booking (`booking_suppliers`) as finished flow
 
 ---
 
@@ -130,13 +131,14 @@ calendars, customer communication, suppliers, performance, reports).
 - [x] Reports — `/admin/reports` (+ audit logs)
 - [x] AI settings — `/admin/ai-configuration`
 - [x] Marketplace administration — `/admin/marketplace`
-- [~] Payment monitoring — no dedicated module; signals elsewhere; Maya incomplete
-- [~] Disputes — placeholder route (not full case management)
+- [x] Payment monitoring — `/admin/payments` transactions, refunds, webhook attention
+- [x] Disputes — scoped case management (`/admin/disputes`, customer raise +
+  `/account/disputes`; lifecycle via `update_dispute_status`)
 
 **Backlog (Admin)**
 
-- [ ] Dedicated payment / refund monitoring workspace
-- [ ] Complete disputes case management
+- [x] Dedicated payment / refund monitoring workspace
+- [x] Complete disputes case management (scoped lifecycle; not full evidence suite)
 - [ ] Finish Maya (or keep disabled) before production enablement
 
 ---

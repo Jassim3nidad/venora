@@ -63,7 +63,7 @@ export function VenueInquiryConversation({
   isReadOnly: boolean;
   customerName?: string;
   venueName?: string;
-  venueLink?: string;
+  venueLink?: string | undefined;
   statusLabel: string;
   counterpartLabel?: string;
 }) {

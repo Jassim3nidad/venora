@@ -1,109 +1,241 @@
+import type { Metadata } from "next";
+import Link from "next/link";
 import {
-  DashboardPage,
+  DashboardSubPage,
   DataTable,
-  StatusBadge,
   EmptyState,
+  KpiCard,
+  Panel,
+  PanelHeader,
+  StatusBadge,
+  type DataTableColumn,
 } from "@/components/dashboard/enterprise";
 import { createClient } from "@/lib/supabase/server";
 import { requirePermissionOrRedirect } from "@/lib/rbac/admin-context";
-import Link from "next/link";
 
+export const metadata: Metadata = { title: "Disputes - Admin" };
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Disputes - Admin" };
 
-export default async function AdminDisputesPage() {
-  await requirePermissionOrRedirect("reports.view");
+type DisputeStatusFilter =
+  | "all"
+  | "open"
+  | "under_review"
+  | "resolved"
+  | "rejected"
+  | "cancelled";
+
+type DisputeRow = {
+  id: string;
+  customer: string;
+  venue: string;
+  category: string;
+  reason: string;
+  status: string;
+  date: string;
+};
+
+const STATUS_OPTIONS: { value: DisputeStatusFilter; label: string }[] = [
+  { value: "all", label: "All statuses" },
+  { value: "open", label: "Open" },
+  { value: "under_review", label: "Under review" },
+  { value: "resolved", label: "Resolved" },
+  { value: "rejected", label: "Rejected" },
+  { value: "cancelled", label: "Cancelled" },
+];
+
+function asOne<T>(value: T | T[] | null | undefined): T | null {
+  if (!value) return null;
+  return Array.isArray(value) ? (value[0] ?? null) : value;
+}
+
+function prettyCategory(value: string) {
+  return value.replace(/_/g, " ");
+}
+
+type Props = {
+  searchParams: Promise<{ status?: string }>;
+};
+
+export default async function AdminDisputesPage({ searchParams }: Props) {
+  await requirePermissionOrRedirect("disputes.view");
+
+  const params = await searchParams;
+  const status = (
+    STATUS_OPTIONS.some((o) => o.value === params.status)
+      ? params.status
+      : "all"
+  ) as DisputeStatusFilter;
 
   const supabase = (await createClient()) as any;
-  const { data: disputes, error } = await supabase
+
+  let listQuery = supabase
     .from("disputes")
     .select(
-      "id, status, created_at, reason, profiles!raised_by(full_name), venues(name), bookings(id)",
+      "id, status, category, created_at, reason, profiles!raised_by(full_name), venues(name)",
     )
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  if (status !== "all") {
+    listQuery = listQuery.eq("status", status);
+  }
+
+  const [
+    { data: disputes, error },
+    { count: openCount },
+    { count: reviewCount },
+    { count: resolvedCount },
+  ] = await Promise.all([
+    listQuery,
+    supabase
+      .from("disputes")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "open"),
+    supabase
+      .from("disputes")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "under_review"),
+    supabase
+      .from("disputes")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "resolved"),
+  ]);
 
   if (error) {
     return (
-      <DashboardPage>
+      <DashboardSubPage title="Disputes" description="Case management workspace.">
         <EmptyState
           icon="error"
           title="Error loading disputes"
           description={error.message}
         />
-      </DashboardPage>
+      </DashboardSubPage>
     );
   }
 
-  const rows = (disputes ?? []).map((d: any) => ({
-    id: d.id,
-    customer: d.profiles?.full_name ?? "Unknown",
-    venue: d.venues?.name ?? "Unknown",
-    reason: d.reason ?? "",
-    status: d.status,
-    date: new Date(d.created_at).toLocaleString(),
-  }));
+  const rows: DisputeRow[] = (disputes ?? []).map((d: any) => {
+    const profile = asOne(d.profiles);
+    const venue = asOne(d.venues);
+    return {
+      id: d.id,
+      customer: profile?.full_name ?? "Unknown",
+      venue: venue?.name ?? "Unknown",
+      category: d.category,
+      reason: d.reason ?? "",
+      status: d.status,
+      date: new Date(d.created_at).toLocaleString("en-PH", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }),
+    };
+  });
+
+  const columns: DataTableColumn<DisputeRow>[] = [
+    {
+      key: "venue",
+      header: "Venue",
+      cell: (r) => (
+        <div>
+          <p className="font-bold text-[#0f172a]">{r.venue}</p>
+          <p className="text-xs font-semibold capitalize text-[#64748b]">
+            {prettyCategory(r.category)}
+          </p>
+        </div>
+      ),
+    },
+    { key: "customer", header: "Raised by", cell: (r) => r.customer },
+    {
+      key: "reason",
+      header: "Reason",
+      cell: (r) => (
+        <span className="max-w-[280px] text-sm text-[#475569]">
+          {r.reason.slice(0, 80)}
+          {r.reason.length > 80 ? "…" : ""}
+        </span>
+      ),
+    },
+    { key: "date", header: "Opened", cell: (r) => r.date },
+    {
+      key: "status",
+      header: "Status",
+      cell: (r) => <StatusBadge status={r.status} />,
+    },
+    {
+      key: "actions",
+      header: "",
+      cell: (r) => (
+        <Link
+          href={`/admin/disputes/${r.id}`}
+          className="text-sm font-bold text-[#1d4ed8] hover:underline"
+        >
+          Open case
+        </Link>
+      ),
+    },
+  ];
 
   return (
-    <DashboardPage>
-      <div className="mb-6">
-        <h1 className="text-3xl font-black text-slate-900">
-          Disputes Overview
-        </h1>
-        <p className="mt-2 text-slate-500">
-          Review booking, payment, and marketplace disputes that require
-          administrator follow-up.
-        </p>
-      </div>
-
-      <div className="rounded-2xl border border-slate-200 bg-white">
-        <DataTable
-          rows={rows}
-          keyFn={(r) => r.id}
-          emptyMessage="No disputes found."
-          columns={[
-            {
-              key: "venue",
-              header: "Venue",
-              cell: (r: any) => (
-                <span className="font-bold text-slate-900">{r.venue}</span>
-              ),
-            },
-            {
-              key: "customer",
-              header: "Raised By",
-              cell: (r: any) => r.customer,
-            },
-            {
-              key: "reason",
-              header: "Reason",
-              cell: (r: any) =>
-                r.reason.slice(0, 50) + (r.reason.length > 50 ? "..." : ""),
-            },
-            {
-              key: "date",
-              header: "Created On",
-              cell: (r: any) => r.date,
-            },
-            {
-              key: "status",
-              header: "Status",
-              cell: (r: any) => <StatusBadge status={r.status} />,
-            },
-            {
-              key: "actions",
-              header: "",
-              cell: (r: any) => (
-                <Link
-                  href={`/admin/disputes/${r.id}`}
-                  className="text-brand-600 hover:underline"
-                >
-                  View Details
-                </Link>
-              ),
-            },
-          ]}
+    <DashboardSubPage
+      title="Disputes"
+      description="Scoped case workflow: open → under review → resolved or rejected. Customers raise cases from eligible bookings."
+    >
+      <div className="grid gap-4 sm:grid-cols-3">
+        <KpiCard label="Open" value={String(openCount ?? 0)} icon="inbox" highlight />
+        <KpiCard
+          label="Under review"
+          value={String(reviewCount ?? 0)}
+          icon="pending_actions"
+        />
+        <KpiCard
+          label="Resolved"
+          value={String(resolvedCount ?? 0)}
+          icon="task_alt"
         />
       </div>
-    </DashboardPage>
+
+      <Panel>
+        <PanelHeader
+          title="Cases"
+          description="Filter and open a dispute to advance its lifecycle."
+        />
+        <form className="mb-4 flex flex-wrap gap-3" method="get">
+          <label className="flex flex-col gap-1 text-xs font-bold uppercase tracking-wide text-[#64748b]">
+            Status
+            <select
+              name="status"
+              defaultValue={status}
+              className="h-10 min-w-[180px] rounded-xl border border-[#dbe3ef] bg-white px-3 text-sm font-semibold text-[#0f172a]"
+            >
+              {STATUS_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="submit"
+            className="mt-5 h-10 rounded-xl bg-[#1d4ed8] px-4 text-sm font-bold text-white"
+          >
+            Apply
+          </button>
+        </form>
+
+        {rows.length > 0 ? (
+          <DataTable
+            rows={rows}
+            keyFn={(r) => r.id}
+            columns={columns}
+            emptyMessage="No disputes found."
+          />
+        ) : (
+          <EmptyState
+            icon="gavel"
+            title="No disputes in this filter"
+            description="When customers raise a dispute on an eligible booking, it appears here for review."
+          />
+        )}
+      </Panel>
+    </DashboardSubPage>
   );
 }

@@ -28,7 +28,7 @@ export type VenueOwnerBooking = {
   date: string;
   time: string;
   revenue: string;
-  status: "pending" | "approved" | "declined";
+  status: string;
   suggestedTotal: number;
   suggestedDeposit: number;
 };
@@ -175,8 +175,7 @@ export function VenueOwnerOverview({
               description="Review and respond to incoming reservation requests."
               action={
                 <span className="rounded-full border border-[#bfdbfe] bg-white px-3 py-1 text-xs font-bold text-[#1d4ed8] shadow-sm">
-                  {initialBookings.filter((r) => r.status === "pending").length}{" "}
-                  pending
+                  {requests.filter((r) => r.status === "pending").length} pending
                 </span>
               }
             />
@@ -188,7 +187,7 @@ export function VenueOwnerOverview({
               </div>
             ) : null}
             <DataTable
-              rows={initialBookings}
+              rows={requests}
               keyFn={(r) => r.id}
               emptyMessage="No booking requests yet."
               columns={[
@@ -264,7 +263,12 @@ export function VenueOwnerOverview({
                         </button>
                       </div>
                     ) : (
-                      <span className="text-xs text-[#6b7280]">-</span>
+                      <Link
+                        href={`/dashboard/bookings/${r.id}`}
+                        className="text-xs font-bold text-[#1d4ed8] hover:underline"
+                      >
+                        View
+                      </Link>
                     ),
                 },
               ]}

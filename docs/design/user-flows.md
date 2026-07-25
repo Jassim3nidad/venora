@@ -636,23 +636,30 @@ flowchart TD
   I -->|No| K["Pending or failed; show support/retry state"]
 ```
 
-## 32. Administrator reviews a dispute — PLACEHOLDER
+## 32. Administrator reviews a dispute
 
-- **Actor / start / preconditions:** Admin with `reports.view` at
-  `/admin/disputes`.
-- **Steps / status:** Permission guard runs, then a static empty placeholder explains
-  that case records will appear when escalation workflows are enabled.
-- **Outcome / recovery / permission:** Safe empty screen is the only implemented
-  outcome. No dispute action, transition, notification, or backend case workflow
-  is presented.
+- **Actor / start / preconditions:** Admin with `disputes.view` at
+  `/admin/disputes`. Manage/resolve need `disputes.manage` /
+  `disputes.resolve`.
+- **Steps / status:** List/filter cases → open case → start review
+  (`open` → `under_review`) → resolve or reject with notes. Customers raise
+  from eligible booking detail; track at `/account/disputes`.
+- **Outcome / recovery / permission:** Closed cases show resolution notes.
+  Unauthorized viewers see safe empty/forbidden states; invalid transitions
+  rejected by `update_dispute_status` RPC.
 
 ```mermaid
 flowchart TD
-  A["Open admin disputes"] --> B{"reports.view permission?"}
+  A["Open admin disputes"] --> B{"disputes.view?"}
   B -->|No| C["Safe unauthorized state"]
-  B -->|Yes| D["Render guarded disputes placeholder"]
-  D --> E["Explain escalation workflow is not enabled"]
-  E --> F["Return to reports or admin overview"]
+  B -->|Yes| D["List / filter cases"]
+  D --> E["Open dispute case"]
+  E --> F{"open?"}
+  F -->|Yes + manage| G["Start review"]
+  G --> H{"under_review + resolve?"}
+  H -->|Yes| I["Resolve or reject with notes"]
+  H -->|No| J["View-only under review"]
+  F -->|Closed| K["Show resolution notes"]
 ```
 
 ## Cross-flow unresolved points
