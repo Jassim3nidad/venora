@@ -178,7 +178,7 @@ export default async function SupplierDiscoverVenuesPage({
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {venues.map((venue: any) => {
-              const status = partnershipMap.get(venue.id);
+              const status = partnershipMap.get(venue.id) as string | undefined;
               return (
                 <div key={venue.id} className="flex flex-col overflow-hidden rounded-2xl border border-[#dbe3ef] bg-white shadow-sm transition hover:shadow-md">
                   <div className="relative h-48 w-full bg-slate-100">

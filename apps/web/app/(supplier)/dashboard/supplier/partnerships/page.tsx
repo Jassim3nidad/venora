@@ -149,7 +149,7 @@ export default async function SupplierPartnershipsPage() {
                 if (!venue) return null;
                 
                 // Find the active agreement for this venue
-                const agreement = agreements?.find(a => 
+                const agreement = agreements?.find((a: any) => 
                   a.venue_id === venue.id && a.status === 'active'
                 );
 
@@ -160,7 +160,7 @@ export default async function SupplierPartnershipsPage() {
                     agreement={agreement}
                     messages={partnership.id ? partnershipMessageMap[partnership.id] ?? [] : []}
                     currentUserId={currentUserId}
-                    currentUserName={profile.business_name ?? "Supplier"}
+                    currentUserName={(profile as any).business_name ?? (profile as any).businessName ?? "Supplier"}
                     counterpartRole="Venue Team"
                   />
                 );

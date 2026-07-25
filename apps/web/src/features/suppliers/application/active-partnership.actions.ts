@@ -12,18 +12,19 @@ export async function endPartnershipAction(partnershipId: string) {
   }
 
   // Fetch the supplier profile to ensure the user owns it
-  const { data: profile } = await supabase
+  const { data: profileRaw } = await supabase
     .from("supplier_profiles")
     .select("id")
     .eq("profile_id", user.user.id)
     .single();
+    
+  const profile = profileRaw as { id: string } | null;
 
   if (!profile) {
     throw new Error("Supplier profile not found");
   }
 
-  const { error } = await supabase
-    .from("venue_suppliers")
+  const { error } = await (supabase.from("venue_suppliers") as any)
     .update({ status: "ended" })
     .eq("id", partnershipId)
     .eq("supplier_id", profile.id);

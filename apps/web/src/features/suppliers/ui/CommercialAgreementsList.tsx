@@ -173,7 +173,7 @@ export function CommercialAgreementsList({
           venueId={venueId}
           venueName={venueName}
           supplierName={supplierName}
-          supplierServices={supplierServices}
+          supplierServices={supplierServices ?? []}
           isOpen={isModalOpen}
           onOpenChange={setIsModalOpen}
         />

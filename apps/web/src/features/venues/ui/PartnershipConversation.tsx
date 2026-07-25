@@ -85,6 +85,8 @@ export function PartnershipConversation({
     const optimistic: PartnershipMessage = {
       id: `optimistic-${Date.now()}`,
       sender_id: currentUserId,
+      venue_organization_id: venueOrgId,
+      supplier_id: supplierId,
       message: trimmed,
       created_at: new Date().toISOString(),
       sender: { full_name: currentUserName, avatar_url: null },
@@ -98,9 +100,10 @@ export function PartnershipConversation({
         50,
       );
       const result = await sendPartnershipMessage({
-        partnershipId,
+        venueOrgId,
+        supplierId,
         message: trimmed,
-        revalidate: revalPath,
+        ...(revalPath ? { revalidate: revalPath } : {}),
       });
       if (!result.success) {
         toast.error(result.error || "Failed to send message.");
