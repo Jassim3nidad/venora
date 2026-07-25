@@ -9,6 +9,8 @@ import { getRequiredSupplierDashboardContext } from "../_lib/supplier-dashboard-
 
 import { SupplierAgreementsList } from "@/src/features/suppliers/ui/SupplierAgreementsList";
 import { ActivePartnershipCard } from "@/src/features/suppliers/ui/ActivePartnershipCard";
+import { getPartnershipMessages } from "@/src/features/venues/application/partnership-messages-actions";
+import { PartnershipConversation } from "@/src/features/venues/ui/PartnershipConversation";
 
 export const metadata: Metadata = {
   title: "Venue Partnerships - Supplier Dashboard",
@@ -40,13 +42,15 @@ export default async function SupplierPartnershipsPage() {
   const { data: partnerships, error } = await supabase
     .from("venue_suppliers")
     .select(`
+      id,
       is_preferred,
       status,
       venues (
         id,
         name,
         city,
-        province
+        province,
+        organization_id
       )
     `)
     .eq("supplier_id", profile.id);
@@ -65,10 +69,22 @@ export default async function SupplierPartnershipsPage() {
   }
 
   const list = (partnerships ?? []) as any[];
-  
+
   const activePartnerships = list.filter((p) => p.status === "active");
   const pendingRequests = list.filter((p) => ["application_submitted", "under_review"].includes(p.status));
   const invitations = list.filter((p) => p.status === "invited");
+
+  // Fetch messages for each active partnership
+  const { data: authUser } = await supabase.auth.getUser();
+  const currentUserId = authUser.user?.id ?? "";
+
+  const partnershipMessageMap: Record<string, any[]> = {};
+  for (const p of activePartnerships) {
+    if (p.id && p.venues?.organization_id) {
+      // B2B unified chat uses venue_organization_id and supplier_id
+      partnershipMessageMap[p.id] = await getPartnershipMessages(p.venues.organization_id, profile.id);
+    }
+  }
 
   return (
     <DashboardSubPage
@@ -142,6 +158,10 @@ export default async function SupplierPartnershipsPage() {
                     key={partnership.id || idx}
                     partnership={partnership}
                     agreement={agreement}
+                    messages={partnership.id ? partnershipMessageMap[partnership.id] ?? [] : []}
+                    currentUserId={currentUserId}
+                    currentUserName={profile.business_name ?? "Supplier"}
+                    counterpartRole="Venue Team"
                   />
                 );
               })}
@@ -154,6 +174,7 @@ export default async function SupplierPartnershipsPage() {
             </div>
           )}
         </section>
+
 
         {/* Pending Requests Section */}
         {pendingRequests.length > 0 && (

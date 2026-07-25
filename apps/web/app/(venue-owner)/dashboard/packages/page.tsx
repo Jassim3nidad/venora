@@ -98,6 +98,21 @@ export default async function PackagesPage() {
       header: "Status",
       cell: (row) => <StatusBadge status={row.status} />,
     },
+    {
+      key: "actions",
+      header: "",
+      cell: (row) => (
+        <div className="flex justify-end">
+          <Link
+            href={`/dashboard/packages/${row.id}/edit`}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-blue-600"
+            title="Edit Package"
+          >
+            <span className="material-symbols-outlined text-[20px]">edit</span>
+          </Link>
+        </div>
+      ),
+    },
   ];
 
   return (

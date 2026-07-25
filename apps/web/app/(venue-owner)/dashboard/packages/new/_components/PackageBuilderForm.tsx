@@ -15,7 +15,7 @@ import {
   ClipboardList,
   ShieldCheck,
 } from "lucide-react";
-import { createVenuePackage } from "@/src/features/venues/application/package-actions";
+import { createVenuePackage, updateVenuePackage } from "@/src/features/venues/application/package-actions";
 import type { EligibleSupplier } from "@/src/features/venues/application/package-queries";
 import { EligibleSuppliersPanel } from "./EligibleSuppliersPanel";
 
@@ -23,11 +23,33 @@ type Venue = { id: string; name: string; province: string; capacity_max: number 
 type EventType = { id: string; name: string };
 type Amenity = { id: string; name: string };
 
+export type PackageInitialData = {
+  id: string;
+  venueId: string;
+  name: string;
+  description: string;
+  eventTypeId: string;
+  minGuests: number | "";
+  maxGuests: number | "";
+  price: number | "";
+  priceUnit: string;
+  depositPercentage: number | "";
+  depositFlatAmount: number | "";
+  validFrom: string;
+  validUntil: string;
+  isActive: boolean;
+  amenityIds: string[];
+  venueRules: string;
+  inclusions: string[];
+  suppliers: SelectedSupplier[];
+};
+
 type Props = {
   venues: Venue[];
   eventTypes: EventType[];
   amenities: Amenity[];
   eligibleSuppliersByVenue: Record<string, EligibleSupplier[]>;
+  initialData?: PackageInitialData;
 };
 
 type SelectedSupplier = {
@@ -50,6 +72,7 @@ export function PackageBuilderForm({
   eventTypes,
   amenities,
   eligibleSuppliersByVenue,
+  initialData,
 }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -57,24 +80,26 @@ export function PackageBuilderForm({
   const [error, setError] = useState<string | null>(null);
 
   // Form state
-  const [venueId, setVenueId] = useState(venues[0]?.id ?? "");
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [eventTypeId, setEventTypeId] = useState("");
-  const [minGuests, setMinGuests] = useState<number | "">("");
-  const [maxGuests, setMaxGuests] = useState<number | "">("");
-  const [price, setPrice] = useState<number | "">("");
-  const [priceUnit, setPriceUnit] = useState("per_event");
-  const [depositType, setDepositType] = useState<"percentage" | "flat" | "none">("percentage");
-  const [depositPercentage, setDepositPercentage] = useState<number | "">(30);
-  const [depositFlat, setDepositFlat] = useState<number | "">("");
-  const [validFrom, setValidFrom] = useState("");
-  const [validUntil, setValidUntil] = useState("");
-  const [isActive, setIsActive] = useState(true);
-  const [selectedAmenities, setSelectedAmenities] = useState<Set<string>>(new Set());
-  const [venueRules, setVenueRules] = useState("");
-  const [inclusions, setInclusions] = useState("");
-  const [selectedSuppliers, setSelectedSuppliers] = useState<SelectedSupplier[]>([]);
+  const [venueId, setVenueId] = useState(initialData?.venueId ?? venues[0]?.id ?? "");
+  const [name, setName] = useState(initialData?.name ?? "");
+  const [description, setDescription] = useState(initialData?.description ?? "");
+  const [eventTypeId, setEventTypeId] = useState(initialData?.eventTypeId ?? "");
+  const [minGuests, setMinGuests] = useState<number | "">(initialData?.minGuests ?? "");
+  const [maxGuests, setMaxGuests] = useState<number | "">(initialData?.maxGuests ?? "");
+  const [price, setPrice] = useState<number | "">(initialData?.price ?? "");
+  const [priceUnit, setPriceUnit] = useState(initialData?.priceUnit ?? "per_event");
+  const [depositType, setDepositType] = useState<"percentage" | "flat" | "none">(
+    initialData?.depositPercentage ? "percentage" : initialData?.depositFlatAmount ? "flat" : "percentage"
+  );
+  const [depositPercentage, setDepositPercentage] = useState<number | "">(initialData?.depositPercentage ?? 30);
+  const [depositFlat, setDepositFlat] = useState<number | "">(initialData?.depositFlatAmount ?? "");
+  const [validFrom, setValidFrom] = useState(initialData?.validFrom ?? "");
+  const [validUntil, setValidUntil] = useState(initialData?.validUntil ?? "");
+  const [isActive, setIsActive] = useState(initialData?.isActive ?? true);
+  const [selectedAmenities, setSelectedAmenities] = useState<Set<string>>(new Set(initialData?.amenityIds ?? []));
+  const [venueRules, setVenueRules] = useState(initialData?.venueRules ?? "");
+  const [inclusions, setInclusions] = useState(initialData?.inclusions?.join("\n") ?? "");
+  const [selectedSuppliers, setSelectedSuppliers] = useState<SelectedSupplier[]>(initialData?.suppliers ?? []);
 
   const eligibleSuppliers = venueId ? (eligibleSuppliersByVenue[venueId] ?? []) : [];
   const selectedVenue = venues.find((v) => v.id === venueId);
@@ -97,7 +122,7 @@ export function PackageBuilderForm({
 
     setError(null);
     startTransition(async () => {
-      const result = await createVenuePackage({
+      const payload = {
         venueId,
         name,
         description,
@@ -120,7 +145,11 @@ export function PackageBuilderForm({
           .filter(Boolean),
         isActive,
         suppliers: selectedSuppliers,
-      });
+      };
+
+      const result = initialData
+        ? await updateVenuePackage(initialData.id, payload)
+        : await createVenuePackage(payload);
 
       if (result.success) {
         router.push("/dashboard/packages");
@@ -146,7 +175,7 @@ export function PackageBuilderForm({
   return (
     <div className="max-w-4xl mx-auto">
       {/* Step indicators */}
-      <div className="mb-10 overflow-x-auto">
+      <div className="mb-10 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <div className="flex items-center gap-1 min-w-max mx-auto justify-center">
           {STEPS.map((s, i) => {
             const Icon = s.icon;
@@ -154,9 +183,8 @@ export function PackageBuilderForm({
               <div key={s.id} className="flex items-center gap-1">
                 <button
                   type="button"
-                  onClick={() => i < step && setStep(i)}
-                  disabled={i > step}
-                  className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all ${stepClass(i)} ${i < step ? "cursor-pointer hover:opacity-80" : i > step ? "cursor-not-allowed opacity-50" : ""}`}
+                  onClick={() => setStep(i)}
+                  className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all ${stepClass(i)} ${i !== step ? "cursor-pointer hover:opacity-80" : ""}`}
                 >
                   {i < step ? (
                     <CheckCircle2 className="h-4 w-4" />

@@ -4,21 +4,32 @@ import { useState } from "react";
 import { MaterialIcon, Panel } from "@/src/components/dashboard/enterprise";
 import { endPartnershipAction } from "../application/active-partnership.actions";
 import { Dialog, DialogContent, DialogTitle, DialogClose, Badge, Button } from "@venora/ui";
-import { X, Handshake, CircleDollarSign, Settings, FileText, Clock, XCircle, AlertCircle, Building, Users, Trash2 } from "lucide-react";
+import { X, Handshake, CircleDollarSign, Settings, FileText, Clock, XCircle, AlertCircle, Building, Users, Trash2, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { PartnershipConversation } from "@/src/features/venues/ui/PartnershipConversation";
+import { type PartnershipMessage } from "@/src/features/venues/application/partnership-messages-actions";
 
 export function ActivePartnershipCard({ 
   partnership, 
-  agreement 
+  agreement,
+  messages,
+  currentUserId,
+  currentUserName,
+  counterpartRole,
 }: { 
   partnership: any;
   agreement?: any;
+  messages?: PartnershipMessage[];
+  currentUserId?: string;
+  currentUserName?: string;
+  counterpartRole?: string;
 }) {
   const router = useRouter();
   const [isEnding, setIsEnding] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showEndModal, setShowEndModal] = useState(false);
+  const [showChatModal, setShowChatModal] = useState(false);
   
   const venue = partnership.venues;
 
@@ -67,14 +78,20 @@ export function ActivePartnershipCard({
           </p>
         </div>
 
-        <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 gap-3">
+        <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-3 gap-3">
+          <Button 
+            variant="outline" 
+            className="w-full text-slate-600 hover:text-blue-600 shadow-sm"
+            onClick={() => setShowChatModal(true)}
+          >
+            Message
+          </Button>
           <Button 
             variant="outline" 
             className="w-full text-slate-600 hover:text-slate-900 shadow-sm"
             onClick={() => setShowTermsModal(true)}
             disabled={!agreement}
           >
-            <FileText className="mr-2 h-4 w-4" />
             Terms
           </Button>
           <Button 
@@ -82,7 +99,6 @@ export function ActivePartnershipCard({
             className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 hover:border-red-200 shadow-sm transition-colors"
             onClick={() => setShowEndModal(true)}
           >
-            <XCircle className="mr-2 h-4 w-4" />
             End
           </Button>
         </div>
@@ -283,6 +299,36 @@ export function ActivePartnershipCard({
                 )}
               </button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Chat Modal */}
+      <Dialog open={showChatModal} onOpenChange={setShowChatModal}>
+        <DialogContent className="max-w-xl p-0 overflow-hidden bg-transparent border-0 shadow-none [&>button]:hidden">
+          <div className="relative">
+            {currentUserId && currentUserName ? (
+              <PartnershipConversation
+                venueOrgId={venue?.organization_id}
+                supplierId={partnership.supplier_id}
+                currentUserId={currentUserId}
+                currentUserName={currentUserName}
+                initialMessages={messages ?? []}
+                counterpartLabel={venue?.name ?? "Venue"}
+                counterpartRole={counterpartRole}
+                revalidatePath="/dashboard/supplier/partnerships"
+              />
+            ) : (
+              <div className="bg-white p-6 rounded-2xl text-center shadow-sm">Loading chat...</div>
+            )}
+            
+            {/* Custom Close Button for the chat modal so it doesn't overlap the conversation header */}
+            <button
+              onClick={() => setShowChatModal(false)}
+              className="absolute right-4 top-4 rounded-xl p-2 text-slate-500 hover:bg-white/50 hover:text-slate-800 transition"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
         </DialogContent>
       </Dialog>

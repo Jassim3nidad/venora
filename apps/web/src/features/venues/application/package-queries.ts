@@ -69,23 +69,19 @@ export async function getEligiblePackageSuppliers(
 
   const rows = (data ?? []) as any[];
 
-  // Filter: supplier must be accredited AND have an active venue_suppliers row AND have at least 1 service
-  const venuePartnerIds = await getActivePartnerSupplierIds(supabase, venueId);
-
+  // Filter: supplier must be accredited AND have an active agreement
   return rows
     .filter((row) => {
       const sp = row.supplier_profiles;
       if (!sp) return false;
       if (sp.accreditation_status !== "accredited") return false;
-      if (!venuePartnerIds.has(sp.id)) return false;
-      if (!sp.supplier_services || sp.supplier_services.length === 0)
-        return false;
       if (
         requiredGuestCapacity &&
         row.max_guest_count &&
         row.max_guest_count < requiredGuestCapacity
-      )
+      ) {
         return false;
+      }
       return true;
     })
     .map((row) => {
@@ -108,16 +104,38 @@ export async function getEligiblePackageSuppliers(
       } satisfies EligibleSupplier;
     });
 }
+export async function getPackageForEditing(packageId: string) {
+  const supabase = (await createClient()) as any;
 
-async function getActivePartnerSupplierIds(
-  supabase: any,
-  venueId: string
-): Promise<Set<string>> {
-  const { data } = await supabase
-    .from("venue_suppliers")
-    .select("supplier_id")
-    .eq("venue_id", venueId)
-    .eq("status", "active");
+  const { data: pkg, error } = await supabase
+    .from("venue_packages")
+    .select(`
+      id,
+      venue_id,
+      name,
+      description,
+      event_type_id,
+      min_guests,
+      max_guests,
+      price,
+      price_unit,
+      deposit_percentage,
+      deposit_flat_amount,
+      valid_from,
+      valid_until,
+      amenity_ids,
+      venue_rules,
+      inclusions,
+      is_active,
+      package_suppliers (
+        supplier_id,
+        agreement_id,
+        included_price
+      )
+    `)
+    .eq("id", packageId)
+    .single();
 
-  return new Set(((data ?? []) as { supplier_id: string }[]).map((r) => r.supplier_id));
+  if (error || !pkg) return null;
+  return pkg;
 }

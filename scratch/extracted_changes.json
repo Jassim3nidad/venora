@@ -1,0 +1,57 @@
+{
+  "C:\\venora\\apps\\web\\app\\(venue-owner)\\dashboard\\coordinator\\messages\\CoordinatorInboxClient.tsx": {
+    "AllowMultiple": false,
+    "Description": "Fix PartnershipConversation props",
+    "EndLine": 452,
+    "Instruction": "Fix PartnershipConversation usage to include currentUserName, counterpartLabel, and counterpartRole",
+    "ReplacementContent": "                <div className=\"flex h-full flex-col\">\n                  {selectedThread.venueOrgId ? (\n                    <PartnershipConversation\n                      venueOrgId={selectedThread.venueOrgId}\n                      supplierId={selectedThread.id}\n                      currentUserId={currentUserId}\n                      currentUserName=\"Venue Team\"\n                      initialMessages={partnershipMessages}\n                      counterpartLabel={selectedThread.customerName}\n                      counterpartRole=\"Supplier\"\n                      revalidatePath=\"/dashboard/coordinator/messages\"\n                    />\n                  ) : (\n                    <div className=\"flex h-full items-center justify-center text-sm text-[#94a3b8]\">\n                      Unable to load partnership details.\n                    </div>\n                  )}\n                </div>",
+    "StartLine": 438,
+    "TargetContent": "                <div className=\"flex h-full flex-col\">\n                  {selectedThread.venueOrgId ? (\n                    <PartnershipConversation\n                      venueOrgId={selectedThread.venueOrgId}\n                      supplierId={selectedThread.id}\n                      currentUserId={currentUserId}\n                      initialMessages={partnershipMessages}\n                      isLoading={isLoadingMessages}\n                    />\n                  ) : (\n                    <div className=\"flex h-full items-center justify-center text-sm text-[#94a3b8]\">\n                      Unable to load partnership details.\n                    </div>\n                  )}\n                </div>",
+    "TargetFile": "C:\\venora\\apps\\web\\app\\(venue-owner)\\dashboard\\coordinator\\messages\\CoordinatorInboxClient.tsx",
+    "toolAction": "Update CoordinatorInboxClient",
+    "toolSummary": "Fix props"
+  },
+  "C:\\venora\\apps\\web\\src\\features\\venues\\application\\partnership-messages-actions.ts": {
+    "AllowMultiple": false,
+    "Description": "Update message actions to B2B model",
+    "EndLine": 75,
+    "Instruction": "Update getPartnershipMessages and sendPartnershipMessage to use venue_organization_id and supplier_id",
+    "ReplacementContent": "\"use server\";\n\nimport { revalidatePath } from \"next/cache\";\nimport { createClient } from \"@/lib/supabase/server\";\n\nexport type PartnershipMessage = {\n  id: string;\n  sender_id: string;\n  message: string;\n  created_at: string;\n  venue_organization_id: string;\n  supplier_id: string;\n  sender: {\n    full_name: string | null;\n    avatar_url: string | null;\n  } | null;\n};\n\nexport async function getPartnershipMessages(\n  venueOrgId: string,\n  supplierId: string,\n): Promise<PartnershipMessage[]> {\n  const supabase = (await createClient()) as any;\n  const { data } = await supabase\n    .from(\"partnership_messages\")\n    .select(`\n      id,\n      sender_id,\n      venue_organization_id,\n      supplier_id,\n      message,\n      created_at,\n      sender:profiles!sender_id(full_name, avatar_url)\n    `)\n    .eq(\"venue_organization_id\", venueOrgId)\n    .eq(\"supplier_id\", supplierId)\n    .order(\"created_at\", { ascending: true });\n\n  return (data as PartnershipMessage[]) ?? [];\n}\n\nexport async function sendPartnershipMessage({\n  venueOrgId,\n  supplierId,\n  message,\n  revalidate,\n}: {\n  venueOrgId: string;\n  supplierId: string;\n  message: string;\n  revalidate?: string;\n}): Promise<{ success: boolean; error?: string }> {\n  try {\n    const supabase = (await createClient()) as any;\n    const {\n      data: { user },\n    } = await supabase.auth.getUser();\n\n    if (!user) return { success: false, error: \"Not authenticated.\" };\n\n    const trimmed = message.trim();\n    if (!trimmed || trimmed.length > 2000) {\n      return { success: false, error: \"Message must be between 1 and 2000 characters.\" };\n    }\n\n    const { error } = await supabase.from(\"partnership_messages\").insert({\n      venue_organization_id: venueOrgId,\n      supplier_id: supplierId,\n      sender_id: user.id,\n      message: trimmed,\n    });\n\n    if (error) {\n      console.error(\"Send partnership message error:\", error);\n      return { success: false, error: error.message };\n    }\n\n    if (revalidate) revalidatePath(revalidate);\n    return { success: true };\n  } catch (err: any) {\n    return { success: false, error: err?.message || \"Failed to send message.\" };\n  }\n}",
+    "StartLine": 1,
+    "TargetContent": "\"use server\";\n\nimport { revalidatePath } from \"next/cache\";\nimport { createClient } from \"@/lib/supabase/server\";\n\nexport type PartnershipMessage = {\n  id: string;\n  sender_id: string;\n  message: string;\n  created_at: string;\n  sender: {\n    full_name: string | null;\n    avatar_url: string | null;\n  } | null;\n};\n\nexport async function getPartnershipMessages(\n  partnershipId: string,\n): Promise<PartnershipMessage[]> {\n  const supabase = (await createClient()) as any;\n  const { data } = await supabase\n    .from(\"partnership_messages\")\n    .select(`\n      id,\n      sender_id,\n      message,\n      created_at,\n      sender:profiles!sender_id(full_name, avatar_url)\n    `)\n    .eq(\"partnership_id\", partnershipId)\n    .order(\"created_at\", { ascending: true });\n\n  return (data as PartnershipMessage[]) ?? [];\n}\n\nexport async function sendPartnershipMessage({\n  partnershipId,\n  message,\n  revalidate,\n}: {\n  partnershipId: string;\n  message: string;\n  revalidate?: string;\n}): Promise<{ success: boolean; error?: string }> {\n  try {\n    const supabase = (await createClient()) as any;\n    const {\n      data: { user },\n    } = await supabase.auth.getUser();\n\n    if (!user) return { success: false, error: \"Not authenticated.\" };\n\n    const trimmed = message.trim();\n    if (!trimmed || trimmed.length > 2000) {\n      return { success: false, error: \"Message must be between 1 and 2000 characters.\" };\n    }\n\n    const { error } = await supabase.from(\"partnership_messages\").insert({\n      partnership_id: partnershipId,\n      sender_id: user.id,\n      message: trimmed,\n    });\n\n    if (error) {\n      console.error(\"Send partnership message error:\", error);\n      return { success: false, error: error.message };\n    }\n\n    if (revalidate) revalidatePath(revalidate);\n    return { success: true };\n  } catch (err: any) {\n    return { success: false, error: err?.message || \"Failed to send message.\" };\n  }\n}",
+    "TargetFile": "C:\\venora\\apps\\web\\src\\features\\venues\\application\\partnership-messages-actions.ts",
+    "toolAction": "Update typescript actions",
+    "toolSummary": "Update ts actions"
+  },
+  "C:\\venora\\apps\\web\\src\\features\\venues\\ui\\PartnershipConversation.tsx": {
+    "Description": "Update PartnershipConversation props",
+    "Instruction": "Change partnershipId to venueOrgId and supplierId, and update sendPartnershipMessage call.",
+    "ReplacementChunks": [
+      {
+        "AllowMultiple": false,
+        "EndLine": 68,
+        "ReplacementContent": "type Props = {\n  venueOrgId: string;\n  supplierId: string;\n  currentUserId: string;\n  currentUserName: string;\n  initialMessages: PartnershipMessage[];\n  counterpartLabel: string;\n  counterpartRole?: string;\n  revalidatePath?: string;\n};\n\nexport function PartnershipConversation({\n  venueOrgId,\n  supplierId,\n  currentUserId,\n  currentUserName,\n  initialMessages,\n  counterpartLabel,\n  counterpartRole,\n  revalidatePath: revalPath,\n}: Props) {",
+        "StartLine": 50,
+        "TargetContent": "type Props = {\n  partnershipId: string;\n  currentUserId: string;\n  currentUserName: string;\n  initialMessages: PartnershipMessage[];\n  counterpartLabel: string; // e.g. \"Grand Ballroom\" or \"Bloom & Brew Florals\"\n  counterpartRole?: string; // e.g. \"Venue Team\" or \"Supplier\"\n  revalidatePath?: string;\n};\n\nexport function PartnershipConversation({\n  partnershipId,\n  currentUserId,\n  currentUserName,\n  initialMessages,\n  counterpartLabel,\n  counterpartRole,\n  revalidatePath: revalPath,\n}: Props) {"
+      },
+      {
+        "AllowMultiple": false,
+        "EndLine": 85,
+        "ReplacementContent": "    addOptimisticMessage({\n      id: crypto.randomUUID(),\n      venue_organization_id: venueOrgId,\n      supplier_id: supplierId,\n      sender_id: currentUserId,\n      message: trimmed,\n      created_at: new Date().toISOString(),\n      sender: { full_name: currentUserName, avatar_url: null },\n    });",
+        "StartLine": 79,
+        "TargetContent": "    addOptimisticMessage({\n      id: crypto.randomUUID(),\n      partnership_id: partnershipId,\n      sender_id: currentUserId,\n      message: trimmed,\n      created_at: new Date().toISOString(),\n      sender: { full_name: currentUserName, avatar_url: null },\n    });"
+      },
+      {
+        "AllowMultiple": false,
+        "EndLine": 92,
+        "ReplacementContent": "      sendPartnershipMessage({\n        venueOrgId,\n        supplierId,\n        message: trimmed,\n        revalidate: revalPath,\n      }).then((res) => {",
+        "StartLine": 87,
+        "TargetContent": "      sendPartnershipMessage({\n        partnershipId,\n        message: trimmed,\n        revalidate: revalPath,\n      }).then((res) => {"
+      }
+    ],
+    "TargetFile": "C:\\venora\\apps\\web\\src\\features\\venues\\ui\\PartnershipConversation.tsx",
+    "TargetLintErrorIds": [],
+    "toolAction": "Update PartnershipConversation",
+    "toolSummary": "Update Component"
+  }
+}
