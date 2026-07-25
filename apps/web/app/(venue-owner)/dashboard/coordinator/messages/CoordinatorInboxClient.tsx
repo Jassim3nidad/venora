@@ -10,7 +10,7 @@ export type InboxThread = {
   id: string;
   customerName: string;
   venueName: string;
-  venueSlug?: string;
+  venueSlug?: string | undefined;
   eventDate: string;
   status: string;
   serviceName?: string;

@@ -13,7 +13,7 @@ const PAYMONGO_API_URL = "https://api.paymongo.com/v1";
 const REQUEST_TIMEOUT_MS = 15_000;
 
 /** Payment methods surfaced on the hosted checkout page. */
-const PAYMENT_METHOD_TYPES = ["card", "gcash", "paymaya", "grab_pay"];
+const PAYMENT_METHOD_TYPES = ["card", "gcash", "grab_pay"];
 
 /** PayMongo only settles in Philippine pesos today. */
 const SUPPORTED_CURRENCIES = ["PHP"];

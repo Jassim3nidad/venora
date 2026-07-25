@@ -2,6 +2,7 @@ import {
   Building2,
   CalendarDays,
   CreditCard,
+  Gavel,
   LayoutDashboard,
   Lock,
   Mail,
@@ -60,6 +61,12 @@ export const ACCOUNT_NAV_ITEMS: AccountNavItem[] = [
     label: "Transactions",
     description: "Your booking payment history",
     icon: Receipt,
+  },
+  {
+    href: "/account/disputes",
+    label: "Disputes",
+    description: "Cases you raised for platform review",
+    icon: Gavel,
   },
   {
     href: "/account/privacy",

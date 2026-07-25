@@ -40,10 +40,18 @@ import {
 import { getOwnerTrustCardLabels } from "@/src/features/owners/ui/owner-profile-presentation";
 
 import { BookingVenueMap } from "@/src/features/booking/ui/BookingVenueMap";
+import { RaiseDisputeForm } from "@/src/features/admin-disputes/ui/RaiseDisputeForm";
 
 export const metadata: Metadata = {
   title: "Booking Details | Venora",
 };
+
+const DISPUTE_ELIGIBLE_STATUSES = new Set([
+  "confirmed",
+  "completed",
+  "cancelled",
+  "reviewed",
+]);
 
 export const dynamic = "force-dynamic";
 
@@ -392,6 +400,20 @@ export default async function BookingDetailPage({ params }: Props) {
 
   const typedBooking = booking as BookingDetail;
   const canCancel = canCancelBookingStatus(typedBooking.status);
+  const canRaiseDispute = DISPUTE_ELIGIBLE_STATUSES.has(typedBooking.status);
+
+  const { data: existingDisputes } = canRaiseDispute
+    ? await supabase
+        .from("disputes")
+        .select("id, status, category, created_at")
+        .eq("booking_id", typedBooking.id)
+        .eq("raised_by", user.id)
+        .order("created_at", { ascending: false })
+    : { data: [] as { id: string; status: string; category: string; created_at: string }[] };
+
+  const hasActiveDispute = (existingDisputes ?? []).some((d: { status: string }) =>
+    ["open", "under_review"].includes(d.status),
+  );
 
   // Messaging is allowed for active statuses
   const MESSAGING_ALLOWED = new Set([
@@ -940,6 +962,27 @@ export default async function BookingDetailPage({ params }: Props) {
               )}
             </div>
           </div>
+
+          {canRaiseDispute ? (
+            hasActiveDispute ? (
+              <div className="rounded-[24px] border border-[#E5E7EB] bg-white p-5 shadow-sm">
+                <p className="text-sm font-bold text-slate-950">
+                  Dispute already in progress
+                </p>
+                <p className="mt-1 text-sm font-medium text-slate-500">
+                  An open or under-review case exists for this booking.
+                </p>
+                <Link
+                  href="/account/disputes"
+                  className="mt-3 inline-flex text-sm font-bold text-[#2563EB] hover:underline"
+                >
+                  View your disputes
+                </Link>
+              </div>
+            ) : (
+              <RaiseDisputeForm bookingId={typedBooking.id} />
+            )
+          ) : null}
         </aside>
       </div>
     </main>

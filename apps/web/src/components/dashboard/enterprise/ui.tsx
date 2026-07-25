@@ -280,6 +280,10 @@ const STATUS_STYLES: Record<string, string> = {
   suspended: "bg-amber-50 text-amber-800 ring-1 ring-amber-200/60",
   revoked: "bg-red-50 text-red-800 ring-1 ring-red-200/60",
   inactive: "bg-slate-50 text-slate-600 ring-1 ring-slate-200/70",
+  open: "bg-amber-50 text-amber-800 ring-1 ring-amber-200/60",
+  under_review: "bg-blue-50 text-blue-800 ring-1 ring-blue-200/60",
+  resolved: "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200/60",
+  rejected: "bg-red-50 text-red-800 ring-1 ring-red-200/60",
 };
 
 export function StatusBadge({

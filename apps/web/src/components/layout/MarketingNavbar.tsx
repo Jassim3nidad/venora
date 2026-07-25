@@ -14,6 +14,7 @@ import {
   Menu,
   Search,
   Store,
+  ClipboardCheck,
   UserRound,
   X,
 } from "lucide-react";
@@ -33,6 +34,7 @@ interface MarketingNavbarProfile {
   avatar_url?: string | null;
   isVenueOwner?: boolean;
   isSupplier?: boolean;
+  isCoordinator?: boolean;
 }
 
 const HOST_VENUE_PATH = "/account/become-partner";
@@ -154,6 +156,7 @@ export default function MarketingNavbar({
       avatar_url: currentUser.avatarUrl,
       isVenueOwner: currentUser.roles.includes("venue_owner"),
       isSupplier: currentUser.roles.includes("supplier"),
+      isCoordinator: currentUser.roles.includes("event_coordinator"),
     }
     : null;
 
@@ -233,6 +236,7 @@ export default function MarketingNavbar({
                 email={email}
                 avatarUrl={profile?.avatar_url}
                 showEnterVenueDashboard={profile?.isVenueOwner ?? false}
+                showEnterCoordinatorDashboard={profile?.isCoordinator ?? false}
                 showEnterSupplierDashboard={profile?.isSupplier ?? false}
               />
             </>
@@ -263,6 +267,7 @@ export default function MarketingNavbar({
                 email={email}
                 avatarUrl={profile?.avatar_url}
                 showEnterVenueDashboard={profile?.isVenueOwner ?? false}
+                showEnterCoordinatorDashboard={profile?.isCoordinator ?? false}
                 showEnterSupplierDashboard={profile?.isSupplier ?? false}
               />
             </>
@@ -360,6 +365,17 @@ export default function MarketingNavbar({
                   >
                     <Store className="h-5 w-5" />
                     Enter Venue Owner Dashboard
+                  </Link>
+                ) : null}
+                {profile?.isCoordinator ? (
+                  <Link
+                    href="/dashboard/coordinator"
+                    role="menuitem"
+                    className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold text-[#1D4ED8] bg-[#EFF6FF] transition hover:bg-[#DBEAFE]"
+                    onClick={closeMenu}
+                  >
+                    <ClipboardCheck className="h-5 w-5" />
+                    Enter Coordinator Dashboard
                   </Link>
                 ) : null}
                 {profile?.isSupplier ? (

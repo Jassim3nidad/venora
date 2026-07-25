@@ -13,6 +13,7 @@ export async function getNavbarProfile(
   avatar_url: string | null;
   isVenueOwner?: boolean;
   isSupplier?: boolean;
+  isCoordinator?: boolean;
 } | null> {
   if (!userId) return null;
 
@@ -29,6 +30,13 @@ export async function getNavbarProfile(
     roles?.some((r: any) => r.role === "venue_owner") ?? false;
   const isSupplier =
     roles?.some((r: any) => r.role === "supplier") ?? false;
+  const isCoordinator =
+    roles?.some((r: any) => r.role === "event_coordinator") ?? false;
 
-  return { ...(profile ?? {}), isVenueOwner, isSupplier } as any;
+  return {
+    ...(profile ?? {}),
+    isVenueOwner,
+    isSupplier,
+    isCoordinator,
+  } as any;
 }

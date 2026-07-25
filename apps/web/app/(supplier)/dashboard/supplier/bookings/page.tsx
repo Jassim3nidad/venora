@@ -17,16 +17,18 @@ import {
 export const metadata: Metadata = { title: "Jobs - Supplier Dashboard" };
 export const dynamic = "force-dynamic";
 
+type BookingEmbed = {
+  event_date: string;
+  guest_count: number | null;
+  venues: { name: string } | { name: string }[] | null;
+  profiles: { full_name: string | null } | { full_name: string | null }[] | null;
+};
+
 type BookingSupplierRow = {
   id: string;
   agreed_price: number | null;
   status: string;
-  bookings: {
-    event_date: string;
-    guest_count: number | null;
-    venues: { name: string } | null;
-    profiles: { full_name: string | null } | null;
-  } | null;
+  bookings: BookingEmbed | BookingEmbed[] | null;
 };
 
 type BookingDisplayRow = {
@@ -38,6 +40,27 @@ type BookingDisplayRow = {
   price: string;
   status: string;
 };
+
+function asOne<T>(value: T | T[] | null | undefined): T | null {
+  if (!value) return null;
+  return Array.isArray(value) ? (value[0] ?? null) : value;
+}
+
+function mapJobRow(row: BookingSupplierRow): BookingDisplayRow {
+  const booking = asOne(row.bookings);
+  const venue = asOne(booking?.venues ?? null);
+  const profile = asOne(booking?.profiles ?? null);
+
+  return {
+    id: row.id,
+    venue: venue?.name ?? "-",
+    client: profile?.full_name ?? "-",
+    date: formatDate(booking?.event_date),
+    guests: booking?.guest_count ? `${booking.guest_count} guests` : "-",
+    price: formatPeso(row.agreed_price),
+    status: row.status,
+  };
+}
 
 export default async function SupplierBookingsPage() {
   const { supabase, supplierProfile } = await getSupplierDashboardContext();
@@ -57,7 +80,7 @@ export default async function SupplierBookingsPage() {
     );
   }
 
-  const { data: bookingsRaw } = await supabase
+  const { data: bookingsRaw, error } = await supabase
     .from("booking_suppliers")
     .select(
       `
@@ -73,20 +96,16 @@ export default async function SupplierBookingsPage() {
       `,
     )
     .eq("supplier_id", supplierProfile.id)
-    .eq("status", "confirmed")
+    .in("status", ["pending", "confirmed"])
     .order("id", { ascending: false });
+
+  if (error) {
+    console.error("[supplier jobs] fetch failed:", error.message);
+  }
 
   const rows: BookingDisplayRow[] = (
     (bookingsRaw ?? []) as BookingSupplierRow[]
-  ).map((b) => ({
-    id: b.id,
-    venue: b.bookings?.venues?.name ?? "-",
-    client: b.bookings?.profiles?.full_name ?? "-",
-    date: formatDate(b.bookings?.event_date),
-    guests: b.bookings?.guest_count ? `${b.bookings.guest_count} guests` : "-",
-    price: formatPeso(b.agreed_price),
-    status: b.status,
-  }));
+  ).map(mapJobRow);
 
   const columns: DataTableColumn<BookingDisplayRow>[] = [
     {
@@ -116,21 +135,21 @@ export default async function SupplierBookingsPage() {
   return (
     <DashboardSubPage
       title="Jobs"
-      description="Confirmed events you're providing services for."
+      description="Events where you are attached as a supplier."
     >
       {rows.length > 0 ? (
         <Panel>
           <PanelHeader
-            title="Confirmed Jobs"
-            description="These are inquiries you've accepted."
+            title="Active Jobs"
+            description="Confirmed and pending supplier jobs attached to venue bookings."
           />
           <DataTable rows={rows} keyFn={(row) => row.id} columns={columns} />
         </Panel>
       ) : (
         <EmptyState
           icon="event_available"
-          title="No confirmed jobs yet"
-          description="Accept a pending inquiry to see it appear here."
+          title="No jobs yet"
+          description="When a venue owner or coordinator attaches you to a booking, or a customer accepts your quote on a linked booking, it appears here."
         />
       )}
     </DashboardSubPage>

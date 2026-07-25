@@ -19,6 +19,7 @@ import {
 } from "@/src/features/booking/ui/booking-action-controls";
 import { getBookingMessages } from "@/src/features/booking/application/messages-actions";
 import { BookingConversation } from "@/src/features/booking/ui/BookingConversation";
+import { BookingSuppliersPanel } from "@/src/features/booking/ui/BookingSuppliersPanel";
 
 export const metadata: Metadata = { title: "Booking Detail - Dashboard" };
 export const dynamic = "force-dynamic";
@@ -62,6 +63,13 @@ type BookingRow = {
     status: string;
     note: string | null;
     created_at: string;
+  }> | null;
+  booking_suppliers: Array<{
+    id: string;
+    status: string;
+    agreed_price: number | null;
+    supplier_profiles: { business_name: string | null } | null;
+    supplier_services: { name: string | null } | null;
   }> | null;
 };
 
@@ -137,6 +145,13 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
         status,
         note,
         created_at
+      ),
+      booking_suppliers(
+        id,
+        status,
+        agreed_price,
+        supplier_profiles!supplier_id(business_name),
+        supplier_services(name)
       )
     `,
     )
@@ -154,7 +169,7 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
       supabase.from("user_roles").select("role").eq("user_id", user.id),
       supabase
         .from("organization_members")
-        .select("organization_id")
+        .select("organization_id, role, permissions, status")
         .eq("user_id", user.id)
         .eq("organization_id", organizationId)
         .eq("status", "active")
@@ -172,6 +187,15 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
   );
 
   if (!isAdmin && !membership && !organization) redirect("/unauthorized");
+
+  const memberPermissions = Array.isArray(membership?.permissions)
+    ? (membership.permissions as string[])
+    : [];
+  const canAttachSuppliers =
+    isAdmin ||
+    Boolean(organization) ||
+    (membership?.role === "coordinator" &&
+      memberPermissions.includes("coordinate_accredited_suppliers"));
 
   const suggestedTotal =
     typedBooking.total_amount ??
@@ -343,6 +367,13 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
               ))}
             </div>
           </section>
+
+          <BookingSuppliersPanel
+            bookingId={typedBooking.id}
+            suppliers={typedBooking.booking_suppliers ?? []}
+            assignHref={`/dashboard/bookings/${typedBooking.id}/assign-supplier`}
+            canAttach={canAttachSuppliers}
+          />
         </div>
 
         <aside className="grid gap-5 xl:sticky xl:top-24">

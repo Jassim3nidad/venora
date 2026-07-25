@@ -201,12 +201,18 @@ export const NAV_BY_ROLE: Record<EnterpriseRole, NavItem[]> = {
       label: "Disputes",
       href: "/admin/disputes",
       icon: "gavel",
-      permission: "reports.view",
+      permission: "disputes.view",
     },
     {
       label: "Commissions",
       href: "/admin/commissions",
       icon: "payments",
+      permission: "commissions.view",
+    },
+    {
+      label: "Payments",
+      href: "/admin/payments",
+      icon: "account_balance_wallet",
       permission: "commissions.view",
     },
     {

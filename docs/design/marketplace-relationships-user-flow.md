@@ -127,7 +127,9 @@ later change venues, permissions, suspend, or revoke.
 ### What is *not* a relationship today
 
 - Customer ↛ Event Coordinator (no hire, no messaging product, no EC directory).
-- Venue booking ↛ automatic supplier package (attaching suppliers onto a venue booking is **schema Phase 2**; no finished venue “hire supplier onto this booking” UI).
+- Venue booking ↛ automatic supplier package (venue/EC can **attach** accredited
+  suppliers onto a booking as jobs via `booking_suppliers`; packaging/dynamic
+  event packages remain Phase 2).
 - Event Coordinator ↛ customer client CRM (no EC booking detail / messaging / client intake as a first-class product).
 
 ---
@@ -192,7 +194,9 @@ flowchart TD
 3. **Quote** — Supplier responds with quotes; customer accepts or declines.
 4. **Independent of venue** — This path does **not** require a venue booking, and does **not** route through an Event Coordinator marketplace.
 
-Venue owners / coordinators may **discover** suppliers in their dashboards for planning, but wiring a supplier as a confirmed job on a venue booking (`booking_suppliers`) is **not a finished customer/venue attach UI**.
+Venue owners / coordinators may **discover** suppliers and **attach** accredited
+venue partners onto a booking (`booking_suppliers` → supplier Jobs). Full
+venue↔supplier packaging remains Phase 2.
 
 ### Step-by-step: “how would I contact an Event Coordinator?”
 
@@ -274,7 +278,7 @@ flowchart TB
 | **Customer ↔ Supplier** | Commercial: inquiry → quote → accept/decline for a **service**. |
 | **Customer ↔ Event Coordinator** | **None as a hire.** Indirect only: customer’s venue booking appears on EC dashboard if EC is org staff. |
 | **Venue Owner ↔ Event Coordinator** | Organizational: VO/org employs or partners with EC via **organization_members**. |
-| **Venue Owner / EC ↔ Supplier** | Discovery and (future) booking attach; today customer↔supplier is the live commercial path. |
+| **Venue Owner / EC ↔ Supplier** | Discovery + attach accredited suppliers onto bookings as jobs; customer↔supplier inquiry remains a parallel commercial path. |
 | **Admin ↔ all partners** | Verification gate for venue owner / EC / supplier roles. |
 
 ---
@@ -320,6 +324,6 @@ Update this file when:
 
 - A customer-facing EC hire or directory ships.
 - Org invite / membership onboarding becomes complete.
-- `booking_suppliers` (or equivalent) gets a finished venue/EC attach flow.
+- `booking_suppliers` venue/EC attach flow shipped (packaging still Phase 2).
 
 Until then, treat **“customer hires an Event Coordinator on Venora”** as **out of product**.

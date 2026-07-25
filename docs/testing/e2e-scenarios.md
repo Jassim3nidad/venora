@@ -49,7 +49,7 @@ fixtures; `--list` success is not test success.
 | 41  | Module-level permissions            | Extensive tier cases listed                | BLOCKED runtime        |
 | 42  | Payment monitoring                  | Finance/super access partial               | BLOCKED runtime        |
 | 43  | View audit logs                     | Tier access cases listed                   | BLOCKED runtime        |
-| 44  | Access disputes placeholder safely  | Route permission only                      | BLOCKED runtime        |
+| 44  | Access disputes case management     | Route + lifecycle actions                  | BLOCKED runtime        |
 | 45  | Deny unauthorized admin module      | Extensive tier denial cases                | BLOCKED runtime        |
 | 46  | Not-found route                     | No generic case; debug 404 unit only       | MISSING                |
 | 47  | Safe server error fixture           | No case                                    | MISSING                |

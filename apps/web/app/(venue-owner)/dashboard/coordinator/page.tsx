@@ -161,7 +161,7 @@ export default async function CoordinatorDashboardPage(props: {
   // Fetch accredited supplier count
   const { count: accreditedSupplierCount } = venueIds.length > 0 
     ? await supabase
-        .from("venue_preferred_suppliers")
+        .from("venue_suppliers")
         .select("supplier_id", { count: "exact", head: true })
         .in("venue_id", venueIds)
     : { count: 0 };
