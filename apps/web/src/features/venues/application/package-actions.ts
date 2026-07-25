@@ -68,7 +68,7 @@ export async function createVenuePackage(
   input: CreatePackageInput
 ): Promise<PackageActionResult> {
   try {
-    const { supabase, isAdmin } = await requireVenueOwnerContext();
+    const { supabase, isAdmin, user } = await requireVenueOwnerContext();
 
     // Ownership guard — verify the caller can write to this venue
     if (!isAdmin) {
@@ -90,7 +90,14 @@ export async function createVenuePackage(
         .limit(1)
         .maybeSingle();
 
-      if (!memberCheck) {
+      const { data: orgCheck } = await supabase
+        .from("organizations")
+        .select("id")
+        .eq("id", venueCheck.organization_id)
+        .eq("owner_id", user.id)
+        .maybeSingle();
+
+      if (!memberCheck && !orgCheck) {
         return {
           success: false,
           error: "You are not authorized to manage this venue.",
@@ -158,6 +165,120 @@ export async function createVenuePackage(
       return { success: false, error: err.message };
     }
     console.error("[createVenuePackage] unexpected error:", err);
+    return { success: false, error: "An unexpected error occurred." };
+  }
+}
+
+export async function updateVenuePackage(
+  packageId: string,
+  input: CreatePackageInput
+): Promise<PackageActionResult> {
+  try {
+    const { supabase, isAdmin, user } = await requireVenueOwnerContext();
+
+    // Ownership guard — verify the caller can write to this venue
+    if (!isAdmin) {
+      const { data: venueCheck } = await supabase
+        .from("venues")
+        .select("id, organization_id")
+        .eq("id", input.venueId)
+        .maybeSingle();
+
+      if (!venueCheck) {
+        return { success: false, error: "Venue not found." };
+      }
+
+      const { data: memberCheck } = await supabase
+        .from("organization_members")
+        .select("id")
+        .eq("organization_id", venueCheck.organization_id)
+        .eq("status", "active")
+        .limit(1)
+        .maybeSingle();
+
+      const { data: orgCheck } = await supabase
+        .from("organizations")
+        .select("id")
+        .eq("id", venueCheck.organization_id)
+        .eq("owner_id", user.id)
+        .maybeSingle();
+
+      if (!memberCheck && !orgCheck) {
+        return {
+          success: false,
+          error: "You are not authorized to manage this venue.",
+        };
+      }
+    }
+
+    // Ensure the package actually belongs to this venue
+    const { data: pkgCheck } = await supabase
+      .from("venue_packages")
+      .select("venue_id")
+      .eq("id", packageId)
+      .maybeSingle();
+
+    if (!pkgCheck || pkgCheck.venue_id !== input.venueId) {
+      return { success: false, error: "Package not found or venue mismatch." };
+    }
+
+    // Update the package
+    const { error: pkgError } = await supabase
+      .from("venue_packages")
+      .update({
+        name: input.name,
+        description: input.description || null,
+        event_type_id: input.eventTypeId || null,
+        min_guests: input.minGuests,
+        max_guests: input.maxGuests,
+        price: input.price,
+        price_unit: input.priceUnit,
+        deposit_percentage: input.depositPercentage,
+        deposit_flat_amount: input.depositFlatAmount,
+        valid_from: input.validFrom || null,
+        valid_until: input.validUntil || null,
+        amenity_ids: input.amenityIds,
+        venue_rules: input.venueRules || null,
+        inclusions: input.inclusions,
+        is_active: input.isActive,
+      })
+      .eq("id", packageId);
+
+    if (pkgError) {
+      console.error("[updateVenuePackage] pkg update error:", pkgError.message);
+      return { success: false, error: pkgError.message };
+    }
+
+    // Delete existing suppliers and re-insert
+    await supabase.from("package_suppliers").delete().eq("package_id", packageId);
+
+    if (input.suppliers.length > 0) {
+      const supplierRows = input.suppliers.map((s) => ({
+        package_id: packageId,
+        supplier_id: s.supplierId,
+        agreement_id: s.agreementId || null,
+        included_price: s.includedPrice,
+      }));
+
+      const { error: suppliersError } = await supabase
+        .from("package_suppliers")
+        .insert(supplierRows);
+
+      if (suppliersError) {
+        console.error(
+          "[updateVenuePackage] supplier insert error:",
+          suppliersError.message
+        );
+      }
+    }
+
+    revalidatePath("/dashboard/packages");
+    return { success: true, packageId };
+  } catch (err: unknown) {
+    if (err instanceof UnauthorizedError || err instanceof ForbiddenError) {
+      return { success: false, error: err.message };
+    }
+    console.error("[updateVenuePackage] unexpected error:", err);
     return { success: false, error: "An unexpected error occurred." };
   }
 }

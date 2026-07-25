@@ -37,7 +37,7 @@ INSERT INTO public.user_roles (user_id, role) VALUES
   ('00000000-0000-0000-0000-000000000002', 'venue_owner'),
   ('00000000-0000-0000-0000-000000000003', 'customer'),
   ('00000000-0000-0000-0000-000000000004', 'supplier')
-ON CONFLICT (user_id, role) DO NOTHING;
+ON CONFLICT ON CONSTRAINT user_roles_one_role_per_user DO UPDATE SET role = EXCLUDED.role;
 
 INSERT INTO public.organizations (id, owner_id, name) VALUES
   ('80000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', 'Venora Research Venue Partners')
