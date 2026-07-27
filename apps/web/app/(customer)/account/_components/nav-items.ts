@@ -58,16 +58,11 @@ export const ACCOUNT_NAV_ITEMS: AccountNavItem[] = [
   },
   {
     href: "/account/payments",
-    label: "Payments and Payouts",
-    description: "Hosted checkout options",
-    icon: CreditCard,
-  },
-  {
-    href: "/account/transactions",
-    label: "Transactions",
-    description: "Your booking payment history",
+    label: "Billing & Payments",
+    description: "Invoices, receipts, and checkout",
     icon: Receipt,
   },
+
   {
     href: "/account/disputes",
     label: "Disputes",
