@@ -198,7 +198,19 @@ export async function searchMarketplaceVenues(
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
-  return query.order("updated_at", { ascending: false }).range(from, to);
+  const { data, error, ...rest } = await query
+    .order("updated_at", { ascending: false })
+    .range(from, to);
+
+  if (data) {
+    // PostgREST inner joins on many-to-many can multiply parent rows. Deduplicate by ID.
+    const uniqueData = Array.from(
+      new Map(data.map((v: any) => [v.id, v])).values()
+    );
+    return { data: uniqueData, error, ...rest };
+  }
+
+  return { data, error, ...rest };
 }
 
 export async function getLandingSearchSuggestionVenues(supabase: any) {

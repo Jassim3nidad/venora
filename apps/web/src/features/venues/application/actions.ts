@@ -12,7 +12,10 @@ import {
   PAST_DATE_MESSAGE,
 } from "@/src/lib/date-only";
 import { searchMarketplaceVenues, type VenueSearchParams } from "./queries";
-import { toLiveMarketplaceVenue } from "../utils/venue-mappers";
+import {
+  applyReviewSummariesToVenues,
+  toLiveMarketplaceVenue,
+} from "../utils/venue-mappers";
 import { researchVenues } from "../data/research-venues";
 import {
   ACTIVE_BOOKING_STATUSES,
@@ -105,8 +108,23 @@ export async function loadMoreVenuesAction(rawInput: unknown) {
         researchVenues.filter(v => v.slug).map((v) => [v.slug, v])
       );
       const dbRows = (dbVenues ?? []) as any[];
+      const { data: reviewRows } =
+        dbRows.length > 0
+          ? await supabase
+              .from("reviews")
+              .select("venue_id, overall_rating")
+              .in(
+                "venue_id",
+                dbRows.map((venue) => venue.id),
+              )
+              .eq("status", "published")
+          : { data: [] };
+      const dbRowsWithReviewSummaries = applyReviewSummariesToVenues(
+        dbRows,
+        reviewRows ?? [],
+      );
 
-      const mapped = dbRows.map((venue) =>
+      const mapped = dbRowsWithReviewSummaries.map((venue) =>
         toLiveMarketplaceVenue(
           venue,
           favoriteVenueIds,
