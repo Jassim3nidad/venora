@@ -75,7 +75,10 @@ export default async function CoordinatorCalendarPage() {
           title="No venues yet"
           description="Venues assigned to your organization will appear here for availability management."
           action={
-            <DashButton href="/dashboard/coordinator/venues" icon="location_city">
+            <DashButton
+              href="/dashboard/coordinator/venues"
+              icon="location_city"
+            >
               View Venues
             </DashButton>
           }

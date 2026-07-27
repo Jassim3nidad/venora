@@ -384,7 +384,9 @@ export async function sendVenueInquiryMessageAction(rawInput: unknown) {
               .eq("organization_id", inquiry.organization_id)
               .eq("venue_id", inquiry.venue_id);
 
-            for (const row of (assignments ?? []) as Array<{ user_id: string }>) {
+            for (const row of (assignments ?? []) as Array<{
+              user_id: string;
+            }>) {
               if (row.user_id !== user.id) recipientIds.add(row.user_id);
             }
           }

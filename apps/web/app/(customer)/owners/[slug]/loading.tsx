@@ -1,5 +1,7 @@
 function SkeletonBlock({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-[#E5E7EB] ${className}`} />;
+  return (
+    <div className={`animate-pulse rounded-lg bg-[#E5E7EB] ${className}`} />
+  );
 }
 
 export default function OwnerProfileLoading() {
@@ -66,7 +68,10 @@ export default function OwnerProfileLoading() {
         </div>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {[0, 1, 2].map((item) => (
-            <div key={item} className="overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white">
+            <div
+              key={item}
+              className="overflow-hidden rounded-[24px] border border-[#E5E7EB] bg-white"
+            >
               <SkeletonBlock className="aspect-[4/3] rounded-none" />
               <div className="space-y-3 p-4">
                 <SkeletonBlock className="h-6 w-4/5" />

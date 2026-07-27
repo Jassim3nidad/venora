@@ -78,8 +78,8 @@ export function RoleSelection({ onNext }: { onNext: (role: string) => void }) {
       {selected === "event_coordinator" ? (
         <div className="mt-6 rounded-2xl border border-[#DBEAFE] bg-[#EFF6FF] px-4 py-3 text-sm font-medium leading-6 text-[#1D4ED8]">
           Event Coordinators work for a venue organization after approval and
-          staff invitation. You coordinate that org&apos;s bookings and venues—you
-          are not listed for customers to hire independently.
+          staff invitation. You coordinate that org&apos;s bookings and
+          venues—you are not listed for customers to hire independently.
         </div>
       ) : null}
 

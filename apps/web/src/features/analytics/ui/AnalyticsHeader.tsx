@@ -107,9 +107,7 @@ export function AnalyticsHeader({
 
         <div className="h-6 w-px bg-slate-200 mx-1 hidden sm:block"></div>
 
-        <AnalyticsExportActions
-          range={range}
-        />
+        <AnalyticsExportActions range={range} />
       </div>
     </div>
   );

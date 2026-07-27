@@ -88,7 +88,7 @@ export function BookingConversation({
 
   const [optimisticMessages, addOptimisticMessage] = useOptimistic(
     initialMessages,
-    (state, newMessage: BookingMessage) => [...state, newMessage]
+    (state, newMessage: BookingMessage) => [...state, newMessage],
   );
 
   // Group messages
@@ -213,26 +213,27 @@ export function BookingConversation({
         >
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <div className="flex items-center gap-4">
-              {header.role === "customer" && header.supplierLogo !== undefined && (
-                <div
-                  className={cx(
-                    "shrink-0 overflow-hidden rounded-full border border-slate-200 bg-white",
-                    compact ? "h-10 w-10" : "h-12 w-12",
-                  )}
-                >
-                  {header.supplierLogo ? (
-                    <img
-                      src={header.supplierLogo}
-                      alt={header.supplierName || "Supplier"}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-slate-100 font-bold text-slate-400">
-                      {header.supplierName?.charAt(0) || "S"}
-                    </div>
-                  )}
-                </div>
-              )}
+              {header.role === "customer" &&
+                header.supplierLogo !== undefined && (
+                  <div
+                    className={cx(
+                      "shrink-0 overflow-hidden rounded-full border border-slate-200 bg-white",
+                      compact ? "h-10 w-10" : "h-12 w-12",
+                    )}
+                  >
+                    {header.supplierLogo ? (
+                      <img
+                        src={header.supplierLogo}
+                        alt={header.supplierName || "Supplier"}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-slate-100 font-bold text-slate-400">
+                        {header.supplierName?.charAt(0) || "S"}
+                      </div>
+                    )}
+                  </div>
+                )}
               <div>
                 <h2
                   className={cx(
@@ -316,7 +317,9 @@ export function BookingConversation({
         <div className="mx-auto max-w-[800px] flex flex-col gap-6">
           {groupedMessages.length === 0 && (
             <div className="flex flex-col items-center justify-center py-10 text-center">
-              <p className="text-sm font-bold text-slate-900">No messages yet</p>
+              <p className="text-sm font-bold text-slate-900">
+                No messages yet
+              </p>
               <p className="mt-1 text-sm font-medium text-slate-500">
                 Start the conversation by sending a message below.
               </p>
@@ -360,24 +363,33 @@ export function BookingConversation({
                           className="flex flex-col gap-1 max-w-[85%] sm:max-w-[75%]"
                         >
                           <div
-                            className={`px-4 py-2.5 text-[14px] sm:text-[15px] font-medium leading-relaxed ${isOwn
-                              ? "bg-blue-600 text-white"
-                              : "bg-white border border-slate-200 text-slate-900 shadow-sm"
-                              } ${isOwn
-                                ? `rounded-l-2xl ${isFirst ? "rounded-tr-2xl" : "rounded-tr-md"
-                                } ${isLast ? "rounded-br-2xl" : "rounded-br-md"
-                                }`
-                                : `rounded-r-2xl ${isFirst ? "rounded-tl-2xl" : "rounded-tl-md"
-                                } ${isLast ? "rounded-bl-2xl" : "rounded-bl-md"
-                                }`
-                              }`}
+                            className={`px-4 py-2.5 text-[14px] sm:text-[15px] font-medium leading-relaxed ${
+                              isOwn
+                                ? "bg-blue-600 text-white"
+                                : "bg-white border border-slate-200 text-slate-900 shadow-sm"
+                            } ${
+                              isOwn
+                                ? `rounded-l-2xl ${
+                                    isFirst ? "rounded-tr-2xl" : "rounded-tr-md"
+                                  } ${
+                                    isLast ? "rounded-br-2xl" : "rounded-br-md"
+                                  }`
+                                : `rounded-r-2xl ${
+                                    isFirst ? "rounded-tl-2xl" : "rounded-tl-md"
+                                  } ${
+                                    isLast ? "rounded-bl-2xl" : "rounded-bl-md"
+                                  }`
+                            }`}
                           >
-                            <span className="whitespace-pre-wrap">{msg.message}</span>
+                            <span className="whitespace-pre-wrap">
+                              {msg.message}
+                            </span>
                           </div>
                           {isLast && (
                             <span
-                              className={`text-[10px] font-semibold text-slate-400 ${isOwn ? "text-right" : "text-left"
-                                }`}
+                              className={`text-[10px] font-semibold text-slate-400 ${
+                                isOwn ? "text-right" : "text-left"
+                              }`}
                             >
                               {formatMessageTime(msg.created_at)}
                             </span>
@@ -398,7 +410,8 @@ export function BookingConversation({
         {isReadOnly ? (
           <div className="flex items-center gap-2 rounded-xl bg-slate-50 p-3 text-sm font-semibold text-slate-600 justify-center">
             <AlertCircle className="h-4 w-4" />
-            This conversation is read-only because the booking is no longer active.
+            This conversation is read-only because the booking is no longer
+            active.
           </div>
         ) : (
           <div className="mx-auto max-w-[800px] flex flex-col gap-2">
@@ -416,10 +429,11 @@ export function BookingConversation({
               </div>
             )}
             <div
-              className={`relative flex items-end gap-2 rounded-2xl border bg-white p-2 transition-colors ${error
-                ? "border-red-300 ring-4 ring-red-100"
-                : "border-slate-300 focus-within:border-blue-600"
-                }`}
+              className={`relative flex items-end gap-2 rounded-2xl border bg-white p-2 transition-colors ${
+                error
+                  ? "border-red-300 ring-4 ring-red-100"
+                  : "border-slate-300 focus-within:border-blue-600"
+              }`}
             >
               <textarea
                 ref={textareaRef}

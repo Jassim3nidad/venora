@@ -468,7 +468,9 @@ export function CustomerInquiryDetail({
                 className="flex h-11 whitespace-nowrap items-center justify-center gap-2 rounded-2xl border border-[#BFDBFE] bg-[#EFF6FF] px-4 text-sm font-bold text-[#1D4ED8] hover:bg-[#DBEAFE]"
               >
                 <Star className="h-4 w-4" />
-                {supplierReviewState.hasReview ? "View Review" : "Review Supplier"}
+                {supplierReviewState.hasReview
+                  ? "View Review"
+                  : "Review Supplier"}
               </Link>
             ) : null}
           </div>
@@ -485,8 +487,8 @@ export function CustomerInquiryDetail({
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
           <h3 className="font-bold text-amber-900">Inquiry declined</h3>
           <p className="mt-1 text-sm font-semibold text-amber-700">
-            The supplier was unable to continue with this request. You can
-            still review the details and conversation below.
+            The supplier was unable to continue with this request. You can still
+            review the details and conversation below.
           </p>
           {inquiry.decline_reason && (
             <p className="mt-2 rounded-xl bg-white/50 p-3 text-sm font-medium text-amber-900">
@@ -500,8 +502,8 @@ export function CustomerInquiryDetail({
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
           <h3 className="font-bold text-slate-900">Inquiry cancelled</h3>
           <p className="mt-1 text-sm font-semibold text-slate-700">
-            This inquiry is closed, but its messages and service proposal
-            remain available for your records.
+            This inquiry is closed, but its messages and service proposal remain
+            available for your records.
           </p>
         </div>
       )}
@@ -517,9 +519,7 @@ export function CustomerInquiryDetail({
 
       {quoteStatus === "expired" && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-          <h3 className="font-bold text-amber-900">
-            Service proposal expired
-          </h3>
+          <h3 className="font-bold text-amber-900">Service proposal expired</h3>
           <p className="mt-1 text-sm font-semibold text-amber-700">
             This proposal can no longer be accepted, but its pricing and terms
             remain available.
@@ -725,7 +725,8 @@ export function CustomerInquiryDetail({
                   Special requirements
                 </p>
                 <p className="mt-2 whitespace-pre-line text-sm font-medium leading-6 text-slate-600">
-                  {inquiry.special_requirements || "No special requirements added."}
+                  {inquiry.special_requirements ||
+                    "No special requirements added."}
                 </p>
               </div>
             </div>

@@ -41,8 +41,11 @@ export function QuoteEditor({
   const router = useRouter();
   const serviceName = inquiry?.supplier_services?.name ?? "Service";
   const customerName = inquiry?.contact_name ?? "Customer";
-  const eventDateRaw = inquiry?.event_date_snapshot || inquiry?.event_date || inquiry?.bookings?.event_date;
-  const minValidUntil = eventDateRaw ? eventDateRaw.split('T')[0] : undefined;
+  const eventDateRaw =
+    inquiry?.event_date_snapshot ||
+    inquiry?.event_date ||
+    inquiry?.bookings?.event_date;
+  const minValidUntil = eventDateRaw ? eventDateRaw.split("T")[0] : undefined;
   const inquiredService = inquiry?.supplier_services;
 
   const generatedTitle = `${serviceName} Proposal for ${customerName}`;
@@ -191,14 +194,20 @@ export function QuoteEditor({
                 {inquiredService && (
                   <button
                     type="button"
-                    disabled={items.some(i => i.description === inquiredService.name)}
+                    disabled={items.some(
+                      (i) => i.description === inquiredService.name,
+                    )}
                     onClick={() => {
                       const newItem = {
                         description: inquiredService.name,
                         quantity: 1,
                         unitPrice: Number(inquiredService.price || 0),
                       };
-                      if (items.length === 1 && items[0]?.description === "" && items[0]?.unitPrice === 0) {
+                      if (
+                        items.length === 1 &&
+                        items[0]?.description === "" &&
+                        items[0]?.unitPrice === 0
+                      ) {
                         setItems([newItem]);
                       } else {
                         setItems([...items, newItem]);
@@ -206,7 +215,8 @@ export function QuoteEditor({
                     }}
                     className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-bold text-emerald-700 shadow-sm transition hover:bg-emerald-100 hover:border-emerald-300 disabled:opacity-50 disabled:pointer-events-none"
                   >
-                    <Plus className="h-4 w-4" /> {inquiredService.name} ({formatCurrency(Number(inquiredService.price || 0))})
+                    <Plus className="h-4 w-4" /> {inquiredService.name} (
+                    {formatCurrency(Number(inquiredService.price || 0))})
                   </button>
                 )}
                 <button

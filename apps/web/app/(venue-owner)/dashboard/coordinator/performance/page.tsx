@@ -21,14 +21,14 @@ export default async function CoordinatorPerformancePage() {
 
   const venueIds = await getOwnerVenueIds(context);
   const { supabase } = context;
-  
+
   // If no venues assigned, show empty state in client
   if (venueIds.length === 0) {
     return (
       <DashboardSubPage title="Performance">
-        <CoordinatorPerformanceClient 
+        <CoordinatorPerformanceClient
           hasVenues={false}
-          trend={[]} 
+          trend={[]}
           occupancy={{ rate: 0, reservedDays: 0, totalDays: 0 }}
           conversion={{ rate: 0, converted: 0, total: 0 }}
           popularVenues={[]}
@@ -40,12 +40,13 @@ export default async function CoordinatorPerformancePage() {
   const scope: AnalyticsScope = { kind: "venues", venueIds };
 
   // Fetch metrics concurrently
-  const [trendRes, occupancyRes, conversionRes, popularVenuesRes] = await Promise.all([
-    getRevenueTrend(supabase, scope, lastNMonthsRange(6)),
-    getOccupancyRate(supabase, scope, getOccupancyWindow()),
-    getConversionRate(supabase, scope, lastNMonthsRange(1)),
-    getPopularVenues(supabase, scope, lastNMonthsRange(1)),
-  ]);
+  const [trendRes, occupancyRes, conversionRes, popularVenuesRes] =
+    await Promise.all([
+      getRevenueTrend(supabase, scope, lastNMonthsRange(6)),
+      getOccupancyRate(supabase, scope, getOccupancyWindow()),
+      getConversionRate(supabase, scope, lastNMonthsRange(1)),
+      getPopularVenues(supabase, scope, lastNMonthsRange(1)),
+    ]);
 
   const trend = trendRes ?? [];
   const occupancy = occupancyRes ?? { rate: 0, reservedDays: 0, totalDays: 0 };

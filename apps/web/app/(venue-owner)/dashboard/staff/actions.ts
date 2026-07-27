@@ -25,7 +25,10 @@ import {
 
 const inviteCoordinatorSchema = z.object({
   organizationId: z.string().uuid(),
-  email: z.string().email().transform((value) => value.trim().toLowerCase()),
+  email: z
+    .string()
+    .email()
+    .transform((value) => value.trim().toLowerCase()),
   venueIds: z.array(z.string().uuid()).min(1, "Choose at least one venue."),
   permissions: z.array(z.string()).optional(),
 });
@@ -52,10 +55,7 @@ const updateStaffPermissionsSchema = z.object({
   permissions: z.array(z.string()),
 });
 
-async function requireOrganizationOwner(
-  supabase: any,
-  organizationId: string,
-) {
+async function requireOrganizationOwner(supabase: any, organizationId: string) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -124,8 +124,7 @@ async function findAuthUserByEmail(admin: any, email: string) {
     }
 
     const match = data.users.find(
-      (user: { email?: string | null }) =>
-        user.email?.toLowerCase() === email,
+      (user: { email?: string | null }) => user.email?.toLowerCase() === email,
     );
 
     if (match) return match;
@@ -212,8 +211,7 @@ function parseCoordinatorPermissions(permissions: string[] | undefined) {
 function isAuthUsersPermissionError(error: { message?: string } | null) {
   const message = error?.message?.toLowerCase() ?? "";
   return (
-    message.includes("permission denied") &&
-    message.includes("table users")
+    message.includes("permission denied") && message.includes("table users")
   );
 }
 
@@ -255,19 +253,20 @@ export async function inviteCoordinatorAction(rawInput: unknown) {
         venue_ids: venueIds,
         permissions: parseCoordinatorPermissions(input.permissions),
         invited_by: owner.id,
-        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        expires_at: new Date(
+          Date.now() + 7 * 24 * 60 * 60 * 1000,
+        ).toISOString(),
         accepted_by: null,
         accepted_at: null,
       };
 
-      const { data: existingInvitation, error: selectError } =
-        await supabase
-          .from("organization_member_invitations")
-          .select("id")
-          .eq("organization_id", input.organizationId)
-          .eq("email", input.email)
-          .eq("status", "pending")
-          .maybeSingle();
+      const { data: existingInvitation, error: selectError } = await supabase
+        .from("organization_member_invitations")
+        .select("id")
+        .eq("organization_id", input.organizationId)
+        .eq("email", input.email)
+        .eq("status", "pending")
+        .maybeSingle();
 
       if (selectError && !isAuthUsersPermissionError(selectError)) {
         throw new ValidationError(
@@ -275,14 +274,15 @@ export async function inviteCoordinatorAction(rawInput: unknown) {
         );
       }
 
-      const writeResult = !selectError && existingInvitation
-        ? await supabase
-            .from("organization_member_invitations")
-            .update({ ...payload, created_at: new Date().toISOString() })
-            .eq("id", existingInvitation.id)
-        : await supabase
-            .from("organization_member_invitations")
-            .insert(payload);
+      const writeResult =
+        !selectError && existingInvitation
+          ? await supabase
+              .from("organization_member_invitations")
+              .update({ ...payload, created_at: new Date().toISOString() })
+              .eq("id", existingInvitation.id)
+          : await supabase
+              .from("organization_member_invitations")
+              .insert(payload);
 
       if (writeResult.error) {
         if (
@@ -478,4 +478,3 @@ export async function updateStaffPermissionsAction(rawInput: unknown) {
     rawInput,
   );
 }
-

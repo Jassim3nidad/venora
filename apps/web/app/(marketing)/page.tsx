@@ -179,7 +179,7 @@ export default async function MarketingHomePage() {
   }
 
   const researchVenueBySlug = new Map(
-    researchVenues.filter(v => v.slug).map((venue) => [venue.slug, venue]),
+    researchVenues.filter((v) => v.slug).map((venue) => [venue.slug, venue]),
   );
   const liveVenues = (error ? [] : ((dbVenues ?? []) as any[]))
     .filter((venue) => venue.status === "published")
@@ -205,10 +205,7 @@ export default async function MarketingHomePage() {
   );
   const suggestionVenues = suggestionResult.error
     ? fallbackVenues
-    : mergeLandingSearchSuggestionSources(
-        liveSuggestionVenues,
-        fallbackVenues,
-      );
+    : mergeLandingSearchSuggestionSources(liveSuggestionVenues, fallbackVenues);
   const searchSuggestions = buildLandingSearchSuggestions(suggestionVenues);
   const heroVenues = featuredVenues.slice(0, 3);
 
@@ -229,9 +226,15 @@ export default async function MarketingHomePage() {
             <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent via-white/70 to-white sm:h-40 lg:h-48" />
           </div>
 
-          <RevealGroup className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 sm:px-6 lg:min-h-[560px] lg:justify-between lg:px-8" staggerDelay={0.08}>
+          <RevealGroup
+            className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 sm:px-6 lg:min-h-[560px] lg:justify-between lg:px-8"
+            staggerDelay={0.08}
+          >
             <div className="max-w-4xl pt-4">
-              <RevealItem yOffset={8} className="mb-6 flex flex-wrap gap-2 sm:gap-3 lg:mb-8">
+              <RevealItem
+                yOffset={8}
+                className="mb-6 flex flex-wrap gap-2 sm:gap-3 lg:mb-8"
+              >
                 {categoryLinks.slice(0, 3).map((category) => (
                   <Link
                     key={category.label}
@@ -251,12 +254,16 @@ export default async function MarketingHomePage() {
               <RevealItem yOffset={12}>
                 <p className="mt-4 max-w-2xl text-base font-medium leading-7 text-white/86 sm:text-lg lg:mt-6 lg:text-xl lg:leading-8">
                   Discover, compare, and book the perfect space for your next
-                  event. The premier marketplace for curated, high-quality venues.
+                  event. The premier marketplace for curated, high-quality
+                  venues.
                 </p>
               </RevealItem>
             </div>
 
-            <RevealItem yOffset={16} className="relative z-10 mt-8 w-full sm:mt-16 lg:mt-16 lg:-mb-36 lg:translate-y-8">
+            <RevealItem
+              yOffset={16}
+              className="relative z-10 mt-8 w-full sm:mt-16 lg:mt-16 lg:-mb-36 lg:translate-y-8"
+            >
               <LandingSegmentedSearch
                 {...searchSuggestions}
                 variant="hero-panel"
@@ -330,7 +337,10 @@ export default async function MarketingHomePage() {
               </div>
             </ScrollReveal>
 
-            <ScrollRevealGroup staggerDelay={0.06} className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+            <ScrollRevealGroup
+              staggerDelay={0.06}
+              className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6"
+            >
               {categoryLinks.map((category) => {
                 const Icon = category.icon;
 
@@ -392,7 +402,10 @@ export default async function MarketingHomePage() {
               </div>
             </ScrollReveal>
 
-            <ScrollRevealGroup staggerDelay={0.08} className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            <ScrollRevealGroup
+              staggerDelay={0.08}
+              className="grid grid-cols-1 gap-6 md:grid-cols-3"
+            >
               {featuredVenues.map((venue) => (
                 <RevealItem key={String(venue.id)} yOffset={16}>
                   <FeaturedVenueCard
@@ -431,7 +444,10 @@ export default async function MarketingHomePage() {
               </div>
             </ScrollReveal>
 
-            <ScrollRevealGroup staggerDelay={0.08} className="grid gap-4 md:grid-cols-3">
+            <ScrollRevealGroup
+              staggerDelay={0.08}
+              className="grid gap-4 md:grid-cols-3"
+            >
               {workflowSteps.map((step) => {
                 const Icon = step.icon;
 
@@ -456,7 +472,10 @@ export default async function MarketingHomePage() {
         </section>
 
         <section className="w-full bg-[#F8FAFC] px-4 py-14 sm:px-6 md:py-20 lg:px-8">
-          <ScrollReveal yOffset={16} className="mx-auto grid max-w-7xl overflow-hidden rounded-[28px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+          <ScrollReveal
+            yOffset={16}
+            className="mx-auto grid max-w-7xl overflow-hidden rounded-[28px] border border-[#E5E7EB] bg-white shadow-sm shadow-slate-200/70 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]"
+          >
             <div className="flex flex-col justify-center p-6 sm:p-8 lg:p-10">
               <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#2563EB]">
                 For venue owners

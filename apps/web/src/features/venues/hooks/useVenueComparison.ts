@@ -60,14 +60,14 @@ export function useVenueComparison() {
       saveVenueIds([...venueIds, id]);
       return { success: true };
     },
-    [venueIds, saveVenueIds]
+    [venueIds, saveVenueIds],
   );
 
   const removeVenueId = useCallback(
     (id: string) => {
       saveVenueIds(venueIds.filter((vId) => vId !== id));
     },
-    [venueIds, saveVenueIds]
+    [venueIds, saveVenueIds],
   );
 
   const clearComparison = useCallback(() => {
@@ -78,7 +78,7 @@ export function useVenueComparison() {
     (id: string): boolean => {
       return venueIds.includes(id);
     },
-    [venueIds]
+    [venueIds],
   );
 
   return {

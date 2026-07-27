@@ -46,8 +46,10 @@ export const getOwnerDashboardContext = cache(
     );
     const permissions = Array.from(
       new Set(
-        (members ?? []).flatMap((m: { permissions: string[] | null }) => m.permissions ?? [])
-      )
+        (members ?? []).flatMap(
+          (m: { permissions: string[] | null }) => m.permissions ?? [],
+        ),
+      ),
     );
 
     const { data: owned } = await supabase

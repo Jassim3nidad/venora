@@ -81,7 +81,8 @@ export function normalizeProfile(row: any): PublicOwnerProfile | null {
     shortDescription: nullableString(row.short_description),
     about: nullableString(row.about),
     yearEstablished:
-      row.year_established == null || !Number.isFinite(Number(row.year_established))
+      row.year_established == null ||
+      !Number.isFinite(Number(row.year_established))
         ? null
         : Number(row.year_established),
     logoPath: nullableString(row.logo_path),

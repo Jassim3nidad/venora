@@ -27,7 +27,10 @@ export type CoordinatorVenueRow = {
   status: string;
 };
 
-import { CoordinatorInvitations, type CoordinatorInvitationRow } from "./CoordinatorInvitations";
+import {
+  CoordinatorInvitations,
+  type CoordinatorInvitationRow,
+} from "./CoordinatorInvitations";
 
 export type CoordinatorOverviewProps = {
   coordinatorName: string;

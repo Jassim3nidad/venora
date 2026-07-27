@@ -128,12 +128,11 @@ function buildPrompt(
     return {
       system:
         "You are a copywriter for a Philippine event-venue marketplace. Write one short paragraph (2-4 sentences) describing an event package. You must reference its actual inclusions list — never invent inclusions, prices, or guest limits not given.",
-      user:
-        `Venue: ${facts}. Package: ${pkg.name}, price PHP ${pkg.price}, guests ${
-          pkg.min_guests ?? "?"
-        }-${pkg.max_guests ?? "?"}, inclusions: ${
-          (pkg.inclusions ?? []).join(", ") || "none listed"
-        }. Tone: ${tone}.`,
+      user: `Venue: ${facts}. Package: ${pkg.name}, price PHP ${pkg.price}, guests ${
+        pkg.min_guests ?? "?"
+      }-${pkg.max_guests ?? "?"}, inclusions: ${
+        (pkg.inclusions ?? []).join(", ") || "none listed"
+      }. Tone: ${tone}.`,
     };
   }
 

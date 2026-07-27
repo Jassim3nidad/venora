@@ -98,7 +98,10 @@ function ImageUploadRow({
   errorMessage: string | undefined;
   uploadError?: string | null;
   isUploading: boolean;
-  onUpload: (kind: BusinessProfileImageKind, file: File) => void | Promise<void>;
+  onUpload: (
+    kind: BusinessProfileImageKind,
+    file: File,
+  ) => void | Promise<void>;
 }) {
   const inputId = `business-profile-${kind}-upload`;
 
@@ -127,7 +130,9 @@ function ImageUploadRow({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-sm font-bold text-slate-800">{title}</p>
-            <p className="mt-1 text-sm leading-5 text-slate-500">{description}</p>
+            <p className="mt-1 text-sm leading-5 text-slate-500">
+              {description}
+            </p>
           </div>
 
           <label
@@ -336,7 +341,10 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
 
       if (identityRes.error) {
         setFormMessage({ type: "error", text: identityRes.error.message });
-        setToastMessage({ title: "Error", description: identityRes.error.message });
+        setToastMessage({
+          title: "Error",
+          description: identityRes.error.message,
+        });
         setToastOpen(true);
         return;
       }
@@ -350,7 +358,10 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
 
       if (aboutRes.error) {
         setFormMessage({ type: "error", text: aboutRes.error.message });
-        setToastMessage({ title: "Error", description: aboutRes.error.message });
+        setToastMessage({
+          title: "Error",
+          description: aboutRes.error.message,
+        });
         setToastOpen(true);
         return;
       }
@@ -372,13 +383,19 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
 
       if (contactRes.error) {
         setFormMessage({ type: "error", text: contactRes.error.message });
-        setToastMessage({ title: "Error", description: contactRes.error.message });
+        setToastMessage({
+          title: "Error",
+          description: contactRes.error.message,
+        });
         setToastOpen(true);
         return;
       }
 
       setFormMessage({ type: "success", text: "Profile successfully saved." });
-      setToastMessage({ title: "Success", description: "Profile successfully saved." });
+      setToastMessage({
+        title: "Success",
+        description: "Profile successfully saved.",
+      });
       setToastOpen(true);
       reset(values); // Reset isDirty state
       router.refresh();
@@ -406,11 +423,20 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
       <div className="flex flex-col xl:flex-row gap-8 items-start">
         {/* Main Form Left Column */}
         <div className="flex-1 w-full min-w-0">
-          <form id="profile-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <SectionCard title="Brand Identity" description="Your business name, tagline, and visual assets.">
+          <form
+            id="profile-form"
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-6"
+          >
+            <SectionCard
+              title="Brand Identity"
+              description="Your business name, tagline, and visual assets."
+            >
               <div className="grid gap-6 sm:grid-cols-2">
                 <label className="grid gap-1.5">
-                  <span className="text-sm font-bold text-slate-700">Display Name</span>
+                  <span className="text-sm font-bold text-slate-700">
+                    Display Name
+                  </span>
                   <input
                     {...register("display_name")}
                     placeholder="Your Business Name"
@@ -419,7 +445,9 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
                   <FieldError message={errors.display_name?.message} />
                 </label>
                 <label className="grid gap-1.5">
-                  <span className="text-sm font-bold text-slate-700">Legal Business Name</span>
+                  <span className="text-sm font-bold text-slate-700">
+                    Legal Business Name
+                  </span>
                   <input
                     {...register("legal_name")}
                     placeholder="Optional Legal Name"
@@ -431,7 +459,9 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
 
               <div className="grid gap-6 sm:grid-cols-2">
                 <label className="grid gap-1.5">
-                  <span className="text-sm font-bold text-slate-700">Profile URL Slug</span>
+                  <span className="text-sm font-bold text-slate-700">
+                    Profile URL Slug
+                  </span>
                   <div className="flex">
                     <span className="inline-flex h-11 items-center rounded-l-lg border border-r-0 border-slate-200 bg-slate-100 px-3 text-sm font-semibold text-slate-500">
                       venora.ph/owners/
@@ -444,7 +474,9 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
                   <FieldError message={errors.slug?.message} />
                 </label>
                 <label className="grid gap-1.5">
-                  <span className="text-sm font-bold text-slate-700">Year Established</span>
+                  <span className="text-sm font-bold text-slate-700">
+                    Year Established
+                  </span>
                   <input
                     {...register("year_established", { valueAsNumber: true })}
                     type="number"
@@ -458,7 +490,9 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
               </div>
 
               <label className="grid gap-1.5">
-                <span className="text-sm font-bold text-slate-700">Tagline</span>
+                <span className="text-sm font-bold text-slate-700">
+                  Tagline
+                </span>
                 <input
                   {...register("tagline")}
                   placeholder="e.g., The best venue in town."
@@ -468,7 +502,10 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
               </label>
             </SectionCard>
 
-            <SectionCard title="Images and Branding" description="Use high-quality images to represent your business.">
+            <SectionCard
+              title="Images and Branding"
+              description="Use high-quality images to represent your business."
+            >
               <div className="grid gap-6">
                 <ImageUploadRow
                   kind="logo"
@@ -496,9 +533,14 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
               </div>
             </SectionCard>
 
-            <SectionCard title="About the Business" description="Describe your business and what makes it special.">
+            <SectionCard
+              title="About the Business"
+              description="Describe your business and what makes it special."
+            >
               <label className="grid gap-1.5">
-                <span className="text-sm font-bold text-slate-700">Short Description</span>
+                <span className="text-sm font-bold text-slate-700">
+                  Short Description
+                </span>
                 <textarea
                   {...register("short_description")}
                   rows={3}
@@ -509,7 +551,9 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
               </label>
 
               <label className="grid gap-1.5">
-                <span className="text-sm font-bold text-slate-700">Full About Section</span>
+                <span className="text-sm font-bold text-slate-700">
+                  Full About Section
+                </span>
                 <textarea
                   {...register("about")}
                   rows={6}
@@ -520,7 +564,10 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
               </label>
             </SectionCard>
 
-            <SectionCard title="Contact & Location" description="How customers can reach your main office.">
+            <SectionCard
+              title="Contact & Location"
+              description="How customers can reach your main office."
+            >
               <div className="grid gap-6 sm:grid-cols-2">
                 <label className="grid gap-1.5">
                   <span className="text-sm font-bold text-slate-700">City</span>
@@ -531,7 +578,9 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
                   <FieldError message={errors.city?.message} />
                 </label>
                 <label className="grid gap-1.5">
-                  <span className="text-sm font-bold text-slate-700">Province</span>
+                  <span className="text-sm font-bold text-slate-700">
+                    Province
+                  </span>
                   <input
                     {...register("province")}
                     className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
@@ -542,13 +591,17 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
 
               <div className="grid gap-6 sm:grid-cols-2">
                 <label className="grid gap-1.5">
-                  <span className="text-sm font-bold text-slate-700">Location Visibility</span>
+                  <span className="text-sm font-bold text-slate-700">
+                    Location Visibility
+                  </span>
                   <select
                     {...register("address_visibility")}
                     className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
                   >
                     <option value="exact">Exact Address</option>
-                    <option value="city_province">City and Province Only</option>
+                    <option value="city_province">
+                      City and Province Only
+                    </option>
                     <option value="province">Province Only</option>
                     <option value="hidden">Hidden</option>
                   </select>
@@ -557,11 +610,15 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
               </div>
 
               <div className="pt-4 border-t border-slate-100 mt-2">
-                <h4 className="text-sm font-bold text-slate-800 mb-4">Contact Methods</h4>
+                <h4 className="text-sm font-bold text-slate-800 mb-4">
+                  Contact Methods
+                </h4>
                 <div className="grid gap-6 sm:grid-cols-2">
                   <div className="grid gap-1.5">
                     <label className="grid gap-1.5">
-                      <span className="text-sm font-bold text-slate-700">Public Email</span>
+                      <span className="text-sm font-bold text-slate-700">
+                        Public Email
+                      </span>
                       <input
                         {...register("public_email")}
                         className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
@@ -573,14 +630,18 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
                         type="checkbox"
                         className="h-4 w-4 rounded border-slate-300 text-[#2563EB] focus:ring-[#2563EB]"
                       />
-                      <span className="text-sm text-slate-600 font-semibold">Show email on public profile</span>
+                      <span className="text-sm text-slate-600 font-semibold">
+                        Show email on public profile
+                      </span>
                     </label>
                     <FieldError message={errors.public_email?.message} />
                   </div>
 
                   <div className="grid gap-1.5">
                     <label className="grid gap-1.5">
-                      <span className="text-sm font-bold text-slate-700">Public Phone</span>
+                      <span className="text-sm font-bold text-slate-700">
+                        Public Phone
+                      </span>
                       <input
                         {...register("public_phone")}
                         className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition-all placeholder:text-slate-400 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10"
@@ -592,13 +653,17 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
                         type="checkbox"
                         className="h-4 w-4 rounded border-slate-300 text-[#2563EB] focus:ring-[#2563EB]"
                       />
-                      <span className="text-sm text-slate-600 font-semibold">Show phone on public profile</span>
+                      <span className="text-sm text-slate-600 font-semibold">
+                        Show phone on public profile
+                      </span>
                     </label>
                     <FieldError message={errors.public_phone?.message} />
                   </div>
 
                   <label className="grid gap-1.5 sm:col-span-2">
-                    <span className="text-sm font-bold text-slate-700">Website URL</span>
+                    <span className="text-sm font-bold text-slate-700">
+                      Website URL
+                    </span>
                     <input
                       {...register("website_url")}
                       placeholder="https://"
@@ -621,7 +686,11 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col pointer-events-none">
               <div className="relative h-32 w-full bg-slate-100 border-b border-slate-100">
                 {formValues.cover_image_path ? (
-                  <img src={formValues.cover_image_path} alt="" className="h-full w-full object-cover" />
+                  <img
+                    src={formValues.cover_image_path}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center text-slate-300">
                     <ImageIcon className="h-8 w-8" />
@@ -631,7 +700,11 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
               <div className="relative p-5 pt-0 flex-1 flex flex-col">
                 <div className="absolute -top-10 left-5 h-20 w-20 rounded-xl border-4 border-white bg-slate-100 shadow-sm overflow-hidden flex items-center justify-center">
                   {formValues.logo_path ? (
-                    <img src={formValues.logo_path} alt="" className="h-full w-full object-cover" />
+                    <img
+                      src={formValues.logo_path}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
                   ) : (
                     <Building2 className="h-8 w-8 text-slate-300" />
                   )}
@@ -647,7 +720,9 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
                   )}
                 </div>
                 {formValues.tagline && (
-                  <p className="mt-3 text-sm text-slate-700 leading-snug">"{formValues.tagline}"</p>
+                  <p className="mt-3 text-sm text-slate-700 leading-snug">
+                    "{formValues.tagline}"
+                  </p>
                 )}
               </div>
               <div className="p-4 bg-slate-50 border-t border-slate-100 pointer-events-auto">

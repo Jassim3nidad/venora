@@ -14,7 +14,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 
 **Total Issues Logged:** 22
 
-
 | Severity | Count |
 | -------- | ----- |
 | Critical | 3     |
@@ -22,21 +21,14 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 | Medium   | 9     |
 | Low      | 6     |
 
-
-
 | Fix status (selected)         | Count                  |
 | ----------------------------- | ---------------------- |
 | Implemented (FIX-001–FIX-011) | 11                     |
 | Still open from BUG-017+      | See open backlog below |
 
-
 ---
 
-
-
 ## Bug Log
-
-
 
 ### BUG-001 — Mismatched Card Name and Venue Profile Name
 
@@ -48,8 +40,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 
 ---
 
-
-
 ### BUG-002 — Favorite Button Not Clickable on Featured Venue Cards
 
 - **Severity:** Medium
@@ -60,8 +50,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 
 ---
 
-
-
 ### BUG-003 — Navigation List Missing Key Tabs When Logged Out
 
 - **Severity:** Medium
@@ -71,8 +59,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 - **Actual Result:** Tabs are missing entirely from the nav bar in the logged-out state.
 
 ---
-
-
 
 ### BUG-004 — Estimate Event Cost Guest Count Not Syncing with User Input
 
@@ -88,8 +74,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 
 ---
 
-
-
 ### BUG-005 — Extra Scrollbar on Booking Request Page
 
 - **Severity:** Low
@@ -99,8 +83,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 - **Actual Result:** A secondary scrollable blank layer appears alongside the main content.
 
 ---
-
-
 
 ### BUG-006 — Venue Profile Package Options Do Not Make Sense
 
@@ -113,8 +95,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 
 ---
 
-
-
 ### BUG-007 — Incorrect Order of "Venue" and "Browse" in Navigation List
 
 - **Severity:** Low
@@ -125,8 +105,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 
 ---
 
-
-
 ### BUG-008 — Supplier Proposal Section Scrolls Instead of Sticking
 
 - **Severity:** Medium
@@ -136,8 +114,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 - **Actual Result:** Section follows normal scroll behavior instead of sticking.
 
 ---
-
-
 
 ### BUG-009 — False Validation Error on Proposal Request Submission
 
@@ -151,8 +127,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 
 ---
 
-
-
 ### BUG-010 — "Back to Supplier" Button Should Be Removed
 
 - **Severity:** Low
@@ -162,8 +136,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 - **Actual Result:** Button is still present on the page.
 
 ---
-
-
 
 ### BUG-011 — "Venues" Nav Highlight Disappears When Switching Tabs
 
@@ -175,8 +147,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 
 ---
 
-
-
 ### BUG-012 — Venue-Specific Nav Tabs Appear in Account Center
 
 - **Severity:** Medium
@@ -187,8 +157,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 
 ---
 
-
-
 ### BUG-013 — Footer Missing on Venues Page
 
 - **Severity:** Low
@@ -198,8 +166,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 - **Actual Result:** No footer is present on the page.
 
 ---
-
-
 
 ### BUG-014 — Cards Not Sticking on Scroll Across Pages and Tabs
 
@@ -212,11 +178,7 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 
 ---
 
-
-
 ## Features To Be Added
-
-
 
 ### FEAT-001 — Dropdown Suggestions for Segmented Search (Location and Event Type)
 
@@ -226,8 +188,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 - **Current Behavior:** No dropdown suggestions are present for either field.
 
 ---
-
-
 
 ### BUG-015 — Billing Documents Card Overlapped and Cut Off on Payment Page
 
@@ -243,8 +203,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 
 ---
 
-
-
 ### BUG-016 — "PayMongo" Payment Provider Unavailable Error
 
 - **Severity:** High
@@ -256,11 +214,7 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 
 ---
 
-
-
 ## Fixes Implemented
-
-
 
 ### FIX-001 — Environment Setup (Supabase Variables)
 
@@ -269,8 +223,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 - **Files:** N/A (local environment configuration)
 
 ---
-
-
 
 ### FIX-002 — Venue Owner Organizations
 
@@ -283,8 +235,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 
 ---
 
-
-
 ### FIX-003 — Venue Photo Uploads
 
 - **Area:** Venue Owner Dashboard — Venue Photos
@@ -295,8 +245,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
   - `supabase/migrations/077_org_owner_membership_and_venue_media_rls.sql`
 
 ---
-
-
 
 ### FIX-004 — Venue Map Coordinates
 
@@ -310,8 +258,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 
 ---
 
-
-
 ### FIX-005 — Admin Bookings
 
 - **Area:** Admin Dashboard — Bookings
@@ -322,8 +268,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 
 ---
 
-
-
 ### FIX-006 — Admin Inquiries
 
 - **Area:** Admin Dashboard — Inquiries
@@ -332,8 +276,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
   - `apps/web/app/(admin)/admin/inquiries/page.tsx`
 
 ---
-
-
 
 ### FIX-007 — Admin Disputes
 
@@ -345,8 +287,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 
 ---
 
-
-
 ### FIX-008 — Supplier Availability Calendar
 
 - **Area:** Supplier Dashboard — Availability Calendar
@@ -356,8 +296,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
   - `apps/web/app/(supplier)/dashboard/supplier/calendar/page.tsx`
 
 ---
-
-
 
 ### FIX-009 — Venue Filters Scrolling
 
@@ -369,8 +307,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 
 ---
 
-
-
 ### FIX-010 — Venue Filter Sidebar Redesign (July 21, 2026)
 
 - **Area:** Venues Page — Filter Sidebar (`/venues`)
@@ -378,11 +314,11 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 - **Description:** Redesigned the filter sidebar to reduce long scrolling and simplify controls. Converted the long stacked filter sections into categorized accordion dropdowns; removed budget preset tabs and the capacity slider; removed decorative icons from venue types and amenities; switched Event Type, Venue Type, and Amenities to vertical checkbox lists.
 - **Changes:**
   1. **Accordion categories** (one open at a time; Location open by default):
-    - Location
-    - Event Type
-    - Budget & Capacity
-    - Venue Type & Indoor/Outdoor
-    - Amenities
+  - Location
+  - Event Type
+  - Budget & Capacity
+  - Venue Type & Indoor/Outdoor
+  - Amenities
   2. Closed accordion headers show an **active-count badge** and a short **summary** of selected values.
   3. **Removed** budget tabs: Standard / Deluxe / Luxury — keep **Min** and **Max** ₱ inputs only.
   4. **Removed** capacity range slider — keep **number input** only (“At least X guests” + Reset).
@@ -396,8 +332,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 - **Related QA / product notes:** Addresses long-scroll filter UX called out during design/QA review; complements FIX-009 (sidebar scroll container).
 
 ---
-
-
 
 ### FIX-011 — Supplier Calendar Label “Availability” → “Calendar” (July 21, 2026)
 
@@ -427,7 +361,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 
 ## Change Log — July 21, 2026 (This Session)
 
-
 | Item          | Type             | Summary                                                                         |
 | ------------- | ---------------- | ------------------------------------------------------------------------------- |
 | FIX-010       | Enhancement / UX | Venue filter accordion redesign + checkbox columns                              |
@@ -436,10 +369,7 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 | Env / tooling | Local setup      | Node/`pnpm` PATH setup notes from local machine (not committed as product code) |
 | Docs          | QA               | Manual pass report + this bug report checked into `docs/testing/`               |
 
-
 ---
-
-
 
 ## Verification Notes
 
@@ -449,8 +379,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 - **Retest recommended:** `/venues` filter accordion open/close, Min/Max budget, capacity number input, Event/Venue/Amenities checkboxes, Clear + View Results; supplier nav shows **Calendar**.
 
 ---
-
-
 
 ### BUG-017 — Forgot Password Flow Fails
 
@@ -465,8 +393,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 - **Actual Result:** Flow fails; root cause not yet confirmed.
 
 ---
-
-
 
 ### BUG-018 — Reset Password Flow Fails
 
@@ -483,8 +409,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 
 ---
 
-
-
 ### BUG-019 — Natural Language Venue Search Fails
 
 - **Severity:** High
@@ -498,8 +422,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 - **Actual Result:** Search fails or does not return ranked results.
 
 ---
-
-
 
 ### BUG-020 — Wrong-Role Denial Shows /login Instead of /unauthorized
 
@@ -515,8 +437,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 
 ---
 
-
-
 ### BUG-021 — Overlapped Text on Booking Message Card
 
 - **Severity:** Low
@@ -526,8 +446,6 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 - **Actual Result:** Text overlap present on the card.
 
 ---
-
-
 
 ### BUG-022 — Supplier Calendar Label Says "Availability" Instead of "Calendar"
 
@@ -541,12 +459,9 @@ This document logs bugs and UI/UX issues identified during QA testing of the Ven
 
 ---
 
-
-
 ## Open / Still Checking (from July 20 Manual QA Pass)
 
 The following items were not yet conclusively verified as of the July 20, 2026 manual QA pass and require follow-up testing before they can be marked pass or fail:
-
 
 | ID   | Area          | Notes                                                                                                           |
 | ---- | ------------- | --------------------------------------------------------------------------------------------------------------- |
@@ -559,10 +474,7 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | H4.1 | Admin         | Support admin permission matrix still checking                                                                  |
 | D6.4 | Customer      | Admin report export (`/api/admin/reports/export`) denial for non-admin roles needs Network-tab proof of 401/403 |
 
-
 ---
-
-
 
 ## Notes
 
@@ -574,8 +486,6 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 
 ---
 
-
-
 # Manual QA Pass Report
 
 **Date:** July 20, 2026
@@ -585,7 +495,6 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 
 ## Summary
 
-
 | Status           | Count   |
 | ---------------- | ------- |
 | Pass             | 148     |
@@ -594,11 +503,7 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | Elaborate / note | 2       |
 | **Total items**  | **162** |
 
-
-
-
 ## Failures (must fix or retest)
-
 
 | ID  | Area           | Issue                                                                            |
 | --- | -------------- | -------------------------------------------------------------------------------- |
@@ -607,11 +512,7 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | K1  | AI             | NL venue search failed                                                           |
 | E17 | Venue security | Unauthorized page should show `/unauthorized`, but redirects to `/login` instead |
 
-
-
-
 ## Open / Still Checking
-
 
 | ID   | Area          | Notes                                          |
 | ---- | ------------- | ---------------------------------------------- |
@@ -623,11 +524,7 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | H3.1 | Admin         | Analyst admin allow/deny matrix still checking |
 | H4.1 | Admin         | Support admin permission matrix still checking |
 
-
-
-
 ## Pass-with-Notes (UX / Product)
-
 
 | ID  | Area        | Notes                                                                                                       |
 | --- | ----------- | ----------------------------------------------------------------------------------------------------------- |
@@ -635,11 +532,7 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | G8  | Supplier    | Calendar works; label updated to "Calendar" (FIX-011)                                                       |
 | E17 | Venue owner | Denial works, but lands on `/login` instead of `/unauthorized` (and does not route back to venue dashboard) |
 
-
-
-
 ## Status Legend
-
 
 | Mark     | Meaning                        |
 | -------- | ------------------------------ |
@@ -649,13 +542,9 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | N/A      | Out of scope for this run      |
 | Note     | Pass or Fail with extra detail |
 
-
 ---
 
-
-
 ## A. Global / Cross-Cutting
-
 
 | ID  | Functionality                            | Status   | Notes                                 |
 | --- | ---------------------------------------- | -------- | ------------------------------------- |
@@ -669,11 +558,7 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | A8  | Accessibility smoke (/, /venues, /login) | Pass     |                                       |
 | A9  | /429 rate-limit page                     | Pass     |                                       |
 
-
-
-
 ## B. Public / Marketing (No Login)
-
 
 | ID  | Route / Action                       | Status | Notes |
 | --- | ------------------------------------ | ------ | ----- |
@@ -697,11 +582,7 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | B18 | /terms                               | Pass   |       |
 | B19 | /help                                | Pass   |       |
 
-
-
-
 ## C. Authentication
-
 
 | ID  | Flow                                     | Status | Notes                                                                    |
 | --- | ---------------------------------------- | ------ | ------------------------------------------------------------------------ |
@@ -715,7 +596,6 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | C8  | Suspended account blocked                | Pass   |                                                                          |
 | C9  | Pending partner application restrictions | Pass   |                                                                          |
 
-
 **C4 / C5 investigation checklist:**
 
 - Submit email on `/forgot-password` — does UI show success without leaking account existence?
@@ -724,14 +604,9 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 - Can a new password be set and used to log in?
 - Expired/invalid token error handling
 
-
-
 ## D. Customer
 
-
-
 ### D1. Profile & Account
-
 
 | ID   | Route / Action                    | Status | Notes                |
 | ---- | --------------------------------- | ------ | -------------------- |
@@ -745,11 +620,7 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | D1.8 | /account/become-partner           | Pass   |                      |
 | D1.9 | Delete account                    | Pass   |                      |
 
-
-
-
 ### D2. Marketplace (Logged In)
-
 
 | ID   | Action                    | Status | Notes |
 | ---- | ------------------------- | ------ | ----- |
@@ -758,11 +629,7 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | D2.3 | Favorite supplier         | Pass   |       |
 | D2.4 | Supplier inquiry submit   | Pass   |       |
 
-
-
-
 ### D3. Booking Lifecycle
-
 
 | ID   | Route / Action           | Status | Notes |
 | ---- | ------------------------ | ------ | ----- |
@@ -776,11 +643,7 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | D3.8 | Cancel booking           | Pass   |       |
 | D3.9 | Submit review + photos   | Pass   |       |
 
-
-
-
 ### D4. Payments & Inquiries
-
 
 | ID   | Route                  | Status | Notes |
 | ---- | ---------------------- | ------ | ----- |
@@ -788,11 +651,7 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | D4.2 | /account/transactions  | Pass   |       |
 | D4.3 | /inquiries/[id] quotes | Pass   |       |
 
-
-
-
 ### D5. Notifications
-
 
 | ID   | Action                     | Status | Notes |
 | ---- | -------------------------- | ------ | ----- |
@@ -801,11 +660,7 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | D5.3 | /notifications inbox       | Pass   |       |
 | D5.4 | Push subscribe/unsubscribe | Pass   |       |
 
-
-
-
 ### D6. Customer Negative Tests
-
 
 | ID   | Action                       | Status    | Notes     |
 | ---- | ---------------------------- | --------- | --------- |
@@ -814,13 +669,11 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | D6.3 | Visit /dashboard/supplier    | Pass      | Denied    |
 | D6.4 | Admin API export denial      | Elaborate | See below |
 
-
 **D6.4 — Elaborate: Admin Report Export Denial**
 
-*What to test:* As a customer (or any non-admin role), call the admin report export endpoint: `GET /api/admin/reports/export` (optionally with query params used by the admin reports UI).
+_What to test:_ As a customer (or any non-admin role), call the admin report export endpoint: `GET /api/admin/reports/export` (optionally with query params used by the admin reports UI).
 
-*Expected:*
-
+_Expected:_
 
 | Check        | Expected Result                                                                              |
 | ------------ | -------------------------------------------------------------------------------------------- |
@@ -829,8 +682,7 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | Side effects | No file download; no audit "export success" for this user                                    |
 | UI           | Customer has no nav link to admin reports/export                                             |
 
-
-*How to verify quickly:*
+_How to verify quickly:_
 
 1. Log in as customer.
 2. Open browser DevTools → Network.
@@ -838,11 +690,10 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 4. Confirm status is 401/403, not 200 with CSV.
 5. Optionally repeat as venue owner / supplier — same denial.
 
-*Pass criteria:* Non-admin never receives export content.
-*Fail criteria:* 200 + downloadable report, or silent data leak.
+_Pass criteria:_ Non-admin never receives export content.
+_Fail criteria:_ 200 + downloadable report, or silent data leak.
 
 ## E. Venue Owner
-
 
 | ID  | Route / Action                   | Status     | Notes                                                                     |
 | --- | -------------------------------- | ---------- | ------------------------------------------------------------------------- |
@@ -866,32 +717,28 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | E18 | Deny /dashboard/supplier         | Checking   |                                                                           |
 | E19 | Cross-tenant booking isolation   | Pass       |                                                                           |
 
-
 **E17 — Unauthorized routing bug (detail)**
 
-*Observed:*
+_Observed:_
 
 - Venue owner visits an unauthorized page (e.g. admin).
 - App redirects to `/login` rather than `/unauthorized`.
 - After denial, user is not routed back to the venue owner dashboard.
 
-*Expected (per checklist A2 / E17):*
+_Expected (per checklist A2 / E17):_
 
 - Authenticated wrong-role user → `/unauthorized`.
 - Unauthenticated user → `/login` (with optional `redirectTo`).
 - Authenticated venue owner after denial should remain able to navigate back to `/dashboard` without a forced re-login UX.
 
-*Suggested retest:*
+_Suggested retest:_
 
 1. Stay logged in as venue owner.
 2. Hit `/admin`, `/dashboard/supplier`, `/admin/users`.
 3. Confirm path is `/unauthorized` (not `/login`).
 4. Use recovery/home/dashboard links from unauthorized page → land on venue dashboard.
 
-
-
 ## F. Event Coordinator
-
 
 | ID  | Route                  | Status | Notes |
 | --- | ---------------------- | ------ | ----- |
@@ -904,11 +751,7 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | F7  | Reports                | Pass   |       |
 | F8  | Shared venue tools     | Pass   |       |
 
-
-
-
 ## G. Supplier
-
 
 | ID  | Route / Action                | Status | Notes                               |
 | --- | ----------------------------- | ------ | ----------------------------------- |
@@ -929,23 +772,15 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | G15 | Deny /admin/*                 | Pass   |                                     |
 | G16 | Deny /dashboard/venue-owner   | Pass   |                                     |
 
-
 **G8 — Copy fix**
-
 
 | Location                           | Previous       | Expected / Current           |
 | ---------------------------------- | -------------- | ---------------------------- |
 | Supplier calendar nav / page title | "Availability" | "Calendar" (fixed — FIX-011) |
 
-
-
-
 ## H. Admin
 
-
-
 ### H1. Super Admin
-
 
 | ID    | Route / Action                      | Status | Notes                                   |
 | ----- | ----------------------------------- | ------ | --------------------------------------- |
@@ -971,11 +806,7 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | H1.20 | Audit logs                          | Pass   |                                         |
 | H1.21 | Self-demotion guard                 | Pass   |                                         |
 
-
-
-
 ### H2–H4. Tier Matrices (Open)
-
 
 | ID   | Tier                      | Status   | Notes                                                                                                                                 |
 | ---- | ------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
@@ -983,11 +814,7 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | H3.1 | Analyst admin allow/deny  | Checking | Can: Overview, Reports, Audit. Cannot: Commissions + management modules                                                               |
 | H4.1 | Support admin permissions | Checking | Verify against permissions.ts / nav gating                                                                                            |
 
-
-
-
 ## I. Payments (PayMongo)
-
 
 | ID  | Action                           | Status | Notes                                                                                |
 | --- | -------------------------------- | ------ | ------------------------------------------------------------------------------------ |
@@ -998,11 +825,7 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | I5  | Receipt / invoice visibility     | Pass   |                                                                                      |
 | I6  | Maya webhook                     | Pass   | Marked pass in this run; still treat as non-prod-ready per product docs if retesting |
 
-
-
-
 ## J. Notifications
-
 
 | ID  | Channel / Action     | Status | Notes |
 | --- | -------------------- | ------ | ----- |
@@ -1012,11 +835,7 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | J4  | Web push             | Pass   |       |
 | J5  | Preferences persist  | Pass   |       |
 
-
-
-
 ## K. AI Features
-
 
 | ID  | Feature                      | Status | Notes                                                                              |
 | --- | ---------------------------- | ------ | ---------------------------------------------------------------------------------- |
@@ -1028,7 +847,6 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | K6  | Customer assistant           | Pass   |                                                                                    |
 | K7  | Admin AI config              | Pass   |                                                                                    |
 
-
 **K1 investigation checklist:**
 
 1. Enter a natural-language query on landing / search.
@@ -1036,10 +854,7 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 3. Confirm ranked venue results render (not empty / error toast / fallback-only).
 4. Check env: AI keys, feature flags in `/admin/ai-configuration`, Supabase edge function deploy.
 
-
-
 ## L. File Uploads
-
 
 | ID  | Bucket / Use Case | Status | Notes |
 | --- | ----------------- | ------ | ----- |
@@ -1048,11 +863,7 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | L3  | Verification docs | Pass   |       |
 | L4  | Review photos     | Pass   |       |
 
-
-
-
 ## M. Booking State Machine Branches
-
 
 | ID  | Branch                       | Status | Notes |
 | --- | ---------------------------- | ------ | ----- |
@@ -1060,11 +871,7 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | M2  | Customer cancels → cancelled | Pass   |       |
 | M3  | Booking expires → expired    | Pass   |       |
 
-
-
-
 ## Defect Backlog (From This Pass)
-
 
 | Priority | ID                                  | Title                                                   | Type                           |
 | -------- | ----------------------------------- | ------------------------------------------------------- | ------------------------------ |
@@ -1077,9 +884,6 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 | —        | Filter UX                           | Long filter sidebar / accordion redesign                | UX — **Implemented (FIX-010)** |
 | —        | A7, E11, E12, E18, H2.1, H3.1, H4.1 | Still checking                                          | Open                           |
 
-
-
-
 ## Recommended Next Actions
 
 1. Retest C4 → C5 as one recovery path (forgot email → link → reset → login).
@@ -1090,8 +894,6 @@ The following items were not yet conclusively verified as of the July 20, 2026 m
 6. Complete D6.4 with Network-tab proof of 401/403 on `/api/admin/reports/export`.
 7. **Retest FIX-010** on `/venues` (accordion filters, Min/Max budget, capacity input, checkbox lists).
 8. **Confirm FIX-011** supplier nav/page titles show "Calendar".
-
-
 
 ## Appendix — Full Result Dump (Raw)
 
@@ -1113,4 +915,4 @@ L1-L4 Pass
 M1-M3 Pass
 ```
 
-*Generated from the July 20, 2026 manual QA checklist results.*
+_Generated from the July 20, 2026 manual QA checklist results._

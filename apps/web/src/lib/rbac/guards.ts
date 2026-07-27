@@ -135,7 +135,7 @@ export async function requireAdmin(): Promise<SessionContext> {
  * their own auth.getUser() call). Prefer hasRole(ROLES.ADMIN)/requireAdmin()
  * when you don't already have a resolved user.
  */
- 
+
 export async function isAdminUser(
   supabase: any,
   userId: string,

@@ -902,7 +902,9 @@ export default async function BookingDetailPage({ params }: Props) {
           {ownerProfile ? (
             <VenueOwnerTrustCard
               ownerProfile={ownerProfile}
-              ownerProfileHref={ownerProfileHref ?? `/owners/${ownerProfile.slug}`}
+              ownerProfileHref={
+                ownerProfileHref ?? `/owners/${ownerProfile.slug}`
+              }
             />
           ) : null}
 

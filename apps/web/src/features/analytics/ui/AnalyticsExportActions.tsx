@@ -61,7 +61,7 @@ export function AnalyticsExportActions({
       link.click();
       link.remove();
       URL.revokeObjectURL(url);
-      
+
       toast.success(`${format.toUpperCase()} export downloaded.`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Export failed.");
@@ -73,9 +73,16 @@ export function AnalyticsExportActions({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="gap-2 h-10 border-slate-200 shadow-sm" disabled={activeFormat !== null}>
+        <Button
+          variant="outline"
+          className="gap-2 h-10 border-slate-200 shadow-sm"
+          disabled={activeFormat !== null}
+        >
           {activeFormat !== null ? (
-            <MaterialIcon name="progress_activity" className="animate-spin text-lg" />
+            <MaterialIcon
+              name="progress_activity"
+              className="animate-spin text-lg"
+            />
           ) : (
             <Download className="h-4 w-4" />
           )}
@@ -85,10 +92,16 @@ export function AnalyticsExportActions({
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>Export analytics</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => void downloadExport("pdf")} disabled={activeFormat !== null}>
+        <DropdownMenuItem
+          onClick={() => void downloadExport("pdf")}
+          disabled={activeFormat !== null}
+        >
           Export summary as PDF
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => void downloadExport("csv")} disabled={activeFormat !== null}>
+        <DropdownMenuItem
+          onClick={() => void downloadExport("csv")}
+          disabled={activeFormat !== null}
+        >
           Export performance as CSV
         </DropdownMenuItem>
       </DropdownMenuContent>

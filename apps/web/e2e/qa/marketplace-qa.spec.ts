@@ -65,9 +65,7 @@ test("landing page presents customer discovery sections and venue-style featured
     .getByRole("img", { name: "Venora event venue hero background" })
     .evaluate((element) => Number(getComputedStyle(element).opacity));
   expect(heroBackgroundOpacity).toBeGreaterThanOrEqual(0.35);
-  await expect(
-    page.getByTestId("landing-hero-search-panel"),
-  ).toBeVisible();
+  await expect(page.getByTestId("landing-hero-search-panel")).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Find Your Perfect Venue" }),
   ).toBeVisible();
@@ -146,7 +144,9 @@ for (const viewport of [
   });
 }
 
-test("featured venue card identity matches its destination", async ({ page }) => {
+test("featured venue card identity matches its destination", async ({
+  page,
+}) => {
   await page.goto("/");
 
   const featuredRegion = page.getByRole("region", {
@@ -219,10 +219,7 @@ test("venue estimate uses booking guests without public package sections", async
   ).toHaveValue("200");
 });
 
-async function expectDesktopSupportingCardOffset(
-  page: Page,
-  card: Locator,
-) {
+async function expectDesktopSupportingCardOffset(page: Page, card: Locator) {
   await expect(card).toBeVisible();
   const styles = await card.evaluate((element) => {
     const computed = getComputedStyle(element);
@@ -288,7 +285,8 @@ test("marketplace uses document scrolling and renders a normal-flow footer", asy
     const main = shell?.querySelector(":scope > main");
 
     return {
-      documentOwnsScroll: document.scrollingElement === document.documentElement,
+      documentOwnsScroll:
+        document.scrollingElement === document.documentElement,
       shellOverflowY: shell ? getComputedStyle(shell).overflowY : null,
       mainOverflowY: main ? getComputedStyle(main).overflowY : null,
     };
@@ -320,7 +318,9 @@ async function expectStickyFiltersDuringDocumentScroll(
   ]);
 
   await page.evaluate(() => window.scrollTo({ top: 64, behavior: "instant" }));
-  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+  await expect
+    .poll(() => page.evaluate(() => window.scrollY))
+    .toBeGreaterThan(0);
 
   const after = await Promise.all([
     filters.evaluate((element) => element.getBoundingClientRect().top),

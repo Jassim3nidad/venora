@@ -28,11 +28,7 @@ export default async function CustomerInquiryDetailPage({
 
   let data;
   try {
-    data = await getCustomerInquiryDetails(
-      supabase as any,
-      user.id,
-      id,
-    );
+    data = await getCustomerInquiryDetails(supabase as any, user.id, id);
   } catch (error) {
     console.error("[CustomerInquiryDetailPage] Error:", error);
     // If it's a 500 error or something, we can render notFound or let error.tsx handle it.

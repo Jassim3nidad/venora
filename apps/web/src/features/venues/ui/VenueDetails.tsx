@@ -132,7 +132,9 @@ export default function VenueDetails({
       triggerToast("Error", result.error.message);
     } else {
       triggerToast(
-        result.data.isFavorited ? "Saved to Favorites" : "Removed from Favorites",
+        result.data.isFavorited
+          ? "Saved to Favorites"
+          : "Removed from Favorites",
         result.data.isFavorited
           ? "You can view this venue anytime in your account dashboard."
           : "This venue has been removed from your saved list.",
@@ -295,7 +297,9 @@ export default function VenueDetails({
                 isFavorited ? "border-red-200 bg-red-50/50 text-red-500" : ""
               }`}
             >
-              <Heart className={`h-5 w-5 ${isFavorited ? "fill-current" : ""}`} />
+              <Heart
+                className={`h-5 w-5 ${isFavorited ? "fill-current" : ""}`}
+              />
               {isFavorited ? "Saved" : "Save"}
             </Button>
           )}
@@ -411,8 +415,8 @@ export default function VenueDetails({
                   Available Packages
                 </h2>
                 <p className="text-lg font-normal leading-8 text-[#434654]">
-                  Choose from our carefully curated packages designed to fit your
-                  event needs.
+                  Choose from our carefully curated packages designed to fit
+                  your event needs.
                 </p>
                 <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {activePackages.map((pkg: any) => (
@@ -444,7 +448,8 @@ export default function VenueDetails({
                         <div className="mb-4 flex w-max items-center gap-2 rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-3 py-1.5 text-xs font-semibold text-[#737685]">
                           <Users className="h-3.5 w-3.5 text-[#0052CC]" />
                           <span>
-                            {pkg.min_guests ?? 1} - {pkg.max_guests ?? "Any"} guests
+                            {pkg.min_guests ?? 1} - {pkg.max_guests ?? "Any"}{" "}
+                            guests
                           </span>
                         </div>
                       ) : null}
@@ -455,20 +460,22 @@ export default function VenueDetails({
                             Inclusions
                           </span>
                           <ul className="space-y-2">
-                            {pkg.inclusions.map((inclusion: string, i: number) => (
-                              <li
-                                key={i}
-                                className="flex items-start gap-2.5 text-xs font-medium text-[#434654]"
-                              >
-                                <div className="mt-0.5 shrink-0 rounded-full bg-emerald-100 p-0.5">
-                                  <Check
-                                    className="h-2.5 w-2.5 text-emerald-600"
-                                    strokeWidth={3}
-                                  />
-                                </div>
-                                <span>{inclusion}</span>
-                              </li>
-                            ))}
+                            {pkg.inclusions.map(
+                              (inclusion: string, i: number) => (
+                                <li
+                                  key={i}
+                                  className="flex items-start gap-2.5 text-xs font-medium text-[#434654]"
+                                >
+                                  <div className="mt-0.5 shrink-0 rounded-full bg-emerald-100 p-0.5">
+                                    <Check
+                                      className="h-2.5 w-2.5 text-emerald-600"
+                                      strokeWidth={3}
+                                    />
+                                  </div>
+                                  <span>{inclusion}</span>
+                                </li>
+                              ),
+                            )}
                           </ul>
                         </div>
                       ) : null}
@@ -503,7 +510,9 @@ export default function VenueDetails({
                 {venue.wheelchair_accessible ? (
                   <div className="mt-3 flex gap-3 border-t border-[#E5E7EB] pt-3">
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                    <p>Accessible routes and ramps are fully prepared on-site.</p>
+                    <p>
+                      Accessible routes and ramps are fully prepared on-site.
+                    </p>
                   </div>
                 ) : null}
                 {venue.overnight_accommodation ? (
@@ -736,7 +745,8 @@ export default function VenueDetails({
               const coverImg =
                 item.venue_images?.find(
                   (i: any) => i.is_featured && i.media_type !== "video",
-                ) ?? item.venue_images?.find((i: any) => i.media_type !== "video");
+                ) ??
+                item.venue_images?.find((i: any) => i.media_type !== "video");
               const imgUrl = coverImg
                 ? String(coverImg.storage_path).startsWith("http")
                   ? coverImg.storage_path

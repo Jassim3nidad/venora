@@ -124,7 +124,7 @@ export async function proxy(request: NextRequest) {
               apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
               Authorization: `Bearer ${session.access_token}`,
             },
-          }
+          },
         );
         if (res.ok) {
           roleRows = await res.json();
@@ -227,8 +227,9 @@ export async function proxy(request: NextRequest) {
 
   // 4. Role guard — redirect users without the required role
   if (user) {
-    const matchedGuard = ROLE_GUARDS.find((guard) =>
-      pathname.startsWith(guard.prefix) && guard.prefix !== "/bookings",
+    const matchedGuard = ROLE_GUARDS.find(
+      (guard) =>
+        pathname.startsWith(guard.prefix) && guard.prefix !== "/bookings",
     );
 
     if (matchedGuard) {

@@ -22,10 +22,12 @@
 ### Task 1: Owner Profile Normalization Tests
 
 **Files:**
+
 - Create: `apps/web/src/features/owners/application/queries.test.ts`
 - Modify: `apps/web/src/features/owners/application/queries.ts`
 
 **Interfaces:**
+
 - Produces: `normalizeProfile(row: any): PublicOwnerProfile | null` exported for tests.
 - Produces: `PublicOwnerProfile` fields for published profile data.
 
@@ -52,10 +54,12 @@ Expected: pass.
 ### Task 2: Public Owner RPC Migration
 
 **Files:**
+
 - Create: new Supabase migration from `supabase migration new unify_owner_profile_publication_fields`
 - Modify generated migration SQL.
 
 **Interfaces:**
+
 - Extends `public.get_public_owner_profile(p_slug text)`.
 - Extends `public.get_public_owner_profile_by_venue(p_venue_slug text)` by reusing `get_public_owner_profile`.
 
@@ -80,9 +84,11 @@ Do not require generated database types to be updated in this task because owner
 ### Task 3: Owner Page UI Fields
 
 **Files:**
+
 - Modify: `apps/web/app/(customer)/owners/[slug]/page.tsx`
 
 **Interfaces:**
+
 - Consumes: expanded `PublicOwnerProfile`.
 - Uses existing owner venue/review queries unchanged.
 
@@ -105,11 +111,13 @@ Keep the existing max-width, section rhythm, venue cards, and review cards. Avoi
 ### Task 4: Dashboard Links And Publishing
 
 **Files:**
+
 - Modify: `apps/web/src/features/business-profiles/ui/BusinessProfileEditor.tsx`
 - Modify: `apps/web/app/(venue-owner)/dashboard/business-profile/preview/page.tsx`
 - Modify: `apps/web/src/features/business-profiles/application/actions.ts`
 
 **Interfaces:**
+
 - Dashboard preview and published links point to `/owners/[slug]`.
 - Publishing revalidates owner and legacy partner paths.
 
@@ -128,9 +136,11 @@ Add `revalidatePath("/dashboard/business-profile/preview")` and `revalidatePath(
 ### Task 5: Legacy Partner Redirect
 
 **Files:**
+
 - Modify: `apps/web/app/(customer)/partners/[slug]/page.tsx`
 
 **Interfaces:**
+
 - Uses `redirect("/owners/[slug]")` when a published profile exists.
 - Returns `notFound()` when no published profile exists.
 
@@ -141,6 +151,7 @@ Keep metadata safe, but page body redirects to owner route after resolving the p
 ### Task 6: Verification
 
 **Files:**
+
 - No source files unless verification reveals a bug.
 
 - [ ] **Step 1: Run focused tests**

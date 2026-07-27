@@ -21,7 +21,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `${profile.name} - Venue Owner on Venora`,
-    description: profile.shortDescription || profile.tagline || `View venues and reviews for ${profile.name} on Venora.`,
+    description:
+      profile.shortDescription ||
+      profile.tagline ||
+      `View venues and reviews for ${profile.name} on Venora.`,
     alternates: { canonical: `/owners/${profile.slug}` },
   };
 }

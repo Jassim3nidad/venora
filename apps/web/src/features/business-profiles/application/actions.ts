@@ -20,7 +20,9 @@ export async function saveBusinessIdentity(rawInput: unknown) {
     profileIdSchema.merge(businessIdentitySchema),
     async (input) => {
       const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new UnauthorizedError();
 
       const repo = new BusinessProfileRepository(supabase as any);
@@ -39,7 +41,7 @@ export async function saveBusinessIdentity(rawInput: unknown) {
       revalidatePath("/dashboard/business-profile");
       return { success: true };
     },
-    rawInput
+    rawInput,
   );
 }
 
@@ -48,7 +50,9 @@ export async function saveBusinessAbout(rawInput: unknown) {
     profileIdSchema.merge(businessAboutSchema),
     async (input) => {
       const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new UnauthorizedError();
 
       const repo = new BusinessProfileRepository(supabase as any);
@@ -61,7 +65,7 @@ export async function saveBusinessAbout(rawInput: unknown) {
       revalidatePath("/dashboard/business-profile");
       return { success: true };
     },
-    rawInput
+    rawInput,
   );
 }
 
@@ -70,7 +74,9 @@ export async function saveBusinessContact(rawInput: unknown) {
     profileIdSchema.merge(businessContactSchema),
     async (input) => {
       const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new UnauthorizedError();
 
       const repo = new BusinessProfileRepository(supabase as any);
@@ -91,7 +97,7 @@ export async function saveBusinessContact(rawInput: unknown) {
       revalidatePath("/dashboard/business-profile");
       return { success: true };
     },
-    rawInput
+    rawInput,
   );
 }
 
@@ -100,7 +106,9 @@ export async function publishBusinessProfile(rawInput: unknown) {
     profileIdSchema.extend({ organizationId: z.string().uuid() }),
     async (input) => {
       const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new UnauthorizedError();
 
       const repo = new BusinessProfileRepository(supabase as any);
@@ -109,7 +117,9 @@ export async function publishBusinessProfile(rawInput: unknown) {
 
       const completeness = calculateProfileCompleteness(draft);
       if (!completeness.isEligibleForPublish) {
-        throw new Error(`Profile is not eligible for publishing. Missing: ${completeness.missingItems.join(", ")}`);
+        throw new Error(
+          `Profile is not eligible for publishing. Missing: ${completeness.missingItems.join(", ")}`,
+        );
       }
 
       // Build the sanitized snapshot
@@ -126,16 +136,27 @@ export async function publishBusinessProfile(rawInput: unknown) {
         coverImagePath: draft.cover_image_path,
         city: draft.address_visibility !== "hidden" ? draft.city : null,
         province: draft.address_visibility !== "hidden" ? draft.province : null,
-        countryCode: draft.address_visibility !== "hidden" ? draft.country_code : null,
+        countryCode:
+          draft.address_visibility !== "hidden" ? draft.country_code : null,
         publicEmail: draft.email_visibility ? draft.public_email : null,
         publicPhone: draft.phone_visibility ? draft.public_phone : null,
         websiteUrl: draft.website_url,
         verificationStatus: draft.verification_status,
-        venues: (draft.venues || []).filter(v => v.is_visible).sort((a, b) => a.display_order - b.display_order),
-        portfolio: (draft.portfolio || []).filter(p => p.is_visible).sort((a, b) => a.display_order - b.display_order),
-        team: (draft.team || []).filter(t => t.is_visible).sort((a, b) => a.display_order - b.display_order),
-        socialLinks: (draft.social_links || []).filter(s => s.is_visible).sort((a, b) => a.display_order - b.display_order),
-        policies: (draft.policies || []).filter(p => p.is_visible).sort((a, b) => a.display_order - b.display_order),
+        venues: (draft.venues || [])
+          .filter((v) => v.is_visible)
+          .sort((a, b) => a.display_order - b.display_order),
+        portfolio: (draft.portfolio || [])
+          .filter((p) => p.is_visible)
+          .sort((a, b) => a.display_order - b.display_order),
+        team: (draft.team || [])
+          .filter((t) => t.is_visible)
+          .sort((a, b) => a.display_order - b.display_order),
+        socialLinks: (draft.social_links || [])
+          .filter((s) => s.is_visible)
+          .sort((a, b) => a.display_order - b.display_order),
+        policies: (draft.policies || [])
+          .filter((p) => p.is_visible)
+          .sort((a, b) => a.display_order - b.display_order),
       };
 
       // Calculate next version
@@ -143,7 +164,7 @@ export async function publishBusinessProfile(rawInput: unknown) {
         .from("business_profile_publications")
         .select("*", { count: "exact", head: true })
         .eq("business_profile_id", input.profileId);
-        
+
       if (countError) throw countError;
       const versionNumber = (count || 0) + 1;
 
@@ -152,7 +173,7 @@ export async function publishBusinessProfile(rawInput: unknown) {
         input.profileId,
         snapshot,
         user.id,
-        versionNumber
+        versionNumber,
       );
 
       // Update draft to published
@@ -169,16 +190,16 @@ export async function publishBusinessProfile(rawInput: unknown) {
         action: "business_profile_published",
         entity_type: "business_profile",
         entity_id: input.profileId,
-        metadata: { version: versionNumber }
+        metadata: { version: versionNumber },
       });
 
       revalidatePath("/dashboard/business-profile");
       revalidatePath("/dashboard/business-profile/preview");
       revalidatePath(`/owners/${draft.slug}`);
       revalidatePath(`/partners/${draft.slug}`);
-      
+
       return { success: true };
     },
-    rawInput
+    rawInput,
   );
 }

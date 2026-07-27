@@ -121,9 +121,13 @@ export default function ReviewsSection({
         </h2>
         <div className="flex items-center gap-2 text-base font-semibold text-[#434654]">
           <Star className="h-5 w-5 fill-amber-400 stroke-amber-400" />
+<<<<<<< HEAD
           <span className="text-[#151C27]">
             {effectiveAvgRating.toFixed(2)}
           </span>
+=======
+          <span className="text-[#151C27]">{avgRating.toFixed(2)}</span>
+>>>>>>> d735cb74697c4d4872b432714c2b4f51e8167c18
           <span className="font-normal text-[#A1A4B2]">
             ({effectiveReviewCount} review
             {effectiveReviewCount === 1 ? "" : "s"})
@@ -134,9 +138,7 @@ export default function ReviewsSection({
       {reviews.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] px-4 py-14 text-center">
           <MessageSquare className="mb-3 h-10 w-10 text-[#A1A4B2]" />
-          <p className="text-base font-bold text-[#151C27]">
-            No reviews yet
-          </p>
+          <p className="text-base font-bold text-[#151C27]">No reviews yet</p>
           <p className="mt-2 max-w-[320px] text-sm leading-6 text-[#A1A4B2]">
             Bookings that are completed will appear here once guests leave their
             feedback.
@@ -184,7 +186,7 @@ export default function ReviewsSection({
               return (
                 <div
                   key={review.id}
-              className="space-y-4 rounded-xl border border-[#E5E7EB] bg-white p-6"
+                  className="space-y-4 rounded-xl border border-[#E5E7EB] bg-white p-6"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">

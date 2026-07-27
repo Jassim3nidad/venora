@@ -48,15 +48,16 @@ export default async function CoordinatorSuppliersPage({
 
   const venueIds = await getOwnerVenueIds(context);
 
-  const { data: venueSuppliers } = venueIds.length > 0 
-    ? await supabase
-        .from("venue_suppliers")
-        .select("id, supplier_id, status")
-        .in("venue_id", venueIds)
-    : { data: [] };
+  const { data: venueSuppliers } =
+    venueIds.length > 0
+      ? await supabase
+          .from("venue_suppliers")
+          .select("id, supplier_id, status")
+          .in("venue_id", venueIds)
+      : { data: [] };
 
   const supplierIds = Array.from(
-    new Set((venueSuppliers ?? []).map((vs: any) => vs.supplier_id))
+    new Set((venueSuppliers ?? []).map((vs: any) => vs.supplier_id)),
   );
 
   const { data: categories } = await supabase

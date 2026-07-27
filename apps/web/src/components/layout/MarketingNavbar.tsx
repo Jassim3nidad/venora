@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { AuthRequiredPrompt } from "@/components/layout/AuthRequiredPrompt";
 import ProfileMenu from "@/components/layout/ProfileMenu";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 import {
   isMarketplaceNavItemActive,
   isMarketplaceParentActive,
@@ -149,6 +150,10 @@ export default function MarketingNavbar({
   const [authRedirectTo, setAuthRedirectTo] = useState(HOST_VENUE_PATH);
   const { user: currentUser } = useCurrentUser();
 
+  const closeMenu = () => setMenuOpen(false);
+  const { containerRef, triggerRef } = useFocusTrap(menuOpen, closeMenu);
+
+
   const user = currentUser ? { email: currentUser.email } : null;
   const profile: MarketingNavbarProfile | null = currentUser
     ? {
@@ -165,7 +170,6 @@ export default function MarketingNavbar({
   const email = user?.email ?? "";
   const isAuthenticated = Boolean(user);
 
-  const closeMenu = () => setMenuOpen(false);
   const navLinksForUser = getMarketingNavLinks();
   const mobileLinks = getMarketingMobileLinks({ user, mobileContext });
   const mobilePanelPosition = embedded
@@ -274,6 +278,7 @@ export default function MarketingNavbar({
           ) : null}
 
           <button
+            ref={triggerRef}
             className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#1D4ED8] transition hover:bg-[#EFF6FF]"
             type="button"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
@@ -298,6 +303,7 @@ export default function MarketingNavbar({
             onClick={closeMenu}
           />
           <div
+            ref={containerRef}
             className={[
               "fixed inset-x-3 z-[60] overflow-y-auto rounded-[28px] border border-[#E5E7EB] bg-white p-4 shadow-2xl shadow-slate-300/50 md:hidden",
               mobilePanelPosition,
@@ -318,7 +324,7 @@ export default function MarketingNavbar({
               Venora
             </p>
 
-            <nav className="grid gap-2">
+            <nav aria-label="Mobile Navigation" className="grid gap-2">
               {mobileLinks.map(({ label, href, icon: Icon }) => {
                 const active =
                   mobileContext === "marketplace"
