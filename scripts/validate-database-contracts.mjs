@@ -13,6 +13,35 @@ const allowlist = JSON.parse(readFileSync(allowlistFile, "utf8"));
 
 function validateGeneratedTypes() {
   const generatedTypes = readFileSync(typeFile, "utf8");
+  const eventGuestTypes = generatedTypes.match(
+    /event_guests:\s*\{[\s\S]*?\n\s{6}\};/,
+  )?.[0];
+  if (!eventGuestTypes) {
+    errors.push("generated event_guests type missing");
+  } else {
+    for (const field of [
+      "id",
+      "user_id",
+      "booking_id",
+      "first_name",
+      "last_name",
+      "email",
+      "phone",
+      "guest_group",
+      "plus_ones_allowed",
+      "dietary_requirements",
+      "accessibility_notes",
+      "rsvp_status",
+      "rsvp_token",
+      "created_at",
+      "updated_at",
+    ]) {
+      if (!new RegExp(`\\b${field}:`).test(eventGuestTypes)) {
+        errors.push(`event_guests field absent from generated types: ${field}`);
+      }
+    }
+  }
+
   const portfolioTypes = generatedTypes.match(
     /supplier_portfolio_items:\s*\{[\s\S]*?\n\s{6}\};/,
   )?.[0];
@@ -69,7 +98,7 @@ if (typesOnly) {
     process.exit(1);
   }
   console.log(
-    "Generated database types valid: migration 070 and supplier location contract fields present.",
+    "Generated database types valid: event guest, migration 070, and supplier location contract fields present.",
   );
   process.exit(0);
 }
@@ -161,6 +190,7 @@ for (const table of [
   "organization_members",
   "venues",
   "bookings",
+  "event_guests",
   "supplier_profiles",
   "supplier_contact_requests",
   "supplier_quotes",
@@ -280,6 +310,8 @@ const requiredMigrations = [
   "070_supplier_portfolio_enhancements.sql",
   "071_supplier_location_coverage.sql",
   "0711_tighten_venue_media_storage_ownership.sql",
+  "20260723100005_event_guests.sql",
+  "20260727130000_event_guest_management_hardening.sql",
 ];
 for (const name of requiredMigrations) {
   if (!migrationFiles.includes(name))
@@ -298,6 +330,25 @@ for (const name of [
 ]) {
   if (!allSql.includes(`FUNCTION public.${name}`)) {
     errors.push(`required database function missing: public.${name}`);
+  }
+}
+
+const eventGuestHardeningMigration =
+  migrations.find(
+    ({ name }) =>
+      name === "20260727130000_event_guest_management_hardening.sql",
+  )?.source ?? "";
+for (const token of [
+  'DROP POLICY IF EXISTS "Public RSVP response by invitation token"',
+  "REVOKE ALL ON TABLE public.event_guests FROM PUBLIC, anon",
+  'POLICY "event_guests.select.own"',
+  'POLICY "event_guests.insert.own"',
+  'POLICY "event_guests.update.own"',
+  'POLICY "event_guests.delete.own"',
+  "booking.customer_id = auth.uid()",
+]) {
+  if (!eventGuestHardeningMigration.includes(token)) {
+    errors.push(`event guest privacy contract missing: ${token}`);
   }
 }
 
@@ -327,9 +378,10 @@ for (const name of [
   }
 }
 
-const venueStorageMigration = migrations.find(
-  ({ name }) => name === "0711_tighten_venue_media_storage_ownership.sql",
-)?.source ?? "";
+const venueStorageMigration =
+  migrations.find(
+    ({ name }) => name === "0711_tighten_venue_media_storage_ownership.sql",
+  )?.source ?? "";
 for (const token of [
   "v.id::text = (storage.foldername(name))[2]",
   "v.organization_id::text = (storage.foldername(name))[1]",
