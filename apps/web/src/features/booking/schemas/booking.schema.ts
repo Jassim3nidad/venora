@@ -91,7 +91,7 @@ export type CancelBookingInput = z.infer<typeof cancelBookingSchema>;
 
 export const startBookingPaymentSchema = z.object({
   bookingId: z.string().uuid(),
-  provider: z.enum(["paymongo", "maya", "stripe"]).default("paymongo"),
+  provider: z.enum(["paymongo", "stripe"]).default("paymongo"),
 });
 
 export type StartBookingPaymentInput = z.infer<

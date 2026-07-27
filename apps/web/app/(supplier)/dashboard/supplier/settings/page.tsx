@@ -47,7 +47,7 @@ export default async function SupplierSettingsPage() {
                 Business
               </p>
               <h2 className="mt-1 text-xl font-black tracking-tight text-[#0f172a]">
-                {profile.business_name}
+                {profile?.businessName ?? "Your Business"}
               </h2>
               <p className="mt-2 text-sm font-medium leading-6 text-[#475569]">
                 Your supplier business profile details are managed in the Profile tab.
