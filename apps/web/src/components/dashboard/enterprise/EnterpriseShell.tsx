@@ -94,11 +94,13 @@ function Sidebar({
   pathname,
   onNavigate,
   navItems,
+  navLabel,
 }: {
   role: EnterpriseRole;
   pathname: string;
   onNavigate?: () => void;
   navItems?: NavItem[];
+  navLabel: string;
 }) {
   const items = navItems ?? NAV_BY_ROLE[role];
   // Some roles currently share a single destination page across multiple nav
@@ -130,7 +132,7 @@ function Sidebar({
         </Link>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1.5">
+      <nav aria-label={navLabel} className="flex flex-1 flex-col gap-1.5">
         {items.map((item, index) => (
           <NavLink
             key={item.label}
@@ -221,7 +223,7 @@ function DesktopTopBar({
   const displayName = userName ?? "Account User";
 
   return (
-    <div className="sticky top-0 z-30 hidden items-center justify-between border-b border-[#e5e7eb] bg-white/90 px-6 py-4 backdrop-blur lg:flex">
+    <header className="sticky top-0 z-30 hidden items-center justify-between border-b border-[#e5e7eb] bg-white/90 px-6 py-4 backdrop-blur lg:flex">
       <div>
         <p className="inline-flex rounded-full border border-[#dbeafe] bg-[#eff6ff] px-3 py-1 text-xs font-black uppercase tracking-wider text-[#1d4ed8]">
           {ROLE_LABELS[role]}
@@ -252,7 +254,7 @@ function DesktopTopBar({
           }
         />
       </div>
-    </div>
+    </header>
   );
 }
 
@@ -277,6 +279,7 @@ export function EnterpriseShell({
         <Sidebar
           role={role}
           pathname={pathname}
+          navLabel="Desktop Sidebar Navigation"
           {...(navItems ? { navItems } : {})}
         />
       </aside>
@@ -294,6 +297,7 @@ export function EnterpriseShell({
             <Sidebar
               role={role}
               pathname={pathname}
+              navLabel="Mobile Sidebar Navigation"
               onNavigate={() => setMobileOpen(false)}
               {...(navItems ? { navItems } : {})}
             />

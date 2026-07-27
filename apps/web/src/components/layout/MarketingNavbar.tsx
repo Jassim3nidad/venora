@@ -324,7 +324,7 @@ export default function MarketingNavbar({
               Venora
             </p>
 
-            <nav className="grid gap-2">
+            <nav aria-label="Mobile Navigation" className="grid gap-2">
               {mobileLinks.map(({ label, href, icon: Icon }) => {
                 const active =
                   mobileContext === "marketplace"
