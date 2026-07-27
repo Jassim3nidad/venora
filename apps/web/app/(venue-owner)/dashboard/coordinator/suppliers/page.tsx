@@ -81,7 +81,7 @@ export default async function CoordinatorSuppliersPage({
 
   // Filtering by an embedded relation's column isn't reliable through the
   // PostgREST query builder here, so the category filter is applied in JS
-  let suppliers = ((suppliersRaw ?? []) as SupplierRow[]).filter((s) =>
+  const suppliers = ((suppliersRaw ?? []) as SupplierRow[]).filter((s) =>
     category ? s.supplier_categories?.slug === category : true,
   );
 
@@ -141,26 +141,33 @@ export default async function CoordinatorSuppliersPage({
       {suppliers.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {suppliers.map((supplier) => (
-            <Link 
+            <Link
               key={supplier.id}
               href={`/dashboard/coordinator/suppliers/${supplier.id}`}
               className="group relative flex flex-col rounded-[24px] bg-white border border-slate-200 overflow-hidden shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/20"
             >
               {/* Image Section */}
               <div className="relative h-48 w-full overflow-hidden bg-slate-100">
-                {(supplier.hero_image_url || supplier.profile_image_url) ? (
+                {supplier.hero_image_url || supplier.profile_image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={supplier.hero_image_url || supplier.profile_image_url || ""}
+                    src={
+                      supplier.hero_image_url ||
+                      supplier.profile_image_url ||
+                      ""
+                    }
                     alt={supplier.business_name}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
                   <div className="absolute inset-0 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-                    <MaterialIcon name="storefront" className="text-4xl text-slate-300" />
+                    <MaterialIcon
+                      name="storefront"
+                      className="text-4xl text-slate-300"
+                    />
                   </div>
                 )}
-                
+
                 {/* Overlay Gradient */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/0 to-black/0 pointer-events-none" />
 
@@ -172,11 +179,15 @@ export default async function CoordinatorSuppliersPage({
                     </div>
                   ) : null}
                 </div>
-                
+
                 <div className="absolute top-4 right-4">
                   {supplier.review_count > 0 ? (
                     <div className="flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-xs font-black text-amber-950 shadow-md">
-                      <MaterialIcon name="star" className="text-[14px]" filled />
+                      <MaterialIcon
+                        name="star"
+                        className="text-[14px]"
+                        filled
+                      />
                       {Number(supplier.avg_rating).toFixed(1)}
                     </div>
                   ) : (
@@ -200,15 +211,21 @@ export default async function CoordinatorSuppliersPage({
                     {supplier.description}
                   </p>
                 ) : (
-                  <p className="text-sm text-slate-400 italic">No description provided.</p>
+                  <p className="text-sm text-slate-400 italic">
+                    No description provided.
+                  </p>
                 )}
 
                 <div className="mt-auto pt-5">
                   <div className="flex items-center justify-between border-t border-slate-100 pt-4">
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Starting at</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
+                        Starting at
+                      </span>
                       <span className="text-base font-black text-slate-900">
-                        {supplier.base_price ? formatPeso(supplier.base_price) : "Custom Quote"}
+                        {supplier.base_price
+                          ? formatPeso(supplier.base_price)
+                          : "Custom Quote"}
                       </span>
                     </div>
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white">
