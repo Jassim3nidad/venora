@@ -169,6 +169,23 @@ export default function VenueDetails({
     .filter(Boolean);
   const promotionalVideo = pickPromotionalVideo(venue.venue_images ?? []);
   const galleryImages = pickGalleryImages(venue.venue_images ?? []);
+  const loadedReviewCount = reviews.length;
+  const effectiveReviewCount = Math.max(
+    Number(venue.review_count ?? 0),
+    loadedReviewCount,
+  );
+  const loadedAverageRating =
+    loadedReviewCount > 0
+      ? reviews.reduce(
+          (sum: number, review: any) =>
+            sum + Number(review.overall_rating ?? 0),
+          0,
+        ) / loadedReviewCount
+      : 0;
+  const effectiveAvgRating =
+    effectiveReviewCount > 0 && Number(venue.avg_rating ?? 0) > 0
+      ? Number(venue.avg_rating)
+      : loadedAverageRating;
   const hostName =
     ownerProfile?.name ?? venue.organizations?.name ?? "Venora Host";
   const hostInitials =
@@ -240,10 +257,11 @@ export default function VenueDetails({
             <span className="inline-flex items-center gap-1.5">
               <Star className="h-5 w-5 fill-[#F59E0B] text-[#F59E0B]" />
               <span className="font-bold text-[#151C27]">
-                {Number(venue.avg_rating ?? 0).toFixed(1)}
+                {effectiveAvgRating.toFixed(1)}
               </span>
               <span className="underline underline-offset-2">
-                ({Number(venue.review_count ?? 0)} reviews)
+                ({effectiveReviewCount} review
+                {effectiveReviewCount === 1 ? "" : "s"})
               </span>
             </span>
             <span className="hidden text-[#E5E7EB] sm:inline">|</span>
@@ -630,8 +648,8 @@ export default function VenueDetails({
 
           <ReviewsSection
             reviews={reviews}
-            avgRating={venue.avg_rating}
-            reviewCount={venue.review_count}
+            avgRating={effectiveAvgRating}
+            reviewCount={effectiveReviewCount}
             currentUserId={currentUser?.id ?? null}
           />
         </div>

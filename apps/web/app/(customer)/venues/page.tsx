@@ -11,6 +11,7 @@ import {
 } from "@/src/features/venues/application/queries";
 
 import {
+  applyReviewSummariesToVenues,
   Venue,
   toLiveMarketplaceVenue,
 } from "@/src/features/venues/utils/venue-mappers";
@@ -85,8 +86,28 @@ export default async function VenuesMarketplacePage({
     researchVenues.filter(v => v.slug).map((venue) => [venue.slug, venue]),
   );
   const dbRows = error ? [] : ((dbVenues ?? []) as any[]);
+  const { data: reviewRows, error: reviewsError } =
+    dbRows.length > 0
+      ? await supabase
+          .from("reviews")
+          .select("venue_id, overall_rating")
+          .in(
+            "venue_id",
+            dbRows.map((venue) => venue.id),
+          )
+          .eq("status", "published")
+      : { data: [], error: null };
+
+  if (reviewsError) {
+    console.error("[venues/page] Reviews fetch error:", reviewsError.message);
+  }
+
+  const dbRowsWithReviewSummaries = applyReviewSummariesToVenues(
+    dbRows,
+    reviewRows ?? [],
+  );
   const dbSlugs = new Set(dbRows.map((venue) => venue.slug).filter(Boolean));
-  const livePublishedVenues = dbRows
+  const livePublishedVenues = dbRowsWithReviewSummaries
     .filter(
       (venue) =>
         venue.status === "published" &&

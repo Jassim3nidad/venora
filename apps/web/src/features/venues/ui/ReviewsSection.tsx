@@ -83,6 +83,18 @@ export default function ReviewsSection({
   reviewCount,
   currentUserId = null,
 }: ReviewsSectionProps) {
+  const loadedReviewCount = reviews.length;
+  const effectiveReviewCount = Math.max(reviewCount ?? 0, loadedReviewCount);
+  const loadedAverageRating =
+    loadedReviewCount > 0
+      ? reviews.reduce((sum, review) => sum + review.overall_rating, 0) /
+        loadedReviewCount
+      : 0;
+  const effectiveAvgRating =
+    effectiveReviewCount > 0 && avgRating > 0
+      ? avgRating
+      : loadedAverageRating;
+
   // Dimension calculators
   const getDimensionAverage = (key: keyof Review) => {
     return computeDimensionAverage(
@@ -110,10 +122,11 @@ export default function ReviewsSection({
         <div className="flex items-center gap-2 text-base font-semibold text-[#434654]">
           <Star className="h-5 w-5 fill-amber-400 stroke-amber-400" />
           <span className="text-[#151C27]">
-            {avgRating.toFixed(2)}
+            {effectiveAvgRating.toFixed(2)}
           </span>
           <span className="font-normal text-[#A1A4B2]">
-            ({reviewCount} reviews)
+            ({effectiveReviewCount} review
+            {effectiveReviewCount === 1 ? "" : "s"})
           </span>
         </div>
       </div>

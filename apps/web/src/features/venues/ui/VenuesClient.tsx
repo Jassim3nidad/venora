@@ -77,6 +77,17 @@ export interface Venue {
   isFavorited?: boolean;
 }
 
+function uniqueVenuesById(venues: Venue[]) {
+  const seen = new Set<string>();
+
+  return venues.filter((venue) => {
+    const id = String(venue.id);
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
+}
+
 const filterKeys = [
   "q",
   "province",
@@ -758,7 +769,7 @@ const VenueCard = memo(function VenueCard({
                 {venue.name}
               </h2>
               <span className="inline-flex shrink-0 items-center gap-1 text-sm font-bold text-[#111827]">
-                <Star className="h-4 w-4 fill-[#111827] text-[#111827]" />
+                <Star className="h-4 w-4 fill-[#F59E0B] text-[#F59E0B]" />
                 {typeof venue.rating === "number"
                   ? venue.rating.toFixed(1)
                   : "New"}
@@ -850,7 +861,9 @@ export default function VenuesClient({
   const [favoritePendingId, setFavoritePendingId] = useState<string | null>(
     null,
   );
-  const [dynamicVenues, setDynamicVenues] = useState<Venue[]>(initialVenues);
+  const [dynamicVenues, setDynamicVenues] = useState<Venue[]>(() =>
+    uniqueVenuesById(initialVenues),
+  );
   const [page, setPage] = useState(1);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMoreDbVenues, setHasMoreDbVenues] = useState(true);
@@ -858,7 +871,7 @@ export default function VenuesClient({
 
   // Sync when URL filters change (initialVenues from server changes)
   useEffect(() => {
-    setDynamicVenues(initialVenues);
+    setDynamicVenues(uniqueVenuesById(initialVenues));
     setPage(1);
     setHasMoreDbVenues(true);
     setVisibleCount(PAGE_SIZE);
@@ -1005,7 +1018,7 @@ export default function VenuesClient({
         ? dynamicVenues.filter((venue) => aiResultRank.has(String(venue.id)))
         : dynamicVenues;
 
-    const list = source.filter((venue) => {
+    const list = uniqueVenuesById(source.filter((venue) => {
       if (query) {
         const matchesQuery = getVenueSearchText(venue).includes(query);
 
@@ -1054,7 +1067,7 @@ export default function VenuesClient({
       }
 
       return true;
-    });
+    }));
 
     return [...list].sort((a, b) => {
       if (aiResultRank.size > 0 && filters.sort === "recommended") {
@@ -1158,7 +1171,7 @@ export default function VenuesClient({
             );
           }
 
-          return [...prev, ...newVenues];
+          return uniqueVenuesById([...prev, ...newVenues]);
         });
         setHasMoreDbVenues(result.data.hasMore);
         setPage(nextPage);
