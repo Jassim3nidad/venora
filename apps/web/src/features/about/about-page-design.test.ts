@@ -19,7 +19,9 @@ describe("About page design constraints", () => {
   });
 
   it("uses a distinct local hero background image", () => {
-    expect(aboutPageSource).toContain("/images/about/about-hero-background.jpg");
+    expect(aboutPageSource).toContain(
+      "/images/about/about-hero-background.jpg",
+    );
     expect(aboutPageSource).not.toContain("/images/landing-hero-venue-bg.png");
   });
 });

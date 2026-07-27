@@ -399,8 +399,9 @@ function getBudgetSummary(filters: {
   const max = Number(filters.maxBudget) || 0;
 
   if (min || max) {
-    return `${min ? formatCurrency(min) : "Any"} - ${max ? formatCurrency(max) : "No limit"
-      }`;
+    return `${min ? formatCurrency(min) : "Any"} - ${
+      max ? formatCurrency(max) : "No limit"
+    }`;
   }
 
   if (filters.budget === "under-100k") return "Standard (Under ₱100k)";
@@ -424,8 +425,8 @@ function getIntentSummary(intent: SmartVenueSearchIntent) {
       (venueType) => venueType.charAt(0).toUpperCase() + venueType.slice(1),
     ),
     intent.indoorOutdoor &&
-    intent.indoorOutdoor.charAt(0).toUpperCase() +
-    intent.indoorOutdoor.slice(1),
+      intent.indoorOutdoor.charAt(0).toUpperCase() +
+        intent.indoorOutdoor.slice(1),
     intent.parking && "Parking",
     intent.petFriendly && "Pet friendly",
     intent.wheelchairAccessible && "Wheelchair accessible",
@@ -514,19 +515,19 @@ function parseLocalSmartSearch(
     (text.includes("aircon") ||
       text.includes("air conditioned") ||
       text.includes("air-conditioned")) &&
-    "Aircon",
+      "Aircon",
     text.includes("pool") && "Pool",
     (text.includes("pet friendly") ||
       text.includes("pet-friendly") ||
       text.includes("pets")) &&
-    "Pet Friendly",
+      "Pet Friendly",
     (text.includes("wheelchair") || text.includes("accessible")) &&
-    "Wheelchair Accessible",
+      "Wheelchair Accessible",
     (text.includes("wifi") || text.includes("wi-fi")) && "WiFi",
     (text.includes("overnight") ||
       text.includes("rooms") ||
       text.includes("accommodation")) &&
-    "Overnight",
+      "Overnight",
   ].filter(Boolean) as string[];
   const eventType = [
     "wedding",
@@ -538,9 +539,9 @@ function parseLocalSmartSearch(
   ].find((event) => text.includes(event));
   const indoorOutdoor: IndoorOutdoorValue | undefined =
     text.includes("indoor and outdoor") ||
-      text.includes("indoor/outdoor") ||
-      text.includes("both indoor") ||
-      text.includes("both outdoor")
+    text.includes("indoor/outdoor") ||
+    text.includes("both indoor") ||
+    text.includes("both outdoor")
       ? "both"
       : text.includes("outdoor")
         ? "outdoor"
@@ -578,15 +579,15 @@ function parseLocalSmartSearch(
   const keyword =
     keywordHints.find((hint) => text.includes(hint)) ||
     (!locationHints.province &&
-      !locationHints.city &&
-      !locationHints.municipality &&
-      !eventType &&
-      !minBudget &&
-      !maxBudget &&
-      !capacity &&
-      venueTypes.length === 0 &&
-      !indoorOutdoor &&
-      amenities.length === 0
+    !locationHints.city &&
+    !locationHints.municipality &&
+    !eventType &&
+    !minBudget &&
+    !maxBudget &&
+    !capacity &&
+    venueTypes.length === 0 &&
+    !indoorOutdoor &&
+    amenities.length === 0
       ? query.trim().slice(0, 120)
       : undefined);
 
@@ -604,7 +605,7 @@ function parseLocalSmartSearch(
   venueTypes.forEach(pushSummary);
   pushSummary(
     indoorOutdoor &&
-    indoorOutdoor.charAt(0).toUpperCase() + indoorOutdoor.slice(1),
+      indoorOutdoor.charAt(0).toUpperCase() + indoorOutdoor.slice(1),
   );
   amenities.forEach(pushSummary);
   pushSummary(keyword && `Keyword: ${keyword}`);
@@ -677,8 +678,8 @@ function toSmartSearchFilters(filters: {
     venue_types: venueTypes,
     indoor_outdoor:
       filters.indoorOutdoor === "indoor" ||
-        filters.indoorOutdoor === "outdoor" ||
-        filters.indoorOutdoor === "both"
+      filters.indoorOutdoor === "outdoor" ||
+      filters.indoorOutdoor === "both"
         ? filters.indoorOutdoor
         : undefined,
     parking: filters.amenities.includes("Parking") || undefined,
@@ -807,8 +808,9 @@ const VenueCard = memo(function VenueCard({
         aria-pressed={isFavorited}
       >
         <Heart
-          className={`h-4 w-4 transition ${isFavorited ? "fill-red-500 text-red-500" : ""
-            }`}
+          className={`h-4 w-4 transition ${
+            isFavorited ? "fill-red-500 text-red-500" : ""
+          }`}
         />
       </button>
     </article>

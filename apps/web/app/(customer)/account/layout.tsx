@@ -62,8 +62,6 @@ export default async function AccountLayout({
 
             <div className="flex min-w-0 flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0">
-
-
                 <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl">
                   Account Center
                 </h1>

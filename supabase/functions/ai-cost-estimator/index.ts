@@ -126,8 +126,7 @@ async function requestEstimate(
         },
         {
           role: "user",
-          content:
-            `Venue: ${venueInfo}. Event: ${input.eventType}, ${input.guestCount} guests, ${input.durationHours}h. Catering requested: ${input.includesCatering}. AV requested: ${input.includesAv}.`,
+          content: `Venue: ${venueInfo}. Event: ${input.eventType}, ${input.guestCount} guests, ${input.durationHours}h. Catering requested: ${input.includesCatering}. AV requested: ${input.includesAv}.`,
         },
       ],
       response_format: {
@@ -394,9 +393,8 @@ serve(async (req) => {
         venue: {
           id: venue.id,
           name: venue.name,
-          basePrice: venue.base_price === null
-            ? null
-            : Number(venue.base_price),
+          basePrice:
+            venue.base_price === null ? null : Number(venue.base_price),
         },
       },
       error: null,

@@ -61,7 +61,6 @@ export default function AccountMobileMenu() {
         <DialogTitle className="sr-only">Account menu</DialogTitle>
 
         <div className="border-b border-[#E5E7EB]/80 px-5 py-5">
-
           <h2 className="mt-3 text-xl font-bold tracking-[-0.03em] text-slate-950">
             Account Center
           </h2>

@@ -141,9 +141,7 @@ function Sidebar({
         ))}
       </nav>
 
-      <div className="mt-6 border-t border-[#dbe3ef] pt-4">
-
-      </div>
+      <div className="mt-6 border-t border-[#dbe3ef] pt-4"></div>
     </div>
   );
 }

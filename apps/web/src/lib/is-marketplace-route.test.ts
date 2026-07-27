@@ -11,9 +11,8 @@ describe("isMarketplaceRoute", () => {
     "/bookings",
     "/favorites",
     "/owners/venora-research-venue-network",
-  ])(
-    "recognizes %s as a marketplace subnavigation route",
-    (pathname) => expect(isMarketplaceRoute(pathname)).toBe(true),
+  ])("recognizes %s as a marketplace subnavigation route", (pathname) =>
+    expect(isMarketplaceRoute(pathname)).toBe(true),
   );
 
   it("excludes Account Center from marketplace subnavigation", () => {

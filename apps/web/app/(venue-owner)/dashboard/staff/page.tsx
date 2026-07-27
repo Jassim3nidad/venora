@@ -69,7 +69,9 @@ export default async function StaffPage() {
       name: organization.name,
     }),
   );
-  const managedOrgIds = organizationOptions.map((organization) => organization.id);
+  const managedOrgIds = organizationOptions.map(
+    (organization) => organization.id,
+  );
 
   if (managedOrgIds.length === 0) {
     return (
@@ -104,7 +106,9 @@ export default async function StaffPage() {
       .order("invited_at", { ascending: false }),
     supabase
       .from("organization_member_invitations")
-      .select("id, organization_id, email, status, venue_ids, permissions, expires_at, created_at")
+      .select(
+        "id, organization_id, email, status, venue_ids, permissions, expires_at, created_at",
+      )
       .in("organization_id", managedOrgIds)
       .order("created_at", { ascending: false }),
     supabase
@@ -117,7 +121,6 @@ export default async function StaffPage() {
       .select("organization_id, user_id, venue_id")
       .in("organization_id", managedOrgIds),
   ]);
-
 
   const memberRows = (members ?? []) as MemberRow[];
   const coordinatorRows = memberRows.filter(
@@ -167,7 +170,8 @@ export default async function StaffPage() {
     organizationId: member.organization_id,
     userId: member.user_id,
     name: profileById.get(member.user_id) ?? "Team member",
-    organization: organizationById.get(member.organization_id) ?? "Organization",
+    organization:
+      organizationById.get(member.organization_id) ?? "Organization",
     role: member.role,
     status: member.status ?? "active",
     assignedVenueIds:

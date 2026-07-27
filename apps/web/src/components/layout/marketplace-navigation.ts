@@ -1,4 +1,10 @@
-import { CalendarDays, Heart, Search, Store, type LucideIcon } from "lucide-react";
+import {
+  CalendarDays,
+  Heart,
+  Search,
+  Store,
+  type LucideIcon,
+} from "lucide-react";
 
 export type MarketplaceNavLink = {
   label: string;

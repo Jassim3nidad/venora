@@ -164,7 +164,10 @@ function StatItem({
 }) {
   return (
     <div className="flex min-w-0 items-start gap-3 bg-white p-4">
-      <Icon aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-[#2563EB]" />
+      <Icon
+        aria-hidden="true"
+        className="mt-0.5 h-5 w-5 shrink-0 text-[#2563EB]"
+      />
       <div className="min-w-0">
         <p className="break-words text-base font-bold leading-tight text-slate-950">
           {value}
@@ -229,7 +232,10 @@ function ReviewCard({ review }: { review: PublicOwnerReview }) {
           </div>
         </div>
         <div className="flex items-center gap-1 rounded-md bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">
-          <Star aria-hidden="true" className="h-3.5 w-3.5 fill-amber-400 stroke-amber-400" />
+          <Star
+            aria-hidden="true"
+            className="h-3.5 w-3.5 fill-amber-400 stroke-amber-400"
+          />
           {review.overallRating.toFixed(1)}
         </div>
       </div>
@@ -246,9 +252,7 @@ function ReviewCard({ review }: { review: PublicOwnerReview }) {
 
       {review.ownerReply ? (
         <div className="mt-4 rounded-lg border border-[#DBEAFE] bg-[#EFF6FF] p-4">
-          <p className="text-xs font-bold text-[#2563EB]">
-            Owner response
-          </p>
+          <p className="text-xs font-bold text-[#2563EB]">Owner response</p>
           <p className="mt-2 text-sm font-medium leading-6 text-[#475569]">
             {review.ownerReply}
           </p>
@@ -294,17 +298,16 @@ function OwnerHero({
   const logoSrc = resolveBusinessProfileImageUrl(owner.logoPath);
   const coverSrc = resolveBusinessProfileImageUrl(owner.coverImagePath);
   const hasPublicContact =
-    Boolean(owner.publicEmail) || Boolean(owner.publicPhone) || Boolean(owner.websiteUrl);
+    Boolean(owner.publicEmail) ||
+    Boolean(owner.publicPhone) ||
+    Boolean(owner.websiteUrl);
   const description =
     owner.tagline ||
     owner.shortDescription ||
     "Compare the venues they manage, review each space's details, and explore customer feedback before sending a booking request.";
 
   return (
-    <section
-      aria-labelledby="owner-profile-heading"
-      className="space-y-5"
-    >
+    <section aria-labelledby="owner-profile-heading" className="space-y-5">
       <nav
         aria-label="Breadcrumb"
         className="flex flex-wrap items-center gap-2 text-sm font-semibold text-[#64748B]"
@@ -422,9 +425,7 @@ function OwnerHero({
           </p>
 
           <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-semibold text-[#64748B]">
-            {memberSince ? (
-              <span>On Venora since {memberSince}</span>
-            ) : null}
+            {memberSince ? <span>On Venora since {memberSince}</span> : null}
             {serviceAreas.visibleAreas.length > 0 ? (
               <span className="inline-flex min-w-0 items-center gap-1.5">
                 <MapPin
@@ -465,7 +466,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function OwnerProfilePage({ params, searchParams }: Props) {
+export default async function OwnerProfilePage({
+  params,
+  searchParams,
+}: Props) {
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
   const supabase = (await createClient()) as any;
@@ -483,10 +487,7 @@ export default async function OwnerProfilePage({ params, searchParams }: Props) 
     getPublicOwnerReviews(supabase, owner.slug),
   ]);
 
-  const reviewLabels = getOwnerReviewLabels(
-    owner.reviewCount,
-    owner.avgRating,
-  );
+  const reviewLabels = getOwnerReviewLabels(owner.reviewCount, owner.avgRating);
   const serviceAreas = summarizeServiceAreas(owner.serviceArea);
   const breadcrumbItems = ownerBreadcrumbItems({
     owner,
@@ -502,7 +503,9 @@ export default async function OwnerProfilePage({ params, searchParams }: Props) 
     `${owner.name} currently manages ${owner.venueCount.toLocaleString("en-PH")} published ${owner.venueCount === 1 ? "venue" : "venues"} across ${areaSummary}. Use the listings below to compare locations, capacity, pricing, and customer feedback for each space.`;
   const location = ownerLocation(owner);
   const hasPublicContact =
-    Boolean(owner.publicEmail) || Boolean(owner.publicPhone) || Boolean(owner.websiteUrl);
+    Boolean(owner.publicEmail) ||
+    Boolean(owner.publicPhone) ||
+    Boolean(owner.websiteUrl);
   const isAuthenticated = Boolean(authData?.user);
 
   return (
@@ -591,7 +594,11 @@ export default async function OwnerProfilePage({ params, searchParams }: Props) 
                 aria-hidden="true"
                 className="mt-0.5 h-5 w-5 shrink-0 text-[#2563EB]"
               />
-              <span>{owner.venueCount.toLocaleString("en-PH")} public {owner.venueCount === 1 ? "listing" : "listings"} available to explore</span>
+              <span>
+                {owner.venueCount.toLocaleString("en-PH")} public{" "}
+                {owner.venueCount === 1 ? "listing" : "listings"} available to
+                explore
+              </span>
             </li>
             <li className="flex items-start gap-3">
               <Star
@@ -640,7 +647,10 @@ export default async function OwnerProfilePage({ params, searchParams }: Props) 
                       className="inline-flex max-w-full items-center gap-1 break-all text-[#2563EB] hover:underline"
                     >
                       {owner.websiteUrl}
-                      <ExternalLink aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
+                      <ExternalLink
+                        aria-hidden="true"
+                        className="h-3.5 w-3.5 shrink-0"
+                      />
                     </a>
                   </ProfileSignal>
                 ) : null}
@@ -707,16 +717,13 @@ export default async function OwnerProfilePage({ params, searchParams }: Props) 
           </div>
         ) : (
           <div className="rounded-lg border border-dashed border-[#E5E7EB] bg-[#F8FAFC] px-6 py-8 text-center">
-            <h3 className="text-lg font-bold text-slate-950">
-              No reviews yet
-            </h3>
+            <h3 className="text-lg font-bold text-slate-950">No reviews yet</h3>
             <p className="mt-2 text-sm font-medium text-[#64748B]">
               Published reviews for this owner&apos;s venues will appear here.
             </p>
           </div>
         )}
       </section>
-
     </main>
   );
 }

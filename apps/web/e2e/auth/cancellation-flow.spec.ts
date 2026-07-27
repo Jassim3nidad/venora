@@ -64,7 +64,7 @@ test.describe.serial("Cancellation flow (real customer session)", () => {
       .eq("booking_id", bookingId);
     await service.from("audit_logs").delete().eq("entity_id", bookingId);
     await service.from("bookings").delete().eq("id", bookingId);
-    
+
     // Deleting a booking doesn't revert venue_availability (trigger only fires on UPDATE/INSERT)
     await service
       .from("venue_availability")

@@ -8,7 +8,9 @@ import type {
 export class BusinessProfileRepository {
   constructor(private supabase: SupabaseClient<Database>) {}
 
-  async getDraftByOrganization(organizationId: string): Promise<BusinessProfileDraft | null> {
+  async getDraftByOrganization(
+    organizationId: string,
+  ): Promise<BusinessProfileDraft | null> {
     const { data: profile, error } = await (this.supabase as any)
       .from("business_profiles")
       .select(
@@ -17,7 +19,7 @@ export class BusinessProfileRepository {
         portfolio:business_portfolio_items(*),
         team:business_team_members(*),
         social_links:business_social_links(*),
-        policies:business_profile_policies(*)`
+        policies:business_profile_policies(*)`,
       )
       .eq("organization_id", organizationId)
       .single();
@@ -27,7 +29,9 @@ export class BusinessProfileRepository {
       throw error;
     }
 
-    const { data: ownedVenues, error: venuesError } = await (this.supabase as any)
+    const { data: ownedVenues, error: venuesError } = await (
+      this.supabase as any
+    )
       .from("venues")
       .select("id, name, slug")
       .eq("organization_id", organizationId)
@@ -43,7 +47,9 @@ export class BusinessProfileRepository {
     } as unknown as BusinessProfileDraft;
   }
 
-  async getPublishedProfileBySlug(slug: string): Promise<BusinessProfilePublicView | null> {
+  async getPublishedProfileBySlug(
+    slug: string,
+  ): Promise<BusinessProfilePublicView | null> {
     // Read the business profile to find the current publication ID
     const { data: profile, error: profileError } = await (this.supabase as any)
       .from("business_profiles")
@@ -81,7 +87,7 @@ export class BusinessProfileRepository {
     profileId: string,
     snapshot: any,
     userId: string,
-    versionNumber: number
+    versionNumber: number,
   ): Promise<string> {
     const { data, error } = await (this.supabase as any)
       .from("business_profile_publications")

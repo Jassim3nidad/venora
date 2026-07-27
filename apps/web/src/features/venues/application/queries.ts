@@ -27,16 +27,17 @@ function parseMoney(value: string | undefined): number {
 }
 
 function sanitizeLocationPart(value: string) {
-  return value.replace(/[()",]/g, " ").replace(/\s+/g, " ").trim();
+  return value
+    .replace(/[()",]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 export function parseMarketplaceLocation(value: string) {
   const parts = value.split(",");
   const locality = sanitizeLocationPart(parts[0]?.split("(")[0] ?? "");
   const province =
-    parts.length > 1
-      ? sanitizeLocationPart(parts[parts.length - 1] ?? "")
-      : "";
+    parts.length > 1 ? sanitizeLocationPart(parts[parts.length - 1] ?? "") : "";
 
   return {
     locality,
@@ -50,17 +51,15 @@ export async function searchMarketplaceVenues(
   supabase: any,
   params: VenueSearchParams,
 ) {
-  let query = supabase
-    .from("venues")
-    .select(
-      `
+  let query = supabase.from("venues").select(
+    `
       *,
       venue_images(storage_path, is_featured, display_order),
       venue_category_assignments${params.venueTypes?.length ? "!inner" : ""}(venue_categories${params.venueTypes?.length ? "!inner" : ""}(name, slug)),
       venue_event_types${params.event ? "!inner" : ""}(event_types${params.event ? "!inner" : ""}(name, slug)),
       venue_amenities${params.amenities?.length ? "!inner" : ""}(amenities${params.amenities?.length ? "!inner" : ""}(name))
     `,
-    );
+  );
 
   if (!params.includeUnpublished) {
     query = query.eq("status", "published");

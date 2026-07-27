@@ -347,4 +347,3 @@ These blockers must be separated from coordinator regressions. The unrelated mar
 - A second booking, calendar, supplier inquiry, notification, or audit system
 - New calendar, chart, PDF, messaging, or testing dependencies
 - Production migration application or production-data testing
-

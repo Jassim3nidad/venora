@@ -18,7 +18,13 @@ type BookingPaymentClientUIProps = {
   venueName: string;
   depositAmount: number;
   formattedDeposit: string;
-  status: "payable" | "pending_provider" | "paid" | "failed" | "expired" | "not_payable";
+  status:
+    | "payable"
+    | "pending_provider"
+    | "paid"
+    | "failed"
+    | "expired"
+    | "not_payable";
   providerStatusLabel?: string | undefined;
   providerReference?: string | undefined;
   providerName?: string | undefined;
@@ -50,7 +56,10 @@ export function BookingPaymentClientUI({
       });
 
       if (result.error) {
-        setError(result.error.message || "We couldn't start your payment. Please try again.");
+        setError(
+          result.error.message ||
+            "We couldn't start your payment. Please try again.",
+        );
         return;
       }
 
@@ -59,7 +68,7 @@ export function BookingPaymentClientUI({
         window.location.assign(checkoutUrl);
         return;
       }
-      
+
       setIsDialogOpen(false);
       router.refresh();
     });
@@ -76,9 +85,12 @@ export function BookingPaymentClientUI({
       <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-sm font-bold text-amber-900">Payment processing</h3>
+            <h3 className="text-sm font-bold text-amber-900">
+              Payment processing
+            </h3>
             <p className="mt-1 text-sm text-amber-800">
-              We’re waiting for {providerName || "the provider"} to confirm your payment.
+              We’re waiting for {providerName || "the provider"} to confirm your
+              payment.
             </p>
             {(providerReference || startedAt) && (
               <div className="mt-3 grid gap-1 text-sm text-amber-700/80">
@@ -95,7 +107,11 @@ export function BookingPaymentClientUI({
             disabled={isPending}
             className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-amber-300 bg-amber-100 px-5 text-sm font-bold text-amber-900 transition hover:bg-amber-200 disabled:opacity-50"
           >
-            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            {isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
             Check payment status
           </button>
         </div>
@@ -121,7 +137,10 @@ export function BookingPaymentClientUI({
           {isRetry ? "Try payment again" : `Pay ${formattedDeposit} deposit`}
         </button>
 
-        <Dialog open={isDialogOpen} onOpenChange={(open) => !isPending && setIsDialogOpen(open)}>
+        <Dialog
+          open={isDialogOpen}
+          onOpenChange={(open) => !isPending && setIsDialogOpen(open)}
+        >
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-xl font-bold">
@@ -129,7 +148,11 @@ export function BookingPaymentClientUI({
               </DialogTitle>
               <DialogDescription className="text-base text-slate-600 mt-3 space-y-3">
                 <p>
-                  This deposit is for your booking at <span className="font-semibold text-slate-900">{venueName}</span>.
+                  This deposit is for your booking at{" "}
+                  <span className="font-semibold text-slate-900">
+                    {venueName}
+                  </span>
+                  .
                 </p>
                 <p>You’ll continue to PayMongo to complete the payment.</p>
               </DialogDescription>

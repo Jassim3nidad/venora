@@ -121,7 +121,10 @@ export async function inviteSupplierAsVenuePartner(
     );
 
     if (validVenueIds.length === 0) {
-      return { success: false, error: "None of the selected venues are yours." };
+      return {
+        success: false,
+        error: "None of the selected venues are yours.",
+      };
     }
 
     // Validate supplier exists
@@ -147,11 +150,17 @@ export async function inviteSupplierAsVenuePartner(
 
     const { error } = await supabase
       .from("venue_suppliers")
-      .upsert(rows, { ignoreDuplicates: false, onConflict: "venue_id,supplier_id" });
+      .upsert(rows, {
+        ignoreDuplicates: false,
+        onConflict: "venue_id,supplier_id",
+      });
 
     if (error) {
       console.error("[venue-partnership] upsert error:", error.message);
-      return { success: false, error: "Failed to save partnership. Please try again." };
+      return {
+        success: false,
+        error: "Failed to save partnership. Please try again.",
+      };
     }
 
     revalidatePath("/dashboard/coordinator/suppliers");
@@ -192,19 +201,20 @@ export async function submitPartnershipRequest({
       return { success: false, error: "Unauthorized." };
     }
 
-    const { error } = await supabase
-      .from("venue_suppliers")
-      .insert({
-        venue_id: venueId,
-        supplier_id: supplierId,
-        status: "application_submitted",
-        approved_services: approvedServices,
-        commercial_terms: commercialTerms,
-        requested_by: user.id,
-      });
+    const { error } = await supabase.from("venue_suppliers").insert({
+      venue_id: venueId,
+      supplier_id: supplierId,
+      status: "application_submitted",
+      approved_services: approvedServices,
+      commercial_terms: commercialTerms,
+      requested_by: user.id,
+    });
 
     if (error) {
-      console.error("[venue-partnership] error submitting request:", error.message);
+      console.error(
+        "[venue-partnership] error submitting request:",
+        error.message,
+      );
       return { success: false, error: "Failed to submit request." };
     }
 
@@ -254,33 +264,39 @@ export async function removeSupplierFromVenue(
   }
 }
 
-export async function updatePartnershipStatus(requestId: string, status: "active" | "declined") {
+export async function updatePartnershipStatus(
+  requestId: string,
+  status: "active" | "declined",
+) {
   try {
     const { supabase, user, isAdmin } = await requireVenueOwnerOrAdmin();
-    
+
     // Validate that the request belongs to one of their venues
     const ownerVenueIds = await getOwnerVenueIds(supabase, user.id, isAdmin);
-    
+
     const { data: request } = await supabase
       .from("venue_suppliers")
       .select("venue_id")
       .eq("id", requestId)
       .single();
-      
+
     if (!request || !ownerVenueIds.includes(request.venue_id)) {
       return { success: false, error: "Unauthorized." };
     }
-    
+
     const { error } = await supabase
       .from("venue_suppliers")
       .update({ status })
       .eq("id", requestId);
-      
+
     if (error) {
-      console.error("[venue-partnership] error updating status:", error.message);
+      console.error(
+        "[venue-partnership] error updating status:",
+        error.message,
+      );
       return { success: false, error: "Failed to update request." };
     }
-    
+
     revalidatePath("/dashboard/coordinator/suppliers");
     revalidatePath("/dashboard/coordinator/suppliers/requests");
     return { success: true };

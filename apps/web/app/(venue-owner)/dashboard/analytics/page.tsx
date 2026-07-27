@@ -12,7 +12,10 @@ import {
   TopItemsBarChart,
   DemographicsBarChart,
 } from "@/components/dashboard/enterprise";
-import { formatPeso, getOwnerDashboardContext } from "../_lib/owner-dashboard-data";
+import {
+  formatPeso,
+  getOwnerDashboardContext,
+} from "../_lib/owner-dashboard-data";
 import { getVenueOwnerAnalytics } from "@/features/analytics/application/get-venue-owner-analytics";
 import { AnalyticsHeader } from "@/features/analytics/ui/AnalyticsHeader";
 import { BookingDemandHeatmap } from "@/features/analytics/ui/BookingDemandHeatmap";
@@ -22,10 +25,14 @@ import Link from "next/link";
 import { ArrowRight, AlertTriangle, CheckCircle2 } from "lucide-react";
 
 const BookingsTrendChart = nextDynamic(() =>
-  import("@/features/analytics/ui/BookingsTrendChart").then((m) => m.BookingsTrendChart)
+  import("@/features/analytics/ui/BookingsTrendChart").then(
+    (m) => m.BookingsTrendChart,
+  ),
 );
 const CustomerGrowthChart = nextDynamic(() =>
-  import("@/features/analytics/ui/CustomerGrowthChart").then((m) => m.CustomerGrowthChart)
+  import("@/features/analytics/ui/CustomerGrowthChart").then(
+    (m) => m.CustomerGrowthChart,
+  ),
 );
 
 export const metadata: Metadata = { title: "Analytics - Dashboard" };
@@ -39,10 +46,17 @@ export default async function AnalyticsPage(props: AnalyticsPageProps) {
   const searchParams = await props.searchParams;
   const context = await getOwnerDashboardContext();
   const orgScopedContext = { ...context, isAdmin: false };
-  
-  const venueParam = typeof searchParams.venue === "string" ? searchParams.venue : "all";
-  const periodParam = typeof searchParams.period === "string" ? searchParams.period : "last_12_months";
-  const compareParam = typeof searchParams.compare === "string" ? searchParams.compare : "previous_period";
+
+  const venueParam =
+    typeof searchParams.venue === "string" ? searchParams.venue : "all";
+  const periodParam =
+    typeof searchParams.period === "string"
+      ? searchParams.period
+      : "last_12_months";
+  const compareParam =
+    typeof searchParams.compare === "string"
+      ? searchParams.compare
+      : "previous_period";
 
   const data = await getVenueOwnerAnalytics({
     supabase: context.supabase,
@@ -52,7 +66,7 @@ export default async function AnalyticsPage(props: AnalyticsPageProps) {
     compareParam,
   });
 
-  const { 
+  const {
     venues,
     venueRows,
     range,
@@ -72,22 +86,27 @@ export default async function AnalyticsPage(props: AnalyticsPageProps) {
   const headerVenues = venueRows.map((v: any) => ({ id: v.id, name: v.name }));
 
   const hasVenues = venues.length > 0;
-  
-  const avgBookingValue = kpis.totalAcceptedBookings > 0 
-    ? Math.round(kpis.totalRevenue / kpis.totalAcceptedBookings) 
-    : 0;
 
-  const compareRevenueDiff = kpis.compareKPIs 
-    ? ((kpis.totalRevenue - kpis.compareKPIs.revenue) / Math.max(1, kpis.compareKPIs.revenue)) * 100 
+  const avgBookingValue =
+    kpis.totalAcceptedBookings > 0
+      ? Math.round(kpis.totalRevenue / kpis.totalAcceptedBookings)
+      : 0;
+
+  const compareRevenueDiff = kpis.compareKPIs
+    ? ((kpis.totalRevenue - kpis.compareKPIs.revenue) /
+        Math.max(1, kpis.compareKPIs.revenue)) *
+      100
     : null;
-    
-  const compareBookingsDiff = kpis.compareKPIs 
-    ? ((kpis.totalBookings - kpis.compareKPIs.bookings) / Math.max(1, kpis.compareKPIs.bookings)) * 100 
+
+  const compareBookingsDiff = kpis.compareKPIs
+    ? ((kpis.totalBookings - kpis.compareKPIs.bookings) /
+        Math.max(1, kpis.compareKPIs.bookings)) *
+      100
     : null;
 
   return (
     <DashboardPage className="flex flex-col gap-6">
-      <AnalyticsHeader 
+      <AnalyticsHeader
         venues={headerVenues}
         defaultVenue={venueParam}
         defaultPeriod={periodParam}
@@ -114,14 +133,22 @@ export default async function AnalyticsPage(props: AnalyticsPageProps) {
               label="Booked Value"
               value={formatPeso(kpis.totalRevenue)}
               icon="payments"
-              change={compareRevenueDiff != null ? `${compareRevenueDiff > 0 ? '+' : ''}${compareRevenueDiff.toFixed(1)}% vs prev` : undefined}
+              change={
+                compareRevenueDiff != null
+                  ? `${compareRevenueDiff > 0 ? "+" : ""}${compareRevenueDiff.toFixed(1)}% vs prev`
+                  : undefined
+              }
               highlight
             />
             <KpiCard
               label="Accepted Bookings"
               value={String(kpis.totalAcceptedBookings)}
               icon="event_available"
-              change={compareBookingsDiff != null ? `${compareBookingsDiff > 0 ? '+' : ''}${compareBookingsDiff.toFixed(1)}% vs prev` : undefined}
+              change={
+                compareBookingsDiff != null
+                  ? `${compareBookingsDiff > 0 ? "+" : ""}${compareBookingsDiff.toFixed(1)}% vs prev`
+                  : undefined
+              }
             />
             <KpiCard
               label="Occupancy Rate"
@@ -154,7 +181,11 @@ export default async function AnalyticsPage(props: AnalyticsPageProps) {
             />
             <KpiCard
               label="Average Rating"
-              value={kpis.avgRating != null ? kpis.avgRating.toFixed(1) : "No reviews yet"}
+              value={
+                kpis.avgRating != null
+                  ? kpis.avgRating.toFixed(1)
+                  : "No reviews yet"
+              }
               icon="star"
             />
           </div>
@@ -177,17 +208,25 @@ export default async function AnalyticsPage(props: AnalyticsPageProps) {
                 />
                 <div className="space-y-3">
                   {kpis.pendingRequests > 0 ? (
-                    <Link href="/dashboard/bookings" className="group flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 p-3 hover:bg-amber-100 transition">
+                    <Link
+                      href="/dashboard/bookings"
+                      className="group flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 p-3 hover:bg-amber-100 transition"
+                    >
                       <div className="flex items-center gap-3 text-amber-900">
                         <AlertTriangle className="h-5 w-5 text-amber-600" />
-                        <span className="text-sm font-medium">{kpis.pendingRequests} pending booking {kpis.pendingRequests === 1 ? 'request' : 'requests'}</span>
+                        <span className="text-sm font-medium">
+                          {kpis.pendingRequests} pending booking{" "}
+                          {kpis.pendingRequests === 1 ? "request" : "requests"}
+                        </span>
                       </div>
                       <ArrowRight className="h-4 w-4 text-amber-600 opacity-50 group-hover:opacity-100 transition" />
                     </Link>
                   ) : (
                     <div className="flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-emerald-900">
                       <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                      <span className="text-sm font-medium">You’re all caught up! No urgent issues.</span>
+                      <span className="text-sm font-medium">
+                        You’re all caught up! No urgent issues.
+                      </span>
                     </div>
                   )}
                 </div>
@@ -239,7 +278,7 @@ export default async function AnalyticsPage(props: AnalyticsPageProps) {
               />
               <PopularVenuesTable venues={popularVenues} />
             </Panel>
-            
+
             <Panel>
               <PanelHeader
                 title="Top Packages"
@@ -248,7 +287,7 @@ export default async function AnalyticsPage(props: AnalyticsPageProps) {
               <TopItemsBarChart data={topPackages} />
             </Panel>
           </div>
-          
+
           <div className="grid gap-6">
             <Panel>
               <PanelHeader
@@ -257,13 +296,20 @@ export default async function AnalyticsPage(props: AnalyticsPageProps) {
               />
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="flex flex-col gap-3">
-                  <h3 className="text-sm font-semibold text-[#1e293b]">Event types</h3>
+                  <h3 className="text-sm font-semibold text-[#1e293b]">
+                    Event types
+                  </h3>
                   <DemographicsBarChart
-                    data={(demographics?.eventTypeMix ?? []).map(x => ({ bucket: x.status, count: x.count }))}
+                    data={(demographics?.eventTypeMix ?? []).map((x) => ({
+                      bucket: x.status,
+                      count: x.count,
+                    }))}
                   />
                 </div>
                 <div className="flex flex-col gap-3">
-                  <h3 className="text-sm font-semibold text-[#1e293b]">Guest count</h3>
+                  <h3 className="text-sm font-semibold text-[#1e293b]">
+                    Guest count
+                  </h3>
                   <DemographicsBarChart
                     data={demographics?.guestCountBuckets ?? []}
                   />
@@ -271,7 +317,7 @@ export default async function AnalyticsPage(props: AnalyticsPageProps) {
               </div>
             </Panel>
           </div>
-          
+
           <div className="grid gap-6">
             <Panel>
               <PanelHeader

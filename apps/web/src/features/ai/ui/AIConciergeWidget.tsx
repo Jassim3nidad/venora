@@ -6,7 +6,9 @@ import { Sparkles, MessageSquare, X, Send, Bot } from "lucide-react";
 export function AIConciergeWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Array<{ sender: "user" | "bot"; text: string }>>([
+  const [messages, setMessages] = useState<
+    Array<{ sender: "user" | "bot"; text: string }>
+  >([
     {
       sender: "bot",
       text: "Hello! I am Venora Concierge. How can I help with your event, venue selection, or guest planning today?",
@@ -50,7 +52,9 @@ export function AIConciergeWidget() {
               </div>
               <div>
                 <p className="text-xs font-bold">Venora AI Concierge</p>
-                <p className="text-[10px] text-emerald-400">Online • Advisory Assistant</p>
+                <p className="text-[10px] text-emerald-400">
+                  Online • Advisory Assistant
+                </p>
               </div>
             </div>
             <button

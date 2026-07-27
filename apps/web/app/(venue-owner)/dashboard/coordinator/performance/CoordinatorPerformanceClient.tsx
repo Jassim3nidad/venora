@@ -1,6 +1,10 @@
 "use client";
 
-import { KpiCard, Panel, PanelHeader } from "@/src/components/dashboard/enterprise/ui";
+import {
+  KpiCard,
+  Panel,
+  PanelHeader,
+} from "@/src/components/dashboard/enterprise/ui";
 import { BookingsTrendChart } from "@/src/features/analytics/ui/BookingsTrendChart";
 import { PopularVenuesTable } from "@/src/features/analytics/ui/PopularVenuesTable";
 import type { RevenueTrendPoint } from "@/src/components/dashboard/enterprise";
@@ -35,7 +39,8 @@ export function CoordinatorPerformanceClient({
         </h3>
         <p className="max-w-md text-sm font-semibold text-[#64748b] leading-relaxed">
           You haven't been assigned any venues to manage yet. Once the venue
-          owner assigns venues to you, your performance metrics will appear here.
+          owner assigns venues to you, your performance metrics will appear
+          here.
         </p>
       </div>
     );
@@ -44,7 +49,7 @@ export function CoordinatorPerformanceClient({
   // Calculate some aggregate values for the KPI cards
   const totalBookings = trend.reduce((sum, p) => sum + Number(p.bookings), 0);
   const totalRevenue = trend.reduce((sum, p) => sum + Number(p.revenue), 0);
-  
+
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat("en-PH", {
       style: "currency",

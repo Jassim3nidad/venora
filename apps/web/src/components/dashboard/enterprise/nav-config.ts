@@ -35,7 +35,11 @@ export const NAV_BY_ROLE: Record<EnterpriseRole, NavItem[]> = {
     { label: "Packages", href: "/dashboard/packages", icon: "inventory_2" },
     { label: "Staff", href: "/dashboard/staff", icon: "groups" },
     { label: "Reviews", href: "/dashboard/reviews", icon: "rate_review" },
-    { label: "Business Profile", href: "/dashboard/business-profile", icon: "storefront" },
+    {
+      label: "Business Profile",
+      href: "/dashboard/business-profile",
+      icon: "storefront",
+    },
     { label: "Analytics", href: "/dashboard/analytics", icon: "analytics" },
   ],
   coordinator: [

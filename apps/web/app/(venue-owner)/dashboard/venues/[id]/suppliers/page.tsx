@@ -3,7 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ShieldCheck, Handshake, ExternalLink } from "lucide-react";
 import { createClient } from "@/src/lib/supabase/server";
-import { DashboardSubPage, Panel, PanelHeader } from "@/components/dashboard/enterprise";
+import {
+  DashboardSubPage,
+  Panel,
+  PanelHeader,
+} from "@/components/dashboard/enterprise";
 import { RemoveSupplierButton } from "./RemoveSupplierButton";
 
 export const metadata: Metadata = {
@@ -109,10 +113,12 @@ export default async function VenueSuppliersPage({ params }: Props) {
         {links.length === 0 ? (
           <div className="py-14 text-center">
             <ShieldCheck className="w-10 h-10 mx-auto text-slate-300 mb-3" />
-            <p className="font-semibold text-sm text-slate-700">No suppliers linked yet</p>
+            <p className="font-semibold text-sm text-slate-700">
+              No suppliers linked yet
+            </p>
             <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-              Browse the supplier directory and click &ldquo;Invite as Venue Partner&rdquo; to
-              start building your preferred supplier list.
+              Browse the supplier directory and click &ldquo;Invite as Venue
+              Partner&rdquo; to start building your preferred supplier list.
             </p>
             <Link
               href="/dashboard/coordinator/suppliers"

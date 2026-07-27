@@ -103,7 +103,7 @@ export default function RecommendedVenues({
                   ? "Outdoor"
                   : venue.indoorOutdoor === "indoor"
                     ? "Indoor"
-                    : venue.categories[0] ?? "Event venue";
+                    : (venue.categories[0] ?? "Event venue");
             const capacityLabel = venue.capacityMax
               ? `Up to ${venue.capacityMax.toLocaleString("en-PH")} pax`
               : null;

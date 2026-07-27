@@ -308,7 +308,7 @@ Deno.test(
       }) as any,
       async () => {
         await assertRejects(() =>
-          postChatCompletion(baseConfig(), "key-1", { messages: [] })
+          postChatCompletion(baseConfig(), "key-1", { messages: [] }),
         );
         assertEquals(callCount, 2);
       },
@@ -327,7 +327,7 @@ Deno.test(
       }) as any,
       async () => {
         await assertRejects(() =>
-          postChatCompletion(baseConfig(), "key-1", { messages: [] })
+          postChatCompletion(baseConfig(), "key-1", { messages: [] }),
         );
         assertEquals(callCount, 1);
       },

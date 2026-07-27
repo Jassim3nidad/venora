@@ -6,7 +6,9 @@ export type CompletenessResult = {
   isEligibleForPublish: boolean;
 };
 
-export function calculateProfileCompleteness(draft: BusinessProfileDraft): CompletenessResult {
+export function calculateProfileCompleteness(
+  draft: BusinessProfileDraft,
+): CompletenessResult {
   let percentage = 0;
   const missingItems: string[] = [];
   const missingPublishBlockers: string[] = [];
@@ -68,11 +70,14 @@ export function calculateProfileCompleteness(draft: BusinessProfileDraft): Compl
 
   // At least one visible published venue: 15%
   const hasConnectedVisibleVenue =
-    draft.venues && draft.venues.length > 0 && draft.venues.some(v => v.is_visible);
+    draft.venues &&
+    draft.venues.length > 0 &&
+    draft.venues.some((v) => v.is_visible);
   const hasPublishedOwnedVenue =
-    draft.published_venues &&
-    draft.published_venues.length > 0;
-  const hasVisibleVenue = Boolean(hasConnectedVisibleVenue || hasPublishedOwnedVenue);
+    draft.published_venues && draft.published_venues.length > 0;
+  const hasVisibleVenue = Boolean(
+    hasConnectedVisibleVenue || hasPublishedOwnedVenue,
+  );
   if (hasVisibleVenue) {
     percentage += 15;
   } else {
@@ -81,7 +86,10 @@ export function calculateProfileCompleteness(draft: BusinessProfileDraft): Compl
   }
 
   // At least one visible portfolio item: 10%
-  const hasPortfolioItem = draft.portfolio && draft.portfolio.length > 0 && draft.portfolio.some(p => p.is_visible);
+  const hasPortfolioItem =
+    draft.portfolio &&
+    draft.portfolio.length > 0 &&
+    draft.portfolio.some((p) => p.is_visible);
   if (hasPortfolioItem) {
     percentage += 10;
   } else {
@@ -93,7 +101,9 @@ export function calculateProfileCompleteness(draft: BusinessProfileDraft): Compl
     draft.website_url ||
     (draft.public_email && draft.email_visibility) ||
     (draft.public_phone && draft.phone_visibility) ||
-    (draft.social_links && draft.social_links.length > 0 && draft.social_links.some(s => s.is_visible))
+    (draft.social_links &&
+      draft.social_links.length > 0 &&
+      draft.social_links.some((s) => s.is_visible))
   );
   if (hasContact) {
     percentage += 5;

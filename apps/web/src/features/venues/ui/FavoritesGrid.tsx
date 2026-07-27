@@ -166,7 +166,9 @@ export default function FavoritesGrid({ initialVenues }: FavoritesGridProps) {
                     <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#6B7280]">
                       Starts at
                     </p>
-                    <p className="text-lg font-bold text-slate-950">{venue.price}</p>
+                    <p className="text-lg font-bold text-slate-950">
+                      {venue.price}
+                    </p>
                   </div>
 
                   <span className="inline-flex h-11 w-full items-center justify-center rounded-2xl bg-[#2563EB] px-4 text-center text-xs font-bold uppercase tracking-[0.08em] text-white shadow-sm shadow-[#2563EB]/20 transition group-hover:bg-[#1D4ED8]">

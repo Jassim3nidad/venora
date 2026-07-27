@@ -3,7 +3,14 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, Image as ImageIcon, MapPin, Scale, Star, Users } from "lucide-react";
+import {
+  Heart,
+  Image as ImageIcon,
+  MapPin,
+  Scale,
+  Star,
+  Users,
+} from "lucide-react";
 import { useAuthRequiredPrompt } from "@/components/layout/AuthRequiredPrompt";
 import { toggleFavoriteAction } from "../application/actions";
 import type { Venue } from "../utils/venue-mappers";
@@ -19,12 +26,13 @@ export default function FeaturedVenueCard({
   venue,
   isAuthenticated,
 }: FeaturedVenueCardProps) {
-  const { openAuthPrompt, authPrompt } = useAuthRequiredPrompt("/", "favorites");
+  const { openAuthPrompt, authPrompt } = useAuthRequiredPrompt(
+    "/",
+    "favorites",
+  );
   const { addVenueId, removeVenueId, isInComparison } = useVenueComparison();
   const isCompared = isInComparison(String(venue.id));
-  const [isFavorited, setIsFavorited] = useState(
-    Boolean(venue.isFavorited),
-  );
+  const [isFavorited, setIsFavorited] = useState(Boolean(venue.isFavorited));
   const [isPending, setIsPending] = useState(false);
   const [favoriteError, setFavoriteError] = useState<string | null>(null);
   const settingLabel =

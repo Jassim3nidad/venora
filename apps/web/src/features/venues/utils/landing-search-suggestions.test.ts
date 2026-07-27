@@ -26,9 +26,9 @@ describe("landing search suggestions", () => {
   });
 
   it("returns all suggestions for an empty query", () => {
-    expect(filterLandingSearchSuggestions(["Wedding", "Corporate"], " ")).toEqual(
-      ["Wedding", "Corporate"],
-    );
+    expect(
+      filterLandingSearchSuggestions(["Wedding", "Corporate"], " "),
+    ).toEqual(["Wedding", "Corporate"]);
   });
 
   it("includes non-featured live venues and replaces stale fallback identities", () => {

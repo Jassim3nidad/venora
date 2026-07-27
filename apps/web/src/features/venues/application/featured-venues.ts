@@ -18,7 +18,10 @@ export function resolveFeaturedMarketplaceVenues(
 
   return fallbackVenues
     .slice(0, FEATURED_VENUE_COUNT)
-    .map((fallbackVenue) =>
-      (fallbackVenue.slug ? liveVenueBySlug.get(fallbackVenue.slug) : undefined) ?? fallbackVenue,
+    .map(
+      (fallbackVenue) =>
+        (fallbackVenue.slug
+          ? liveVenueBySlug.get(fallbackVenue.slug)
+          : undefined) ?? fallbackVenue,
     );
 }

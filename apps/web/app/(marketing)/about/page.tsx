@@ -109,22 +109,26 @@ const journeySteps: JourneyStep[] = [
   },
   {
     title: "Check availability",
-    description: "Plan around venue calendars and booking status with confidence.",
+    description:
+      "Plan around venue calendars and booking status with confidence.",
     icon: CalendarCheck,
   },
   {
     title: "Request",
-    description: "Send structured booking requests with the details venues need.",
+    description:
+      "Send structured booking requests with the details venues need.",
     icon: MessageCircle,
   },
   {
     title: "Coordinate",
-    description: "Connect with venue teams and suppliers as the plan takes shape.",
+    description:
+      "Connect with venue teams and suppliers as the plan takes shape.",
     icon: Handshake,
   },
   {
     title: "Confirm",
-    description: "Track booking status, next steps, and event readiness in one place.",
+    description:
+      "Track booking status, next steps, and event readiness in one place.",
     icon: CheckCircle2,
   },
 ];
@@ -274,9 +278,7 @@ export default function AboutPage() {
           >
             <div className="min-w-0">
               <RevealItem yOffset={8}>
-                <p className="text-sm font-bold text-blue-100">
-                  About Venora
-                </p>
+                <p className="text-sm font-bold text-blue-100">About Venora</p>
               </RevealItem>
               <RevealItem yOffset={12}>
                 <h1 className="mt-4 max-w-2xl text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-[3.4rem]">
@@ -286,9 +288,8 @@ export default function AboutPage() {
               <RevealItem yOffset={12}>
                 <p className="mt-5 max-w-xl text-base font-medium leading-7 text-blue-50 sm:text-lg">
                   Venora brings customers, venue owners, and event suppliers
-                  together in one platform, making it easier to discover
-                  venues, coordinate services, and manage every stage of an
-                  event.
+                  together in one platform, making it easier to discover venues,
+                  coordinate services, and manage every stage of an event.
                 </p>
               </RevealItem>
               <RevealItem yOffset={16}>
@@ -532,10 +533,7 @@ export default function AboutPage() {
                           {index === 0 ? (
                             <Bot className="h-4 w-4" aria-hidden="true" />
                           ) : index === 1 ? (
-                            <Sparkles
-                              className="h-4 w-4"
-                              aria-hidden="true"
-                            />
+                            <Sparkles className="h-4 w-4" aria-hidden="true" />
                           ) : index === 2 ? (
                             <WalletCards
                               className="h-4 w-4"
@@ -562,7 +560,10 @@ export default function AboutPage() {
 
         <section className="bg-white py-14 sm:py-20">
           <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-            <ScrollReveal yOffset={12} className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+            <ScrollReveal
+              yOffset={12}
+              className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center"
+            >
               <SectionHeading
                 eyebrow="Marketplace ecosystem"
                 title="More than a venue directory"

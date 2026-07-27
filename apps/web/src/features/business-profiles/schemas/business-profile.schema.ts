@@ -1,14 +1,25 @@
 import { z } from "zod";
 
-export const businessVisibilityLevelSchema = z.enum(["exact", "city_province", "province", "hidden"]);
+export const businessVisibilityLevelSchema = z.enum([
+  "exact",
+  "city_province",
+  "province",
+  "hidden",
+]);
 
 export const businessIdentitySchema = z.object({
-  display_name: z.string().min(2, "Display name must be at least 2 characters").max(100),
+  display_name: z
+    .string()
+    .min(2, "Display name must be at least 2 characters")
+    .max(100),
   slug: z
     .string()
     .min(3, "Slug must be at least 3 characters")
     .max(80)
-    .regex(/^[a-z0-9-]+$/, "Slug must contain only lowercase letters, numbers, and hyphens"),
+    .regex(
+      /^[a-z0-9-]+$/,
+      "Slug must contain only lowercase letters, numbers, and hyphens",
+    ),
   legal_name: z.string().max(100).nullable().optional(),
   tagline: z.string().max(80).nullable().optional(),
   primary_category: z.string().max(50).nullable().optional(),
@@ -51,7 +62,13 @@ export const businessPortfolioItemSchema = z.object({
   title: z.string().min(2).max(120),
   event_type: z.string().max(50).nullable().optional(),
   description: z.string().max(1000).nullable().optional(),
-  event_year: z.number().int().min(1900).max(new Date().getFullYear()).nullable().optional(),
+  event_year: z
+    .number()
+    .int()
+    .min(1900)
+    .max(new Date().getFullYear())
+    .nullable()
+    .optional(),
   cover_image_path: z.string().nullable().optional(),
   associated_venue_id: z.string().uuid().nullable().optional(),
   is_featured: z.boolean().default(false),
@@ -74,7 +91,10 @@ export const businessTeamMemberSchema = z.object({
 export const businessSocialLinkSchema = z.object({
   id: z.string().uuid().optional(),
   platform: z.string().min(1).max(50),
-  url: z.string().url().regex(/^https?:\/\//),
+  url: z
+    .string()
+    .url()
+    .regex(/^https?:\/\//),
   is_visible: z.boolean().default(true),
   display_order: z.number().int().default(0),
 });

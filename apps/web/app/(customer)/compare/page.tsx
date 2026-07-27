@@ -53,7 +53,8 @@ export default function CompareVenuesPage() {
       const supabase = createClient();
       const { data } = await supabase
         .from("venues")
-        .select(`
+        .select(
+          `
           id,
           name,
           slug,
@@ -68,7 +69,8 @@ export default function CompareVenuesPage() {
           cover_image,
           is_accredited,
           status
-        `)
+        `,
+        )
         .in("id", venueIds)
         .eq("status", "published");
 
@@ -89,7 +91,9 @@ export default function CompareVenuesPage() {
           No venues selected for comparison
         </h1>
         <p className="text-slate-600 max-w-md mb-6 text-sm">
-          Browse our curated venue marketplace and click &quot;Compare&quot; on up to 4 venues to evaluate features, capacity, pricing, and policies side-by-side.
+          Browse our curated venue marketplace and click &quot;Compare&quot; on
+          up to 4 venues to evaluate features, capacity, pricing, and policies
+          side-by-side.
         </p>
         <Link
           href="/venues"
@@ -183,19 +187,25 @@ export default function CompareVenuesPage() {
                       </h3>
                       <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
                         <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        {[v.city, v.province].filter(Boolean).join(", ") || "Location unavailable"}
+                        {[v.city, v.province].filter(Boolean).join(", ") ||
+                          "Location unavailable"}
                       </p>
                     </div>
                   </th>
                 ))}
                 {Array.from({ length: 4 - venues.length }).map((_, idx) => (
-                  <th key={idx} className="p-4 w-64 min-w-[240px] bg-slate-50/30 border-l border-slate-100">
+                  <th
+                    key={idx}
+                    className="p-4 w-64 min-w-[240px] bg-slate-50/30 border-l border-slate-100"
+                  >
                     <Link
                       href="/venues"
                       className="h-48 rounded-xl border-2 border-dashed border-slate-200 hover:border-rose-400 bg-slate-50/50 hover:bg-rose-50/20 flex flex-col items-center justify-center gap-2 text-slate-400 hover:text-rose-600 transition group"
                     >
                       <Plus className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                      <span className="text-xs font-semibold">Select Venue</span>
+                      <span className="text-xs font-semibold">
+                        Select Venue
+                      </span>
                     </Link>
                   </th>
                 ))}
@@ -204,19 +214,23 @@ export default function CompareVenuesPage() {
             <tbody className="divide-y divide-slate-100 text-sm">
               {/* Price */}
               <tr>
-                <td className="p-4 font-semibold text-slate-700 bg-slate-50/50">Base Price</td>
+                <td className="p-4 font-semibold text-slate-700 bg-slate-50/50">
+                  Base Price
+                </td>
                 {venues.map((v: PublicVenueComparison) => (
                   <td key={v.id} className="p-4 font-bold text-slate-900">
                     {v.base_price != null ? (
                       <div className="flex items-center gap-1 text-rose-600">
-                        <DollarSign className="w-4 h-4 text-rose-500" />
-                        ₱{v.base_price.toLocaleString()}{" "}
+                        <DollarSign className="w-4 h-4 text-rose-500" />₱
+                        {v.base_price.toLocaleString()}{" "}
                         <span className="text-xs text-slate-500 font-normal">
                           / {v.price_unit || "event"}
                         </span>
                       </div>
                     ) : (
-                      <span className="text-slate-400 italic">Price on inquiry</span>
+                      <span className="text-slate-400 italic">
+                        Price on inquiry
+                      </span>
                     )}
                   </td>
                 ))}
@@ -224,7 +238,9 @@ export default function CompareVenuesPage() {
 
               {/* Capacity */}
               <tr>
-                <td className="p-4 font-semibold text-slate-700 bg-slate-50/50">Capacity</td>
+                <td className="p-4 font-semibold text-slate-700 bg-slate-50/50">
+                  Capacity
+                </td>
                 {venues.map((v: PublicVenueComparison) => (
                   <td key={v.id} className="p-4 text-slate-800">
                     {v.capacity_max != null ? (
@@ -233,7 +249,9 @@ export default function CompareVenuesPage() {
                         Up to {v.capacity_max.toLocaleString()} guests
                       </div>
                     ) : (
-                      <span className="text-slate-400 italic">Not specified</span>
+                      <span className="text-slate-400 italic">
+                        Not specified
+                      </span>
                     )}
                   </td>
                 ))}
@@ -241,7 +259,9 @@ export default function CompareVenuesPage() {
 
               {/* Venue Type */}
               <tr>
-                <td className="p-4 font-semibold text-slate-700 bg-slate-50/50">Venue Type</td>
+                <td className="p-4 font-semibold text-slate-700 bg-slate-50/50">
+                  Venue Type
+                </td>
                 {venues.map((v: PublicVenueComparison) => (
                   <td key={v.id} className="p-4 text-slate-800">
                     <span className="capitalize px-2.5 py-1 rounded-md bg-slate-100 font-medium text-xs text-slate-700">
@@ -253,7 +273,9 @@ export default function CompareVenuesPage() {
 
               {/* Rating */}
               <tr>
-                <td className="p-4 font-semibold text-slate-700 bg-slate-50/50">Rating</td>
+                <td className="p-4 font-semibold text-slate-700 bg-slate-50/50">
+                  Rating
+                </td>
                 {venues.map((v: PublicVenueComparison) => (
                   <td key={v.id} className="p-4 text-slate-800">
                     <div className="flex items-center gap-1">
@@ -273,7 +295,9 @@ export default function CompareVenuesPage() {
 
               {/* Accreditation */}
               <tr>
-                <td className="p-4 font-semibold text-slate-700 bg-slate-50/50">Accreditation</td>
+                <td className="p-4 font-semibold text-slate-700 bg-slate-50/50">
+                  Accreditation
+                </td>
                 {venues.map((v: PublicVenueComparison) => (
                   <td key={v.id} className="p-4 text-slate-800">
                     {v.is_accredited ? (

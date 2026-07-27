@@ -25,7 +25,8 @@ export function BusinessProfileView({
     <main className="mx-auto min-w-0 max-w-7xl space-y-10 px-4 pb-20 pt-6 font-sans sm:px-6 sm:pt-8 lg:px-8">
       {isPreview && (
         <div className="bg-amber-100 text-amber-900 px-4 py-2 rounded-md font-medium text-sm mb-4">
-          Preview Mode: This is how your public profile will appear to customers.
+          Preview Mode: This is how your public profile will appear to
+          customers.
         </div>
       )}
 
@@ -43,7 +44,7 @@ export function BusinessProfileView({
           <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-slate-900" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 to-transparent" />
-        
+
         <div className="absolute bottom-0 left-0 w-full p-6 sm:p-10">
           <div className="flex items-end gap-6">
             <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl border-4 border-slate-950 bg-white sm:h-32 sm:w-32">
@@ -61,7 +62,7 @@ export function BusinessProfileView({
                 </div>
               )}
             </div>
-            
+
             <div className="mb-2 flex-1">
               <div className="flex items-center gap-3">
                 <h1 className="text-3xl font-black text-white sm:text-5xl">
@@ -97,14 +98,21 @@ export function BusinessProfileView({
 
           {/* Venues Section */}
           <section>
-            <h2 className="text-2xl font-bold text-slate-900 mb-4">Our Venues</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mb-4">
+              Our Venues
+            </h2>
             {profile.venues.length > 0 ? (
               <div className="grid gap-6 sm:grid-cols-2">
                 {profile.venues.map((v) => (
-                  <div key={v.id} className="rounded-xl border border-slate-200 p-4">
+                  <div
+                    key={v.id}
+                    className="rounded-xl border border-slate-200 p-4"
+                  >
                     <div className="flex items-center gap-3">
                       <Building2 className="h-5 w-5 text-blue-600" />
-                      <span className="font-semibold text-slate-900">Venue {v.venue_id}</span>
+                      <span className="font-semibold text-slate-900">
+                        Venue {v.venue_id}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -120,13 +128,15 @@ export function BusinessProfileView({
         {/* Sidebar */}
         <div className="space-y-6">
           <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <h3 className="font-bold text-slate-900 mb-4">Business Information</h3>
+            <h3 className="font-bold text-slate-900 mb-4">
+              Business Information
+            </h3>
             <ul className="space-y-4 text-sm text-slate-600">
               {(profile.city || profile.province) && (
                 <li className="flex items-start gap-3">
                   <MapPin className="h-5 w-5 shrink-0 text-slate-400" />
                   <span>
-                    {profile.city && profile.province 
+                    {profile.city && profile.province
                       ? `${profile.city}, ${profile.province}`
                       : profile.city || profile.province}
                   </span>
@@ -135,7 +145,12 @@ export function BusinessProfileView({
               {profile.websiteUrl && (
                 <li className="flex items-start gap-3">
                   <Globe className="h-5 w-5 shrink-0 text-slate-400" />
-                  <a href={profile.websiteUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline break-all">
+                  <a
+                    href={profile.websiteUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-blue-600 hover:underline break-all"
+                  >
                     {profile.websiteUrl}
                   </a>
                 </li>
@@ -143,7 +158,10 @@ export function BusinessProfileView({
               {profile.publicEmail && (
                 <li className="flex items-start gap-3">
                   <Mail className="h-5 w-5 shrink-0 text-slate-400" />
-                  <a href={`mailto:${profile.publicEmail}`} className="text-blue-600 hover:underline break-all">
+                  <a
+                    href={`mailto:${profile.publicEmail}`}
+                    className="text-blue-600 hover:underline break-all"
+                  >
                     {profile.publicEmail}
                   </a>
                 </li>
@@ -151,7 +169,10 @@ export function BusinessProfileView({
               {profile.publicPhone && (
                 <li className="flex items-start gap-3">
                   <Phone className="h-5 w-5 shrink-0 text-slate-400" />
-                  <a href={`tel:${profile.publicPhone}`} className="text-blue-600 hover:underline">
+                  <a
+                    href={`tel:${profile.publicPhone}`}
+                    className="text-blue-600 hover:underline"
+                  >
                     {profile.publicPhone}
                   </a>
                 </li>
