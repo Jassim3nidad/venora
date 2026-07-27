@@ -22,11 +22,6 @@ const PROVIDER_DETAILS: Record<
     methods: ["Cards", "GCash", "GrabPay"],
     note: "Methods are selected on PayMongo's hosted checkout page.",
   },
-  maya: {
-    name: "Maya",
-    methods: ["Maya wallet", "Cards"],
-    note: "Not enabled unless a Maya gateway is registered.",
-  },
   stripe: {
     name: "Stripe",
     methods: ["Cards"],

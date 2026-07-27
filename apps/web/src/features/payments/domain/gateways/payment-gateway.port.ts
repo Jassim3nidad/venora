@@ -3,7 +3,7 @@ import type { PaymentProviderId } from "../../types/payment.types";
 /**
  * PaymentGateway port — the provider abstraction boundary.
  *
- * Every payment provider (PayMongo today; Maya and Stripe later) implements
+ * Every payment provider (PayMongo today; Stripe later) implements
  * this interface. Application code (use-cases, API routes) depends only on
  * this contract and resolves concrete gateways through the registry, so a
  * new provider is added by:

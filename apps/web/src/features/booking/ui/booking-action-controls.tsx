@@ -48,7 +48,6 @@ export function CustomerCancelBookingButton({
 
 const PROVIDER_LABELS: Record<string, string> = {
   paymongo: "PayMongo — Cards, GCash, GrabPay",
-  maya: "Maya",
   stripe: "Stripe",
 };
 
@@ -59,10 +58,10 @@ export function StartPaymentForm({
 }: {
   bookingId: string;
   compact?: boolean;
-  providers?: Array<"paymongo" | "maya" | "stripe">;
+  providers?: Array<"paymongo" | "stripe">;
 }) {
   const router = useRouter();
-  const [provider, setProvider] = useState<"paymongo" | "maya" | "stripe">(
+  const [provider, setProvider] = useState<"paymongo" | "stripe">(
     providers[0] ?? "paymongo",
   );
   const [isPending, startTransition] = useTransition();
@@ -76,7 +75,7 @@ export function StartPaymentForm({
           <select
             value={provider}
             onChange={(event) =>
-              setProvider(event.target.value as "paymongo" | "maya" | "stripe")
+              setProvider(event.target.value as "paymongo" | "stripe")
             }
             className="h-12 rounded-2xl border border-[#E5E7EB] bg-white px-4 text-sm font-semibold outline-none focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10"
           >

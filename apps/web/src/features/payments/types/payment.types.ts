@@ -3,7 +3,7 @@
  * (migration 038_payments_platform.sql).
  */
 
-export const PAYMENT_PROVIDERS = ["paymongo", "maya", "stripe"] as const;
+export const PAYMENT_PROVIDERS = ["paymongo", "stripe"] as const;
 export type PaymentProviderId = (typeof PAYMENT_PROVIDERS)[number];
 
 export type TransactionStatus =
