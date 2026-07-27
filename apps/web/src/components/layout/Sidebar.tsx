@@ -21,11 +21,7 @@ import {
 type FilterUpdate = Record<string, string | number | null | undefined>;
 
 type AccordionId =
-  | "location"
-  | "event"
-  | "budgetCapacity"
-  | "venueType"
-  | "amenities";
+  "location" | "event" | "budgetCapacity" | "venueType" | "amenities";
 
 interface VenueFilterSource {
   id: string | number;
@@ -264,9 +260,9 @@ function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * (Math.PI / 180)) *
-    Math.cos(lat2 * (Math.PI / 180)) *
-    Math.sin(dLon / 2) *
-    Math.sin(dLon / 2);
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
 
   return radius * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
 }
@@ -356,10 +352,11 @@ export default function Sidebar({
   const maxBudgetValue = Number(selectedMaxBudget) || 0;
   const activeBudgetLabel =
     minBudgetValue || maxBudgetValue
-      ? `${minBudgetValue ? `₱${minBudgetValue.toLocaleString("en-PH")}` : "Any"} - ${maxBudgetValue
-        ? `₱${maxBudgetValue.toLocaleString("en-PH")}`
-        : "No limit"
-      }`
+      ? `${minBudgetValue ? `₱${minBudgetValue.toLocaleString("en-PH")}` : "Any"} - ${
+          maxBudgetValue
+            ? `₱${maxBudgetValue.toLocaleString("en-PH")}`
+            : "No limit"
+        }`
       : "Any budget";
 
   const updateFilters = (updates: FilterUpdate) => {
@@ -559,7 +556,7 @@ export default function Sidebar({
       : null,
     selectedIndoorOutdoor
       ? indoorOutdoorModes.find((mode) => mode.value === selectedIndoorOutdoor)
-        ?.label
+          ?.label
       : null,
   ]
     .filter(Boolean)

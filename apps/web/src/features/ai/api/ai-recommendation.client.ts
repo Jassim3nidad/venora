@@ -72,7 +72,10 @@ export async function fetchVenueRecommendations(): Promise<AIRecommendationRespo
 
     const imageMap = new Map<string, string>();
     if (images) {
-      for (const img of images as Array<{ venue_id: string; storage_path: string }>) {
+      for (const img of images as Array<{
+        venue_id: string;
+        storage_path: string;
+      }>) {
         if (!imageMap.has(img.venue_id)) {
           imageMap.set(img.venue_id, img.storage_path);
         }

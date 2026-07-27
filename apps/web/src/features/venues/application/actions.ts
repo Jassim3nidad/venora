@@ -102,7 +102,7 @@ export async function loadMoreVenuesAction(rawInput: unknown) {
       if (error) throw error;
 
       const researchVenueBySlug = new Map(
-        researchVenues.filter(v => v.slug).map((v) => [v.slug, v])
+        researchVenues.filter((v) => v.slug).map((v) => [v.slug, v]),
       );
       const dbRows = (dbVenues ?? []) as any[];
 

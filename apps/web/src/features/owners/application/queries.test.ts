@@ -16,7 +16,8 @@ describe("normalizeProfile", () => {
       display_name: "Sai's Eventplace",
       tagline: "Reliable spaces for milestone celebrations.",
       short_description: "A trusted venue group in Cavite.",
-      about: "We manage event venues for weddings, debuts, and corporate gatherings.",
+      about:
+        "We manage event venues for weddings, debuts, and corporate gatherings.",
       year_established: 2025,
       logo_path: "https://example.com/logo.png",
       cover_image_path: "https://example.com/cover.jpg",
@@ -35,7 +36,8 @@ describe("normalizeProfile", () => {
       organizationName: "Venora Research Venue Network",
       tagline: "Reliable spaces for milestone celebrations.",
       shortDescription: "A trusted venue group in Cavite.",
-      about: "We manage event venues for weddings, debuts, and corporate gatherings.",
+      about:
+        "We manage event venues for weddings, debuts, and corporate gatherings.",
       yearEstablished: 2025,
       logoPath: "https://example.com/logo.png",
       coverImagePath: "https://example.com/cover.jpg",

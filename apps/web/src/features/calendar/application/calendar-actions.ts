@@ -4,7 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import type {
   UpdateAvailabilityInput,
-  MoveBookingInput} from "../schemas/calendar.schema";
+  MoveBookingInput,
+} from "../schemas/calendar.schema";
 import {
   updateAvailabilitySchema,
   moveBookingSchema,

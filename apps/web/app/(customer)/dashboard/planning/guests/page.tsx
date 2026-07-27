@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { createClient } from "@/src/lib/supabase/server";
-import { DashboardSubPage, Panel, PanelHeader } from "@/components/dashboard/enterprise";
+import {
+  DashboardSubPage,
+  Panel,
+  PanelHeader,
+} from "@/components/dashboard/enterprise";
 import { Users, Mail, UserCheck, UserX, Clock, Plus } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -9,7 +13,9 @@ export const metadata: Metadata = {
 
 export default async function GuestManagementPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const { data: guests } = user
     ? await supabase
@@ -19,9 +25,15 @@ export default async function GuestManagementPage() {
         .order("created_at", { ascending: false })
     : { data: [] };
 
-  const attending = (guests || []).filter((g: any) => g.rsvp_status === "attending").length;
-  const declined = (guests || []).filter((g: any) => g.rsvp_status === "declined").length;
-  const pending = (guests || []).filter((g: any) => g.rsvp_status === "pending").length;
+  const attending = (guests || []).filter(
+    (g: any) => g.rsvp_status === "attending",
+  ).length;
+  const declined = (guests || []).filter(
+    (g: any) => g.rsvp_status === "declined",
+  ).length;
+  const pending = (guests || []).filter(
+    (g: any) => g.rsvp_status === "pending",
+  ).length;
 
   return (
     <DashboardSubPage
@@ -35,7 +47,9 @@ export default async function GuestManagementPage() {
           </div>
           <div>
             <p className="text-xs text-slate-500 font-medium">Total Guests</p>
-            <p className="text-lg font-bold text-slate-900">{(guests || []).length}</p>
+            <p className="text-lg font-bold text-slate-900">
+              {(guests || []).length}
+            </p>
           </div>
         </div>
 
@@ -75,21 +89,32 @@ export default async function GuestManagementPage() {
           title="Guest List"
           description="Keep track of guest groups and special requirements for seating and catering."
         />
-        {(!guests || guests.length === 0) ? (
+        {!guests || guests.length === 0 ? (
           <div className="py-12 text-center text-slate-500">
             <Users className="w-10 h-10 mx-auto text-slate-300 mb-2" />
-            <p className="font-semibold text-sm text-slate-700">No guests added to list yet</p>
+            <p className="font-semibold text-sm text-slate-700">
+              No guests added to list yet
+            </p>
             <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-              Add guests to send digital RSVP invitations and collect dietary preferences.
+              Add guests to send digital RSVP invitations and collect dietary
+              preferences.
             </p>
           </div>
         ) : (
           <div className="divide-y divide-slate-100">
             {guests.map((g: any) => (
-              <div key={g.id} className="py-3 flex items-center justify-between">
+              <div
+                key={g.id}
+                className="py-3 flex items-center justify-between"
+              >
                 <div>
-                  <p className="font-semibold text-sm text-slate-900">{g.first_name} {g.last_name}</p>
-                  <p className="text-xs text-slate-500">{g.email || "No email"} • Group: {g.guest_group || "General"}</p>
+                  <p className="font-semibold text-sm text-slate-900">
+                    {g.first_name} {g.last_name}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    {g.email || "No email"} • Group:{" "}
+                    {g.guest_group || "General"}
+                  </p>
                 </div>
                 <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 capitalize">
                   {g.rsvp_status}

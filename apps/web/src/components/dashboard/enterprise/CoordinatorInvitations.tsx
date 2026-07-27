@@ -26,15 +26,16 @@ export function CoordinatorInvitations({
   const handleRespond = (invitationId: string, accept: boolean) => {
     startTransition(async () => {
       try {
-        const result = await respondToInvitationAction({ invitationId, accept });
+        const result = await respondToInvitationAction({
+          invitationId,
+          accept,
+        });
         if (result.error) {
           toast.error(result.error.message);
           return;
         }
 
-        toast.success(
-          accept ? "Invitation accepted!" : "Invitation declined.",
-        );
+        toast.success(accept ? "Invitation accepted!" : "Invitation declined.");
         router.refresh();
       } catch (error) {
         toast.error("Failed to respond to the invitation. Please try again.");

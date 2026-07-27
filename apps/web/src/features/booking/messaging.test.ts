@@ -7,16 +7,33 @@ export interface BookingMessage {
   content: string;
 }
 
-export function filterCustomerMessages(messages: BookingMessage[]): BookingMessage[] {
+export function filterCustomerMessages(
+  messages: BookingMessage[],
+): BookingMessage[] {
   return messages.filter((msg) => !msg.is_internal_note);
 }
 
 describe("Booking Communication & Internal Note Isolation", () => {
   it("should exclude internal organization notes from customer-facing queries", () => {
     const rawMessages: BookingMessage[] = [
-      { id: "m1", sender_id: "u1", is_internal_note: false, content: "Hello venue!" },
-      { id: "m2", sender_id: "staff1", is_internal_note: true, content: "Internal Note: Customer requested 50% discount." },
-      { id: "m3", sender_id: "staff1", is_internal_note: false, content: "We can accommodate your request." },
+      {
+        id: "m1",
+        sender_id: "u1",
+        is_internal_note: false,
+        content: "Hello venue!",
+      },
+      {
+        id: "m2",
+        sender_id: "staff1",
+        is_internal_note: true,
+        content: "Internal Note: Customer requested 50% discount.",
+      },
+      {
+        id: "m3",
+        sender_id: "staff1",
+        is_internal_note: false,
+        content: "We can accommodate your request.",
+      },
     ];
 
     const customerVisible = filterCustomerMessages(rawMessages);

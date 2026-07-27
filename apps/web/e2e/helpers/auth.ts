@@ -93,10 +93,11 @@ export async function loginAs(page: Page, role: Role): Promise<void> {
       });
       return; // success
     } catch {
-      if (attempt === maxAttempts) throw new Error(
-        `loginAs("${role}") failed after ${maxAttempts} attempts (last email: ${email}). ` +
-        `Page stayed on /login — likely Supabase auth rate-limit or credential mismatch.`,
-      );
+      if (attempt === maxAttempts)
+        throw new Error(
+          `loginAs("${role}") failed after ${maxAttempts} attempts (last email: ${email}). ` +
+            `Page stayed on /login — likely Supabase auth rate-limit or credential mismatch.`,
+        );
       // Jittered backoff before retry (absorbs free-tier rate-limit bursts)
       const delay = 2000 * attempt + Math.random() * 1000;
       await page.waitForTimeout(delay);

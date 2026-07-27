@@ -403,7 +403,8 @@ export function getFallbackResearchVenueRecommendations(
       categories: getResearchVenueCategories(venue),
       amenities: venue.amenities,
       eventTypes: venue.event_types_supported,
-      image: venue.photos.cover_image_url ?? venue.photos.image_urls?.[0] ?? null,
+      image:
+        venue.photos.cover_image_url ?? venue.photos.image_urls?.[0] ?? null,
     }));
 }
 

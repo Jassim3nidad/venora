@@ -15,17 +15,15 @@ function FilterRailSkeleton() {
       </div>
 
       <div className="min-h-0 flex-1 overflow-hidden px-4 py-4">
-        {["Search", "Category", "Location", "Budget", "Rating"].map(
-          (label) => (
-            <section key={label} className="mb-4">
-              <div className="mb-3.5 flex items-center gap-2">
-                <SkeletonBlock className="h-4 w-4 bg-slate-200" />
-                <SkeletonBlock className="h-3 w-20 bg-slate-200" />
-              </div>
-              <SkeletonBlock className="h-12 w-full rounded-2xl bg-white" />
-            </section>
-          ),
-        )}
+        {["Search", "Category", "Location", "Budget", "Rating"].map((label) => (
+          <section key={label} className="mb-4">
+            <div className="mb-3.5 flex items-center gap-2">
+              <SkeletonBlock className="h-4 w-4 bg-slate-200" />
+              <SkeletonBlock className="h-3 w-20 bg-slate-200" />
+            </div>
+            <SkeletonBlock className="h-12 w-full rounded-2xl bg-white" />
+          </section>
+        ))}
       </div>
 
       <div className="sticky bottom-0 shrink-0 border-t border-[#E5E7EB] bg-white/95 px-4 py-3">

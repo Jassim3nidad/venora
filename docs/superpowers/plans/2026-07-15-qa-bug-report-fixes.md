@@ -51,6 +51,7 @@
 ### Task 1: Navigation Contract And Account Scoping
 
 **Files:**
+
 - Create: `apps/web/src/components/layout/marketplace-navigation.ts`
 - Create: `apps/web/src/components/layout/marketplace-navigation.test.ts`
 - Create: `apps/web/src/lib/is-marketplace-route.test.ts`
@@ -59,6 +60,7 @@
 - Modify: `apps/web/src/components/layout/CustomerNavbar.tsx`
 
 **Interfaces:**
+
 - Produces: `MARKETPLACE_NAV_LINKS`, `isMarketplaceParentActive(pathname)`, `isMarketplaceNavItemActive(pathname, href)`, and `resolveMarketplaceNavHref(href, isAuthenticated)`.
 - Consumed by: `MarketingNavbar`, `CustomerNavbar`, and Task 2 shell routing.
 
@@ -140,6 +142,7 @@ git commit -m "fix(web): correct marketplace navigation"
 ### Task 2: Document Scrolling, Footer, And Sticky Sidebars
 
 **Files:**
+
 - Modify: `apps/web/src/components/layout/MarketplaceLayout.tsx`
 - Modify: `apps/web/app/(customer)/venues/page.tsx`
 - Modify: `apps/web/src/features/venues/ui/VenuesClient.tsx`
@@ -147,6 +150,7 @@ git commit -m "fix(web): correct marketplace navigation"
 - Create: `apps/web/e2e/qa/marketplace-qa.spec.ts`
 
 **Interfaces:**
+
 - Consumes: Task 1 marketplace route helpers.
 - Produces: one document scrollbar, route-scoped secondary navigation, a normal-flow footer, and sticky desktop filter columns.
 
@@ -155,16 +159,21 @@ git commit -m "fix(web): correct marketplace navigation"
 ```ts
 import { expect, test } from "@playwright/test";
 
-test("marketplace uses document scrolling and renders a normal-flow footer", async ({ page }) => {
+test("marketplace uses document scrolling and renders a normal-flow footer", async ({
+  page,
+}) => {
   await page.goto("/venues");
-  await expect(page.getByRole("link", { name: "Browse", exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Browse", exact: true }),
+  ).toBeVisible();
   await expect(page.getByRole("contentinfo")).toBeVisible();
 
   const scrollContract = await page.evaluate(() => {
     const shell = document.querySelector('[data-testid="marketplace-shell"]');
-    const main = shell?.querySelector(':scope > main');
+    const main = shell?.querySelector(":scope > main");
     return {
-      documentOwnsScroll: document.scrollingElement === document.documentElement,
+      documentOwnsScroll:
+        document.scrollingElement === document.documentElement,
       shellOverflowY: shell ? getComputedStyle(shell).overflowY : null,
       mainOverflowY: main ? getComputedStyle(main).overflowY : null,
     };
@@ -195,10 +204,19 @@ Expected: FAIL because the shell is `h-dvh overflow-hidden`, `/account` receives
 Use this structure:
 
 ```tsx
-<div data-testid="marketplace-shell" className="flex min-h-screen flex-col bg-[#F8FAFC] text-[#111827]">
+<div
+  data-testid="marketplace-shell"
+  className="flex min-h-screen flex-col bg-[#F8FAFC] text-[#111827]"
+>
   <div className="sticky top-0 z-50 shrink-0">
     <MarketingNavbar embedded />
-    {showMarketplaceSubnav ? <CustomerNavbar user={user ?? null} profile={profile ?? null} variant="subnav" /> : null}
+    {showMarketplaceSubnav ? (
+      <CustomerNavbar
+        user={user ?? null}
+        profile={profile ?? null}
+        variant="subnav"
+      />
+    ) : null}
   </div>
   <main className="flex min-w-0 flex-1 flex-col">{children}</main>
   {showMarketplaceSubnav ? <SiteFooter /> : null}
@@ -212,7 +230,8 @@ Account Center continues using its own footer. Remove `h-dvh`, shell-level `over
 Replace full-height result containers with ordinary layouts. Desktop asides use:
 
 ```tsx
-className="hidden shrink-0 lg:sticky lg:top-[9.5rem] lg:block lg:max-h-[calc(100dvh-10.5rem)] lg:self-start lg:overflow-hidden"
+className =
+  "hidden shrink-0 lg:sticky lg:top-[9.5rem] lg:block lg:max-h-[calc(100dvh-10.5rem)] lg:self-start lg:overflow-hidden";
 ```
 
 The filter panel may keep its own bounded internal scroll. Results `<main>` must not use `h-full overflow-y-auto`. Remove the viewport-locking wrappers from `venues/page.tsx`.
@@ -233,6 +252,7 @@ git commit -m "fix(web): normalize marketplace scrolling"
 ### Task 3: Featured Venue Identity And Favorite Interaction
 
 **Files:**
+
 - Create: `apps/web/src/features/venues/application/featured-venues.ts`
 - Create: `apps/web/src/features/venues/application/featured-venues.test.ts`
 - Create: `apps/web/src/features/venues/ui/FeaturedVenueCard.tsx`
@@ -240,6 +260,7 @@ git commit -m "fix(web): normalize marketplace scrolling"
 - Modify: `apps/web/e2e/qa/marketplace-qa.spec.ts`
 
 **Interfaces:**
+
 - Produces: `resolveFeaturedMarketplaceVenues(liveVenues, fallbackVenues)` and `FeaturedVenueCard`.
 - Consumes: existing `searchMarketplaceVenues`, `toLiveMarketplaceVenue`, `toggleFavoriteAction`, and research venue records.
 
@@ -256,7 +277,9 @@ it("prefers a published live venue identity over research fallback", () => {
 });
 
 it("uses research data when a live row is missing", () => {
-  expect(resolveFeaturedMarketplaceVenues([], [fallbackVenue])).toEqual([fallbackVenue]);
+  expect(resolveFeaturedMarketplaceVenues([], [fallbackVenue])).toEqual([
+    fallbackVenue,
+  ]);
 });
 ```
 
@@ -302,6 +325,7 @@ git commit -m "fix(web): align featured venue cards"
 ### Task 4: Landing Search Suggestions
 
 **Files:**
+
 - Create: `apps/web/src/features/venues/utils/landing-search-suggestions.ts`
 - Create: `apps/web/src/features/venues/utils/landing-search-suggestions.test.ts`
 - Create: `apps/web/src/features/venues/ui/LandingSegmentedSearch.tsx`
@@ -309,6 +333,7 @@ git commit -m "fix(web): align featured venue cards"
 - Modify: `apps/web/e2e/qa/marketplace-qa.spec.ts`
 
 **Interfaces:**
+
 - Produces: `buildLandingSearchSuggestions(venues)`, `filterLandingSearchSuggestions(options, query)`, and `LandingSegmentedSearch`.
 - Consumes: mapped marketplace venue `location` and `eventTypes` fields.
 
@@ -326,7 +351,9 @@ it("deduplicates and sorts location and event suggestions", () => {
 });
 
 it("filters suggestions case-insensitively", () => {
-  expect(filterLandingSearchSuggestions(["Wedding", "Corporate"], "wed")).toEqual(["Wedding"]);
+  expect(
+    filterLandingSearchSuggestions(["Wedding", "Corporate"], "wed"),
+  ).toEqual(["Wedding"]);
 });
 ```
 
@@ -366,6 +393,7 @@ git commit -m "feat(web): add landing search suggestions"
 ### Task 5: Guest Count Synchronization And Package Display Removal
 
 **Files:**
+
 - Create: `apps/web/src/features/ai/ui/cost-estimator-form.test.ts`
 - Modify: `apps/web/src/features/venues/ui/BookingSidebar.tsx`
 - Modify: `apps/web/src/features/ai/ui/CostEstimatorPanel.tsx`
@@ -374,6 +402,7 @@ git commit -m "feat(web): add landing search suggestions"
 - Modify: `apps/web/e2e/qa/marketplace-qa.spec.ts`
 
 **Interfaces:**
+
 - `BookingSidebar.children`: `ReactNode | ((guestCount: number) => ReactNode)`.
 - `CostEstimatorPanel.initialGuestCount?: number`.
 - `CostEstimatorForm.initialGuestCount?: number`.
@@ -387,9 +416,9 @@ expect(
   getCostEstimatorDefaultValues({ initialGuestCount: 200, capacityMin: 50 }),
 ).toMatchObject({ guestCount: 200 });
 
-expect(
-  getCostEstimatorDefaultValues({ capacityMin: 50 }),
-).toMatchObject({ guestCount: 50 });
+expect(getCostEstimatorDefaultValues({ capacityMin: 50 })).toMatchObject({
+  guestCount: 50,
+});
 ```
 
 - [ ] **Step 2: Run and verify RED**
@@ -401,7 +430,9 @@ Run the new Vitest file. Expected: FAIL because the default builder and initial 
 Render function children inside `BookingSidebar`:
 
 ```tsx
-{typeof children === "function" ? children(guests) : children}
+{
+  typeof children === "function" ? children(guests) : children;
+}
 ```
 
 Pass `initialGuestCount={guests}` from `VenueDetails` to `CostEstimatorPanel`, and use it before `capacityMin` in form defaults.
@@ -428,12 +459,14 @@ git commit -m "fix(web): sync venue estimate guests"
 ### Task 6: Supplier Profile Cleanup And Sticky Supporting Cards
 
 **Files:**
+
 - Modify: `apps/web/src/features/suppliers/ui/SupplierDetail.tsx`
 - Modify: `apps/web/src/features/venues/ui/BookingSidebar.tsx`
 - Modify: `apps/web/app/(customer)/venues/[slug]/book/page.tsx`
 - Modify: `apps/web/e2e/qa/marketplace-qa.spec.ts`
 
 **Interfaces:**
+
 - Consumes: Task 2 document-scroll shell and shared `top-[9.5rem]` desktop offset convention.
 - Produces: sticky proposal, booking, and workflow cards with no supplier back button.
 
@@ -450,7 +483,7 @@ Run the focused Playwright file. Expected: supplier back-link assertion fails an
 Remove only the public supplier back link. Standardize supporting desktop cards on:
 
 ```tsx
-className="lg:sticky lg:top-[9.5rem] lg:self-start"
+className = "lg:sticky lg:top-[9.5rem] lg:self-start";
 ```
 
 Do not add sticky positioning to result cards or mobile cards.
@@ -469,9 +502,11 @@ git commit -m "fix(web): keep supporting cards sticky"
 ### Task 7: Responsive Browser Audit And Final Regression Checks
 
 **Files:**
+
 - Modify only files from Tasks 1-6 if the audit identifies a verified regression.
 
 **Interfaces:**
+
 - Produces: verified desktop, tablet, and mobile behavior with no new scrolling or navigation regressions.
 
 - [ ] **Step 1: Run all new tests**

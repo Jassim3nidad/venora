@@ -26,7 +26,9 @@ function PageHeaderSkeleton({ view }: { view: "venues" | "suppliers" }) {
             {isSuppliers ? "Supplier Inquiries" : "Booking center"}
           </span>
           <h1 className="max-w-3xl text-3xl font-bold leading-9 tracking-[-0.04em] text-slate-950 sm:text-4xl sm:leading-tight">
-            {isSuppliers ? "Supplier Inquiries" : "Track every booking request."}
+            {isSuppliers
+              ? "Supplier Inquiries"
+              : "Track every booking request."}
           </h1>
           <SkeletonBlock className="mt-3 h-5 w-full max-w-2xl" />
         </div>
@@ -63,7 +65,10 @@ function VenueFilterSkeleton() {
       </div>
       <div className="flex flex-wrap gap-2">
         {["w-32", "w-36", "w-32", "w-28", "w-32"].map((width, index) => (
-          <SkeletonBadge key={`${width}-${index}`} className={`${width} h-10`} />
+          <SkeletonBadge
+            key={`${width}-${index}`}
+            className={`${width} h-10`}
+          />
         ))}
       </div>
       <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_160px_auto]">
@@ -87,7 +92,10 @@ function SupplierFilterSkeleton() {
       </div>
       <div className="flex flex-wrap gap-2">
         {["w-36", "w-28", "w-32", "w-32"].map((width, index) => (
-          <SkeletonBadge key={`${width}-${index}`} className={`${width} h-10`} />
+          <SkeletonBadge
+            key={`${width}-${index}`}
+            className={`${width} h-10`}
+          />
         ))}
       </div>
       <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_180px_160px_auto]">
@@ -171,7 +179,8 @@ function SupplierInquiryCardSkeleton() {
 
 export default function BookingsLoading() {
   const searchParams = useSearchParams();
-  const view = searchParams.get("view") === "suppliers" ? "suppliers" : "venues";
+  const view =
+    searchParams.get("view") === "suppliers" ? "suppliers" : "venues";
 
   return (
     <LoadingRegion
@@ -186,7 +195,11 @@ export default function BookingsLoading() {
         <PageHeaderSkeleton view={view} />
         <CustomerActivityTabs active={view} />
         <StatsSkeleton />
-        {view === "suppliers" ? <SupplierFilterSkeleton /> : <VenueFilterSkeleton />}
+        {view === "suppliers" ? (
+          <SupplierFilterSkeleton />
+        ) : (
+          <VenueFilterSkeleton />
+        )}
         <div className="grid gap-5">
           {Array.from({ length: view === "suppliers" ? 2 : 3 }).map(
             (_, index) =>

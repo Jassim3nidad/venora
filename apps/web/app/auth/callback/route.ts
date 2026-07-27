@@ -31,10 +31,15 @@ export async function GET(request: NextRequest) {
   if (tokenHash && type) {
     if (type === "recovery") {
       const supabase = await createClient();
-      const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "recovery" });
-      
+      const { error } = await supabase.auth.verifyOtp({
+        token_hash: tokenHash,
+        type: "recovery",
+      });
+
       if (!error) {
-        const response = NextResponse.redirect(new URL("/reset-password", request.url));
+        const response = NextResponse.redirect(
+          new URL("/reset-password", request.url),
+        );
         response.cookies.set(PASSWORD_RECOVERY_COOKIE, "1", {
           httpOnly: true,
           sameSite: "lax",
@@ -44,7 +49,7 @@ export async function GET(request: NextRequest) {
         });
         return response;
       }
-      
+
       // If error, send to reset-password to show the native expired link UI
       return NextResponse.redirect(new URL("/reset-password", request.url));
     }

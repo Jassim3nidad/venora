@@ -91,7 +91,9 @@ export function StaffManagementClient({
   );
   const [email, setEmail] = useState("");
   const [selectedVenueIds, setSelectedVenueIds] = useState<string[]>([]);
-  const [selectedPermissions, setSelectedPermissions] = useState<CoordinatorPermission[]>([...DEFAULT_COORDINATOR_PERMISSIONS]);
+  const [selectedPermissions, setSelectedPermissions] = useState<
+    CoordinatorPermission[]
+  >([...DEFAULT_COORDINATOR_PERMISSIONS]);
   const [assignmentDrafts, setAssignmentDrafts] = useState<
     Record<string, string[]>
   >({});
@@ -139,7 +141,10 @@ export function StaffManagementClient({
     );
     setPermissionDrafts(
       Object.fromEntries(
-        staffRows.map((row) => [row.id, (row.permissions as CoordinatorPermission[]) ?? []]),
+        staffRows.map((row) => [
+          row.id,
+          (row.permissions as CoordinatorPermission[]) ?? [],
+        ]),
       ),
     );
   }, [staffRows]);
@@ -172,7 +177,10 @@ export function StaffManagementClient({
     });
   };
 
-  const toggleStaffPermission = (row: StaffDisplayRow, permission: CoordinatorPermission) => {
+  const toggleStaffPermission = (
+    row: StaffDisplayRow,
+    permission: CoordinatorPermission,
+  ) => {
     setPermissionDrafts((current) => {
       const selected = current[row.id] ?? row.permissions ?? [];
       return {
@@ -335,7 +343,7 @@ export function StaffManagementClient({
             </span>
           );
         }
-        
+
         const venues = row.assignedVenues.split(", ");
         const show = venues.slice(0, 2);
         const hiddenCount = venues.length - 2;
@@ -362,7 +370,11 @@ export function StaffManagementClient({
         );
       },
     },
-    { key: "joined", header: "Added", cell: (row) => <span className="whitespace-nowrap">{row.joined}</span> },
+    {
+      key: "joined",
+      header: "Added",
+      cell: (row) => <span className="whitespace-nowrap">{row.joined}</span>,
+    },
     {
       key: "actions",
       header: "Actions",
@@ -422,7 +434,7 @@ export function StaffManagementClient({
             </span>
           );
         }
-        
+
         const venues = row.assignedVenues.split(", ");
         const show = venues.slice(0, 2);
         const hiddenCount = venues.length - 2;
@@ -454,8 +466,16 @@ export function StaffManagementClient({
       header: "Status",
       cell: (row) => <StatusBadge status={row.status} />,
     },
-    { key: "expires", header: "Expires", cell: (row) => <span className="whitespace-nowrap">{row.expiresAt}</span> },
-    { key: "created", header: "Sent", cell: (row) => <span className="whitespace-nowrap">{row.createdAt}</span> },
+    {
+      key: "expires",
+      header: "Expires",
+      cell: (row) => <span className="whitespace-nowrap">{row.expiresAt}</span>,
+    },
+    {
+      key: "created",
+      header: "Sent",
+      cell: (row) => <span className="whitespace-nowrap">{row.createdAt}</span>,
+    },
     {
       key: "actions",
       header: "Actions",
@@ -652,7 +672,7 @@ export function StaffManagementClient({
           description="Select a coordinator to modify the venues they manage and their permissions."
         />
         {currentStaffRows.length > 0 ? (
-          <StaffAccessEditor 
+          <StaffAccessEditor
             staffRows={currentStaffRows}
             venues={venues}
             assignmentDrafts={assignmentDrafts}
@@ -666,7 +686,8 @@ export function StaffManagementClient({
           />
         ) : (
           <p className="rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-4 text-sm font-semibold text-[#64748b]">
-            Accepted coordinators for this organization will appear here after they accept an invitation.
+            Accepted coordinators for this organization will appear here after
+            they accept an invitation.
           </p>
         )}
       </Panel>
@@ -697,7 +718,7 @@ function StaffAccessEditor({
   saveVenueAssignments,
   savePermissions,
   toggleStaffVenue,
-  toggleStaffPermission
+  toggleStaffPermission,
 }: {
   staffRows: StaffDisplayRow[];
   venues: VenueOption[];
@@ -708,19 +729,24 @@ function StaffAccessEditor({
   saveVenueAssignments: (row: StaffDisplayRow) => void;
   savePermissions: (row: StaffDisplayRow) => void;
   toggleStaffVenue: (row: StaffDisplayRow, venueId: string) => void;
-  toggleStaffPermission: (row: StaffDisplayRow, permission: CoordinatorPermission) => void;
+  toggleStaffPermission: (
+    row: StaffDisplayRow,
+    permission: CoordinatorPermission,
+  ) => void;
 }) {
-  const [selectedStaffId, setSelectedStaffId] = useState<string>(staffRows[0]?.id ?? "");
+  const [selectedStaffId, setSelectedStaffId] = useState<string>(
+    staffRows[0]?.id ?? "",
+  );
 
   // Update selection if the selected staff goes away
   useEffect(() => {
     const firstRow = staffRows[0];
-    if (firstRow && !staffRows.find(r => r.id === selectedStaffId)) {
+    if (firstRow && !staffRows.find((r) => r.id === selectedStaffId)) {
       setSelectedStaffId(firstRow.id);
     }
   }, [staffRows, selectedStaffId]);
 
-  const selectedRow = staffRows.find(r => r.id === selectedStaffId);
+  const selectedRow = staffRows.find((r) => r.id === selectedStaffId);
 
   if (!selectedRow) return null;
 
@@ -728,7 +754,8 @@ function StaffAccessEditor({
     (venue) => venue.organization_id === selectedRow.organizationId,
   );
   const selectedVenues = assignmentDrafts[selectedRow.id] ?? [];
-  const selectedPerms = permissionDrafts[selectedRow.id] ?? selectedRow.permissions ?? [];
+  const selectedPerms =
+    permissionDrafts[selectedRow.id] ?? selectedRow.permissions ?? [];
 
   return (
     <div className="grid gap-4 mt-4">
@@ -785,7 +812,7 @@ function StaffAccessEditor({
             </label>
           ))}
         </div>
-        
+
         <div className="mt-6 border-t border-[#e5e7eb] pt-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
@@ -812,7 +839,9 @@ function StaffAccessEditor({
                   <input
                     type="checkbox"
                     checked={selectedPerms.includes(permission)}
-                    onChange={() => toggleStaffPermission(selectedRow, permission)}
+                    onChange={() =>
+                      toggleStaffPermission(selectedRow, permission)
+                    }
                     disabled={selectedRow.status !== "active"}
                     className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#cbd5e1] text-[#2563eb]"
                   />

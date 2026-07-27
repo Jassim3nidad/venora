@@ -54,15 +54,15 @@ export default async function NewVenuePage({
 
   const { data: organizations } = isAdmin
     ? await supabase
-      .from("organizations")
-      .select("id, name")
-      .order("name", { ascending: true })
-    : orgIds.length > 0
-      ? await supabase
         .from("organizations")
         .select("id, name")
-        .in("id", orgIds)
         .order("name", { ascending: true })
+    : orgIds.length > 0
+      ? await supabase
+          .from("organizations")
+          .select("id, name")
+          .in("id", orgIds)
+          .order("name", { ascending: true })
       : { data: [] };
 
   const orgRows = (organizations ?? []) as Array<{ id: string; name: string }>;
@@ -322,7 +322,18 @@ export default async function NewVenuePage({
                       ))}
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-[#94a3b8]">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="m6 9 6 6 6-6" />
+                      </svg>
                     </div>
                   </div>
                 </div>
@@ -403,7 +414,18 @@ export default async function NewVenuePage({
                       <option value="both">Indoor and outdoor</option>
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-[#94a3b8]">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="m6 9 6 6 6-6" />
+                      </svg>
                     </div>
                   </div>
                 </div>

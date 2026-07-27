@@ -18,7 +18,7 @@ export function PublishButton({
     setIsPublishing(true);
     const res = await publishBusinessProfile({ profileId, organizationId });
     setIsPublishing(false);
-    
+
     if (res.error) {
       alert("Error publishing profile: " + res.error.message);
     } else {

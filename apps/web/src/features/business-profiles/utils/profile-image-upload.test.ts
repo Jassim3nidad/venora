@@ -14,9 +14,9 @@ describe("business profile image uploads", () => {
   });
 
   it("rejects non-image files and oversized images", () => {
-    expect(validateBusinessProfileImage({ type: "application/pdf", size: 1024 })).toContain(
-      "JPEG, PNG, WEBP, or GIF",
-    );
+    expect(
+      validateBusinessProfileImage({ type: "application/pdf", size: 1024 }),
+    ).toContain("JPEG, PNG, WEBP, or GIF");
     expect(
       validateBusinessProfileImage({
         type: "image/png",

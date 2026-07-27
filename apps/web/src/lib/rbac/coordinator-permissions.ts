@@ -77,11 +77,7 @@ export function sanitizeCoordinatorPermissions(
     return [...fallback];
   }
 
-  const unique = [
-    ...new Set(
-      permissions.filter(isCoordinatorPermission),
-    ),
-  ];
+  const unique = [...new Set(permissions.filter(isCoordinatorPermission))];
 
   return unique.length > 0 ? unique : [...fallback];
 }

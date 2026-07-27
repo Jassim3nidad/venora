@@ -12,8 +12,8 @@ describe("cost estimator defaults", () => {
   });
 
   it("falls back to the venue minimum capacity", () => {
-    expect(
-      getCostEstimatorDefaultValues({ capacityMin: 50 }),
-    ).toMatchObject({ guestCount: 50 });
+    expect(getCostEstimatorDefaultValues({ capacityMin: 50 })).toMatchObject({
+      guestCount: 50,
+    });
   });
 });

@@ -333,7 +333,11 @@ export async function upsertSupplierPortfolioAction(rawInput: unknown) {
 
 export async function createSupplierContactRequestAction(rawInput: unknown) {
   return createServerAction(
-    supplierContactRequestSchema.omit({ contactName: true, contactEmail: true, contactPhone: true }),
+    supplierContactRequestSchema.omit({
+      contactName: true,
+      contactEmail: true,
+      contactPhone: true,
+    }),
     async (input) => {
       const { supabase, user } = await requireUser();
 
@@ -443,9 +447,12 @@ export async function createSupplierContactRequestAction(rawInput: unknown) {
           customer_id: user.id,
           booking_id: input.bookingId ?? null,
           venue_id: venueId ?? null,
-        contact_name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Customer",
-        contact_email: user.email || "",
-        contact_phone: null,
+          contact_name:
+            user.user_metadata?.full_name ||
+            user.email?.split("@")[0] ||
+            "Customer",
+          contact_email: user.email || "",
+          contact_phone: null,
           event_date: eventDate,
           event_location: eventLocation,
           guest_count: guestCount,

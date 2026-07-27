@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { isSafeInternalRedirect, resolvePostAuthRedirect } from "./profile-setup";
+import {
+  isSafeInternalRedirect,
+  resolvePostAuthRedirect,
+} from "./profile-setup";
 
 describe("isSafeInternalRedirect", () => {
   it("accepts normal internal app routes", () => {

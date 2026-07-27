@@ -767,43 +767,43 @@ export function SuppliersMarketplaceClient({
                   </p>
                 </div>
 
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setDesktopFiltersOpen((open) => !open)}
-                  aria-pressed={desktopFiltersOpen}
-                  className="hidden h-11 items-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white px-4 text-sm font-bold text-[#111827] transition hover:border-[#BFDBFE] hover:bg-[#F8FAFC] lg:inline-flex"
-                >
-                  {desktopFiltersOpen ? (
-                    <PanelLeftClose className="h-4 w-4 text-[#2563EB]" />
-                  ) : (
-                    <PanelLeftOpen className="h-4 w-4 text-[#2563EB]" />
-                  )}
-                  {desktopFiltersOpen ? "Hide filters" : "Show filters"}
-                  {activeFilterCount > 0 ? (
-                    <span className="rounded-full bg-[#EFF6FF] px-2 py-0.5 text-xs font-extrabold text-[#1D4ED8]">
-                      {activeFilterCount}
-                    </span>
-                  ) : null}
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setDesktopFiltersOpen((open) => !open)}
+                    aria-pressed={desktopFiltersOpen}
+                    className="hidden h-11 items-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white px-4 text-sm font-bold text-[#111827] transition hover:border-[#BFDBFE] hover:bg-[#F8FAFC] lg:inline-flex"
+                  >
+                    {desktopFiltersOpen ? (
+                      <PanelLeftClose className="h-4 w-4 text-[#2563EB]" />
+                    ) : (
+                      <PanelLeftOpen className="h-4 w-4 text-[#2563EB]" />
+                    )}
+                    {desktopFiltersOpen ? "Hide filters" : "Show filters"}
+                    {activeFilterCount > 0 ? (
+                      <span className="rounded-full bg-[#EFF6FF] px-2 py-0.5 text-xs font-extrabold text-[#1D4ED8]">
+                        {activeFilterCount}
+                      </span>
+                    ) : null}
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => setMobileFiltersOpen(true)}
-                  className="inline-flex h-11 items-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white px-4 text-sm font-bold text-[#111827] transition hover:border-[#BFDBFE] hover:bg-[#F8FAFC] lg:hidden"
-                >
-                  <SlidersHorizontal className="h-4 w-4 text-[#2563EB]" />
-                  Filters
-                  {activeFilterCount > 0 ? (
-                    <span className="rounded-full bg-[#EFF6FF] px-2 py-0.5 text-xs font-extrabold text-[#1D4ED8]">
-                      {activeFilterCount}
-                    </span>
-                  ) : null}
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => setMobileFiltersOpen(true)}
+                    className="inline-flex h-11 items-center gap-2 rounded-2xl border border-[#E5E7EB] bg-white px-4 text-sm font-bold text-[#111827] transition hover:border-[#BFDBFE] hover:bg-[#F8FAFC] lg:hidden"
+                  >
+                    <SlidersHorizontal className="h-4 w-4 text-[#2563EB]" />
+                    Filters
+                    {activeFilterCount > 0 ? (
+                      <span className="rounded-full bg-[#EFF6FF] px-2 py-0.5 text-xs font-extrabold text-[#1D4ED8]">
+                        {activeFilterCount}
+                      </span>
+                    ) : null}
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <form
+              <form
                 onSubmit={handleSupplierPromptSearch}
                 className="grid gap-3 rounded-[18px] border border-slate-200 bg-[#F9FAFB] p-3 sm:p-4"
               >

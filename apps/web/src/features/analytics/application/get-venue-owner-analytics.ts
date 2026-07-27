@@ -1,5 +1,15 @@
-import type { AnalyticsScope, DateRange} from "./queries";
-import { getRevenueTrend, getOccupancyRate, getConversionRate, getTopPackages, getBookingDemographics, getCustomerGrowth, getPopularVenues, getBookingDemandHeatmap, getMonthlyReports } from "./queries";
+import type { AnalyticsScope, DateRange } from "./queries";
+import {
+  getRevenueTrend,
+  getOccupancyRate,
+  getConversionRate,
+  getTopPackages,
+  getBookingDemographics,
+  getCustomerGrowth,
+  getPopularVenues,
+  getBookingDemandHeatmap,
+  getMonthlyReports,
+} from "./queries";
 import { getOwnerVenueIds } from "../../../../app/(venue-owner)/dashboard/_lib/owner-dashboard-data";
 
 export type AnalyticsPeriod =
@@ -19,7 +29,7 @@ function toISODate(date: Date): string {
 function resolveDateRange(period: AnalyticsPeriod): DateRange {
   const to = new Date();
   const from = new Date(to);
-  
+
   switch (period) {
     case "last_30_days":
       from.setDate(to.getDate() - 30);
@@ -49,7 +59,7 @@ function resolveDateRange(period: AnalyticsPeriod): DateRange {
 
 function resolveCompareRange(
   range: DateRange,
-  compare: AnalyticsCompare
+  compare: AnalyticsCompare,
 ): DateRange | null {
   if (compare === "none") return null;
 
@@ -85,7 +95,7 @@ export async function getVenueOwnerAnalytics({
   compareParam = "previous_period",
 }: GetVenueOwnerAnalyticsParams) {
   const allVenueIds = await getOwnerVenueIds(context);
-  
+
   let selectedVenueIds = allVenueIds;
   if (venueParam !== "all" && allVenueIds.includes(venueParam)) {
     selectedVenueIds = [venueParam];
@@ -93,7 +103,10 @@ export async function getVenueOwnerAnalytics({
 
   const scope: AnalyticsScope = { kind: "venues", venueIds: selectedVenueIds };
   const range = resolveDateRange(periodParam as AnalyticsPeriod);
-  const compareRange = resolveCompareRange(range, compareParam as AnalyticsCompare);
+  const compareRange = resolveCompareRange(
+    range,
+    compareParam as AnalyticsCompare,
+  );
 
   // 1. Fetch current period data
   const [
@@ -121,17 +134,27 @@ export async function getVenueOwnerAnalytics({
   // 2. Fetch comparison period data for top-level KPIs
   let compareKPIs = null;
   if (compareRange) {
-    const [compConversion, compOccupancy, compMonthlyReports] = await Promise.all([
-      getConversionRate(supabase, scope, compareRange),
-      getOccupancyRate(supabase, scope, compareRange),
-      getMonthlyReports(supabase, scope, compareRange),
-    ]);
-    
+    const [compConversion, compOccupancy, compMonthlyReports] =
+      await Promise.all([
+        getConversionRate(supabase, scope, compareRange),
+        getOccupancyRate(supabase, scope, compareRange),
+        getMonthlyReports(supabase, scope, compareRange),
+      ]);
+
     // Calculate aggregate totals for comparison range
-    const compTotalRevenue = compMonthlyReports.reduce((sum, r) => sum + r.revenue, 0);
-    const compTotalBookings = compMonthlyReports.reduce((sum, r) => sum + r.bookings, 0);
-    const compTotalCustomers = compMonthlyReports.reduce((sum, r) => sum + r.customers, 0);
-    
+    const compTotalRevenue = compMonthlyReports.reduce(
+      (sum, r) => sum + r.revenue,
+      0,
+    );
+    const compTotalBookings = compMonthlyReports.reduce(
+      (sum, r) => sum + r.bookings,
+      0,
+    );
+    const compTotalCustomers = compMonthlyReports.reduce(
+      (sum, r) => sum + r.customers,
+      0,
+    );
+
     compareKPIs = {
       revenue: compTotalRevenue,
       bookings: compTotalBookings,
@@ -144,8 +167,11 @@ export async function getVenueOwnerAnalytics({
   // Calculate current top-level KPIs
   const totalRevenue = monthlyReports.reduce((sum, r) => sum + r.revenue, 0);
   const totalBookings = monthlyReports.reduce((sum, r) => sum + r.bookings, 0);
-  const totalAcceptedBookings = monthlyReports.reduce((sum, r) => sum + r.confirmedBookings, 0);
-  
+  const totalAcceptedBookings = monthlyReports.reduce(
+    (sum, r) => sum + r.confirmedBookings,
+    0,
+  );
+
   // To avoid double-counting unique customers across months, we re-query for the unique count in this range
   const { data: customerData } = await supabase
     .from("bookings")
@@ -154,8 +180,10 @@ export async function getVenueOwnerAnalytics({
     .in("status", ["approved", "confirmed", "completed"])
     .gte("event_date", range.from)
     .lte("event_date", range.to);
-    
-  const totalCustomers = new Set((customerData || []).map((r: any) => r.customer_id)).size;
+
+  const totalCustomers = new Set(
+    (customerData || []).map((r: any) => r.customer_id),
+  ).size;
 
   // Additional Listing Health & Attention Needed Metrics
   const { count: pendingCount } = await supabase
@@ -168,13 +196,21 @@ export async function getVenueOwnerAnalytics({
     .from("venues")
     .select("id, status, avg_rating, review_count, name")
     .in("id", selectedVenueIds);
-    
+
   const venueRows = venuesData || [];
-  const publishedVenues = venueRows.filter((v: any) => v.status === "published").length;
-  const ratedVenues = venueRows.filter((v: any) => v.review_count > 0 && v.avg_rating > 0);
-  const avgRating = ratedVenues.length > 0
-    ? ratedVenues.reduce((sum: number, v: any) => sum + Number(v.avg_rating), 0) / ratedVenues.length
-    : null;
+  const publishedVenues = venueRows.filter(
+    (v: any) => v.status === "published",
+  ).length;
+  const ratedVenues = venueRows.filter(
+    (v: any) => v.review_count > 0 && v.avg_rating > 0,
+  );
+  const avgRating =
+    ratedVenues.length > 0
+      ? ratedVenues.reduce(
+          (sum: number, v: any) => sum + Number(v.avg_rating),
+          0,
+        ) / ratedVenues.length
+      : null;
 
   return {
     scope,

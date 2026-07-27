@@ -1,6 +1,4 @@
-import {
-  sampleSupplierCategories,
-} from "../data/sample-suppliers";
+import { sampleSupplierCategories } from "../data/sample-suppliers";
 import type {
   SupplierCategory,
   SupplierDashboardContext,
