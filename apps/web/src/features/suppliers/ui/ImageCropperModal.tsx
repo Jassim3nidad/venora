@@ -28,6 +28,7 @@ export function ImageCropperModal({
   const dragStart = useRef({ x: 0, y: 0 });
   const offsetStart = useRef({ x: 0, y: 0 });
   const [imgSize, setImgSize] = useState({ width: 0, height: 0 });
+  const [announcement, setAnnouncement] = useState("");
 
   // Reset state when opening a new image
   useEffect(() => {
@@ -41,6 +42,7 @@ export function ImageCropperModal({
     const { naturalWidth, naturalHeight } = e.currentTarget;
     setImgSize({ width: naturalWidth, height: naturalHeight });
     setOffset({ x: 0, y: 0 }); // reset offset on load to center
+    setAnnouncement("Image loaded. Use arrow keys to adjust crop.");
   };
 
   // Calculate scaling and bounds
@@ -102,6 +104,25 @@ export function ImageCropperModal({
     setIsDragging(false);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    const STEP = 20;
+    if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+      e.preventDefault();
+      let dx = 0;
+      let dy = 0;
+      if (e.key === "ArrowLeft") dx = -STEP;
+      if (e.key === "ArrowRight") dx = STEP;
+      if (e.key === "ArrowUp") dy = -STEP;
+      if (e.key === "ArrowDown") dy = STEP;
+      
+      const newX = offset.x - dx;
+      const newY = offset.y - dy;
+      
+      setOffset({ x: newX, y: newY });
+      setAnnouncement(`Crop adjusted. Zoom level: ${zoom}x.`);
+    }
+  };
+
   const handleCrop = async () => {
     if (!imageRef.current || !containerRef.current) return;
 
@@ -127,6 +148,7 @@ export function ImageCropperModal({
     canvas.toBlob(
       (blob) => {
         if (blob) {
+          setAnnouncement("Image successfully cropped.");
           onCropSubmit(blob);
         }
       },
@@ -150,8 +172,11 @@ export function ImageCropperModal({
             <Dialog.Title className="text-lg font-bold text-slate-800">
               Crop Image
             </Dialog.Title>
+            <Dialog.Description className="sr-only">
+              Adjust your image before uploading. Use arrow keys to move the crop area.
+            </Dialog.Description>
             <Dialog.Close asChild>
-              <button className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+              <button aria-label="Close" className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
                 <X className="h-5 w-5" />
               </button>
             </Dialog.Close>
@@ -162,7 +187,10 @@ export function ImageCropperModal({
               {/* Cropper Container */}
               <div
                 ref={containerRef}
-                className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-100 touch-none w-full shadow-inner cursor-move"
+                tabIndex={0}
+                role="region"
+                aria-label="Image cropping area"
+                className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-100 touch-none w-full shadow-inner cursor-move focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
                 style={{
                   aspectRatio: aspectRatio,
                   maxHeight: "60vh",
@@ -171,6 +199,7 @@ export function ImageCropperModal({
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
                 onPointerLeave={handlePointerUp}
+                onKeyDown={handleKeyDown}
               >
                 {imageUrl && (
                   <img
@@ -212,7 +241,11 @@ export function ImageCropperModal({
                   max="3"
                   step="0.01"
                   value={zoom}
-                  onChange={(e) => setZoom(parseFloat(e.target.value))}
+                  onChange={(e) => {
+                    setZoom(parseFloat(e.target.value));
+                    setAnnouncement(`Zoom level: ${e.target.value}x.`);
+                  }}
+                  aria-label="Zoom image"
                   className="h-2 flex-1 appearance-none rounded-full bg-slate-200 accent-[#2563EB]"
                 />
                 <ZoomIn className="h-5 w-5 text-slate-500" />
@@ -233,6 +266,9 @@ export function ImageCropperModal({
               <Check className="h-4 w-4" />
               Crop & Upload
             </button>
+          </div>
+          <div className="sr-only" aria-live="polite">
+            {announcement}
           </div>
         </Dialog.Content>
       </Dialog.Portal>
