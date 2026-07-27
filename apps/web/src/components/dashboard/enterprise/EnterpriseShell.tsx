@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@venora/lib";
 import ProfileMenu from "@/components/layout/ProfileMenu";
 import { NotificationBell } from "@/features/notifications/ui/NotificationBell";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { MaterialIcon } from "./MaterialIcon";
 import {
   NAV_BY_ROLE,
@@ -154,6 +155,7 @@ function TopBar({
   userAvatar,
   businessName,
   onMenuClick,
+  triggerRef,
 }: {
   role: EnterpriseRole;
   userName?: string;
@@ -162,6 +164,7 @@ function TopBar({
   userAvatar?: string;
   businessName?: string;
   onMenuClick?: () => void;
+  triggerRef?: React.RefObject<HTMLButtonElement | null>;
 }) {
   const displayName = userName ?? "Account User";
   const subtitle = userSubtitle ?? businessName ?? ROLE_LABELS[role];
@@ -169,6 +172,7 @@ function TopBar({
   return (
     <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-[#e5e7eb] bg-white/90 px-4 backdrop-blur lg:hidden">
       <button
+        ref={triggerRef}
         type="button"
         onClick={onMenuClick}
         className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#dbe3ef] bg-white text-[#475569] shadow-sm hover:bg-[#eff6ff]"
@@ -264,6 +268,7 @@ export function EnterpriseShell({
 }: EnterpriseShellProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { containerRef, triggerRef } = useFocusTrap(mobileOpen, () => setMobileOpen(false));
 
   return (
     <div className="flex min-h-dvh bg-[#f8fbff]">
@@ -278,7 +283,7 @@ export function EnterpriseShell({
 
       {/* Mobile drawer */}
       {mobileOpen ? (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div ref={containerRef} className="fixed inset-0 z-50 lg:hidden">
           <button
             type="button"
             className="absolute inset-0 bg-black/40"
@@ -306,6 +311,7 @@ export function EnterpriseShell({
           {...(userAvatar ? { userAvatar } : {})}
           {...(businessName ? { businessName } : {})}
           onMenuClick={() => setMobileOpen(true)}
+          triggerRef={triggerRef}
         />
         <DesktopTopBar
           role={role}
