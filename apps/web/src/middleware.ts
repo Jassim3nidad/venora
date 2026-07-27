@@ -173,7 +173,9 @@ export async function middleware(request: NextRequest) {
 
   // Protect all restricted routes
   const isProtected = PROTECTED_ROUTES.some(
-    (route) => url.pathname === route.prefix || url.pathname.startsWith(`${route.prefix}/`)
+    (route) =>
+      url.pathname === route.prefix ||
+      url.pathname.startsWith(`${route.prefix}/`),
   );
 
   if (isProtected) {

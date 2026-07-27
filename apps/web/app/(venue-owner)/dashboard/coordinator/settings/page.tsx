@@ -23,12 +23,14 @@ export default async function CoordinatorSettingsPage() {
   const { data: venues } =
     isAdmin || venueIds.length > 0 ? await venuesQuery : { data: [] };
 
-  const assignedVenues = ((venues ?? []) as Array<{
-    id: string;
-    name: string;
-    city: string | null;
-    province: string | null;
-  }>).map((venue) => ({
+  const assignedVenues = (
+    (venues ?? []) as Array<{
+      id: string;
+      name: string;
+      city: string | null;
+      province: string | null;
+    }>
+  ).map((venue) => ({
     id: venue.id,
     name: venue.name,
     location: [venue.city, venue.province].filter(Boolean).join(", "),

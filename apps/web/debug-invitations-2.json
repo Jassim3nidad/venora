@@ -5,9 +5,7 @@
       "organization_id": "80000000-0000-0000-0000-000000000001",
       "email": "jared.baquirin112@gmail.com",
       "status": "pending",
-      "venue_ids": [
-        "d131d99a-5300-4de4-a23f-03abf6c61c1d"
-      ],
+      "venue_ids": ["d131d99a-5300-4de4-a23f-03abf6c61c1d"],
       "expires_at": "2026-07-30T03:32:24.231+00:00",
       "created_at": "2026-07-23T03:32:24.688129+00:00"
     },
@@ -28,9 +26,7 @@
       "organization_id": "80000000-0000-0000-0000-000000000001",
       "email": "coordinator@venora.local",
       "status": "accepted",
-      "venue_ids": [
-        "03894748-3793-4702-8a99-c44c93d1d32b"
-      ],
+      "venue_ids": ["03894748-3793-4702-8a99-c44c93d1d32b"],
       "expires_at": "2026-07-30T02:15:00.486+00:00",
       "created_at": "2026-07-23T02:15:00.486+00:00"
     },
@@ -39,9 +35,7 @@
       "organization_id": "80000000-0000-0000-0000-000000000001",
       "email": "remote-postgrest-test-1784703471572@example.com",
       "status": "revoked",
-      "venue_ids": [
-        "758c437f-6a9c-434a-a5aa-e6290787bd7f"
-      ],
+      "venue_ids": ["758c437f-6a9c-434a-a5aa-e6290787bd7f"],
       "expires_at": "2026-07-29T06:57:51.572+00:00",
       "created_at": "2026-07-22T06:57:51.330468+00:00"
     },

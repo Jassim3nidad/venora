@@ -83,7 +83,10 @@ export function MonthlyReportsTable({ data }: { data: MonthlyReportRow[] }) {
           checked={showZeroActivity}
           onCheckedChange={setShowZeroActivity}
         />
-        <Label htmlFor="show-zero-months" className="text-sm font-medium text-slate-600">
+        <Label
+          htmlFor="show-zero-months"
+          className="text-sm font-medium text-slate-600"
+        >
           Show months with no activity
         </Label>
       </div>

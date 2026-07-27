@@ -83,7 +83,7 @@ export default async function VenuesMarketplacePage({
   }
 
   const researchVenueBySlug = new Map(
-    researchVenues.filter(v => v.slug).map((venue) => [venue.slug, venue]),
+    researchVenues.filter((v) => v.slug).map((venue) => [venue.slug, venue]),
   );
   const dbRows = error ? [] : ((dbVenues ?? []) as any[]);
   const { data: reviewRows, error: reviewsError } =
@@ -112,7 +112,7 @@ export default async function VenuesMarketplacePage({
       (venue) =>
         venue.status === "published" &&
         !venue.name.toLowerCase().includes("tenant a") &&
-        !venue.name.toLowerCase().includes("tenant b")
+        !venue.name.toLowerCase().includes("tenant b"),
     )
     .map((venue) =>
       toLiveMarketplaceVenue(

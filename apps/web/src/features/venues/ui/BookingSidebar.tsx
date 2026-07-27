@@ -223,9 +223,7 @@ export default function BookingSidebar({
       <div className="mt-6 space-y-4">
         {/* Date Selector */}
         <div className="space-y-1.5 relative">
-          <label className="sr-only">
-            Event Date
-          </label>
+          <label className="sr-only">Event Date</label>
           <button
             type="button"
             onClick={() => setShowCalendar(!showCalendar)}
@@ -277,9 +275,7 @@ export default function BookingSidebar({
         {/* Package Selector */}
         {packages.length > 0 && (
           <div className="space-y-1.5">
-            <label className="sr-only">
-              Select Package
-            </label>
+            <label className="sr-only">Select Package</label>
             <Select
               value={selectedPackageId}
               onValueChange={setSelectedPackageId}

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@venora/lib";
 import ProfileMenu from "@/components/layout/ProfileMenu";
 import { NotificationBell } from "@/features/notifications/ui/NotificationBell";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { MaterialIcon } from "./MaterialIcon";
 import {
   NAV_BY_ROLE,
@@ -93,11 +94,13 @@ function Sidebar({
   pathname,
   onNavigate,
   navItems,
+  navLabel,
 }: {
   role: EnterpriseRole;
   pathname: string;
   onNavigate?: () => void;
   navItems?: NavItem[];
+  navLabel: string;
 }) {
   const items = navItems ?? NAV_BY_ROLE[role];
   // Some roles currently share a single destination page across multiple nav
@@ -129,7 +132,7 @@ function Sidebar({
         </Link>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1.5">
+      <nav aria-label={navLabel} className="flex flex-1 flex-col gap-1.5">
         {items.map((item, index) => (
           <NavLink
             key={item.label}
@@ -141,9 +144,7 @@ function Sidebar({
         ))}
       </nav>
 
-      <div className="mt-6 border-t border-[#dbe3ef] pt-4">
-
-      </div>
+      <div className="mt-6 border-t border-[#dbe3ef] pt-4"></div>
     </div>
   );
 }
@@ -156,6 +157,7 @@ function TopBar({
   userAvatar,
   businessName,
   onMenuClick,
+  triggerRef,
 }: {
   role: EnterpriseRole;
   userName?: string;
@@ -164,6 +166,7 @@ function TopBar({
   userAvatar?: string;
   businessName?: string;
   onMenuClick?: () => void;
+  triggerRef?: React.RefObject<HTMLButtonElement | null>;
 }) {
   const displayName = userName ?? "Account User";
   const subtitle = userSubtitle ?? businessName ?? ROLE_LABELS[role];
@@ -171,6 +174,7 @@ function TopBar({
   return (
     <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-[#e5e7eb] bg-white/90 px-4 backdrop-blur lg:hidden">
       <button
+        ref={triggerRef}
         type="button"
         onClick={onMenuClick}
         className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#dbe3ef] bg-white text-[#475569] shadow-sm hover:bg-[#eff6ff]"
@@ -219,7 +223,7 @@ function DesktopTopBar({
   const displayName = userName ?? "Account User";
 
   return (
-    <div className="sticky top-0 z-30 hidden items-center justify-between border-b border-[#e5e7eb] bg-white/90 px-6 py-4 backdrop-blur lg:flex">
+    <header className="sticky top-0 z-30 hidden items-center justify-between border-b border-[#e5e7eb] bg-white/90 px-6 py-4 backdrop-blur lg:flex">
       <div>
         <p className="inline-flex rounded-full border border-[#dbeafe] bg-[#eff6ff] px-3 py-1 text-xs font-black uppercase tracking-wider text-[#1d4ed8]">
           {ROLE_LABELS[role]}
@@ -250,7 +254,7 @@ function DesktopTopBar({
           }
         />
       </div>
-    </div>
+    </header>
   );
 }
 
@@ -266,6 +270,7 @@ export function EnterpriseShell({
 }: EnterpriseShellProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { containerRef, triggerRef } = useFocusTrap(mobileOpen, () => setMobileOpen(false));
 
   return (
     <div className="flex min-h-dvh bg-[#f8fbff]">
@@ -274,13 +279,14 @@ export function EnterpriseShell({
         <Sidebar
           role={role}
           pathname={pathname}
+          navLabel="Desktop Sidebar Navigation"
           {...(navItems ? { navItems } : {})}
         />
       </aside>
 
       {/* Mobile drawer */}
       {mobileOpen ? (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div ref={containerRef} className="fixed inset-0 z-50 lg:hidden">
           <button
             type="button"
             className="absolute inset-0 bg-black/40"
@@ -291,6 +297,7 @@ export function EnterpriseShell({
             <Sidebar
               role={role}
               pathname={pathname}
+              navLabel="Mobile Sidebar Navigation"
               onNavigate={() => setMobileOpen(false)}
               {...(navItems ? { navItems } : {})}
             />
@@ -308,6 +315,7 @@ export function EnterpriseShell({
           {...(userAvatar ? { userAvatar } : {})}
           {...(businessName ? { businessName } : {})}
           onMenuClick={() => setMobileOpen(true)}
+          triggerRef={triggerRef}
         />
         <DesktopTopBar
           role={role}

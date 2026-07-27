@@ -32,10 +32,7 @@ export type UserRole =
 export type OrgMemberRole = "owner" | "coordinator" | "staff";
 export type OrgMemberStatus = "active" | "suspended" | "revoked";
 export type OrganizationInvitationStatus =
-  | "pending"
-  | "accepted"
-  | "revoked"
-  | "expired";
+  "pending" | "accepted" | "revoked" | "expired";
 export type AccountStatus =
   "active" | "pending_verification" | "suspended" | "banned";
 export type VenueStatus =
@@ -1724,16 +1721,9 @@ export interface Database {
     // ── Enums ──────────────────────────────────────────────
     Enums: {
       business_visibility_level:
-        | "exact"
-        | "city_province"
-        | "province"
-        | "hidden";
+        "exact" | "city_province" | "province" | "hidden";
       business_publication_status:
-        | "incomplete"
-        | "draft"
-        | "published"
-        | "changes_pending"
-        | "suspended";
+        "incomplete" | "draft" | "published" | "changes_pending" | "suspended";
 
       user_role: UserRole;
       org_member_role: OrgMemberRole;

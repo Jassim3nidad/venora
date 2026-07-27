@@ -18,8 +18,7 @@ export function mergeLandingSearchSuggestionSources(
   return [
     ...liveVenues,
     ...fallbackVenues.filter(
-      (venue) =>
-        venue.id === undefined || !liveVenueIds.has(String(venue.id)),
+      (venue) => venue.id === undefined || !liveVenueIds.has(String(venue.id)),
     ),
   ];
 }
@@ -45,9 +44,7 @@ function uniqueSorted(values: Array<string | null | undefined>) {
 export function buildLandingSearchSuggestions(venues: SuggestionVenue[]) {
   return {
     locations: uniqueSorted(venues.map((venue) => venue.location)),
-    eventTypes: uniqueSorted(
-      venues.flatMap((venue) => venue.eventTypes ?? []),
-    ),
+    eventTypes: uniqueSorted(venues.flatMap((venue) => venue.eventTypes ?? [])),
   };
 }
 

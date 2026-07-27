@@ -41,7 +41,8 @@ type BookingCancellationFormProps = {
 export function BookingCancellationForm({
   booking,
 }: BookingCancellationFormProps) {
-  const [reasonCode, setReasonCode] = useState<BookingCancellationReasonCode | null>(null);
+  const [reasonCode, setReasonCode] =
+    useState<BookingCancellationReasonCode | null>(null);
   const [reasonDetail, setReasonDetail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -94,7 +95,7 @@ export function BookingCancellationForm({
 
   const handleConfirmCancellation = () => {
     if (!reasonCode) return;
-    
+
     startTransition(async () => {
       const result = await cancelBookingAction({
         bookingId: booking.id,
@@ -104,7 +105,10 @@ export function BookingCancellationForm({
 
       if (result.error) {
         setIsDialogOpen(false);
-        setError(result.error.message || "We couldn't update your booking. Please try again.");
+        setError(
+          result.error.message ||
+            "We couldn't update your booking. Please try again.",
+        );
         return;
       }
 
@@ -119,7 +123,10 @@ export function BookingCancellationForm({
         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-600">
           <CheckCircle2 className="h-8 w-8" />
         </div>
-        <h2 className="mb-2 text-2xl font-bold tracking-tight text-slate-900" tabIndex={-1}>
+        <h2
+          className="mb-2 text-2xl font-bold tracking-tight text-slate-900"
+          tabIndex={-1}
+        >
           {isPendingRequest ? "Booking request withdrawn" : "Booking cancelled"}
         </h2>
         <p className="mb-8 max-w-md text-base text-slate-600">
@@ -232,7 +239,10 @@ export function BookingCancellationForm({
 
           {reasonCode === "other" && (
             <div className="grid gap-2 animate-in fade-in slide-in-from-top-2">
-              <label htmlFor="reasonDetail" className="text-sm font-bold text-slate-700">
+              <label
+                htmlFor="reasonDetail"
+                className="text-sm font-bold text-slate-700"
+              >
                 Tell us more
                 <span className="block text-xs font-normal text-slate-500 mt-0.5">
                   This is optional and helps the venue understand your decision.
@@ -251,7 +261,10 @@ export function BookingCancellationForm({
           )}
 
           {error && (
-            <div id="form-error" className="rounded-xl bg-red-50 p-4 text-sm font-bold text-red-700">
+            <div
+              id="form-error"
+              className="rounded-xl bg-red-50 p-4 text-sm font-bold text-red-700"
+            >
               {error}
             </div>
           )}
@@ -263,7 +276,7 @@ export function BookingCancellationForm({
             >
               {isPendingRequest ? "Keep request" : "Keep booking"}
             </Link>
-            
+
             <button
               type="submit"
               className="inline-flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-6 text-sm font-bold text-slate-700 transition hover:bg-slate-50 hover:text-red-600 hover:border-red-200 order-2 sm:order-1"
@@ -274,28 +287,48 @@ export function BookingCancellationForm({
         </form>
       </div>
 
-      <Dialog open={isDialogOpen} onOpenChange={(open) => !isPending && setIsDialogOpen(open)}>
+      <Dialog
+        open={isDialogOpen}
+        onOpenChange={(open) => !isPending && setIsDialogOpen(open)}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">
-              {isPendingRequest ? "Withdraw this booking request?" : "Cancel this booking?"}
+              {isPendingRequest
+                ? "Withdraw this booking request?"
+                : "Cancel this booking?"}
             </DialogTitle>
             <DialogDescription className="text-base text-slate-600 mt-3 space-y-3">
               {isPendingRequest ? (
                 <>
                   <p>
                     You’re about to withdraw your request for{" "}
-                    <span className="font-semibold text-slate-900">{booking.venueName}</span> on{" "}
-                    <span className="font-semibold text-slate-900">{formattedDate}</span>.
+                    <span className="font-semibold text-slate-900">
+                      {booking.venueName}
+                    </span>{" "}
+                    on{" "}
+                    <span className="font-semibold text-slate-900">
+                      {formattedDate}
+                    </span>
+                    .
                   </p>
-                  <p>The venue will be notified, and this request cannot be reopened.</p>
+                  <p>
+                    The venue will be notified, and this request cannot be
+                    reopened.
+                  </p>
                 </>
               ) : (
                 <>
                   <p>
                     You’re about to cancel your booking for{" "}
-                    <span className="font-semibold text-slate-900">{booking.venueName}</span> on{" "}
-                    <span className="font-semibold text-slate-900">{formattedDate}</span>.
+                    <span className="font-semibold text-slate-900">
+                      {booking.venueName}
+                    </span>{" "}
+                    on{" "}
+                    <span className="font-semibold text-slate-900">
+                      {formattedDate}
+                    </span>
+                    .
                   </p>
                   <p>{warningText}</p>
                 </>
@@ -324,7 +357,9 @@ export function BookingCancellationForm({
               ) : (
                 <XCircle className="h-4 w-4" />
               )}
-              {isPendingRequest ? "Yes, withdraw request" : "Yes, cancel booking"}
+              {isPendingRequest
+                ? "Yes, withdraw request"
+                : "Yes, cancel booking"}
             </button>
           </DialogFooter>
         </DialogContent>

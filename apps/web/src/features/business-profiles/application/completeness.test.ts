@@ -47,7 +47,9 @@ describe("calculateProfileCompleteness", () => {
     const result = calculateProfileCompleteness(
       baseDraft({
         venues: [],
-        published_venues: [{ id: "venue-1", name: "Main Hall", slug: "main-hall" }],
+        published_venues: [
+          { id: "venue-1", name: "Main Hall", slug: "main-hall" },
+        ],
       }),
     );
 

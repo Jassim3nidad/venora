@@ -26,12 +26,12 @@ export function SiteFooter() {
   return (
     <footer className="w-full shrink-0 border-t border-zinc-200 bg-zinc-50 px-6 pb-12 pt-14 text-sm text-zinc-600 md:px-20">
       <div className="mx-auto w-full max-w-[1600px] space-y-12">
-        <div className="grid gap-8 sm:grid-cols-3">
+        <nav aria-label="Footer Navigation" className="grid gap-8 sm:grid-cols-3">
           {Object.entries(FOOTER_LINKS).map(([title, links]) => (
             <div key={title} className="space-y-4">
-              <h6 className="font-semibold tracking-tight text-zinc-800">
+              <h2 className="font-semibold tracking-tight text-zinc-800 text-sm">
                 {title}
-              </h6>
+              </h2>
               <ul className="space-y-2 text-[13px] text-zinc-500">
                 {links.map((link) => (
                   <li key={link.href}>
@@ -46,7 +46,7 @@ export function SiteFooter() {
               </ul>
             </div>
           ))}
-        </div>
+        </nav>
 
         <Separator className="bg-zinc-200" />
 

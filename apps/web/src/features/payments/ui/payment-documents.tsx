@@ -59,7 +59,10 @@ export function InvoiceCard({ invoice }: { invoice: InvoiceRow }) {
 
       <dl className="mt-3 grid gap-1 text-sm font-semibold text-slate-600">
         {invoice.line_items.map((item, index) => (
-          <div key={index} className="flex items-center justify-between gap-3 min-w-0 w-full">
+          <div
+            key={index}
+            className="flex items-center justify-between gap-3 min-w-0 w-full"
+          >
             <dt className="truncate flex-1">{item.description}</dt>
             <dd className="shrink-0 text-slate-950">
               {formatMoney(item.amount, invoice.currency)}

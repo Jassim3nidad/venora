@@ -181,13 +181,15 @@ function uniqueRecommendationVenues(
     [currentVenue.id, currentVenue.slug].filter(Boolean).map(String),
   );
 
-  return venues.filter((venue) => {
-    const keys = [venue.id, venue.slug].filter(Boolean).map(String);
-    if (keys.some((key) => currentKeys.has(key))) return false;
-    if (keys.some((key) => seen.has(key))) return false;
-    keys.forEach((key) => seen.add(key));
-    return true;
-  }).slice(0, limit);
+  return venues
+    .filter((venue) => {
+      const keys = [venue.id, venue.slug].filter(Boolean).map(String);
+      if (keys.some((key) => currentKeys.has(key))) return false;
+      if (keys.some((key) => seen.has(key))) return false;
+      keys.forEach((key) => seen.add(key));
+      return true;
+    })
+    .slice(0, limit);
 }
 
 function mergeVenueDetail(dbVenue: any, fallback?: ResearchVenue | null) {
@@ -385,7 +387,7 @@ export default async function VenueDetailPage({ params }: Props) {
     <>
       <script
         type="application/ld+json"
-         
+
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
         }}

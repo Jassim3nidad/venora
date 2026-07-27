@@ -386,9 +386,7 @@ export function SupplierRequestSidebar({
         id="supplier-request-card"
       >
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-[#111827]">
-            Request Proposal
-          </h2>
+          <h2 className="text-xl font-bold text-[#111827]">Request Proposal</h2>
           <Button
             variant="ghost"
             size="sm"
@@ -459,7 +457,10 @@ export function SupplierRequestSidebar({
         </Button>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-5 overflow-y-auto pr-2 pb-2">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-5 overflow-y-auto pr-2 pb-2"
+      >
         <div className="flex flex-col gap-2">
           <label
             htmlFor="service-select"

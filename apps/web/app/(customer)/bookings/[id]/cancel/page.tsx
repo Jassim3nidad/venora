@@ -66,9 +66,12 @@ export default async function CancelBookingPage({ params }: Props) {
       <div className="bg-[#F8FAFC] text-[#111827] min-h-screen">
         <div className="mx-auto flex w-full max-w-[760px] flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
           <div className="rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-sm text-center">
-            <h2 className="text-xl font-bold text-slate-900 mb-2">Booking inactive</h2>
+            <h2 className="text-xl font-bold text-slate-900 mb-2">
+              Booking inactive
+            </h2>
             <p className="text-slate-600 mb-6">
-              This booking has already been {status} and can no longer be cancelled.
+              This booking has already been {status} and can no longer be
+              cancelled.
             </p>
             <Link
               href={`/bookings/${id}`}
@@ -86,8 +89,12 @@ export default async function CancelBookingPage({ params }: Props) {
     redirect(`/bookings/${id}`);
   }
 
-  const venue = Array.isArray(booking.venues) ? booking.venues[0] : booking.venues;
-  const packageData = Array.isArray(booking.venue_packages) ? booking.venue_packages[0] : booking.venue_packages;
+  const venue = Array.isArray(booking.venues)
+    ? booking.venues[0]
+    : booking.venues;
+  const packageData = Array.isArray(booking.venue_packages)
+    ? booking.venue_packages[0]
+    : booking.venue_packages;
 
   const bookingSummary = {
     id: booking.id,
@@ -97,18 +104,21 @@ export default async function CancelBookingPage({ params }: Props) {
     guestCount: booking.guest_count,
     venueName: venue?.name ?? "Venue",
     venueSlug: venue?.slug,
-    coverImageUrl: venue?.photos?.cover_image_url ?? venue?.photos?.image_urls?.[0],
+    coverImageUrl:
+      venue?.photos?.cover_image_url ?? venue?.photos?.image_urls?.[0],
     packageName: packageData?.name ?? "Custom quote",
   };
 
   let eyebrow = "Cancel booking";
   let title = "Cancel this booking?";
-  let description = "Tell us why you’re cancelling. The venue will be notified immediately.";
+  let description =
+    "Tell us why you’re cancelling. The venue will be notified immediately.";
 
   if (status === "pending") {
     eyebrow = "Withdraw request";
     title = "Withdraw booking request?";
-    description = "Tell us why you’re withdrawing your request. The venue will be notified immediately.";
+    description =
+      "Tell us why you’re withdrawing your request. The venue will be notified immediately.";
   } else if (status === "confirmed" || status === "payment_pending") {
     title = "Cancel this confirmed booking?";
   }
@@ -131,9 +141,7 @@ export default async function CancelBookingPage({ params }: Props) {
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
             {title}
           </h1>
-          <p className="mt-3 text-base text-slate-600">
-            {description}
-          </p>
+          <p className="mt-3 text-base text-slate-600">{description}</p>
         </div>
 
         <BookingCancellationForm booking={bookingSummary} />

@@ -8,6 +8,7 @@ import {
   AVAILABILITY_CELL_CLASSES,
   AVAILABILITY_LABELS,
   isActiveBookingStatus,
+  isBlockingAvailabilityStatus,
 } from "../utils/availability";
 import { BookingDraggable } from "./BookingDraggable";
 
@@ -41,12 +42,13 @@ export function CalendarCell({
     isActiveBookingStatus(booking.status),
   );
   const effectiveStatus =
-    availability?.status ??
-    (activeBooking?.status === "pending" || activeBooking?.status === "approved"
-      ? "tentative"
-      : activeBooking
-        ? "reserved"
-        : "available");
+    availability?.status && isBlockingAvailabilityStatus(availability.status)
+      ? availability.status
+      : activeBooking?.status === "pending" || activeBooking?.status === "approved"
+        ? "tentative"
+        : activeBooking
+          ? "reserved"
+          : "available";
 
   let bgClass = isCurrentMonth
     ? AVAILABILITY_CELL_CLASSES[effectiveStatus]

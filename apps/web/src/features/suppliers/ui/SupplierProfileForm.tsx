@@ -27,11 +27,7 @@ import type {
   SupplierMarketplaceProfile,
 } from "../types/supplier.types";
 import { SupplierImageUpload } from "./SupplierImageUpload";
-import {
-  Toast,
-  ToastDescription,
-  ToastTitle,
-} from "@venora/ui";
+import { Toast, ToastDescription, ToastTitle } from "@venora/ui";
 import dynamic from "next/dynamic";
 const SupplierLocationPicker = dynamic(
   () => import("./SupplierLocationPicker"),
@@ -161,10 +157,13 @@ export function SupplierProfileForm({
     type: "success" | "error";
     text: string;
   } | null>(null);
-  
+
   // Toast state
   const [toastOpen, setToastOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState({ title: "", description: "" });
+  const [toastMessage, setToastMessage] = useState({
+    title: "",
+    description: "",
+  });
 
   const defaultValues: ProfileFormValues = {
     businessName: profile?.businessName ?? "",
@@ -281,7 +280,10 @@ export function SupplierProfileForm({
       }
 
       setFormMessage({ type: "success", text: "Profile successfully saved." });
-      setToastMessage({ title: "Success", description: "Profile successfully saved." });
+      setToastMessage({
+        title: "Success",
+        description: "Profile successfully saved.",
+      });
       setToastOpen(true);
       reset(values); // Reset isDirty state
       router.refresh();

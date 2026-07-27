@@ -31,7 +31,7 @@ export default async function BusinessProfilePage() {
   const draft = await repo.getDraftByOrganization(organizationId);
 
   if (!draft) {
-    // If somehow the seeding failed, we could gracefully handle it, 
+    // If somehow the seeding failed, we could gracefully handle it,
     // but the migration ensures organizations have a profile.
     return notFound();
   }
@@ -54,11 +54,13 @@ export default async function BusinessProfilePage() {
       <div className="mb-6 rounded-xl border border-[#e5e7eb] bg-white p-5">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-bold text-[#0f172a]">Profile Completeness</h3>
+            <h3 className="text-sm font-bold text-[#0f172a]">
+              Profile Completeness
+            </h3>
             <p className="mt-1 text-sm text-[#64748b]">
-              {completeness.percentage}% complete. 
-              {completeness.isEligibleForPublish 
-                ? " Your profile is eligible to be published." 
+              {completeness.percentage}% complete.
+              {completeness.isEligibleForPublish
+                ? " Your profile is eligible to be published."
                 : " Complete the required fields to publish."}
             </p>
           </div>
@@ -68,7 +70,8 @@ export default async function BusinessProfilePage() {
         </div>
         {!completeness.isEligibleForPublish && (
           <div className="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
-            <strong>Missing requirements:</strong> {completeness.missingItems.join(", ")}
+            <strong>Missing requirements:</strong>{" "}
+            {completeness.missingItems.join(", ")}
           </div>
         )}
       </div>

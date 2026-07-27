@@ -3,7 +3,10 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getCurrentAuthUser } from "@/lib/supabase/current-user";
 import { getNavbarProfile } from "@/lib/get-navbar-profile";
-import { EnterpriseShell, NAV_BY_ROLE } from "@/components/dashboard/enterprise";
+import {
+  EnterpriseShell,
+  NAV_BY_ROLE,
+} from "@/components/dashboard/enterprise";
 import { hasRole } from "@/lib/rbac/guards";
 import { ROLES } from "@/lib/rbac/roles";
 
@@ -21,7 +24,7 @@ export default async function VenueOwnerDashboardLayout({
   const { supabase, user } = await getCurrentAuthUser();
 
   if (!user) redirect("/login?redirectTo=/dashboard");
-  
+
   const isVenueOwner = await hasRole(ROLES.VENUE_OWNER);
   const isCoordinator = await hasRole(ROLES.EVENT_COORDINATOR);
   const isAdmin = await hasRole(ROLES.ADMIN);
@@ -42,26 +45,36 @@ export default async function VenueOwnerDashboardLayout({
 
   const profile = await getNavbarProfile(supabase, user.id);
   const userName =
-    profile?.full_name || 
-    user.email?.split("@")[0] || 
-    (isCoordinator && !isVenueOwner && !isAdmin ? "Event Coordinator" : "Venue Owner");
+    profile?.full_name ||
+    user.email?.split("@")[0] ||
+    (isCoordinator && !isVenueOwner && !isAdmin
+      ? "Event Coordinator"
+      : "Venue Owner");
 
-  const shellRole = (isCoordinator && !isVenueOwner && !isAdmin) ? "coordinator" : "venue_owner";
+  const shellRole =
+    isCoordinator && !isVenueOwner && !isAdmin ? "coordinator" : "venue_owner";
 
   let navItems = undefined;
   if (isCoordinator && !isVenueOwner && !isAdmin) {
     try {
       const context = await getOwnerDashboardContext();
-      
+
       navItems = (
         await Promise.all(
           NAV_BY_ROLE.coordinator.map(async (item) =>
-            !item.permission || hasCoordinatorPermission(item.permission as CoordinatorPermission, context)
+            !item.permission ||
+            hasCoordinatorPermission(
+              item.permission as CoordinatorPermission,
+              context,
+            )
               ? item
               : null,
           ),
         )
-      ).filter((item): item is (typeof NAV_BY_ROLE.coordinator)[number] => item !== null);
+      ).filter(
+        (item): item is (typeof NAV_BY_ROLE.coordinator)[number] =>
+          item !== null,
+      );
     } catch {
       // non-fatal
     }

@@ -66,11 +66,7 @@ function OwnerProfilePreview({ draft }: { draft: BusinessProfileDraft }) {
       <div className="p-4 sm:p-6 lg:p-8">
         {coverUrl ? (
           <div className="relative h-40 overflow-hidden rounded-xl bg-[#f1f5f9] sm:h-56">
-            <img
-              src={coverUrl}
-              alt=""
-              className="h-full w-full object-cover"
-            />
+            <img src={coverUrl} alt="" className="h-full w-full object-cover" />
             <div className="absolute inset-0 bg-slate-950/20" />
           </div>
         ) : null}
@@ -102,7 +98,8 @@ function OwnerProfilePreview({ draft }: { draft: BusinessProfileDraft }) {
                   </span>
                 )}
                 <span className="text-xs font-bold text-[#64748b]">
-                  {venues.length} published venue{venues.length === 1 ? "" : "s"}
+                  {venues.length} published venue
+                  {venues.length === 1 ? "" : "s"}
                 </span>
               </div>
               <h2 className="mt-3 break-words text-3xl font-bold leading-tight text-[#0f172a]">
@@ -115,7 +112,10 @@ function OwnerProfilePreview({ draft }: { draft: BusinessProfileDraft }) {
               ) : null}
               {location ? (
                 <p className="mt-3 flex items-center gap-2 text-sm font-semibold text-[#64748b]">
-                  <MapPin aria-hidden="true" className="h-4 w-4 text-[#2563eb]" />
+                  <MapPin
+                    aria-hidden="true"
+                    className="h-4 w-4 text-[#2563eb]"
+                  />
                   {location}
                 </p>
               ) : null}
@@ -135,18 +135,23 @@ function OwnerProfilePreview({ draft }: { draft: BusinessProfileDraft }) {
 
         <div className="mt-8 grid gap-6 border-t border-[#e2e8f0] pt-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
           <section className="min-w-0">
-            <h3 className="text-lg font-bold text-[#0f172a]">About this owner</h3>
+            <h3 className="text-lg font-bold text-[#0f172a]">
+              About this owner
+            </h3>
             {draft.short_description ? (
               <p className="mt-3 text-sm font-bold leading-6 text-[#334155]">
                 {draft.short_description}
               </p>
             ) : null}
             <p className="mt-3 whitespace-pre-wrap text-sm font-medium leading-7 text-[#475569]">
-              {draft.about || "Add an about section so customers can understand your venue business before booking."}
+              {draft.about ||
+                "Add an about section so customers can understand your venue business before booking."}
             </p>
 
             <div className="mt-8">
-              <h3 className="text-lg font-bold text-[#0f172a]">Managed venues</h3>
+              <h3 className="text-lg font-bold text-[#0f172a]">
+                Managed venues
+              </h3>
               {venues.length > 0 ? (
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {venues.slice(0, 4).map((venue) => (
@@ -155,7 +160,10 @@ function OwnerProfilePreview({ draft }: { draft: BusinessProfileDraft }) {
                       className="rounded-lg border border-[#e2e8f0] bg-[#f8fafc] p-4"
                     >
                       <div className="flex items-start gap-3">
-                        <Building2 aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-[#2563eb]" />
+                        <Building2
+                          aria-hidden="true"
+                          className="mt-0.5 h-5 w-5 shrink-0 text-[#2563eb]"
+                        />
                         <div className="min-w-0">
                           <p className="break-words text-sm font-bold text-[#0f172a]">
                             {venue.name}
@@ -172,28 +180,45 @@ function OwnerProfilePreview({ draft }: { draft: BusinessProfileDraft }) {
                 </div>
               ) : (
                 <div className="mt-4 rounded-lg border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-6 text-sm font-semibold text-[#64748b]">
-                  Add or publish a venue first so customers can see listings on this owner profile.
+                  Add or publish a venue first so customers can see listings on
+                  this owner profile.
                 </div>
               )}
             </div>
           </section>
 
           <aside className="rounded-lg border border-[#e2e8f0] bg-[#f8fafc] p-5">
-            <h3 className="text-base font-bold text-[#0f172a]">Profile signals</h3>
+            <h3 className="text-base font-bold text-[#0f172a]">
+              Profile signals
+            </h3>
             <ul className="mt-4 space-y-3 text-sm font-semibold text-[#475569]">
               {draft.year_established ? (
                 <li className="flex gap-3">
-                  <CalendarCheck2 aria-hidden="true" className="h-5 w-5 shrink-0 text-[#2563eb]" />
+                  <CalendarCheck2
+                    aria-hidden="true"
+                    className="h-5 w-5 shrink-0 text-[#2563eb]"
+                  />
                   <span>Established in {draft.year_established}</span>
                 </li>
               ) : null}
               <li className="flex gap-3">
-                <Building2 aria-hidden="true" className="h-5 w-5 shrink-0 text-[#2563eb]" />
-                <span>{venues.length} public venue{venues.length === 1 ? "" : "s"}</span>
+                <Building2
+                  aria-hidden="true"
+                  className="h-5 w-5 shrink-0 text-[#2563eb]"
+                />
+                <span>
+                  {venues.length} public venue{venues.length === 1 ? "" : "s"}
+                </span>
               </li>
-              {publicEmail ? <li className="break-all">Email: {publicEmail}</li> : null}
-              {publicPhone ? <li className="break-all">Phone: {publicPhone}</li> : null}
-              {draft.website_url ? <li className="break-all">Website: {draft.website_url}</li> : null}
+              {publicEmail ? (
+                <li className="break-all">Email: {publicEmail}</li>
+              ) : null}
+              {publicPhone ? (
+                <li className="break-all">Phone: {publicPhone}</li>
+              ) : null}
+              {draft.website_url ? (
+                <li className="break-all">Website: {draft.website_url}</li>
+              ) : null}
             </ul>
           </aside>
         </div>
@@ -230,7 +255,10 @@ export default async function BusinessProfilePreviewPage() {
             Back to Editor
           </a>
           {completeness.isEligibleForPublish ? (
-            <PublishButton profileId={draft.id} organizationId={organizationId} />
+            <PublishButton
+              profileId={draft.id}
+              organizationId={organizationId}
+            />
           ) : (
             <button
               disabled

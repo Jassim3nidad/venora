@@ -74,12 +74,14 @@
 ### Task 0: Restore The Database Development Gate And Capture Baseline
 
 **Files:**
+
 - Inspect: `supabase/config.toml`
 - Inspect: `package.json`
 - Inspect: `apps/web/package.json`
 - No source changes
 
 **Interfaces:**
+
 - Consumes: Docker Desktop Linux engine, WSL 2, repository Supabase CLI command, current `.env.local`.
 - Produces: a running local Supabase stack, exact CLI-generated migration path for Task 3, and a recorded pre-change verification baseline.
 
@@ -148,10 +150,12 @@ Expected: exactly one new migration path is printed. Store that exact path in th
 ### Task 1: Define The Coordinator Permission Contract
 
 **Files:**
+
 - Create: `apps/web/src/lib/rbac/coordinator-permissions.test.ts`
 - Create: `apps/web/src/lib/rbac/coordinator-permissions.ts`
 
 **Interfaces:**
+
 - Consumes: no database state.
 - Produces: `COORDINATOR_PERMISSIONS`, `CoordinatorPermission`, `COORDINATOR_PERMISSION_PRESETS`, `CoordinatorPermissionPreset`, `isCoordinatorPermission(value)`, and `resolveCoordinatorPermissions(preset, requested)`.
 
@@ -169,7 +173,9 @@ describe("coordinator permissions", () => {
   it("keeps every preset inside the allowlist", () => {
     const allowed = new Set<string>(COORDINATOR_PERMISSIONS);
     for (const permissions of Object.values(COORDINATOR_PERMISSION_PRESETS)) {
-      expect(permissions.every((permission) => allowed.has(permission))).toBe(true);
+      expect(permissions.every((permission) => allowed.has(permission))).toBe(
+        true,
+      );
     }
   });
 
@@ -178,7 +184,9 @@ describe("coordinator permissions", () => {
     expect(resolved).toContain("booking.view");
     expect(resolved).toContain("message.send");
     expect(new Set(resolved).size).toBe(resolved.length);
-    expect(resolved).not.toBe(COORDINATOR_PERMISSION_PRESETS.booking_coordinator);
+    expect(resolved).not.toBe(
+      COORDINATOR_PERMISSION_PRESETS.booking_coordinator,
+    );
   });
 
   it("intersects custom permissions with the server allowlist", () => {
@@ -297,11 +305,14 @@ export const COORDINATOR_PERMISSION_PRESETS = {
   custom: [],
 } as const satisfies Record<string, readonly CoordinatorPermission[]>;
 
-export type CoordinatorPermissionPreset = keyof typeof COORDINATOR_PERMISSION_PRESETS;
+export type CoordinatorPermissionPreset =
+  keyof typeof COORDINATOR_PERMISSION_PRESETS;
 
 const permissionSet = new Set<string>(COORDINATOR_PERMISSIONS);
 
-export function isCoordinatorPermission(value: string): value is CoordinatorPermission {
+export function isCoordinatorPermission(
+  value: string,
+): value is CoordinatorPermission {
   return permissionSet.has(value);
 }
 
@@ -309,7 +320,8 @@ export function resolveCoordinatorPermissions(
   preset: CoordinatorPermissionPreset,
   requested: readonly string[],
 ): CoordinatorPermission[] {
-  const source = preset === "custom" ? requested : COORDINATOR_PERMISSION_PRESETS[preset];
+  const source =
+    preset === "custom" ? requested : COORDINATOR_PERMISSION_PRESETS[preset];
   return [...new Set(source.filter(isCoordinatorPermission))];
 }
 ```
@@ -332,10 +344,12 @@ Expected: permission tests PASS; TypeScript reports no new error in either coord
 ### Task 2: Define Staff Invitation And Assignment Validation
 
 **Files:**
+
 - Create: `apps/web/src/features/staff/schemas/staff-invitation.schema.test.ts`
 - Create: `apps/web/src/features/staff/schemas/staff-invitation.schema.ts`
 
 **Interfaces:**
+
 - Consumes: `CoordinatorPermissionPreset`, `isCoordinatorPermission`, and `resolveCoordinatorPermissions` from Task 1.
 - Produces: `createStaffInvitationSchema`, `updateStaffAssignmentSchema`, `invitationTokenSchema`, `acceptStaffInvitationSchema`, and inferred input types.
 
@@ -367,7 +381,10 @@ describe("staff invitation schema", () => {
 
   it("requires explicit account conversion confirmation", () => {
     expect(() =>
-      acceptStaffInvitationSchema.parse({ token: "a".repeat(64), confirmRoleConversion: false }),
+      acceptStaffInvitationSchema.parse({
+        token: "a".repeat(64),
+        confirmRoleConversion: false,
+      }),
     ).toThrow();
   });
 });
@@ -401,29 +418,49 @@ const preset = z.enum(
 );
 
 export const createStaffInvitationSchema = z.object({
-  email: z.string().trim().email().transform((value) => value.toLowerCase()),
-  venueIds: z.array(uuid).min(1).transform((values) => [...new Set(values)]),
+  email: z
+    .string()
+    .trim()
+    .email()
+    .transform((value) => value.toLowerCase()),
+  venueIds: z
+    .array(uuid)
+    .min(1)
+    .transform((values) => [...new Set(values)]),
   preset,
   permissions: z.array(z.string()).transform((values, context) => {
     const invalid = values.filter((value) => !isCoordinatorPermission(value));
     if (invalid.length > 0) {
-      context.addIssue({ code: "custom", message: "One or more permissions are not allowed." });
+      context.addIssue({
+        code: "custom",
+        message: "One or more permissions are not allowed.",
+      });
       return z.NEVER;
     }
     return [...new Set(values)];
   }),
-  jobTitle: z.string().trim().max(80).transform((value) => value || null),
+  jobTitle: z
+    .string()
+    .trim()
+    .max(80)
+    .transform((value) => value || null),
 });
 
 export const updateStaffAssignmentSchema = z.object({
   assignmentId: uuid,
   preset,
-  permissions: z.array(z.string()).refine(
-    (values) => values.every(isCoordinatorPermission),
-    "One or more permissions are not allowed.",
-  ),
+  permissions: z
+    .array(z.string())
+    .refine(
+      (values) => values.every(isCoordinatorPermission),
+      "One or more permissions are not allowed.",
+    ),
   status: z.enum(["active", "suspended", "revoked"]),
-  jobTitle: z.string().trim().max(80).transform((value) => value || null),
+  jobTitle: z
+    .string()
+    .trim()
+    .max(80)
+    .transform((value) => value || null),
 });
 
 export const invitationTokenSchema = z.string().regex(/^[a-f0-9]{64}$/i);
@@ -433,9 +470,15 @@ export const acceptStaffInvitationSchema = z.object({
   confirmRoleConversion: z.literal(true),
 });
 
-export type CreateStaffInvitationInput = z.infer<typeof createStaffInvitationSchema>;
-export type UpdateStaffAssignmentInput = z.infer<typeof updateStaffAssignmentSchema>;
-export type AcceptStaffInvitationInput = z.infer<typeof acceptStaffInvitationSchema>;
+export type CreateStaffInvitationInput = z.infer<
+  typeof createStaffInvitationSchema
+>;
+export type UpdateStaffAssignmentInput = z.infer<
+  typeof updateStaffAssignmentSchema
+>;
+export type AcceptStaffInvitationInput = z.infer<
+  typeof acceptStaffInvitationSchema
+>;
 ```
 
 - [ ] **Step 4: Run focused validation tests**
@@ -455,10 +498,12 @@ Expected: PASS with email normalization, venue deduplication, invalid permission
 ### Task 3: Add Assignment And Invitation Storage With Safe RLS
 
 **Files:**
+
 - Modify: exact CLI-generated `supabase/migrations/*event_coordinator_foundation.sql` path from Task 0
 - Create: `supabase/tests/event_coordinator_foundation.sql`
 
 **Interfaces:**
+
 - Consumes: the exact permission keys and preset names from Task 1.
 - Produces: `public.venue_staff_assignments`, `public.venue_staff_invitations`, `public.venue_staff_invitation_venues`, `private.venue_staff_invitation_secrets`, private permission helpers, indexes, grants, RLS, and timestamp triggers.
 
@@ -734,10 +779,12 @@ Expected: all 17 pgTAP assertions PASS; reset completes without migration-order 
 ### Task 4: Add Atomic Invitation And Assignment RPCs
 
 **Files:**
+
 - Modify: CLI-generated foundation migration from Task 0
 - Modify: `supabase/tests/event_coordinator_foundation.sql`
 
 **Interfaces:**
+
 - Consumes: tables/private helpers from Task 3.
 - Produces: `create_venue_staff_invitation`, `preview_venue_staff_invitation`, `accept_venue_staff_invitation`, `decline_venue_staff_invitation`, `update_venue_staff_assignment`, `revoke_venue_staff_invitation`, and `rotate_venue_staff_invitation_token` RPCs.
 
@@ -901,11 +948,13 @@ Expected: all foundation tests PASS; lint reports no new security-definer search
 ### Task 5: Regenerate Types And Add Server Authorization Helpers
 
 **Files:**
+
 - Modify: `packages/database/types/generated.ts`
 - Create: `apps/web/src/features/staff/application/coordinator-authorization.test.ts`
 - Create: `apps/web/src/features/staff/application/coordinator-authorization.ts`
 
 **Interfaces:**
+
 - Consumes: generated assignment rows and `CoordinatorPermission` from Task 1.
 - Produces: `requireCoordinatorUser()`, `getCoordinatorAssignments(userId)`, `requireVenueAssignment(venueId)`, and `requireVenuePermission(venueId, permission)`.
 
@@ -929,21 +978,35 @@ it("rejects a coordinator without an active assignment", async () => {
   mockUser("coordinator-user");
   mockRole("event_coordinator");
   mockAssignments([]);
-  await expect(requireVenuePermission(VENUE_ID, "booking.view")).rejects.toMatchObject({
+  await expect(
+    requireVenuePermission(VENUE_ID, "booking.view"),
+  ).rejects.toMatchObject({
     code: "FORBIDDEN",
   });
 });
 
 it("rejects a missing permission on an active assignment", async () => {
-  mockAssignment({ venue_id: VENUE_ID, status: "active", permissions: ["venue.view"] });
-  await expect(requireVenuePermission(VENUE_ID, "booking.approve")).rejects.toMatchObject({
+  mockAssignment({
+    venue_id: VENUE_ID,
+    status: "active",
+    permissions: ["venue.view"],
+  });
+  await expect(
+    requireVenuePermission(VENUE_ID, "booking.approve"),
+  ).rejects.toMatchObject({
     code: "FORBIDDEN",
   });
 });
 
 it("returns the active assignment when permission exists", async () => {
-  mockAssignment({ venue_id: VENUE_ID, status: "active", permissions: ["booking.view"] });
-  await expect(requireVenuePermission(VENUE_ID, "booking.view")).resolves.toMatchObject({
+  mockAssignment({
+    venue_id: VENUE_ID,
+    status: "active",
+    permissions: ["booking.view"],
+  });
+  await expect(
+    requireVenuePermission(VENUE_ID, "booking.view"),
+  ).resolves.toMatchObject({
     venue_id: VENUE_ID,
   });
 });
@@ -980,7 +1043,9 @@ export const getCoordinatorAssignments = cache(async (userId: string) => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("venue_staff_assignments")
-    .select("id,organization_id,venue_id,user_id,permission_preset,permissions,status,job_title,accepted_at")
+    .select(
+      "id,organization_id,venue_id,user_id,permission_preset,permissions,status,job_title,accepted_at",
+    )
     .eq("user_id", userId)
     .order("accepted_at", { ascending: true });
   if (error) throw error;
@@ -991,9 +1056,11 @@ export async function requireVenueAssignment(venueId: string) {
   const { user } = await requireCoordinatorUser();
   const assignments = await getCoordinatorAssignments(user.id);
   const assignment = assignments.find(
-    (candidate) => candidate.venue_id === venueId && candidate.status === "active",
+    (candidate) =>
+      candidate.venue_id === venueId && candidate.status === "active",
   );
-  if (!assignment) throw new CoordinatorAuthorizationError("Venue access is not assigned.");
+  if (!assignment)
+    throw new CoordinatorAuthorizationError("Venue access is not assigned.");
   return assignment;
 }
 
@@ -1029,12 +1096,14 @@ Expected: focused tests PASS and generated database contracts match the local sc
 ### Task 6: Add Secure Invitation Server Actions And Email Delivery
 
 **Files:**
+
 - Create: `apps/web/src/features/staff/application/staff-invitation-actions.test.ts`
 - Create: `apps/web/src/features/staff/application/staff-invitation-actions.ts`
 - Create: `apps/web/src/features/staff/application/get-owner-staff.ts`
 - Create: `apps/web/src/features/staff/application/get-invitation-preview.ts`
 
 **Interfaces:**
+
 - Consumes: Task 2 schemas, Task 4 RPCs, existing server Supabase clients, existing owner dashboard context, and existing server-side Auth admin/email helper.
 - Produces: `createStaffInvitationAction`, `acceptStaffInvitationAction`, `declineStaffInvitationAction`, `updateStaffAssignmentAction`, `revokeStaffInvitationAction`, `resendStaffInvitationAction`, `getOwnerStaff`, and `getInvitationPreview`.
 
@@ -1045,11 +1114,19 @@ Cover these exact outcomes:
 ```ts
 it("hashes a random token and never returns the hash", async () => {
   mockRandomBytes(Buffer.alloc(32, 7));
-  mockCreateInvitationRpc({ invitation_id: INVITATION_ID, expires_at: EXPIRES_AT });
+  mockCreateInvitationRpc({
+    invitation_id: INVITATION_ID,
+    expires_at: EXPIRES_AT,
+  });
   const result = await createStaffInvitationAction(validInput);
-  expect(mockRpc).toHaveBeenCalledWith("create_venue_staff_invitation", expect.objectContaining({
-    p_token_hash: createHash("sha256").update(Buffer.alloc(32, 7).toString("hex")).digest("hex"),
-  }));
+  expect(mockRpc).toHaveBeenCalledWith(
+    "create_venue_staff_invitation",
+    expect.objectContaining({
+      p_token_hash: createHash("sha256")
+        .update(Buffer.alloc(32, 7).toString("hex"))
+        .digest("hex"),
+    }),
+  );
   expect(result).toEqual({ ok: true });
   expect(JSON.stringify(result)).not.toContain("p_token_hash");
 });
@@ -1064,8 +1141,14 @@ it("returns a stable safe error for unauthorized venue input", async () => {
 
 it("requires explicit conversion confirmation on acceptance", async () => {
   await expect(
-    acceptStaffInvitationAction({ token: RAW_TOKEN, confirmRoleConversion: false }),
-  ).resolves.toEqual({ ok: false, message: "Confirm the account role change to continue." });
+    acceptStaffInvitationAction({
+      token: RAW_TOKEN,
+      confirmRoleConversion: false,
+    }),
+  ).resolves.toEqual({
+    ok: false,
+    message: "Confirm the account role change to continue.",
+  });
 });
 ```
 
@@ -1097,15 +1180,25 @@ import {
 
 type StaffActionResult = { ok: true } | { ok: false; message: string };
 
-const hashToken = (token: string) => createHash("sha256").update(token).digest("hex");
+const hashToken = (token: string) =>
+  createHash("sha256").update(token).digest("hex");
 
-export async function createStaffInvitationAction(rawInput: unknown): Promise<StaffActionResult> {
+export async function createStaffInvitationAction(
+  rawInput: unknown,
+): Promise<StaffActionResult> {
   const parsed = createStaffInvitationSchema.safeParse(rawInput);
-  if (!parsed.success) return { ok: false, message: "Check the invitation details and try again." };
+  if (!parsed.success)
+    return {
+      ok: false,
+      message: "Check the invitation details and try again.",
+    };
 
   const { supabase } = await getOwnerDashboardContext();
   const rawToken = randomBytes(32).toString("hex");
-  const permissions = resolveCoordinatorPermissions(parsed.data.preset, parsed.data.permissions);
+  const permissions = resolveCoordinatorPermissions(
+    parsed.data.preset,
+    parsed.data.permissions,
+  );
   const { data, error } = await supabase.rpc("create_venue_staff_invitation", {
     p_invited_email: parsed.data.email,
     p_venue_ids: parsed.data.venueIds,
@@ -1115,7 +1208,10 @@ export async function createStaffInvitationAction(rawInput: unknown): Promise<St
     p_token_hash: hashToken(rawToken),
   });
   if (error || !data?.[0]) {
-    return { ok: false, message: "Unable to invite this coordinator for the selected venues." };
+    return {
+      ok: false,
+      message: "Unable to invite this coordinator for the selected venues.",
+    };
   }
 
   await deliverCoordinatorInvitation({
@@ -1170,11 +1266,13 @@ Expected: PASS for hashing, safe errors, ownership failure, confirmation, expiry
 ### Task 7: Replace The Owner Staff Scaffold With Real Management
 
 **Files:**
+
 - Create: `apps/web/src/features/staff/ui/InviteCoordinatorDialog.tsx`
 - Create: `apps/web/src/features/staff/ui/StaffAccessCard.tsx`
 - Modify: `apps/web/app/(venue-owner)/dashboard/staff/page.tsx`
 
 **Interfaces:**
+
 - Consumes: `getOwnerStaff`, venue list from owner context, coordinator presets, and Task 6 actions.
 - Produces: owner invitation, resend, revoke, suspend, restore, permission edit, and empty/error states.
 
@@ -1241,6 +1339,7 @@ Browser checks at 1440x900, 1024x768, and 390x844: empty state, dialog viewport 
 ### Task 8: Add Invitation Review And Acceptance Route
 
 **Files:**
+
 - Create: `apps/web/src/features/staff/ui/InvitationAcceptanceCard.tsx`
 - Create: `apps/web/app/(auth)/staff/invitations/[token]/page.tsx`
 - Create: `apps/web/app/(auth)/staff/invitations/[token]/loading.tsx`
@@ -1248,6 +1347,7 @@ Browser checks at 1440x900, 1024x768, and 390x844: empty state, dialog viewport 
 - Modify: `apps/web/src/lib/rbac/roles.ts`
 
 **Interfaces:**
+
 - Consumes: `getInvitationPreview` and acceptance/decline actions from Task 6.
 - Produces: authenticated invite review with explicit customer conversion consent and stable invalid/expired/revoked states.
 
@@ -1302,6 +1402,7 @@ Expected: no secret appears in rendered HTML beyond the raw token already presen
 ### Task 9: Remove Event Coordinator From Public Partner Applications
 
 **Files:**
+
 - Modify: `apps/web/src/features/partner-applications/schemas/partner.schema.ts`
 - Modify: `apps/web/src/features/partner-applications/ui/RoleSelection.tsx`
 - Modify: `apps/web/src/features/partner-applications/ui/CategorySelection.tsx`
@@ -1311,6 +1412,7 @@ Expected: no secret appears in rendered HTML beyond the raw token already presen
 - Test: existing partner application tests plus focused schema test
 
 **Interfaces:**
+
 - Consumes: public partner application flow.
 - Produces: a two-role public application contract: `venue_owner | supplier`.
 
@@ -1337,7 +1439,9 @@ Use one exported type:
 
 ```ts
 export const partnerApplicationRoleSchema = z.enum(["venue_owner", "supplier"]);
-export type PartnerApplicationRole = z.infer<typeof partnerApplicationRoleSchema>;
+export type PartnerApplicationRole = z.infer<
+  typeof partnerApplicationRoleSchema
+>;
 ```
 
 Replace local role unions in Category Selection, Verification Upload, progress constants, and wizard state with `PartnerApplicationRole`. Delete coordinator cards, categories, documents, labels, and dashboard route mapping from the public application flow.
@@ -1353,6 +1457,7 @@ Run all partner application Vitest files. Browser-check `/account/become-partner
 ### Task 10: Gate The Coordinator Shell By Active Assignments And Permissions
 
 **Files:**
+
 - Create: `apps/web/src/features/staff/application/coordinator-context.ts`
 - Create: `apps/web/src/features/staff/ui/NoVenueAssignments.tsx`
 - Modify: `apps/web/src/components/dashboard/enterprise/nav-config.ts`
@@ -1361,6 +1466,7 @@ Run all partner application Vitest files. Browser-check `/account/become-partner
 - Modify: `apps/web/app/(event-coordinator)/dashboard/coordinator/page.tsx`
 
 **Interfaces:**
+
 - Consumes: Task 5 authorization helpers and assignments.
 - Produces: `CoordinatorContext`, validated `selectedVenueId`, unioned shell permissions, permission-filtered nav, and safe assignment states.
 
@@ -1369,7 +1475,9 @@ Run all partner application Vitest files. Browser-check `/account/become-partner
 Test all active assignments, mixed suspended/revoked assignments, unauthorized `?venue=`, and permission union behavior:
 
 ```ts
-expect(resolveSelectedVenue(assignments, "unassigned-id")).toBe(assignments[0]?.venue_id ?? null);
+expect(resolveSelectedVenue(assignments, "unassigned-id")).toBe(
+  assignments[0]?.venue_id ?? null,
+);
 expect(resolveCoordinatorPermissionsForShell(assignments)).toEqual(
   expect.arrayContaining(["venue.view", "booking.view"]),
 );
@@ -1397,9 +1505,21 @@ Map foundation links only:
 ```ts
 const coordinatorNav = [
   { href: "/dashboard/coordinator", label: "Overview", permission: null },
-  { href: "/dashboard/coordinator/venues", label: "My Venues", permission: "venue.view" },
-  { href: "/dashboard/coordinator/calendar", label: "Calendar", permission: "calendar.view" },
-  { href: "/dashboard/coordinator/reports", label: "Reports", permission: "report.view_operations" },
+  {
+    href: "/dashboard/coordinator/venues",
+    label: "My Venues",
+    permission: "venue.view",
+  },
+  {
+    href: "/dashboard/coordinator/calendar",
+    label: "Calendar",
+    permission: "calendar.view",
+  },
+  {
+    href: "/dashboard/coordinator/reports",
+    label: "Reports",
+    permission: "report.view_operations",
+  },
 ] satisfies CoordinatorNavItem[];
 ```
 
@@ -1433,11 +1553,13 @@ Verify active full, read-only, unassigned, suspended-only, and revoked-only acco
 ### Task 11: Remove Coordinator Owner-Equivalent Database Access
 
 **Files:**
+
 - Modify: CLI-generated foundation migration from Task 0
 - Modify: `supabase/tests/event_coordinator_foundation.sql`
 - Inspect and replace policies/functions found by `rg -n "is_org_member_for_venue|is_org_member_for_booking" supabase/migrations`
 
 **Interfaces:**
+
 - Consumes: `private.has_venue_staff_permission` from Task 3.
 - Produces: preserved owner/admin access, preserved intended legacy non-coordinator staff behavior, and assignment-aware coordinator access with no broad financial access.
 
@@ -1511,10 +1633,12 @@ Expected: coordinator cross-tenant and direct-RPC tests PASS; owner/admin/custom
 ### Task 12: Foundation End-To-End Verification
 
 **Files:**
+
 - Create: `apps/web/e2e/coordinator-foundation.spec.ts`
 - Modify only test fixtures/helpers already used by existing Playwright auth tests when required
 
 **Interfaces:**
+
 - Consumes: all Tasks 1-11.
 - Produces: repeatable owner/invitation/coordinator browser evidence and a clean foundation handoff to later plans.
 
