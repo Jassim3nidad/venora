@@ -1,0 +1,5 @@
+- `[x]` Create `/account/messages/CustomerInboxClient.tsx` based on `CoordinatorInboxClient.tsx`.
+- `[x]` Create `/account/messages/page.tsx` to fetch bookings, venue inquiries, and supplier inquiries, and map them to unified threads.
+- `[x]` Create unified action `getSupplierInquiryMessages` if it doesn't exist.
+- `[x]` Update `ACCOUNT_NAV_ITEMS` in `nav-items.ts` to include the new Messages route.
+- `[x]` Update `CustomerInboxClient.tsx` to handle dynamic loading for all 3 message types.

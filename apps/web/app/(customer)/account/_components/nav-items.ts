@@ -33,6 +33,12 @@ export const ACCOUNT_NAV_ITEMS: AccountNavItem[] = [
     icon: LayoutDashboard,
   },
   {
+    href: "/account/messages",
+    label: "Messages",
+    description: "Unified inbox for all conversations",
+    icon: Mail,
+  },
+  {
     href: "/bookings",
     label: "Venue Bookings",
     description: "Track venue requests and payments",
