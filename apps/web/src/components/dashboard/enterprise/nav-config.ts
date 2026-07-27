@@ -41,6 +41,11 @@ export const NAV_BY_ROLE: Record<EnterpriseRole, NavItem[]> = {
       icon: "storefront",
     },
     { label: "Analytics", href: "/dashboard/analytics", icon: "analytics" },
+    {
+      label: "Settings",
+      href: "/dashboard/venue-owner/settings",
+      icon: "settings",
+    },
   ],
   coordinator: [
     { label: "Overview", href: "/dashboard/coordinator", icon: "dashboard" },
@@ -144,6 +149,11 @@ export const NAV_BY_ROLE: Record<EnterpriseRole, NavItem[]> = {
       label: "Analytics",
       href: "/dashboard/supplier/analytics",
       icon: "trending_up",
+    },
+    {
+      label: "Settings",
+      href: "/dashboard/supplier/settings",
+      icon: "settings",
     },
   ],
   admin: [
