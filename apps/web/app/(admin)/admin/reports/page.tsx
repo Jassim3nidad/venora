@@ -75,13 +75,13 @@ export default async function AdminReportsPage(props: {
     .gte("event_date", range.from)
     .lte("event_date", range.to);
 
-  const bookings = bookingsRaw || [];
-  const statusCounts = bookings.reduce<Record<string, number>>((acc, b) => {
+  const bookings = (bookingsRaw as { status: string }[]) || [];
+  const statusCounts = bookings.reduce((acc: Record<string, number>, b) => {
     acc[b.status] = (acc[b.status] ?? 0) + 1;
     return acc;
   }, {});
   const statusDistribution = Object.entries(statusCounts).map(
-    ([status, count]) => ({ status, count }),
+    ([status, count]) => ({ status, count: count as number }),
   );
 
   const scope = { kind: "platform" as const };

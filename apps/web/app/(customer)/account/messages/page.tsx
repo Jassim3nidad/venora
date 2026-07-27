@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/src/lib/supabase/server";
 import { CustomerInboxClient, type CustomerInboxThread } from "./CustomerInboxClient";
-import { AccountNav } from "../_components/AccountNav";
-import { AccountMobileMenu } from "../_components/AccountMobileMenu";
+import AccountNav from "../_components/AccountNav";
+import AccountMobileMenu from "../_components/AccountMobileMenu";
 
 export const metadata = {
   title: "Messages | Venora",
@@ -37,8 +37,8 @@ export default async function CustomerMessagesPage() {
     .eq("customer_id", user.id);
 
   // Now fetch latest messages for each
-  const bookingIds = (bookingsRaw || []).map(b => b.id);
-  let latestBookingMessages = [];
+  const bookingIds = ((bookingsRaw as any[]) || []).map((b) => b.id);
+  let latestBookingMessages: any[] = [];
   if (bookingIds.length > 0) {
     const { data } = await supabase
       .from("booking_messages")
@@ -48,8 +48,8 @@ export default async function CustomerMessagesPage() {
     latestBookingMessages = data || [];
   }
 
-  const venueInquiryIds = (venueInquiriesRaw || []).map(i => i.id);
-  let latestVenueInquiryMessages = [];
+  const venueInquiryIds = ((venueInquiriesRaw as any[]) || []).map((i) => i.id);
+  let latestVenueInquiryMessages: any[] = [];
   if (venueInquiryIds.length > 0) {
     const { data } = await supabase
       .from("venue_inquiry_messages")
@@ -59,8 +59,8 @@ export default async function CustomerMessagesPage() {
     latestVenueInquiryMessages = data || [];
   }
 
-  const supplierInquiryIds = (supplierInquiriesRaw || []).map(i => i.id);
-  let latestSupplierInquiryMessages = [];
+  const supplierInquiryIds = ((supplierInquiriesRaw as any[]) || []).map((i) => i.id);
+  let latestSupplierInquiryMessages: any[] = [];
   if (supplierInquiryIds.length > 0) {
     const { data } = await supabase
       .from("supplier_inquiry_messages")
@@ -72,7 +72,7 @@ export default async function CustomerMessagesPage() {
 
   const threads: CustomerInboxThread[] = [];
 
-  for (const b of bookingsRaw || []) {
+  for (const b of (bookingsRaw as any[]) || []) {
     const venue = Array.isArray(b.venues) ? b.venues[0] : b.venues;
     const pkg = Array.isArray(venue?.venue_packages) ? venue?.venue_packages[0] : venue?.venue_packages;
     const latestMsg = latestBookingMessages.find(m => m.booking_id === b.id);
@@ -93,7 +93,7 @@ export default async function CustomerMessagesPage() {
     });
   }
 
-  for (const i of venueInquiriesRaw || []) {
+  for (const i of (venueInquiriesRaw as any[]) || []) {
     const venue = Array.isArray(i.venues) ? i.venues[0] : i.venues;
     const latestMsg = latestVenueInquiryMessages.find(m => m.inquiry_id === i.id);
     
@@ -113,7 +113,7 @@ export default async function CustomerMessagesPage() {
     });
   }
 
-  for (const s of supplierInquiriesRaw || []) {
+  for (const s of (supplierInquiriesRaw as any[]) || []) {
     const profile = Array.isArray(s.supplier_profiles) ? s.supplier_profiles[0] : s.supplier_profiles;
     const service = Array.isArray(s.supplier_services) ? s.supplier_services[0] : s.supplier_services;
     const latestMsg = latestSupplierInquiryMessages.find(m => m.inquiry_id === s.id);

@@ -63,14 +63,22 @@ export function CoordinatorInboxClient({
 
   // Fetch full messages when a thread is selected
   useEffect(() => {
-    if (!selectedThreadId) return;
+    if (!selectedThread) return;
     let isMounted = true;
     setIsLoadingMessages(true);
 
     const load =
       selectedThread.kind === "inquiry"
         ? import("@/src/features/venues/application/inquiry-messages-actions").then(
-            (mod) => mod.getVenueInquiryMessages(selectedThread.id),
+            (mod) => mod.getVenueInquiryMessages(selectedThread.id).then((msgs) => msgs.map((m: any): BookingMessage => ({
+              id: m.id,
+              booking_id: m.inquiry_id,
+              sender_id: m.sender_id,
+              sender_role: m.sender_id === currentUserId ? "venue_owner" : "customer",
+              message: m.message,
+              created_at: m.created_at,
+              sender_name: m.sender_name ?? null
+            })))
           )
         : import("@/src/features/booking/application/messages-actions").then(
             (mod) => mod.getBookingMessages(selectedThread.id),
