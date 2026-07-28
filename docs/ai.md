@@ -2,7 +2,7 @@
 
 Venora AI features run in Supabase Edge Functions with database configuration
 and usage controls. OpenRouter is the only supported provider and
-`tencent/hy3:free` is the required model. Code inspection and automated tests do
+`qwen/qwen3.7-flash` is the required model. Code inspection and automated tests do
 not prove live model/provider behavior.
 
 ## Inventory
@@ -21,7 +21,7 @@ not prove live model/provider behavior.
 
 Feature enablement, temperatures, token/rate/spend limits, and system
 instructions are database-configured. Provider/model selection is locked to
-OpenRouter and `tencent/hy3:free`; alternate provider/model fallbacks and the
+OpenRouter and `qwen/qwen3.7-flash`; alternate provider/model fallbacks and the
 legacy direct-embedding path are disabled. `OPENROUTER_API_KEY` stays in
 Supabase Edge Function secrets.
 
