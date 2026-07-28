@@ -150,7 +150,9 @@ Do **not** block Phase 1 release on these unless product explicitly expands scop
 - [~] Seating planner — authenticated table CRUD, capacity-aware guest
   assignment UI/actions, ownership hardening, and focused tests exist; hosted
   migration and live multi-account E2E remain
-- [ ] Event timeline planner — schema exists; task/dependency UI remains missing
+- [~] Event timeline planner — authenticated task CRUD, scheduling, owners,
+  priorities, status filters, and dependency UI exist; hosted migration and
+  live multi-account E2E remain
 - [~] AI Event Planner / Budget Advisor / Supplier Matching — modules and focused
   tests exist; customer workflows and production behavior remain unverified
 - [~] AI Concierge — scripted widget only; production tools and AI behavior remain
