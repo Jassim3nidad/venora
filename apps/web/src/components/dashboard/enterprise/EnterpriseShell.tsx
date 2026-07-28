@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@venora/lib";
@@ -270,7 +270,11 @@ export function EnterpriseShell({
 }: EnterpriseShellProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { containerRef, triggerRef } = useFocusTrap(mobileOpen, () => setMobileOpen(false));
+  const closeMobileMenu = useCallback(() => setMobileOpen(false), []);
+  const { containerRef, triggerRef } = useFocusTrap(
+    mobileOpen,
+    closeMobileMenu,
+  );
 
   return (
     <div className="flex min-h-dvh bg-[#f8fbff]">
@@ -286,19 +290,26 @@ export function EnterpriseShell({
 
       {/* Mobile drawer */}
       {mobileOpen ? (
-        <div ref={containerRef} className="fixed inset-0 z-50 lg:hidden">
+        <div
+          ref={containerRef}
+          className="fixed inset-0 z-50 lg:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Dashboard navigation"
+        >
           <button
             type="button"
+            tabIndex={-1}
             className="absolute inset-0 bg-black/40"
             aria-label="Close menu"
-            onClick={() => setMobileOpen(false)}
+            onClick={closeMobileMenu}
           />
           <aside className="relative h-full w-[288px] overflow-y-auto bg-[#eef6ff] p-5 shadow-xl">
             <Sidebar
               role={role}
               pathname={pathname}
               navLabel="Mobile Sidebar Navigation"
-              onNavigate={() => setMobileOpen(false)}
+              onNavigate={closeMobileMenu}
               {...(navItems ? { navItems } : {})}
             />
           </aside>
