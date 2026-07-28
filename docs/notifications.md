@@ -32,6 +32,16 @@ Provider validation scripts can send mail or write test notification data and
 therefore require dedicated test fixtures. They are not part of default unit
 tests. See [environment variables](environment-variables.md).
 
+Guest RSVP invitations use the `rsvp-notifications` Edge Function. Invitation
+requests retain the signed-in customer's bearer token so guest ownership is
+enforced by RLS. The production `RSVP reminders` workflow runs every six hours
+and calls a secret-protected, capacity-bounded reminder batch. Configure
+`RSVP_REMINDER_FUNCTION_URL`, `RSVP_REMINDER_ANON_KEY`, and
+`RSVP_REMINDER_SECRET` as GitHub production-environment secrets, and configure
+the same reminder secret plus Resend and application URL values in Supabase.
+Reminder rows are claimed conditionally before sending to prevent duplicate
+concurrent sends; failed sends clear the claim for a later retry.
+
 ## Troubleshooting
 
 | Symptom                             | Confirm                                                        | Safe action                                                            |
