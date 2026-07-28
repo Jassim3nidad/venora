@@ -144,7 +144,9 @@ Do **not** block Phase 1 release on these unless product explicitly expands scop
 
 - [~] Guest management — CRUD/CSV UI, hardened migration, and focused tests exist;
   hosted migration and live E2E remain
-- [ ] RSVP management — public invitation/response lifecycle remains missing
+- [~] RSVP management — owner create/copy/revoke controls, deadlines, token-only
+  public response RPCs, plus-ones, and `/rsvp/[token]` exist; hosted migration,
+  delivery/reminder automation, and live E2E remain
 - [ ] Seating planner — schema exists; UI/actions remain missing
 - [ ] Event timeline planner — schema exists; task/dependency UI remains missing
 - [~] AI Event Planner / Budget Advisor / Supplier Matching — modules and focused
