@@ -69,11 +69,21 @@ function bytes(value) {
 }
 
 async function assertObject(path, expected) {
-  const { data, error } = await service.storage
-    .from("venue-images")
-    .download(path);
-  if (error || !data) throw new Error("expected venue-media object is missing");
-  const actual = new TextDecoder().decode(await data.arrayBuffer());
+  const encodedPath = path.split("/").map(encodeURIComponent).join("/");
+  const objectUrl = new URL(
+    `/storage/v1/object/venue-images/${encodedPath}`,
+    url,
+  );
+  objectUrl.searchParams.set("verification", crypto.randomUUID());
+  const response = await fetch(objectUrl, {
+    cache: "no-store",
+    headers: {
+      apikey: serviceKey,
+      Authorization: `Bearer ${serviceKey}`,
+    },
+  });
+  if (!response.ok) throw new Error("expected venue-media object is missing");
+  const actual = await response.text();
   if (actual !== expected)
     throw new Error("venue-media object content changed unexpectedly");
 }
