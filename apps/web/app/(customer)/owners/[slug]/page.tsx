@@ -509,7 +509,7 @@ export default async function OwnerProfilePage({
   const isAuthenticated = Boolean(authData?.user);
 
   return (
-    <main className="mx-auto min-w-0 max-w-7xl space-y-10 px-4 pb-20 pt-6 font-sans text-[#151C27] sm:px-6 sm:pt-8 lg:px-8">
+    <div className="mx-auto min-w-0 max-w-7xl space-y-10 px-4 pb-20 pt-6 font-sans text-[#151C27] sm:px-6 sm:pt-8 lg:px-8">
       <OwnerHero owner={owner} breadcrumbItems={breadcrumbItems} />
 
       <section
@@ -724,6 +724,6 @@ export default async function OwnerProfilePage({
           </div>
         )}
       </section>
-    </main>
+    </div>
   );
 }
