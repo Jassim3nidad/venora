@@ -4,7 +4,7 @@ Checklist of **Target Users** capabilities from the Venora Project Brief (v1.0)
 against the **current codebase**. Use this for backlog triage; it is not a
 runtime QA pass.
 
-Last repository audit: **2026-07-28**, `main` at `5981097e`.
+Last repository audit: **2026-07-28**, `main` through `b16471db`.
 
 **Legend**
 
@@ -91,8 +91,9 @@ calendars, customer communication, suppliers, performance, reports).
 - Customers **cannot hire** an Event Coordinator on Venora; EC is org staff after
   partner approval + organization membership. Become-partner and Settings copy
   state this explicitly.
-- Role overall remains **PARTIALLY IMPLEMENTED** in the experience matrix
-  (supplier attach + admin depth gaps).
+- Role overall remains **PARTIALLY IMPLEMENTED** because coordinators do not own
+  full venue CRUD or a customer-hire/global CRM product; org-scoped booking,
+  messaging, supplier attachment, settings, and reporting surfaces exist.
 
 **Backlog (Event Coordinator)**
 
