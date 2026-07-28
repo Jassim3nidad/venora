@@ -18,6 +18,12 @@ const allowedHistoricalMissingSources = new Set([
 const allowedLocalConfigurationSources = new Set([
   "apps/web/.env",
   "apps/web/.env.local",
+  "supabase/.env",
+]);
+const historicalPathReferenceDocs = new Set([
+  "docs/superpowers/plans/2026-07-15-event-coordinator-foundation.md",
+  "docs/superpowers/specs/2026-07-15-event-coordinator-design.md",
+  "docs/testing/Venora_QA_Bug_Report.md",
 ]);
 
 const requiredDocs = [
@@ -201,6 +207,7 @@ for (const file of markdownFiles) {
   for (const match of source.matchAll(
     /`((?:apps|packages|supabase|scripts|docs)\/[^`\s]+)`/g,
   )) {
+    if (historicalPathReferenceDocs.has(display(file))) continue;
     const candidate = match[1].replace(/[),.;:]+$/, "");
     if (/[<>*{}]/.test(candidate) || candidate.includes("**")) continue;
     if (!existsSync(join(root, candidate))) {
