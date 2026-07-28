@@ -40,7 +40,6 @@ const TX_STATUS_OPTIONS: { value: TransactionStatusFilter; label: string }[] = [
 const PROVIDER_OPTIONS: { value: ProviderFilter; label: string }[] = [
   { value: "all", label: "All providers" },
   { value: "paymongo", label: "PayMongo" },
-  { value: "maya", label: "Maya" },
   { value: "stripe", label: "Stripe" },
 ];
 
@@ -105,8 +104,6 @@ export default async function AdminPaymentsPage({ searchParams }: Props) {
       refundStatus,
     });
 
-  const mayaEnabled = process.env.NEXT_PUBLIC_ENABLE_MAYA_PAYMENTS === "true";
-
   function filterHref(overrides: Record<string, string | undefined>) {
     const next = new URLSearchParams();
     const merged = {
@@ -152,7 +149,10 @@ export default async function AdminPaymentsPage({ searchParams }: Props) {
           <p className="font-semibold capitalize text-[#111827]">
             {row.paymentProvider}
           </p>
-          <p className="max-w-[160px] truncate text-xs text-[#6b7280]" title={row.providerReference ?? undefined}>
+          <p
+            className="max-w-[160px] truncate text-xs text-[#6b7280]"
+            title={row.providerReference ?? undefined}
+          >
             {row.providerReference ?? "No provider ref"}
           </p>
         </div>
@@ -165,7 +165,10 @@ export default async function AdminPaymentsPage({ searchParams }: Props) {
         <div className="space-y-1">
           <StatusBadge status={row.status} />
           {row.failureReason ? (
-            <p className="max-w-[180px] text-xs text-red-600" title={row.failureReason}>
+            <p
+              className="max-w-[180px] text-xs text-red-600"
+              title={row.failureReason}
+            >
               {row.failureReason}
             </p>
           ) : null}
@@ -222,12 +225,18 @@ export default async function AdminPaymentsPage({ searchParams }: Props) {
         <div className="space-y-1">
           <StatusBadge status={row.status} />
           {row.reason ? (
-            <p className="max-w-[180px] text-xs text-[#64748b]" title={row.reason}>
+            <p
+              className="max-w-[180px] text-xs text-[#64748b]"
+              title={row.reason}
+            >
               {row.reason}
             </p>
           ) : null}
           {row.failureReason ? (
-            <p className="max-w-[180px] text-xs text-red-600" title={row.failureReason}>
+            <p
+              className="max-w-[180px] text-xs text-red-600"
+              title={row.failureReason}
+            >
               {row.failureReason}
             </p>
           ) : null}
@@ -253,7 +262,10 @@ export default async function AdminPaymentsPage({ searchParams }: Props) {
       cell: (row) => (
         <div>
           <p className="font-semibold text-[#111827]">{row.eventType}</p>
-          <p className="max-w-[220px] truncate text-xs text-[#6b7280]" title={row.eventId}>
+          <p
+            className="max-w-[220px] truncate text-xs text-[#6b7280]"
+            title={row.eventId}
+          >
             {row.eventId}
           </p>
         </div>
@@ -296,7 +308,7 @@ export default async function AdminPaymentsPage({ searchParams }: Props) {
   return (
     <DashboardSubPage
       title="Payments & Refunds"
-      description="Monitor booking deposits, refunds, and payment webhook reconciliation. PayMongo is the active gateway; Maya stays disabled until fully ready."
+      description="Monitor booking deposits, refunds, and payment webhook reconciliation. PayMongo is the active gateway."
     >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <KpiCard
@@ -332,33 +344,34 @@ export default async function AdminPaymentsPage({ searchParams }: Props) {
           title="Gateway status"
           description="Operational flags for payment providers. This workspace is read-only monitoring."
         />
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3">
           <div className="rounded-2xl border border-[#e5e7eb] bg-[#f8fbff] p-4">
             <p className="text-xs font-extrabold uppercase tracking-wide text-[#64748b]">
               PayMongo
             </p>
             <p className="mt-1 text-sm font-black text-[#0f172a]">Active</p>
           </div>
-          <div className="rounded-2xl border border-[#e5e7eb] bg-[#f8fbff] p-4">
-            <p className="text-xs font-extrabold uppercase tracking-wide text-[#64748b]">
-              Maya
-            </p>
-            <p className="mt-1 text-sm font-black text-[#0f172a]">
-              {mayaEnabled ? "Enabled (not recommended)" : "Disabled (safe mode)"}
-            </p>
-          </div>
         </div>
         <p className="mt-3 text-sm font-semibold text-[#64748b]">
           Related:{" "}
-          <Link href="/admin/commissions" className="text-[#1d4ed8] hover:underline">
+          <Link
+            href="/admin/commissions"
+            className="text-[#1d4ed8] hover:underline"
+          >
             Commissions
           </Link>
           {" · "}
-          <Link href="/admin/marketplace" className="text-[#1d4ed8] hover:underline">
+          <Link
+            href="/admin/marketplace"
+            className="text-[#1d4ed8] hover:underline"
+          >
             Marketplace signals
           </Link>
           {" · "}
-          <Link href="/admin/disputes" className="text-[#1d4ed8] hover:underline">
+          <Link
+            href="/admin/disputes"
+            className="text-[#1d4ed8] hover:underline"
+          >
             Disputes
           </Link>
         </p>
