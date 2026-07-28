@@ -51,7 +51,7 @@ below are names and placeholders only.
 There is no Google Maps key, alternate AI-provider key, or external analytics
 key in the implementation. Maps use MapLibre/OpenFreeMap and OSM Nominatim;
 analytics are database-derived. The database constrains every active AI feature
-to OpenRouter with `tencent/hy3:free`.
+to OpenRouter with `qwen/qwen3.7-flash`.
 
 ## Test-only variables
 
