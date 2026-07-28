@@ -9,6 +9,7 @@ import {
   Mail,
   MessageSquareText,
   Receipt,
+  Sparkles,
   Users,
   UserRound,
   type LucideIcon,
@@ -51,6 +52,12 @@ export const ACCOUNT_NAV_ITEMS: AccountNavItem[] = [
     label: "Event Timeline",
     description: "Tasks, owners, timing, and dependencies",
     icon: ListTodo,
+  },
+  {
+    href: "/account/event-planner",
+    label: "AI Event Planner",
+    description: "Milestones, services, and budget guidance",
+    icon: Sparkles,
   },
   {
     href: "/account/messages",
