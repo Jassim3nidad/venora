@@ -2,8 +2,9 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
+const appRoot = resolve(import.meta.dirname, "../../..");
 const readSource = (path: string) =>
-  readFileSync(resolve(process.cwd(), path), "utf8");
+  readFileSync(resolve(appRoot, path), "utf8");
 
 describe("mobile drawer accessibility contract", () => {
   it.each([
