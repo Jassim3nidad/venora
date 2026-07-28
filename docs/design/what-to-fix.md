@@ -130,8 +130,8 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 - [x] Help controls route to `/help` from public and account navigation.
 - [x] Mobile drawers use named modal dialogs, contain focus, close with Escape,
       inert background content, and restore trigger focus (UX-06).
-- [x] Supplier crop dialog risk retired — profile image upload uses the native
-      labeled file flow and no inaccessible crop dialog remains.
+- [x] Supplier crop dialog controls are named; arrow-key positioning, zoom,
+      reset, focus containment, and live announcements are covered (UX-25).
 - [x] Shared branded 404 / error recovery (UX-10 / UX-11).
 - [x] Shared public shells own the single `main` landmark; nested marketing and
       marketplace content uses neutral containers and page headings remain (UX-05/08/09).
