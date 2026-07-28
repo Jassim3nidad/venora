@@ -56,8 +56,8 @@ async function buildPreferenceQuery(
     openRouterApiKey,
     {
       temperature: config.temperature ?? 0.3,
-      // Generous budget — the default free model reasons before writing
-      // content; too low a cap truncates it mid-thought.
+      // Generous budget — the approved model may reason before writing
+      // content; too low a cap can truncate it mid-response.
       max_tokens: config.maxTokens,
       messages: [
         {
