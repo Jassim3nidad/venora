@@ -110,7 +110,7 @@ async function fillPlanningTask(
   await dialog.getByLabel("Priority").selectOption("high");
   await dialog.getByLabel("Owner").fill("Hosted QA");
   await dialog.getByLabel("Start").fill("2099-10-01T09:00");
-  await dialog.getByLabel("End").fill("2099-10-01T10:00");
+  await dialog.getByLabel("End", { exact: true }).fill("2099-10-01T10:00");
   if (dependency) {
     await dialog.getByLabel("Depends on").selectOption({ label: dependency });
   }
