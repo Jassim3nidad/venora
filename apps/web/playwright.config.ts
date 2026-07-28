@@ -25,7 +25,6 @@ export default defineConfig({
     extraHTTPHeaders: protectionBypass
       ? {
           "x-vercel-protection-bypass": protectionBypass,
-          "x-vercel-set-bypass-cookie": "true",
         }
       : undefined,
     trace: process.env.E2E_LOW_DISK === "true" ? "off" : "retain-on-failure",
