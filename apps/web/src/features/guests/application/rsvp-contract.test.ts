@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { publicGuestRsvpSchema } from "../schemas/guest.schema";
 
-const repositoryRoot = resolve(import.meta.dirname, "../../../../..");
+const repositoryRoot = resolve(import.meta.dirname, "../../../../../..");
 const migration = readFileSync(
   resolve(
     repositoryRoot,
