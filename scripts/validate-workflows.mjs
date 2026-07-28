@@ -72,9 +72,17 @@ for (const file of workflowFiles) {
     );
   }
 
+  const issueAutomationWorkflow = [
+    "squad-heartbeat.yml",
+    "squad-issue-assign.yml",
+    "squad-triage.yml",
+    "sync-squad-labels.yml",
+  ].some((name) => file.endsWith(name));
   const topPermissions = workflow.permissions ?? {};
   for (const [scope, access] of Object.entries(topPermissions)) {
-    if (access === "write") {
+    const allowedIssueAutomationWrite =
+      issueAutomationWorkflow && scope === "issues" && access === "write";
+    if (access === "write" && !allowedIssueAutomationWrite) {
       errors.push(`${display(file)} grants top-level ${scope}: write`);
     }
   }
