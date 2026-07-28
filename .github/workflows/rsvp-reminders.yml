@@ -1,0 +1,44 @@
+name: RSVP reminders
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rsvp-reminders
+  cancel-in-progress: false
+
+jobs:
+  send:
+    name: Send pending RSVP reminders
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 5
+    steps:
+      - name: Validate configuration
+        env:
+          FUNCTION_URL: ${{ secrets.RSVP_REMINDER_FUNCTION_URL }}
+          ANON_KEY: ${{ secrets.RSVP_REMINDER_ANON_KEY }}
+          REMINDER_SECRET: ${{ secrets.RSVP_REMINDER_SECRET }}
+        run: |
+          test -n "$FUNCTION_URL"
+          test -n "$ANON_KEY"
+          test -n "$REMINDER_SECRET"
+
+      - name: Send reminders
+        env:
+          FUNCTION_URL: ${{ secrets.RSVP_REMINDER_FUNCTION_URL }}
+          ANON_KEY: ${{ secrets.RSVP_REMINDER_ANON_KEY }}
+          REMINDER_SECRET: ${{ secrets.RSVP_REMINDER_SECRET }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --retry 2 \
+            --request POST "$FUNCTION_URL" \
+            --header "Authorization: Bearer $ANON_KEY" \
+            --header "Content-Type: application/json" \
+            --header "x-rsvp-reminder-secret: $REMINDER_SECRET" \
+            --data '{"mode":"reminders","limit":100}'
