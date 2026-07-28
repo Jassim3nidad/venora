@@ -45,6 +45,31 @@ function validateGeneratedTypes() {
     }
   }
 
+  const aiActionTypes = generatedTypes.match(
+    /ai_action_requests:\s*\{[\s\S]*?\n\s{6}\};/,
+  )?.[0];
+  if (!aiActionTypes) {
+    errors.push("generated ai_action_requests type missing");
+  } else {
+    for (const field of [
+      "id",
+      "user_id",
+      "conversation_id",
+      "tool_name",
+      "arguments",
+      "status",
+      "error_message",
+      "confirmed_at",
+      "executed_at",
+    ]) {
+      if (!new RegExp(`\\b${field}:`).test(aiActionTypes)) {
+        errors.push(
+          `ai_action_requests field absent from generated types: ${field}`,
+        );
+      }
+    }
+  }
+
   const portfolioTypes = generatedTypes.match(
     /supplier_portfolio_items:\s*\{[\s\S]*?\n\s{6}\};/,
   )?.[0];
@@ -316,6 +341,7 @@ const requiredMigrations = [
   "20260723100005_event_guests.sql",
   "20260727130000_event_guest_management_hardening.sql",
   "20260728140000_rsvp_delivery_tracking.sql",
+  "20260728150000_ai_concierge_actions.sql",
 ];
 for (const name of requiredMigrations) {
   if (!migrationFiles.includes(name))
