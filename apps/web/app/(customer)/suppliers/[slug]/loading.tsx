@@ -76,7 +76,7 @@ function RequestCardSkeleton() {
 
 export default function SupplierProfileLoading() {
   return (
-    <main
+    <div
       aria-busy="true"
       className="mx-auto max-w-7xl space-y-8 bg-white px-4 pb-28 pt-6 font-sans sm:px-6 sm:pt-8 lg:px-8 lg:pb-12"
     >
@@ -215,6 +215,6 @@ export default function SupplierProfileLoading() {
           <Pulse className="h-12 flex-1 rounded-2xl bg-slate-200" />
         </div>
       </div>
-    </main>
+    </div>
   );
 }
