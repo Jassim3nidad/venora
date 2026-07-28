@@ -144,24 +144,27 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 Do **not** block Phase 1 release on these unless product explicitly expands scope.
 
 - [~] Guest management — CRUD/CSV UI, hardened migration, focused tests, and
-  fail-closed hosted acceptance coverage exist; the protected staging run is
-  pending
+  fail-closed hosted acceptance coverage exist; staging migrations are applied,
+  but the exact-main protected browser run is blocked by Vercel build capacity
 - [~] RSVP management — owner create/copy/revoke controls, deadlines, token-only
   public response RPCs, plus-ones, invitation email delivery, targeted reminder
-  automation, and `/rsvp/[token]` exist; hosted delivery/E2E evidence is pending
+  automation, and `/rsvp/[token]` exist; hosted delivery is blocked by the
+  invalid Resend credential and browser E2E awaits an exact-main deployment
 - [~] Seating planner — authenticated table CRUD, capacity-aware guest
   assignment UI/actions, ownership hardening, focused tests, and staging
-  multi-account acceptance coverage exist; the hosted run is pending
+  multi-account acceptance coverage exist; the exact-main hosted run is pending
 - [~] Event timeline planner — authenticated task CRUD, scheduling, owners,
   priorities, status filters, dependency UI, focused tests, and staging
-  multi-account acceptance coverage exist; the hosted run is pending
-- [~] AI Event Planner / Budget Advisor / Supplier Matching — authenticated event
-  planning, venue cost estimation, and accredited-supplier ranking are
-  customer-facing with focused and hosted acceptance coverage; live
-  provider/data evidence is pending
+  multi-account acceptance coverage exist; the exact-main hosted run is pending
+- [~] AI Event Planner / Supplier Matching — authenticated event planning and
+  accredited-supplier ranking are customer-facing with focused and hosted
+  acceptance coverage; exact-main browser and live account-data evidence remain
+- [x] AI Budget Advisor — the hosted Qwen cost estimator returns a validated
+      venue estimate and records successful provider/model/token/cost evidence
 - [~] AI Concierge — the active customer widget streams through `ai-assistant`;
   customer-only cancellation proposals require explicit confirmation and write
-  service-only action/audit evidence; live provider/tool execution is pending
+  service-only action/audit evidence; live Qwen streaming and usage evidence
+  pass, while hosted confirmed-tool execution awaits the exact-main browser run
 - [ ] Featured placements, sponsored listings, premium subscriptions
 - [ ] Stripe (future payments)
 
