@@ -19,7 +19,7 @@ flowchart LR
   Edge --> DB
   Edge --> Resend["Resend"]
   Edge --> Push["Web Push endpoints"]
-  Edge --> AI["OpenRouter: tencent/hy3:free"]
+  Edge --> AI["OpenRouter: qwen/qwen3.7-flash"]
   Browser --> Maps["OpenFreeMap / Nominatim"]
   GitHub["GitHub repository"] -. "external integration" .-> Vercel
 ```
@@ -196,7 +196,7 @@ sequenceDiagram
   participant U as Authenticated user
   participant E as Supabase Edge Function
   participant D as PostgreSQL
-  participant P as OpenRouter (tencent/hy3:free)
+  participant P as OpenRouter (qwen/qwen3.7-flash)
   U->>E: Feature input + JWT
   E->>D: Load ai_configurations and usage limits
   E->>E: Validate, moderate, redact/minimize
@@ -206,7 +206,7 @@ sequenceDiagram
   E-->>U: Validated output or deterministic error/fallback
 ```
 
-OpenRouter is the only supported provider and `tencent/hy3:free` is the required
+OpenRouter is the only supported provider and `qwen/qwen3.7-flash` is the required
 model. Alternate provider/model fallbacks are rejected. Limits and feature
 settings are database-configured. External model calls require prompt-injection
 defenses, data minimization, timeouts, cost limits, and safe failure behavior.
@@ -223,7 +223,7 @@ defenses, data minimization, timeouts, cost limits, and safe failure behavior.
 | PayMongo                  | Hosted checkout, webhook events                                 | Duplicate/late events expected; signature, event claim, and reconciliation required                                 |
 | Resend/Web Push           | Outbound delivery                                               | At-least-once/failed delivery possible; use delivery records and user preferences; never log credentials            |
 | Map providers             | Tiles and geocoding for public venue data                       | Network/rate-policy failure; graceful map/search fallback; no Google Maps integration                               |
-| OpenRouter                | Generated output and search intent using `tencent/hy3:free`     | Timeout, rate limit, unsafe output; bound context, validate output, log metadata only                               |
+| OpenRouter                | Generated output and search intent using `qwen/qwen3.7-flash`   | Timeout, rate limit, unsafe output; bound context, validate output, log metadata only                               |
 | GitHub/Vercel integration | Source and deployment orchestration                             | Configuration is outside repository and unverified; no repo workflow/vercel config exists                           |
 
 Logging uses application/provider logs, database audit rows, payment event
