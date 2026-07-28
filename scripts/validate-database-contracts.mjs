@@ -344,6 +344,7 @@ const requiredMigrations = [
   "20260728150000_ai_concierge_actions.sql",
   "20260728160000_restore_venue_media_storage_ownership.sql",
   "20260728161000_qualify_venue_media_object_path.sql",
+  "20260728161500_prepare_qwen_model_transition.sql",
   "20260728162000_lock_ai_to_qwen37_flash.sql",
 ];
 for (const name of requiredMigrations) {
