@@ -129,7 +129,8 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 - [x] Supplier crop dialog risk retired — profile image upload uses the native
       labeled file flow and no inaccessible crop dialog remains.
 - [x] Shared branded 404 / error recovery (UX-10 / UX-11).
-- [ ] Landmark / heading structure cleanup (UX-05/08/09).
+- [x] Shared public shells own the single `main` landmark; nested marketing and
+      marketplace content uses neutral containers and page headings remain (UX-05/08/09).
 
 ---
 
