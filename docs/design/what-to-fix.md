@@ -42,7 +42,8 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 
 ### Payments / security (production)
 
-- [ ] Keep **Maya disabled** until full adapter + reconciliation exists.
+- [x] **Maya retired** — no selectable provider, active webhook, environment
+      contract, or admin enablement surface remains
 - [ ] Confirm hosted **RLS / Storage / Edge** state before release.
 - [ ] Address **API rate limiting** and Storage ownership/validation gaps as
       listed in known limitations.
@@ -85,7 +86,7 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 
 - [x] **Dedicated payment / refund monitoring** workspace (brief: Payment
       monitoring) — `/admin/payments` with transactions, refunds, webhook attention;
-      Maya remains disabled until complete.
+      Maya has been retired from the application.
 - [x] **Disputes** — scoped case management: customer raise from eligible
       booking, admin list/detail lifecycle (`open` → `under_review` →
       `resolved`/`rejected`), gated by `disputes.*` (UX-13).
@@ -108,7 +109,7 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 
 ### Payments
 
-- [ ] Finish or permanently park **Maya**.
+- [x] Permanently retire **Maya**.
 - [ ] Customer **invoice / receipt / refund IA** easier to find (UX-15).
 
 ### Analytics
