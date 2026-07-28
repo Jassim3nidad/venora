@@ -242,9 +242,9 @@ async function parseQueryWithOpenRouter(
     openRouterApiKey,
     {
       temperature: config.temperature ?? 0,
-      // Generous budget: the default free model is a reasoning model that
-      // spends tokens on hidden chain-of-thought before writing `content` —
-      // too low a cap truncates it mid-thought with content: null.
+      // Generous budget: the approved model may consume part of the token
+      // budget while reasoning before writing `content`; too low a cap can
+      // truncate the response with content: null.
       max_tokens: config.maxTokens,
       messages: [
         {
