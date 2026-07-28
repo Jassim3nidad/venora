@@ -201,7 +201,7 @@ const schemas = {
   },
   PaymentProvider: {
     type: "string",
-    enum: ["paymongo", "maya", "stripe"],
+    enum: ["paymongo", "stripe"],
     default: "paymongo",
     description:
       "Only PayMongo currently has a registered gateway when configured.",
@@ -555,17 +555,6 @@ const schemas = {
       },
     },
   },
-  MayaWebhook: {
-    type: "object",
-    required: ["id", "status"],
-    additionalProperties: true,
-    properties: {
-      id: { type: "string" },
-      status: { type: "string" },
-      requestReferenceNumber: { type: "string" },
-      metadata: { type: "object", properties: { booking_id: uuid } },
-    },
-  },
   AISearchRequest: {
     type: "object",
     additionalProperties: false,
@@ -713,12 +702,6 @@ const components = {
       in: "header",
       name: "Paymongo-Signature",
       description: "Timestamped PayMongo HMAC over the raw body.",
-    },
-    mayaSignature: {
-      type: "apiKey",
-      in: "header",
-      name: "x-maya-signature",
-      description: "Maya HMAC-SHA512 over the raw body.",
     },
   },
   schemas,
@@ -1419,23 +1402,6 @@ const definitions = [
       },
     }),
     webhook: "paymongo",
-  },
-  {
-    method: "post",
-    path: "/api/webhooks/maya",
-    summary: "Receive Maya webhook",
-    tags: ["Webhooks", "Payments"],
-    security: [{ mayaSignature: [] }],
-    deprecated: true,
-    description:
-      "Placeholder receiver. Verifies HMAC-SHA512; failure statuses can fail a payment, but success reconciliation deliberately throws because no current Maya gateway/correlation exists. No event claim/idempotency. Do not enable in production.",
-    requestBody: body("MayaWebhook", {
-      id: "maya-event-example",
-      status: "PAYMENT_FAILED",
-      requestReferenceNumber: "maya-reference",
-      metadata: { booking_id: "00000000-0000-4000-8000-000000000001" },
-    }),
-    webhook: "maya",
   },
   {
     method: "get",
