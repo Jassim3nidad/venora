@@ -108,7 +108,7 @@ export async function generateAIEventPlan(
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "qwen/qwen3.7-flash",
           response_format: { type: "json_object" },
           temperature: 0.2,
           messages: [
