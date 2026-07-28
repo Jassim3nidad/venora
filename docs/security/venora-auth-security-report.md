@@ -28,8 +28,8 @@ Files reviewed:
 - `apps/web/app/logout/route.ts`
 - `apps/web/src/lib/supabase/**`
 - `apps/web/src/lib/rbac/**`
+- `apps/web/src/lib/security/rate-limit.ts`
 - `apps/web/proxy.ts`
-- `apps/web/src/middleware.ts`
 - `apps/web/app/(admin)/**/layout.tsx`
 - `apps/web/app/(supplier)/**/layout.tsx`
 - `apps/web/app/(venue-owner)/**/layout.tsx`
