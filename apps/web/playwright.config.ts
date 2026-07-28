@@ -1,5 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 import dotenv from "dotenv";
+import { vercelBypassStorageStatePath } from "./e2e/global-setup";
 dotenv.config({ path: ".env.local" });
 
 const appBaseUrl = process.env.APP_BASE_URL ?? "http://127.0.0.1:3000";
@@ -19,14 +20,11 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : 2,
   reporter: "html",
+  ...(protectionBypass ? { globalSetup: "./e2e/global-setup.ts" } : {}),
   use: {
     actionTimeout: 0,
     baseURL: appBaseUrl,
-    extraHTTPHeaders: protectionBypass
-      ? {
-          "x-vercel-protection-bypass": protectionBypass,
-        }
-      : undefined,
+    ...(protectionBypass ? { storageState: vercelBypassStorageStatePath } : {}),
     trace: process.env.E2E_LOW_DISK === "true" ? "off" : "retain-on-failure",
     screenshot: process.env.E2E_LOW_DISK === "true" ? "off" : "only-on-failure",
     video: process.env.E2E_LOW_DISK === "true" ? "off" : "retain-on-failure",
