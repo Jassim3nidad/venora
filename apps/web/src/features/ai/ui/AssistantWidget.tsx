@@ -21,6 +21,9 @@ export default function AssistantWidget() {
     error,
     startNewConversation,
     ready,
+    pendingAction,
+    confirmPendingAction,
+    rejectPendingAction,
   } = useAssistantConversation();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -105,6 +108,35 @@ export default function AssistantWidget() {
                 {error}
               </div>
             )}
+
+            {pendingAction && (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3.5">
+                <p className="text-sm font-bold text-amber-950">
+                  {pendingAction.title}
+                </p>
+                <p className="mt-1 text-xs leading-5 text-amber-800">
+                  {pendingAction.description}
+                </p>
+                <div className="mt-3 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void confirmPendingAction()}
+                    disabled={isStreaming}
+                    className="rounded-lg bg-red-600 px-3 py-2 text-xs font-bold text-white hover:bg-red-700 disabled:opacity-50"
+                  >
+                    Confirm cancellation
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void rejectPendingAction()}
+                    disabled={isStreaming}
+                    className="rounded-lg border border-amber-300 bg-white px-3 py-2 text-xs font-bold text-amber-900 hover:bg-amber-100 disabled:opacity-50"
+                  >
+                    Keep booking
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <form
@@ -126,6 +158,9 @@ export default function AssistantWidget() {
               <Send className="h-4 w-4" />
             </button>
           </form>
+          <p className="border-t border-[var(--border-default)] px-3 py-2 text-center text-[10px] text-[var(--text-muted)]">
+            Advice is read-only unless you explicitly confirm an action.
+          </p>
         </div>
       )}
 
