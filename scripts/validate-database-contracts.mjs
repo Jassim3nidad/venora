@@ -344,6 +344,7 @@ const requiredMigrations = [
   "20260728150000_ai_concierge_actions.sql",
   "20260728160000_restore_venue_media_storage_ownership.sql",
   "20260728161000_qualify_venue_media_object_path.sql",
+  "20260728162000_lock_ai_to_qwen37_flash.sql",
 ];
 for (const name of requiredMigrations) {
   if (!migrationFiles.includes(name))
@@ -446,8 +447,7 @@ for (const name of [
 
 const venueStorageMigration =
   migrations.find(
-    ({ name }) =>
-      name === "20260728161000_qualify_venue_media_object_path.sql",
+    ({ name }) => name === "20260728161000_qualify_venue_media_object_path.sql",
   )?.source ?? "";
 for (const token of [
   "v.id::text = (storage.foldername(storage.objects.name))[2]",
@@ -456,6 +456,21 @@ for (const token of [
 ]) {
   if (!venueStorageMigration.includes(token)) {
     errors.push(`venue-media ownership contract missing: ${token}`);
+  }
+}
+
+const qwenModelMigration =
+  migrations.find(
+    ({ name }) => name === "20260728162000_lock_ai_to_qwen37_flash.sql",
+  )?.source ?? "";
+for (const token of [
+  "model = 'qwen/qwen3.7-flash'",
+  "provider = 'openrouter'",
+  "fallback_provider IS NULL",
+  "fallback_model IS NULL",
+]) {
+  if (!qwenModelMigration.includes(token)) {
+    errors.push(`approved AI model contract missing: ${token}`);
   }
 }
 
