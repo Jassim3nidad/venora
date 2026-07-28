@@ -33,6 +33,9 @@ function validateGeneratedTypes() {
       "accessibility_notes",
       "rsvp_status",
       "rsvp_token",
+      "rsvp_invitation_delivered_at",
+      "rsvp_reminder_sent_at",
+      "rsvp_delivery_error",
       "created_at",
       "updated_at",
     ]) {
@@ -312,6 +315,7 @@ const requiredMigrations = [
   "0711_tighten_venue_media_storage_ownership.sql",
   "20260723100005_event_guests.sql",
   "20260727130000_event_guest_management_hardening.sql",
+  "20260728140000_rsvp_delivery_tracking.sql",
 ];
 for (const name of requiredMigrations) {
   if (!migrationFiles.includes(name))
