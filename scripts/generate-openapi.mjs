@@ -1605,13 +1605,13 @@ const definitions = [
     security: optionalBearer,
     edge: true,
     description:
-      "Creates/resumes a conversation, optionally adds authenticated user's booking context, persists messages/usage, and streams SSE. First event carries conversationId. Maximum 100 messages per conversation.",
+      "Creates/resumes a conversation, optionally adds authenticated user's booking context, persists messages/usage, and streams SSE. A strict cancellation command returns a confirmation proposal; the customer-confirmed action is role/ownership checked, conditionally claimed, executed under the user JWT, and audited.",
     requestBody: body("AIAssistantRequest", {
       sessionId: "browser-session-example",
       message: "Show venues for 120 guests in Cebu.",
     }),
     stream: true,
-    errors: [400, 401, 403, 429, 500, 502],
+    errors: [400, 401, 403, 404, 409, 429, 500, 502],
   },
   {
     method: "post",
@@ -1633,6 +1633,23 @@ const definitions = [
     successSchema: schemaRef("GenericObject"),
     successExample: { success: true },
     errors: [401, 500, 503],
+  },
+  {
+    method: "post",
+    path: "/rsvp-notifications",
+    summary: "Deliver RSVP invitations or reminders",
+    tags: ["Notifications", "Internal"],
+    security: bearer,
+    edge: true,
+    description:
+      "Invitation mode requires the signed-in guest-list owner's bearer and rechecks guest ownership through RLS. Reminder mode requires the dedicated reminder secret, conditionally claims due pending rows, and sends a bounded Resend batch.",
+    requestBody: body("GenericObject", {
+      mode: "invitation",
+      guestId: "00000000-0000-4000-8000-000000000001",
+    }),
+    successSchema: schemaRef("GenericObject"),
+    successExample: { success: true, delivery: "sent" },
+    errors: [400, 401, 404, 500, 503],
   },
 ];
 
