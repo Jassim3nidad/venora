@@ -234,7 +234,7 @@ export default function VenueDetails({
   ].filter((item) => item.show);
 
   return (
-    <main className="mx-auto max-w-7xl space-y-8 px-4 pb-28 pt-8 font-sans text-[#151C27] sm:px-6 lg:px-8 lg:pb-8">
+    <div className="mx-auto max-w-7xl space-y-8 px-4 pb-28 pt-8 font-sans text-[#151C27] sm:px-6 lg:px-8 lg:pb-8">
       <nav
         aria-label="Breadcrumb"
         className="flex flex-wrap items-center gap-2 text-sm font-semibold text-[#434654]"
@@ -825,6 +825,6 @@ export default function VenueDetails({
       ) : null}
 
       {authPrompt}
-    </main>
+    </div>
   );
 }
