@@ -754,6 +754,11 @@ export interface Database {
           accessibility_notes: string | null;
           rsvp_status: EventGuestRsvpStatus;
           rsvp_token: string | null;
+          invitation_sent_at: string | null;
+          rsvp_deadline: string | null;
+          rsvp_responded_at: string | null;
+          rsvp_revoked_at: string | null;
+          plus_ones_attending: number;
           created_at: string;
           updated_at: string;
         };
@@ -771,6 +776,11 @@ export interface Database {
           accessibility_notes?: string | null;
           rsvp_status?: EventGuestRsvpStatus;
           rsvp_token?: string | null;
+          invitation_sent_at?: string | null;
+          rsvp_deadline?: string | null;
+          rsvp_responded_at?: string | null;
+          rsvp_revoked_at?: string | null;
+          plus_ones_attending?: number;
           created_at?: string;
           updated_at?: string;
         };
@@ -785,6 +795,12 @@ export interface Database {
           dietary_requirements?: string | null;
           accessibility_notes?: string | null;
           rsvp_status?: EventGuestRsvpStatus;
+          rsvp_token?: string | null;
+          invitation_sent_at?: string | null;
+          rsvp_deadline?: string | null;
+          rsvp_responded_at?: string | null;
+          rsvp_revoked_at?: string | null;
+          plus_ones_attending?: number;
           updated_at?: string;
         };
       };
