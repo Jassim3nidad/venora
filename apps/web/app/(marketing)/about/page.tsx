@@ -253,7 +253,7 @@ export default function AboutPage() {
     <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-[#F6F8FB] text-[#111827] antialiased">
       <MarketingNavbar />
 
-      <main className="w-full flex-grow">
+      <div className="w-full flex-grow">
         <section className="relative isolate overflow-hidden bg-slate-950">
           <Image
             src="/images/about/about-hero-background.jpg"
@@ -619,7 +619,7 @@ export default function AboutPage() {
             </div>
           </ScrollReveal>
         </section>
-      </main>
+      </div>
     </div>
   );
 }
