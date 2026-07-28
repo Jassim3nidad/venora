@@ -1020,56 +1020,61 @@ export default function VenuesClient({
         ? dynamicVenues.filter((venue) => aiResultRank.has(String(venue.id)))
         : dynamicVenues;
 
-    const list = uniqueVenuesById(source.filter((venue) => {
-      if (query) {
-        const matchesQuery = getVenueSearchText(venue).includes(query);
+    const list = uniqueVenuesById(
+      source.filter((venue) => {
+        if (query) {
+          const matchesQuery = getVenueSearchText(venue).includes(query);
 
-        if (!matchesQuery) return false;
-      }
+          if (!matchesQuery) return false;
+        }
 
-      if (province && !localityMatches(venue.province, province)) {
-        return false;
-      }
-      if (city && !localityMatches(venue.city, city)) return false;
-      if (municipality && !localityMatches(venue.municipality, municipality)) {
-        return false;
-      }
+        if (province && !localityMatches(venue.province, province)) {
+          return false;
+        }
+        if (city && !localityMatches(venue.city, city)) return false;
+        if (
+          municipality &&
+          !localityMatches(venue.municipality, municipality)
+        ) {
+          return false;
+        }
 
-      if (location) {
-        const matchesLocation =
-          textIncludes(venue.location, location) ||
-          textIncludes(venue.city, location) ||
-          textIncludes(venue.municipality, location) ||
-          textIncludes(venue.province, location);
+        if (location) {
+          const matchesLocation =
+            textIncludes(venue.location, location) ||
+            textIncludes(venue.city, location) ||
+            textIncludes(venue.municipality, location) ||
+            textIncludes(venue.province, location);
 
-        if (!matchesLocation) return false;
-      }
+          if (!matchesLocation) return false;
+        }
 
-      if (!matchesEventType(venue, filters.eventType)) return false;
-      if (!matchesBudgetPreset(venue, filters.budget)) return false;
-      if (!matchesBudgetRange(venue, filters.minBudget, filters.maxBudget)) {
-        return false;
-      }
+        if (!matchesEventType(venue, filters.eventType)) return false;
+        if (!matchesBudgetPreset(venue, filters.budget)) return false;
+        if (!matchesBudgetRange(venue, filters.minBudget, filters.maxBudget)) {
+          return false;
+        }
 
-      if (
-        requestedCapacity > 0 &&
-        getVenueCapacity(venue) < requestedCapacity
-      ) {
-        return false;
-      }
+        if (
+          requestedCapacity > 0 &&
+          getVenueCapacity(venue) < requestedCapacity
+        ) {
+          return false;
+        }
 
-      if (!matchesVenueTypes(venue, filters.venueTypes)) return false;
-      if (!matchesIndoorOutdoor(venue, filters.indoorOutdoor)) return false;
+        if (!matchesVenueTypes(venue, filters.venueTypes)) return false;
+        if (!matchesIndoorOutdoor(venue, filters.indoorOutdoor)) return false;
 
-      if (
-        filters.amenities.length > 0 &&
-        !filters.amenities.every((amenity) => matchesAmenity(venue, amenity))
-      ) {
-        return false;
-      }
+        if (
+          filters.amenities.length > 0 &&
+          !filters.amenities.every((amenity) => matchesAmenity(venue, amenity))
+        ) {
+          return false;
+        }
 
-      return true;
-    }));
+        return true;
+      }),
+    );
 
     return [...list].sort((a, b) => {
       if (aiResultRank.size > 0 && filters.sort === "recommended") {
@@ -1441,7 +1446,7 @@ export default function VenuesClient({
         <Sidebar venues={initialVenues} />
       </aside>
 
-      <main className="min-w-0 flex-1 overflow-x-hidden px-4 py-5 sm:px-6 sm:py-6 lg:px-7 xl:px-10">
+      <div className="min-w-0 flex-1 overflow-x-hidden px-4 py-5 sm:px-6 sm:py-6 lg:px-7 xl:px-10">
         <div className="flex flex-col gap-6">
           <section className="max-w-full overflow-hidden rounded-[24px] border border-[#E5E7EB]/90 bg-white shadow-sm shadow-slate-200/60">
             <div className="grid gap-4 p-5 sm:p-6 lg:p-7">
@@ -1727,7 +1732,7 @@ export default function VenuesClient({
             </>
           )}
         </div>
-      </main>
+      </div>
       {authPrompt}
     </div>
   );
