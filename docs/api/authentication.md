@@ -87,7 +87,11 @@ const result = await loginAction({
 - Service-role clients bypass RLS and therefore appear only in payment webhooks, checkout attachment, refund reconciliation, AI server work, and notification delivery.
 - Every service-role Edge Function must perform its own authorization before reading user-private data or writing on a user's behalf.
 - `ai-venue-description` explicitly checks organization membership/admin because it uses service role.
-- `ai-assistant` verifies an optional bearer before adding that user's bookings to model context.
+- `ai-assistant` verifies an optional bearer before adding that user's bookings
+  to model context. Its cancellation tool additionally requires the live
+  `customer` role, exact booking ownership, a pending server-stored proposal,
+  explicit confirmation, and execution through `cancel_booking_request` with
+  the same user JWT.
 
 ## CSRF and origin
 
