@@ -1,7 +1,7 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Armchair, Pencil, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
@@ -52,8 +52,21 @@ export function SeatingPlanner({
   const [isPending, startTransition] = useTransition();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [draft, setDraft] = useState<TableDraft>(EMPTY_TABLE);
-  const assignedGuestIds = new Set(assignments.map((item) => item.guest_id));
-  const totalCapacity = tables.reduce((sum, table) => sum + table.capacity, 0);
+  const [tableRows, setTableRows] = useState(tables);
+  const [assignmentRows, setAssignmentRows] = useState(assignments);
+  const assignedGuestIds = new Set(assignmentRows.map((item) => item.guest_id));
+  const totalCapacity = tableRows.reduce(
+    (sum, table) => sum + table.capacity,
+    0,
+  );
+
+  useEffect(() => {
+    setTableRows(tables);
+  }, [tables]);
+
+  useEffect(() => {
+    setAssignmentRows(assignments);
+  }, [assignments]);
 
   function openCreate() {
     setDraft(EMPTY_TABLE);
@@ -84,6 +97,14 @@ export function SeatingPlanner({
         toast.error(result.error.message);
         return;
       }
+      const savedTable = result.data.table as SeatingTable;
+      setTableRows((current) =>
+        draft.id
+          ? current.map((table) =>
+              table.id === savedTable.id ? savedTable : table,
+            )
+          : [savedTable, ...current],
+      );
       toast.success(draft.id ? "Table updated." : "Table added.");
       setDialogOpen(false);
       router.refresh();
@@ -97,6 +118,12 @@ export function SeatingPlanner({
       const result = await deleteSeatingTableAction({ id: table.id });
       if (result.error) toast.error(result.error.message);
       else {
+        setTableRows((current) =>
+          current.filter((item) => item.id !== table.id),
+        );
+        setAssignmentRows((current) =>
+          current.filter((item) => item.table_id !== table.id),
+        );
         toast.success("Table deleted.");
         router.refresh();
       }
@@ -109,6 +136,10 @@ export function SeatingPlanner({
       const result = await assignGuestSeatAction({ tableId, guestId });
       if (result.error) toast.error(result.error.message);
       else {
+        setAssignmentRows((current) => [
+          result.data.assignment as Assignment,
+          ...current,
+        ]);
         toast.success("Guest assigned.");
         router.refresh();
       }
@@ -120,6 +151,9 @@ export function SeatingPlanner({
       const result = await removeGuestSeatAction({ id });
       if (result.error) toast.error(result.error.message);
       else {
+        setAssignmentRows((current) =>
+          current.filter((item) => item.id !== id),
+        );
         toast.success("Guest removed from table.");
         router.refresh();
       }
@@ -156,11 +190,11 @@ export function SeatingPlanner({
 
       <div className="grid gap-3 sm:grid-cols-3">
         {[
-          { label: "Tables", value: tables.length },
-          { label: "Assigned guests", value: assignments.length },
+          { label: "Tables", value: tableRows.length },
+          { label: "Assigned guests", value: assignmentRows.length },
           {
             label: "Open seats",
-            value: Math.max(0, totalCapacity - assignments.length),
+            value: Math.max(0, totalCapacity - assignmentRows.length),
           },
         ].map((item) => (
           <div
@@ -177,7 +211,7 @@ export function SeatingPlanner({
         ))}
       </div>
 
-      {tables.length === 0 ? (
+      {tableRows.length === 0 ? (
         <section className="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
           <Armchair className="mx-auto h-10 w-10 text-slate-300" />
           <h3 className="mt-3 font-bold text-slate-900">No tables yet</h3>
@@ -187,8 +221,8 @@ export function SeatingPlanner({
         </section>
       ) : (
         <div className="grid gap-4 xl:grid-cols-2">
-          {tables.map((table) => {
-            const tableAssignments = assignments.filter(
+          {tableRows.map((table) => {
+            const tableAssignments = assignmentRows.filter(
               (item) => item.table_id === table.id,
             );
             const availableGuests = guests.filter(
