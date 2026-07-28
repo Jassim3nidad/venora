@@ -174,34 +174,31 @@ calendars, customer communication, suppliers, performance, reports).
 
 ### Phase 3–4 — Planning suite / AI event platform
 
-- [~] Guest management — authenticated CRUD, CSV import/export, filters,
-  statistics, RLS hardening, focused tests, and fail-closed hosted acceptance
-  coverage exist; staging migrations are applied, but the exact-main protected
-  browser run is blocked by Vercel build capacity
+- [x] Guest management — authenticated CRUD, CSV import/export, filters,
+      statistics, RLS hardening, focused tests, and protected hosted acceptance
+      pass against the applied staging migration
 - [~] RSVP management — owner create/copy/revoke controls, deadlines, token-only
   public response RPCs, plus-ones, `/rsvp/[token]`, invitation delivery, and
-  targeted reminder automation exist; hosted delivery is blocked by the invalid
-  Resend credential and browser E2E awaits an exact-main deployment
-- [~] Seating planner — authenticated table CRUD, capacity-aware guest
-  assignment UI/actions, ownership hardening, focused tests, and staging
-  multi-account acceptance coverage exist; the exact-main hosted run is pending
-- [~] Event timeline planner — authenticated task CRUD, scheduling, owners,
-  priorities, status filters, dependency UI, focused tests, and staging
-  multi-account acceptance coverage exist; the exact-main hosted run is pending
-- [~] AI Event Planner — the authenticated `/account/event-planner` workflow
-  validates provider output, discloses deterministic fallback use, and has
-  focused plus hosted acceptance coverage; the Qwen provider contract is live,
-  but the exact-main customer workflow is not deployed
+  targeted reminder automation exist; protected hosted acceptance reaches
+  invitation delivery, which is blocked by the invalid Resend credential
+- [x] Seating planner — authenticated capacity-aware table CRUD/assignment,
+      ownership hardening, focused tests, and hosted multi-account acceptance pass
+- [x] Event timeline planner — authenticated task CRUD, scheduling, owners,
+      priorities, status filters, dependency UI, focused tests, and hosted
+      multi-account acceptance pass
+- [x] AI Event Planner — the authenticated `/account/event-planner` workflow
+      validates live Qwen output, discloses deterministic fallback use, and
+      passes focused and protected hosted acceptance
 - [x] AI Budget Advisor — customer-facing venue cost estimation and the
       deterministic module exist; hosted Qwen output validation and provider/model,
       token, and integer-cost usage evidence pass
-- [~] AI Supplier Matching — deterministic accredited-supplier ranking is
-  integrated into the customer marketplace with focused and hosted acceptance
-  coverage; live authorization/data evidence is pending
-- [~] AI Concierge — the active customer widget streams through `ai-assistant`;
-  customer-only cancellation proposals require explicit confirmation and persist
-  service-only audit evidence; hosted Qwen streaming and usage evidence pass,
-  while confirmed-tool browser execution awaits the exact-main deployment
+- [x] AI Supplier Matching — deterministic accredited-supplier ranking is
+      integrated into the customer marketplace and passes focused plus hosted
+      authorization/data acceptance
+- [x] AI Concierge — the customer widget streams live Qwen output through
+      `ai-assistant`; customer-only cancellation proposals require explicit
+      confirmation, execute in protected hosted acceptance, and persist
+      service-only audit evidence
 
 ---
 
