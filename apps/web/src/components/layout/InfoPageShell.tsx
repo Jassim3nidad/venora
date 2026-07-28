@@ -37,7 +37,7 @@ export function InfoPageShell({
     <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-[#F9FAFB] text-[#111827] antialiased">
       <MarketingNavbar />
 
-      <main className="w-full flex-grow">
+      <div className="w-full flex-grow">
         <section className="relative overflow-hidden border-b border-[#E5E7EB] bg-gradient-to-br from-white via-[#EFF6FF] to-white py-16 sm:py-20 lg:py-24">
           <div className="absolute left-1/2 top-8 h-64 w-64 -translate-x-1/2 rounded-full bg-[#BFDBFE]/35 blur-3xl" />
           <div className="relative mx-auto grid w-full max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:px-8">
@@ -141,7 +141,7 @@ export function InfoPageShell({
             </Link>
           </div>
         </section>
-      </main>
+      </div>
 
       {includeFooter ? <SiteFooter /> : null}
     </div>
