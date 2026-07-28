@@ -5,7 +5,7 @@ const validConfiguration = {
   feature: "assistant",
   enabled: true,
   provider: "openrouter",
-  model: "tencent/hy3:free",
+  model: "qwen/qwen3.7-flash",
   fallbackProvider: "",
   fallbackModel: "",
   systemInstruction: "Ground answers in Venora data.",
@@ -20,7 +20,7 @@ const validConfiguration = {
 } as const;
 
 describe("updateAiConfigurationSchema", () => {
-  it("accepts the approved OpenRouter HY3 configuration", () => {
+  it("accepts the approved OpenRouter Qwen configuration", () => {
     expect(
       updateAiConfigurationSchema.safeParse(validConfiguration).success,
     ).toBe(true);
