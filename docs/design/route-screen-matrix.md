@@ -1,6 +1,6 @@
 # Route-to-screen matrix
 
-This matrix covers all 136 `page.tsx` files currently under `apps/web/app`.
+This matrix covers all 137 `page.tsx` files currently under `apps/web/app`.
 “Source-only” means the route and guard were inspected but no authenticated
 runtime claim is made. Detailed child components, actions, entities, and states
 are summarized after the file-level matrix and in [screen inventory](screen-inventory.md).
@@ -54,6 +54,7 @@ but not runtime-verified, **P** partially implemented, **PH** placeholder,
 | `/account/become-partner`     | `apps/web/app/(customer)/account/become-partner/page.tsx`     | Partner application wizard    | Authenticated                                      | U      | Source-only       |
 | `/account/change-password`    | `apps/web/app/(customer)/account/change-password/page.tsx`    | Password/security             | Authenticated                                      | U      | Source-only       |
 | `/account/dashboard`          | `apps/web/app/(customer)/account/dashboard/page.tsx`          | Customer dashboard            | Authenticated                                      | U      | Source-only       |
+| `/account/event-planner`      | `apps/web/app/(customer)/account/event-planner/page.tsx`      | AI event planner              | Authenticated customer                             | U      | Source-only       |
 | `/account/inquiries`          | `apps/web/app/(customer)/account/inquiries/page.tsx`          | Inquiry list alias            | Authenticated; redirects to bookings supplier view | DEP    | Source-only       |
 | `/account/inquiries/[id]`     | `apps/web/app/(customer)/account/inquiries/[id]/page.tsx`     | Inquiry detail alias          | Authenticated; redirects to canonical inquiry      | DEP    | Source-only       |
 | `/account/payments`           | `apps/web/app/(customer)/account/payments/page.tsx`           | Payments/documents            | Authenticated                                      | U      | Source-only       |
@@ -186,7 +187,7 @@ authorization contracts are in the [endpoint inventory](../api/endpoint-inventor
 
 ## Count reconciliation
 
-The baseline contains 136 page files. There are no page files classified as
+The baseline contains 137 page files. There are no page files classified as
 MISSING, INACCESSIBLE, or BLOCKED. Missing conceptual experiences are listed in
 [UI gap analysis](ui-gap-analysis.md).
 
@@ -196,6 +197,7 @@ These source-only routes extend the original classified matrix:
 
 - `apps/web/app/(admin)/admin/payments/page.tsx`
 - `apps/web/app/(customer)/account/disputes/page.tsx`
+- `apps/web/app/(customer)/account/event-planner/page.tsx`
 - `apps/web/app/(customer)/account/guests/page.tsx`
 - `apps/web/app/(customer)/account/messages/page.tsx`
 - `apps/web/app/(customer)/account/seating/page.tsx`
