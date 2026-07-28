@@ -58,6 +58,14 @@ Do not rename, delete, repair, or mark these entries applied without authorized
 staging/production history and schema evidence. Prefer an approved forward
 reconciliation migration if either contract is missing.
 
+The same restriction applies to the exact duplicate timestamp pair
+`20260724000000_fix_partner_application_notifications.sql` and
+`20260724000000_fix_venue_grants.sql`, plus the legacy numeric ordering of
+`0795_business_profiles.sql` before `080_booking_supplier_coordinations.sql`.
+They are repository-contract exceptions only. Before database apply, verify the
+linked migration ledger and confirm the partner-notification function, venue
+grants, business-profile schema, and supplier-coordination schema independently.
+
 ## Commands
 
 ```bash

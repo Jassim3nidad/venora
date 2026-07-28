@@ -8,6 +8,7 @@ import {
   Mail,
   MessageSquareText,
   Receipt,
+  Users,
   UserRound,
   type LucideIcon,
 } from "lucide-react";
@@ -31,6 +32,12 @@ export const ACCOUNT_NAV_ITEMS: AccountNavItem[] = [
     label: "Customer Dashboard",
     description: "Bookings, spending, and activity overview",
     icon: LayoutDashboard,
+  },
+  {
+    href: "/account/guests",
+    label: "Guest Management",
+    description: "Guest list, responses, and requirements",
+    icon: Users,
   },
   {
     href: "/account/messages",

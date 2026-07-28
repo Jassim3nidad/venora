@@ -1,6 +1,6 @@
 # Route-to-screen matrix
 
-This matrix covers every `page.tsx` under `apps/web/app` at commit `afceb1d`.
+This matrix covers all 133 `page.tsx` files currently under `apps/web/app`.
 “Source-only” means the route and guard were inspected but no authenticated
 runtime claim is made. Detailed child components, actions, entities, and states
 are summarized after the file-level matrix and in [screen inventory](screen-inventory.md).
@@ -11,29 +11,29 @@ but not runtime-verified, **P** partially implemented, **PH** placeholder,
 
 ## Administrator
 
-| Route                     | Source                                                 | Screen                 | Access / page permission      | Status | Runtime     |
-| ------------------------- | ------------------------------------------------------ | ---------------------- | ----------------------------- | ------ | ----------- |
-| `/admin`                  | `apps/web/app/(admin)/admin/page.tsx`                  | Admin overview         | Admin; `admin.dashboard.view` | U      | Source-only |
-| `/admin/administrators`   | `apps/web/app/(admin)/admin/administrators/page.tsx`   | Admin accounts         | Admin; `admin_accounts.view`  | U      | Source-only |
-| `/admin/ai-configuration` | `apps/web/app/(admin)/admin/ai-configuration/page.tsx` | AI configuration       | Admin; `ai_config.view`       | U      | Source-only |
-| `/admin/applications`     | `apps/web/app/(admin)/admin/applications/page.tsx`     | Partner applications   | Admin; `users.verify`         | U      | Source-only |
-| `/admin/audit-logs`       | `apps/web/app/(admin)/admin/audit-logs/page.tsx`       | Audit logs             | Admin; `audit_logs.view`      | U      | Source-only |
-| `/admin/bookings`         | `apps/web/app/(admin)/admin/bookings/page.tsx`         | Booking monitoring     | Admin; `marketplace.view`     | U      | Source-only |
-| `/admin/commissions`      | `apps/web/app/(admin)/admin/commissions/page.tsx`      | Commission management  | Admin; `commissions.view`     | U      | Source-only |
-| `/admin/disputes`         | `apps/web/app/(admin)/admin/disputes/page.tsx`         | Disputes               | Admin; `disputes.view`        | I      | Source-only |
-| `/admin/disputes/[id]`    | `apps/web/app/(admin)/admin/disputes/[id]/page.tsx`    | Dispute detail         | Admin; `disputes.view` (+ manage/resolve actions) | I | Source-only |
-| `/admin/inquiries`        | `apps/web/app/(admin)/admin/inquiries/page.tsx`        | Inquiry monitoring     | Admin; `marketplace.view`     | U      | Source-only |
-| `/admin/marketplace`      | `apps/web/app/(admin)/admin/marketplace/page.tsx`      | Marketplace monitoring | Admin; `marketplace.view`     | U      | Source-only |
-| `/admin/reports`          | `apps/web/app/(admin)/admin/reports/page.tsx`          | Reports                | Admin; `reports.view`         | U      | Source-only |
-| `/admin/reviews`          | `apps/web/app/(admin)/admin/reviews/page.tsx`          | Review moderation      | Admin; `marketplace.moderate` | U      | Source-only |
-| `/admin/settings`         | `apps/web/app/(admin)/admin/settings/page.tsx`         | System settings        | Admin; `system_settings.view` | U      | Source-only |
-| `/admin/suppliers`        | `apps/web/app/(admin)/admin/suppliers/page.tsx`        | Supplier management    | Admin; `suppliers.view`       | U      | Source-only |
-| `/admin/suppliers/[id]`   | `apps/web/app/(admin)/admin/suppliers/[id]/page.tsx`   | Supplier review        | Admin; `suppliers.view`       | U      | Source-only |
-| `/admin/users`            | `apps/web/app/(admin)/admin/users/page.tsx`            | User management        | Admin; `users.view`           | U      | Source-only |
-| `/admin/users/[id]`       | `apps/web/app/(admin)/admin/users/[id]/page.tsx`       | User details/roles     | Admin; `users.view`           | U      | Source-only |
-| `/admin/venues`           | `apps/web/app/(admin)/admin/venues/page.tsx`           | Venue management       | Admin; `venues.view`          | U      | Source-only |
-| `/admin/venues/[id]`      | `apps/web/app/(admin)/admin/venues/[id]/page.tsx`      | Venue review           | Admin; `venues.view`          | U      | Source-only |
-| `/dashboard/admin`        | `apps/web/app/(admin)/dashboard/admin/page.tsx`        | Admin overview alias   | Same as `/admin`              | DUP    | Source-only |
+| Route                     | Source                                                 | Screen                 | Access / page permission                          | Status | Runtime     |
+| ------------------------- | ------------------------------------------------------ | ---------------------- | ------------------------------------------------- | ------ | ----------- |
+| `/admin`                  | `apps/web/app/(admin)/admin/page.tsx`                  | Admin overview         | Admin; `admin.dashboard.view`                     | U      | Source-only |
+| `/admin/administrators`   | `apps/web/app/(admin)/admin/administrators/page.tsx`   | Admin accounts         | Admin; `admin_accounts.view`                      | U      | Source-only |
+| `/admin/ai-configuration` | `apps/web/app/(admin)/admin/ai-configuration/page.tsx` | AI configuration       | Admin; `ai_config.view`                           | U      | Source-only |
+| `/admin/applications`     | `apps/web/app/(admin)/admin/applications/page.tsx`     | Partner applications   | Admin; `users.verify`                             | U      | Source-only |
+| `/admin/audit-logs`       | `apps/web/app/(admin)/admin/audit-logs/page.tsx`       | Audit logs             | Admin; `audit_logs.view`                          | U      | Source-only |
+| `/admin/bookings`         | `apps/web/app/(admin)/admin/bookings/page.tsx`         | Booking monitoring     | Admin; `marketplace.view`                         | U      | Source-only |
+| `/admin/commissions`      | `apps/web/app/(admin)/admin/commissions/page.tsx`      | Commission management  | Admin; `commissions.view`                         | U      | Source-only |
+| `/admin/disputes`         | `apps/web/app/(admin)/admin/disputes/page.tsx`         | Disputes               | Admin; `disputes.view`                            | I      | Source-only |
+| `/admin/disputes/[id]`    | `apps/web/app/(admin)/admin/disputes/[id]/page.tsx`    | Dispute detail         | Admin; `disputes.view` (+ manage/resolve actions) | I      | Source-only |
+| `/admin/inquiries`        | `apps/web/app/(admin)/admin/inquiries/page.tsx`        | Inquiry monitoring     | Admin; `marketplace.view`                         | U      | Source-only |
+| `/admin/marketplace`      | `apps/web/app/(admin)/admin/marketplace/page.tsx`      | Marketplace monitoring | Admin; `marketplace.view`                         | U      | Source-only |
+| `/admin/reports`          | `apps/web/app/(admin)/admin/reports/page.tsx`          | Reports                | Admin; `reports.view`                             | U      | Source-only |
+| `/admin/reviews`          | `apps/web/app/(admin)/admin/reviews/page.tsx`          | Review moderation      | Admin; `marketplace.moderate`                     | U      | Source-only |
+| `/admin/settings`         | `apps/web/app/(admin)/admin/settings/page.tsx`         | System settings        | Admin; `system_settings.view`                     | U      | Source-only |
+| `/admin/suppliers`        | `apps/web/app/(admin)/admin/suppliers/page.tsx`        | Supplier management    | Admin; `suppliers.view`                           | U      | Source-only |
+| `/admin/suppliers/[id]`   | `apps/web/app/(admin)/admin/suppliers/[id]/page.tsx`   | Supplier review        | Admin; `suppliers.view`                           | U      | Source-only |
+| `/admin/users`            | `apps/web/app/(admin)/admin/users/page.tsx`            | User management        | Admin; `users.view`                               | U      | Source-only |
+| `/admin/users/[id]`       | `apps/web/app/(admin)/admin/users/[id]/page.tsx`       | User details/roles     | Admin; `users.view`                               | U      | Source-only |
+| `/admin/venues`           | `apps/web/app/(admin)/admin/venues/page.tsx`           | Venue management       | Admin; `venues.view`                              | U      | Source-only |
+| `/admin/venues/[id]`      | `apps/web/app/(admin)/admin/venues/[id]/page.tsx`      | Venue review           | Admin; `venues.view`                              | U      | Source-only |
+| `/dashboard/admin`        | `apps/web/app/(admin)/dashboard/admin/page.tsx`        | Admin overview alias   | Same as `/admin`                                  | DUP    | Source-only |
 
 ## Authentication
 
@@ -68,7 +68,7 @@ but not runtime-verified, **P** partially implemented, **PH** placeholder,
 | `/bookings/[id]/review`       | `apps/web/app/(customer)/bookings/[id]/review/page.tsx`       | Review submission             | Eligible customer booking                          | U      | Source-only       |
 | `/dashboard/customer`         | `apps/web/app/(customer)/dashboard/customer/page.tsx`         | Customer dashboard alias      | Authenticated; redirects to account dashboard      | DEP    | Source-only       |
 | `/favorites`                  | `apps/web/app/(customer)/favorites/page.tsx`                  | Saved venues                  | Authenticated                                      | U      | Source-only       |
-| `/help`                       | `apps/web/app/(customer)/help/page.tsx`                       | Customer help                 | Public shell                                       | U      | Source-only       |
+| `/help`                       | `apps/web/app/help/page.tsx`                                  | Customer help                 | Public shell                                       | U      | Source-only       |
 | `/inquiries/[id]`             | `apps/web/app/(customer)/inquiries/[id]/page.tsx`             | Supplier inquiry detail       | Inquiry participant                                | U      | Source-only       |
 | `/notifications`              | `apps/web/app/(customer)/notifications/page.tsx`              | Notification inbox            | Authenticated                                      | U      | Source-only       |
 | `/settings`                   | `apps/web/app/(customer)/settings/page.tsx`                   | Account/notification settings | Authenticated                                      | U      | Source-only       |
@@ -80,16 +80,8 @@ but not runtime-verified, **P** partially implemented, **PH** placeholder,
 
 ## Event coordinator
 
-| Route                                | Source                                                                        | Screen                     | Access                     | Status | Runtime     |
-| ------------------------------------ | ----------------------------------------------------------------------------- | -------------------------- | -------------------------- | ------ | ----------- |
-| `/dashboard/coordinator`             | `apps/web/app/(event-coordinator)/dashboard/coordinator/page.tsx`             | Coordinator overview       | Coordinator/admin          | U      | Source-only |
-| `/dashboard/coordinator/calendar`    | `apps/web/app/(event-coordinator)/dashboard/coordinator/calendar/page.tsx`    | Coordinator calendar       | Coordinator/admin          | U      | Source-only |
-| `/dashboard/coordinator/events`      | `apps/web/app/(event-coordinator)/dashboard/coordinator/events/page.tsx`      | Coordinated events         | Coordinator/admin          | U      | Source-only |
-| `/dashboard/coordinator/events/[id]` | `apps/web/app/(event-coordinator)/dashboard/coordinator/events/[id]/page.tsx` | Coordinated event detail   | Coordinator/admin          | U      | Source-only |
-| `/dashboard/coordinator/reports`     | `apps/web/app/(event-coordinator)/dashboard/coordinator/reports/page.tsx`     | Coordinator reports        | Coordinator/admin          | U      | Source-only |
-| `/dashboard/coordinator/suppliers`   | `apps/web/app/(event-coordinator)/dashboard/coordinator/suppliers/page.tsx`   | Supplier discovery         | Coordinator/admin          | U      | Source-only |
-| `/dashboard/coordinator/venues`      | `apps/web/app/(event-coordinator)/dashboard/coordinator/venues/page.tsx`      | Venue discovery            | Coordinator/admin          | U      | Source-only |
-| `/dashboard/event-coordinator`       | `apps/web/app/(event-coordinator)/dashboard/event-coordinator/page.tsx`       | Coordinator overview alias | Same as canonical overview | DUP    | Source-only |
+| Route | Source | Screen | Access | Status | Runtime |
+| ----- | ------ | ------ | ------ | ------ | ------- |
 
 ## Marketing and legal
 
@@ -170,27 +162,70 @@ authorization contracts are in the [endpoint inventory](../api/endpoint-inventor
 | `/api/notification-preferences`                                                     | Notification settings                                          | Authenticated current-user GET/PATCH                                                 |
 | `/api/analytics/venue-owner/export`                                                 | Owner/coordinator analytics export                             | Venue owner, coordinator, or admin; scoped CSV/PDF                                   |
 | `/api/admin/reports/export`                                                         | Admin report export                                            | `reports.export`; writes export/audit records                                        |
-| `/api/webhooks/paymongo`, `/api/webhooks/maya`                                      | Payment/refund settlement shown in booking UI                  | Signed provider callbacks; PayMongo active, Maya success path incomplete             |
+| `/api/webhooks/paymongo`                                                            | Payment/refund settlement shown in booking UI                  | Signed PayMongo provider callbacks                                                   |
 | `/api/debug`                                                                        | No supported screen                                            | Unguarded diagnostic surface documented as an API risk; should not become navigation |
 | `/robots.txt`, `/sitemap.xml`                                                       | Public search discovery                                        | Generated crawl policy and public sitemap                                            |
 
 ## Screen-family integration details
 
-| Family                      | Important child components                                            | Server Actions / APIs                                                                       | Main entities                                                        | Loading / error / empty                                   | Responsive / accessibility                                              |
-| --------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Auth                        | Auth forms, avatar/setup wizard                                       | Supabase auth callbacks and profile actions; see [authentication](../api/authentication.md) | `auth.users`, profiles, roles                                        | Inline pending/errors; no route error                     | Labeled forms; password targets small; heading issue on forgot-password |
-| Venue marketplace/detail    | Filters, cards, gallery, video, map, packages, reviews                | Venue/favorite/booking actions                                                              | venues, media, amenities, packages, availability, reviews            | Venue loading file; filter empty state; no route error    | Responsive grid; duplicate landmarks/headings; load-more defect         |
-| Supplier marketplace/detail | Filters, cards, profile, packages, portfolio                          | Supplier/inquiry actions                                                                    | suppliers, services, packages, portfolio, reviews                    | Supplier loading file; empty results                      | Responsive grid; filter label association gap                           |
-| Customer booking            | Filter controls, timeline, status, conversation, map, cancel controls | Booking, payment, cancellation, review actions; payment Route Handlers/webhooks             | bookings, booking events, payments, refunds, reviews, notifications  | List loading/empty; detail state messages; no route error | Source-only; complex status/action sequence needs assistive QA          |
-| Partner application         | Wizard, uploads, review dialog                                        | Application and upload actions; see [storage](../api/storage.md)                            | applications, verification documents, partner profiles               | Step validation, pending and result states                | Dialog/upload keyboard behavior unverified                              |
-| Enterprise dashboards       | `EnterpriseShell`, overview cards, charts, tables                     | Role-scoped dashboard/analytics/report actions                                              | role-specific aggregates                                             | Inline/feature states; analytics loading file only        | Sidebar/drawer breakpoints; mobile drawer focus gap                     |
-| Venue operations            | Venue forms, media uploads, calendar, packages, booking review        | Venue CRUD/media/availability/package/booking actions                                       | venues, media, availability, pricing, bookings                       | Form feedback and empty lists; no route error             | Dense forms/calendar/table require authenticated responsive QA          |
-| Supplier operations         | Profile/services/portfolio, inquiry snapshot, quote forms, calendar   | Supplier profile/service/inquiry/quote/availability actions                                 | suppliers, services, inquiries, snapshots, quotes                    | Inline states; no route loading files                     | Event privacy and long snapshot content need multi-account QA           |
-| Admin governance            | Review action bar, tables, filters, details, settings                 | Permission-guarded admin actions                                                            | users, roles, permissions, applications, bookings, commissions, logs, disputes | Page-local empty/errors                                    | Tables/dialogs and destructive feedback source-only                     |
-| Notifications               | Bell, inbox, preferences                                              | Notification read/preferences actions                                                       | notifications, preferences                                           | Inbox empty state                                         | Live announcement and focus behavior unverified                         |
+| Family                      | Important child components                                            | Server Actions / APIs                                                                       | Main entities                                                                  | Loading / error / empty                                   | Responsive / accessibility                                              |
+| --------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Auth                        | Auth forms, avatar/setup wizard                                       | Supabase auth callbacks and profile actions; see [authentication](../api/authentication.md) | `auth.users`, profiles, roles                                                  | Inline pending/errors; no route error                     | Labeled forms; password targets small; heading issue on forgot-password |
+| Venue marketplace/detail    | Filters, cards, gallery, video, map, packages, reviews                | Venue/favorite/booking actions                                                              | venues, media, amenities, packages, availability, reviews                      | Venue loading file; filter empty state; no route error    | Responsive grid; duplicate landmarks/headings; load-more defect         |
+| Supplier marketplace/detail | Filters, cards, profile, packages, portfolio                          | Supplier/inquiry actions                                                                    | suppliers, services, packages, portfolio, reviews                              | Supplier loading file; empty results                      | Responsive grid; filter label association gap                           |
+| Customer booking            | Filter controls, timeline, status, conversation, map, cancel controls | Booking, payment, cancellation, review actions; payment Route Handlers/webhooks             | bookings, booking events, payments, refunds, reviews, notifications            | List loading/empty; detail state messages; no route error | Source-only; complex status/action sequence needs assistive QA          |
+| Partner application         | Wizard, uploads, review dialog                                        | Application and upload actions; see [storage](../api/storage.md)                            | applications, verification documents, partner profiles                         | Step validation, pending and result states                | Dialog/upload keyboard behavior unverified                              |
+| Enterprise dashboards       | `EnterpriseShell`, overview cards, charts, tables                     | Role-scoped dashboard/analytics/report actions                                              | role-specific aggregates                                                       | Inline/feature states; analytics loading file only        | Sidebar/drawer breakpoints; mobile drawer focus gap                     |
+| Venue operations            | Venue forms, media uploads, calendar, packages, booking review        | Venue CRUD/media/availability/package/booking actions                                       | venues, media, availability, pricing, bookings                                 | Form feedback and empty lists; no route error             | Dense forms/calendar/table require authenticated responsive QA          |
+| Supplier operations         | Profile/services/portfolio, inquiry snapshot, quote forms, calendar   | Supplier profile/service/inquiry/quote/availability actions                                 | suppliers, services, inquiries, snapshots, quotes                              | Inline states; no route loading files                     | Event privacy and long snapshot content need multi-account QA           |
+| Admin governance            | Review action bar, tables, filters, details, settings                 | Permission-guarded admin actions                                                            | users, roles, permissions, applications, bookings, commissions, logs, disputes | Page-local empty/errors                                   | Tables/dialogs and destructive feedback source-only                     |
+| Notifications               | Bell, inbox, preferences                                              | Notification read/preferences actions                                                       | notifications, preferences                                                     | Inbox empty state                                         | Live announcement and focus behavior unverified                         |
 
 ## Count reconciliation
 
-`6 V + 86 U + 2 P + 2 PH + 3 DUP + 3 DEP = 102` (plus 2 new uncounted) page files. There
-are no page files classified as MISSING, INACCESSIBLE, or BLOCKED. Missing
-conceptual experiences are listed in [UI gap analysis](ui-gap-analysis.md).
+The baseline contains 133 page files. There are no page files classified as
+MISSING, INACCESSIBLE, or BLOCKED. Missing conceptual experiences are listed in
+[UI gap analysis](ui-gap-analysis.md).
+
+## Routes added after the original matrix audit
+
+These source-only routes extend the original classified matrix:
+
+- `apps/web/app/(admin)/admin/payments/page.tsx`
+- `apps/web/app/(customer)/account/disputes/page.tsx`
+- `apps/web/app/(customer)/account/guests/page.tsx`
+- `apps/web/app/(customer)/account/messages/page.tsx`
+- `apps/web/app/(customer)/account/venue-inquiries/page.tsx`
+- `apps/web/app/(customer)/account/venue-inquiries/[id]/page.tsx`
+- `apps/web/app/(customer)/compare/page.tsx`
+- `apps/web/app/(customer)/dashboard/planning/guests/page.tsx`
+- `apps/web/app/(customer)/inquiries/[id]/review/page.tsx`
+- `apps/web/app/(customer)/owners/[slug]/page.tsx`
+- `apps/web/app/(customer)/partners/[slug]/page.tsx`
+- `apps/web/app/(supplier)/dashboard/supplier/partnerships/page.tsx`
+- `apps/web/app/(supplier)/dashboard/supplier/settings/page.tsx`
+- `apps/web/app/(supplier)/dashboard/supplier/venues/page.tsx`
+- `apps/web/app/(supplier)/dashboard/supplier/venues/[venueId]/page.tsx`
+- `apps/web/app/(venue-owner)/dashboard/bookings/[id]/assign-supplier/page.tsx`
+- `apps/web/app/(venue-owner)/dashboard/business-profile/page.tsx`
+- `apps/web/app/(venue-owner)/dashboard/business-profile/preview/page.tsx`
+- `apps/web/app/(venue-owner)/dashboard/coordinator/page.tsx`
+- `apps/web/app/(venue-owner)/dashboard/coordinator/bookings/page.tsx`
+- `apps/web/app/(venue-owner)/dashboard/coordinator/bookings/[id]/page.tsx`
+- `apps/web/app/(venue-owner)/dashboard/coordinator/bookings/[id]/assign-supplier/page.tsx`
+- `apps/web/app/(venue-owner)/dashboard/coordinator/calendar/page.tsx`
+- `apps/web/app/(venue-owner)/dashboard/coordinator/messages/page.tsx`
+- `apps/web/app/(venue-owner)/dashboard/coordinator/performance/page.tsx`
+- `apps/web/app/(venue-owner)/dashboard/coordinator/reports/page.tsx`
+- `apps/web/app/(venue-owner)/dashboard/coordinator/settings/page.tsx`
+- `apps/web/app/(venue-owner)/dashboard/coordinator/suppliers/page.tsx`
+- `apps/web/app/(venue-owner)/dashboard/coordinator/suppliers/requests/page.tsx`
+- `apps/web/app/(venue-owner)/dashboard/coordinator/suppliers/[supplierId]/page.tsx`
+- `apps/web/app/(venue-owner)/dashboard/coordinator/venues/page.tsx`
+- `apps/web/app/(venue-owner)/dashboard/packages/new/page.tsx`
+- `apps/web/app/(venue-owner)/dashboard/packages/[id]/edit/page.tsx`
+- `apps/web/app/(venue-owner)/dashboard/venue-owner/settings/page.tsx`
+- `apps/web/app/(venue-owner)/dashboard/venues/[id]/suppliers/page.tsx`
+- `apps/web/app/auth/session/page.tsx`
+- `apps/web/app/help/page.tsx`
+- `apps/web/app/staff/accept/page.tsx`

@@ -1,6 +1,16 @@
 {
   "schemaVersion": 1,
-  "duplicateVersions": [],
+  "duplicateVersions": [
+    {
+      "version": "20260724000000",
+      "files": [
+        "20260724000000_fix_partner_application_notifications.sql",
+        "20260724000000_fix_venue_grants.sql"
+      ],
+      "reason": "Both migrations were introduced together by upstream commit 65d6f35d5a438e237194af0df2dd5361da94600d. Hosted migration history is unavailable, so renaming either file could cause an unsafe reapplication.",
+      "removalCondition": "Remove only after protected linked migration history and schema evidence support an approved forward reconciliation."
+    }
+  ],
   "orderingExceptions": [
     {
       "before": "0045_venues_core.sql",
@@ -16,6 +26,11 @@
       "before": "0711_tighten_venue_media_storage_ownership.sql",
       "after": "071_supplier_location_coverage.sql",
       "reason": "0711 is lexically sorted before 071_ but has a higher numeric prefix"
+    },
+    {
+      "before": "0795_business_profiles.sql",
+      "after": "080_booking_supplier_coordinations.sql",
+      "reason": "Legacy files were added in this order by upstream commits e052e3d2146f5afccd0bee317b43561f77e58d7e and 5647cb0b2dbf220d2dedd4889becc3b254ed19d6. Renaming an applied migration without hosted history could reapply non-idempotent schema creation."
     }
   ],
   "legacyRenames": [
