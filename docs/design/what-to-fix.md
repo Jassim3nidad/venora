@@ -44,8 +44,12 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 - [x] **Maya retired** — no selectable provider, active webhook, environment
       contract, or admin enablement surface remains
 - [ ] Confirm hosted **RLS / Storage / Edge** state before release.
-- [ ] Address **API rate limiting** and Storage ownership/validation gaps as
-      listed in known limitations.
+- [~] **API rate limiting** — sensitive route groups have bounded per-IP
+  middleware limits and focused tests; globally distributed enforcement
+  still needs production infrastructure.
+- [x] **Storage ownership/validation** — repository policies use owned paths;
+      direct uploads validate size, MIME, and file signatures. Hosted
+      cross-tenant verification and provider malware scanning remain release work.
 
 ---
 
