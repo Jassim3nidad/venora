@@ -106,8 +106,9 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 
 ### Messaging & notifications
 
-- [ ] Unified **customer messaging** suite across all commercial surfaces (Phase 2;
-      EC booking + venue inquiry threads already shipped).
+- [x] Unified **customer messaging** across current commercial surfaces:
+      `/account/messages` aggregates booking, venue-inquiry, and supplier-inquiry
+      histories and continues replies on their owned conversation routes.
 - [x] Dedicated settings routes for owner / supplier / EC plus shared
       notification access in dashboard shells.
 
