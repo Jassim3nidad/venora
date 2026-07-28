@@ -143,24 +143,25 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 
 Do **not** block Phase 1 release on these unless product explicitly expands scope.
 
-- [~] Guest management — CRUD/CSV UI, hardened migration, and focused tests exist;
-  hosted migration and live E2E remain
+- [~] Guest management — CRUD/CSV UI, hardened migration, focused tests, and
+  fail-closed hosted acceptance coverage exist; the protected staging run is
+  pending
 - [~] RSVP management — owner create/copy/revoke controls, deadlines, token-only
-  public response RPCs, plus-ones, and `/rsvp/[token]` exist; hosted migration,
-  delivery/reminder automation, and live E2E remain
+  public response RPCs, plus-ones, invitation email delivery, targeted reminder
+  automation, and `/rsvp/[token]` exist; hosted delivery/E2E evidence is pending
 - [~] Seating planner — authenticated table CRUD, capacity-aware guest
-  assignment UI/actions, ownership hardening, and focused tests exist; hosted
-  migration and live multi-account E2E remain
+  assignment UI/actions, ownership hardening, focused tests, and staging
+  multi-account acceptance coverage exist; the hosted run is pending
 - [~] Event timeline planner — authenticated task CRUD, scheduling, owners,
-  priorities, status filters, and dependency UI exist; hosted migration and
-  live multi-account E2E remain
+  priorities, status filters, dependency UI, focused tests, and staging
+  multi-account acceptance coverage exist; the hosted run is pending
 - [~] AI Event Planner / Budget Advisor / Supplier Matching — authenticated event
-  planning, venue cost estimation, and recommendation workflows are
-  customer-facing; the accredited-supplier matcher remains unintegrated, and
-  hosted provider/live-data behavior is unverified
+  planning, venue cost estimation, and accredited-supplier ranking are
+  customer-facing with focused and hosted acceptance coverage; live
+  provider/data evidence is pending
 - [~] AI Concierge — the active customer widget streams through `ai-assistant`;
-  hosted provider behavior, role-aware mutation tools, confirmation, and audit
-  evidence remain unverified
+  customer-only cancellation proposals require explicit confirmation and write
+  service-only action/audit evidence; live provider/tool execution is pending
 - [ ] Featured placements, sponsored listings, premium subscriptions
 - [ ] Stripe (future payments)
 
