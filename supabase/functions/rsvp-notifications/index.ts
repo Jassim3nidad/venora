@@ -213,10 +213,11 @@ async function deliverInvitation(
 async function deliverReminders(
   serviceClient: ReturnType<typeof createClient<any>>,
   limit: number,
+  guestId?: string,
 ) {
   const now = new Date();
   const reminderWindow = new Date(now.getTime() + 72 * 60 * 60 * 1000);
-  const { data, error } = await serviceClient
+  let query = serviceClient
     .from("event_guests")
     .select(
       "id,first_name,last_name,email,rsvp_token,rsvp_deadline",
@@ -228,7 +229,10 @@ async function deliverReminders(
     .is("rsvp_reminder_sent_at", null)
     .not("email", "is", null)
     .gte("rsvp_deadline", now.toISOString())
-    .lte("rsvp_deadline", reminderWindow.toISOString())
+    .lte("rsvp_deadline", reminderWindow.toISOString());
+  if (guestId) query = query.eq("id", guestId);
+
+  const { data, error } = await query
     .order("rsvp_deadline", { ascending: true })
     .limit(limit)
     .returns<GuestInvitation[]>();
@@ -302,7 +306,13 @@ serve(async (req) => {
       const limit = Number.isFinite(requestedLimit)
         ? Math.min(100, Math.max(1, Math.trunc(requestedLimit)))
         : 100;
-      return await deliverReminders(serviceClient, limit);
+      const guestId = typeof payload?.guestId === "string"
+        ? payload.guestId
+        : undefined;
+      if (guestId && !/^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(guestId)) {
+        return json({ error: "Invalid guest ID" }, 400);
+      }
+      return await deliverReminders(serviceClient, limit, guestId);
     }
 
     return json({ error: "Invalid delivery mode" }, 400);
