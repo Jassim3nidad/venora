@@ -139,7 +139,11 @@ function getPolicy(path: string, method: string): RateLimitPolicy {
     return { maxRequests: 10, windowMs: ONE_MINUTE_MS };
   }
 
-  if (path.startsWith("/api/ai") || path.includes("ai-assistant")) {
+  if (
+    path.startsWith("/api/ai") ||
+    path.includes("ai-assistant") ||
+    path === "/account/event-planner"
+  ) {
     return { maxRequests: 20, windowMs: ONE_MINUTE_MS };
   }
 
