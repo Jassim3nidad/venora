@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 export const eventPlanInputSchema = z.object({
-  eventType: z.string().min(2),
+  eventType: z.string().min(2).max(80),
   guestCount: z.number().int().positive(),
   budgetAmount: z.number().positive(),
-  preferredCity: z.string().optional(),
-  eventDate: z.string().optional(),
+  preferredCity: z.string().max(100).optional(),
+  eventDate: z.string().date().optional(),
 });
 
 export type EventPlanInput = z.infer<typeof eventPlanInputSchema>;
@@ -23,6 +23,68 @@ export interface AIEventPlanResult {
     estimatedAmount: number;
   }>;
   fallbackUsed: boolean;
+}
+
+const generatedEventPlanSchema = z.object({
+  recommendedMilestones: z
+    .array(
+      z.object({
+        title: z.string().min(2).max(120),
+        timeline: z.string().min(2).max(80),
+        category: z.string().min(2).max(60),
+      }),
+    )
+    .min(1)
+    .max(10),
+  suggestedServices: z.array(z.string().min(2).max(100)).min(1).max(12),
+  budgetAllocation: z
+    .array(
+      z.object({
+        category: z.string().min(2).max(80),
+        percentage: z.number().min(0).max(100),
+        estimatedAmount: z.number().nonnegative(),
+      }),
+    )
+    .min(1)
+    .max(12),
+});
+
+function parseGeneratedPlan(
+  content: unknown,
+  budgetAmount: number,
+): AIEventPlanResult | null {
+  if (typeof content !== "string") {
+    return null;
+  }
+
+  const normalized = content
+    .trim()
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/, "");
+
+  try {
+    const parsed = generatedEventPlanSchema.safeParse(JSON.parse(normalized));
+    if (!parsed.success) {
+      return null;
+    }
+
+    const allocatedAmount = parsed.data.budgetAllocation.reduce(
+      (sum, allocation) => sum + allocation.estimatedAmount,
+      0,
+    );
+    const allocatedPercentage = parsed.data.budgetAllocation.reduce(
+      (sum, allocation) => sum + allocation.percentage,
+      0,
+    );
+
+    if (allocatedAmount > budgetAmount || allocatedPercentage > 100) {
+      return null;
+    }
+
+    return { ...parsed.data, fallbackUsed: false };
+  } catch {
+    return null;
+  }
 }
 
 export async function generateAIEventPlan(
@@ -47,15 +109,17 @@ export async function generateAIEventPlan(
         },
         body: JSON.stringify({
           model: "google/gemini-2.5-flash",
+          response_format: { type: "json_object" },
+          temperature: 0.2,
           messages: [
             {
               role: "system",
               content:
-                "You are an expert event planner advisor. Return a structured JSON plan matching the requested format.",
+                "You are an event planning advisor. Return only JSON with recommendedMilestones (title, timeline, category), suggestedServices, and budgetAllocation (category, percentage, estimatedAmount). Keep allocations realistic and within the supplied budget.",
             },
             {
               role: "user",
-              content: `Create an event plan for a ${validated.eventType} with ${validated.guestCount} guests and budget ₱${validated.budgetAmount}.`,
+              content: JSON.stringify(validated),
             },
           ],
         }),
@@ -67,12 +131,12 @@ export async function generateAIEventPlan(
     }
 
     const data = await response.json();
-    const textContent = data.choices?.[0]?.message?.content;
-    if (!textContent) {
-      return generateDeterministicFallbackPlan(validated);
-    }
+    const generatedPlan = parseGeneratedPlan(
+      data?.choices?.[0]?.message?.content,
+      validated.budgetAmount,
+    );
 
-    return generateDeterministicFallbackPlan(validated);
+    return generatedPlan ?? generateDeterministicFallbackPlan(validated);
   } catch {
     return generateDeterministicFallbackPlan(validated);
   }
