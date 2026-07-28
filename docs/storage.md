@@ -21,10 +21,10 @@ bucket/path, file size and allowed MIME/extension, then upload directly or via a
 signed authorization. Cleanup should remove replaced/orphaned objects only after
 the database update succeeds and ownership is reconfirmed.
 
-Current validation does not inspect file magic bytes. MIME and extension can be
-spoofed, so malware/content scanning and magic-byte validation remain security
-work. The `venue-images` policies are also broader by role than ideal path-level
-ownership; do not assume complete tenant isolation without runtime tests.
+Direct upload flows inspect file magic bytes in addition to MIME and size.
+Verification documents are re-downloaded and checked before finalization.
+Provider malware/polyglot scanning remains security work, and hosted
+cross-tenant policy behavior must still be verified before release.
 
 ## Troubleshooting
 
