@@ -176,8 +176,9 @@ calendars, customer communication, suppliers, performance, reports).
 - [~] Guest management — authenticated CRUD, CSV import/export, filters,
   statistics, RLS hardening, and focused tests exist; hosted migration and live
   end-to-end behavior remain unverified
-- [ ] RSVP management — internal status tracking only; no public invitation,
-      response, revocation, deadline, or reminder flow
+- [~] RSVP management — owner create/copy/revoke controls, deadlines, token-only
+  public response RPCs, plus-ones, and `/rsvp/[token]` exist; hosted migration,
+  delivery/reminder automation, and live E2E remain
 - [ ] Seating planner — database schema only; no finished UI or application actions
 - [ ] Event timeline planner — database schema only; no finished task/dependency UI
 - [~] AI Event Planner — module and focused tests exist; no customer-facing workflow
