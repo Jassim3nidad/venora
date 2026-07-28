@@ -4,13 +4,15 @@ Checklist of **Target Users** capabilities from the Venora Project Brief (v1.0)
 against the **current codebase**. Use this for backlog triage; it is not a
 runtime QA pass.
 
+Last repository audit: **2026-07-28**, `main` at `5981097e`.
+
 **Legend**
 
-| Mark | Meaning |
-| ---- | ------- |
+| Mark  | Meaning                                                      |
+| ----- | ------------------------------------------------------------ |
 | `[x]` | **Satisfied** — capability exists in product (source-backed) |
-| `[~]` | **Partial** — surface exists but gaps vs brief intent |
-| `[ ]` | **Missing** — not shipped / Phase 2+ only |
+| `[~]` | **Partial** — surface exists but gaps vs brief intent        |
+| `[ ]` | **Missing** — not shipped / Phase 2+ only                    |
 
 Related: [role experience matrix](role-experience-matrix.md),
 [marketplace relationships](marketplace-relationships-user-flow.md),
@@ -21,20 +23,20 @@ Related: [role experience matrix](role-experience-matrix.md),
 
 ## Summary
 
-| Role | Brief fit |
-| ---- | --------- |
-| Customer | Mostly satisfied (compare is the main gap) |
-| Venue Owner | Mostly satisfied |
-| Event Coordinator | Mostly aligned (MVP + messaging + org staff invite path) |
-| Accredited Supplier | Profile/marketplace yes; venue-package association no |
-| Platform Administrator | Satisfied for Phase 1 admin surfaces |
+| Role                   | Brief fit                                                                        |
+| ---------------------- | -------------------------------------------------------------------------------- |
+| Customer               | Mostly satisfied                                                                 |
+| Venue Owner            | Mostly satisfied                                                                 |
+| Event Coordinator      | Mostly aligned (MVP + messaging + org staff invite path)                         |
+| Accredited Supplier    | Marketplace, partnerships, and package association implemented; live E2E pending |
+| Platform Administrator | Satisfied for Phase 1 admin surfaces                                             |
 
 ---
 
 ## Customer
 
 - [x] Search venues — `/venues` filters and search
-- [~] Compare venues — favorites/shortlist only; no side-by-side compare
+- [x] Compare venues — `/compare` side-by-side workspace
 - [x] Save favorites — `/favorites` + heart actions
 - [x] View pricing and packages — `/venues/[slug]`
 - [x] Check availability — booking flow availability calendar
@@ -45,7 +47,7 @@ Related: [role experience matrix](role-experience-matrix.md),
 
 **Backlog (Customer)**
 
-- [ ] Side-by-side venue compare experience
+- [x] Side-by-side venue compare experience
 
 ---
 
@@ -58,7 +60,7 @@ Related: [role experience matrix](role-experience-matrix.md),
 - [x] Receive inquiries — `/dashboard/bookings` pending pipeline
 - [x] Accept or decline bookings — owner booking decision RPCs/UI
 - [x] Manage staff — `/dashboard/staff` invite + venue assignment + permissions;
-  accept via `/staff/accept` or coordinator dashboard; owner-only mutate
+      accept via `/staff/accept` or coordinator dashboard; owner-only mutate
 - [x] Monitor business analytics — `/dashboard/analytics`
 
 **Backlog (Venue Owner)**
@@ -74,12 +76,12 @@ calendars, customer communication, suppliers, performance, reports).
 
 - [~] Managing venue listings — org venue list/discovery; not full owner CRUD
 - [x] Coordinating bookings — `/dashboard/coordinator/bookings` list + detail;
-  approve/decline/complete when `manage_booking_decisions` is granted
+      approve/decline/complete when `manage_booking_decisions` is granted
 - [x] Managing calendars — `/dashboard/coordinator/calendar`
 - [x] Communicating with customers — Messages inbox with booking chats + venue
-  inquiry threads (`/dashboard/coordinator/messages`, `/account/venue-inquiries`)
+      inquiry threads (`/dashboard/coordinator/messages`, `/account/venue-inquiries`)
 - [x] Coordinating accredited suppliers — discovery + attach to booking
-  (`booking_suppliers` jobs path on VO/EC booking detail)
+      (`booking_suppliers` jobs path on VO/EC booking detail)
 - [~] Monitoring booking performance — `/dashboard/coordinator/performance`
 - [x] Generating operational reports — `/dashboard/coordinator/reports`
 - [x] Settings / notifications — `/dashboard/coordinator/settings` + shell NotificationBell
@@ -95,7 +97,7 @@ calendars, customer communication, suppliers, performance, reports).
 **Backlog (Event Coordinator)**
 
 - [x] Reliable org membership / invite onboarding (`/dashboard/staff` → email →
-  `/staff/accept` or in-dashboard accept)
+      `/staff/accept` or in-dashboard accept)
 - [x] First-class booking + venue-inquiry customer messaging (ops-scoped; not global CRM)
 - [x] Attach suppliers to venue bookings (`booking_suppliers` attach UI)
 - [ ] Deeper booking-performance analytics
@@ -113,11 +115,14 @@ calendars, customer communication, suppliers, performance, reports).
 - [x] Contact — customer inquiry → supplier inbox/quotes
 - [x] Accreditation status — profile field + admin accreditation
 - [x] Customers browse suppliers — `/suppliers`
-- [ ] Participate in venue packages / venues associate suppliers — schema Phase 2; no finished attach UI
+- [~] Participate in venue packages / venues associate suppliers — package
+  builder, eligible-supplier selection, partnerships, and agreements exist;
+  focused tests and hosted end-to-end verification are still missing
 
 **Backlog (Supplier / Phase 2)**
 
-- [ ] Venue listing association (`venue_suppliers` or equivalent product UI)
+- [~] Venue listing association and package participation — UI and schema exist;
+  hosted end-to-end verification remains
 - [x] Attach suppliers onto a venue booking (`booking_suppliers`) as finished flow
 
 ---
@@ -133,7 +138,7 @@ calendars, customer communication, suppliers, performance, reports).
 - [x] Marketplace administration — `/admin/marketplace`
 - [x] Payment monitoring — `/admin/payments` transactions, refunds, webhook attention
 - [x] Disputes — scoped case management (`/admin/disputes`, customer raise +
-  `/account/disputes`; lifecycle via `update_dispute_status`)
+      `/account/disputes`; lifecycle via `update_dispute_status`)
 
 **Backlog (Admin)**
 
@@ -151,20 +156,36 @@ calendars, customer communication, suppliers, performance, reports).
 - [x] Availability calendar
 - [x] Booking requests (+ PayMongo deposit settlement)
 - [x] Reviews (verified after complete)
-- [~] Interactive calendar richness (seasonal pricing / blackout nuances may be incomplete vs full brief calendar list)
+- [x] Interactive calendar richness — tentative, reserved, maintenance, blackout,
+      seasonal price override, notes, booking guards, and focused tests exist
 
 ### Phase 2 — Event ecosystem
 
 - [x] Supplier marketplace browse + inquiry/quotes (customer↔supplier path)
-- [ ] Full venue↔supplier packaging / dynamic event packages
-- [~] Customer messaging (partial / embedded, not full suite)
+- [~] Full venue↔supplier packaging / dynamic event packages — create/edit
+  builder and supplier association exist; focused tests and hosted E2E remain
+- [x] Customer messaging — booking, venue-inquiry, and customer inbox paths exist
+      (operations-scoped, not a global CRM)
 - [~] Payment automation (PayMongo yes; Maya incomplete)
 - [x] Commission management (admin surface exists)
 
 ### Phase 3–4 — Planning suite / AI event platform
 
-- [ ] Guest management, RSVP, seating, timeline planners
-- [ ] AI Event Planner / Budget Advisor / Supplier Matching / Concierge (beyond current recommendation/search/cost estimator prototypes)
+- [~] Guest management — authenticated CRUD, CSV import/export, filters,
+  statistics, RLS hardening, and focused tests exist; hosted migration and live
+  end-to-end behavior remain unverified
+- [ ] RSVP management — internal status tracking only; no public invitation,
+      response, revocation, deadline, or reminder flow
+- [ ] Seating planner — database schema only; no finished UI or application actions
+- [ ] Event timeline planner — database schema only; no finished task/dependency UI
+- [~] AI Event Planner — module and focused tests exist; no customer-facing workflow
+  or verified production provider behavior
+- [~] AI Budget Advisor — deterministic module and focused tests exist; no
+  customer-facing workflow
+- [~] AI Supplier Matching — deterministic module and focused tests exist; no
+  marketplace integration or live authorization/data verification
+- [~] AI Concierge — customer widget exists, but responses are scripted; no
+  role-aware tools, mutation confirmation, audit logging, or production AI verification
 
 ---
 
