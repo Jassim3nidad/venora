@@ -50,15 +50,16 @@ against OpenAPI. Human-readable examples for all 31 operations live in
 
 ## Supabase Edge Functions
 
-| Operation                     | Source                                              | Auth model                                 | Status     |
-| ----------------------------- | --------------------------------------------------- | ------------------------------------------ | ---------- |
-| `POST /ai-assistant`          | `supabase/functions/ai-assistant/index.ts`          | Optional bearer; anonymous session allowed | Documented |
-| `POST /ai-cost-estimator`     | `supabase/functions/ai-cost-estimator/index.ts`     | Optional bearer                            | Documented |
-| `POST /ai-package-comparison` | `supabase/functions/ai-package-comparison/index.ts` | Optional bearer                            | Documented |
-| `POST /ai-recommendation`     | `supabase/functions/ai-recommendation/index.ts`     | Bearer required                            | Documented |
-| `POST /ai-search`             | `supabase/functions/ai-search/index.ts`             | Optional bearer                            | Documented |
-| `POST /ai-venue-description`  | `supabase/functions/ai-venue-description/index.ts`  | Bearer plus org/admin authorization        | Documented |
-| `POST /booking-notifications` | `supabase/functions/booking-notifications/index.ts` | Exact service-role bearer required         | Documented |
+| Operation                     | Source                                              | Auth model                                                       | Status     |
+| ----------------------------- | --------------------------------------------------- | ---------------------------------------------------------------- | ---------- |
+| `POST /ai-assistant`          | `supabase/functions/ai-assistant/index.ts`          | Optional chat bearer; customer bearer + confirmation for actions | Documented |
+| `POST /ai-cost-estimator`     | `supabase/functions/ai-cost-estimator/index.ts`     | Optional bearer                                                  | Documented |
+| `POST /ai-package-comparison` | `supabase/functions/ai-package-comparison/index.ts` | Optional bearer                                                  | Documented |
+| `POST /ai-recommendation`     | `supabase/functions/ai-recommendation/index.ts`     | Bearer required                                                  | Documented |
+| `POST /ai-search`             | `supabase/functions/ai-search/index.ts`             | Optional bearer                                                  | Documented |
+| `POST /ai-venue-description`  | `supabase/functions/ai-venue-description/index.ts`  | Bearer plus org/admin authorization                              | Documented |
+| `POST /booking-notifications` | `supabase/functions/booking-notifications/index.ts` | Exact service-role bearer required                               | Documented |
+| `POST /rsvp-notifications`    | `supabase/functions/rsvp-notifications/index.ts`    | Customer bearer or dedicated reminder secret                     | Documented |
 
 ## Non-HTTP inventories
 
