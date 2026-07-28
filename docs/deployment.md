@@ -42,7 +42,7 @@ workflow to compare Vercel metadata with the approved full commit SHA.
 - Register PayMongo HTTPS webhook and matching secret; configure test/live keys
   in the correct scope and validate return URLs.
 - Verify Resend domain/sender, VAPID pair/subject, the OpenRouter key, exact
-  `tencent/hy3:free` runtime configuration, and production app origin. Google
+  `qwen/qwen3.7-flash` runtime configuration, and production app origin. Google
   Maps and alternate AI-provider settings are not applicable.
 
 ## Safe release order
