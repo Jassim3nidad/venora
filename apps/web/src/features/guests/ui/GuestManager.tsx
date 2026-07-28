@@ -227,6 +227,15 @@ export function GuestManager({
         return;
       }
       copyRsvpUrl(result.data.rsvp_token);
+      if (result.data.delivery === "sent") {
+        toast.success("RSVP invitation email sent.");
+      } else if (result.data.delivery === "skipped") {
+        toast.info("No guest email is stored; share the copied RSVP link.");
+      } else {
+        toast.warning(
+          "RSVP link created, but email delivery is unavailable. Share the copied link.",
+        );
+      }
       router.refresh();
     });
   }
