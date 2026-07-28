@@ -272,8 +272,8 @@ serve(async (req) => {
         config,
       );
     }
-    const aiSummaryAllowed =
-      !!config?.enabled && providerCheck.ok && limitCheck.allowed;
+    const aiSummaryAllowed = !!config?.enabled && providerCheck.ok &&
+      limitCheck.allowed;
 
     const rawBody = await req.json().catch(() => null);
     const packageIds = parsePackageIds(rawBody);
