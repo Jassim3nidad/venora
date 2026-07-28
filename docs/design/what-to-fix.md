@@ -124,7 +124,8 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 ### UX / a11y (from remediation backlog)
 
 - [x] Help controls route to `/help` from public and account navigation.
-- [ ] Mobile drawer focus/Escape (UX-06).
+- [x] Mobile drawers use named modal dialogs, contain focus, close with Escape,
+      inert background content, and restore trigger focus (UX-06).
 - [x] Supplier crop dialog risk retired — profile image upload uses the native
       labeled file flow and no inaccessible crop dialog remains.
 - [x] Shared branded 404 / error recovery (UX-10 / UX-11).
