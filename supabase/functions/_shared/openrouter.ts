@@ -12,7 +12,7 @@
  */
 
 export const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
-export const DEFAULT_CHAT_MODEL = "tencent/hy3:free";
+export const DEFAULT_CHAT_MODEL = "qwen/qwen3.7-flash";
 
 export function openRouterHeaders(apiKey: string) {
   return {
