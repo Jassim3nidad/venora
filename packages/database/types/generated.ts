@@ -1298,6 +1298,41 @@ export interface Database {
 
       // ── Admin / Payments ──────────────────────────────────
 
+      ai_action_requests: {
+        Row: {
+          id: string;
+          user_id: string;
+          conversation_id: string;
+          tool_name: "cancel_booking";
+          arguments: Json;
+          status: "proposed" | "confirmed" | "executed" | "rejected" | "failed";
+          error_message: string | null;
+          created_at: string;
+          confirmed_at: string | null;
+          executed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          conversation_id: string;
+          tool_name: "cancel_booking";
+          arguments?: Json;
+          status?:
+            "proposed" | "confirmed" | "executed" | "rejected" | "failed";
+          error_message?: string | null;
+          created_at?: string;
+          confirmed_at?: string | null;
+          executed_at?: string | null;
+        };
+        Update: {
+          status?:
+            "proposed" | "confirmed" | "executed" | "rejected" | "failed";
+          error_message?: string | null;
+          confirmed_at?: string | null;
+          executed_at?: string | null;
+        };
+      };
+
       commission_rules: {
         Row: {
           id: string;
