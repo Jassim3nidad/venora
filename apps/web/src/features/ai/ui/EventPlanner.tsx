@@ -122,7 +122,7 @@ export default function EventPlanner() {
               <input
                 name="budgetAmount"
                 type="number"
-                min={1}
+                min={1000}
                 step={1000}
                 required
                 placeholder="300000"
