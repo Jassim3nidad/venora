@@ -32,7 +32,6 @@ import type {
 import {
   getSupplierHeroImage,
   getSupplierStartingPrice,
-  supplierSearchText,
 } from "../utils/supplier-derive";
 import {
   formatPriceUnit,
@@ -40,6 +39,7 @@ import {
   formatResponseTime,
   formatSupplierPrice,
 } from "../utils/supplier-format";
+import { rankSupplierMatches } from "../../ai/supplier-matching";
 
 const PAGE_SIZE = 12;
 
@@ -351,59 +351,35 @@ export function SuppliersMarketplaceClient({
     categories.find((item) => item.slug === category)?.name ?? "";
 
   const filteredSuppliers = useMemo(() => {
-    const q = normalize(query);
-    const selectedCategory = normalize(category);
-    const selectedLocation = normalize(location);
     const priceFloor = Number(minPrice) || 0;
     const priceLimit = Number(maxPrice) || 0;
     const ratingFloor = Number(minRating) || 0;
 
-    return initialSuppliers
-      .filter((supplier) => {
-        if (q && !supplierSearchText(supplier).includes(q)) return false;
-        if (
-          selectedCategory !== "all" &&
-          supplier.category?.slug !== selectedCategory
-        ) {
-          return false;
-        }
-        if (
-          selectedLocation &&
-          !supplier.serviceAreas.some(
-            (area) => normalize(area) === selectedLocation,
-          )
-        ) {
-          return false;
-        }
-        if (ratingFloor > 0 && supplier.avgRating < ratingFloor) return false;
-        if (priceFloor > 0 || priceLimit > 0) {
-          const startingPrice = getSupplierStartingPrice(supplier);
-          if (!startingPrice) return false;
-          if (priceFloor > 0 && startingPrice < priceFloor) return false;
-          if (priceLimit > 0 && startingPrice > priceLimit) return false;
-        }
+    const matched = rankSupplierMatches(initialSuppliers, {
+      query,
+      categorySlug: category,
+      location,
+      minPrice: priceFloor,
+      maxPrice: priceLimit,
+      minRating: ratingFloor,
+    }).map((match) => match.supplier);
 
-        return true;
-      })
-      .sort((a, b) => {
-        if (sort === "rating") return b.avgRating - a.avgRating;
-        if (sort === "price") {
-          return (
-            (getSupplierStartingPrice(a) ?? Number.MAX_SAFE_INTEGER) -
-            (getSupplierStartingPrice(b) ?? Number.MAX_SAFE_INTEGER)
-          );
-        }
-        if (sort === "newest") {
-          return (
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-        }
+    return matched.sort((a, b) => {
+      if (sort === "rating") return b.avgRating - a.avgRating;
+      if (sort === "price") {
+        return (
+          (getSupplierStartingPrice(a) ?? Number.MAX_SAFE_INTEGER) -
+          (getSupplierStartingPrice(b) ?? Number.MAX_SAFE_INTEGER)
+        );
+      }
+      if (sort === "newest") {
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      }
 
-        if (a.isFeatured !== b.isFeatured) return a.isFeatured ? -1 : 1;
-        const ratingDelta = b.avgRating - a.avgRating;
-        if (Math.abs(ratingDelta) > 0.001) return ratingDelta;
-        return b.reviewCount - a.reviewCount;
-      });
+      return 0;
+    });
   }, [
     category,
     initialSuppliers,
@@ -764,6 +740,10 @@ export function SuppliersMarketplaceClient({
                     </span>{" "}
                     supplier{filteredSuppliers.length === 1 ? "" : "s"}
                     {isFiltered ? " matching your filters" : ""}
+                  </p>
+                  <p className="mt-1 max-w-2xl text-xs font-medium leading-5 text-slate-500">
+                    Recommended order uses verified accreditation, relevance,
+                    ratings, review confidence, and featured status.
                   </p>
                 </div>
 
