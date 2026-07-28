@@ -175,28 +175,29 @@ calendars, customer communication, suppliers, performance, reports).
 ### Phase 3–4 — Planning suite / AI event platform
 
 - [~] Guest management — authenticated CRUD, CSV import/export, filters,
-  statistics, RLS hardening, and focused tests exist; hosted migration and live
-  end-to-end behavior remain unverified
+  statistics, RLS hardening, focused tests, and fail-closed hosted acceptance
+  coverage exist; the protected staging run has not executed
 - [~] RSVP management — owner create/copy/revoke controls, deadlines, token-only
-  public response RPCs, plus-ones, and `/rsvp/[token]` exist; hosted migration,
-  delivery/reminder automation, and live E2E remain
+  public response RPCs, plus-ones, `/rsvp/[token]`, invitation delivery, and
+  targeted reminder automation exist; hosted delivery/E2E evidence is pending
 - [~] Seating planner — authenticated table CRUD, capacity-aware guest
-  assignment UI/actions, ownership hardening, and focused tests exist; hosted
-  migration and live multi-account E2E remain
+  assignment UI/actions, ownership hardening, focused tests, and staging
+  multi-account acceptance coverage exist; the hosted run is pending
 - [~] Event timeline planner — authenticated task CRUD, scheduling, owners,
-  priorities, status filters, and dependency UI exist; hosted migration and
-  live multi-account E2E remain
+  priorities, status filters, dependency UI, focused tests, and staging
+  multi-account acceptance coverage exist; the hosted run is pending
 - [~] AI Event Planner — the authenticated `/account/event-planner` workflow
   validates provider output, discloses deterministic fallback use, and has
-  focused tests; production provider behavior is unverified
+  focused plus hosted acceptance coverage; live provider evidence is pending
 - [~] AI Budget Advisor — customer-facing venue cost estimation exists alongside
-  the deterministic module; hosted Edge/provider behavior remains unverified
-- [~] AI Supplier Matching — customer-facing venue recommendations exist, while
-  the accredited-supplier matcher remains outside marketplace workflows; live
-  authorization/data behavior is unverified
+  the deterministic module and hosted acceptance coverage; live Edge/provider
+  evidence is pending
+- [~] AI Supplier Matching — deterministic accredited-supplier ranking is
+  integrated into the customer marketplace with focused and hosted acceptance
+  coverage; live authorization/data evidence is pending
 - [~] AI Concierge — the active customer widget streams through `ai-assistant`;
-  hosted provider behavior, role-aware mutation tools, confirmation, and audit
-  evidence remain unverified
+  customer-only cancellation proposals require explicit confirmation and persist
+  service-only audit evidence; live provider/tool execution evidence is pending
 
 ---
 
