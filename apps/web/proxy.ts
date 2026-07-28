@@ -11,11 +11,13 @@ import {
   defaultRouteForRoles,
   type RoleName,
 } from "@/lib/rbac/roles";
+import { applyRateLimit } from "@/lib/security/rate-limit";
 
 /**
- * Proxy — two responsibilities:
- * 1. Session refresh: keeps the Supabase session cookie alive on every request.
- * 2. Role guard: redirects unauthenticated or unauthorized users.
+ * Proxy — three responsibilities:
+ * 1. Rate limiting: throttles abusive requests before network work.
+ * 2. Session refresh: keeps the Supabase session cookie alive on every request.
+ * 3. Role guard: redirects unauthenticated or unauthorized users.
  */
 
 type CookieToSet = {
@@ -69,6 +71,11 @@ function redirectWithCookies(url: URL | string, sourceResponse: NextResponse) {
 }
 
 export async function proxy(request: NextRequest) {
+  const rateLimitResponse = applyRateLimit(request);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient<Database>(
@@ -129,7 +136,7 @@ export async function proxy(request: NextRequest) {
         if (res.ok) {
           roleRows = await res.json();
         }
-      } catch (e) {
+      } catch {
         // Fallback to empty roles on error
       }
     }
