@@ -83,9 +83,9 @@ export default async function AdminAiConfigurationPage() {
           </li>
           <li>
             • <strong>Provider/model validation:</strong> every AI feature is
-            locked to <code>openrouter</code> with <code>tencent/hy3:free</code>
-            ; any other provider or model fails closed instead of silently
-            changing the approved runtime.
+            locked to <code>openrouter</code> with{" "}
+            <code>qwen/qwen3.7-flash</code>; any other provider or model fails
+            closed instead of silently changing the approved runtime.
           </li>
           <li>
             • <strong>Provider retry:</strong> transient OpenRouter rate-limit
