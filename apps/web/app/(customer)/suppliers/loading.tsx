@@ -89,7 +89,7 @@ export default function SuppliersLoading() {
         <FilterRailSkeleton />
       </aside>
 
-      <main className="min-w-0 flex-1 overflow-x-hidden px-4 py-5 sm:px-6 sm:py-6 lg:px-7 xl:px-10">
+      <div className="min-w-0 flex-1 overflow-x-hidden px-4 py-5 sm:px-6 sm:py-6 lg:px-7 xl:px-10">
         <div className="flex flex-col gap-6">
           <section className="max-w-full overflow-hidden rounded-[24px] border border-[#E5E7EB]/90 bg-white shadow-sm shadow-slate-200/60">
             <div className="grid gap-4 p-5 sm:p-6 lg:p-7">
@@ -120,7 +120,7 @@ export default function SuppliersLoading() {
             ))}
           </div>
         </div>
-      </main>
+      </div>
     </LoadingRegion>
   );
 }

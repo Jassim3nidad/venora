@@ -74,7 +74,7 @@ Mocked payment tests cover checkout creation, amount/currency/metadata, safe
 return URLs, signatures, duplicate/out-of-order/late events, unknown/already
 settled transactions, refund mapping, and gateway failures. Hosted receipt,
 invoice, commission, audit, refund, and settlement effects were not executed.
-Maya reconciliation remains incomplete and no live PayMongo test-mode call ran.
+Maya has been retired. No live PayMongo test-mode call ran.
 
 Notification E2E waits were made condition-based and cleanup/assertions were
 strengthened. Provider, pipeline, and remote-database commands were not run:
@@ -195,7 +195,7 @@ self-embed its own final hash.
   not inspected or called.
 - Most integrations remain mocked; controlled database factories are missing.
 - Supplier fallback lacks explicit sample provenance.
-- Maya reconciliation, coordinator scope, admin disputes, mixed API envelopes,
-  and centralized rate limiting remain incomplete.
+- Coordinator scope, admin disputes, mixed API envelopes, and centralized rate
+  limiting remain incomplete.
 - Manual accessibility, real-browser responsive, and production-scale
   performance testing remain incomplete.

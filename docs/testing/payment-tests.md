@@ -24,7 +24,7 @@ pnpm test:payment
 - Hosted reconciliation, invoice/receipt creation, audit rows, refund provider
   effects, and retry races need QA DB/provider credentials.
 - Partial refunds are not claimed as implemented.
-- Maya webhook signature exists, but complete reconciliation is not implemented;
-  Maya must not be described as operational.
+- Maya has been retired from application and API surfaces. The legacy database
+  enum value remains only for historical-row compatibility.
 
 No live keys, real cards, real charges, or customer data are used.

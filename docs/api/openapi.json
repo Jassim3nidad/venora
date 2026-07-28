@@ -1547,73 +1547,6 @@
         }
       }
     },
-    "/api/webhooks/maya": {
-      "post": {
-        "summary": "Receive Maya webhook",
-        "description": "Placeholder receiver. Verifies HMAC-SHA512; failure statuses can fail a payment, but success reconciliation deliberately throws because no current Maya gateway/correlation exists. No event claim/idempotency. Do not enable in production.",
-        "operationId": "postApiWebhooksMaya",
-        "tags": ["Webhooks", "Payments"],
-        "x-venora-surface": "next-route-handler",
-        "security": [{ "mayaSignature": [] }],
-        "requestBody": {
-          "required": true,
-          "description": "JSON request body",
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/MayaWebhook" },
-              "example": {
-                "id": "maya-event-example",
-                "status": "PAYMENT_FAILED",
-                "requestReferenceNumber": "maya-reference",
-                "metadata": {
-                  "booking_id": "00000000-0000-4000-8000-000000000001"
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["received"],
-                  "properties": { "received": { "const": true } }
-                },
-                "example": { "received": true }
-              }
-            }
-          },
-          "401": {
-            "description": "Invalid signature",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": { "error": { "type": "string" } }
-                },
-                "example": { "error": "Invalid signature" }
-              }
-            }
-          },
-          "500": {
-            "description": "Processing failed or success path not implemented",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": { "error": { "type": "string" } }
-                },
-                "example": { "error": "Processing failed" }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
     "/auth/callback": {
       "get": {
         "summary": "Complete Supabase auth callback",
@@ -2210,12 +2143,6 @@
         "in": "header",
         "name": "Paymongo-Signature",
         "description": "Timestamped PayMongo HMAC over the raw body."
-      },
-      "mayaSignature": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "x-maya-signature",
-        "description": "Maya HMAC-SHA512 over the raw body."
       }
     },
     "schemas": {
@@ -2393,7 +2320,7 @@
       },
       "PaymentProvider": {
         "type": "string",
-        "enum": ["paymongo", "maya", "stripe"],
+        "enum": ["paymongo", "stripe"],
         "default": "paymongo",
         "description": "Only PayMongo currently has a registered gateway when configured."
       },
@@ -2832,22 +2759,6 @@
                   "data": { "type": "object", "additionalProperties": true }
                 }
               }
-            }
-          }
-        }
-      },
-      "MayaWebhook": {
-        "type": "object",
-        "required": ["id", "status"],
-        "additionalProperties": true,
-        "properties": {
-          "id": { "type": "string" },
-          "status": { "type": "string" },
-          "requestReferenceNumber": { "type": "string" },
-          "metadata": {
-            "type": "object",
-            "properties": {
-              "booking_id": { "type": "string", "format": "uuid" }
             }
           }
         }

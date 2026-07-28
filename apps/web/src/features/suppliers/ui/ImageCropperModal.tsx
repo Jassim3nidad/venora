@@ -104,6 +104,13 @@ export function ImageCropperModal({
     setIsDragging(false);
   };
 
+  const resetCrop = () => {
+    setZoom(1);
+    setOffset({ x: 0, y: 0 });
+    setAnnouncement("Crop position and zoom reset.");
+    containerRef.current?.focus();
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     const STEP = 20;
     if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
@@ -114,10 +121,10 @@ export function ImageCropperModal({
       if (e.key === "ArrowRight") dx = STEP;
       if (e.key === "ArrowUp") dy = -STEP;
       if (e.key === "ArrowDown") dy = STEP;
-      
+
       const newX = offset.x - dx;
       const newY = offset.y - dy;
-      
+
       setOffset({ x: newX, y: newY });
       setAnnouncement(`Crop adjusted. Zoom level: ${zoom}x.`);
     }
@@ -173,10 +180,15 @@ export function ImageCropperModal({
               Crop Image
             </Dialog.Title>
             <Dialog.Description className="sr-only">
-              Adjust your image before uploading. Use arrow keys to move the crop area.
+              Adjust your image before uploading. Use arrow keys to move the
+              crop area.
             </Dialog.Description>
             <Dialog.Close asChild>
-              <button aria-label="Close" className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+              <button
+                type="button"
+                aria-label="Close image cropper"
+                className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+              >
                 <X className="h-5 w-5" />
               </button>
             </Dialog.Close>
@@ -190,7 +202,8 @@ export function ImageCropperModal({
                 tabIndex={0}
                 role="region"
                 aria-label="Image cropping area"
-                className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-100 touch-none w-full shadow-inner cursor-move focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                aria-describedby="crop-keyboard-instructions"
+                className="relative w-full touch-none cursor-move overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-inner focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
                 style={{
                   aspectRatio: aspectRatio,
                   maxHeight: "60vh",
@@ -201,13 +214,17 @@ export function ImageCropperModal({
                 onPointerLeave={handlePointerUp}
                 onKeyDown={handleKeyDown}
               >
+                <p id="crop-keyboard-instructions" className="sr-only">
+                  Use the arrow keys to move the image within the crop area. Use
+                  the zoom slider or Reset crop button to adjust the view.
+                </p>
                 {imageUrl && (
                   <img
                     ref={imageRef}
                     src={imageUrl}
                     alt="Crop source"
                     onLoad={handleImageLoad}
-                    className="absolute max-w-none pointer-events-none"
+                    className="pointer-events-none absolute max-w-none"
                     style={{
                       width: imgSize.width ? `${dw}px` : "auto",
                       height: imgSize.height ? `${dh}px` : "auto",
@@ -234,7 +251,10 @@ export function ImageCropperModal({
 
               {/* Zoom Controls */}
               <div className="mt-6 flex w-full items-center gap-4 px-2">
-                <ZoomOut className="h-5 w-5 text-slate-500" />
+                <ZoomOut
+                  aria-hidden="true"
+                  className="h-5 w-5 text-slate-500"
+                />
                 <input
                   type="range"
                   min="1"
@@ -248,18 +268,29 @@ export function ImageCropperModal({
                   aria-label="Zoom image"
                   className="h-2 flex-1 appearance-none rounded-full bg-slate-200 accent-[#2563EB]"
                 />
-                <ZoomIn className="h-5 w-5 text-slate-500" />
+                <ZoomIn aria-hidden="true" className="h-5 w-5 text-slate-500" />
               </div>
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 border-t border-slate-100 bg-slate-50 px-6 py-4">
+          <div className="flex flex-wrap items-center justify-end gap-3 border-t border-slate-100 bg-slate-50 px-6 py-4">
+            <button
+              type="button"
+              onClick={resetCrop}
+              className="mr-auto h-10 rounded-lg px-4 text-sm font-bold text-[#1D4ED8] transition-colors hover:bg-[#DBEAFE]"
+            >
+              Reset crop
+            </button>
             <Dialog.Close asChild>
-              <button className="h-10 rounded-lg px-4 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-200">
+              <button
+                type="button"
+                className="h-10 rounded-lg px-4 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-200"
+              >
                 Cancel
               </button>
             </Dialog.Close>
             <button
+              type="button"
               onClick={handleCrop}
               className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-6 text-sm font-black text-white shadow-sm transition hover:bg-[#1D4ED8]"
             >

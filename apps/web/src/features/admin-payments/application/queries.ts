@@ -11,22 +11,13 @@ export type TransactionStatusFilter =
   | "partially_refunded"
   | "cancelled";
 
-export type ProviderFilter = "all" | "paymongo" | "maya" | "stripe";
+export type ProviderFilter = "all" | "paymongo" | "stripe";
 
 export type RefundStatusFilter =
-  | "all"
-  | "pending"
-  | "processing"
-  | "succeeded"
-  | "failed"
-  | "cancelled";
+  "all" | "pending" | "processing" | "succeeded" | "failed" | "cancelled";
 
 export type WebhookStatusFilter =
-  | "all"
-  | "processing"
-  | "processed"
-  | "failed"
-  | "skipped";
+  "all" | "processing" | "processed" | "failed" | "skipped";
 
 function asOne<T>(value: T | T[] | null | undefined): T | null {
   if (!value) return null;
