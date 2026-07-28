@@ -284,14 +284,19 @@ export default function BookingSidebar({
                 aria-label="Select Package"
                 className="min-h-[72px] w-full rounded-xl border border-[#E5E7EB] bg-white px-4 py-3 text-left text-[#151C27] hover:border-[#0052CC]"
               >
-                <span className="block">
+                <div className="min-w-0 flex-1 pr-3 text-left">
                   <span className="block text-xs font-medium uppercase tracking-wide text-[#434654]">
                     Package
                   </span>
-                  <span className="mt-0.5 block text-base font-medium">
-                    <SelectValue placeholder="Custom (Base Price)" />
+                  <span className="mt-0.5 block truncate text-base font-medium">
+                    {selectedPackage
+                      ? `${selectedPackage.name} (${formatCurrency(selectedPackage.price)})`
+                      : "Custom (Base Price)"}
                   </span>
-                </span>
+                  <span className="hidden">
+                    <SelectValue />
+                  </span>
+                </div>
               </SelectTrigger>
               <SelectContent className="rounded-xl border-[var(--border-default)]">
                 <SelectItem value="none" className="text-sm font-medium">
