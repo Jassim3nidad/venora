@@ -151,6 +151,82 @@ jobs:
             ) <> 11 THEN
               RAISE EXCEPTION 'supplier location migration contract is incomplete';
             END IF;
+
+            IF (
+              SELECT count(*)
+              FROM supabase_migrations.schema_migrations
+              WHERE version IN (
+                '20260727130000',
+                '20260728110000',
+                '20260728120000',
+                '20260728130000',
+                '20260728140000',
+                '20260728150000'
+              )
+            ) <> 6 THEN
+              RAISE EXCEPTION 'phase 3-4 migration set is incomplete';
+            END IF;
+
+            IF (
+              SELECT count(*)
+              FROM pg_class AS relation
+              JOIN pg_namespace AS namespace
+                ON namespace.oid = relation.relnamespace
+              WHERE namespace.nspname = 'public'
+                AND relation.relname IN (
+                  'event_guests',
+                  'event_seating_tables',
+                  'event_seating_assignments',
+                  'event_timeline_tasks',
+                  'ai_action_requests'
+                )
+                AND relation.relrowsecurity
+            ) <> 5 THEN
+              RAISE EXCEPTION 'phase 3-4 RLS table set is incomplete';
+            END IF;
+
+            IF (
+              SELECT count(*)
+              FROM information_schema.columns
+              WHERE table_schema = 'public'
+                AND table_name = 'event_guests'
+                AND column_name IN (
+                  'invitation_sent_at',
+                  'rsvp_deadline',
+                  'rsvp_responded_at',
+                  'rsvp_revoked_at',
+                  'plus_ones_attending',
+                  'rsvp_invitation_delivered_at',
+                  'rsvp_reminder_sent_at',
+                  'rsvp_delivery_error'
+                )
+            ) <> 8 THEN
+              RAISE EXCEPTION 'RSVP lifecycle columns are incomplete';
+            END IF;
+
+            IF (
+              SELECT count(*)
+              FROM pg_proc AS procedure
+              JOIN pg_namespace AS namespace
+                ON namespace.oid = procedure.pronamespace
+              WHERE namespace.nspname = 'public'
+                AND procedure.proname IN (
+                  'get_guest_rsvp_invitation',
+                  'respond_to_guest_rsvp'
+                )
+            ) <> 2 THEN
+              RAISE EXCEPTION 'public RSVP RPC set is incomplete';
+            END IF;
+
+            IF EXISTS (
+              SELECT 1
+              FROM information_schema.role_table_grants
+              WHERE table_schema = 'public'
+                AND table_name = 'ai_action_requests'
+                AND grantee IN ('anon', 'authenticated', 'PUBLIC')
+            ) THEN
+              RAISE EXCEPTION 'AI action audit table is exposed to clients';
+            END IF;
           END
           $verify$;
           SELECT 'hosted_database_contracts=PASS' AS result;
@@ -182,6 +258,31 @@ jobs:
               'travel_available',
               'travel_fee_note'
             );
+          SELECT version AS applied_phase_3_4_migration
+          FROM supabase_migrations.schema_migrations
+          WHERE version IN (
+            '20260727130000',
+            '20260728110000',
+            '20260728120000',
+            '20260728130000',
+            '20260728140000',
+            '20260728150000'
+          )
+          ORDER BY version;
+          SELECT relation.relname AS rls_table
+          FROM pg_class AS relation
+          JOIN pg_namespace AS namespace
+            ON namespace.oid = relation.relnamespace
+          WHERE namespace.nspname = 'public'
+            AND relation.relname IN (
+              'event_guests',
+              'event_seating_tables',
+              'event_seating_assignments',
+              'event_timeline_tasks',
+              'ai_action_requests'
+            )
+            AND relation.relrowsecurity
+          ORDER BY relation.relname;
           SQL
       - name: Verify Vercel commit binding and smoke routes
         run: pnpm deployment:verify
