@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   deleteGuestAction,
   importGuestsAction,
+  issueGuestRsvpAction,
   saveGuestAction,
 } from "./actions";
 
@@ -199,5 +200,60 @@ describe("guest actions", () => {
       message: "Guest not found or access denied.",
     });
     expect(query.eq).toHaveBeenCalledWith("user_id", userId);
+  });
+
+  it("delivers an issued RSVP invitation through the protected function", async () => {
+    const token = "00000000-0000-4000-8000-000000000004";
+    const query = createQuery({
+      data: { id: guestId, rsvp_token: token, rsvp_deadline: null },
+      error: null,
+    });
+    const invoke = vi.fn().mockResolvedValue({
+      data: { delivery: "sent" },
+      error: null,
+    });
+    vi.mocked(createClient).mockResolvedValue({
+      auth: {
+        getUser: vi.fn().mockResolvedValue({ data: { user: { id: userId } } }),
+      },
+      from: vi.fn(() => query),
+      functions: { invoke },
+    } as any);
+
+    const result = await issueGuestRsvpAction({ id: guestId, deadline: null });
+
+    expect(result.error).toBeNull();
+    expect(result.data.delivery).toBe("sent");
+    expect(invoke).toHaveBeenCalledWith("rsvp-notifications", {
+      body: { mode: "invitation", guestId },
+    });
+    expect(query.eq).toHaveBeenCalledWith("user_id", userId);
+  });
+
+  it("keeps an issued RSVP link usable when email delivery fails", async () => {
+    const token = "00000000-0000-4000-8000-000000000004";
+    const query = createQuery({
+      data: { id: guestId, rsvp_token: token, rsvp_deadline: null },
+      error: null,
+    });
+    vi.mocked(createClient).mockResolvedValue({
+      auth: {
+        getUser: vi.fn().mockResolvedValue({ data: { user: { id: userId } } }),
+      },
+      from: vi.fn(() => query),
+      functions: {
+        invoke: vi.fn().mockResolvedValue({
+          data: null,
+          error: { message: "Function unavailable" },
+        }),
+      },
+    } as any);
+
+    const result = await issueGuestRsvpAction({ id: guestId, deadline: null });
+
+    expect(result.error).toBeNull();
+    expect(result.data).toEqual(
+      expect.objectContaining({ rsvp_token: token, delivery: "failed" }),
+    );
   });
 });
