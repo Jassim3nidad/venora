@@ -1,8 +1,16 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
-import { MessageSquareText, CalendarDays, Search, MapPin, Inbox, ArrowLeft, AlertCircle } from "lucide-react";
+import {
+  MessageSquareText,
+  CalendarDays,
+  Search,
+  Inbox,
+  ArrowLeft,
+  ExternalLink,
+} from "lucide-react";
 import { BookingConversation } from "@/src/features/booking/ui/BookingConversation";
 import type { BookingMessage } from "@/src/features/booking/application/messages-actions";
 
@@ -18,7 +26,8 @@ export type CustomerInboxThread = {
     | {
         message: string;
         created_at: string;
-        sender_role: "customer" | "venue_owner" | "venue_team" | "partner" | string;
+        sender_role:
+          "customer" | "venue_owner" | "venue_team" | "partner" | string;
       }
     | undefined;
 };
@@ -42,15 +51,23 @@ export function CustomerInboxClient({
     return threads.filter(
       (t) =>
         t.partnerName.toLowerCase().includes(lowerQuery) ||
-        (t.serviceName && t.serviceName.toLowerCase().includes(lowerQuery))
+        (t.serviceName && t.serviceName.toLowerCase().includes(lowerQuery)),
     );
   }, [threads, searchQuery]);
 
   // Sort threads by latest message date, or event date if no messages
   const sortedThreads = useMemo(() => {
     return [...filteredThreads].sort((a, b) => {
-      const dateA = a.latestMessage ? new Date(a.latestMessage.created_at).getTime() : (a.eventDate ? new Date(a.eventDate).getTime() : 0);
-      const dateB = b.latestMessage ? new Date(b.latestMessage.created_at).getTime() : (b.eventDate ? new Date(b.eventDate).getTime() : 0);
+      const dateA = a.latestMessage
+        ? new Date(a.latestMessage.created_at).getTime()
+        : a.eventDate
+          ? new Date(a.eventDate).getTime()
+          : 0;
+      const dateB = b.latestMessage
+        ? new Date(b.latestMessage.created_at).getTime()
+        : b.eventDate
+          ? new Date(b.eventDate).getTime()
+          : 0;
       return dateB - dateA;
     });
   }, [filteredThreads]);
@@ -66,32 +83,42 @@ export function CustomerInboxClient({
     let load;
     if (selectedThread.kind === "booking") {
       load = import("@/src/features/booking/application/messages-actions").then(
-        (mod) => mod.getBookingMessages(selectedThread.id)
+        (mod) => mod.getBookingMessages(selectedThread.id),
       );
     } else if (selectedThread.kind === "venue_inquiry") {
-      load = import("@/src/features/venues/application/inquiry-messages-actions").then(
-        (mod) => mod.getVenueInquiryMessages(selectedThread.id).then((msgs) => msgs.map((m: any): BookingMessage => ({
-          id: m.id,
-          booking_id: m.inquiry_id,
-          sender_id: m.sender_id,
-          sender_role: m.sender_id === currentUserId ? "customer" : "venue_owner",
-          message: m.message,
-          created_at: m.created_at,
-          sender_name: m.sender_name ?? null
-        })))
-      );
+      load =
+        import("@/src/features/venues/application/inquiry-messages-actions").then(
+          (mod) =>
+            mod.getVenueInquiryMessages(selectedThread.id).then((msgs) =>
+              msgs.map((m: any): BookingMessage => ({
+                id: m.id,
+                booking_id: m.inquiry_id,
+                sender_id: m.sender_id,
+                sender_role:
+                  m.sender_id === currentUserId ? "customer" : "venue_owner",
+                message: m.message,
+                created_at: m.created_at,
+                sender_name: m.sender_name ?? null,
+              })),
+            ),
+        );
     } else {
-      load = import("@/src/features/messages/application/customer-inbox-actions").then(
-        (mod) => mod.getSupplierInquiryMessages(selectedThread.id).then((msgs) => msgs.map((m: any): BookingMessage => ({
-          id: m.id,
-          booking_id: m.inquiry_id,
-          sender_id: m.sender_id,
-          sender_role: m.sender_id === currentUserId ? "customer" : "venue_owner",
-          message: m.message,
-          created_at: m.created_at,
-          sender_name: m.sender_name ?? null
-        })))
-      );
+      load =
+        import("@/src/features/messages/application/customer-inbox-actions").then(
+          (mod) =>
+            mod.getSupplierInquiryMessages(selectedThread.id).then((msgs) =>
+              msgs.map((m: any): BookingMessage => ({
+                id: m.id,
+                booking_id: m.inquiry_id,
+                sender_id: m.sender_id,
+                sender_role:
+                  m.sender_id === currentUserId ? "customer" : "venue_owner",
+                message: m.message,
+                created_at: m.created_at,
+                sender_name: m.sender_name ?? null,
+              })),
+            ),
+        );
     }
 
     load
@@ -109,7 +136,7 @@ export function CustomerInboxClient({
     return () => {
       isMounted = false;
     };
-  }, [selectedThread?.id, selectedThread?.kind]);
+  }, [currentUserId, selectedThread]);
 
   function formatDate(iso: string | null | undefined) {
     if (!iso) return "No date set";
@@ -118,7 +145,7 @@ export function CustomerInboxClient({
     return new Intl.DateTimeFormat("en-PH", {
       month: "short",
       day: "numeric",
-      year: "numeric"
+      year: "numeric",
     }).format(d);
   }
 
@@ -134,9 +161,10 @@ export function CustomerInboxClient({
 
   return (
     <div className="flex h-full min-h-[600px] overflow-hidden rounded-[24px] border border-[#e5e7eb] bg-white shadow-sm shadow-slate-200/60">
-      
       {/* LEFT PANE: Sidebar List */}
-      <div className={`flex w-full flex-col border-r border-[#e5e7eb] bg-[#f8fafc] md:w-[350px] lg:w-[400px] shrink-0 ${selectedThread ? "hidden md:flex" : "flex"}`}>
+      <div
+        className={`flex w-full flex-col border-r border-[#e5e7eb] bg-[#f8fafc] md:w-[350px] lg:w-[400px] shrink-0 ${selectedThread ? "hidden md:flex" : "flex"}`}
+      >
         <div className="p-5 border-b border-[#e5e7eb] bg-white">
           <h2 className="text-xl font-black tracking-tight text-[#0f172a] mb-4">
             Unified Inbox
@@ -190,30 +218,42 @@ export function CustomerInboxClient({
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="flex items-center gap-1.5 text-xs font-semibold text-[#475569]">
-                      <span className="truncate">{thread.serviceName || "Conversation"}</span>
+                      <span className="truncate">
+                        {thread.serviceName || "Conversation"}
+                      </span>
                       <span className="mx-1 h-1 w-1 rounded-full bg-[#cbd5e1]" />
-                      <span className="capitalize text-[#1d4ed8]">{thread.kind.replace("_", " ")}</span>
+                      <span className="capitalize text-[#1d4ed8]">
+                        {thread.kind.replace("_", " ")}
+                      </span>
                     </div>
 
                     <div className="flex items-center gap-1.5 text-xs font-semibold text-[#475569]">
                       <CalendarDays className="h-3 w-3 text-[#1d4ed8]" />
                       <span>{formatDate(thread.eventDate)}</span>
                       <span className="mx-1 h-1 w-1 rounded-full bg-[#cbd5e1]" />
-                      <span className="capitalize">{thread.status.replace(/_/g, " ")}</span>
+                      <span className="capitalize">
+                        {thread.status.replace(/_/g, " ")}
+                      </span>
                     </div>
 
-                    <p className={`mt-1 text-sm line-clamp-2 ${isActive ? "text-[#1e293b]" : "text-[#64748b]"}`}>
+                    <p
+                      className={`mt-1 text-sm line-clamp-2 ${isActive ? "text-[#1e293b]" : "text-[#64748b]"}`}
+                    >
                       {thread.latestMessage ? (
                         <>
                           <span className="font-semibold text-[#0f172a] mr-1">
-                            {thread.latestMessage.sender_role === "customer" ? "You:" : `${thread.partnerName}:`}
+                            {thread.latestMessage.sender_role === "customer"
+                              ? "You:"
+                              : `${thread.partnerName}:`}
                           </span>
                           {thread.latestMessage.message}
                         </>
                       ) : (
-                        <span className="italic text-[#94a3b8]">No messages yet.</span>
+                        <span className="italic text-[#94a3b8]">
+                          No messages yet.
+                        </span>
                       )}
                     </p>
                   </button>
@@ -225,7 +265,9 @@ export function CustomerInboxClient({
       </div>
 
       {/* RIGHT PANE: Conversation Area */}
-      <div className={`flex-1 bg-white relative flex-col ${selectedThread ? "flex" : "hidden md:flex"}`}>
+      <div
+        className={`flex-1 bg-white relative flex-col ${selectedThread ? "flex" : "hidden md:flex"}`}
+      >
         {!selectedThread ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#f8fafc]/50">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm border border-[#e5e7eb]">
@@ -235,7 +277,8 @@ export function CustomerInboxClient({
               Your messages
             </h3>
             <p className="mt-2 max-w-[250px] text-center text-sm font-medium text-[#64748b]">
-              Select a conversation from the sidebar to view messages and respond.
+              Select a conversation from the sidebar to view messages and
+              respond.
             </p>
           </div>
         ) : isLoadingMessages ? (
@@ -254,17 +297,22 @@ export function CustomerInboxClient({
               </button>
             </div>
             <div className="flex-1 overflow-hidden p-4 sm:p-6 flex flex-col relative">
-              {/* Note: the existing BookingConversation currently only supports booking_id for sending messages. 
-                  So for inquiries, we treat them as read-only or it will throw an error since the route expects a booking. */}
               {selectedThread.kind !== "booking" && (
                 <div className="absolute top-8 left-8 right-8 z-10">
-                  <div className="flex items-center gap-2 rounded-xl border border-yellow-200 bg-yellow-50 p-3 text-sm font-semibold text-yellow-800 shadow-sm">
-                    <AlertCircle className="h-4 w-4 shrink-0" />
-                    Viewing {selectedThread.kind.replace("_", " ")} history. Navigate to the inquiry details to send a new message.
-                  </div>
+                  <Link
+                    href={
+                      selectedThread.kind === "venue_inquiry"
+                        ? `/account/venue-inquiries/${selectedThread.id}`
+                        : `/inquiries/${selectedThread.id}`
+                    }
+                    className="flex items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm font-bold text-blue-800 shadow-sm transition hover:bg-blue-100"
+                  >
+                    Continue this conversation
+                    <ExternalLink className="h-4 w-4" />
+                  </Link>
                 </div>
               )}
-              
+
               <BookingConversation
                 bookingId={selectedThread.id}
                 initialMessages={messages}
@@ -276,10 +324,17 @@ export function CustomerInboxClient({
                   supplierName: selectedThread.partnerName,
                   serviceName: selectedThread.serviceName,
                   inquiryRef: `${selectedThread.kind.replace("_", " ").toUpperCase()} #${selectedThread.id.substring(0, 8)}`,
-                  eventType: selectedThread.kind === "booking" ? "Event Booking" : "Inquiry",
-                  eventDate: selectedThread.eventDate ? formatDate(selectedThread.eventDate) : "TBD",
+                  eventType:
+                    selectedThread.kind === "booking"
+                      ? "Event Booking"
+                      : "Inquiry",
+                  eventDate: selectedThread.eventDate
+                    ? formatDate(selectedThread.eventDate)
+                    : "TBD",
                   venueName: selectedThread.partnerName,
-                  venueLink: selectedThread.partnerSlug ? `/venues/${selectedThread.partnerSlug}` : undefined,
+                  venueLink: selectedThread.partnerSlug
+                    ? `/venues/${selectedThread.partnerSlug}`
+                    : undefined,
                   statusLabel: selectedThread.status.replace(/_/g, " "),
                 }}
               />
@@ -287,7 +342,6 @@ export function CustomerInboxClient({
           </div>
         )}
       </div>
-
     </div>
   );
 }
