@@ -1,7 +1,7 @@
 import {
+  Armchair,
   Building2,
   CalendarDays,
-  CreditCard,
   Gavel,
   LayoutDashboard,
   Lock,
@@ -38,6 +38,12 @@ export const ACCOUNT_NAV_ITEMS: AccountNavItem[] = [
     label: "Guest Management",
     description: "Guest list, responses, and requirements",
     icon: Users,
+  },
+  {
+    href: "/account/seating",
+    label: "Seating Planner",
+    description: "Tables, capacity, and guest assignments",
+    icon: Armchair,
   },
   {
     href: "/account/messages",
