@@ -7,17 +7,17 @@ not prove live model/provider behavior.
 
 ## Inventory
 
-| Feature                       | Status                     | Input / output                                  | Provider and fallback                                                                  |
-| ----------------------------- | -------------------------- | ----------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Natural-language venue search | IMPLEMENTED BUT UNVERIFIED | Query/filters to ranked venue/search output     | OpenRouter intent parsing plus database-grounded search; deterministic/error fallback  |
-| Venue recommendations         | IMPLEMENTED BUT UNVERIFIED | User/event preferences to venue suggestions     | OpenRouter preference query plus database-grounded results                             |
-| Venue-description generation  | IMPLEMENTED BUT UNVERIFIED | Venue attributes/instructions to generated copy | Configured model; admin/owner authorization and validation required                    |
-| Package comparison            | IMPLEMENTED BUT UNVERIFIED | Selected package facts to comparison            | Configured model with persisted comparison support                                     |
-| Cost estimation               | IMPLEMENTED BUT UNVERIFIED | Event/budget facts to estimate                  | Configured model; estimate is non-binding                                              |
-| Customer assistant            | PARTIAL                    | Conversation/context to streamed answer         | Current streaming path is OpenRouter-oriented; failure if key/provider path mismatches |
-| Runtime AI configuration      | IMPLEMENTED BUT UNVERIFIED | Admin settings to model/limits/moderation       | `ai_configurations` table and admin permissions                                        |
-| Usage logs                    | IMPLEMENTED BUT UNVERIFIED | Token/cost/status metadata                      | `ai_usage_logs`; raw prompts/responses are intentionally not stored                    |
-| Direct Anthropic provider     | MISSING                    | None                                            | No `ANTHROPIC_API_KEY` runtime path                                                    |
+| Feature                       | Status                     | Input / output                                                                | Provider and fallback                                                                 |
+| ----------------------------- | -------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Natural-language venue search | IMPLEMENTED BUT UNVERIFIED | Query/filters to ranked venue/search output                                   | OpenRouter intent parsing plus database-grounded search; deterministic/error fallback |
+| Venue recommendations         | IMPLEMENTED BUT UNVERIFIED | User/event preferences to venue suggestions                                   | OpenRouter preference query plus database-grounded results                            |
+| Venue-description generation  | IMPLEMENTED BUT UNVERIFIED | Venue attributes/instructions to generated copy                               | Configured model; admin/owner authorization and validation required                   |
+| Package comparison            | IMPLEMENTED BUT UNVERIFIED | Selected package facts to comparison                                          | Configured model with persisted comparison support                                    |
+| Cost estimation               | IMPLEMENTED BUT UNVERIFIED | Event/budget facts to estimate                                                | Configured model; estimate is non-binding                                             |
+| Customer assistant            | IMPLEMENTED BUT UNVERIFIED | Conversation/context to streamed answer; confirmed customer cancellation tool | OpenRouter answers plus deterministic, role/ownership-checked action path             |
+| Runtime AI configuration      | IMPLEMENTED BUT UNVERIFIED | Admin settings to model/limits/moderation                                     | `ai_configurations` table and admin permissions                                       |
+| Usage logs                    | IMPLEMENTED BUT UNVERIFIED | Token/cost/status metadata                                                    | `ai_usage_logs`; raw prompts/responses are intentionally not stored                   |
+| Direct Anthropic provider     | MISSING                    | None                                                                          | No `ANTHROPIC_API_KEY` runtime path                                                   |
 
 Feature enablement, temperatures, token/rate/spend limits, and system
 instructions are database-configured. Provider/model selection is locked to
@@ -37,7 +37,11 @@ or unrelated customer records.
 Treat user and marketplace text as untrusted prompt content. Delimit it from
 instructions, minimize retrieved context, enforce authorization before retrieval,
 validate structured output, escape rendered output, and never allow model output
-to directly authorize/mutate payments, bookings, roles, or policies. Current
+to directly authorize mutations. The assistant's booking cancellation tool is
+separate from model output: it requires a customer role, booking ownership, a
+persisted proposal, an explicit confirmation card, conditional action claiming,
+the existing user-JWT `cancel_booking_request` RPC, and append-only audit
+evidence. Payments, roles, and policies have no assistant mutation tool. Current
 moderation is pattern-based, not a comprehensive provider moderation service.
 
 ## Reliability and cost
