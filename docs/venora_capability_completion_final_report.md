@@ -1,8 +1,8 @@
 # Venora Capability Completion Final Report
 
 **Date**: July 23, 2026  
-**Repository**: [Venora](file:///c:/Users/Jassim%20Trinidad/OneDrive/Desktop/venora)  
-**Branch**: [`feature/complete-remaining-capabilities`](file:///c:/Users/Jassim%20Trinidad/OneDrive/Desktop/venora)  
+**Repository**: [Venora](https://github.com/Jassim3nidad/venora)
+**Branch**: [`feature/complete-remaining-capabilities`](https://github.com/Jassim3nidad/venora/tree/feature/complete-remaining-capabilities)
 **Pull Request**: [Create PR on GitHub](https://github.com/Jassim3nidad/venora/pull/new/feature/complete-remaining-capabilities)
 
 ---

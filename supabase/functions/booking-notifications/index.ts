@@ -53,8 +53,8 @@ type DispatchResult = {
 function appUrl() {
   return (
     Deno.env.get("APP_URL") ??
-    Deno.env.get("NEXT_PUBLIC_APP_URL") ??
-    "https://venora.ph"
+      Deno.env.get("NEXT_PUBLIC_APP_URL") ??
+      "https://venora.ph"
   );
 }
 
@@ -159,9 +159,11 @@ async function sendEmail(
         <div style="font-family:Inter,Arial,sans-serif;color:#111827;line-height:1.6">
           <h2>${escapeHtml(notification.title)}</h2>
           ${notification.body ? `<p>${escapeHtml(notification.body)}</p>` : ""}
-          <p><a href="${escapeHtml(
-            absoluteUrl(notification.link),
-          )}" style="color:#2563eb;font-weight:700">Open in Venora</a></p>
+          <p><a href="${
+        escapeHtml(
+          absoluteUrl(notification.link),
+        )
+      }" style="color:#2563eb;font-weight:700">Open in Venora</a></p>
         </div>
       `,
     }),
@@ -284,12 +286,11 @@ async function updateDelivery(
   attemptCount: number,
 ) {
   const now = new Date().toISOString();
-  const nextAttemptAt =
-    result.status === "failed" && attemptCount + 1 < 3
-      ? new Date(
-          Date.now() + Math.min(60, 5 * 2 ** attemptCount) * 60_000,
-        ).toISOString()
-      : null;
+  const nextAttemptAt = result.status === "failed" && attemptCount + 1 < 3
+    ? new Date(
+      Date.now() + Math.min(60, 5 * 2 ** attemptCount) * 60_000,
+    ).toISOString()
+    : null;
 
   await supabase
     .from("notification_deliveries")
@@ -443,7 +444,7 @@ async function processQueuedDeliveries(limit = 25) {
           errorMessage: "SMS delivery is disabled for this phase",
         },
         0,
-      ),
+      )
     ),
   );
 
@@ -459,9 +460,9 @@ function isDeliveryRecord(record: unknown): record is DeliveryRecord {
   const value = record as Partial<DeliveryRecord>;
   return Boolean(
     value.id &&
-    value.notification_id &&
-    value.user_id &&
-    ["email", "sms", "push", "in_app"].includes(String(value.channel)),
+      value.notification_id &&
+      value.user_id &&
+      ["email", "sms", "push", "in_app"].includes(String(value.channel)),
   );
 }
 

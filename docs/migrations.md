@@ -1,9 +1,11 @@
 # Database Migrations
 
 SQL migration files under `supabase/migrations/` are ordered, reviewable schema
-history. There are 73 files at the current baseline. Names mostly follow
+history. There are 113 files at the current baseline. Names mostly follow
 `NNN_description.sql`, but legacy `0040`/`0045`, missing `030`, the upstream
-`068`-to-`0680` rename, and duplicate `071` make numbering non-contiguous.
+`068`-to-`0680` rename, duplicate `071`, duplicate timestamp
+`20260724000000`, and the legacy `0795`/`080` ordering make numbering
+non-contiguous.
 
 ## Known history conflicts
 
@@ -16,6 +18,16 @@ evidence available to this task. It also added
 version-based, so either change can make local/linked ordering or application
 ambiguous. Do not rename, delete, repair, or mark these applied without checking
 the actual hosted migration table/schema and approving a forward-only plan.
+
+Upstream commit `65d6f35d5a438e237194af0df2dd5361da94600d` introduced both
+`20260724000000_fix_partner_application_notifications.sql` and
+`20260724000000_fix_venue_grants.sql` with the same timestamp. The validator
+tracks that exact pair while hosted history remains unavailable. It also tracks
+`0795_business_profiles.sql` before `080_booking_supplier_coordinations.sql`;
+their numeric prefixes sort differently from their repository chronology.
+These exact exceptions preserve immutable history—they do not prove either
+migration was applied. Remove an exception only after protected linked-history
+and schema verification supports an approved forward reconciliation.
 
 ## Create and review
 

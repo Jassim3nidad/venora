@@ -91,9 +91,7 @@ export default function ReviewsSection({
         loadedReviewCount
       : 0;
   const effectiveAvgRating =
-    effectiveReviewCount > 0 && avgRating > 0
-      ? avgRating
-      : loadedAverageRating;
+    effectiveReviewCount > 0 && avgRating > 0 ? avgRating : loadedAverageRating;
 
   // Dimension calculators
   const getDimensionAverage = (key: keyof Review) => {
