@@ -250,7 +250,7 @@ async function parseQueryWithOpenRouter(
         {
           role: "system",
           content:
-            "Extract venue search parameters from natural language. Convert shorthand budgets like 100k to 100000. Return only fields in the schema. Use lowercase strings. Put amenities or features such as parking, pool, wifi, beachfront, pet friendly, or wheelchair accessible in keywords. Do not put budget phrases in keywords.",
+            "Extract venue search parameters from natural language. Convert shorthand budgets like 100k to 100000. Return JSON containing only fields in the schema. Use lowercase strings. Put amenities or features such as parking, pool, wifi, beachfront, pet friendly, or wheelchair accessible in keywords. Do not put budget phrases in keywords.",
         },
         {
           role: "user",
