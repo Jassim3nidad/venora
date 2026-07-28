@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Toast, ToastDescription, ToastTitle } from "@venora/ui";
 import { createClient } from "@/lib/supabase/client";
+import { fileHasAllowedSignature } from "@/lib/security/file-signatures";
 import type { BusinessProfileDraft } from "../types/business-profile.types";
 import {
   saveBusinessIdentity,
@@ -266,6 +267,14 @@ export function BusinessProfileEditor({ draft, organizationId }: EditorProps) {
 
     if (validationError) {
       setImageUploadError(kind, validationError);
+      return;
+    }
+
+    if (!(await fileHasAllowedSignature(file))) {
+      setImageUploadError(
+        kind,
+        "Image content does not match its declared file type.",
+      );
       return;
     }
 
