@@ -182,7 +182,9 @@ calendars, customer communication, suppliers, performance, reports).
 - [~] Seating planner — authenticated table CRUD, capacity-aware guest
   assignment UI/actions, ownership hardening, and focused tests exist; hosted
   migration and live multi-account E2E remain
-- [ ] Event timeline planner — database schema only; no finished task/dependency UI
+- [~] Event timeline planner — authenticated task CRUD, scheduling, owners,
+  priorities, status filters, and dependency UI exist; hosted migration and
+  live multi-account E2E remain
 - [~] AI Event Planner — module and focused tests exist; no customer-facing workflow
   or verified production provider behavior
 - [~] AI Budget Advisor — deterministic module and focused tests exist; no
