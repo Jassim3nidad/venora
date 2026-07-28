@@ -42,7 +42,7 @@ export type SupabaseLike = {
 };
 
 export const APPROVED_AI_PROVIDER = "openrouter";
-export const APPROVED_AI_MODEL = "tencent/hy3:free";
+export const APPROVED_AI_MODEL = "qwen/qwen3.7-flash";
 
 /**
  * Loads the stored config for a feature via the service-role client
@@ -176,11 +176,12 @@ export async function checkAiUsageLimits(
 /**
  * Best-effort budgeting estimate, not a billing reconciliation source —
  * matches the "estimated_cost" naming already in the schema. Unknown
- * models default to 0 rather than guessing, so a genuinely free model
- * (the seeded default, tencent/hy3:free) never shows a fabricated cost.
+ * models default to 0 rather than guessing. Qwen 3.7 Flash uses its maximum
+ * published input/output rate because this helper receives only a total token
+ * count; the estimate is intentionally conservative.
  */
 const COST_PER_1K_TOKENS_CENTS: Record<string, number> = {
-  "tencent/hy3:free": 0,
+  "qwen/qwen3.7-flash": 0.013,
 };
 
 export function estimateCostCents(model: string, totalTokens: number): number {
