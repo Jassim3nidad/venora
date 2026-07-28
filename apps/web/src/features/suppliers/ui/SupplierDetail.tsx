@@ -328,7 +328,7 @@ export function SupplierDetail({
   });
 
   return (
-    <main className="mx-auto max-w-7xl space-y-8 bg-white px-4 pb-28 pt-6 font-sans sm:px-6 sm:pt-8 lg:px-8 lg:pb-12">
+    <div className="mx-auto max-w-7xl space-y-8 bg-white px-4 pb-28 pt-6 font-sans sm:px-6 sm:pt-8 lg:px-8 lg:pb-12">
       {/* Top Header info (matching VenueDetails) */}
       <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-end">
         {/* Action Controls */}
@@ -985,6 +985,6 @@ export function SupplierDetail({
           </div>
         </div>
       )}
-    </main>
+    </div>
   );
 }
