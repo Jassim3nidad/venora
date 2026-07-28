@@ -9,6 +9,8 @@ import {
   deleteGuestSchema,
   guestInputSchema,
   importGuestsSchema,
+  issueGuestRsvpSchema,
+  revokeGuestRsvpSchema,
   type GuestInput,
 } from "../schemas/guest.schema";
 
@@ -128,6 +130,56 @@ export async function importGuestsAction(rawInput: unknown) {
       revalidateGuestPages();
 
       return { imported: data?.length ?? 0, guests: data ?? [] };
+    },
+    rawInput,
+  );
+}
+
+export async function issueGuestRsvpAction(rawInput: unknown) {
+  return createServerAction(
+    issueGuestRsvpSchema,
+    async (input) => {
+      const { supabase, user } = await requireGuestUser();
+      const token = crypto.randomUUID();
+      const { data, error } = await supabase
+        .from("event_guests")
+        .update({
+          rsvp_token: token,
+          invitation_sent_at: new Date().toISOString(),
+          rsvp_deadline: input.deadline ?? null,
+          rsvp_revoked_at: null,
+        })
+        .eq("id", input.id)
+        .eq("user_id", user.id)
+        .select("id,rsvp_token,rsvp_deadline")
+        .maybeSingle();
+
+      throwGuestError(error);
+      if (!data) throw new ValidationError("Guest not found or access denied.");
+      revalidateGuestPages();
+      return data;
+    },
+    rawInput,
+  );
+}
+
+export async function revokeGuestRsvpAction(rawInput: unknown) {
+  return createServerAction(
+    revokeGuestRsvpSchema,
+    async (input) => {
+      const { supabase, user } = await requireGuestUser();
+      const { data, error } = await supabase
+        .from("event_guests")
+        .update({ rsvp_revoked_at: new Date().toISOString() })
+        .eq("id", input.id)
+        .eq("user_id", user.id)
+        .select("id")
+        .maybeSingle();
+
+      throwGuestError(error);
+      if (!data) throw new ValidationError("Guest not found or access denied.");
+      revalidateGuestPages();
+      return { guestId: input.id };
     },
     rawInput,
   );
