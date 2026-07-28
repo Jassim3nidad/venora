@@ -176,28 +176,32 @@ calendars, customer communication, suppliers, performance, reports).
 
 - [~] Guest management — authenticated CRUD, CSV import/export, filters,
   statistics, RLS hardening, focused tests, and fail-closed hosted acceptance
-  coverage exist; the protected staging run has not executed
+  coverage exist; staging migrations are applied, but the exact-main protected
+  browser run is blocked by Vercel build capacity
 - [~] RSVP management — owner create/copy/revoke controls, deadlines, token-only
   public response RPCs, plus-ones, `/rsvp/[token]`, invitation delivery, and
-  targeted reminder automation exist; hosted delivery/E2E evidence is pending
+  targeted reminder automation exist; hosted delivery is blocked by the invalid
+  Resend credential and browser E2E awaits an exact-main deployment
 - [~] Seating planner — authenticated table CRUD, capacity-aware guest
   assignment UI/actions, ownership hardening, focused tests, and staging
-  multi-account acceptance coverage exist; the hosted run is pending
+  multi-account acceptance coverage exist; the exact-main hosted run is pending
 - [~] Event timeline planner — authenticated task CRUD, scheduling, owners,
   priorities, status filters, dependency UI, focused tests, and staging
-  multi-account acceptance coverage exist; the hosted run is pending
+  multi-account acceptance coverage exist; the exact-main hosted run is pending
 - [~] AI Event Planner — the authenticated `/account/event-planner` workflow
   validates provider output, discloses deterministic fallback use, and has
-  focused plus hosted acceptance coverage; live provider evidence is pending
-- [~] AI Budget Advisor — customer-facing venue cost estimation exists alongside
-  the deterministic module and hosted acceptance coverage; live Edge/provider
-  evidence is pending
+  focused plus hosted acceptance coverage; the Qwen provider contract is live,
+  but the exact-main customer workflow is not deployed
+- [x] AI Budget Advisor — customer-facing venue cost estimation and the
+      deterministic module exist; hosted Qwen output validation and provider/model,
+      token, and integer-cost usage evidence pass
 - [~] AI Supplier Matching — deterministic accredited-supplier ranking is
   integrated into the customer marketplace with focused and hosted acceptance
   coverage; live authorization/data evidence is pending
 - [~] AI Concierge — the active customer widget streams through `ai-assistant`;
   customer-only cancellation proposals require explicit confirmation and persist
-  service-only audit evidence; live provider/tool execution evidence is pending
+  service-only audit evidence; hosted Qwen streaming and usage evidence pass,
+  while confirmed-tool browser execution awaits the exact-main deployment
 
 ---
 
