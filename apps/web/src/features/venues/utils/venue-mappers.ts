@@ -71,6 +71,32 @@ export function firstVenueImage(venue: any) {
     })[0];
 }
 
+export function applyReviewSummariesToVenues(venues: any[], reviews: any[]) {
+  const summaryByVenue = new Map<string, { count: number; total: number }>();
+
+  for (const review of reviews) {
+    const venueId = String(review.venue_id ?? "");
+    const rating = Number(review.overall_rating ?? 0);
+    if (!venueId || !Number.isFinite(rating) || rating <= 0) continue;
+
+    const summary = summaryByVenue.get(venueId) ?? { count: 0, total: 0 };
+    summary.count += 1;
+    summary.total += rating;
+    summaryByVenue.set(venueId, summary);
+  }
+
+  return venues.map((venue) => {
+    const summary = summaryByVenue.get(String(venue.id));
+    if (!summary) return venue;
+
+    return {
+      ...venue,
+      avg_rating: summary.total / summary.count,
+      review_count: summary.count,
+    };
+  });
+}
+
 export function toLiveMarketplaceVenue(
   venue: any,
   favoriteVenueIds: Set<string>,
