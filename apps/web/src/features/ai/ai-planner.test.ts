@@ -63,6 +63,12 @@ describe("AI Event Planner Zod Validation & Deterministic Fallback", () => {
 
     expect(plan.fallbackUsed).toBe(false);
     expect(plan.recommendedMilestones[0]?.title).toBe("Confirm venue");
+    expect(fetch).toHaveBeenCalledWith(
+      "https://openrouter.ai/api/v1/chat/completions",
+      expect.objectContaining({
+        body: expect.stringContaining('"model":"qwen/qwen3.7-flash"'),
+      }),
+    );
   });
 
   it("falls back when provider output is malformed", async () => {
