@@ -198,7 +198,11 @@ async function provisionAccounts() {
 
     await adminClient
       .from("profiles")
-      .update({ status: "active", full_name: `QA ${acc.role}` })
+      .update({
+        status: "active",
+        full_name: `QA ${acc.role}`,
+        profile_setup_completed_at: new Date().toISOString(),
+      })
       .eq("id", userId);
 
     if (acc.dbRole) {
