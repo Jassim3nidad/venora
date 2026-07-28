@@ -2025,7 +2025,7 @@
     "/ai-assistant": {
       "post": {
         "summary": "Stream customer assistant response",
-        "description": "Creates/resumes a conversation, optionally adds authenticated user's booking context, persists messages/usage, and streams SSE. First event carries conversationId. Maximum 100 messages per conversation.",
+        "description": "Creates/resumes a conversation, optionally adds authenticated user's booking context, persists messages/usage, and streams SSE. A strict cancellation command returns a confirmation proposal; the customer-confirmed action is role/ownership checked, conditionally claimed, executed under the user JWT, and audited.",
         "operationId": "postAiAssistant",
         "tags": ["AI"],
         "x-venora-surface": "supabase-edge-function",
@@ -2056,6 +2056,8 @@
           "400": { "$ref": "#/components/responses/BadRequest" },
           "401": { "$ref": "#/components/responses/Unauthorized" },
           "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" },
           "429": { "$ref": "#/components/responses/TooManyRequests" },
           "500": { "$ref": "#/components/responses/InternalError" },
           "502": { "$ref": "#/components/responses/InternalError" }
@@ -2109,6 +2111,54 @@
             }
           },
           "401": { "$ref": "#/components/responses/Unauthorized" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "503": { "$ref": "#/components/responses/ServiceUnavailable" }
+        },
+        "servers": [
+          {
+            "url": "{supabaseUrl}/functions/v1",
+            "description": "Supabase Edge Functions",
+            "variables": {
+              "supabaseUrl": { "default": "http://localhost:54321" }
+            }
+          }
+        ]
+      }
+    },
+    "/rsvp-notifications": {
+      "post": {
+        "summary": "Deliver RSVP invitations or reminders",
+        "description": "Invitation mode requires the signed-in guest-list owner's bearer and rechecks guest ownership through RLS. Reminder mode requires the dedicated reminder secret, conditionally claims due pending rows, and sends a bounded Resend batch.",
+        "operationId": "postRsvpNotifications",
+        "tags": ["Notifications", "Internal"],
+        "x-venora-surface": "supabase-edge-function",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "description": "JSON request body",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/GenericObject" },
+              "example": {
+                "mode": "invitation",
+                "guestId": "00000000-0000-4000-8000-000000000001"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GenericObject" },
+                "example": { "success": true, "delivery": "sent" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
           "500": { "$ref": "#/components/responses/InternalError" },
           "503": { "$ref": "#/components/responses/ServiceUnavailable" }
         },
