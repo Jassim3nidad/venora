@@ -15,7 +15,7 @@ import {
 } from "../schemas/guest.schema";
 
 const GUEST_SELECT =
-  "id,user_id,booking_id,first_name,last_name,email,phone,guest_group,plus_ones_allowed,dietary_requirements,accessibility_notes,rsvp_status,created_at,updated_at";
+  "id,user_id,booking_id,first_name,last_name,email,phone,guest_group,plus_ones_allowed,plus_ones_attending,dietary_requirements,accessibility_notes,rsvp_status,rsvp_token,invitation_sent_at,rsvp_deadline,rsvp_responded_at,rsvp_revoked_at,rsvp_invitation_delivered_at,rsvp_reminder_sent_at,rsvp_delivery_error,created_at,updated_at";
 
 async function requireGuestUser() {
   // The repository's hand-maintained Database shape predates Supabase's
