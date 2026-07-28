@@ -56,7 +56,7 @@ above.
   - `SUPABASE_SERVICE_ROLE_KEY`
   - `SUPABASE_ANON_KEY`
 - Provider/model configuration is constrained to OpenRouter with
-  `tencent/hy3:free` by migration 072 and runtime validation.
+  `qwen/qwen3.7-flash` by the current forward migration and runtime validation.
 - Local Edge Function env example: `supabase/.env.example`.
 - Deployed Supabase secret setup:
 
