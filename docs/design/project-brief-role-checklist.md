@@ -185,9 +185,9 @@ calendars, customer communication, suppliers, performance, reports).
 - [~] Event timeline planner — authenticated task CRUD, scheduling, owners,
   priorities, status filters, and dependency UI exist; hosted migration and
   live multi-account E2E remain
-- [~] AI Event Planner — deterministic plan module and focused tests exist; the
-  standalone generator is not customer-facing and production provider behavior
-  is unverified
+- [~] AI Event Planner — the authenticated `/account/event-planner` workflow
+  validates provider output, discloses deterministic fallback use, and has
+  focused tests; production provider behavior is unverified
 - [~] AI Budget Advisor — customer-facing venue cost estimation exists alongside
   the deterministic module; hosted Edge/provider behavior remains unverified
 - [~] AI Supplier Matching — customer-facing venue recommendations exist, while
