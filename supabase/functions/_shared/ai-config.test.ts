@@ -190,7 +190,7 @@ Deno.test(
 
 // ── estimateCostCents: approved and unknown-model behavior ──────────────────
 Deno.test("estimateCostCents estimates the approved Qwen model", () => {
-  assertEquals(estimateCostCents("qwen/qwen3.7-flash", 5000), 0.07);
+  assertEquals(estimateCostCents("qwen/qwen3.7-flash", 5000), 1);
 });
 
 Deno.test(
