@@ -12,7 +12,15 @@ export class AIAssistantClientError extends Error {
 
 export type AssistantStreamEvent =
   | { type: "conversationId"; conversationId: string }
-  | { type: "delta"; text: string };
+  | { type: "delta"; text: string }
+  | { type: "actionProposal"; proposal: AssistantActionProposal };
+
+export type AssistantActionProposal = {
+  requestId: string;
+  tool: "cancel_booking";
+  title: string;
+  description: string;
+};
 
 interface StreamAssistantReplyInput {
   conversationId: string | null;
@@ -58,6 +66,23 @@ export async function* streamAssistantReply(
       message: input.message,
     }),
   });
+
+  if (response.headers.get("Content-Type")?.includes("application/json")) {
+    const parsed = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new AIAssistantClientError(
+        parsed?.error?.code ?? "REQUEST_FAILED",
+        parsed?.error?.message ?? "Assistant is temporarily unavailable.",
+      );
+    }
+    if (parsed?.data?.type === "action_proposal") {
+      yield {
+        type: "actionProposal",
+        proposal: parsed.data as AssistantActionProposal,
+      };
+    }
+    return;
+  }
 
   if (!response.ok || !response.body) {
     const text = await response.text().catch(() => "");
@@ -106,4 +131,47 @@ export async function* streamAssistantReply(
       }
     }
   }
+}
+
+export async function executeAssistantAction(
+  actionRequestId: string,
+  confirmed: boolean,
+): Promise<string> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !anonKey) {
+    throw new AIAssistantClientError(
+      "CONFIGURATION_ERROR",
+      "Assistant is not configured.",
+    );
+  }
+
+  const supabase = createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session?.access_token) {
+    throw new AIAssistantClientError(
+      "AUTHENTICATION_REQUIRED",
+      "Sign in to confirm this action.",
+    );
+  }
+
+  const response = await fetch(`${supabaseUrl}/functions/v1/ai-assistant`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: anonKey,
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({ actionRequestId, confirmed }),
+  });
+  const parsed = await response.json().catch(() => null);
+  if (!response.ok || parsed?.error) {
+    throw new AIAssistantClientError(
+      parsed?.error?.code ?? "ACTION_FAILED",
+      parsed?.error?.message ?? "The action could not be completed.",
+    );
+  }
+  return parsed?.data?.message ?? "Action completed.";
 }
