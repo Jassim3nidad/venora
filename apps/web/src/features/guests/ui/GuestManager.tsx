@@ -8,6 +8,8 @@ import {
   FileUp,
   Pencil,
   Plus,
+  Link2,
+  Ban,
   Search,
   ShieldCheck,
   Trash2,
@@ -19,12 +21,14 @@ import type { Tables } from "@venora/database";
 import {
   deleteGuestAction,
   importGuestsAction,
+  issueGuestRsvpAction,
+  revokeGuestRsvpAction,
   saveGuestAction,
 } from "../application/actions";
 import { buildGuestCsv, parseGuestCsv } from "../application/csv";
 import { GUEST_RSVP_STATUSES } from "../schemas/guest.schema";
 
-type EventGuest = Omit<Tables<"event_guests">, "rsvp_token">;
+type EventGuest = Tables<"event_guests">;
 
 export type GuestBookingOption = {
   id: string;
@@ -186,6 +190,57 @@ export function GuestManager({
         return;
       }
       toast.success("Guest deleted.");
+      router.refresh();
+    });
+  }
+
+  function copyRsvpUrl(token: string) {
+    const url = `${window.location.origin}/rsvp/${token}`;
+    void navigator.clipboard.writeText(url).then(
+      () => toast.success("RSVP link copied."),
+      () => toast.error("Could not copy the RSVP link."),
+    );
+  }
+
+  function issueRsvp(guest: EventGuest) {
+    const deadlineInput = window.prompt(
+      "RSVP deadline (YYYY-MM-DD). Leave blank for no deadline.",
+      "",
+    );
+    if (deadlineInput === null) return;
+    const parsedDeadline = deadlineInput.trim()
+      ? new Date(`${deadlineInput.trim()}T23:59:59`)
+      : null;
+    if (parsedDeadline && Number.isNaN(parsedDeadline.getTime())) {
+      toast.error("Enter the deadline as YYYY-MM-DD.");
+      return;
+    }
+    const deadline = parsedDeadline?.toISOString() ?? null;
+
+    startTransition(async () => {
+      const result = await issueGuestRsvpAction({
+        id: guest.id,
+        deadline,
+      });
+      if (result.error || !result.data.rsvp_token) {
+        toast.error(result.error?.message ?? "Could not create RSVP link.");
+        return;
+      }
+      copyRsvpUrl(result.data.rsvp_token);
+      router.refresh();
+    });
+  }
+
+  function revokeRsvp(guest: EventGuest) {
+    if (!window.confirm(`Revoke the RSVP link for ${guest.first_name}?`))
+      return;
+    startTransition(async () => {
+      const result = await revokeGuestRsvpAction({ id: guest.id });
+      if (result.error) {
+        toast.error(result.error.message);
+        return;
+      }
+      toast.success("RSVP link revoked.");
       router.refresh();
     });
   }
@@ -380,7 +435,41 @@ export function GuestManager({
                     {guest.email || guest.phone || "No contact details stored"}
                   </p>
                 </div>
-                <div className="flex shrink-0 gap-2">
+                <div className="flex shrink-0 flex-wrap gap-2">
+                  {guest.invitation_sent_at &&
+                  guest.rsvp_token &&
+                  !guest.rsvp_revoked_at ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => copyRsvpUrl(guest.rsvp_token!)}
+                        disabled={isPending}
+                        className="inline-flex h-9 items-center gap-2 rounded-xl border border-blue-200 px-3 text-sm font-bold text-blue-700 hover:bg-blue-50 disabled:opacity-50"
+                      >
+                        <Link2 className="h-4 w-4" />
+                        Copy RSVP
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => revokeRsvp(guest)}
+                        disabled={isPending}
+                        className="inline-flex h-9 items-center gap-2 rounded-xl border border-amber-200 px-3 text-sm font-bold text-amber-700 hover:bg-amber-50 disabled:opacity-50"
+                      >
+                        <Ban className="h-4 w-4" />
+                        Revoke
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => issueRsvp(guest)}
+                      disabled={isPending}
+                      className="inline-flex h-9 items-center gap-2 rounded-xl border border-blue-200 px-3 text-sm font-bold text-blue-700 hover:bg-blue-50 disabled:opacity-50"
+                    >
+                      <Link2 className="h-4 w-4" />
+                      Create RSVP
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => openEdit(guest)}
