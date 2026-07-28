@@ -70,6 +70,304 @@ async function getAuthenticatedUser(req: Request, supabaseUrl: string) {
 const systemPrompt =
   "You are Venora's customer assistant for a Philippine event-venue marketplace. Help users find venues, understand packages and pricing, and answer questions about their own bookings when logged in. Use only the venue/booking facts provided in the context message — never invent prices, availability, or booking details. If you don't have enough information, say so and suggest using search or contacting the venue. Keep answers under 120 words unless asked for detail.";
 
+const actionSystemPrompt =
+  `${systemPrompt} If an authenticated customer asks to cancel, explain that they must enter \`cancel booking <booking-id>\` and then approve the confirmation card. Never claim a mutation occurred without confirmed tool evidence.`;
+
+const uuidPattern =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function cancellationBookingId(message: string) {
+  const match = message.match(
+    /^cancel\s+(?:my\s+)?booking\s+([0-9a-f-]{36})\s*$/i,
+  );
+  return match?.[1] && uuidPattern.test(match[1]) ? match[1] : null;
+}
+
+async function hasCustomerRole(
+  supabase: ReturnType<typeof createClient<any>>,
+  userId: string,
+) {
+  const { data } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "customer")
+    .maybeSingle();
+  return Boolean(data);
+}
+
+async function logActionAudit(
+  supabase: ReturnType<typeof createClient<any>>,
+  actorId: string,
+  action: string,
+  requestId: string,
+  metadata: Record<string, unknown>,
+) {
+  const { error } = await supabase.from("audit_logs").insert({
+    actor_id: actorId,
+    action,
+    entity_type: "ai_action_request",
+    entity_id: requestId,
+    metadata,
+  });
+  if (error) {
+    console.error("[ai-assistant] Failed to persist action audit:", error);
+  }
+  return !error;
+}
+
+async function proposeBookingCancellation(
+  supabase: ReturnType<typeof createClient<any>>,
+  userId: string,
+  conversationId: string,
+  bookingId: string,
+) {
+  if (!(await hasCustomerRole(supabase, userId))) {
+    return errorResponse(
+      "TOOL_FORBIDDEN",
+      "Booking cancellation is available only to customer accounts.",
+      403,
+    );
+  }
+
+  const { data: booking, error: bookingError } = await supabase
+    .from("bookings")
+    .select("id,status,event_date,venues(name)")
+    .eq("id", bookingId)
+    .eq("customer_id", userId)
+    .maybeSingle();
+  if (bookingError || !booking) {
+    return errorResponse(
+      "BOOKING_NOT_FOUND",
+      "That booking was not found in your account.",
+      404,
+    );
+  }
+  if (
+    !["pending", "approved", "payment_pending", "confirmed"].includes(
+      String(booking.status),
+    )
+  ) {
+    return errorResponse(
+      "BOOKING_NOT_CANCELLABLE",
+      "This booking can no longer be cancelled.",
+      409,
+    );
+  }
+
+  const { data: request, error: requestError } = await supabase
+    .from("ai_action_requests")
+    .insert({
+      user_id: userId,
+      conversation_id: conversationId,
+      tool_name: "cancel_booking",
+      arguments: { bookingId },
+    })
+    .select("id")
+    .single();
+  if (requestError || !request) {
+    return errorResponse(
+      "ACTION_PROPOSAL_FAILED",
+      "Could not prepare the cancellation.",
+      500,
+    );
+  }
+
+  const auditRecorded = await logActionAudit(
+    supabase,
+    userId,
+    "ai.concierge.action_proposed",
+    request.id,
+    { tool: "cancel_booking", booking_id: bookingId },
+  );
+  if (!auditRecorded) {
+    await supabase
+      .from("ai_action_requests")
+      .update({
+        status: "failed",
+        error_message: "Action audit could not be recorded.",
+      })
+      .eq("id", request.id);
+    return errorResponse(
+      "ACTION_AUDIT_FAILED",
+      "Could not safely prepare the cancellation.",
+      500,
+    );
+  }
+
+  const venueRelation = booking.venues as
+    | { name?: string }
+    | { name?: string }[]
+    | null;
+  const venue = Array.isArray(venueRelation)
+    ? venueRelation[0]?.name
+    : venueRelation?.name;
+  return jsonResponse({
+    data: {
+      type: "action_proposal",
+      requestId: request.id,
+      tool: "cancel_booking",
+      title: "Cancel booking?",
+      description: `${
+        venue ?? "Venue"
+      } on ${booking.event_date}. This action cannot be undone here.`,
+    },
+    error: null,
+  });
+}
+
+async function executeConfirmedAction(
+  req: Request,
+  supabase: ReturnType<typeof createClient<any>>,
+  supabaseUrl: string,
+  userId: string,
+  requestId: string,
+  confirmed: boolean,
+) {
+  if (!uuidPattern.test(requestId)) {
+    return errorResponse("VALIDATION_ERROR", "Invalid action request.", 400);
+  }
+
+  const { data: actionRequest } = await supabase
+    .from("ai_action_requests")
+    .select("id,tool_name,arguments,status")
+    .eq("id", requestId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!actionRequest || actionRequest.status !== "proposed") {
+    return errorResponse(
+      "ACTION_NOT_PENDING",
+      "This action is unavailable or was already handled.",
+      409,
+    );
+  }
+
+  if (!confirmed) {
+    await supabase
+      .from("ai_action_requests")
+      .update({ status: "rejected" })
+      .eq("id", requestId)
+      .eq("status", "proposed");
+    await logActionAudit(
+      supabase,
+      userId,
+      "ai.concierge.action_rejected",
+      requestId,
+      { tool: actionRequest.tool_name },
+    );
+    return jsonResponse({
+      data: { status: "rejected", message: "Action cancelled." },
+      error: null,
+    });
+  }
+
+  if (
+    actionRequest.tool_name !== "cancel_booking" ||
+    !(await hasCustomerRole(supabase, userId))
+  ) {
+    return errorResponse("TOOL_FORBIDDEN", "Action is not permitted.", 403);
+  }
+
+  const bookingId = actionRequest.arguments?.bookingId;
+  if (typeof bookingId !== "string" || !uuidPattern.test(bookingId)) {
+    return errorResponse("VALIDATION_ERROR", "Invalid booking action.", 400);
+  }
+
+  const now = new Date().toISOString();
+  const { data: claimed } = await supabase
+    .from("ai_action_requests")
+    .update({ status: "confirmed", confirmed_at: now })
+    .eq("id", requestId)
+    .eq("status", "proposed")
+    .select("id")
+    .maybeSingle();
+  if (!claimed) {
+    return errorResponse(
+      "ACTION_NOT_PENDING",
+      "This action was already handled.",
+      409,
+    );
+  }
+
+  const confirmationAudited = await logActionAudit(
+    supabase,
+    userId,
+    "ai.concierge.action_confirmed",
+    requestId,
+    { tool: actionRequest.tool_name, booking_id: bookingId },
+  );
+  if (!confirmationAudited) {
+    await supabase
+      .from("ai_action_requests")
+      .update({
+        status: "failed",
+        error_message: "Confirmation audit could not be recorded.",
+      })
+      .eq("id", requestId);
+    return errorResponse(
+      "ACTION_AUDIT_FAILED",
+      "The action was not executed because its confirmation could not be audited.",
+      500,
+    );
+  }
+
+  const authorization = req.headers.get("Authorization") ?? "";
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+  const userClient = createClient(supabaseUrl, anonKey, {
+    global: { headers: { Authorization: authorization } },
+    auth: { persistSession: false },
+  });
+  const { error: executionError } = await userClient.rpc(
+    "cancel_booking_request",
+    {
+      p_booking_id: bookingId,
+      p_reason: "Cancelled through confirmed AI Concierge action.",
+    },
+  );
+
+  if (executionError) {
+    await supabase
+      .from("ai_action_requests")
+      .update({
+        status: "failed",
+        error_message: "Booking cancellation was rejected.",
+      })
+      .eq("id", requestId);
+    await logActionAudit(
+      supabase,
+      userId,
+      "ai.concierge.action_failed",
+      requestId,
+      { tool: actionRequest.tool_name, booking_id: bookingId },
+    );
+    return errorResponse(
+      "ACTION_FAILED",
+      "The booking could not be cancelled.",
+      409,
+    );
+  }
+
+  await supabase
+    .from("ai_action_requests")
+    .update({ status: "executed", executed_at: new Date().toISOString() })
+    .eq("id", requestId);
+  await logActionAudit(
+    supabase,
+    userId,
+    "ai.concierge.action_executed",
+    requestId,
+    { tool: actionRequest.tool_name, booking_id: bookingId },
+  );
+
+  return jsonResponse({
+    data: {
+      status: "executed",
+      message: "Booking cancelled successfully.",
+    },
+    error: null,
+  });
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -124,15 +422,27 @@ serve(async (req) => {
       );
     }
 
-    if (!openRouterApiKey) {
-      return errorResponse(
-        "OPENROUTER_NOT_CONFIGURED",
-        "OPENROUTER_API_KEY is not configured.",
-        500,
+    const rawBody = await req.json().catch(() => null);
+    const user = await getAuthenticatedUser(req, supabaseUrl);
+    const actionRequestId = cleanString(rawBody?.actionRequestId, 100);
+    if (actionRequestId) {
+      if (!user) {
+        return errorResponse(
+          "AUTHENTICATION_REQUIRED",
+          "Sign in to confirm this action.",
+          401,
+        );
+      }
+      return await executeConfirmedAction(
+        req,
+        supabase,
+        supabaseUrl,
+        user.id,
+        actionRequestId,
+        rawBody?.confirmed === true,
       );
     }
 
-    const rawBody = await req.json().catch(() => null);
     const sessionId = cleanString(rawBody?.sessionId, 100);
     const message = cleanString(rawBody?.message, 2000);
     const requestedConversationId = cleanString(rawBody?.conversationId, 100);
@@ -152,13 +462,6 @@ serve(async (req) => {
       }
     }
 
-    const limitCheck = await checkAiUsageLimits(supabase, "assistant", config);
-    if (!limitCheck.allowed) {
-      return errorResponse("AI_LIMIT_EXCEEDED", limitCheck.reason!, 429);
-    }
-
-    const user = await getAuthenticatedUser(req, supabaseUrl);
-
     // Resolve or create the conversation.
     let conversationId: string | null = null;
 
@@ -169,7 +472,14 @@ serve(async (req) => {
         .eq("id", requestedConversationId)
         .maybeSingle();
 
-      if (existing && existing.session_id === sessionId) {
+      const samePrincipal = user
+        ? existing?.user_id === user.id
+        : existing?.user_id === null;
+      if (
+        existing &&
+        samePrincipal &&
+        existing.session_id === sessionId
+      ) {
         conversationId = existing.id;
       }
     }
@@ -194,6 +504,13 @@ serve(async (req) => {
       }
       conversationId = created.id;
     }
+    if (!conversationId) {
+      return errorResponse(
+        "CONVERSATION_FAILED",
+        "Could not resolve the conversation.",
+        500,
+      );
+    }
 
     const { count: messageCount } = await supabase
       .from("ai_messages")
@@ -206,6 +523,41 @@ serve(async (req) => {
         "This conversation has reached its message limit. Please start a new one.",
         429,
       );
+    }
+
+    const cancellationId = cancellationBookingId(message);
+    if (cancellationId) {
+      if (!user) {
+        return errorResponse(
+          "AUTHENTICATION_REQUIRED",
+          "Sign in before cancelling a booking.",
+          401,
+        );
+      }
+      await supabase.from("ai_messages").insert({
+        conversation_id: conversationId,
+        role: "user",
+        content: message,
+      });
+      return await proposeBookingCancellation(
+        supabase,
+        user.id,
+        conversationId,
+        cancellationId,
+      );
+    }
+
+    if (!openRouterApiKey) {
+      return errorResponse(
+        "OPENROUTER_NOT_CONFIGURED",
+        "OPENROUTER_API_KEY is not configured.",
+        500,
+      );
+    }
+
+    const limitCheck = await checkAiUsageLimits(supabase, "assistant", config);
+    if (!limitCheck.allowed) {
+      return errorResponse("AI_LIMIT_EXCEEDED", limitCheck.reason!, 429);
     }
 
     const { data: priorMessages } = await supabase
@@ -249,7 +601,7 @@ serve(async (req) => {
     if (user) {
       const { data: bookingRows } = await supabase
         .from("bookings")
-        .select("event_date, status, venues(name)")
+        .select("id, event_date, status, venues(name)")
         .eq("customer_id", user.id)
         .order("event_date", { ascending: false })
         .limit(5);
@@ -259,6 +611,7 @@ serve(async (req) => {
           `This user's recent bookings: ${
             JSON.stringify(
               bookingRows.map((b: any) => ({
+                bookingId: b.id,
                 venue: b.venues?.name ?? "Unknown venue",
                 eventDate: b.event_date,
                 status: b.status,
@@ -270,7 +623,7 @@ serve(async (req) => {
     }
 
     const messages = [
-      { role: "system", content: systemPrompt },
+      { role: "system", content: actionSystemPrompt },
       ...(contextParts.length > 0
         ? [{ role: "system" as const, content: contextParts.join("\n") }]
         : []),
