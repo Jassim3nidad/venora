@@ -57,6 +57,11 @@
       "file": "supabase/migrations/20260728110000_public_guest_rsvp.sql",
       "kind": "SECURITY_DEFINER",
       "reason": "Token-scoped RSVP RPCs expose only minimal invitation fields and bounded response mutation; both use a fixed search_path, direct anon table access stays revoked, and EXECUTE is granted only after revoking PUBLIC."
+    },
+    {
+      "file": "supabase/migrations/20260728130000_harden_event_timeline_tasks.sql",
+      "kind": "SECURITY_DEFINER",
+      "reason": "A trigger validates booking ownership, same-owner dependency links, and dependency cycles with a fixed empty search_path; direct execution is revoked from every API role."
     }
   ]
 }
