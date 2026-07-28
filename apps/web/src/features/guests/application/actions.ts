@@ -156,8 +156,21 @@ export async function issueGuestRsvpAction(rawInput: unknown) {
 
       throwGuestError(error);
       if (!data) throw new ValidationError("Guest not found or access denied.");
+
+      const deliveryResult = await supabase.functions.invoke(
+        "rsvp-notifications",
+        {
+          body: { mode: "invitation", guestId: data.id },
+        },
+      );
+      const delivery =
+        deliveryResult.error ||
+        !["sent", "skipped"].includes(deliveryResult.data?.delivery)
+          ? "failed"
+          : (deliveryResult.data.delivery as "sent" | "skipped");
+
       revalidateGuestPages();
-      return data;
+      return { ...data, delivery };
     },
     rawInput,
   );
