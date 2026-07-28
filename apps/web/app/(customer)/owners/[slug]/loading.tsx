@@ -6,7 +6,7 @@ function SkeletonBlock({ className = "" }: { className?: string }) {
 
 export default function OwnerProfileLoading() {
   return (
-    <main className="mx-auto min-w-0 max-w-7xl space-y-10 px-4 pb-20 pt-6 font-sans text-[#151C27] sm:px-6 sm:pt-8 lg:px-8">
+    <div className="mx-auto min-w-0 max-w-7xl space-y-10 px-4 pb-20 pt-6 font-sans text-[#151C27] sm:px-6 sm:pt-8 lg:px-8">
       <div className="flex items-center gap-2">
         <SkeletonBlock className="h-4 w-12" />
         <SkeletonBlock className="h-4 w-4" />
@@ -87,6 +87,6 @@ export default function OwnerProfileLoading() {
           ))}
         </div>
       </section>
-    </main>
+    </div>
   );
 }
