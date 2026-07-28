@@ -532,8 +532,10 @@ test.describe.serial("Phase 3-4 hosted acceptance", () => {
     await expect(
       page
         .getByRole("listitem")
-        .filter({ hasText: firstTask })
-        .getByText("Completed"),
+        .filter({
+          has: page.getByRole("heading", { name: firstTask, exact: true }),
+        })
+        .getByText("Completed", { exact: true }),
     ).toBeVisible();
 
     for (const title of [secondTask, firstTask]) {
