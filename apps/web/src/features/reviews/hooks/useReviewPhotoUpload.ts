@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { fileHasAllowedSignature } from "@/lib/security/file-signatures";
 
 const MAX_PHOTOS = 5;
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -43,6 +44,13 @@ export function useReviewPhotoUpload() {
         `"${invalidFile.name}" must be a JPEG, PNG, or WEBP image under 10 MB.`,
       );
       return [];
+    }
+
+    for (const file of files) {
+      if (!(await fileHasAllowedSignature(file))) {
+        setError(`"${file.name}" content does not match its image file type.`);
+        return [];
+      }
     }
 
     setIsUploading(true);
