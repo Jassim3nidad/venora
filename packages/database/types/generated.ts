@@ -758,6 +758,9 @@ export interface Database {
           rsvp_deadline: string | null;
           rsvp_responded_at: string | null;
           rsvp_revoked_at: string | null;
+          rsvp_invitation_delivered_at: string | null;
+          rsvp_reminder_sent_at: string | null;
+          rsvp_delivery_error: string | null;
           plus_ones_attending: number;
           created_at: string;
           updated_at: string;
@@ -780,6 +783,9 @@ export interface Database {
           rsvp_deadline?: string | null;
           rsvp_responded_at?: string | null;
           rsvp_revoked_at?: string | null;
+          rsvp_invitation_delivered_at?: string | null;
+          rsvp_reminder_sent_at?: string | null;
+          rsvp_delivery_error?: string | null;
           plus_ones_attending?: number;
           created_at?: string;
           updated_at?: string;
@@ -800,6 +806,9 @@ export interface Database {
           rsvp_deadline?: string | null;
           rsvp_responded_at?: string | null;
           rsvp_revoked_at?: string | null;
+          rsvp_invitation_delivered_at?: string | null;
+          rsvp_reminder_sent_at?: string | null;
+          rsvp_delivery_error?: string | null;
           plus_ones_attending?: number;
           updated_at?: string;
         };
