@@ -67,6 +67,11 @@
       "file": "supabase/migrations/20260728160000_restore_venue_media_storage_ownership.sql",
       "kind": "STORAGE_POLICY",
       "reason": "A forward-only repair removes the legacy organization-folder-only policies and restores organization plus venue path validation for authenticated venue-media writes."
+    },
+    {
+      "file": "supabase/migrations/20260728161000_qualify_venue_media_object_path.sql",
+      "kind": "STORAGE_POLICY",
+      "reason": "A forward-only repair qualifies storage.objects.name so nested venue policy queries validate the uploaded object path instead of public.venues.name."
     }
   ]
 }
