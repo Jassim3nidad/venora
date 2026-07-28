@@ -185,14 +185,17 @@ calendars, customer communication, suppliers, performance, reports).
 - [~] Event timeline planner — authenticated task CRUD, scheduling, owners,
   priorities, status filters, and dependency UI exist; hosted migration and
   live multi-account E2E remain
-- [~] AI Event Planner — module and focused tests exist; no customer-facing workflow
-  or verified production provider behavior
-- [~] AI Budget Advisor — deterministic module and focused tests exist; no
-  customer-facing workflow
-- [~] AI Supplier Matching — deterministic module and focused tests exist; no
-  marketplace integration or live authorization/data verification
-- [~] AI Concierge — customer widget exists, but responses are scripted; no
-  role-aware tools, mutation confirmation, audit logging, or production AI verification
+- [~] AI Event Planner — deterministic plan module and focused tests exist; the
+  standalone generator is not customer-facing and production provider behavior
+  is unverified
+- [~] AI Budget Advisor — customer-facing venue cost estimation exists alongside
+  the deterministic module; hosted Edge/provider behavior remains unverified
+- [~] AI Supplier Matching — customer-facing venue recommendations exist, while
+  the accredited-supplier matcher remains outside marketplace workflows; live
+  authorization/data behavior is unverified
+- [~] AI Concierge — the active customer widget streams through `ai-assistant`;
+  hosted provider behavior, role-aware mutation tools, confirmation, and audit
+  evidence remain unverified
 
 ---
 
