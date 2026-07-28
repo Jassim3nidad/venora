@@ -45,7 +45,7 @@ flowchart LR
   Edge --> DB
   Edge --> Resend["Resend"]
   Edge --> Push["Web Push endpoints"]
-  Edge --> AI["OpenRouter: tencent/hy3:free"]
+  Edge --> AI["OpenRouter: qwen/qwen3.7-flash"]
   Browser --> Maps["OpenFreeMap / Nominatim"]
   GitHub["GitHub repository"] -. "external integration" .-> Vercel
 ```
@@ -73,7 +73,7 @@ Full lifecycles (auth, booking, payment, storage, AI) are in
 | Backend   | Supabase Auth, PostgreSQL, RLS, Storage, Edge Functions (Deno)        |
 | Payments  | PayMongo (active); Stripe is not a registered gateway                 |
 | Messaging | Resend (email), Web Push (VAPID); SMS disabled                        |
-| AI        | OpenRouter only; model locked to `tencent/hy3:free`                   |
+| AI        | OpenRouter only; model locked to `qwen/qwen3.7-flash`                 |
 | Maps      | MapLibre / OpenFreeMap / OSM Nominatim                                |
 
 ### 1.3 Trust boundaries
@@ -479,7 +479,7 @@ Edge Function secrets: copy names from `supabase/.env.example`, then
 | PayMongo webhook rejects                               | Wrong secret or body parsing               | [runbook 10](docs/runbooks/10-paymongo-webhook-signature.md)                            |
 | Build fails                                            | Missing env, TS, or route error            | Reproduce with `pnpm build`; [runbook 26](docs/runbooks/26-production-build-failure.md) |
 | Google Maps “missing key”                              | Feature not used                           | Use MapLibre path; do not add Google keys                                               |
-| OpenRouter / AI errors                                 | Missing Edge secret or model unavailable   | Set `OPENROUTER_API_KEY`; keep model `tencent/hy3:free`                                 |
+| OpenRouter / AI errors                                 | Missing Edge secret or model unavailable   | Set `OPENROUTER_API_KEY`; keep model `qwen/qwen3.7-flash`                               |
 
 Do **not** bypass RLS, expose the service-role key, or apply unreviewed SQL to
 production to unblock local setup.
