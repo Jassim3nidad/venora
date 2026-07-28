@@ -24,19 +24,18 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 
 ### Role routing & access
 
-- [ ] **EC booking “View” links** — Events table still may deep-link into
-      venue-owner `/dashboard/bookings/...` and hit unauthorized. Mirror calendar
-      fix: coordinator-owned booking detail routes (or shared pages under EC shell).
+- [x] **EC booking “View” links** — Events table links to coordinator-owned
+      `/dashboard/coordinator/bookings/[id]` detail routes.
 - [x] **Org membership for coordinators** — Staff invite / accept path is live:
       VO `/dashboard/staff` → email → `/staff/accept` (or in-dashboard accept).
       Remaining: runtime email delivery depends on Supabase Auth config.
-- [ ] **Venue card identity** — Card ID/name/slug/detail/favorite must agree
-      (UX-02 / known limitations). Prevents wrong venue booked or favorited.
+- [x] **Venue card identity** — featured cards resolve live rows by the same
+      venue ID used for slug/detail/favorite actions; focused regressions pass.
 
 ### Marketplace data honesty
 
-- [ ] **Supplier fallback inventory** — Empty/error states must not look like
-      real suppliers customers can contact (UX-03).
+- [x] **Supplier fallback inventory** — marketplace queries no longer import or
+      return actionable sample supplier profiles; empty/error states stay explicit.
 - [ ] **Authenticated QA matrix** — Run customer / owner / supplier / EC / admin
       fixtures; many paths are source-only, not runtime-verified.
 
@@ -72,15 +71,16 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 
 ### Supplier ↔ Venue (Phase 2, but brief already lists it)
 
-- [ ] **Venues associate accredited suppliers** with listings (product UI for
-      `venue_suppliers` or equivalent).
+- [x] **Venues associate accredited suppliers** with listings — venue supplier
+      management, partnership requests, package selection, and booking attachment
+      use `venue_suppliers`.
 - [x] **Attach suppliers to a booking** (`booking_suppliers`) — VO/EC booking
       detail attach form writes confirmed jobs; supplier Jobs lists them.
 
 ### Customer
 
-- [ ] **Compare venues** — side-by-side or structured compare (brief capability;
-      today = favorites only).
+- [x] **Compare venues** — `/compare` provides a side-by-side workspace with
+      marketplace comparison controls.
 
 ### Administrator
 
@@ -97,32 +97,37 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 
 ### Calendar richness (brief § Interactive Venue Calendar)
 
-- [ ] Confirm/cover: tentative reservations, maintenance, seasonal pricing,
-      blackout dates — beyond basic available/reserved.
+- [x] Covered: tentative reservations, maintenance, seasonal pricing, blackout
+      dates, owner editing, booking guards, and focused tests.
 
 ### Messaging & notifications
 
 - [ ] Unified **customer messaging** suite across all commercial surfaces (Phase 2;
       EC booking + venue inquiry threads already shipped).
-- [~] Dedicated notification/settings routes for owner / supplier / EC — EC Settings
-  shipped; owner/supplier gaps may remain.
+- [x] Dedicated settings routes for owner / supplier / EC plus shared
+      notification access in dashboard shells.
 
 ### Payments
 
 - [x] Permanently retire **Maya**.
-- [ ] Customer **invoice / receipt / refund IA** easier to find (UX-15).
+- [x] Customer **invoice / receipt / refund IA** — Billing & Payments is in the
+      account navigation and booking payment detail exposes owned documents.
 
 ### Analytics
 
-- [ ] EC **booking performance** beyond overview/reports list.
-- [ ] Admin marketplace-wide analytics completeness vs brief.
+- [x] EC **booking performance** — scoped revenue, occupancy, conversion, and
+      popular-venue metrics at `/dashboard/coordinator/performance`.
+- [x] Admin marketplace-wide analytics vs brief — platform KPIs, revenue,
+      commission, occupancy, conversion, packages, demographics, and exports
+      live under `/admin/reports`; AI/error telemetry remains later observability.
 
 ### UX / a11y (from remediation backlog)
 
-- [ ] Dead Help control → wire `/help` (UX-04).
+- [x] Help controls route to `/help` from public and account navigation.
 - [ ] Mobile drawer focus/Escape (UX-06).
-- [ ] Supplier crop dialog accessibility (UX-25).
-- [ ] Shared branded 404 / error recovery (UX-10 / UX-11).
+- [x] Supplier crop dialog risk retired — profile image upload uses the native
+      labeled file flow and no inaccessible crop dialog remains.
+- [x] Shared branded 404 / error recovery (UX-10 / UX-11).
 - [ ] Landmark / heading structure cleanup (UX-05/08/09).
 
 ---
