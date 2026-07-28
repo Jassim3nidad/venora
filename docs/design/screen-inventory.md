@@ -25,7 +25,7 @@ The authoritative file-by-file list is the [route matrix](route-screen-matrix.md
 | Admin shell       | `apps/web/app/(admin)/admin/layout.tsx`                            | Admin role check and permission-filtered navigation  | Safe `/unauthorized` redirect                          | Source-verified                                           |
 | Venue-owner shell | `apps/web/app/(venue-owner)/dashboard/layout.tsx`                  | Venue-owner/admin role guard                         | Safe denial                                            | Source-verified                                           |
 | Supplier shell    | `apps/web/app/(supplier)/dashboard/layout.tsx`                     | Supplier/admin role guard                            | Safe denial                                            | Source-verified                                           |
-| Coordinator shell | `apps/web/app/(event-coordinator)/dashboard/layout.tsx`            | Coordinator/admin role guard                         | Safe denial                                            | Source-verified                                           |
+| Coordinator shell | `apps/web/app/(venue-owner)/dashboard/layout.tsx`                  | Coordinator/admin role guard                         | Safe denial                                            | Source-verified                                           |
 
 Six route loading files exist: customer bookings, customer dashboard, favorites,
 suppliers, venues, and venue-owner analytics. Other screens rely on inline pending

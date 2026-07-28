@@ -56,6 +56,8 @@ export type InquiryStatus = "new" | "responded" | "closed";
 export type AccreditationStatus =
   "pending" | "accredited" | "rejected" | "suspended";
 export type ReviewStatus = "published" | "flagged" | "removed";
+export type EventGuestRsvpStatus =
+  "pending" | "attending" | "declined" | "tentative";
 export type PaymentProvider = "paymongo" | "maya" | "stripe";
 export type TransactionStatus =
   "pending" | "paid" | "failed" | "refunded" | "partially_refunded";
@@ -734,6 +736,56 @@ export interface Database {
           cancelled_at?: string | null;
           completed_at?: string | null;
           reviewed_at?: string | null;
+        };
+      };
+
+      event_guests: {
+        Row: {
+          id: string;
+          user_id: string;
+          booking_id: string | null;
+          first_name: string;
+          last_name: string;
+          email: string | null;
+          phone: string | null;
+          guest_group: string | null;
+          plus_ones_allowed: number;
+          dietary_requirements: string | null;
+          accessibility_notes: string | null;
+          rsvp_status: EventGuestRsvpStatus;
+          rsvp_token: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          booking_id?: string | null;
+          first_name: string;
+          last_name: string;
+          email?: string | null;
+          phone?: string | null;
+          guest_group?: string | null;
+          plus_ones_allowed?: number;
+          dietary_requirements?: string | null;
+          accessibility_notes?: string | null;
+          rsvp_status?: EventGuestRsvpStatus;
+          rsvp_token?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          booking_id?: string | null;
+          first_name?: string;
+          last_name?: string;
+          email?: string | null;
+          phone?: string | null;
+          guest_group?: string | null;
+          plus_ones_allowed?: number;
+          dietary_requirements?: string | null;
+          accessibility_notes?: string | null;
+          rsvp_status?: EventGuestRsvpStatus;
+          updated_at?: string;
         };
       };
 

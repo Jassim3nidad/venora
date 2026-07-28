@@ -292,3 +292,20 @@ body {
 .filter-sticky-footer {
   box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
 }
+
+.guest-input {
+  width: 100%;
+  min-height: 2.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  padding-inline: 0.75rem;
+  color: #0f172a;
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.guest-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px #dbeafe;
+}

@@ -12,16 +12,14 @@ export function resolveFeaturedMarketplaceVenues(
   liveVenues: Venue[],
   fallbackVenues: Venue[],
 ) {
-  const liveVenueBySlug = new Map(
-    liveVenues.filter((v) => v.slug).map((venue) => [venue.slug, venue]),
+  const liveVenueById = new Map(
+    liveVenues.map((venue) => [String(venue.id), venue]),
   );
 
   return fallbackVenues
     .slice(0, FEATURED_VENUE_COUNT)
     .map(
       (fallbackVenue) =>
-        (fallbackVenue.slug
-          ? liveVenueBySlug.get(fallbackVenue.slug)
-          : undefined) ?? fallbackVenue,
+        liveVenueById.get(String(fallbackVenue.id)) ?? fallbackVenue,
     );
 }
