@@ -41,9 +41,9 @@ for (const file of requiredDocs) {
 if (existsSync(routeMatrixPath)) {
   const matrix = readFileSync(routeMatrixPath, "utf8");
   const pages = walk(appRoot, (file) => file.endsWith(`${sep}page.tsx`));
-  if (pages.length !== 104) {
+  if (pages.length !== 133) {
     errors.push(
-      `route baseline changed: expected 104 page files, found ${pages.length}`,
+      `route baseline changed: expected 133 page files, found ${pages.length}`,
     );
   }
   for (const page of pages) {
@@ -67,7 +67,7 @@ if (existsSync(flowPath)) {
   }
   const sections = flows.split(/^## \d+\. /gm).slice(1);
   for (const [index, section] of sections.entries()) {
-    if (!section.includes("```mermaid\nflowchart")) {
+    if (!/```mermaid\r?\nflowchart/.test(section)) {
       errors.push(`user flow ${index + 1} lacks a Mermaid flowchart`);
     }
   }
@@ -110,5 +110,5 @@ if (errors.length > 0) {
 }
 
 console.log(
-  `Design documentation valid: ${requiredDocs.length} files, 104 routes, 32 flows, ${mermaidCount} Mermaid diagrams.`,
+  `Design documentation valid: ${requiredDocs.length} files, 133 routes, 32 flows, ${mermaidCount} Mermaid diagrams.`,
 );
