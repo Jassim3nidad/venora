@@ -805,6 +805,55 @@ export interface Database {
         };
       };
 
+      event_seating_tables: {
+        Row: {
+          id: string;
+          user_id: string;
+          booking_id: string | null;
+          table_name: string;
+          capacity: number;
+          notes: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          booking_id?: string | null;
+          table_name: string;
+          capacity?: number;
+          notes?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          booking_id?: string | null;
+          table_name?: string;
+          capacity?: number;
+          notes?: string | null;
+        };
+      };
+
+      event_seating_assignments: {
+        Row: {
+          id: string;
+          table_id: string;
+          guest_id: string;
+          seat_number: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          table_id: string;
+          guest_id: string;
+          seat_number?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          table_id?: string;
+          guest_id?: string;
+          seat_number?: number | null;
+        };
+      };
+
       booking_status_history: {
         Row: {
           id: string;
