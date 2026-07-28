@@ -1,7 +1,7 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   Download,
@@ -110,11 +110,16 @@ export function GuestManager({
   const [isPending, startTransition] = useTransition();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [draft, setDraft] = useState<GuestDraft>(EMPTY_DRAFT);
+  const [guestRows, setGuestRows] = useState(guests);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [includeSensitive, setIncludeSensitive] = useState(false);
 
-  const filteredGuests = guests.filter((guest) => {
+  useEffect(() => {
+    setGuestRows(guests);
+  }, [guests]);
+
+  const filteredGuests = guestRows.filter((guest) => {
     const text =
       `${guest.first_name} ${guest.last_name} ${guest.guest_group ?? ""}`.toLowerCase();
     const matchesSearch = text.includes(search.trim().toLowerCase());
@@ -123,10 +128,10 @@ export function GuestManager({
     return matchesSearch && matchesStatus;
   });
 
-  const attending = guests.filter(
+  const attending = guestRows.filter(
     (guest) => guest.rsvp_status === "attending",
   ).length;
-  const pending = guests.filter(
+  const pending = guestRows.filter(
     (guest) => guest.rsvp_status === "pending",
   ).length;
 
@@ -168,6 +173,14 @@ export function GuestManager({
         return;
       }
 
+      const savedGuest = result.data.guest as EventGuest;
+      setGuestRows((current) =>
+        draft.id
+          ? current.map((guest) =>
+              guest.id === savedGuest.id ? savedGuest : guest,
+            )
+          : [savedGuest, ...current],
+      );
       toast.success(draft.id ? "Guest updated." : "Guest added.");
       setDialogOpen(false);
       router.refresh();
@@ -189,6 +202,7 @@ export function GuestManager({
         toast.error(result.error.message);
         return;
       }
+      setGuestRows((current) => current.filter((item) => item.id !== guest.id));
       toast.success("Guest deleted.");
       router.refresh();
     });
@@ -236,6 +250,19 @@ export function GuestManager({
           "RSVP link created, but email delivery is unavailable. Share the copied link.",
         );
       }
+      setGuestRows((current) =>
+        current.map((item) =>
+          item.id === guest.id
+            ? {
+                ...item,
+                rsvp_token: result.data.rsvp_token,
+                rsvp_deadline: result.data.rsvp_deadline,
+                invitation_sent_at: new Date().toISOString(),
+                rsvp_revoked_at: null,
+              }
+            : item,
+        ),
+      );
       router.refresh();
     });
   }
@@ -249,6 +276,13 @@ export function GuestManager({
         toast.error(result.error.message);
         return;
       }
+      setGuestRows((current) =>
+        current.map((item) =>
+          item.id === guest.id
+            ? { ...item, rsvp_revoked_at: new Date().toISOString() }
+            : item,
+        ),
+      );
       toast.success("RSVP link revoked.");
       router.refresh();
     });
@@ -263,6 +297,10 @@ export function GuestManager({
           toast.error(result.error.message);
           return;
         }
+        setGuestRows((current) => [
+          ...(result.data.guests as EventGuest[]),
+          ...current,
+        ]);
         toast.success(`${result.data.imported} guests imported.`);
         router.refresh();
       });
@@ -316,9 +354,9 @@ export function GuestManager({
             <button
               type="button"
               onClick={() =>
-                downloadCsv(buildGuestCsv(guests, { includeSensitive }))
+                downloadCsv(buildGuestCsv(guestRows, { includeSensitive }))
               }
-              disabled={guests.length === 0}
+              disabled={guestRows.length === 0}
               className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
             >
               <Download className="h-4 w-4" />
@@ -357,7 +395,7 @@ export function GuestManager({
 
       <div className="grid gap-3 sm:grid-cols-3">
         {[
-          { label: "Total guests", value: guests.length },
+          { label: "Total guests", value: guestRows.length },
           { label: "Attending", value: attending },
           { label: "Awaiting response", value: pending },
         ].map((item) => (
@@ -408,10 +446,10 @@ export function GuestManager({
           <div className="px-6 py-16 text-center">
             <Users className="mx-auto h-10 w-10 text-slate-300" />
             <p className="mt-3 font-bold text-slate-800">
-              {guests.length === 0 ? "No guests yet" : "No matching guests"}
+              {guestRows.length === 0 ? "No guests yet" : "No matching guests"}
             </p>
             <p className="mt-1 text-sm text-slate-500">
-              {guests.length === 0
+              {guestRows.length === 0
                 ? "Add one guest or import a CSV to begin."
                 : "Change search or response filter."}
             </p>
