@@ -213,7 +213,7 @@ export default async function MarketingHomePage() {
     <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-[#F8FAFC] text-[#111827] antialiased">
       <MarketingNavbar />
 
-      <main className="w-full flex-grow">
+      <div className="w-full flex-grow">
         <section className="relative isolate w-full overflow-visible bg-slate-950 pb-20 pt-10 sm:pb-28 sm:pt-14 md:pb-32 lg:pb-28 lg:pt-16">
           <div className="absolute inset-0 -z-10">
             <img
@@ -515,7 +515,7 @@ export default async function MarketingHomePage() {
             ) : null}
           </ScrollReveal>
         </section>
-      </main>
+      </div>
     </div>
   );
 }
