@@ -26,7 +26,7 @@ function baseConfig(overrides: Partial<AiConfiguration> = {}): AiConfiguration {
     feature: "assistant",
     enabled: true,
     provider: "openrouter",
-    model: "tencent/hy3:free",
+    model: "qwen/qwen3.7-flash",
     fallbackProvider: null,
     fallbackModel: null,
     systemInstruction: null,
@@ -189,8 +189,8 @@ Deno.test(
 );
 
 // ── estimateCostCents: free model never fabricates a cost ────────────
-Deno.test("estimateCostCents returns 0 for the seeded free model", () => {
-  assertEquals(estimateCostCents("tencent/hy3:free", 5000), 0);
+Deno.test("estimateCostCents estimates the approved Qwen model", () => {
+  assertEquals(estimateCostCents("qwen/qwen3.7-flash", 5000), 0.07);
 });
 
 Deno.test(
@@ -265,7 +265,7 @@ Deno.test(
         });
         assertEquals(result.usedFallback, false);
         assertEquals(result.providerUsed, "openrouter");
-        assertEquals(result.modelUsed, "tencent/hy3:free");
+        assertEquals(result.modelUsed, "qwen/qwen3.7-flash");
       },
     );
   },
