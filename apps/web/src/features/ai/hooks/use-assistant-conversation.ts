@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  executeAssistantAction,
   streamAssistantReply,
   AIAssistantClientError,
+  type AssistantActionProposal,
 } from "../api/ai-assistant.client";
 
 export interface AssistantMessage {
@@ -31,6 +33,8 @@ export function useAssistantConversation() {
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingAction, setPendingAction] =
+    useState<AssistantActionProposal | null>(null);
   const conversationIdRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -83,6 +87,14 @@ export function useAssistantConversation() {
             continue;
           }
 
+          if (event.type === "actionProposal") {
+            setPendingAction(event.proposal);
+            setMessages((prev) =>
+              prev.filter((message) => message.id !== assistantMessageId),
+            );
+            continue;
+          }
+
           setMessages((prev) =>
             prev.map((m) =>
               m.id === assistantMessageId
@@ -115,10 +127,43 @@ export function useAssistantConversation() {
     setConversationId(null);
     conversationIdRef.current = null;
     setError(null);
+    setPendingAction(null);
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(CONVERSATION_STORAGE_KEY);
     }
   }, []);
+
+  const resolvePendingAction = useCallback(
+    async (confirmed: boolean) => {
+      if (!pendingAction || isStreaming) return;
+      setError(null);
+      setIsStreaming(true);
+      try {
+        const message = await executeAssistantAction(
+          pendingAction.requestId,
+          confirmed,
+        );
+        setMessages((current) => [
+          ...current,
+          {
+            id: crypto.randomUUID(),
+            role: "assistant",
+            content: message,
+          },
+        ]);
+        setPendingAction(null);
+      } catch (err) {
+        setError(
+          err instanceof AIAssistantClientError
+            ? err.message
+            : "The action could not be completed.",
+        );
+      } finally {
+        setIsStreaming(false);
+      }
+    },
+    [isStreaming, pendingAction],
+  );
 
   return {
     messages,
@@ -128,5 +173,8 @@ export function useAssistantConversation() {
     startNewConversation,
     ready: Boolean(sessionId),
     conversationId,
+    pendingAction,
+    confirmPendingAction: () => resolvePendingAction(true),
+    rejectPendingAction: () => resolvePendingAction(false),
   };
 }
