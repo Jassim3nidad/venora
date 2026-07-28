@@ -67,13 +67,13 @@ Accounts have **one application role** at a time. Partner approval **replaces** 
 
 ## System lanes (who does what when)
 
-| Phase | Customer | Venue owner | Event coordinator | Supplier | Admin |
-| ----- | -------- | ----------- | ----------------- | -------- | ----- |
-| Discover | Browse venues/suppliers | Listing appears if live | Uses discovery tools later | Listing appears if live | Monitors marketplace |
-| Enter | Register → verify → login | Become partner → wait | Become partner → wait | Become partner → wait | Approves/denies applications |
-| Transact | Booking inquiry; supplier inquiry | Approve/decline + quote | Sees org events if member | Quote on inquiries | Oversight / moderation |
-| Pay / confirm | PayMongo checkout | Availability, calendar, packages | Calendar / events views | Jobs when rows exist (Phase 2 attach incomplete) | Payment/reporting tools |
-| After event | Review; cancel/refund when eligible; raise dispute when eligible | Mark complete; respond to reviews | Reports / events list | Portfolio / reviews | Disputes case review |
+| Phase         | Customer                                                         | Venue owner                       | Event coordinator                             | Supplier                                  | Admin                        |
+| ------------- | ---------------------------------------------------------------- | --------------------------------- | --------------------------------------------- | ----------------------------------------- | ---------------------------- |
+| Discover      | Browse venues/suppliers                                          | Listing appears if live           | Uses discovery tools later                    | Listing appears if live                   | Monitors marketplace         |
+| Enter         | Register → verify → login                                        | Become partner → wait             | Become partner → wait                         | Become partner → wait                     | Approves/denies applications |
+| Transact      | Booking inquiry; supplier inquiry                                | Approve/decline + quote           | Sees org events if member                     | Quote on inquiries                        | Oversight / moderation       |
+| Pay / confirm | PayMongo checkout                                                | Availability, calendar, packages  | Calendar / events views + supplier assignment | Jobs assigned through `booking_suppliers` | Payment/reporting tools      |
+| After event   | Review; cancel/refund when eligible; raise dispute when eligible | Mark complete; respond to reviews | Reports / events list                         | Portfolio / reviews                       | Disputes case review         |
 
 ---
 
@@ -112,12 +112,12 @@ Event Coordinators are **not** in this commercial sequence unless they work for 
 
 **People**
 
-| Person | Role in Venora |
-| ------ | -------------- |
-| Ana Reyes | Customer (bride) |
-| Marco Lim | Venue owner — *Hillcrest Gardens* organization |
-| Bea Cruz | Supplier — floral design |
-| Jam Ortiz | Supplier — mobile DJ / AV |
+| Person    | Role in Venora                                 |
+| --------- | ---------------------------------------------- |
+| Ana Reyes | Customer (bride)                               |
+| Marco Lim | Venue owner — _Hillcrest Gardens_ organization |
+| Bea Cruz  | Supplier — floral design                       |
+| Jam Ortiz | Supplier — mobile DJ / AV                      |
 
 **Story**
 
@@ -126,7 +126,7 @@ Ana wants a 120-guest garden wedding in Tagaytay in October. She does not hire a
 **End-to-end inside the system**
 
 1. **Monday evening — discovery**  
-   Ana opens Venora, filters `/venues` for Tagaytay / outdoor capacity, favorites two gardens, and opens *Hillcrest Gardens*.
+   Ana opens Venora, filters `/venues` for Tagaytay / outdoor capacity, favorites two gardens, and opens _Hillcrest Gardens_.
 
 2. **Tuesday — account**  
    She registers, verifies email, finishes profile setup, and returns to the venue.
@@ -160,8 +160,8 @@ Ana wants a 120-guest garden wedding in Tagaytay in October. She does not hire a
 
 **People:** Carlo (customer), two venue owners.
 
-1. Carlo requests *Skyline Loft* for a product launch; owner declines with a reason → booking **`declined`** (terminal for that inquiry).
-2. Carlo favorites alternate venues, books *Harbor View Hall* for the same week.
+1. Carlo requests _Skyline Loft_ for a product launch; owner declines with a reason → booking **`declined`** (terminal for that inquiry).
+2. Carlo favorites alternate venues, books _Harbor View Hall_ for the same week.
 3. Harbor View approves; Carlo pays → **`confirmed`**.
 
 **System lesson:** One declined inquiry does not block new bookings elsewhere. Availability and “no conflicting active booking for the same customer/date rules” still apply on creation (see bookings docs).
@@ -172,11 +172,11 @@ Ana wants a 120-guest garden wedding in Tagaytay in October. She does not hire a
 
 **People**
 
-| Person | Role |
-| ------ | ---- |
-| Priya Shah | Customer — company OPX organizes a 2-day offsite |
-| Diego Santos | Venue owner — *Lakeview Pavilion* |
-| Lina Gomez | Event coordinator — employee of Diego’s organization |
+| Person       | Role                                                 |
+| ------------ | ---------------------------------------------------- |
+| Priya Shah   | Customer — company OPX organizes a 2-day offsite     |
+| Diego Santos | Venue owner — _Lakeview Pavilion_                    |
+| Lina Gomez   | Event coordinator — employee of Diego’s organization |
 
 **Story**
 
@@ -192,11 +192,11 @@ Priya books Lakeview for her company’s offsite. Lina is Diego’s on-site coor
 
 3. **Coordinator work**  
    Lina opens `/dashboard/coordinator`:
-   - **Events** — sees Priya’s booking in the org pipeline  
-   - **Calendar** — `/dashboard/coordinator/calendar` for availability across org venues  
-   - **Venues** — Lakeview details  
-   - **Suppliers** — browses for AV/catering ideas; venue/EC can also attach accredited venue suppliers onto the booking as jobs  
-   - **Reports** — org-oriented reporting  
+   - **Events** — sees Priya’s booking in the org pipeline
+   - **Calendar** — `/dashboard/coordinator/calendar` for availability across org venues
+   - **Venues** — Lakeview details
+   - **Suppliers** — browses for AV/catering ideas; venue/EC can also attach accredited venue suppliers onto the booking as jobs
+   - **Reports** — org-oriented reporting
 
 4. **Priya’s parallel path**  
    Separately, Priya may still inquire with catering on `/suppliers` if her company contracts food directly.
@@ -317,15 +317,15 @@ stateDiagram-v2
 
 Illustrates concurrent activity on the same wedding weekend.
 
-| Time | Ana (customer) | Marco (venue owner) | Lina (coordinator, if on Marco’s org) | Bea (florist) |
-| ---- | -------------- | ------------------- | ------------------------------------- | ------------- |
-| Fri 10:00 | Submits venue inquiry | — | — | — |
-| Fri 14:00 | — | Approves + quote | Sees pending/approved in Events once present | — |
-| Fri 19:00 | Pays deposit | Calendar shows booked date | Calendar / events updated | — |
-| Sat 09:00 | Inquires florist | — | Browses suppliers (planning) | Receives inquiry |
-| Sat 16:00 | Accepts floral quote | — | — | Sends quote |
-| Event day | Attends | On-site ops outside app | On-site coordination | Delivers flowers |
-| After | Reviews venue | Marks booking complete | Reports / history | Portfolio update |
+| Time      | Ana (customer)        | Marco (venue owner)        | Lina (coordinator, if on Marco’s org)        | Bea (florist)    |
+| --------- | --------------------- | -------------------------- | -------------------------------------------- | ---------------- |
+| Fri 10:00 | Submits venue inquiry | —                          | —                                            | —                |
+| Fri 14:00 | —                     | Approves + quote           | Sees pending/approved in Events once present | —                |
+| Fri 19:00 | Pays deposit          | Calendar shows booked date | Calendar / events updated                    | —                |
+| Sat 09:00 | Inquires florist      | —                          | Browses suppliers (planning)                 | Receives inquiry |
+| Sat 16:00 | Accepts floral quote  | —                          | —                                            | Sends quote      |
+| Event day | Attends               | On-site ops outside app    | On-site coordination                         | Delivers flowers |
+| After     | Reviews venue         | Marks booking complete     | Reports / history                            | Portfolio update |
 
 Customers experience **two commerce apps** (venue booking + supplier inquiries). Venue and coordinator experience **one org’s event pipeline**. Suppliers experience **their inbox of inquiries**.
 
@@ -333,28 +333,28 @@ Customers experience **two commerce apps** (venue booking + supplier inquiries).
 
 ## What to tell stakeholders (accurate)
 
-| Claim | Accurate? |
-| ----- | --------- |
-| Clients find and book venues on Venora | **Yes** |
-| Clients find and quote suppliers on Venora | **Yes** |
-| Clients hire Event Coordinators on Venora | **No** |
-| Coordinators help run an org’s venues/events | **Yes** (invite + scoped dashboard; supplier attach still Phase 2) |
-| Venue “packs” suppliers onto a booking in-app | **Not finished** (schema Phase 2) |
-| Admin verifies partners before they operate | **Yes** |
-| PayMongo deposit confirms via webhook | **Yes** |
+| Claim                                         | Accurate?                                                                   |
+| --------------------------------------------- | --------------------------------------------------------------------------- |
+| Clients find and book venues on Venora        | **Yes**                                                                     |
+| Clients find and quote suppliers on Venora    | **Yes**                                                                     |
+| Clients hire Event Coordinators on Venora     | **No**                                                                      |
+| Coordinators help run an org’s venues/events  | **Yes** (invite + scoped dashboard + eligible supplier attachment)          |
+| Venue “packs” suppliers onto a booking in-app | **Yes** — package supplier associations and explicit booking-job attachment |
+| Admin verifies partners before they operate   | **Yes**                                                                     |
+| PayMongo deposit confirms via webhook         | **Yes**                                                                     |
 
 ---
 
 ## Related documents
 
-| Doc | Use when |
-| --- | -------- |
+| Doc                                                                              | Use when                           |
+| -------------------------------------------------------------------------------- | ---------------------------------- |
 | [marketplace-relationships-user-flow.md](marketplace-relationships-user-flow.md) | Roles, org model, EC hire question |
-| [user-flows.md](user-flows.md) | 32 discrete flows with Mermaid |
-| [role-experience-matrix.md](role-experience-matrix.md) | Completeness by role |
-| [navigation-map.md](navigation-map.md) | Where screens live |
-| [bookings.md](../bookings.md) | Status transitions and actors |
-| [known-limitations.md](../known-limitations.md) | Gaps that affect real scenarios |
+| [user-flows.md](user-flows.md)                                                   | 32 discrete flows with Mermaid     |
+| [role-experience-matrix.md](role-experience-matrix.md)                           | Completeness by role               |
+| [navigation-map.md](navigation-map.md)                                           | Where screens live                 |
+| [bookings.md](../bookings.md)                                                    | Status transitions and actors      |
+| [known-limitations.md](../known-limitations.md)                                  | Gaps that affect real scenarios    |
 
 ---
 
