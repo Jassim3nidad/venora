@@ -32,7 +32,7 @@ export default async function GuestManagementPage() {
       supabase
         .from("event_guests")
         .select(
-          "id,user_id,booking_id,first_name,last_name,email,phone,guest_group,plus_ones_allowed,dietary_requirements,accessibility_notes,rsvp_status,created_at,updated_at",
+          "id,user_id,booking_id,first_name,last_name,email,phone,guest_group,plus_ones_allowed,plus_ones_attending,dietary_requirements,accessibility_notes,rsvp_status,rsvp_token,invitation_sent_at,rsvp_deadline,rsvp_responded_at,rsvp_revoked_at,created_at,updated_at",
         )
         .eq("user_id", user.id)
         .order("created_at", { ascending: false }),
@@ -71,9 +71,7 @@ export default async function GuestManagementPage() {
 
   return (
     <GuestManager
-      guests={
-        (guests ?? []) as Array<Omit<Tables<"event_guests">, "rsvp_token">>
-      }
+      guests={(guests ?? []) as Array<Tables<"event_guests">>}
       bookings={bookings}
     />
   );
