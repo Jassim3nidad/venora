@@ -22,10 +22,10 @@ export const updateAiConfigurationSchema = z.object({
     .string()
     .trim()
     .superRefine((value, context) => {
-      if (value !== "tencent/hy3:free") {
+      if (value !== "qwen/qwen3.7-flash") {
         context.addIssue({
           code: "custom",
-          message: "tencent/hy3:free is the required AI model",
+          message: "qwen/qwen3.7-flash is the required AI model",
         });
       }
     }),
