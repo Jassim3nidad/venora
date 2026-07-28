@@ -143,28 +143,25 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 
 Do **not** block Phase 1 release on these unless product explicitly expands scope.
 
-- [~] Guest management — CRUD/CSV UI, hardened migration, focused tests, and
-  fail-closed hosted acceptance coverage exist; staging migrations are applied,
-  but the exact-main protected browser run is blocked by Vercel build capacity
+- [x] Guest management — CRUD/CSV UI, filters, statistics, hardened staging
+      migration, focused tests, and protected hosted acceptance pass
 - [~] RSVP management — owner create/copy/revoke controls, deadlines, token-only
   public response RPCs, plus-ones, invitation email delivery, targeted reminder
-  automation, and `/rsvp/[token]` exist; hosted delivery is blocked by the
-  invalid Resend credential and browser E2E awaits an exact-main deployment
-- [~] Seating planner — authenticated table CRUD, capacity-aware guest
-  assignment UI/actions, ownership hardening, focused tests, and staging
-  multi-account acceptance coverage exist; the exact-main hosted run is pending
-- [~] Event timeline planner — authenticated task CRUD, scheduling, owners,
-  priorities, status filters, dependency UI, focused tests, and staging
-  multi-account acceptance coverage exist; the exact-main hosted run is pending
-- [~] AI Event Planner / Supplier Matching — authenticated event planning and
-  accredited-supplier ranking are customer-facing with focused and hosted
-  acceptance coverage; exact-main browser and live account-data evidence remain
+  automation, and `/rsvp/[token]` exist; protected hosted acceptance reaches
+  invitation delivery, which is blocked by the invalid Resend credential
+- [x] Seating planner — authenticated capacity-aware CRUD/assignment,
+      ownership hardening, focused tests, and hosted multi-account acceptance pass
+- [x] Event timeline planner — authenticated task CRUD, scheduling, owners,
+      priorities, status filters, dependencies, focused tests, and hosted
+      multi-account acceptance pass
+- [x] AI Event Planner / Supplier Matching — authenticated planning and
+      accredited-supplier ranking are customer-facing; focused and hosted
+      provider/authorization/data acceptance pass
 - [x] AI Budget Advisor — the hosted Qwen cost estimator returns a validated
       venue estimate and records successful provider/model/token/cost evidence
-- [~] AI Concierge — the active customer widget streams through `ai-assistant`;
-  customer-only cancellation proposals require explicit confirmation and write
-  service-only action/audit evidence; live Qwen streaming and usage evidence
-  pass, while hosted confirmed-tool execution awaits the exact-main browser run
+- [x] AI Concierge — the customer widget streams through `ai-assistant`;
+      customer-only cancellation proposals require explicit confirmation and
+      hosted execution writes service-only action/audit evidence
 - [ ] Featured placements, sponsored listings, premium subscriptions
 - [ ] Stripe (future payments)
 
