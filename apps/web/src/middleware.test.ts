@@ -153,7 +153,21 @@ describe("Active Proxy Rate Limiter", () => {
     expect((await proxy(searchReq)).status).toBe(200);
   });
 
-  it("15. Invalid forwarding headers do not crash middleware", async () => {
+  it("15. Event planner actions use the AI request limit", async () => {
+    const req = createMockRequest("/account/event-planner", "POST", "8.8.8.8");
+
+    for (let i = 0; i < 20; i++) {
+      const response = await proxy(req);
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toContain("/login");
+    }
+
+    const response = await proxy(req);
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toContain("/429");
+  });
+
+  it("16. Invalid forwarding headers do not crash middleware", async () => {
     const req = createMockRequest("/api/test", "GET", null, {
       "x-forwarded-for": "not-an-ip, 10.0.0.1",
       "x-real-ip": "192.168.1.1",
