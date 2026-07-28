@@ -854,6 +854,54 @@ export interface Database {
         };
       };
 
+      event_timeline_tasks: {
+        Row: {
+          id: string;
+          user_id: string;
+          booking_id: string | null;
+          title: string;
+          description: string | null;
+          start_time: string | null;
+          end_time: string | null;
+          owner_name: string | null;
+          supplier_id: string | null;
+          status: "todo" | "in_progress" | "completed" | "cancelled";
+          priority: "low" | "medium" | "high" | "urgent";
+          depends_on_task_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          booking_id?: string | null;
+          title: string;
+          description?: string | null;
+          start_time?: string | null;
+          end_time?: string | null;
+          owner_name?: string | null;
+          supplier_id?: string | null;
+          status?: "todo" | "in_progress" | "completed" | "cancelled";
+          priority?: "low" | "medium" | "high" | "urgent";
+          depends_on_task_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          booking_id?: string | null;
+          title?: string;
+          description?: string | null;
+          start_time?: string | null;
+          end_time?: string | null;
+          owner_name?: string | null;
+          supplier_id?: string | null;
+          status?: "todo" | "in_progress" | "completed" | "cancelled";
+          priority?: "low" | "medium" | "high" | "urgent";
+          depends_on_task_id?: string | null;
+          updated_at?: string;
+        };
+      };
+
       booking_status_history: {
         Row: {
           id: string;
