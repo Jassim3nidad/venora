@@ -48,6 +48,12 @@ const productionUrl = safeUrl(
   process.env.PRODUCTION_BASE_URL,
   "PRODUCTION_BASE_URL",
 );
+const protectionBypass = process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.trim();
+const deploymentHeaders = protectionBypass
+  ? {
+      "x-vercel-protection-bypass": protectionBypass,
+    }
+  : {};
 if (
   tier === "production" &&
   deploymentUrl.hostname !== productionUrl.hostname
@@ -140,7 +146,10 @@ for (;;) {
 const checks = [];
 async function check(path, allowedStatuses, label) {
   const url = new URL(path, deploymentUrl);
-  const response = await fetch(url, { redirect: "manual" });
+  const response = await fetch(url, {
+    redirect: "manual",
+    headers: deploymentHeaders,
+  });
   if (
     !allowedStatuses.some(
       ([min, max]) => response.status >= min && response.status <= max,
