@@ -30,8 +30,7 @@ export type ApiError = {
 ```
 app/api/
 └── webhooks/
-    ├── paymongo/route.ts    ← POST only (external webhook)
-    └── maya/route.ts        ← POST only (external webhook)
+    └── paymongo/route.ts    ← POST only (external webhook)
 ```
 
 ### Template
@@ -125,7 +124,7 @@ export async function createBookingAction(rawInput: unknown) {
 
 All webhook handlers MUST:
 
-1. **Verify the signature** before processing (HMAC-SHA256 for PayMongo, HMAC-SHA512 for Maya)
+1. **Verify the signature** before processing (HMAC-SHA256 for PayMongo)
 2. Return `200 { received: true }` immediately, process async
 3. Use `SUPABASE_SERVICE_ROLE_KEY` (bypasses RLS) only inside webhook handlers
 4. Be idempotent — handle duplicate webhook delivery gracefully
