@@ -1163,6 +1163,16 @@ Requires 2–4 unique package UUIDs (`package_ids` alias accepted).
 
 ### 14.6 `POST /ai-assistant`
 
+Chat uses the optional-bearer streaming contract below. The exact command
+`cancel booking <booking-id>` enters a separate JSON action mode: a customer
+bearer, live customer role, exact booking ownership, and cancellable status are
+required before a server-stored proposal is returned. The client then sends the
+proposal's `actionRequestId` with `confirmed: true` or `false`. Confirmed
+requests are conditionally claimed and executed through
+`cancel_booking_request` under the same user JWT; every lifecycle state is
+persisted and audited. Action errors additionally include `401`
+authentication, `403` tool authorization, and `409` state conflicts.
+
 **Auth:** optional bearer (unlocks own booking context)  
 **Body:** `sessionId` (required, ≤100), `message` (required, ≤2000), optional `conversationId`
 
@@ -1200,6 +1210,15 @@ Batch:
 **Success `200`:** `{ "success": true }` or batch summary with counts.  
 **Errors:** `401` · `503` not configured · `500`
 
+### 14.8 `POST /rsvp-notifications`
+
+**Auth:** invitation mode uses the signed-in guest-list owner's bearer and RLS;
+reminder mode uses an anon bearer plus `x-rsvp-reminder-secret`.
+**Body:** `{ "mode": "invitation", "guestId": "<uuid>" }` or
+`{ "mode": "reminders", "limit": 100 }`.
+**Effect:** sends Resend email, records delivery/error evidence, and
+conditionally claims reminder rows to prevent duplicate concurrent sends.
+
 ---
 
 ## 15. Coverage checklist
@@ -1236,8 +1255,9 @@ Batch:
 | 29  | `POST /ai-cost-estimator`                      | Yes             | Yes             | Yes          |
 | 30  | `POST /ai-assistant`                           | Yes             | SSE noted       | Yes          |
 | 31  | `POST /booking-notifications`                  | Yes             | Yes             | Yes          |
+| 32  | `POST /rsvp-notifications`                     | Yes             | Yes             | Yes          |
 
-**Coverage:** 31 / 31 active HTTP operations (100%).
+**Coverage:** 32 / 32 active HTTP operations (100%).
 
 Validate with:
 
