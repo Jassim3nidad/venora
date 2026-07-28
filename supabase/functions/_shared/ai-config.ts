@@ -178,7 +178,8 @@ export async function checkAiUsageLimits(
  * matches the "estimated_cost" naming already in the schema. Unknown
  * models default to 0 rather than guessing. Qwen 3.7 Flash uses its maximum
  * published input/output rate because this helper receives only a total token
- * count; the estimate is intentionally conservative.
+ * count. The integer-cents schema requires rounding non-zero estimates up to a
+ * full cent, so the estimate is intentionally conservative.
  */
 const COST_PER_1K_TOKENS_CENTS: Record<string, number> = {
   "qwen/qwen3.7-flash": 0.013,
@@ -186,7 +187,7 @@ const COST_PER_1K_TOKENS_CENTS: Record<string, number> = {
 
 export function estimateCostCents(model: string, totalTokens: number): number {
   const rate = COST_PER_1K_TOKENS_CENTS[model] ?? 0;
-  return Math.round((totalTokens / 1000) * rate * 100) / 100;
+  return Math.ceil((totalTokens / 1000) * rate);
 }
 
 export type LogAiUsageEntry = {
