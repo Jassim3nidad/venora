@@ -82,7 +82,7 @@ calendars, customer communication, suppliers, performance, reports).
       inquiry threads (`/dashboard/coordinator/messages`, `/account/venue-inquiries`)
 - [x] Coordinating accredited suppliers — discovery + attach to booking
       (`booking_suppliers` jobs path on VO/EC booking detail)
-- [~] Monitoring booking performance — `/dashboard/coordinator/performance`
+- [x] Monitoring booking performance — `/dashboard/coordinator/performance`
 - [x] Generating operational reports — `/dashboard/coordinator/reports`
 - [x] Settings / notifications — `/dashboard/coordinator/settings` + shell NotificationBell
 
@@ -100,7 +100,8 @@ calendars, customer communication, suppliers, performance, reports).
       `/staff/accept` or in-dashboard accept)
 - [x] First-class booking + venue-inquiry customer messaging (ops-scoped; not global CRM)
 - [x] Attach suppliers to venue bookings (`booking_suppliers` attach UI)
-- [ ] Deeper booking-performance analytics
+- [x] Deeper booking-performance analytics — revenue, occupancy, conversion,
+      and popular-venue metrics scoped to assigned venues
 - [x] Fix become-partner copy (EC = org staff, not hired)
 
 ---
@@ -115,9 +116,9 @@ calendars, customer communication, suppliers, performance, reports).
 - [x] Contact — customer inquiry → supplier inbox/quotes
 - [x] Accreditation status — profile field + admin accreditation
 - [x] Customers browse suppliers — `/suppliers`
-- [~] Participate in venue packages / venues associate suppliers — package
-  builder, eligible-supplier selection, partnerships, and agreements exist;
-  focused tests and hosted end-to-end verification are still missing
+- [x] Participate in venue packages / venues associate suppliers — package
+      builder, eligible-supplier selection, partnerships, and agreements exist;
+      hosted verification remains tracked by the release QA matrix
 
 **Backlog (Supplier / Phase 2)**
 
@@ -162,8 +163,9 @@ calendars, customer communication, suppliers, performance, reports).
 ### Phase 2 — Event ecosystem
 
 - [x] Supplier marketplace browse + inquiry/quotes (customer↔supplier path)
-- [~] Full venue↔supplier packaging / dynamic event packages — create/edit
-  builder and supplier association exist; focused tests and hosted E2E remain
+- [x] Full venue↔supplier packaging / dynamic event packages — create/edit
+      builder, supplier association, partnership workflows, and booking
+      attachment exist; hosted verification remains tracked by release QA
 - [x] Customer messaging — booking, venue-inquiry, and customer inbox paths exist
       (operations-scoped, not a global CRM)
 - [x] Payment automation — PayMongo checkout, settlement, refunds, and monitoring
