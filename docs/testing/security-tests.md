@@ -22,7 +22,6 @@ URL misuse, unsafe upload, replay/idempotency, and secret exposure risks.
 | P2       | Abuse protection      | Sensitive Next.js APIs/AI | No central rate limiter found                                                   | Brute force, cost, export/webhook abuse                               | Open; route-local AI limits partially tested    | Platform design needed                             |
 | P2       | Data provenance       | Supplier marketplace      | Empty/error DB falls back to sample inventory                                   | Sample can resemble live inventory                                    | Confirmed; documented, not changed              | UI disclosure/source typing needed                 |
 | P2       | API consistency       | HTTP operations           | Mixed response envelopes                                                        | Client/error handling inconsistency                                   | Documented                                      | Contract migration needed                          |
-| P2       | Payment completeness  | Maya webhook              | Signature code exists; reconciliation partial                                   | External paid state may not settle workflow                           | Documented, not claimed operational             | Implement/test reconciliation                      |
 
 ## Existing protections verified by tests/static evidence
 
