@@ -43,6 +43,21 @@ export const deleteGuestSchema = z.object({
   id: z.string().uuid(),
 });
 
+export const issueGuestRsvpSchema = z.object({
+  id: z.string().uuid(),
+  deadline: z.string().datetime().optional().nullable(),
+});
+
+export const revokeGuestRsvpSchema = z.object({
+  id: z.string().uuid(),
+});
+
+export const publicGuestRsvpSchema = z.object({
+  token: z.string().uuid(),
+  status: z.enum(["attending", "declined", "tentative"]),
+  plusOnes: z.coerce.number().int().min(0).max(20).default(0),
+});
+
 export const importGuestsSchema = z.object({
   guests: z
     .array(guestInputSchema.omit({ id: true }))
