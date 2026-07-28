@@ -9,12 +9,12 @@ issues. Use alongside:
 
 **Priority key**
 
-| Priority | Meaning |
-| -------- | ------- |
-| P0 | Blocks trust / wrong role access / production risk |
-| P1 | Brief “must have” still missing or badly partial |
-| P2 | Important polish, Phase 2 ecosystem, or ops depth |
-| P3 | Nice-to-have / later roadmap |
+| Priority | Meaning                                            |
+| -------- | -------------------------------------------------- |
+| P0       | Blocks trust / wrong role access / production risk |
+| P1       | Brief “must have” still missing or badly partial   |
+| P2       | Important polish, Phase 2 ecosystem, or ops depth  |
+| P3       | Nice-to-have / later roadmap                       |
 
 Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 
@@ -25,27 +25,27 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 ### Role routing & access
 
 - [ ] **EC booking “View” links** — Events table still may deep-link into
-  venue-owner `/dashboard/bookings/...` and hit unauthorized. Mirror calendar
-  fix: coordinator-owned booking detail routes (or shared pages under EC shell).
+      venue-owner `/dashboard/bookings/...` and hit unauthorized. Mirror calendar
+      fix: coordinator-owned booking detail routes (or shared pages under EC shell).
 - [x] **Org membership for coordinators** — Staff invite / accept path is live:
-  VO `/dashboard/staff` → email → `/staff/accept` (or in-dashboard accept).
-  Remaining: runtime email delivery depends on Supabase Auth config.
+      VO `/dashboard/staff` → email → `/staff/accept` (or in-dashboard accept).
+      Remaining: runtime email delivery depends on Supabase Auth config.
 - [ ] **Venue card identity** — Card ID/name/slug/detail/favorite must agree
-  (UX-02 / known limitations). Prevents wrong venue booked or favorited.
+      (UX-02 / known limitations). Prevents wrong venue booked or favorited.
 
 ### Marketplace data honesty
 
 - [ ] **Supplier fallback inventory** — Empty/error states must not look like
-  real suppliers customers can contact (UX-03).
+      real suppliers customers can contact (UX-03).
 - [ ] **Authenticated QA matrix** — Run customer / owner / supplier / EC / admin
-  fixtures; many paths are source-only, not runtime-verified.
+      fixtures; many paths are source-only, not runtime-verified.
 
 ### Payments / security (production)
 
 - [ ] Keep **Maya disabled** until full adapter + reconciliation exists.
 - [ ] Confirm hosted **RLS / Storage / Edge** state before release.
 - [ ] Address **API rate limiting** and Storage ownership/validation gaps as
-  listed in known limitations.
+      listed in known limitations.
 
 ---
 
@@ -54,41 +54,41 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 ### Event Coordinator (largest role gap)
 
 - [x] Scope or ship **EC MVP**: event detail, coordination actions, messaging,
-  notifications, settings (UX-12). Booking detail/actions live under
-  `/dashboard/coordinator/bookings/[id]`; Messages inbox; NotificationBell;
-  Settings at `/dashboard/coordinator/settings`. Approve/decline gated by
-  `manage_booking_decisions` (not default for coordinators).
+      notifications, settings (UX-12). Booking detail/actions live under
+      `/dashboard/coordinator/bookings/[id]`; Messages inbox; NotificationBell;
+      Settings at `/dashboard/coordinator/settings`. Approve/decline gated by
+      `manage_booking_decisions` (not default for coordinators).
 - [x] **Communicate with customers** as a first-class flow for venue ops:
-  unified EC Messages inbox covers booking chats + replyable venue inquiry
-  threads (`venue_inquiry_messages`). Still not a global CRM / Phase 2 suite.
+      unified EC Messages inbox covers booking chats + replyable venue inquiry
+      threads (`venue_inquiry_messages`). Still not a global CRM / Phase 2 suite.
 - [x] Clarify product rule in UI: EC is **org staff**, not customer-hired
-  (become-partner copy updated; Settings role card already states staff model).
+      (become-partner copy updated; Settings role card already states staff model).
 
 ### Venue Owner
 
 - [x] Complete **staff invite + permissions** end-to-end (brief: Manage staff).
-  Invite, venues, permissions, revoke/suspend, accept link + dashboard accept.
+      Invite, venues, permissions, revoke/suspend, accept link + dashboard accept.
 
 ### Supplier ↔ Venue (Phase 2, but brief already lists it)
 
 - [ ] **Venues associate accredited suppliers** with listings (product UI for
-  `venue_suppliers` or equivalent).
+      `venue_suppliers` or equivalent).
 - [x] **Attach suppliers to a booking** (`booking_suppliers`) — VO/EC booking
-  detail attach form writes confirmed jobs; supplier Jobs lists them.
+      detail attach form writes confirmed jobs; supplier Jobs lists them.
 
 ### Customer
 
 - [ ] **Compare venues** — side-by-side or structured compare (brief capability;
-  today = favorites only).
+      today = favorites only).
 
 ### Administrator
 
 - [x] **Dedicated payment / refund monitoring** workspace (brief: Payment
-  monitoring) — `/admin/payments` with transactions, refunds, webhook attention;
-  Maya remains disabled until complete.
+      monitoring) — `/admin/payments` with transactions, refunds, webhook attention;
+      Maya remains disabled until complete.
 - [x] **Disputes** — scoped case management: customer raise from eligible
-  booking, admin list/detail lifecycle (`open` → `under_review` →
-  `resolved`/`rejected`), gated by `disputes.*` (UX-13).
+      booking, admin list/detail lifecycle (`open` → `under_review` →
+      `resolved`/`rejected`), gated by `disputes.*` (UX-13).
 
 ---
 
@@ -97,12 +97,12 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 ### Calendar richness (brief § Interactive Venue Calendar)
 
 - [ ] Confirm/cover: tentative reservations, maintenance, seasonal pricing,
-  blackout dates — beyond basic available/reserved.
+      blackout dates — beyond basic available/reserved.
 
 ### Messaging & notifications
 
 - [ ] Unified **customer messaging** suite across all commercial surfaces (Phase 2;
-  EC booking + venue inquiry threads already shipped).
+      EC booking + venue inquiry threads already shipped).
 - [~] Dedicated notification/settings routes for owner / supplier / EC — EC Settings
   shipped; owner/supplier gaps may remain.
 
@@ -130,8 +130,15 @@ Status: `[ ]` open · `[~]` in progress / partial · `[x]` done
 
 Do **not** block Phase 1 release on these unless product explicitly expands scope.
 
-- [ ] Guest management / RSVP / seating / event timeline
-- [ ] AI Event Planner / Budget Advisor / Supplier Matching / Concierge
+- [~] Guest management — CRUD/CSV UI, hardened migration, and focused tests exist;
+  hosted migration and live E2E remain
+- [ ] RSVP management — public invitation/response lifecycle remains missing
+- [ ] Seating planner — schema exists; UI/actions remain missing
+- [ ] Event timeline planner — schema exists; task/dependency UI remains missing
+- [~] AI Event Planner / Budget Advisor / Supplier Matching — modules and focused
+  tests exist; customer workflows and production behavior remain unverified
+- [~] AI Concierge — scripted widget only; production tools and AI behavior remain
+  unverified
 - [ ] Featured placements, sponsored listings, premium subscriptions
 - [ ] Stripe (future payments)
 
@@ -139,13 +146,13 @@ Do **not** block Phase 1 release on these unless product explicitly expands scop
 
 ## Suggested fix order (next 4–6 sprints)
 
-| Order | Item | Why |
-| ----: | ---- | --- |
-| 1 | Venue identity + supplier fallback honesty | Stops wrong bookings / fake inventory |
-| 2 | Disputes case management depth | Admin ops trust |
-| 3 | Venue↔supplier listing association | Brief supplier “participate in packages” |
-| 4 | Venue compare + calendar richness | Customer brief polish |
-| 5 | Messaging / notifications / a11y P2 | Ecosystem quality |
+| Order | Item                                       | Why                                      |
+| ----: | ------------------------------------------ | ---------------------------------------- |
+|     1 | Venue identity + supplier fallback honesty | Stops wrong bookings / fake inventory    |
+|     2 | Disputes case management depth             | Admin ops trust                          |
+|     3 | Venue↔supplier listing association         | Brief supplier “participate in packages” |
+|     4 | Venue compare + calendar richness          | Customer brief polish                    |
+|     5 | Messaging / notifications / a11y P2        | Ecosystem quality                        |
 
 ---
 
