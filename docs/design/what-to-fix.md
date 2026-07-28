@@ -154,10 +154,10 @@ Do **not** block Phase 1 release on these unless product explicitly expands scop
 - [~] Event timeline planner — authenticated task CRUD, scheduling, owners,
   priorities, status filters, and dependency UI exist; hosted migration and
   live multi-account E2E remain
-- [~] AI Event Planner / Budget Advisor / Supplier Matching — venue cost estimation
-  and recommendation workflows are customer-facing; the standalone event-plan
-  generator and accredited-supplier matcher remain unintegrated, and hosted
-  provider/live-data behavior is unverified
+- [~] AI Event Planner / Budget Advisor / Supplier Matching — authenticated event
+  planning, venue cost estimation, and recommendation workflows are
+  customer-facing; the accredited-supplier matcher remains unintegrated, and
+  hosted provider/live-data behavior is unverified
 - [~] AI Concierge — the active customer widget streams through `ai-assistant`;
   hosted provider behavior, role-aware mutation tools, confirmation, and audit
   evidence remain unverified
