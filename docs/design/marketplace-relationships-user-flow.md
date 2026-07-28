@@ -14,13 +14,13 @@ It reflects **implemented product behavior**, not aspirational marketing copy. C
 
 There is **no** customer-facing marketplace to find, request, or hire an Event Coordinator. Coordinators are a **partner role** meant to work as **organization staff** on venues that a Venue Owner (or org) already operates. They help manage **that organization’s** events, venues, and supplier discovery — they are not freelancers the client books from a public directory.
 
-| Question | Answer today |
-| -------- | ------------ |
-| Can a client browse ECs and hire one? | **No** |
-| Can an EC receive a booking from a customer account? | **No** dedicated EC hiring flow |
-| How does an EC get work on Venora? | Apply as partner → admin approval → be attached to a **venue organization** (org membership) |
-| Who does the customer hire for the space? | The **venue** (venue organization) |
-| Who does the customer hire for catering/photo/AV/etc.? | **Suppliers**, via direct inquiry (separate from venue booking) |
+| Question                                               | Answer today                                                                                 |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| Can a client browse ECs and hire one?                  | **No**                                                                                       |
+| Can an EC receive a booking from a customer account?   | **No** dedicated EC hiring flow                                                              |
+| How does an EC get work on Venora?                     | Apply as partner → admin approval → be attached to a **venue organization** (org membership) |
+| Who does the customer hire for the space?              | The **venue** (venue organization)                                                           |
+| Who does the customer hire for catering/photo/AV/etc.? | **Suppliers**, via direct inquiry (separate from venue booking)                              |
 
 Become-partner copy for EC (“Manage clients and plan events”) describes intent; the live product only delivers an **org-scoped coordinator dashboard**, not a client hiring channel.
 
@@ -65,13 +65,13 @@ flowchart TB
 
 ### Roles in one line
 
-| Role | Primary job on Venora |
-| ---- | --------------------- |
-| **Customer** | Discover venues and suppliers; request venue bookings; inquire for supplier quotes; pay deposits after venue approval. |
-| **Venue Owner** | Operate org venues: listings, availability, packages, approve/decline booking inquiries, quotes, analytics. |
+| Role                  | Primary job on Venora                                                                                                         |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Customer**          | Discover venues and suppliers; request venue bookings; inquire for supplier quotes; pay deposits after venue approval.        |
+| **Venue Owner**       | Operate org venues: listings, availability, packages, approve/decline booking inquiries, quotes, analytics.                   |
 | **Event Coordinator** | Org-side operator: see coordinated venues’ events, calendar, venues, supplier discovery, reports. **Not** hired by customers. |
-| **Supplier** | Marketplace profile (catering, AV, décor, photo, etc.); respond to **customer** inquiries and quotes. |
-| **Admin** | Approve partner applications; moderate marketplace and platform workflows. |
+| **Supplier**          | Marketplace profile (catering, AV, décor, photo, etc.); respond to **customer** inquiries and quotes.                         |
+| **Admin**             | Approve partner applications; moderate marketplace and platform workflows.                                                    |
 
 Accounts use **one application role** at a time (partner approval replaces the customer role; it does not stack “customer + coordinator”).
 
@@ -90,7 +90,7 @@ erDiagram
   VENUE ||--o{ BOOKING : receives
   CUSTOMER ||--o{ SUPPLIER_INQUIRY : sends
   SUPPLIER ||--o{ SUPPLIER_INQUIRY : receives
-  BOOKING ||--o{ BOOKING_SUPPLIER : "Phase 2 / schema only"
+  BOOKING ||--o{ BOOKING_SUPPLIER : "venue/EC assigns supplier jobs"
 
   PROFILE {
     string id
@@ -124,13 +124,14 @@ permissions). Invitee accepts via email link (`/staff/accept`) or pending banner
 `venue_coordinator_assignments`, and grants `event_coordinator` role. Owners can
 later change venues, permissions, suspend, or revoke.
 
-### What is *not* a relationship today
+### What is _not_ a relationship today
 
 - Customer ↛ Event Coordinator (no hire, no messaging product, no EC directory).
-- Venue booking ↛ automatic supplier package (venue/EC can **attach** accredited
-  suppliers onto a booking as jobs via `booking_suppliers`; packaging/dynamic
-  event packages remain Phase 2).
-- Event Coordinator ↛ customer client CRM (no EC booking detail / messaging / client intake as a first-class product).
+- Venue booking ↛ automatic supplier job creation (venue/EC can explicitly
+  attach accredited venue partners via `booking_suppliers`; package builder and
+  supplier associations are implemented).
+- Event Coordinator ↛ customer-hired planner CRM (org-scoped booking detail and
+  messaging exist, but no public EC hire/directory or global client intake).
 
 ---
 
@@ -194,9 +195,9 @@ flowchart TD
 3. **Quote** — Supplier responds with quotes; customer accepts or declines.
 4. **Independent of venue** — This path does **not** require a venue booking, and does **not** route through an Event Coordinator marketplace.
 
-Venue owners / coordinators may **discover** suppliers and **attach** accredited
-venue partners onto a booking (`booking_suppliers` → supplier Jobs). Full
-venue↔supplier packaging remains Phase 2.
+Venue owners / coordinators may **discover** suppliers, associate accredited
+partners with venue packages, and **attach** those partners onto a booking
+(`booking_suppliers` → supplier Jobs).
 
 ### Step-by-step: “how would I contact an Event Coordinator?”
 
@@ -204,11 +205,11 @@ venue↔supplier packaging remains Phase 2.
 
 Practical realities:
 
-| Intent | What happens on Venora |
-| ------ | ---------------------- |
+| Intent                                          | What happens on Venora                                                                                                                   |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | “I want a planner to run my wedding end-to-end” | **Not supported** as a bookable EC product. Client books **venue** and/or **suppliers** separately, or hires a planner **off-platform**. |
-| “I’m a coordinator working for Garden Hill” | Apply as EC → get approved → **org owner adds you** → use `/dashboard/coordinator/*`. |
-| “I’m a customer messaging the venue’s planner” | Use venue booking communications / venue processes if present; **no dedicated EC directory or hire CTA**. |
+| “I’m a coordinator working for Garden Hill”     | Apply as EC → get approved → **org owner adds you** → use `/dashboard/coordinator/*`.                                                    |
+| “I’m a customer messaging the venue’s planner”  | Use venue booking communications / venue processes if present; **no dedicated EC directory or hire CTA**.                                |
 
 ---
 
@@ -240,21 +241,20 @@ flowchart LR
 
 ### What EC can do (partial product)
 
-| Area | Behavior |
-| ---- | -------- |
-| **Events** | List bookings across org venues; open links into booking detail routes (shared with venue-owner paths where allowed). |
-| **Calendar** | Org-scoped availability calendar under `/dashboard/coordinator/calendar` (EC shell — not the venue-owner calendar URL). |
-| **Venues** | See venues belonging to their organization. |
-| **Suppliers** | Discovery / browse for planning context. |
-| **Reports** | Org-oriented reporting surface. |
+| Area          | Behavior                                                                                                                |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **Events**    | List bookings across org venues; open links into booking detail routes (shared with venue-owner paths where allowed).   |
+| **Calendar**  | Org-scoped availability calendar under `/dashboard/coordinator/calendar` (EC shell — not the venue-owner calendar URL). |
+| **Venues**    | See venues belonging to their organization.                                                                             |
+| **Suppliers** | Discover accredited partners and attach eligible suppliers to bookings.                                                 |
+| **Reports**   | Org-oriented reporting surface.                                                                                         |
 
 ### What EC cannot do yet (important gaps)
 
 - Own a public profile clients browse.
 - Be hired or messaged as a service provider by customers.
-- Full booking detail / messaging / notifications / settings as a first-class EC experience (matrix marks coordinator **PARTIALLY IMPLEMENTED**).
 - Reliable self-serve org attach (staff invite / accept live; email delivery depends on Supabase Auth).
-- End-to-end “I coordinate suppliers onto this booking” product (Phase 2 schema).
+- Full venue listing CRUD and a customer-hire/global CRM product.
 
 ### How EC relates to each actor
 
@@ -264,7 +264,7 @@ flowchart TB
 
   EC -->|"Same org · shared venue/booking data"| VO[Venue Owner]
   EC -->|"Sees events created when customers book org venues"| CU[Customer]
-  EC -->|"Discovers / may plan with; no finished attach-to-booking UI"| SU[Supplier]
+  EC -->|"Discovers accredited partners and attaches booking jobs"| SU[Supplier]
   EC -->|"Approved by"| AD[Admin]
 
   CU -->|"Books venue · does not hire EC"| Venue[Venue]
@@ -272,14 +272,14 @@ flowchart TB
   Venue --> EC
 ```
 
-| Pair | Relationship |
-| ---- | ------------ |
-| **Customer ↔ Venue Owner** | Commercial: inquiry → approval → payment for a **venue**. |
-| **Customer ↔ Supplier** | Commercial: inquiry → quote → accept/decline for a **service**. |
-| **Customer ↔ Event Coordinator** | **None as a hire.** Indirect only: customer’s venue booking appears on EC dashboard if EC is org staff. |
-| **Venue Owner ↔ Event Coordinator** | Organizational: VO/org employs or partners with EC via **organization_members**. |
-| **Venue Owner / EC ↔ Supplier** | Discovery + attach accredited suppliers onto bookings as jobs; customer↔supplier inquiry remains a parallel commercial path. |
-| **Admin ↔ all partners** | Verification gate for venue owner / EC / supplier roles. |
+| Pair                                | Relationship                                                                                                                 |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Customer ↔ Venue Owner**          | Commercial: inquiry → approval → payment for a **venue**.                                                                    |
+| **Customer ↔ Supplier**             | Commercial: inquiry → quote → accept/decline for a **service**.                                                              |
+| **Customer ↔ Event Coordinator**    | **None as a hire.** Indirect only: customer’s venue booking appears on EC dashboard if EC is org staff.                      |
+| **Venue Owner ↔ Event Coordinator** | Organizational: VO/org employs or partners with EC via **organization_members**.                                             |
+| **Venue Owner / EC ↔ Supplier**     | Discovery + attach accredited suppliers onto bookings as jobs; customer↔supplier inquiry remains a parallel commercial path. |
+| **Admin ↔ all partners**            | Verification gate for venue owner / EC / supplier roles.                                                                     |
 
 ---
 
@@ -297,14 +297,14 @@ If Lina is not in `organization_members`, she cannot usefully “pick up” Ana�
 
 ## Intended vs live product (don’t confuse these)
 
-| Story | Live? |
-| ----- | ----- |
-| Venue marketplace + booking + deposit | **Yes** (broadly implemented) |
-| Supplier marketplace + inquiry + quotes | **Yes** (broadly implemented) |
-| Customer hires Event Coordinator | **No** |
-| EC as org staff on venues | **Yes** — invite + accept + venue/permission scope |
-| Suppliers attached as jobs on a venue booking | **Schema Phase 2; no finished attach UI** |
-| EC full client-management product | **No (partial dashboard only)** |
+| Story                                         | Live?                                                                                 |
+| --------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Venue marketplace + booking + deposit         | **Yes** (broadly implemented)                                                         |
+| Supplier marketplace + inquiry + quotes       | **Yes** (broadly implemented)                                                         |
+| Customer hires Event Coordinator              | **No**                                                                                |
+| EC as org staff on venues                     | **Yes** — invite + accept + venue/permission scope                                    |
+| Suppliers attached as jobs on a venue booking | **Yes** — venue/EC attachment writes `booking_suppliers`; supplier Jobs consumes them |
+| EC full client-management product             | **No (partial dashboard only)**                                                       |
 
 ---
 
@@ -324,6 +324,6 @@ Update this file when:
 
 - A customer-facing EC hire or directory ships.
 - Org invite / membership onboarding becomes complete.
-- `booking_suppliers` venue/EC attach flow shipped (packaging still Phase 2).
+- Package-to-job behavior becomes automatic rather than an explicit venue/EC action.
 
 Until then, treat **“customer hires an Event Coordinator on Venora”** as **out of product**.
