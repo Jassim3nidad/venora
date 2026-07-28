@@ -4,6 +4,7 @@ import {
   CalendarDays,
   Gavel,
   LayoutDashboard,
+  ListTodo,
   Lock,
   Mail,
   MessageSquareText,
@@ -44,6 +45,12 @@ export const ACCOUNT_NAV_ITEMS: AccountNavItem[] = [
     label: "Seating Planner",
     description: "Tables, capacity, and guest assignments",
     icon: Armchair,
+  },
+  {
+    href: "/account/timeline",
+    label: "Event Timeline",
+    description: "Tasks, owners, timing, and dependencies",
+    icon: ListTodo,
   },
   {
     href: "/account/messages",
