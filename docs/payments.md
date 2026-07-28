@@ -1,9 +1,9 @@
 # Payments and PayMongo
 
 The payment domain uses a gateway abstraction, but PayMongo is the only
-registered implementation. Maya has signature-verification scaffolding with
-incomplete reconciliation. Stripe appears only in inactive configuration
-examples. Neither is production-ready.
+registered implementation. Maya has been retired from the application.
+Stripe appears only in inactive configuration examples and is not
+production-ready.
 
 ## Checkout and settlement
 
@@ -73,5 +73,5 @@ evidence. Never make a raw booking/payment row edit to “match” a dashboard.
 - [Refund mismatch](runbooks/15-refund-mismatch.md)
 
 HTTP/event details are in [API webhooks](api/webhooks.md). Current limitations
-include incomplete Maya reconciliation, externally unverified live behavior,
-and environment-sensitive return URLs.
+include externally unverified live PayMongo behavior and environment-sensitive
+return URLs.
