@@ -342,6 +342,8 @@ const requiredMigrations = [
   "20260727130000_event_guest_management_hardening.sql",
   "20260728140000_rsvp_delivery_tracking.sql",
   "20260728150000_ai_concierge_actions.sql",
+  "20260728160000_restore_venue_media_storage_ownership.sql",
+  "20260728161000_qualify_venue_media_object_path.sql",
 ];
 for (const name of requiredMigrations) {
   if (!migrationFiles.includes(name))
@@ -444,11 +446,12 @@ for (const name of [
 
 const venueStorageMigration =
   migrations.find(
-    ({ name }) => name === "0711_tighten_venue_media_storage_ownership.sql",
+    ({ name }) =>
+      name === "20260728161000_qualify_venue_media_object_path.sql",
   )?.source ?? "";
 for (const token of [
-  "v.id::text = (storage.foldername(name))[2]",
-  "v.organization_id::text = (storage.foldername(name))[1]",
+  "v.id::text = (storage.foldername(storage.objects.name))[2]",
+  "v.organization_id::text = (storage.foldername(storage.objects.name))[1]",
   "public.is_org_member(v.organization_id)",
 ]) {
   if (!venueStorageMigration.includes(token)) {
