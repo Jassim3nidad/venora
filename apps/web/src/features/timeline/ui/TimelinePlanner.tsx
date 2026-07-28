@@ -1,7 +1,7 @@
 "use client";
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarClock, Pencil, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
@@ -96,10 +96,15 @@ export function TimelinePlanner({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [draft, setDraft] = useState<TaskDraft>(EMPTY_TASK);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [taskRows, setTaskRows] = useState(tasks);
+
+  useEffect(() => {
+    setTaskRows(tasks);
+  }, [tasks]);
 
   const visibleTasks = useMemo(
     () =>
-      tasks
+      [...taskRows]
         .filter(
           (task) => statusFilter === "all" || task.status === statusFilter,
         )
@@ -108,7 +113,7 @@ export function TimelinePlanner({
             b.start_time ?? b.created_at,
           ),
         ),
-    [statusFilter, tasks],
+    [statusFilter, taskRows],
   );
 
   function openCreate() {
@@ -139,6 +144,12 @@ export function TimelinePlanner({
         toast.error(result.error.message);
         return;
       }
+      const savedTask = result.data.task as TimelineTask;
+      setTaskRows((current) =>
+        draft.id
+          ? current.map((task) => (task.id === savedTask.id ? savedTask : task))
+          : [...current, savedTask],
+      );
       toast.success(draft.id ? "Task updated." : "Task added.");
       setDialogOpen(false);
       router.refresh();
@@ -151,17 +162,20 @@ export function TimelinePlanner({
       const result = await deleteTimelineTaskAction({ id: task.id });
       if (result.error) toast.error(result.error.message);
       else {
+        setTaskRows((current) => current.filter((item) => item.id !== task.id));
         toast.success("Task deleted.");
         router.refresh();
       }
     });
   }
 
-  const completed = tasks.filter((task) => task.status === "completed").length;
-  const blocked = tasks.filter(
+  const completed = taskRows.filter(
+    (task) => task.status === "completed",
+  ).length;
+  const blocked = taskRows.filter(
     (task) =>
       task.depends_on_task_id &&
-      tasks.find((item) => item.id === task.depends_on_task_id)?.status !==
+      taskRows.find((item) => item.id === task.depends_on_task_id)?.status !==
         "completed",
   ).length;
 
@@ -195,7 +209,7 @@ export function TimelinePlanner({
 
       <div className="grid gap-3 sm:grid-cols-3">
         {[
-          { label: "Tasks", value: tasks.length },
+          { label: "Tasks", value: taskRows.length },
           { label: "Completed", value: completed },
           { label: "Waiting on dependency", value: blocked },
         ].map((item) => (
@@ -242,7 +256,7 @@ export function TimelinePlanner({
         ) : (
           <ol className="divide-y divide-slate-100">
             {visibleTasks.map((task) => {
-              const dependency = tasks.find(
+              const dependency = taskRows.find(
                 (item) => item.id === task.depends_on_task_id,
               );
               return (
@@ -314,7 +328,7 @@ export function TimelinePlanner({
         onOpenChange={setDialogOpen}
         draft={draft}
         setDraft={setDraft}
-        tasks={tasks}
+        tasks={taskRows}
         bookings={bookings}
         isPending={isPending}
         onSave={saveTask}
