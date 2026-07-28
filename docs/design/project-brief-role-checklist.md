@@ -144,7 +144,7 @@ calendars, customer communication, suppliers, performance, reports).
 
 - [x] Dedicated payment / refund monitoring workspace
 - [x] Complete disputes case management (scoped lifecycle; not full evidence suite)
-- [ ] Finish Maya (or keep disabled) before production enablement
+- [x] Maya retired from application surfaces and configuration
 
 ---
 
@@ -166,7 +166,7 @@ calendars, customer communication, suppliers, performance, reports).
   builder and supplier association exist; focused tests and hosted E2E remain
 - [x] Customer messaging — booking, venue-inquiry, and customer inbox paths exist
       (operations-scoped, not a global CRM)
-- [~] Payment automation (PayMongo yes; Maya incomplete)
+- [x] Payment automation — PayMongo checkout, settlement, refunds, and monitoring
 - [x] Commission management (admin surface exists)
 
 ### Phase 3–4 — Planning suite / AI event platform
