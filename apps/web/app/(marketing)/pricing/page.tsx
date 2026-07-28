@@ -43,7 +43,7 @@ const PLANS = [
 
 export default function PricingPage() {
   return (
-    <main className="container" style={{ paddingBlock: "5rem" }}>
+    <section className="container" style={{ paddingBlock: "5rem" }}>
       <h1
         style={{
           fontFamily: "var(--font-sora, sans-serif)",
@@ -178,6 +178,6 @@ export default function PricingPage() {
           </div>
         ))}
       </div>
-    </main>
+    </section>
   );
 }

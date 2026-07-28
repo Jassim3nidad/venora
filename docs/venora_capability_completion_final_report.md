@@ -45,7 +45,7 @@ Each capability is isolated in its own git commit on branch `feature/complete-re
 | **10** | Administrator Payment Monitoring          |    Missing     | **Verified** | `d40c1d1`  | `/admin/payments` workspace                |
 | **11** | Refund Management                         |    Partial     | **Verified** | `55b5a56`  | Admin refund review flow                   |
 | **12** | Dispute Case Management                   |    Partial     | **Verified** | `4bdc7b6`  | `/admin/disputes` workspace                |
-| **13** | Maya Safe Disablement                     |    Partial     | **Verified** | `a999d9b`  | 1/1 Vitest test passed                     |
+| **13** | Maya retirement                           |    Partial     | **Verified** | `a999d9b`  | Application/API surface removed            |
 | **14** | Advanced Calendar & Availability          |    Missing     | **Verified** | `aee0659`  | Migration `20260723100003`                 |
 | **15** | Seasonal & Date-Specific Pricing          |    Missing     | **Verified** | `ab10d1f`  | Migration `20260723100004`                 |
 | **16** | Guest Management                          |    Missing     | **Verified** | `70195cc`  | Migration `20260723100005` + UI workspace  |
@@ -78,7 +78,7 @@ Rather than using a single monolithic migration, the database schema additions w
 - **Guest PII & RSVP Security**: Corrected `event_guests` Row Level Security policy. Enforced strict authentication (`auth.uid() IS NOT NULL AND user_id = auth.uid()`), completely removing broad anonymous `auth.uid() IS NULL` policy. Unauthenticated public users can only query single rows via secure UUID `rsvp_token`.
 - **Coordinator Permission Boundaries**: Coordinators are explicitly authorized only for assigned venues (`assignedVenueIds.includes(venueId)`). Commercial approval, ownership changes, and payout destination modifications remain strictly restricted to Organization Owners.
 - **Internal Messaging Protection**: Internal organization notes (`is_internal_note = true`) are strictly filtered out from customer-facing message queries.
-- **Maya Payment Safety**: Maya payment gateway remains safely disabled behind `NEXT_PUBLIC_ENABLE_MAYA_PAYMENTS=false`, preventing unverified sandbox requests while maintaining PayMongo operations.
+- **Maya Payment Safety**: Maya is retired from application and API surfaces.
 
 ---
 

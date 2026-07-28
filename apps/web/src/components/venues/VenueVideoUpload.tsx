@@ -20,6 +20,7 @@ import {
 } from "@venora/ui";
 import { createClient } from "@/src/lib/supabase/client";
 import { getVenueMediaUrl } from "@/features/venues/utils/venue-media";
+import { fileHasAllowedSignature } from "@/lib/security/file-signatures";
 
 interface VenueVideo {
   id: string;
@@ -113,6 +114,16 @@ export default function VenueVideoUpload({
         status: "error",
         progress: 0,
         error: `Video must be ${formatBytes(MAX_VIDEO_BYTES)} or smaller.`,
+        fileName: file.name,
+      });
+      return;
+    }
+
+    if (!(await fileHasAllowedSignature(file))) {
+      setUploadState({
+        status: "error",
+        progress: 0,
+        error: "Video content does not match its MP4 or MOV file type.",
         fileName: file.name,
       });
       return;

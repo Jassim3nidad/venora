@@ -116,24 +116,6 @@ If no provider payment reference exists, refund remains pending for manual settl
 
 Rate limiting is not applied by Venora. PayMongo delivery behavior and hosting limits apply. Webhook payloads can contain personal/payment metadata; logs must not dump secrets or full sensitive bodies.
 
-## Maya
-
-### Endpoint
-
-`POST /api/webhooks/maya`, header `x-maya-signature`.
-
-The route verifies HMAC-SHA512 with `MAYA_WEBHOOK_SECRET`. Missing/invalid signature returns `401`. It parses `id`, `status`, optional `metadata.booking_id`, and `requestReferenceNumber`.
-
-Current status: not production-ready.
-
-- `PAYMENT_SUCCESS` calls a deliberate throwing stub because Maya has no registered gateway/checkout session and cannot satisfy the hardened five-argument confirmation RPC.
-- Failure/expiry/cancellation can call service-role `fail_booking_payment` using webhook booking metadata.
-- No event claim/idempotency table is used.
-- No amount/currency/checkout reconciliation is implemented.
-- Repository comments state the secret is unset in production, so requests should fail signature verification.
-
-Before enabling Maya, implement the same gateway, checkout correlation, signature age checks, event claiming, amount/currency reconciliation, tests, and retry behavior used by PayMongo.
-
 ## Example PayMongo test delivery
 
 Provider-generated signatures are required. This shape is illustrative only:

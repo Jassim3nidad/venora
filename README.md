@@ -71,7 +71,7 @@ Full lifecycles (auth, booking, payment, storage, AI) are in
 | App       | Next.js 16, React 19, TypeScript, Tailwind CSS 4, TanStack Query, Zod |
 | Workspace | pnpm workspaces + Turborepo                                           |
 | Backend   | Supabase Auth, PostgreSQL, RLS, Storage, Edge Functions (Deno)        |
-| Payments  | PayMongo (active); Maya/Stripe are not registered gateways            |
+| Payments  | PayMongo (active); Stripe is not a registered gateway                 |
 | Messaging | Resend (email), Web Push (VAPID); SMS disabled                        |
 | AI        | OpenRouter only; model locked to `tencent/hy3:free`                   |
 | Maps      | MapLibre / OpenFreeMap / OSM Nominatim                                |

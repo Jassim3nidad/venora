@@ -21,7 +21,7 @@ export default function VenuesLoading() {
         </aside>
 
         {/* Main content */}
-        <main className="h-full min-w-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-7 xl:px-10">
+        <div className="h-full min-w-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-7 xl:px-10">
           <div className="flex flex-col gap-6">
             {/* Header card skeleton */}
             <section className="overflow-hidden rounded-[24px] border border-[#E5E7EB]/90 bg-white shadow-sm shadow-slate-200/60 p-5 sm:p-6">
@@ -68,7 +68,7 @@ export default function VenuesLoading() {
               ))}
             </div>
           </div>
-        </main>
+        </div>
       </div>
     </div>
   );

@@ -116,8 +116,8 @@ sequenceDiagram
   H-->>G: Idempotent response
 ```
 
-PayMongo is active. Maya signature scaffolding lacks complete reconciliation;
-Stripe is not registered. Webhooks can be duplicated, delayed, or reordered, so
+PayMongo is active. Maya has been retired and Stripe is not registered.
+Webhooks can be duplicated, delayed, or reordered, so
 claiming, reconciliation, and idempotent database operations are mandatory.
 
 ## Notification lifecycle

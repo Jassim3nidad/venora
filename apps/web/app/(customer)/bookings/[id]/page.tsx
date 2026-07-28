@@ -409,10 +409,17 @@ export default async function BookingDetailPage({ params }: Props) {
         .eq("booking_id", typedBooking.id)
         .eq("raised_by", user.id)
         .order("created_at", { ascending: false })
-    : { data: [] as { id: string; status: string; category: string; created_at: string }[] };
+    : {
+        data: [] as {
+          id: string;
+          status: string;
+          category: string;
+          created_at: string;
+        }[],
+      };
 
-  const hasActiveDispute = (existingDisputes ?? []).some((d: { status: string }) =>
-    ["open", "under_review"].includes(d.status),
+  const hasActiveDispute = (existingDisputes ?? []).some(
+    (d: { status: string }) => ["open", "under_review"].includes(d.status),
   );
 
   // Messaging is allowed for active statuses
@@ -464,7 +471,7 @@ export default async function BookingDetailPage({ params }: Props) {
     .filter(Boolean);
 
   return (
-    <main className="mx-auto max-w-7xl space-y-6 px-4 pb-28 pt-6 font-sans sm:px-6 sm:pt-8 lg:px-8 lg:pb-8">
+    <div className="mx-auto max-w-7xl space-y-6 px-4 pb-28 pt-6 font-sans sm:px-6 sm:pt-8 lg:px-8 lg:pb-8">
       <Link
         href="/bookings"
         className="inline-flex w-fit items-center gap-2 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-bold text-[#6B7280] shadow-sm transition hover:border-[#2563EB]/50 hover:bg-[#EFF6FF] hover:text-[#2563EB]"
@@ -987,6 +994,6 @@ export default async function BookingDetailPage({ params }: Props) {
           ) : null}
         </aside>
       </div>
-    </main>
+    </div>
   );
 }

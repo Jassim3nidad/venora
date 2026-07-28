@@ -73,7 +73,7 @@ These are requirements or advertised options without a confirmed usable API. The
 - No Next.js `GET /api/venues` list/detail Route Handler. Venue discovery uses Server Components/actions, Supabase queries, and `ai-search`.
 - No public REST review CRUD endpoints. Review mutations are Server Actions.
 - No standalone REST admin CRUD beyond report export. Admin mutations are Server Actions/RPCs.
-- No usable Maya or Stripe checkout gateway. Only PayMongo registers when configured.
+- No usable Stripe checkout gateway. Only PayMongo registers when configured.
 - No direct invoice/receipt download Route Handler was found; records are created/read through database-backed UI flows.
 - No generic file-upload Route Handler. Uploads use Supabase Storage SDK/signed URLs.
 - No application-level Next.js rate-limit middleware or per-route limiter was found.

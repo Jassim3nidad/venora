@@ -55,7 +55,7 @@ migration notes; OpenAPI is regenerated via `pnpm docs:generate`.
 | Session cookie      | Browser cookies set by `@supabase/ssr` after login / `/auth/callback` | Most `/api/*` mutating and private reads      |
 | Bearer access token | `Authorization: Bearer <supabase_access_token>`                       | Edge Functions; optional on several AI routes |
 | Public anon key     | `apikey: <NEXT_PUBLIC_SUPABASE_ANON_KEY>`                             | Edge Function gateway                         |
-| Webhook HMAC        | Provider signature header (see webhook sections)                      | PayMongo / Maya receivers                     |
+| Webhook HMAC        | Provider signature header (see webhook sections)                      | PayMongo receiver                             |
 | Service-role bearer | `Authorization: Bearer <SUPABASE_SERVICE_ROLE_KEY>` (server-only)     | `booking-notifications` only                  |
 
 OpenAPI security schemes:
@@ -96,7 +96,7 @@ curl -sS "${SUPABASE_URL}/functions/v1/ai-search" \
 | Venue create                               |   No   |   Yes   | `venue_owner` / `event_coordinator` / `admin` |
 | Venue-owner analytics export               |   No   |   Yes   | Same roles, scoped venues                     |
 | Admin report export                        |   No   |   Yes   | Permission `reports.export`                   |
-| PayMongo / Maya webhooks                   |   —    |    —    | Provider HMAC                                 |
+| PayMongo webhooks                          |   —    |    —    | Provider HMAC                                 |
 | `/auth/callback`, `/logout`                | Yes\*  |    —    | One-time codes / sign-out                     |
 
 \*Public entry points that establish or clear a session.
@@ -166,7 +166,6 @@ Details: [authentication.md](authentication.md).
 | `Authorization`      | Edge Functions (and service-role dispatcher)        |
 | `apikey`             | Edge Functions                                      |
 | `Paymongo-Signature` | PayMongo webhook only                               |
-| `x-maya-signature`   | Maya webhook only                                   |
 
 ### 3.5 Binary / redirect responses
 
@@ -258,7 +257,6 @@ Full notes: [error-handling.md](error-handling.md).
 | `GET`    | `/api/analytics/venue-owner/export`     | Session + role             |
 | `GET`    | `/api/admin/reports/export`             | Session + `reports.export` |
 | `POST`   | `/api/webhooks/paymongo`                | HMAC                       |
-| `POST`   | `/api/webhooks/maya`                    | HMAC                       |
 | `GET`    | `/auth/callback`                        | Public (one-time code)     |
 | `GET`    | `/logout`                               | Optional session           |
 | `GET`    | `/api/debug`                            | Always `404`               |
@@ -452,9 +450,9 @@ Start or resume deposit checkout.
 }
 ```
 
-| Field      | Type                                   | Required | Notes                                                            |
-| ---------- | -------------------------------------- | -------- | ---------------------------------------------------------------- |
-| `provider` | `"paymongo"` \| `"maya"` \| `"stripe"` | No       | Default `paymongo`. Only PayMongo is registered when configured. |
+| Field      | Type                       | Required | Notes                                                            |
+| ---------- | -------------------------- | -------- | ---------------------------------------------------------------- |
+| `provider` | `"paymongo"` \| `"stripe"` | No       | Default `paymongo`. Only PayMongo is registered when configured. |
 
 Empty body `{}` is valid.
 
@@ -978,18 +976,6 @@ Details: [webhooks.md](webhooks.md).
 
 ---
 
-### 11.2 `POST /api/webhooks/maya`
-
-**Auth:** header `x-maya-signature` (HMAC-SHA512) vs `MAYA_WEBHOOK_SECRET`
-
-**Success `200`:** `{ "received": true }`  
-**Errors:** `401` `{ "error": "Invalid signature" }` · `500` `{ "error": "Processing failed" }`
-
-> Maya success reconciliation is **not production-ready**. Only PayMongo is a
-> usable checkout gateway when configured.
-
----
-
 ## 12. Auth callback and logout
 
 ### 12.1 `GET /auth/callback`
@@ -1240,7 +1226,6 @@ Batch:
 | 18  | `GET /api/analytics/venue-owner/export`        | Yes             | Binary noted    | Yes          |
 | 19  | `GET /api/admin/reports/export`                | Yes             | Binary noted    | Yes          |
 | 20  | `POST /api/webhooks/paymongo`                  | Yes             | Yes             | Yes          |
-| 21  | `POST /api/webhooks/maya`                      | Yes             | Yes             | Yes          |
 | 22  | `GET /auth/callback`                           | Yes             | Redirect        | Yes          |
 | 23  | `GET /logout`                                  | Yes             | Redirect        | Yes          |
 | 24  | `GET /api/debug`                               | Yes             | Empty 404       | Yes          |

@@ -145,9 +145,10 @@ starting at `a44cf4c`):
 - Fixed a Turbopack workspace-root ambiguity in the build.
 - Restored map attribution (was disabled, contrary to the tile provider's
   terms) and added accessible names to both MapLibre map components.
-- Fixed a webhook route (`/api/webhooks/maya`) that called a database
-  function signature migration 046 had already dropped, which would have
-  thrown an unhandled exception on any real invocation. Not currently
+- Identified a retired webhook route (`/api/webhooks/maya`) that called a
+  database function signature migration 046 had already dropped, which would
+  have thrown an unhandled exception on any real invocation. It was later
+  removed.
   reachable in production (no active gateway is registered for that
   provider), but now fails safely instead of leaking a raw error.
 - Documented a missing `OPENROUTER_API_KEY` entry in the Edge Function
@@ -216,12 +217,7 @@ pre-existing "not testable with current seed data" cross-tenant cases),
   the Migration 065 section, both reused again in this follow-up pass)
   were shared directly in chat — all recommended for revocation/rotation
   in the Supabase dashboard.
-- The Maya payment webhook route is present but not functionally wired to
-  a real gateway (no `MayaGateway` implementation is registered) and its
-  `confirmBookingPayment` handler now throws a documented, safe error
-  rather than attempting the stale RPC call. If Maya is ever activated,
-  that handler needs a full rebuild to match the checkout-session
-  reconciliation contract PayMongo's webhook already follows.
+- Maya has been retired from application and API surfaces.
 - A status-color-map drift risk (booking status colors hand-maintained
   independently in two places using two different color systems) and one
   duplicated "no results" empty-state JSX block (suppliers marketplace vs

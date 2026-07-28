@@ -395,7 +395,7 @@ export function CustomerInquiryDetail({
   };
 
   return (
-    <main className="mx-auto max-w-7xl space-y-6 px-4 pb-28 pt-6 font-sans sm:px-6 sm:pt-8 lg:px-8 lg:pb-8">
+    <div className="mx-auto max-w-7xl space-y-6 px-4 pb-28 pt-6 font-sans sm:px-6 sm:pt-8 lg:px-8 lg:pb-8">
       <Link
         href="/bookings?view=suppliers"
         className="inline-flex w-fit items-center gap-2 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-bold text-[#6B7280] shadow-sm transition hover:border-[#2563EB]/50 hover:bg-[#EFF6FF] hover:text-[#2563EB]"
@@ -934,6 +934,6 @@ export function CustomerInquiryDetail({
         onClose={() => setPendingAction(null)}
         onConfirm={handleConfirmAction}
       />
-    </main>
+    </div>
   );
 }
