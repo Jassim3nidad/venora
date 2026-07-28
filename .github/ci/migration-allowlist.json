@@ -62,6 +62,11 @@
       "file": "supabase/migrations/20260728130000_harden_event_timeline_tasks.sql",
       "kind": "SECURITY_DEFINER",
       "reason": "A trigger validates booking ownership, same-owner dependency links, and dependency cycles with a fixed empty search_path; direct execution is revoked from every API role."
+    },
+    {
+      "file": "supabase/migrations/20260728160000_restore_venue_media_storage_ownership.sql",
+      "kind": "STORAGE_POLICY",
+      "reason": "A forward-only repair removes the legacy organization-folder-only policies and restores organization plus venue path validation for authenticated venue-media writes."
     }
   ]
 }
