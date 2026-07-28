@@ -22,7 +22,7 @@ type LegacyFailure = {
 };
 ```
 
-PayMongo returns `{received:true,result:"processed|duplicate|skipped"}` on success. Maya returns `{received:true}`. Export routes return CSV or PDF, not JSON.
+PayMongo returns `{received:true,result:"processed|duplicate|skipped"}` on success. Export routes return CSV or PDF, not JSON.
 
 ## Status codes
 
