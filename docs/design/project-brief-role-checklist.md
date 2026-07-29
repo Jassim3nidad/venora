@@ -142,13 +142,15 @@ calendars, customer communication, suppliers, performance, reports).
 - [x] AI settings — `/admin/ai-configuration`
 - [x] Marketplace administration — `/admin/marketplace`
 - [x] Payment monitoring — `/admin/payments` transactions, refunds, webhook attention
-- [x] Disputes — scoped case management (`/admin/disputes`, customer raise +
-      `/account/disputes`; lifecycle via `update_dispute_status`)
+- [x] Disputes — ops case management with optional https evidence links,
+      customer cancel on open, admin case activity from audit logs
+      (`/admin/disputes`, `/account/disputes`)
 
 **Backlog (Admin)**
 
 - [x] Dedicated payment / refund monitoring workspace
-- [x] Complete disputes case management (scoped lifecycle; not full evidence suite)
+- [x] Complete disputes case management (lifecycle + link evidence; file-upload
+      suite still deferred)
 - [x] Maya retired from application surfaces and configuration
 
 ---

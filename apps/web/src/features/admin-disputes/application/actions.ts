@@ -11,6 +11,15 @@ import {
 } from "@/src/lib/errors";
 import { hasPermission } from "@/src/lib/rbac/admin-context";
 
+const httpsUrl = z
+  .string()
+  .trim()
+  .url("Evidence links must be valid URLs.")
+  .refine(
+    (value) => value.startsWith("https://"),
+    "Evidence links must use https://",
+  );
+
 const updateDisputeStatusSchema = z.object({
   disputeId: z.string().uuid(),
   status: z.enum(["under_review", "resolved", "rejected", "cancelled"]),
@@ -30,17 +39,56 @@ const raiseDisputeSchema = z.object({
     .trim()
     .min(10, "Add at least 10 characters describing the issue.")
     .max(2000),
+  evidenceUrls: z.array(httpsUrl).max(3).optional().default([]),
 });
+
+function revalidateDisputePaths(disputeId: string, bookingId?: string) {
+  revalidatePath("/admin/disputes");
+  revalidatePath(`/admin/disputes/${disputeId}`);
+  revalidatePath("/account/disputes");
+  if (bookingId) revalidatePath(`/bookings/${bookingId}`);
+}
 
 export async function updateDisputeStatusAction(rawInput: unknown) {
   return createServerAction(
     updateDisputeStatusSchema,
     async (input) => {
-      if (input.status === "under_review" || input.status === "cancelled") {
+      const supabase = (await createClient()) as any;
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new UnauthorizedError("Sign in to update a dispute.");
+      }
+
+      if (input.status === "under_review") {
         if (!(await hasPermission("disputes.manage"))) {
           throw new ForbiddenError(
             "You do not have permission to manage disputes.",
           );
+        }
+      }
+
+      if (input.status === "cancelled") {
+        const canManage = await hasPermission("disputes.manage");
+        if (!canManage) {
+          const { data: dispute } = await supabase
+            .from("disputes")
+            .select("raised_by, status")
+            .eq("id", input.disputeId)
+            .maybeSingle();
+
+          if (!dispute || dispute.raised_by !== user.id) {
+            throw new ForbiddenError(
+              "Only the case raiser or a dispute manager can cancel.",
+            );
+          }
+          if (dispute.status !== "open") {
+            throw new ValidationError(
+              "Only open disputes can be cancelled by the raiser.",
+            );
+          }
         }
       }
 
@@ -57,7 +105,6 @@ export async function updateDisputeStatusAction(rawInput: unknown) {
         }
       }
 
-      const supabase = (await createClient()) as any;
       const { error } = await supabase.rpc("update_dispute_status", {
         p_dispute_id: input.disputeId,
         p_new_status: input.status,
@@ -70,8 +117,7 @@ export async function updateDisputeStatusAction(rawInput: unknown) {
         );
       }
 
-      revalidatePath("/admin/disputes");
-      revalidatePath(`/admin/disputes/${input.disputeId}`);
+      revalidateDisputePaths(input.disputeId);
       return { disputeId: input.disputeId, status: input.status };
     },
     rawInput,
@@ -123,6 +169,10 @@ export async function raiseDisputeAction(rawInput: unknown) {
         throw new ValidationError("Booking venue is incomplete.");
       }
 
+      const evidenceUrls = Array.from(
+        new Set((input.evidenceUrls ?? []).map((url) => url.trim()).filter(Boolean)),
+      );
+
       const { data: paidTx } = await supabase
         .from("transactions")
         .select("id")
@@ -142,6 +192,7 @@ export async function raiseDisputeAction(rawInput: unknown) {
           organization_id: venue.organization_id,
           category: input.category,
           reason: input.reason,
+          evidence_urls: evidenceUrls,
           status: "open",
         })
         .select("id")
@@ -158,9 +209,7 @@ export async function raiseDisputeAction(rawInput: unknown) {
         );
       }
 
-      revalidatePath(`/bookings/${input.bookingId}`);
-      revalidatePath("/account/disputes");
-      revalidatePath("/admin/disputes");
+      revalidateDisputePaths(dispute.id as string, input.bookingId);
       return { disputeId: dispute.id as string };
     },
     rawInput,

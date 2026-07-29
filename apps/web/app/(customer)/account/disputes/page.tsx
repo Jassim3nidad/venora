@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Gavel } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { CancelDisputeButton } from "@/src/features/admin-disputes/ui/CancelDisputeButton";
 
 export const metadata: Metadata = {
   title: "Disputes",
@@ -42,7 +43,7 @@ export default async function AccountDisputesPage() {
   const { data: disputes, error } = await supabase
     .from("disputes")
     .select(
-      "id, status, category, reason, created_at, resolved_at, resolution_notes, booking_id, venues(name)",
+      "id, status, category, reason, evidence_urls, created_at, resolved_at, resolution_notes, booking_id, venues(name)",
     )
     .eq("raised_by", user.id)
     .order("created_at", { ascending: false });
@@ -55,7 +56,7 @@ export default async function AccountDisputesPage() {
         </h1>
         <p className="mt-1 text-sm font-semibold text-slate-500">
           Cases you raised from eligible bookings. Admins review open → under
-          review → resolved or rejected.
+          review → resolved or rejected. You can cancel an open case.
         </p>
       </div>
 
@@ -87,6 +88,9 @@ export default async function AccountDisputesPage() {
           const venue = asOne(dispute.venues);
           const statusStyle =
             STATUS_STYLES[dispute.status] ?? STATUS_STYLES.open;
+          const evidenceUrls = Array.isArray(dispute.evidence_urls)
+            ? (dispute.evidence_urls as string[]).filter(Boolean)
+            : [];
 
           return (
             <article
@@ -113,6 +117,28 @@ export default async function AccountDisputesPage() {
                 {dispute.reason}
               </p>
 
+              {evidenceUrls.length > 0 ? (
+                <div className="mt-4">
+                  <p className="text-xs font-extrabold uppercase tracking-wide text-slate-400">
+                    Evidence links
+                  </p>
+                  <ul className="mt-2 space-y-1">
+                    {evidenceUrls.map((url) => (
+                      <li key={url}>
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="break-all text-sm font-bold text-[#2563EB] hover:underline"
+                        >
+                          {url}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
               <div className="mt-4 flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-500">
                 <span>
                   Opened{" "}
@@ -128,6 +154,12 @@ export default async function AccountDisputesPage() {
                   View booking
                 </Link>
               </div>
+
+              {dispute.status === "open" ? (
+                <div className="mt-4">
+                  <CancelDisputeButton disputeId={dispute.id} />
+                </div>
+              ) : null}
 
               {dispute.resolution_notes ? (
                 <div className="mt-4 rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">

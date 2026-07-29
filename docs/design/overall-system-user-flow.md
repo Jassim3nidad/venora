@@ -238,7 +238,8 @@ If the payment deadline passes while unpaid, scheduled jobs can move the booking
 1. Booking is **`confirmed`** with recorded payment.
 2. Customer requests cancellation where policy allows → cancellation RPC + refund workflow as applicable.
 3. Venue/admin paths exist for authorized cancellation; disputes have **scoped
-   case management** (raise → review → resolve/reject), not a full evidence suite.
+   case management** with optional https evidence links and case activity (file
+   upload suite deferred).
 
 Use payment/refund runbooks for money mismatches; do not hand-edit booking status to “fix” payments.
 

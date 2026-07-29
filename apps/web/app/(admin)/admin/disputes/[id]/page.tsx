@@ -64,6 +64,22 @@ export default async function DisputeDetailsPage({
   const venue = asOne(dispute.venues);
   const booking = asOne(dispute.bookings);
   const resolver = asOne(dispute.resolver);
+  const evidenceUrls = Array.isArray(dispute.evidence_urls)
+    ? (dispute.evidence_urls as string[]).filter(Boolean)
+    : [];
+
+  const canViewAudit = await hasPermission("audit_logs.view");
+  const { data: auditRows } = canViewAudit
+    ? await supabase
+        .from("audit_logs")
+        .select(
+          "id, action, reason, created_at, actor_id, new_values, profiles:actor_id(full_name)",
+        )
+        .eq("entity_type", "dispute")
+        .eq("entity_id", id)
+        .order("created_at", { ascending: false })
+        .limit(10)
+    : { data: [] as any[] };
 
   return (
     <DashboardSubPage
@@ -121,6 +137,31 @@ export default async function DisputeDetailsPage({
               <p className="mt-1 whitespace-pre-wrap text-sm font-medium leading-6 text-[#334155]">
                 {dispute.reason}
               </p>
+            </div>
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-wide text-[#64748b]">
+                Evidence links
+              </p>
+              {evidenceUrls.length > 0 ? (
+                <ul className="mt-2 space-y-2">
+                  {evidenceUrls.map((url) => (
+                    <li key={url}>
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="break-all text-sm font-bold text-[#1d4ed8] hover:underline"
+                      >
+                        {url}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-1 text-sm font-semibold text-[#64748b]">
+                  No evidence links provided.
+                </p>
+              )}
             </div>
             <p className="text-xs font-semibold text-[#64748b]">
               Opened{" "}
@@ -225,6 +266,57 @@ export default async function DisputeDetailsPage({
               canManage={canManage}
               canResolve={canResolve}
             />
+          )}
+        </Panel>
+
+        <Panel className="xl:col-span-2">
+          <PanelHeader
+            title="Case activity"
+            description="Audit trail for status transitions on this dispute."
+          />
+          {!canViewAudit ? (
+            <p className="p-1 text-sm font-semibold text-[#64748b]">
+              Case activity requires the audit_logs.view permission. Status still
+              updates; open Audit Logs if you have access.
+            </p>
+          ) : (auditRows ?? []).length > 0 ? (
+            <ul className="space-y-3 p-1">
+              {(auditRows ?? []).map((row: any) => {
+                const actor = asOne(row.profiles);
+                const nextStatus =
+                  row.new_values?.status ??
+                  row.new_values?.p_new_status ??
+                  null;
+                return (
+                  <li
+                    key={row.id}
+                    className="rounded-2xl border border-[#e5e7eb] bg-[#f8fafc] px-4 py-3"
+                  >
+                    <p className="text-sm font-bold text-[#0f172a]">
+                      {pretty(String(row.action))}
+                      {nextStatus ? ` → ${pretty(String(nextStatus))}` : ""}
+                    </p>
+                    <p className="mt-1 text-xs font-semibold text-[#64748b]">
+                      {actor?.full_name ?? "System"} ·{" "}
+                      {new Date(row.created_at).toLocaleString("en-PH", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
+                    </p>
+                    {row.reason ? (
+                      <p className="mt-2 text-sm font-medium text-[#334155]">
+                        {row.reason}
+                      </p>
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className="p-1 text-sm font-semibold text-[#64748b]">
+              No audited status transitions yet. Activity appears after an admin
+              updates the case.
+            </p>
           )}
         </Panel>
       </div>

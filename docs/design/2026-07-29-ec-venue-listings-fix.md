@@ -4,6 +4,7 @@ Brief partials closed today:
 
 1. Event Coordinator — **Managing venue listings**
 2. Accredited Supplier — **Participate in venue packages**
+3. Platform Admin — **Disputes (ops extension)**
 
 ---
 
@@ -118,3 +119,53 @@ active agreement** (docs-aligned).
 
 - Hosted Playwright / full release QA matrix
 - Changing commercial agreement proposal UX beyond existing flow
+
+---
+
+## 3. Platform Admin — Disputes (ops extension)
+
+### Summary
+
+Scoped lifecycle already existed. Ops extension now includes optional **https
+evidence links**, customer **cancel open case**, admin **case activity** from
+audit logs, and account-path revalidation after status updates. File-upload /
+malware-scanned attachment suite remains deferred.
+
+### Changes
+
+#### Raise + actions
+
+- Files:
+  - `apps/web/src/features/admin-disputes/application/actions.ts`
+  - `apps/web/src/features/admin-disputes/ui/RaiseDisputeForm.tsx`
+  - `apps/web/src/features/admin-disputes/ui/CancelDisputeButton.tsx` (new)
+- Raise accepts up to 3 `https://` evidence URLs → `disputes.evidence_urls`
+- Raiser can cancel own **open** dispute (RPC already allowed; app gate fixed)
+- Status updates revalidate `/account/disputes`
+
+#### Admin + customer UI
+
+- Files:
+  - `apps/web/app/(admin)/admin/disputes/[id]/page.tsx`
+  - `apps/web/app/(customer)/account/disputes/page.tsx`
+- Evidence links shown on admin case + customer list
+- Admin **Case activity** panel (requires `audit_logs.view`)
+- Customer cancel control on open cases
+
+#### Docs
+
+- Checklist / known-limitations / coverage-matrix / QA canvas updated
+- File uploads explicitly deferred; link evidence counts as ops extension
+
+### QA smoke (Disputes)
+
+1. Customer: raise dispute on eligible booking with 1–2 https links.
+2. `/account/disputes` shows links; Cancel open case works.
+3. Admin `/admin/disputes/[id]`: evidence links visible; Start review → Resolve with notes.
+4. Case activity shows transitions when viewer has `audit_logs.view`.
+5. Invalid non-https evidence URL rejected on raise.
+
+### Out of scope (Disputes)
+
+- Storage upload bucket / attachment table / malware scan
+- Threaded mid-case notes beyond resolution notes
