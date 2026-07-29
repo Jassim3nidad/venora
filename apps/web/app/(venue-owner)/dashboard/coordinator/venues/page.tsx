@@ -13,6 +13,7 @@ import {
   formatPeso,
   getOwnerDashboardContext,
   getOwnerVenueIds,
+  hasCoordinatorPermission,
   requireCoordinatorPermission,
 } from "@/lib/dashboard/org-dashboard-data";
 
@@ -45,6 +46,10 @@ type VenueDisplayRow = {
 export default async function CoordinatorVenuesPage() {
   const context = await getOwnerDashboardContext();
   requireCoordinatorPermission("view_assigned_venues", context);
+  const canManageListings = hasCoordinatorPermission(
+    "manage_assigned_venue_listings",
+    context,
+  );
   const { supabase, isAdmin } = context;
   const venueIds = await getOwnerVenueIds(context);
 
@@ -107,31 +112,45 @@ export default async function CoordinatorVenuesPage() {
     {
       key: "actions",
       header: "",
-      cell: (row) => (
-        <DashButton
-          href={`/dashboard/venues/${row.id}/edit`}
-          variant="secondary"
-          icon="visibility"
-          className="px-3 py-2 text-xs"
-        >
-          View
-        </DashButton>
-      ),
+      cell: (row) =>
+        canManageListings ? (
+          <DashButton
+            href={`/dashboard/venues/${row.id}/edit`}
+            variant="secondary"
+            icon="edit"
+            className="px-3 py-2 text-xs"
+          >
+            Edit listing
+          </DashButton>
+        ) : (
+          <DashButton
+            href={`/dashboard/venues/${row.id}/edit`}
+            variant="secondary"
+            icon="visibility"
+            className="px-3 py-2 text-xs"
+          >
+            View
+          </DashButton>
+        ),
     },
   ];
 
   return (
     <DashboardSubPage
       title="Venues"
-      description="Venues owned by the organization(s) you coordinate for."
+      description={
+        canManageListings
+          ? "Manage listing details, media, amenities, and packages for venues assigned to you. Creating or deleting venues stays with the venue owner."
+          : "Venues assigned to you. Ask your owner for manage listing permission to edit profiles and packages."
+      }
       action={
-        rows.length > 0 ? (
+        rows.length > 0 && canManageListings ? (
           <DashButton
             href="/dashboard/packages"
             variant="secondary"
             icon="inventory_2"
           >
-            View Packages
+            Manage packages
           </DashButton>
         ) : null
       }
@@ -139,8 +158,12 @@ export default async function CoordinatorVenuesPage() {
       {rows.length > 0 ? (
         <Panel>
           <PanelHeader
-            title="Venue Portfolio"
-            description="Open a venue to review its details and package configuration."
+            title="Assigned venues"
+            description={
+              canManageListings
+                ? "Open a listing to update profile, gallery, rules, amenities, and packages."
+                : "You can review assigned venues. Listing edits require manage_assigned_venue_listings."
+            }
           />
           <DataTable rows={rows} columns={columns} keyFn={(row) => row.id} />
         </Panel>
@@ -148,7 +171,7 @@ export default async function CoordinatorVenuesPage() {
         <EmptyState
           icon="location_city"
           title="No venues yet"
-          description="Ask your organization owner to add you as a coordinator on their venues so they appear here."
+          description="Ask your organization owner to assign you as a coordinator on their venues so they appear here."
         />
       )}
     </DashboardSubPage>

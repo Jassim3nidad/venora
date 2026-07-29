@@ -43,8 +43,20 @@ type PackageDisplayRow = {
 
 export default async function PackagesPage() {
   const context = await getOwnerDashboardContext();
-  const { supabase } = context;
+  const { supabase, isAdmin, roles, permissions } = context;
   const venueIds = await getOwnerVenueIds(context);
+  const isCoordinatorOnly =
+    !isAdmin &&
+    !roles.includes("venue_owner") &&
+    roles.includes("event_coordinator");
+  const canManagePackages =
+    isAdmin ||
+    roles.includes("venue_owner") ||
+    (roles.includes("event_coordinator") &&
+      permissions.includes("manage_assigned_venue_listings"));
+  const venuesHref = isCoordinatorOnly
+    ? "/dashboard/coordinator/venues"
+    : "/dashboard/venues";
 
   const { data: packages } =
     venueIds.length > 0
@@ -101,17 +113,18 @@ export default async function PackagesPage() {
     {
       key: "actions",
       header: "",
-      cell: (row) => (
-        <div className="flex justify-end">
-          <Link
-            href={`/dashboard/packages/${row.id}/edit`}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-blue-600"
-            title="Edit Package"
-          >
-            <span className="material-symbols-outlined text-[20px]">edit</span>
-          </Link>
-        </div>
-      ),
+      cell: (row) =>
+        canManagePackages ? (
+          <div className="flex justify-end">
+            <Link
+              href={`/dashboard/packages/${row.id}/edit`}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-blue-600"
+              title="Edit Package"
+            >
+              <span className="material-symbols-outlined text-[20px]">edit</span>
+            </Link>
+          </div>
+        ) : null,
     },
   ];
 
@@ -123,20 +136,22 @@ export default async function PackagesPage() {
         <div className="flex gap-3">
           {rows.length > 0 && (
             <DashButton
-              href="/dashboard/venues"
+              href={venuesHref}
               variant="secondary"
               icon="location_city"
             >
               Review Venues
             </DashButton>
           )}
-          <Link
-            href="/dashboard/packages/new"
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl bg-[#1d4ed8] px-4 text-sm font-bold text-white shadow-sm transition hover:bg-[#1e40af]"
-          >
-            <span className="material-symbols-outlined text-[18px]">add</span>
-            New Package
-          </Link>
+          {canManagePackages ? (
+            <Link
+              href="/dashboard/packages/new"
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl bg-[#1d4ed8] px-4 text-sm font-bold text-white shadow-sm transition hover:bg-[#1e40af]"
+            >
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              New Package
+            </Link>
+          ) : null}
         </div>
       }
     >
@@ -152,15 +167,23 @@ export default async function PackagesPage() {
         <EmptyState
           icon="inventory_2"
           title="No packages yet"
-          description="Create your first venue package — include pricing, amenities, and accredited suppliers."
+          description={
+            canManagePackages
+              ? "Create your first venue package — include pricing, amenities, and accredited suppliers."
+              : "No packages on your assigned venues yet. Ask the venue owner to grant listing management if you need to create them."
+          }
           action={
-            <Link
-              href="/dashboard/packages/new"
-              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl bg-[#1d4ed8] px-4 text-sm font-bold text-white shadow-sm transition hover:bg-[#1e40af]"
-            >
-              <span className="material-symbols-outlined text-[18px]">add</span>
-              Create First Package
-            </Link>
+            canManagePackages ? (
+              <Link
+                href="/dashboard/packages/new"
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-2xl bg-[#1d4ed8] px-4 text-sm font-bold text-white shadow-sm transition hover:bg-[#1e40af]"
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  add
+                </span>
+                Create First Package
+              </Link>
+            ) : undefined
           }
         />
       )}

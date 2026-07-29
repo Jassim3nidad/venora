@@ -21,22 +21,111 @@ async function requireVenueOwnerContext() {
   const roles = (roleRows ?? []).map((r: { role: string }) => r.role);
   const isAdmin = roles.includes("admin");
   const isVenueOwner = roles.includes("venue_owner");
+  const isEventCoordinator = roles.includes("event_coordinator");
 
   const { data: memberRows } = await supabase
     .from("organization_members")
-    .select("organization_id")
+    .select("organization_id, permissions")
     .eq("user_id", user.id)
     .eq("status", "active");
 
-  const isCoordinator = memberRows && memberRows.length > 0;
+  const permissions = Array.from(
+    new Set(
+      (memberRows ?? []).flatMap(
+        (m: { permissions: string[] | null }) => m.permissions ?? [],
+      ),
+    ),
+  );
 
-  if (!isAdmin && !isVenueOwner && !isCoordinator) {
+  const canManageAsCoordinator =
+    isEventCoordinator &&
+    permissions.includes("manage_assigned_venue_listings");
+
+  if (!isAdmin && !isVenueOwner && !canManageAsCoordinator) {
     throw new ForbiddenError(
-      "Only venue owners, admins, or coordinators can manage packages."
+      "Only venue owners, admins, or coordinators with listing management can manage packages.",
     );
   }
 
-  return { supabase, user, isAdmin, isVenueOwner, roles };
+  return {
+    supabase,
+    user,
+    isAdmin,
+    isVenueOwner,
+    isEventCoordinator,
+    canManageAsCoordinator,
+    roles,
+  };
+}
+
+async function assertCanWriteVenuePackage(args: {
+  supabase: any;
+  userId: string;
+  venueId: string;
+  isAdmin: boolean;
+  isVenueOwner: boolean;
+  canManageAsCoordinator: boolean;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const {
+    supabase,
+    userId,
+    venueId,
+    isAdmin,
+    isVenueOwner,
+    canManageAsCoordinator,
+  } = args;
+
+  if (isAdmin) return { ok: true };
+
+  const { data: venueCheck } = await supabase
+    .from("venues")
+    .select("id, organization_id")
+    .eq("id", venueId)
+    .maybeSingle();
+
+  if (!venueCheck) {
+    return { ok: false, error: "Venue not found." };
+  }
+
+  const { data: memberCheck } = await supabase
+    .from("organization_members")
+    .select("id")
+    .eq("organization_id", venueCheck.organization_id)
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .maybeSingle();
+
+  const { data: orgCheck } = await supabase
+    .from("organizations")
+    .select("id")
+    .eq("id", venueCheck.organization_id)
+    .eq("owner_id", userId)
+    .maybeSingle();
+
+  if (!memberCheck && !orgCheck) {
+    return {
+      ok: false,
+      error: "You are not authorized to manage this venue.",
+    };
+  }
+
+  if (!isVenueOwner && canManageAsCoordinator) {
+    const { data: assignment } = await supabase
+      .from("venue_coordinator_assignments")
+      .select("id")
+      .eq("venue_id", venueId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (!assignment) {
+      return {
+        ok: false,
+        error: "You are not assigned to this venue.",
+      };
+    }
+  }
+
+  return { ok: true };
 }
 
 export type CreatePackageInput = {
@@ -68,41 +157,19 @@ export async function createVenuePackage(
   input: CreatePackageInput
 ): Promise<PackageActionResult> {
   try {
-    const { supabase, isAdmin, user } = await requireVenueOwnerContext();
+    const { supabase, isAdmin, user, isVenueOwner, canManageAsCoordinator } =
+      await requireVenueOwnerContext();
 
-    // Ownership guard — verify the caller can write to this venue
-    if (!isAdmin) {
-      const { data: venueCheck } = await supabase
-        .from("venues")
-        .select("id, organization_id")
-        .eq("id", input.venueId)
-        .maybeSingle();
-
-      if (!venueCheck) {
-        return { success: false, error: "Venue not found." };
-      }
-
-      const { data: memberCheck } = await supabase
-        .from("organization_members")
-        .select("id")
-        .eq("organization_id", venueCheck.organization_id)
-        .eq("status", "active")
-        .limit(1)
-        .maybeSingle();
-
-      const { data: orgCheck } = await supabase
-        .from("organizations")
-        .select("id")
-        .eq("id", venueCheck.organization_id)
-        .eq("owner_id", user.id)
-        .maybeSingle();
-
-      if (!memberCheck && !orgCheck) {
-        return {
-          success: false,
-          error: "You are not authorized to manage this venue.",
-        };
-      }
+    const access = await assertCanWriteVenuePackage({
+      supabase,
+      userId: user.id,
+      venueId: input.venueId,
+      isAdmin,
+      isVenueOwner,
+      canManageAsCoordinator,
+    });
+    if (!access.ok) {
+      return { success: false, error: access.error };
     }
 
     // Insert the package
@@ -159,6 +226,7 @@ export async function createVenuePackage(
     }
 
     revalidatePath("/dashboard/packages");
+    revalidatePath("/dashboard/coordinator/venues");
     return { success: true, packageId };
   } catch (err: unknown) {
     if (err instanceof UnauthorizedError || err instanceof ForbiddenError) {
@@ -174,41 +242,19 @@ export async function updateVenuePackage(
   input: CreatePackageInput
 ): Promise<PackageActionResult> {
   try {
-    const { supabase, isAdmin, user } = await requireVenueOwnerContext();
+    const { supabase, isAdmin, user, isVenueOwner, canManageAsCoordinator } =
+      await requireVenueOwnerContext();
 
-    // Ownership guard — verify the caller can write to this venue
-    if (!isAdmin) {
-      const { data: venueCheck } = await supabase
-        .from("venues")
-        .select("id, organization_id")
-        .eq("id", input.venueId)
-        .maybeSingle();
-
-      if (!venueCheck) {
-        return { success: false, error: "Venue not found." };
-      }
-
-      const { data: memberCheck } = await supabase
-        .from("organization_members")
-        .select("id")
-        .eq("organization_id", venueCheck.organization_id)
-        .eq("status", "active")
-        .limit(1)
-        .maybeSingle();
-
-      const { data: orgCheck } = await supabase
-        .from("organizations")
-        .select("id")
-        .eq("id", venueCheck.organization_id)
-        .eq("owner_id", user.id)
-        .maybeSingle();
-
-      if (!memberCheck && !orgCheck) {
-        return {
-          success: false,
-          error: "You are not authorized to manage this venue.",
-        };
-      }
+    const access = await assertCanWriteVenuePackage({
+      supabase,
+      userId: user.id,
+      venueId: input.venueId,
+      isAdmin,
+      isVenueOwner,
+      canManageAsCoordinator,
+    });
+    if (!access.ok) {
+      return { success: false, error: access.error };
     }
 
     // Ensure the package actually belongs to this venue
@@ -273,6 +319,7 @@ export async function updateVenuePackage(
     }
 
     revalidatePath("/dashboard/packages");
+    revalidatePath("/dashboard/coordinator/venues");
     return { success: true, packageId };
   } catch (err: unknown) {
     if (err instanceof UnauthorizedError || err instanceof ForbiddenError) {

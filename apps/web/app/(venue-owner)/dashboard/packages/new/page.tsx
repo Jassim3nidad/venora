@@ -10,16 +10,26 @@ export const dynamic = "force-dynamic";
 
 export default async function NewPackagePage() {
   const context = await getOwnerDashboardContext();
-  const { supabase, isAdmin, roles } = context;
+  const { supabase, isAdmin, roles, permissions } = context;
 
-  if (!isAdmin && !roles.includes("venue_owner") && !roles.includes("coordinator")) {
+  const canManagePackages =
+    isAdmin ||
+    roles.includes("venue_owner") ||
+    (roles.includes("event_coordinator") &&
+      permissions.includes("manage_assigned_venue_listings"));
+
+  if (!canManagePackages) {
     redirect("/unauthorized");
   }
 
   const venueIds = await getOwnerVenueIds(context);
 
   if (venueIds.length === 0) {
-    redirect("/dashboard/venues");
+    redirect(
+      roles.includes("event_coordinator") && !roles.includes("venue_owner")
+        ? "/dashboard/coordinator/venues"
+        : "/dashboard/venues",
+    );
   }
 
   // Fetch owner venues
