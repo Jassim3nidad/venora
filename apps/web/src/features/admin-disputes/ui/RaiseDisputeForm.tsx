@@ -17,6 +17,7 @@ export function RaiseDisputeForm({ bookingId }: { bookingId: string }) {
   const [category, setCategory] =
     useState<(typeof CATEGORIES)[number]["value"]>("refund_request");
   const [reason, setReason] = useState("");
+  const [evidenceUrls, setEvidenceUrls] = useState(["", "", ""]);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -31,6 +32,7 @@ export function RaiseDisputeForm({ bookingId }: { bookingId: string }) {
             bookingId,
             category,
             reason,
+            evidenceUrls: evidenceUrls.map((url) => url.trim()).filter(Boolean),
           });
 
           if (result.error) {
@@ -41,6 +43,7 @@ export function RaiseDisputeForm({ bookingId }: { bookingId: string }) {
 
           toast.success("Dispute submitted. An admin will review it.");
           setReason("");
+          setEvidenceUrls(["", "", ""]);
           router.push("/account/disputes");
           router.refresh();
         });
@@ -64,7 +67,9 @@ export function RaiseDisputeForm({ bookingId }: { bookingId: string }) {
         <select
           value={category}
           onChange={(event) =>
-            setCategory(event.target.value as (typeof CATEGORIES)[number]["value"])
+            setCategory(
+              event.target.value as (typeof CATEGORIES)[number]["value"],
+            )
           }
           className="h-11 rounded-xl border border-[#dbe3ef] bg-white px-3 text-sm font-semibold"
         >
@@ -88,6 +93,36 @@ export function RaiseDisputeForm({ bookingId }: { bookingId: string }) {
           placeholder="What happened, and what outcome are you requesting?"
         />
       </label>
+
+      <fieldset className="grid gap-3">
+        <legend className="text-sm font-bold text-[#0f172a]">
+          Evidence links (optional)
+        </legend>
+        <p className="text-xs font-semibold text-[#64748b]">
+          Add up to 3 public https links (photos, receipts, docs). File upload
+          storage is not required for this case path.
+        </p>
+        {evidenceUrls.map((url, index) => (
+          <label
+            key={index}
+            className="flex flex-col gap-1 text-xs font-bold uppercase tracking-wide text-[#64748b]"
+          >
+            Link {index + 1}
+            <input
+              type="url"
+              inputMode="url"
+              placeholder="https://"
+              value={url}
+              onChange={(event) => {
+                const next = [...evidenceUrls];
+                next[index] = event.target.value;
+                setEvidenceUrls(next);
+              }}
+              className="h-11 rounded-xl border border-[#dbe3ef] bg-white px-3 text-sm font-semibold normal-case text-[#0f172a]"
+            />
+          </label>
+        ))}
+      </fieldset>
 
       <button
         type="submit"
