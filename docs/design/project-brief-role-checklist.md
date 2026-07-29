@@ -197,6 +197,9 @@ calendars, customer communication, suppliers, performance, reports).
 - [x] AI Budget Advisor — customer-facing venue cost estimation and the
       deterministic module exist; hosted Qwen output validation and provider/model,
       token, and integer-cost usage evidence pass
+- [x] AI Package Comparison — venue detail Compare Packages picker (≥2 packages)
+      → deterministic price/capacity/inclusion table via `ai-package-comparison`;
+      optional AI narrative with honest fallback when unavailable
 - [x] AI Supplier Matching — deterministic accredited-supplier ranking is
       integrated into the customer marketplace and passes focused plus hosted
       authorization/data acceptance

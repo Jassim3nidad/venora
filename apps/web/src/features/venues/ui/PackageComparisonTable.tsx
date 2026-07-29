@@ -98,7 +98,7 @@ export default function PackageComparisonTable({
         </table>
       </div>
 
-      {aiSummary && (
+      {aiSummary ? (
         <div className="space-y-4 rounded-2xl border border-[#DBEAFE] bg-[#EFF6FF] p-4">
           <div className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-[0.12em] text-[#2563EB]">
             <Sparkles className="h-3.5 w-3.5" />
@@ -157,6 +157,12 @@ export default function PackageComparisonTable({
               })}
             </div>
           )}
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-medium text-[#64748B]">
+          Comparison uses package price, guest capacity, and inclusions. AI
+          narrative is unavailable right now (config, limits, or provider) —
+          the table above is still accurate.
         </div>
       )}
     </div>

@@ -40,6 +40,7 @@ import type { SmartVenueSearchVenue } from "@/features/search/schemas/search.sch
 import { toggleFavoriteAction } from "../application/actions";
 import { pickGalleryImages, pickPromotionalVideo } from "../utils/venue-media";
 import BookingSidebar from "./BookingSidebar";
+import PackageComparePicker from "./PackageComparePicker";
 import ReviewsSection from "./ReviewsSection";
 import VenueGallery from "./VenueGallery";
 import VenuePromotionalVideo from "./VenuePromotionalVideo";
@@ -482,6 +483,19 @@ export default function VenueDetails({
                     </div>
                   ))}
                 </div>
+
+                {activePackages.length >= 2 ? (
+                  <div className="mt-6 rounded-2xl border border-[#DBEAFE] bg-[#F8FBFF] p-5">
+                    <PackageComparePicker
+                      packages={activePackages.map((pkg: any) => ({
+                        id: pkg.id,
+                        name: pkg.name,
+                        price: Number(pkg.price),
+                        price_unit: pkg.price_unit,
+                      }))}
+                    />
+                  </div>
+                ) : null}
               </section>
               <Separator />
             </>

@@ -159,6 +159,8 @@ Do **not** block Phase 1 release on these unless product explicitly expands scop
       provider/authorization/data acceptance pass
 - [x] AI Budget Advisor — the hosted Qwen cost estimator returns a validated
       venue estimate and records successful provider/model/token/cost evidence
+- [x] AI Package Comparison — remounted on venue detail (≥2 packages); fact
+      table always; AI summary disclosed when unavailable
 - [x] AI Concierge — the customer widget streams through `ai-assistant`;
       customer-only cancellation proposals require explicit confirmation and
       hosted execution writes service-only action/audit evidence

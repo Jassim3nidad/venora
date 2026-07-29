@@ -5,6 +5,7 @@ Brief partials closed today:
 1. Event Coordinator — **Managing venue listings**
 2. Accredited Supplier — **Participate in venue packages**
 3. Platform Admin — **Disputes (ops extension)**
+4. Customer AI — **Package comparison**
 
 ---
 
@@ -169,3 +170,37 @@ malware-scanned attachment suite remains deferred.
 
 - Storage upload bucket / attachment table / malware scan
 - Threaded mid-case notes beyond resolution notes
+
+---
+
+## 4. Customer AI — Package comparison
+
+### Summary
+
+Edge function + compare UI already existed but the picker was orphaned (removed
+from venue detail). Remounted under **Available Packages** when a venue has ≥2
+active packages. Deterministic comparison table (price, guests, inclusions)
+always runs; AI narrative is optional with honest fallback copy.
+
+### Changes
+
+- `apps/web/src/features/venues/ui/VenueDetails.tsx` — mount `PackageComparePicker`
+- `apps/web/src/features/venues/ui/PackageComparisonTable.tsx` — disclose when
+  `aiSummary` is null
+- `apps/web/e2e/qa/marketplace-qa.spec.ts` — clarify fixture has no packages
+- Docs: checklist, what-to-fix, `docs/ai.md`, QA canvas
+
+### QA smoke
+
+1. Open a venue with ≥2 active packages.
+2. Select 2–4 packages → **Compare Selected**.
+3. Confirm comparison table shows price, guest range, inclusion matrix.
+4. AI Summary appears when provider/config allow; otherwise fallback message shows.
+5. Venue with 0–1 packages: Compare Packages section absent.
+
+### Out of scope
+
+- Cross-venue package compare on `/compare` (venue metadata compare remains
+  separate)
+- Hosted OpenRouter proof for this path (product path bar; Budget Advisor has
+  deeper hosted evidence)
