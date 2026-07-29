@@ -308,6 +308,25 @@ const STATUS_STYLES: Record<string, string> = {
   under_review: "bg-blue-50 text-blue-800 ring-1 ring-blue-200/60",
   resolved: "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200/60",
   rejected: "bg-red-50 text-red-800 ring-1 ring-red-200/60",
+  matched: "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200/60",
+  pending_provider_confirmation:
+    "bg-amber-50 text-amber-800 ring-1 ring-amber-200/60",
+  missing_provider_reference:
+    "bg-red-50 text-red-800 ring-1 ring-red-200/60",
+  missing_provider_transaction:
+    "bg-red-50 text-red-800 ring-1 ring-red-200/60",
+  amount_mismatch: "bg-red-50 text-red-800 ring-1 ring-red-200/60",
+  currency_mismatch: "bg-red-50 text-red-800 ring-1 ring-red-200/60",
+  status_mismatch: "bg-red-50 text-red-800 ring-1 ring-red-200/60",
+  requires_manual_review:
+    "bg-amber-50 text-amber-800 ring-1 ring-amber-200/60",
+  informational: "bg-slate-50 text-slate-700 ring-1 ring-slate-200/70",
+  warning: "bg-amber-50 text-amber-800 ring-1 ring-amber-200/60",
+  high: "bg-orange-50 text-orange-800 ring-1 ring-orange-200/70",
+  critical: "bg-red-50 text-red-800 ring-1 ring-red-200/60",
+  acknowledged: "bg-blue-50 text-blue-800 ring-1 ring-blue-200/60",
+  investigating: "bg-violet-50 text-violet-800 ring-1 ring-violet-200/60",
+  dismissed: "bg-slate-50 text-slate-600 ring-1 ring-slate-200/70",
 };
 
 export function StatusBadge({

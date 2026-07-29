@@ -14,6 +14,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requirePermissionOrRedirect } from "@/lib/rbac/admin-context";
 import {
   getAdminPaymentsWorkspace,
+  type AdminPaymentAlertRow,
   type AdminRefundRow,
   type AdminTransactionRow,
   type AdminWebhookRow,
@@ -40,6 +41,7 @@ const TX_STATUS_OPTIONS: { value: TransactionStatusFilter; label: string }[] = [
 const PROVIDER_OPTIONS: { value: ProviderFilter; label: string }[] = [
   { value: "all", label: "All providers" },
   { value: "paymongo", label: "PayMongo" },
+  { value: "maya", label: "Maya" },
   { value: "stripe", label: "Stripe" },
 ];
 
@@ -77,7 +79,7 @@ type Props = {
 };
 
 export default async function AdminPaymentsPage({ searchParams }: Props) {
-  await requirePermissionOrRedirect("commissions.view");
+  await requirePermissionOrRedirect("payments.view");
 
   const params = await searchParams;
   const status = (
@@ -97,7 +99,7 @@ export default async function AdminPaymentsPage({ searchParams }: Props) {
   ) as RefundStatusFilter;
 
   const supabase = (await createClient()) as any;
-  const { transactions, refunds, webhooks, kpis, errors } =
+  const { transactions, refunds, webhooks, alerts, kpis, errors } =
     await getAdminPaymentsWorkspace(supabase, {
       transactionStatus: status,
       provider,
@@ -125,7 +127,12 @@ export default async function AdminPaymentsPage({ searchParams }: Props) {
       header: "Booking / Venue",
       cell: (row) => (
         <div>
-          <p className="font-semibold text-[#111827]">{row.venueName}</p>
+          <Link
+            href={`/admin/payments/${row.id}`}
+            className="font-semibold text-[#111827] hover:text-[#1d4ed8] hover:underline"
+          >
+            {row.venueName}
+          </Link>
           <p className="text-xs text-[#6b7280]">
             Booking {shortId(row.bookingId)} · {row.paymentKind}
           </p>
@@ -305,12 +312,63 @@ export default async function AdminPaymentsPage({ searchParams }: Props) {
     },
   ];
 
+  const alertColumns: DataTableColumn<AdminPaymentAlertRow>[] = [
+    {
+      key: "alert",
+      header: "Alert",
+      cell: (row) => (
+        <div>
+          <p className="font-semibold text-[#111827]">{row.title}</p>
+          {row.description ? (
+            <p className="max-w-xl text-xs text-[#64748b]">
+              {row.description}
+            </p>
+          ) : null}
+        </div>
+      ),
+    },
+    {
+      key: "severity",
+      header: "Severity",
+      cell: (row) => <StatusBadge status={row.severity} />,
+    },
+    {
+      key: "status",
+      header: "Status",
+      cell: (row) => <StatusBadge status={row.status} />,
+    },
+    {
+      key: "transaction",
+      header: "Transaction",
+      cell: (row) =>
+        row.transactionId ? (
+          <Link
+            href={`/admin/payments/${row.transactionId}`}
+            className="text-sm font-bold text-[#1d4ed8] hover:underline"
+          >
+            {shortId(row.transactionId)}
+          </Link>
+        ) : (
+          <span className="text-sm text-[#64748b]">-</span>
+        ),
+    },
+    {
+      key: "detected",
+      header: "Detected",
+      cell: (row) => (
+        <span className="text-xs text-[#475569]">
+          {formatDate(row.detectedAt)}
+        </span>
+      ),
+    },
+  ];
+
   return (
     <DashboardSubPage
       title="Payments & Refunds"
       description="Monitor booking deposits, refunds, and payment webhook reconciliation. PayMongo is the active gateway."
     >
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
         <KpiCard
           label="Paid volume"
           value={formatPeso(kpis.paidVolume)}
@@ -336,6 +394,16 @@ export default async function AdminPaymentsPage({ searchParams }: Props) {
           label="Failed webhooks"
           value={String(kpis.webhookFailedCount)}
           icon="sync_problem"
+        />
+        <KpiCard
+          label="Open alerts"
+          value={String(kpis.openAlertCount)}
+          change={
+            kpis.criticalAlertCount > 0
+              ? `${kpis.criticalAlertCount} critical`
+              : undefined
+          }
+          icon="notification_important"
         />
       </div>
 
@@ -375,6 +443,32 @@ export default async function AdminPaymentsPage({ searchParams }: Props) {
             Disputes
           </Link>
         </p>
+      </Panel>
+
+      <Panel>
+        <PanelHeader
+          title="Payment monitoring alerts"
+          description="Open reconciliation and provider-risk alerts that need finance or operations follow-up."
+        />
+        {errors.alerts ? (
+          <p className="mb-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+            {errors.alerts}
+          </p>
+        ) : null}
+        {alerts.length > 0 ? (
+          <DataTable
+            rows={alerts}
+            columns={alertColumns}
+            keyFn={(row) => row.id}
+            emptyMessage="No payment alerts."
+          />
+        ) : (
+          <EmptyState
+            icon="verified"
+            title="No payment alerts"
+            description="Amount, currency, provider, and webhook issues will appear here after reconciliation checks."
+          />
+        )}
       </Panel>
 
       <Panel>
