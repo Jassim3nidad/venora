@@ -62,27 +62,9 @@ export default async function CancelBookingPage({ params }: Props) {
   const status = booking.status as BookingStatusValue;
 
   if (["completed", "cancelled", "declined", "withdrawn"].includes(status)) {
-    return (
-      <div className="bg-[#F8FAFC] text-[#111827] min-h-screen">
-        <div className="mx-auto flex w-full max-w-[760px] flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
-          <div className="rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-sm text-center">
-            <h2 className="text-xl font-bold text-slate-900 mb-2">
-              Booking inactive
-            </h2>
-            <p className="text-slate-600 mb-6">
-              This booking has already been {status} and can no longer be
-              cancelled.
-            </p>
-            <Link
-              href={`/bookings/${id}`}
-              className="inline-flex h-12 items-center justify-center rounded-full bg-[#2563EB] px-6 text-sm font-bold text-white transition hover:bg-[#1D4ED8]"
-            >
-              Back to booking details
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
+    // Page-level guard: never show the cancel form for terminal statuses.
+    // Redirect before the form so the RPC path is never reached for re-entry.
+    redirect(`/bookings/${id}`);
   }
 
   if (!canCancelBookingStatus(status)) {

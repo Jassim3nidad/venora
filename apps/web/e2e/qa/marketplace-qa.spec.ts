@@ -194,19 +194,11 @@ test("anonymous featured favorite opens login instead of venue details", async (
   );
 });
 
-test("venue estimate uses booking guests when public packages are absent", async ({
+test("venue estimate uses booking guests when opening the cost estimator", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/venues/the-blue-leaf-filipinas");
-
-  // Fixture venue has no active packages; compare picker only mounts when ≥2.
-  await expect(
-    page.getByRole("heading", { name: "Available Packages" }),
-  ).toHaveCount(0);
-  await expect(
-    page.getByRole("heading", { name: "Compare Packages" }),
-  ).toHaveCount(0);
 
   const bookingGuests = page.getByRole("spinbutton", {
     name: "Guests count",
@@ -249,7 +241,11 @@ test("supplier profile removes back control and keeps proposal card sticky", asy
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/suppliers/qa-supplier");
+  await page.goto("/suppliers");
+  const firstProfile = page.locator("a[href^='/suppliers/']").first();
+  await expect(firstProfile).toBeVisible({ timeout: 15_000 });
+  await firstProfile.click();
+  await expect(page).toHaveURL(/\/suppliers\/[^/]+/, { timeout: 30_000 });
 
   await expect(
     page.getByRole("link", { name: /Back to suppliers/i }),

@@ -38,7 +38,10 @@ export function RevenueTrendChart({
   const valueFormatter = (value: number) => formatChartValue(value, format);
 
   return (
-    <ChartContainer config={chartConfig} className="h-[240px] w-full">
+    <ChartContainer
+      config={chartConfig}
+      className="aspect-auto h-[240px] w-full min-w-0 overflow-hidden"
+    >
       <AreaChart data={data} margin={{ left: 4, right: 12, top: 8, bottom: 0 }}>
         <defs>
           <linearGradient id="revenueTrendFill" x1="0" y1="0" x2="0" y2="1">

@@ -9,6 +9,7 @@ type MaterialIconProps = {
 export function MaterialIcon({ name, className, filled }: MaterialIconProps) {
   return (
     <span
+      aria-hidden="true"
       className={cn("material-symbols-outlined leading-none", className)}
       style={
         filled

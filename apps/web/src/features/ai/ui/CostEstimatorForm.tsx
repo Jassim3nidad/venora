@@ -101,6 +101,7 @@ export default function CostEstimatorForm({
                     {...field}
                     type="number"
                     min={1}
+                    aria-label="Guest Count"
                     className="w-full rounded-2xl border border-[var(--border-default)] bg-[var(--bg-subtle)] p-3.5 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-500)]/20 focus:border-[var(--color-brand-500)] transition-all"
                   />
                 </FormControl>

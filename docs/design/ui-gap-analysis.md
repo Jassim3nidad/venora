@@ -24,7 +24,7 @@ enhancement. No P0 exposure was confirmed in this anonymous/source audit.
 | UX-14 | P2       | `/account/privacy`                  | Every preference/data operation is marked “Coming soon”                                                                                                         | Page offers supported controls or clearly routes to support                        | Remove inactive controls or implement supported privacy workflow                                      |
 | UX-15 | P2       | Customer payments                   | Receipts, invoices, transactions, and refunds are distributed; no receipt/invoice/refund detail route                                                           | Booking state links clearly to owned document/refund detail                        | Define one payment-history information architecture and consistent status copy                        |
 | UX-16 | P2       | Global async states                 | Six loading routes and zero route error files; empty/error/pending UI is page-local                                                                             | Predictable announced loading, empty, error, and retry states                      | Create canonical patterns and adopt incrementally                                                     |
-| UX-17 | P2       | Admin finance                       | No dedicated payment/refund/webhook reconciliation module despite backend records                                                                               | Authorized finance users can trace operational payment state safely                | Define finance-monitoring requirements and permission model before UI work                            |
+| UX-17 | P2       | Admin finance                       | Dedicated `/admin/payments` workspace shipped (transactions, refunds, webhook attention; `commissions.view`)                                                    | Authorized finance users can trace operational payment state safely                | Done — residual risk is runtime permission-tier QA only                                               |
 | UX-18 | P2       | Payment integration                 | Legacy database enum retains retired Maya and future Stripe values while only PayMongo is registered; customer UX advertises PayMongo only                      | Only operational providers are selectable/advertised                               | Preserve PayMongo-only messaging; remove legacy enum values only through a reviewed forward migration |
 | UX-19 | P2       | Booking/payment/review              | Status/next-action UI is spread across list, detail, confirmation, payment, cancellation, and review components                                                 | One vocabulary explains current state, reason, and next action                     | Establish shared state-to-copy/action mapping and cross-route tests                                   |
 | UX-20 | P3       | Aliases                             | Three redirect aliases and three re-export duplicates remain                                                                                                    | One canonical route per experience with intentional compatibility redirects        | Track usage, prefer redirects over re-exports, remove only after migration window                     |
@@ -42,8 +42,8 @@ These are not counted as App Router page files:
 - Dedicated customer receipt, invoice, and refund-detail experiences.
 - Dedicated coordinator booking/event detail, messaging, notifications, and
   account settings.
-- Dedicated admin payment/refund/webhook reconciliation.
-- Implemented admin dispute cases and escalation detail.
+- Implemented admin dispute cases and escalation detail (scoped; file-upload
+  suite deferred).
 - Complete active privacy/data-request controls.
 - Role-specific owner/supplier notification and account-setting destinations
   beyond shared surfaces.

@@ -6,6 +6,7 @@ Brief partials closed today:
 2. Accredited Supplier — **Participate in venue packages**
 3. Platform Admin — **Disputes (ops extension)**
 4. Customer AI — **Package comparison**
+5. Platform Admin — **Payment monitoring** (verified Satisfied; stale gap docs fixed)
 
 ---
 
@@ -204,3 +205,55 @@ always runs; AI narrative is optional with honest fallback copy.
   separate)
 - Hosted OpenRouter proof for this path (product path bar; Budget Advisor has
   deeper hosted evidence)
+
+---
+
+## 5. Platform Admin — Payment monitoring
+
+### Verdict
+
+**Satisfied.** Brief old wording (“no dedicated module; signals elsewhere”) is
+stale. Dedicated module already ships:
+
+- Route: `/admin/payments`
+- Nav / modules: Payments under admin shell (`nav-config`, `admin-modules`)
+- Gate: `commissions.view`
+- Surfaces: KPI strip; transactions (status + provider filters); refunds;
+  webhook attention (failed / processing)
+- Queries: `apps/web/src/features/admin-payments/application/queries.ts`
+- Shipped: `139509d` / `d40c1d1` (Maya filter cleanup later)
+
+Checklist + QA canvas already `[x]` / Satisfied. No product code change needed
+this pass.
+
+### Doc hygiene
+
+- `docs/design/ui-gap-analysis.md` — UX-17 marked Done; removed from “Missing
+  conceptual screens”
+- Checklist / what-to-fix / screen-inventory / role matrix already pointed at
+  `/admin/payments`
+
+### QA smoke
+
+1. Admin with `commissions.view` → `/admin/payments` loads.
+2. Filter transactions by status/provider; refunds by status.
+3. Webhook attention lists failed/processing events when present.
+4. Admin without permission redirects / denied.
+
+### Residual risk
+
+- Permission-tier runtime QA still not fully exercised (same note as disputes /
+  other admin modules).
+- E2E scenario #42 still marked BLOCKED runtime (fixture/host), not a product
+  gap.
+
+### Runtime QA (2026-07-29)
+
+Detailed report (both runs, per-role matrices, failure catalog):
+
+→ [`docs/qa/2026-07-29-system-qa-report.md`](../qa/2026-07-29-system-qa-report.md)
+
+**Authoritative re-run (superadmin fixture):** 52 passed · 11 failed · 1 did
+not run. Payment monitoring workspace **PASS**; guest/customer denied **PASS**.
+No separate finance-admin account in this environment.
+

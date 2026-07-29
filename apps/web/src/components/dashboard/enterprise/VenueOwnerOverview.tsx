@@ -167,8 +167,8 @@ export function VenueOwnerOverview({
         ))}
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_320px]">
-        <Panel padding={false} className="overflow-hidden">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
+        <Panel padding={false} className="min-w-0 overflow-hidden">
           <div className="border-b border-[#e5e7eb] bg-[#f8fbff] p-5 sm:p-6">
             <PanelHeader
               title="Booking Requests"
@@ -313,7 +313,7 @@ export function VenueOwnerOverview({
             </Link>
           </Panel>
 
-          <Panel className="bg-gradient-to-br from-[#eff6ff] to-white">
+          <Panel className="min-w-0 overflow-hidden bg-gradient-to-br from-[#eff6ff] to-white">
             <PanelHeader
               title="Performance Trend"
               description="Revenue from confirmed bookings"

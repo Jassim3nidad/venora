@@ -939,10 +939,10 @@ export function SupplierDetail({
           </section>
         </div>
 
-        {/* Right Column - Sidebar (sticky container on lg) */}
+        {/* Right Column - Sidebar (sticky container on lg+) */}
         {viewMode !== "coordinator" ? (
           <aside className="w-full lg:w-auto lg:self-stretch">
-            <div className="lg:sticky lg:top-[9.5rem] lg:self-start">
+            <div className="sticky top-[9.5rem] self-start">
               <SupplierRequestSidebar
                 supplier={supplier}
                 supplierSlug={supplier.slug}
@@ -955,9 +955,7 @@ export function SupplierDetail({
         ) : (
           sidebarNode && (
             <aside className="w-full lg:w-auto lg:self-stretch">
-              <div className="lg:sticky lg:top-[9.5rem] lg:self-start">
-                {sidebarNode}
-              </div>
+              <div className="sticky top-[9.5rem] self-start">{sidebarNode}</div>
             </aside>
           )
         )}

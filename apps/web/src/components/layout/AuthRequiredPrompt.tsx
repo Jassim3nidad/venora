@@ -82,8 +82,15 @@ export function AuthRequiredPrompt({
     kind ?? authPromptKindForHref(redirectTo) ?? ("generic" as const);
   const copy = PROMPT_COPY[resolvedKind];
 
-  const loginHref = `/login?${new URLSearchParams({ redirectTo }).toString()}`;
-  const registerHref = `/register?${new URLSearchParams({ redirectTo }).toString()}`;
+  const loginHref = `/login?${new URLSearchParams({
+    redirectTo,
+    ...(kind === "favorites" || kind === "bookings" || kind === "host"
+      ? { prompt: kind }
+      : {}),
+  }).toString()}`;
+  const registerHref = `/register?${new URLSearchParams({
+    redirectTo,
+  }).toString()}`;
 
   const handleGoogleSignIn = () => {
     if (isGoogleLoading) return;

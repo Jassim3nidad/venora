@@ -713,6 +713,7 @@ export function SuppliersMarketplaceClient({
           "sticky top-[8.5rem] hidden h-[calc(100dvh-8.5rem)] shrink-0 self-start overflow-hidden transition-all duration-300 lg:block",
           desktopFiltersOpen ? "w-[300px] opacity-100" : "w-0 opacity-0",
         ].join(" ")}
+        aria-label="Supplier filters"
         aria-hidden={!desktopFiltersOpen}
         inert={!desktopFiltersOpen ? true : undefined}
       >
