@@ -108,6 +108,12 @@ export default async function EditVenuePage({
   const canEditDetails =
     isOwner || permissions.includes("manage_assigned_venue_listings");
   const canEditPricing = isOwner;
+  const canEditPackages = canEditDetails;
+  const isCoordinatorOnly =
+    !isOwner && roles.includes("event_coordinator");
+  const venuesBackHref = isCoordinatorOnly
+    ? "/dashboard/coordinator/venues"
+    : "/dashboard/venues";
   const venue = await getOwnerVenueById(context, id);
 
   if (!venue) notFound();
@@ -193,6 +199,9 @@ export default async function EditVenuePage({
     const canEditDetails =
       isOwner ||
       actionContext.permissions.includes("manage_assigned_venue_listings");
+    const canEditPackages = canEditDetails;
+    const isCoordinatorOnly =
+      !isOwner && actionContext.roles.includes("event_coordinator");
 
     if (!canEditDetails) {
       errorRedirect(id, "You do not have permission to edit venue details.");
@@ -201,7 +210,7 @@ export default async function EditVenuePage({
     const existingVenue = await getOwnerVenueById(
       actionContext,
       id,
-      "id, slug, name",
+      "id, slug, name, base_price, price_unit",
     );
     if (!existingVenue) notFound();
 
@@ -358,7 +367,7 @@ export default async function EditVenuePage({
       }
     }
 
-    if (isOwner) {
+    if (canEditPackages) {
       const packageIds = formData
         .getAll("package_id")
         .map((value) => String(value));
@@ -506,6 +515,8 @@ export default async function EditVenuePage({
     revalidatePath("/dashboard");
     revalidatePath("/dashboard/venue-owner");
     revalidatePath("/dashboard/venues");
+    revalidatePath("/dashboard/coordinator/venues");
+    revalidatePath("/dashboard/packages");
     revalidatePath(editVenuePath(id));
     revalidatePath("/venues");
     if (existingVenue.slug) {
@@ -532,10 +543,10 @@ export default async function EditVenuePage({
   return (
     <DashboardSubPage
       title="Edit Venue"
-      description="Update core venue details, pricing, guest capacity, and media for this listing."
+      description="Update core venue details, guest capacity, media, and packages for this listing."
       action={
         <DashButton
-          href="/dashboard/venues"
+          href={venuesBackHref}
           variant="secondary"
           icon="arrow_back"
         >
@@ -557,13 +568,20 @@ export default async function EditVenuePage({
                 Changes here update the venue profile used throughout the
                 marketplace and owner dashboard.
               </p>
-              {!canEditPricing && (
+              {!canEditPricing && canEditPackages ? (
                 <div className="mt-4 flex items-center gap-2 rounded-xl bg-amber-50 p-3 text-sm font-semibold text-amber-800">
                   <AlertTriangle className="h-5 w-5" />
-                  You have permission to edit venue details, but sensitive
-                  pricing and package settings are locked to venue owners only.
+                  You can manage listing details, media, and packages. Venue base
+                  price stays locked to the venue owner.
                 </div>
-              )}
+              ) : null}
+              {!canEditDetails ? (
+                <div className="mt-4 flex items-center gap-2 rounded-xl bg-amber-50 p-3 text-sm font-semibold text-amber-800">
+                  <AlertTriangle className="h-5 w-5" />
+                  View only. Managing this listing requires
+                  manage_assigned_venue_listings.
+                </div>
+              ) : null}
             </div>
 
             {query.created ? (
@@ -824,7 +842,7 @@ export default async function EditVenuePage({
                   </div>
 
                   <fieldset
-                    disabled={!canEditPricing}
+                    disabled={!canEditPackages}
                     className="mt-5 space-y-4"
                   >
                     {packages.length > 0 ? (
@@ -1195,7 +1213,7 @@ export default async function EditVenuePage({
                 </section>
 
                 <div className="flex flex-col gap-3 border-t border-[#e5e7eb] pt-5 sm:flex-row sm:justify-end">
-                  <DashButton href="/dashboard/venues" variant="secondary">
+                  <DashButton href={venuesBackHref} variant="secondary">
                     Cancel
                   </DashButton>
                   <button

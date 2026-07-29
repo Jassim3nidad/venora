@@ -27,7 +27,7 @@ Related: [role experience matrix](role-experience-matrix.md),
 | ---------------------- | -------------------------------------------------------------------------------- |
 | Customer               | Mostly satisfied                                                                 |
 | Venue Owner            | Mostly satisfied                                                                 |
-| Event Coordinator      | Mostly aligned (MVP + messaging + org staff invite path)                         |
+| Event Coordinator      | Satisfied for org-staff ops (assigned venues; not venue ownership)   |
 | Accredited Supplier    | Marketplace, partnerships, and package association implemented; live E2E pending |
 | Platform Administrator | Satisfied for Phase 1 admin surfaces                                             |
 
@@ -74,7 +74,10 @@ Related: [role experience matrix](role-experience-matrix.md),
 Brief: operational manager for one or more venue accounts (listings, bookings,
 calendars, customer communication, suppliers, performance, reports).
 
-- [~] Managing venue listings — org venue list/discovery; not full owner CRUD
+- [x] Managing venue listings — assigned venues at
+      `/dashboard/coordinator/venues` → shared edit
+      (`manage_assigned_venue_listings`); profile/media/amenities/packages;
+      create/delete + venue base price remain owner-only
 - [x] Coordinating bookings — `/dashboard/coordinator/bookings` list + detail;
       approve/decline/complete when `manage_booking_decisions` is granted
 - [x] Managing calendars — `/dashboard/coordinator/calendar`
@@ -91,9 +94,8 @@ calendars, customer communication, suppliers, performance, reports).
 - Customers **cannot hire** an Event Coordinator on Venora; EC is org staff after
   partner approval + organization membership. Become-partner and Settings copy
   state this explicitly.
-- Role overall remains **PARTIALLY IMPLEMENTED** because coordinators do not own
-  full venue CRUD or a customer-hire/global CRM product; org-scoped booking,
-  messaging, supplier attachment, settings, and reporting surfaces exist.
+- Coordinators manage **assigned** listings (not full ownership CRUD). Venue
+  create/delete and base price stay with the venue owner.
 
 **Backlog (Event Coordinator)**
 
