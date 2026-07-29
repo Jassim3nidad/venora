@@ -12,12 +12,17 @@ type SelectedSupplier = {
 
 type Props = {
   suppliers: EligibleSupplier[];
+  initialSelected?: SelectedSupplier[];
   onChange: (selected: SelectedSupplier[]) => void;
 };
 
-export function EligibleSuppliersPanel({ suppliers, onChange }: Props) {
+export function EligibleSuppliersPanel({
+  suppliers,
+  initialSelected = [],
+  onChange,
+}: Props) {
   const [selected, setSelected] = useState<Map<string, SelectedSupplier>>(
-    new Map()
+    () => new Map(initialSelected.map((item) => [item.supplierId, item])),
   );
   const [search, setSearch] = useState("");
 

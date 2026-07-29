@@ -622,6 +622,7 @@ export function PackageBuilderForm({
               </p>
               <EligibleSuppliersPanel
                 suppliers={eligibleSuppliers}
+                initialSelected={selectedSuppliers}
                 onChange={setSelectedSuppliers}
               />
             </StepSection>

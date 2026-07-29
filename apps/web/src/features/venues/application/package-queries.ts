@@ -36,15 +36,18 @@ export async function getEligiblePackageSuppliers(
 ): Promise<EligibleSupplier[]> {
   const supabase = (await createClient()) as any;
 
-  const { data, error } = await supabase
-    .from("venue_supplier_agreements")
-    .select(
-      `
+  const [{ data, error }, { data: activePartners, error: partnersError }] =
+    await Promise.all([
+      supabase
+        .from("venue_supplier_agreements")
+        .select(
+          `
       id,
       supplier_base_rate,
       venue_markup_fee,
       custom_service_name,
       max_guest_count,
+      supplier_id,
       supplier_profiles!inner (
         id,
         business_name,
@@ -57,23 +60,41 @@ export async function getEligiblePackageSuppliers(
         supplier_categories ( name ),
         supplier_services ( id, name )
       )
-    `
-    )
-    .eq("venue_id", venueId)
-    .eq("status", "active");
+    `,
+        )
+        .eq("venue_id", venueId)
+        .eq("status", "active"),
+      supabase
+        .from("venue_suppliers")
+        .select("supplier_id")
+        .eq("venue_id", venueId)
+        .eq("status", "active"),
+    ]);
 
   if (error) {
     console.error("[getEligiblePackageSuppliers] query error:", error.message);
     return [];
   }
 
+  if (partnersError) {
+    console.error(
+      "[getEligiblePackageSuppliers] partners error:",
+      partnersError.message,
+    );
+    return [];
+  }
+
+  const activePartnerIds = new Set(
+    (activePartners ?? []).map((row: { supplier_id: string }) => row.supplier_id),
+  );
+
   const rows = (data ?? []) as any[];
 
-  // Filter: supplier must be accredited AND have an active agreement
   return rows
     .filter((row) => {
       const sp = row.supplier_profiles;
       if (!sp) return false;
+      if (!activePartnerIds.has(row.supplier_id ?? sp.id)) return false;
       if (sp.accreditation_status !== "accredited") return false;
       if (
         requiredGuestCapacity &&
