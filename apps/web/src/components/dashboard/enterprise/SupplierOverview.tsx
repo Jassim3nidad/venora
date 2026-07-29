@@ -119,8 +119,8 @@ export function SupplierOverview({
         ))}
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <Panel>
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+        <Panel className="min-w-0 overflow-hidden">
           <PanelHeader
             title="Revenue Performance"
             description={`Confirmed supplier revenue: ${formatCurrency(monthlyRevenue)}.`}
@@ -133,7 +133,7 @@ export function SupplierOverview({
           <RevenueTrendChart data={revenueTrend} format="currency" />
         </Panel>
 
-        <Panel>
+        <Panel className="min-w-0">
           <PanelHeader title="Quick Actions" />
           <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
             {quickActions.map((action) => (

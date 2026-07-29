@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Heart,
   Image as ImageIcon,
@@ -11,7 +12,6 @@ import {
   Star,
   Users,
 } from "lucide-react";
-import { useAuthRequiredPrompt } from "@/components/layout/AuthRequiredPrompt";
 import { toggleFavoriteAction } from "../application/actions";
 import type { Venue } from "../utils/venue-mappers";
 import { isOptimizableImageSrc } from "@/src/lib/image-host";
@@ -26,10 +26,7 @@ export default function FeaturedVenueCard({
   venue,
   isAuthenticated,
 }: FeaturedVenueCardProps) {
-  const { openAuthPrompt, authPrompt } = useAuthRequiredPrompt(
-    "/",
-    "favorites",
-  );
+  const router = useRouter();
   const { addVenueId, removeVenueId, isInComparison } = useVenueComparison();
   const isCompared = isInComparison(String(venue.id));
   const [isFavorited, setIsFavorited] = useState(Boolean(venue.isFavorited));
@@ -54,7 +51,8 @@ export default function FeaturedVenueCard({
     event.stopPropagation();
 
     if (!isAuthenticated) {
-      openAuthPrompt(`/venues/${venue.slug ?? venue.id}`);
+      // Featured cards return to home after login (not venue detail).
+      router.push("/login?redirectTo=%2F&prompt=favorites");
       return;
     }
 
@@ -201,8 +199,6 @@ export default function FeaturedVenueCard({
           {favoriteError}
         </p>
       ) : null}
-
-      {authPrompt}
     </article>
   );
 }

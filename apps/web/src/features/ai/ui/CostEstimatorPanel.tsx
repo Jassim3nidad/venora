@@ -74,15 +74,16 @@ export default function CostEstimatorPanel({
 
           {data ? (
             <CostEstimatorResult result={data} onReset={reset} />
-          ) : (
+          ) : open ? (
             <CostEstimatorForm
+              key={`guests-${initialGuestCount ?? "default"}`}
               initialGuestCount={initialGuestCount}
               capacityMin={capacityMin}
               capacityMax={capacityMax}
               isPending={isPending}
               onSubmit={handleSubmit}
             />
-          )}
+          ) : null}
         </div>
       </DialogContent>
     </Dialog>
