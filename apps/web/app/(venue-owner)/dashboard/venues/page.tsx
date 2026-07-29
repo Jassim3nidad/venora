@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import {
   DashButton,
   DashboardSubPage,
@@ -97,7 +98,12 @@ export default async function OwnerVenuesPage() {
       header: "Venue",
       cell: (row) => (
         <div>
-          <p className="font-semibold text-[#111827]">{row.name}</p>
+          <Link
+            href={`/dashboard/venues/${row.id}/edit`}
+            className="font-semibold text-[#111827] transition hover:text-[#2563eb]"
+          >
+            {row.name}
+          </Link>
           <p className="text-xs text-[#6b7280]">
             {row.location || "Location pending"}
           </p>
@@ -161,7 +167,65 @@ export default async function OwnerVenuesPage() {
             title="Venue Inventory"
             description="Only venues owned by your organization appear here."
           />
-          <DataTable rows={rows} columns={columns} keyFn={(row) => row.id} />
+          <DataTable
+            rows={rows}
+            columns={columns}
+            keyFn={(row) => row.id}
+            renderMobileCard={(row) => (
+              <div className="flex flex-col gap-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <Link
+                      href={`/dashboard/venues/${row.id}/edit`}
+                      className="text-base font-bold text-[#111827] transition hover:text-[#2563eb]"
+                    >
+                      {row.name}
+                    </Link>
+                    <p className="mt-0.5 text-xs text-[#6b7280]">
+                      {row.location || "Location pending"}
+                    </p>
+                  </div>
+                  <div className="shrink-0">
+                    <StatusBadge status={row.status} />
+                  </div>
+                </div>
+
+                <div className="my-2 h-px w-full bg-[#f1f5f9]" />
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-[#94a3b8]">
+                      Capacity
+                    </p>
+                    <p className="mt-1 font-medium text-[#334155]">{row.capacity}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-[#94a3b8]">
+                      Base Price
+                    </p>
+                    <p className="mt-1 font-medium text-[#334155]">{row.basePrice}</p>
+                  </div>
+                </div>
+
+                <div className="mt-2 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-sm text-[#475569]">
+                    <span className="material-symbols-outlined text-[16px] text-[#fbbf24]">
+                      star
+                    </span>
+                    <span className="font-medium">{row.rating}</span>
+                  </div>
+                  <DashButton
+                    href={`/dashboard/venues/${row.id}/edit`}
+                    variant="secondary"
+                    icon="edit"
+                    className="h-8 min-h-0 px-3 py-1 text-xs"
+                  >
+                    Edit
+                  </DashButton>
+                </div>
+              </div>
+            )}
+          />
         </Panel>
       ) : (
         <EmptyState

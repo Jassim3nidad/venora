@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition, Suspense } from "react";
-import { ArrowLeft, Mail, AlertCircle } from "lucide-react";
+import { Suspense, useState, useTransition, type FormEvent } from "react";
+import { ArrowLeft, Mail, AlertCircle, Lock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { forgotPasswordAction } from "@/features/auth/actions/auth.actions";
 import { forgotPasswordSchema } from "@/features/auth/schemas/auth.schema";
@@ -16,7 +16,7 @@ function ForgotPasswordContent() {
   const [success, setSuccess] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setFieldErrors({});
     setSuccess(false);
@@ -29,143 +29,167 @@ function ForgotPasswordContent() {
     }
 
     startTransition(async () => {
-      const response = await forgotPasswordAction({ email });
+      try {
+        const response = await forgotPasswordAction({ email });
 
-      if (response && response.success) {
-        setSuccess(true);
-      } else {
+        if (response && response.success) {
+          setSuccess(true);
+        } else if (response && response.fieldErrors) {
+          setFieldErrors(response.fieldErrors);
+        } else {
+          setFieldErrors({
+            email: ["Password recovery is temporarily unavailable. Please try again later."],
+          });
+        }
+      } catch (error) {
         setFieldErrors({
-          email: [
-            "Unable to send reset link. Please check your network and try again.",
-          ],
+          email: ["We couldn't send the reset request. Check your connection and try again."],
         });
       }
     });
   };
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[linear-gradient(180deg,#F9FAFB_0%,#F8FAFC_100%)] px-4 py-10 text-[#111827] sm:px-6">
-      <section className="relative grid w-full max-w-5xl overflow-hidden rounded-[32px] border border-[#E5E7EB]/80 bg-white shadow-xl shadow-slate-200/70 lg:grid-cols-[0.95fr_1.05fr]">
-        <div className="hidden bg-gradient-to-br from-[#1D4ED8] via-[#2563EB] to-[#2563EB] p-10 text-white lg:flex lg:flex-col lg:justify-between">
+    <main className="flex min-h-screen flex-col bg-white lg:items-center lg:justify-center lg:bg-[#F9FAFB] lg:px-6 lg:py-10">
+      <section className="flex w-full max-w-[1080px] flex-col bg-white lg:min-h-[600px] lg:flex-row lg:overflow-hidden lg:rounded-[24px] lg:border lg:border-slate-200 lg:shadow-xl lg:shadow-slate-200/50">
+        
+        {/* LEFT BRANDING PANEL */}
+        <div className="hidden flex-col justify-between bg-[#1D4ED8] p-12 text-white lg:flex lg:w-[42%]">
           <div>
             <Link
               href="/"
-              className="inline-flex items-center text-2xl font-black tracking-[-0.04em] text-white"
+              className="inline-flex items-center text-2xl font-black tracking-[-0.04em] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-sm"
             >
               Venora
             </Link>
-
-            <div className="mt-16 inline-flex items-center gap-2 !translate-x-5 rounded-full border border-white/25 bg-white/15 px-10 py-2 text-xs font-bold uppercase tracking-[0.14em] backdrop-blur-md">
-              Secure account recovery
-            </div>
-
-            <h1 className="mt-6 max-w-sm text-4xl font-black leading-tight tracking-[-0.04em]">
-              Get back to planning extraordinary events.
+            
+            <h1 className="mt-16 max-w-sm text-3xl font-bold leading-tight tracking-[-0.02em]">
+              Return to your Venora account
             </h1>
-
-            <p className="mt-4 max-w-sm text-sm font-medium leading-6 text-white/80">
-              Enter your email and we&apos;ll help you reset your password so
-              you can continue browsing venues, bookings, and event tools.
+            
+            <p className="mt-4 max-w-sm text-base font-medium leading-7 text-white/80">
+              Reset your password securely and continue managing your venues,
+              bookings, suppliers, and event plans.
             </p>
           </div>
-
-          <div className="rounded-3xl border border-white/20 bg-white/15 p-5 backdrop-blur-md">
-            <p className="text-sm font-semibold leading-6 text-white/85">
-              For your security, password reset links are sent only to the email
-              connected to your Venora account.
-            </p>
+          
+          <div className="flex items-center gap-3 text-sm font-medium text-white/80">
+            <Lock className="h-5 w-5 shrink-0" />
+            <p>Reset links expire after a limited time and can only be used once.</p>
           </div>
         </div>
 
-        <div className="p-6 sm:p-10 lg:p-12">
-          <div className="mb-8">
+        {/* RIGHT FORM PANEL */}
+        <div className="flex w-full flex-col px-6 py-8 sm:px-10 lg:w-[58%] lg:p-12">
+          
+          <div className="mb-10 flex items-center lg:hidden">
+            <Link href="/" className="text-2xl font-black tracking-[-0.04em] text-[#2563EB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] rounded-sm">
+              Venora
+            </Link>
+          </div>
+
+          <div className="mb-10 lg:mb-12">
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 text-sm font-extrabold text-[#6B7280] transition hover:text-[#2563EB]"
+              className="inline-flex items-center gap-2 rounded-md text-[15px] font-medium text-slate-500 transition-colors hover:text-[#2563EB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to sign in
             </Link>
           </div>
 
-          <div className="mx-auto max-w-md">
+          <div className="mx-auto w-full max-w-[460px] lg:ml-0">
             <div className="mb-8">
-              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EFF6FF] text-[#2563EB] shadow-sm">
-                <Mail className="h-6 w-6" />
-              </div>
-
-              <p className="mb-3 inline-flex rounded-full border border-[#DBEAFE] bg-[#EFF6FF] px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#2563EB]">
-                Password reset
+              <p className="mb-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-[#2563EB]">
+                Account Recovery
               </p>
-
-              <h1 className="text-3xl font-black tracking-[-0.04em] text-[#111827] sm:text-4xl">
-                Forgot your password?
+              
+              <h1 className="text-[30px] font-bold leading-tight tracking-[-0.04em] text-[#0F172A] lg:text-[38px]">
+                Reset your password
               </h1>
-
-              <p className="mt-3 text-sm font-medium leading-6 text-slate-500 sm:text-base">
-                Enter your email address and we&apos;ll send you a secure reset
-                link.
+              
+              <p className="mt-3 text-[16px] leading-7 text-slate-500">
+                Enter the email associated with your Venora account. We&apos;ll send you a secure password-reset link.
               </p>
             </div>
 
             {urlError && (
-              <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-800 flex gap-3 items-start">
-                <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+              <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-800">
+                <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
                 <div>
-                  <p className="font-bold text-red-900">
-                    Reset link expired or invalid
-                  </p>
+                  <p className="font-bold text-red-900">Reset link expired or invalid</p>
                   <p className="mt-1 opacity-90">{urlError}</p>
-                  <p className="mt-2 text-xs opacity-75">
-                    This usually happens if you double-clicked the link,
-                    requested a newer link, or your email provider pre-scanned
-                    the link. Please request a new one below.
-                  </p>
                 </div>
               </div>
             )}
 
             {success ? (
-              <div
-                role="status"
-                className="rounded-2xl border border-[#E5E7EB] bg-[#EFF6FF] p-5 text-sm font-semibold leading-6 text-[#1D4ED8]"
-              >
-                If your email is registered, you will receive a password reset
-                link shortly. Please check your spam/junk folder if you do not
-                see it in your inbox.
+              <div className="flex flex-col gap-6" aria-live="polite">
+                <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                  <h2 className="mb-2 text-xl font-bold text-[#0F172A]">Check your email</h2>
+                  <p className="text-[15px] leading-6 text-slate-600">
+                    If an account exists for the email you entered, we&apos;ve sent password-reset instructions.
+                  </p>
+                  <ul className="mt-4 list-inside list-disc space-y-1 text-sm text-slate-500">
+                    <li>Check your spam or junk folder</li>
+                    <li>The link expires after a limited time</li>
+                    <li>Wait for the resend cooldown before requesting another link</li>
+                  </ul>
+                </div>
+                
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                  <Link
+                    href="/login"
+                    className="inline-flex h-11 items-center justify-center rounded-xl bg-[#2563EB] px-5 text-[14px] font-semibold text-white transition hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25"
+                  >
+                    Back to sign in
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSuccess(false);
+                      setEmail("");
+                    }}
+                    className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-[14px] font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-200"
+                  >
+                    Send another link
+                  </button>
+                </div>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                 <div>
                   <label
                     htmlFor="forgot-email"
-                    className="mb-2 block text-sm font-bold text-slate-700"
+                    className="mb-2 block text-[14px] font-semibold text-slate-700"
                   >
                     Email address
                   </label>
 
                   <div className="relative">
-                    <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
 
                     <input
                       id="forgot-email"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@example.com"
+                      placeholder="name@example.com"
                       autoComplete="email"
                       disabled={isPending}
+                      aria-invalid={!!fieldErrors.email}
+                      aria-describedby={fieldErrors.email ? "email-error" : undefined}
                       className={[
-                        "h-12 w-full rounded-2xl border bg-[#F9FAFB] pl-11 pr-4 text-sm font-semibold text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-70",
+                        "h-12 w-full rounded-xl border bg-white pl-11 pr-4 text-[16px] text-[#0F172A] outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-70",
                         fieldErrors.email
                           ? "border-red-500 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
-                          : "border-slate-200 hover:border-[#E5E7EB] focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-[#2563EB]/10",
+                          : "border-slate-300 hover:border-slate-400 focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10",
                       ].join(" ")}
                     />
                   </div>
 
                   {fieldErrors.email && (
-                    <p className="mt-2 text-xs font-semibold text-red-600">
+                    <p id="email-error" className="mt-2 text-sm font-medium text-red-600">
                       {fieldErrors.email[0]}
                     </p>
                   )}
@@ -175,22 +199,18 @@ function ForgotPasswordContent() {
                   id="forgot-submit-btn"
                   type="submit"
                   disabled={isPending}
-                  className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-[#2563EB] px-5 text-sm font-extrabold text-white shadow-lg shadow-[#2563EB]/25 transition hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 disabled:cursor-not-allowed disabled:opacity-70"
+                  aria-busy={isPending}
+                  className="inline-flex h-12 w-full items-center justify-center rounded-xl bg-[#2563EB] px-5 text-[15px] font-semibold text-white transition hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2563EB]/25 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  {isPending ? "Sending reset link..." : "Send Reset Link"}
+                  {isPending ? "Sending reset link..." : "Send reset link"}
                 </button>
+
+                <div className="mt-2 flex items-center gap-2 text-[13px] text-slate-500">
+                  <Lock className="h-4 w-4 shrink-0" />
+                  <p>For your security, the reset link will expire after a limited time.</p>
+                </div>
               </form>
             )}
-
-            <p className="mt-8 text-center text-sm font-medium text-slate-500">
-              Remembered your password?{" "}
-              <Link
-                href="/login"
-                className="font-extrabold text-[#2563EB] transition hover:text-[#1D4ED8]"
-              >
-                Sign in
-              </Link>
-            </p>
           </div>
         </div>
       </section>

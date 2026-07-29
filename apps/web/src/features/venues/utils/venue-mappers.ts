@@ -61,6 +61,27 @@ export function relationNames(
     .filter((name): name is string => Boolean(name));
 }
 
+export function mergeAmenityNames(
+  predefined: Array<string | null | undefined> = [],
+  custom: Array<string | null | undefined> = [],
+) {
+  const seen = new Set<string>();
+  const merged: string[] = [];
+
+  for (const name of [...predefined, ...custom]) {
+    const trimmed = String(name ?? "").trim();
+    if (!trimmed) continue;
+
+    const key = trimmed.toLocaleLowerCase();
+    if (seen.has(key)) continue;
+
+    seen.add(key);
+    merged.push(trimmed);
+  }
+
+  return merged;
+}
+
 export function firstVenueImage(venue: any) {
   return [...(venue.venue_images ?? [])]
     .filter((item: any) => item.media_type !== "video")
@@ -111,6 +132,10 @@ export function toLiveMarketplaceVenue(
   );
   const eventTypes = relationNames(venue.venue_event_types, "event_types");
   const amenities = relationNames(venue.venue_amenities, "amenities");
+  const mergedAmenities = mergeAmenityNames(
+    amenities,
+    venue.custom_amenities,
+  );
   const image = buildVenueImageUrl(
     firstVenueImage(venue)?.storage_path,
     fallbackVenue?.image ?? "",
@@ -150,7 +175,9 @@ export function toLiveMarketplaceVenue(
     categories:
       categories.length > 0 ? categories : (fallbackVenue?.categories ?? []),
     amenities:
-      amenities.length > 0 ? amenities : (fallbackVenue?.amenities ?? []),
+      mergedAmenities.length > 0
+        ? mergedAmenities
+        : (fallbackVenue?.amenities ?? []),
     isFavorited: favoriteVenueIds.has(String(venue.id)),
   };
 }
