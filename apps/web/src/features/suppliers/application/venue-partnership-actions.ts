@@ -142,29 +142,80 @@ export async function inviteSupplierAsVenuePartner(
       };
     }
 
-    const rows = validVenueIds.map((venueId) => ({
-      venue_id: venueId,
-      supplier_id: supplierId,
-      is_preferred: isPreferred,
-    }));
-
-    const { error } = await supabase
+    const { data: existingRows } = await supabase
       .from("venue_suppliers")
-      .upsert(rows, {
-        ignoreDuplicates: false,
-        onConflict: "venue_id,supplier_id",
-      });
+      .select("venue_id, status")
+      .eq("supplier_id", supplierId)
+      .in("venue_id", validVenueIds);
 
-    if (error) {
-      console.error("[venue-partnership] upsert error:", error.message);
-      return {
-        success: false,
-        error: "Failed to save partnership. Please try again.",
-      };
+    const existingByVenue = new Map(
+      (existingRows ?? []).map((row: { venue_id: string; status: string }) => [
+        row.venue_id,
+        row.status,
+      ]),
+    );
+
+    const toInsert = validVenueIds.filter((id) => !existingByVenue.has(id));
+    const toReinvite = validVenueIds.filter((id) => {
+      const status = existingByVenue.get(id);
+      return status === "declined" || status === "invited";
+    });
+
+    if (toInsert.length > 0) {
+      const { error: insertError } = await supabase.from("venue_suppliers").insert(
+        toInsert.map((venueId) => ({
+          venue_id: venueId,
+          supplier_id: supplierId,
+          is_preferred: isPreferred,
+          status: "invited",
+          requested_by: user.id,
+        })),
+      );
+
+      if (insertError) {
+        console.error("[venue-partnership] insert error:", insertError.message);
+        return {
+          success: false,
+          error: "Failed to save partnership. Please try again.",
+        };
+      }
+    }
+
+    for (const venueId of toReinvite) {
+      const { error: updateError } = await supabase
+        .from("venue_suppliers")
+        .update({
+          is_preferred: isPreferred,
+          status: "invited",
+          requested_by: user.id,
+        })
+        .eq("venue_id", venueId)
+        .eq("supplier_id", supplierId);
+
+      if (updateError) {
+        console.error("[venue-partnership] update error:", updateError.message);
+        return {
+          success: false,
+          error: "Failed to update partnership invite.",
+        };
+      }
+    }
+
+    // Keep preferred flag for already-active partners without downgrading status
+    const alreadyActive = validVenueIds.filter(
+      (id) => existingByVenue.get(id) === "active",
+    );
+    for (const venueId of alreadyActive) {
+      await supabase
+        .from("venue_suppliers")
+        .update({ is_preferred: isPreferred })
+        .eq("venue_id", venueId)
+        .eq("supplier_id", supplierId);
     }
 
     revalidatePath("/dashboard/coordinator/suppliers");
     revalidatePath("/dashboard/venues");
+    revalidatePath("/dashboard/supplier/partnerships");
     return { success: true };
   } catch (err: any) {
     console.error("[venue-partnership] error:", err?.message);
@@ -299,10 +350,77 @@ export async function updatePartnershipStatus(
 
     revalidatePath("/dashboard/coordinator/suppliers");
     revalidatePath("/dashboard/coordinator/suppliers/requests");
+    revalidatePath("/dashboard/supplier/partnerships");
     return { success: true };
   } catch (err: any) {
     console.error("[venue-partnership] error:", err?.message);
     return { success: false, error: "An unexpected error occurred." };
+  }
+}
+
+/**
+ * Supplier accepts or declines a venue-initiated partnership invite.
+ */
+export async function respondToPartnershipInvite(
+  partnershipId: string,
+  decision: "active" | "declined",
+): Promise<{ success: true } | { success: false; error: string }> {
+  try {
+    const { supabase, user } = await requireSupplierContext();
+
+    const { data: supplier } = await supabase
+      .from("supplier_profiles")
+      .select("id")
+      .eq("profile_id", user.id)
+      .maybeSingle();
+
+    if (!supplier) {
+      return { success: false, error: "Supplier profile not found." };
+    }
+
+    const { data: row } = await supabase
+      .from("venue_suppliers")
+      .select("id, status, supplier_id")
+      .eq("id", partnershipId)
+      .eq("supplier_id", supplier.id)
+      .maybeSingle();
+
+    if (!row) {
+      return { success: false, error: "Invitation not found." };
+    }
+
+    if (row.status !== "invited") {
+      return {
+        success: false,
+        error: "This invitation is no longer pending.",
+      };
+    }
+
+    const { error } = await supabase
+      .from("venue_suppliers")
+      .update({ status: decision })
+      .eq("id", partnershipId)
+      .eq("supplier_id", supplier.id);
+
+    if (error) {
+      console.error(
+        "[venue-partnership] invite respond error:",
+        error.message,
+      );
+      return { success: false, error: "Failed to update invitation." };
+    }
+
+    revalidatePath("/dashboard/supplier/partnerships");
+    revalidatePath("/dashboard/supplier/venues");
+    revalidatePath("/dashboard/coordinator/suppliers");
+    revalidatePath("/dashboard/coordinator/suppliers/requests");
+    return { success: true };
+  } catch (err: any) {
+    console.error("[venue-partnership] invite respond error:", err?.message);
+    return {
+      success: false,
+      error: err?.message ?? "An unexpected error occurred.",
+    };
   }
 }
 

@@ -119,14 +119,15 @@ calendars, customer communication, suppliers, performance, reports).
 - [x] Contact — customer inquiry → supplier inbox/quotes
 - [x] Accreditation status — profile field + admin accreditation
 - [x] Customers browse suppliers — `/suppliers`
-- [x] Participate in venue packages / venues associate suppliers — package
-      builder, eligible-supplier selection, partnerships, and agreements exist;
-      hosted verification remains tracked by the release QA matrix
+- [x] Participate in venue packages / venues associate suppliers — invite →
+      accept → agreement → package builder eligibility → `package_suppliers`
+      inclusions visible on supplier partnerships; hosted E2E remains release QA
 
 **Backlog (Supplier / Phase 2)**
 
-- [~] Venue listing association and package participation — UI and schema exist;
-  hosted end-to-end verification remains
+- [x] Venue listing association and package participation — product path usable
+  (invite Accept/Decline, eligibility requires active partnership + agreement,
+  package inclusions UI); hosted verification remains in release QA matrix
 - [x] Attach suppliers onto a venue booking (`booking_suppliers`) as finished flow
 
 ---

@@ -1,23 +1,30 @@
 # Fixes — 2026-07-29
 
-Event Coordinator **Managing venue listings** (brief partial → satisfied).
+Brief partials closed today:
 
-## Summary
+1. Event Coordinator — **Managing venue listings**
+2. Accredited Supplier — **Participate in venue packages**
+
+---
+
+## 1. Event Coordinator — Managing venue listings
+
+### Summary
 
 Coordinators with `manage_assigned_venue_listings` can edit assigned venue
 profiles, media, amenities, and packages. Create/delete venue and venue **base
 price** stay owner-only.
 
-## Changes
+### Changes
 
-### Coordinator venues
+#### Coordinator venues
 
 - File: `apps/web/app/(venue-owner)/dashboard/coordinator/venues/page.tsx`
 - “Edit listing” CTA when `manage_assigned_venue_listings` is granted
 - Clear copy: manage assigned listings; create/delete remains with owner
 - “Manage packages” links to `/dashboard/packages` when permitted
 
-### Shared venue edit
+#### Shared venue edit
 
 - File: `apps/web/app/(venue-owner)/dashboard/venues/[id]/edit/page.tsx`
 - Packages unlocked for `manage_assigned_venue_listings` (not only owners)
@@ -26,7 +33,7 @@ price** stay owner-only.
 - Save revalidates coordinator venues + packages
 - Fix: preserve `base_price` / `price_unit` when non-owner saves (select those columns)
 
-### Packages
+#### Packages (EC access)
 
 - Files:
   - `apps/web/app/(venue-owner)/dashboard/packages/page.tsx`
@@ -39,24 +46,75 @@ price** stay owner-only.
 - Package create/update requires org membership + assignment for coordinators
 - Security: org member check now filters by `user_id` (was any active member)
 
-### Docs
+### QA smoke (EC)
 
-- `docs/design/project-brief-role-checklist.md` — Managing venue listings `[x]`
-- QA canvas `brief-qa-checklist.canvas.tsx` — EC listings marked Satisfied
-
-## QA smoke
-
-1. Sign in as EC with default staff permissions (includes
-   `manage_assigned_venue_listings`) and assigned venues.
+1. Sign in as EC with default staff permissions and assigned venues.
 2. `/dashboard/coordinator/venues` → **Edit listing**.
 3. Change description/media/amenities → save → success.
-4. Edit an existing package on the listing (or via `/dashboard/packages`) → save.
-5. Confirm base price field stays disabled.
-6. Confirm EC without listing permission sees View-only messaging.
-7. Confirm create venue remains unavailable on coordinator venues.
+4. Edit package on listing or `/dashboard/packages` → save.
+5. Base price stays disabled; create venue unavailable on EC venues list.
 
-## Out of scope (intentional)
+### Out of scope (EC)
 
 - EC create/delete venues
 - EC change venue base price
-- Customer-hired coordinator product (EC = org staff only)
+
+---
+
+## 2. Accredited Supplier — Participate in venue packages
+
+### Summary
+
+Supplier can complete the product path: venue invite → Accept/Decline → active
+partnership → commercial agreement → eligible for package builder → see package
+inclusions on Partnerships. Eligibility now requires **active partnership +
+active agreement** (docs-aligned).
+
+### Changes
+
+#### Owner invite status
+
+- File: `apps/web/src/features/suppliers/application/venue-partnership-actions.ts`
+- Owner/EC invite creates `venue_suppliers.status = invited` (was defaulting to
+  `application_submitted`, so invites looked like pending applications)
+- Does not downgrade already-`active` partnerships
+- New `respondToPartnershipInvite` for supplier Accept → `active` / Decline →
+  `declined`
+
+#### Supplier invite UI
+
+- Files:
+  - `apps/web/src/features/suppliers/ui/PartnershipInviteActions.tsx` (new)
+  - `apps/web/app/(supplier)/dashboard/supplier/partnerships/page.tsx`
+- Wire Accept / Decline (previously dead buttons)
+- New **Package inclusions** section from `package_suppliers`
+
+#### Package eligibility + builder
+
+- File: `apps/web/src/features/venues/application/package-queries.ts`
+- `getEligiblePackageSuppliers` requires active `venue_suppliers` **and** active
+  agreement
+- Files:
+  - `.../EligibleSuppliersPanel.tsx`
+  - `.../PackageBuilderForm.tsx`
+- Preserve previously selected suppliers when editing a package
+
+### Docs
+
+- `docs/design/project-brief-role-checklist.md` — both capabilities `[x]`
+- QA canvas `brief-qa-checklist.canvas.tsx` — supplier package participation
+  Satisfied
+
+### QA smoke (Supplier packages)
+
+1. VO/EC: Invite accredited supplier as venue partner → supplier sees Invitation.
+2. Supplier: Accept invite → Active Partnerships.
+3. VO/EC: Propose commercial agreement → supplier accepts.
+4. VO/EC: Package builder Add Suppliers shows that supplier → save package.
+5. Supplier Partnerships → **Package inclusions** lists the package.
+6. Confirm supplier without active partnership does **not** appear in eligibility.
+
+### Out of scope (Supplier)
+
+- Hosted Playwright / full release QA matrix
+- Changing commercial agreement proposal UX beyond existing flow
