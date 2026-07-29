@@ -194,14 +194,15 @@ test("anonymous featured favorite opens login instead of venue details", async (
   );
 });
 
-test("venue estimate uses booking guests without public package sections", async ({
+test("venue estimate uses booking guests when public packages are absent", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/venues/the-blue-leaf-filipinas");
 
+  // Fixture venue has no active packages; compare picker only mounts when ≥2.
   await expect(
-    page.getByRole("heading", { name: "Available packages" }),
+    page.getByRole("heading", { name: "Available Packages" }),
   ).toHaveCount(0);
   await expect(
     page.getByRole("heading", { name: "Compare Packages" }),
