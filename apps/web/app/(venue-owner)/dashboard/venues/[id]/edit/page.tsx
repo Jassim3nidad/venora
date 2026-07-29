@@ -13,10 +13,12 @@ import VenuePhotoUpload from "@/components/venues/VenuePhotoUpload";
 import VenueVideoUpload from "@/components/venues/VenueVideoUpload";
 import DescriptionGeneratorPanel from "@/features/venues/ui/DescriptionGeneratorPanel";
 import DeleteVenueButton from "@/src/features/venues/ui/DeleteVenueButton";
+import CustomAmenitiesInput from "@/src/features/venues/ui/CustomAmenitiesInput";
 import { getLatestGeneratedContentByType } from "@/features/venues/application/queries";
 import {
   getOwnerDashboardContext,
   getOwnerVenueById,
+  formatPeso,
 } from "../../../_lib/owner-dashboard-data";
 import { resolveVenueMapCoordinates } from "@/src/lib/venue-map-coordinates";
 const VenueLocationPicker = dynamic(
@@ -62,15 +64,6 @@ function lineListValue(formData: FormData, name: string) {
         .filter(Boolean),
     ),
   );
-}
-
-function textFromLines(values: string[] | null | undefined) {
-  return (values ?? []).join("\n");
-}
-
-function numberOrNullFromValue(value: FormDataEntryValue | null) {
-  const raw = String(value ?? "").trim();
-  return raw === "" ? null : Number(raw);
 }
 
 function validPriceUnit(value: string) {
@@ -146,10 +139,10 @@ export default async function EditVenuePage({
   const venuePackageOptions = packages
     .filter((pkg) => pkg.is_active)
     .map((pkg) => ({ id: pkg.id, name: pkg.name }));
-  const amenities = (amenitiesResult.data ?? []) as Array<{
+  const amenities = ((amenitiesResult.data ?? []) as Array<{
     id: string;
     name: string;
-  }>;
+  }>).filter((a) => a.name !== "WiFi");
   const selectedAmenityIds = new Set(
     ((venueAmenitiesResult.data ?? []) as Array<{ amenity_id: string }>).map(
       (item) => item.amenity_id,
@@ -199,7 +192,6 @@ export default async function EditVenuePage({
     const canEditDetails =
       isOwner ||
       actionContext.permissions.includes("manage_assigned_venue_listings");
-    const canEditPackages = canEditDetails;
     const isCoordinatorOnly =
       !isOwner && actionContext.roles.includes("event_coordinator");
 
@@ -228,6 +220,11 @@ export default async function EditVenuePage({
     const rules = lineListValue(formData, "venue_rules");
     const cancellationPolicy =
       fieldValue(formData, "cancellation_policy") || null;
+    const customAmenitiesRaw = fieldValue(formData, "custom_amenities") || "";
+    const customAmenities = customAmenitiesRaw
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
 
     if (!name || !province || !city || !address) {
       errorRedirect(id, "Please complete all required fields.");
@@ -318,6 +315,7 @@ export default async function EditVenuePage({
         ceremony_venue: booleanValue(formData, "ceremony_venue"),
         reception_venue: booleanValue(formData, "reception_venue"),
         cancellation_policy: cancellationPolicy,
+        custom_amenities: customAmenities,
         venue_rules: rules.length > 0 ? rules.join("\n") : null,
         latitude,
         longitude,
@@ -364,151 +362,6 @@ export default async function EditVenuePage({
           id,
           insertAmenitiesError.message || "Unable to update amenities.",
         );
-      }
-    }
-
-    if (canEditPackages) {
-      const packageIds = formData
-        .getAll("package_id")
-        .map((value) => String(value));
-      for (const packageId of packageIds) {
-        const packageName = fieldValue(formData, `package_${packageId}_name`);
-        const packageDescription =
-          fieldValue(formData, `package_${packageId}_description`) || null;
-        const packagePrice = Number(
-          fieldValue(formData, `package_${packageId}_price`),
-        );
-        const packagePriceUnit = validPriceUnit(
-          fieldValue(formData, `package_${packageId}_price_unit`),
-        );
-        const packageMinGuests = numberOrNullFromValue(
-          formData.get(`package_${packageId}_min_guests`),
-        );
-        const packageMaxGuests = numberOrNullFromValue(
-          formData.get(`package_${packageId}_max_guests`),
-        );
-        const packageInclusions = lineListValue(
-          formData,
-          `package_${packageId}_inclusions`,
-        );
-        const shouldDeactivate =
-          formData.get(`package_${packageId}_delete`) === "on";
-
-        if (!packageName) errorRedirect(id, "Package name is required.");
-        if (Number.isNaN(packagePrice) || packagePrice < 0) {
-          errorRedirect(id, "Package price must be zero or positive.");
-        }
-        if (
-          (packageMinGuests != null && Number.isNaN(packageMinGuests)) ||
-          (packageMaxGuests != null && Number.isNaN(packageMaxGuests))
-        ) {
-          errorRedirect(id, "Package guest counts must be valid numbers.");
-        }
-        if (
-          packageMinGuests != null &&
-          packageMaxGuests != null &&
-          packageMinGuests > packageMaxGuests
-        ) {
-          errorRedirect(
-            id,
-            "Package minimum guests cannot exceed maximum guests.",
-          );
-        }
-        if (packageMaxGuests != null && packageMaxGuests > capacityMax) {
-          errorRedirect(
-            id,
-            "Package maximum guests cannot exceed venue capacity.",
-          );
-        }
-
-        const { error: packageError } = await actionContext.supabase
-          .from("venue_packages")
-          .update({
-            name: packageName,
-            description: packageDescription,
-            price: packagePrice,
-            price_unit: packagePriceUnit,
-            min_guests: packageMinGuests,
-            max_guests: packageMaxGuests,
-            inclusions: packageInclusions,
-            is_active: shouldDeactivate
-              ? false
-              : booleanValue(formData, `package_${packageId}_is_active`),
-          })
-          .eq("id", packageId)
-          .eq("venue_id", id);
-
-        if (packageError) {
-          errorRedirect(
-            id,
-            packageError.message || "Unable to update package.",
-          );
-        }
-      }
-
-      const newPackageName = fieldValue(formData, "new_package_name");
-      const newPackagePriceRaw = fieldValue(formData, "new_package_price");
-      if (newPackageName || newPackagePriceRaw) {
-        const newPackagePrice = Number(newPackagePriceRaw);
-        const newPackageMinGuests = optionalNumber(
-          formData,
-          "new_package_min_guests",
-        );
-        const newPackageMaxGuests = optionalNumber(
-          formData,
-          "new_package_max_guests",
-        );
-
-        if (!newPackageName) errorRedirect(id, "New package name is required.");
-        if (Number.isNaN(newPackagePrice) || newPackagePrice < 0) {
-          errorRedirect(id, "New package price must be zero or positive.");
-        }
-        if (
-          (newPackageMinGuests != null && Number.isNaN(newPackageMinGuests)) ||
-          (newPackageMaxGuests != null && Number.isNaN(newPackageMaxGuests))
-        ) {
-          errorRedirect(id, "New package guest counts must be valid numbers.");
-        }
-        if (
-          newPackageMinGuests != null &&
-          newPackageMaxGuests != null &&
-          newPackageMinGuests > newPackageMaxGuests
-        ) {
-          errorRedirect(
-            id,
-            "New package minimum guests cannot exceed maximum guests.",
-          );
-        }
-        if (newPackageMaxGuests != null && newPackageMaxGuests > capacityMax) {
-          errorRedirect(
-            id,
-            "New package maximum guests cannot exceed venue capacity.",
-          );
-        }
-
-        const { error: newPackageError } = await actionContext.supabase
-          .from("venue_packages")
-          .insert({
-            venue_id: id,
-            name: newPackageName,
-            description:
-              fieldValue(formData, "new_package_description") || null,
-            price: newPackagePrice,
-            price_unit: validPriceUnit(
-              fieldValue(formData, "new_package_price_unit"),
-            ),
-            min_guests: newPackageMinGuests,
-            max_guests: newPackageMaxGuests,
-            inclusions: lineListValue(formData, "new_package_inclusions"),
-            is_active: booleanValue(formData, "new_package_is_active"),
-          });
-
-        if (newPackageError) {
-          errorRedirect(
-            id,
-            newPackageError.message || "Unable to create package.",
-          );
-        }
       }
     }
 
@@ -825,322 +678,92 @@ export default async function EditVenuePage({
                       </label>
                     ))}
                   </div>
+
+                  <div className="mt-6 border-t border-[#e5e7eb] pt-6">
+                    <label
+                      htmlFor="custom-amenities"
+                      className="mb-2 block text-sm font-bold text-[#334155]"
+                    >
+                      Custom Amenities
+                    </label>
+                    <p className="mb-3 text-xs text-[#64748b]">
+                      Type an additional feature and click Add (e.g. Helipad, Valet Parking)
+                    </p>
+                    <CustomAmenitiesInput initialAmenities={venue.custom_amenities || []} />
+                  </div>
                 </section>
 
                 <section className="rounded-[24px] border border-[#e5e7eb] bg-white p-5">
-                  <div>
-                    <p className="text-xs font-extrabold uppercase tracking-wide text-[#2563eb]">
-                      Packages & Pricing
-                    </p>
-                    <h3 className="mt-1 text-lg font-black text-[#0f172a]">
-                      Manage active customer packages
-                    </h3>
-                    <p className="mt-1 text-sm font-medium text-[#64748b]">
-                      Inactive packages stay in the dashboard but are hidden
-                      from customers and booking selection.
-                    </p>
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-xs font-extrabold uppercase tracking-wide text-[#2563eb]">
+                        Packages & Pricing
+                      </p>
+                      <h3 className="mt-1 text-lg font-black text-[#0f172a]">
+                        Manage customer packages
+                      </h3>
+                      <p className="mt-1 text-sm font-medium text-[#64748b]">
+                        Packages attached to this venue.
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <DashButton
+                        href={`/dashboard/packages?venueId=${id}`}
+                        variant="secondary"
+                        className="text-xs"
+                      >
+                        Manage Packages
+                      </DashButton>
+                      <DashButton
+                        href={`/dashboard/packages/new?venueId=${id}`}
+                        icon="add"
+                        className="text-xs"
+                      >
+                        New
+                      </DashButton>
+                    </div>
                   </div>
 
-                  <fieldset
-                    disabled={!canEditPackages}
-                    className="mt-5 space-y-4"
-                  >
+                  <div className="mt-5">
                     {packages.length > 0 ? (
-                      packages.map((pkg, index) => (
-                        <div
-                          key={pkg.id}
-                          className="rounded-[22px] border border-[#e5e7eb] bg-[#f8fbff] p-4 shadow-sm shadow-slate-200/60"
-                        >
-                          <input
-                            type="hidden"
-                            name="package_id"
-                            value={pkg.id}
-                          />
-                          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                            <p className="text-sm font-black text-[#111827]">
-                              Package {index + 1}
+                      <div className="flex flex-col gap-3">
+                        {packages.map((pkg) => (
+                          <div
+                            key={pkg.id}
+                            className={`flex items-center justify-between rounded-xl border border-[#e5e7eb] p-4 ${pkg.is_active ? "bg-[#f8fbff]" : "bg-slate-50 opacity-60"}`}
+                          >
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="font-semibold text-[#111827]">{pkg.name}</p>
+                                {!pkg.is_active && (
+                                  <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-600">
+                                    Hidden
+                                  </span>
+                                )}
+                              </div>
+                              <p className="mt-0.5 text-xs text-[#64748b]">
+                                {pkg.price_unit === "per_event"
+                                  ? "Per event"
+                                  : pkg.price_unit === "per_pax"
+                                    ? "Per guest"
+                                    : pkg.price_unit === "per_hour"
+                                      ? "Per hour"
+                                      : "Per day"}
+                              </p>
+                            </div>
+                            <p className="font-black text-[#1d4ed8]">
+                              {pkg.price_unit === "per_pax" ? "From " : ""}
+                              {formatPeso(pkg.price)}
                             </p>
-                            <div className="flex flex-wrap gap-3 text-xs font-bold text-[#6b7280]">
-                              <label className="inline-flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  name={`package_${pkg.id}_is_active`}
-                                  defaultChecked={pkg.is_active}
-                                  className="h-4 w-4 rounded border-[#d1d5db] text-[#2563eb]"
-                                />
-                                Active
-                              </label>
-                              <label className="inline-flex items-center gap-2 text-red-600">
-                                <input
-                                  type="checkbox"
-                                  name={`package_${pkg.id}_delete`}
-                                  className="h-4 w-4 rounded border-red-300 text-red-600"
-                                />
-                                Deactivate
-                              </label>
-                            </div>
                           </div>
-
-                          <div className="grid gap-4 sm:grid-cols-2">
-                            <div className="flex flex-col gap-2">
-                              <label
-                                className={labelClass}
-                                htmlFor={`package-${pkg.id}-name`}
-                              >
-                                Package name
-                              </label>
-                              <input
-                                id={`package-${pkg.id}-name`}
-                                name={`package_${pkg.id}_name`}
-                                defaultValue={pkg.name}
-                                required
-                                className={inputClass}
-                              />
-                            </div>
-
-                            <div className="flex flex-col gap-2">
-                              <label
-                                className={labelClass}
-                                htmlFor={`package-${pkg.id}-price`}
-                              >
-                                Price
-                              </label>
-                              <input
-                                id={`package-${pkg.id}-price`}
-                                type="number"
-                                min="0"
-                                step="1"
-                                name={`package_${pkg.id}_price`}
-                                defaultValue={pkg.price}
-                                required
-                                className={inputClass}
-                              />
-                            </div>
-
-                            <div className="flex flex-col gap-2">
-                              <label
-                                className={labelClass}
-                                htmlFor={`package-${pkg.id}-unit`}
-                              >
-                                Price unit
-                              </label>
-                              <select
-                                id={`package-${pkg.id}-unit`}
-                                name={`package_${pkg.id}_price_unit`}
-                                defaultValue={pkg.price_unit}
-                                className={inputClass}
-                              >
-                                <option value="per_event">Per event</option>
-                                <option value="per_pax">Per guest</option>
-                                <option value="per_hour">Per hour</option>
-                                <option value="per_day">Per day</option>
-                              </select>
-                            </div>
-
-                            <div className="grid gap-3 sm:grid-cols-2">
-                              <div className="flex flex-col gap-2">
-                                <label
-                                  className={labelClass}
-                                  htmlFor={`package-${pkg.id}-min`}
-                                >
-                                  Min guests
-                                </label>
-                                <input
-                                  id={`package-${pkg.id}-min`}
-                                  type="number"
-                                  min="0"
-                                  step="1"
-                                  name={`package_${pkg.id}_min_guests`}
-                                  defaultValue={pkg.min_guests ?? ""}
-                                  className={inputClass}
-                                />
-                              </div>
-                              <div className="flex flex-col gap-2">
-                                <label
-                                  className={labelClass}
-                                  htmlFor={`package-${pkg.id}-max`}
-                                >
-                                  Max guests
-                                </label>
-                                <input
-                                  id={`package-${pkg.id}-max`}
-                                  type="number"
-                                  min="0"
-                                  step="1"
-                                  name={`package_${pkg.id}_max_guests`}
-                                  defaultValue={pkg.max_guests ?? ""}
-                                  className={inputClass}
-                                />
-                              </div>
-                            </div>
-
-                            <div className="flex flex-col gap-2 sm:col-span-2">
-                              <label
-                                className={labelClass}
-                                htmlFor={`package-${pkg.id}-description`}
-                              >
-                                Description
-                              </label>
-                              <textarea
-                                id={`package-${pkg.id}-description`}
-                                name={`package_${pkg.id}_description`}
-                                rows={3}
-                                defaultValue={pkg.description ?? ""}
-                                className="rounded-xl border border-[#e5e7eb] bg-white px-3 py-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9ca3af] focus:border-[#2563eb] focus:ring-4 focus:ring-[#eff6ff]"
-                              />
-                            </div>
-
-                            <div className="flex flex-col gap-2 sm:col-span-2">
-                              <label
-                                className={labelClass}
-                                htmlFor={`package-${pkg.id}-inclusions`}
-                              >
-                                Package inclusions, one per line
-                              </label>
-                              <textarea
-                                id={`package-${pkg.id}-inclusions`}
-                                name={`package_${pkg.id}_inclusions`}
-                                rows={4}
-                                defaultValue={textFromLines(pkg.inclusions)}
-                                className="rounded-xl border border-[#e5e7eb] bg-white px-3 py-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9ca3af] focus:border-[#2563eb] focus:ring-4 focus:ring-[#eff6ff]"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      ))
+                        ))}
+                      </div>
                     ) : (
-                      <div className="rounded-2xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-4 text-sm font-semibold text-[#64748b]">
-                        No packages yet. Add the first package below.
+                      <div className="rounded-2xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-8 text-center text-sm font-semibold text-[#64748b]">
+                        No packages attached to this venue.
                       </div>
                     )}
-
-                    <div className="rounded-2xl border border-dashed border-[#bfdbfe] bg-[#eff6ff] p-4">
-                      <p className="mb-4 text-sm font-black text-[#1d4ed8]">
-                        Add a new package
-                      </p>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="flex flex-col gap-2">
-                          <label
-                            className={labelClass}
-                            htmlFor="new-package-name"
-                          >
-                            Package name
-                          </label>
-                          <input
-                            id="new-package-name"
-                            name="new_package_name"
-                            className={inputClass}
-                          />
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <label
-                            className={labelClass}
-                            htmlFor="new-package-price"
-                          >
-                            Price
-                          </label>
-                          <input
-                            id="new-package-price"
-                            type="number"
-                            min="0"
-                            step="1"
-                            name="new_package_price"
-                            className={inputClass}
-                          />
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <label
-                            className={labelClass}
-                            htmlFor="new-package-unit"
-                          >
-                            Price unit
-                          </label>
-                          <select
-                            id="new-package-unit"
-                            name="new_package_price_unit"
-                            defaultValue="per_event"
-                            className={inputClass}
-                          >
-                            <option value="per_event">Per event</option>
-                            <option value="per_pax">Per guest</option>
-                            <option value="per_hour">Per hour</option>
-                            <option value="per_day">Per day</option>
-                          </select>
-                        </div>
-                        <label className="flex items-center gap-3 rounded-2xl border border-[#bfdbfe] bg-white px-3 py-3 text-sm font-semibold text-[#334155]">
-                          <input
-                            type="checkbox"
-                            name="new_package_is_active"
-                            defaultChecked
-                            className="h-4 w-4 rounded border-[#d1d5db] text-[#2563eb]"
-                          />
-                          Active for customers
-                        </label>
-                        <div className="grid gap-3 sm:grid-cols-2">
-                          <div className="flex flex-col gap-2">
-                            <label
-                              className={labelClass}
-                              htmlFor="new-package-min"
-                            >
-                              Min guests
-                            </label>
-                            <input
-                              id="new-package-min"
-                              type="number"
-                              min="0"
-                              step="1"
-                              name="new_package_min_guests"
-                              className={inputClass}
-                            />
-                          </div>
-                          <div className="flex flex-col gap-2">
-                            <label
-                              className={labelClass}
-                              htmlFor="new-package-max"
-                            >
-                              Max guests
-                            </label>
-                            <input
-                              id="new-package-max"
-                              type="number"
-                              min="0"
-                              step="1"
-                              name="new_package_max_guests"
-                              className={inputClass}
-                            />
-                          </div>
-                        </div>
-                        <div className="flex flex-col gap-2 sm:col-span-2">
-                          <label
-                            className={labelClass}
-                            htmlFor="new-package-description"
-                          >
-                            Description
-                          </label>
-                          <textarea
-                            id="new-package-description"
-                            name="new_package_description"
-                            rows={3}
-                            className="rounded-xl border border-[#e5e7eb] bg-white px-3 py-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9ca3af] focus:border-[#2563eb] focus:ring-4 focus:ring-[#eff6ff]"
-                          />
-                        </div>
-                        <div className="flex flex-col gap-2 sm:col-span-2">
-                          <label
-                            className={labelClass}
-                            htmlFor="new-package-inclusions"
-                          >
-                            Package inclusions, one per line
-                          </label>
-                          <textarea
-                            id="new-package-inclusions"
-                            name="new_package_inclusions"
-                            rows={4}
-                            className="rounded-xl border border-[#e5e7eb] bg-white px-3 py-3 text-sm text-[#111827] outline-none transition placeholder:text-[#9ca3af] focus:border-[#2563eb] focus:ring-4 focus:ring-[#eff6ff]"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </fieldset>
+                  </div>
                 </section>
 
                 <section className="grid gap-5 rounded-2xl border border-[#e5e7eb] bg-white p-5 lg:grid-cols-2">

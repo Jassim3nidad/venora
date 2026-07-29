@@ -191,11 +191,13 @@ export function DataTable<T>({
   rows,
   keyFn,
   emptyMessage = "No records found.",
+  renderMobileCard,
 }: {
   columns: DataTableColumn<T>[];
   rows: T[];
   keyFn: (row: T) => string;
   emptyMessage?: string;
+  renderMobileCard?: (row: T) => ReactNode;
 }) {
   if (rows.length === 0) {
     return (
@@ -206,52 +208,74 @@ export function DataTable<T>({
   }
 
   return (
-    <div className="overflow-hidden rounded-[22px] border border-[#e5e7eb] bg-white">
+    <>
+      {/* Desktop Table View */}
       <div
-        className="overflow-x-auto"
-        role="region"
-        aria-label="Table data, scroll horizontally to see more columns"
-        tabIndex={0}
+        className={cn(
+          "overflow-hidden rounded-[22px] border border-[#e5e7eb] bg-white",
+          renderMobileCard && "hidden md:block"
+        )}
       >
-        <table className="w-full min-w-[640px] border-collapse text-left">
-          <thead className="bg-[#f8fafc]">
-            <tr>
-              {columns.map((col) => (
-                <th
-                  key={col.key}
-                  className={cn(
-                    "px-4 py-3 text-xs font-black uppercase tracking-wider text-[#2563eb]",
-                    col.className,
-                  )}
-                >
-                  {col.header}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr
-                key={keyFn(row)}
-                className="border-t border-[#e5e7eb] bg-white transition hover:bg-[#f8fbff]"
-              >
+        <div
+          className="overflow-x-auto"
+          role="region"
+          aria-label="Table data, scroll horizontally to see more columns"
+          tabIndex={0}
+        >
+          <table className="w-full min-w-[640px] border-collapse text-left">
+            <thead className="bg-[#f8fafc]">
+              <tr>
                 {columns.map((col) => (
-                  <td
+                  <th
                     key={col.key}
                     className={cn(
-                      "px-4 py-4 text-sm text-[#475569]",
+                      "px-4 py-3 text-xs font-black uppercase tracking-wider text-[#2563eb]",
                       col.className,
                     )}
                   >
-                    {col.cell(row)}
-                  </td>
+                    {col.header}
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr
+                  key={keyFn(row)}
+                  className="border-t border-[#e5e7eb] bg-white transition hover:bg-[#f8fbff]"
+                >
+                  {columns.map((col) => (
+                    <td
+                      key={col.key}
+                      className={cn(
+                        "px-4 py-4 text-sm text-[#475569]",
+                        col.className,
+                      )}
+                    >
+                      {col.cell(row)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+
+      {/* Mobile Card View */}
+      {renderMobileCard ? (
+        <div className="flex flex-col gap-4 md:hidden">
+          {rows.map((row) => (
+            <div
+              key={keyFn(row)}
+              className="rounded-[22px] border border-[#e5e7eb] bg-white p-5 shadow-sm shadow-slate-200/60"
+            >
+              {renderMobileCard(row)}
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </>
   );
 }
 

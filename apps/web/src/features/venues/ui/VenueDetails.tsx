@@ -38,6 +38,7 @@ import { isOptimizableImageSrc } from "@/src/lib/image-host";
 import type { PublicOwnerProfile } from "@/src/features/owners/application/queries";
 import type { SmartVenueSearchVenue } from "@/features/search/schemas/search.schema";
 import { toggleFavoriteAction } from "../application/actions";
+import { mergeAmenityNames } from "../utils/venue-mappers";
 import { pickGalleryImages, pickPromotionalVideo } from "../utils/venue-media";
 import BookingSidebar from "./BookingSidebar";
 import PackageComparePicker from "./PackageComparePicker";
@@ -159,10 +160,14 @@ export default function VenueDetails({
     Number.isFinite(Number(mapLatitude)) &&
     Number.isFinite(Number(mapLongitude));
 
-  const amenitiesList =
+  const predefinedAmenities =
     venue.venue_amenities
       ?.map((va: any) => va.amenities?.name)
       .filter(Boolean) ?? [];
+  const amenitiesList = mergeAmenityNames(
+    predefinedAmenities,
+    venue.custom_amenities,
+  );
   const activePackages = (venue.venue_packages ?? []).filter(
     (pkg: any) => pkg.is_active !== false,
   );
