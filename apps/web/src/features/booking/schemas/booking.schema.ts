@@ -104,6 +104,16 @@ export const completeBookingSchema = z.object({
 
 export type CompleteBookingInput = z.infer<typeof completeBookingSchema>;
 
+export const overrideBookingAutomationSchema = z.object({
+  bookingId: z.string().uuid(),
+  action: z.enum(["manual_review", "reject"]),
+  reason: z.string().trim().min(5, "Add a short override reason").max(500),
+});
+
+export type OverrideBookingAutomationInput = z.infer<
+  typeof overrideBookingAutomationSchema
+>;
+
 export const bookingReviewSchema = z.object({
   bookingId: z.string().uuid(),
   venueId: z.string().uuid(),

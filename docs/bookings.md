@@ -35,6 +35,27 @@ Declined, cancelled, expired, and reviewed are terminal in the documented
 workflow. Confirmation is not a browser-return action; it is a verified payment
 reconciliation result.
 
+## Smart booking automation
+
+Auto-accept is disabled by default and configured per venue. Booking lifecycle
+`status` remains compatible with payment and event workflows; separate
+`decision_status` records `pending_review`, `auto_approved`,
+`manually_approved`, `rejected_by_rule`, `cancelled`, or `expired`.
+`approval_source` records `automation` or `human`.
+
+New requests are created through the existing conflict-safe booking RPC. The
+booking evaluation function may interpret special-request text, but it cannot
+write booking status. A service-role-only database RPC locks the booking,
+rechecks availability, evaluates every deterministic rule, calculates the
+canonical package total/deposit, writes the final decision, and stores an
+immutable `booking_automation_decisions` audit record in one transaction.
+Missing, invalid, low-confidence, or unavailable AI output fails closed to
+manual review.
+
+Automatic approval approves the quote and issues the existing deposit invoice;
+it does not bypass payment. Venue staff may override an unpaid automatic
+approval. Once payment starts, cancellation/refund controls remain authoritative.
+
 ## Allowed transition matrix
 
 | From                                     | To                | Initiator/control               | Required evidence                                                 |
