@@ -137,6 +137,7 @@ export function EventPlanningWizard({
   const headingRef = useRef<HTMLHeadingElement | null>(null);
   const hasAttemptedAuthReturnSaveRef = useRef(false);
   const latestAccountSaveRequestRef = useRef(0);
+  const skipNextHeadingFocusRef = useRef(false);
 
   const currentStep = draft.currentStep;
   const currentCopy = STEP_COPY[currentStep];
@@ -285,7 +286,13 @@ export function EventPlanningWizard({
       window.setTimeout(() => {
         document.getElementById(`summary-${summaryFocusStep}`)?.focus();
       }, 0);
+      skipNextHeadingFocusRef.current = true;
       setSummaryFocusStep(null);
+      return;
+    }
+
+    if (skipNextHeadingFocusRef.current) {
+      skipNextHeadingFocusRef.current = false;
       return;
     }
 
@@ -378,6 +385,7 @@ export function EventPlanningWizard({
     setReturnToSummary(false);
     setSummaryFocusStep(null);
     setStartOverOpen(false);
+    window.setTimeout(() => headingRef.current?.focus(), 0);
   };
 
   const saveCurrentPlan = () => {
