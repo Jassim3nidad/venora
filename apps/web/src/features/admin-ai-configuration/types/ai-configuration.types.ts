@@ -5,6 +5,7 @@ export const AI_FEATURES = [
   "venue_description",
   "cost_estimator",
   "package_comparison",
+  "booking_auto_accept",
   "embeddings",
 ] as const;
 
@@ -17,6 +18,7 @@ export const AI_FEATURE_LABELS: Record<AiFeature, string> = {
   venue_description: "Venue Description Generator",
   cost_estimator: "Cost Estimator",
   package_comparison: "Package Comparison",
+  booking_auto_accept: "Booking Auto-Accept",
   embeddings: "Search Embeddings",
 };
 
