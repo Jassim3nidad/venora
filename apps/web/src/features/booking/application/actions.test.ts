@@ -230,3 +230,44 @@ describe("declineBookingAction", () => {
     expect(result.data).toMatchObject({ status: "declined" });
   });
 });
+
+describe("overrideBookingAutomationAction", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("uses the guarded override RPC and never writes booking status directly", async () => {
+    const bookingId = "00000000-0000-0000-0000-000000000006";
+    mockAdminManageableBooking(bookingId);
+    rpcMock.mockResolvedValue({
+      data: {
+        id: bookingId,
+        status: "pending",
+        decision_status: "pending_review",
+      },
+      error: null,
+    });
+
+    const { overrideBookingAutomationAction } = await import("./actions");
+    const result = await overrideBookingAutomationAction({
+      bookingId,
+      action: "manual_review",
+      reason: "Special setup needs supplier confirmation",
+    });
+
+    expect(rpcMock).toHaveBeenCalledWith(
+      "override_booking_automation_decision",
+      {
+        p_booking_id: bookingId,
+        p_action: "manual_review",
+        p_reason: "Special setup needs supplier confirmation",
+      },
+    );
+    expect(bookingsUpdateMock).not.toHaveBeenCalled();
+    expect(result.error).toBeNull();
+    expect(result.data).toMatchObject({
+      status: "pending",
+      decisionStatus: "pending_review",
+    });
+  });
+});
