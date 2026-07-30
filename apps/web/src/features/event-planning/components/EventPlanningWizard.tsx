@@ -30,6 +30,7 @@ import {
   saveEventPlanDraft,
 } from "../utils/event-plan-draft";
 import { saveEventPlanToAccount } from "../utils/event-plan-account-save";
+import { createVenueSearchHrefFromEventPlan } from "../utils/event-plan-search-mapper";
 import {
   applyDraftPatch,
   getFirstErrorField,
@@ -433,6 +434,9 @@ export function EventPlanningWizard({
         draft={draft}
         onEdit={goToEditStep}
         onSave={saveCurrentPlan}
+        onFindVenues={() =>
+          window.location.assign(createVenueSearchHrefFromEventPlan(draft))
+        }
         isSaving={accountSaveState === "saving"}
         saveError={accountSaveError}
         saveMessage={accountSaveMessage}
