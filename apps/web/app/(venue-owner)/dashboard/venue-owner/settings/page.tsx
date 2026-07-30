@@ -51,7 +51,7 @@ export default async function VenueOwnerSettingsPage() {
               <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
                 Role
               </p>
-              <h2 className="mt-1 text-xl font-black tracking-tight text-[#0f172a]">
+              <h2 className="mt-1 text-xl font-bold tracking-tight text-[#0f172a]">
                 Venue Owner
               </h2>
               <p className="mt-2 max-w-3xl text-sm font-medium leading-6 text-[#475569]">
@@ -70,7 +70,7 @@ export default async function VenueOwnerSettingsPage() {
               <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
                 Properties
               </p>
-              <h2 className="mt-1 text-xl font-black tracking-tight text-[#0f172a]">
+              <h2 className="mt-1 text-xl font-bold tracking-tight text-[#0f172a]">
                 Your venues
               </h2>
               <p className="mt-2 text-sm font-medium leading-6 text-[#475569]">
@@ -114,7 +114,7 @@ export default async function VenueOwnerSettingsPage() {
                 <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#2563EB]">
                   Notifications
                 </p>
-                <h2 className="mt-1 text-xl font-black tracking-tight text-[#0f172a]">
+                <h2 className="mt-1 text-xl font-bold tracking-tight text-[#0f172a]">
                   Delivery preferences
                 </h2>
                 <p className="mt-2 max-w-3xl text-sm font-medium leading-6 text-[#475569]">

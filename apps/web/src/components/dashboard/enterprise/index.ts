@@ -19,7 +19,10 @@ export { ADMIN_MODULES } from "./admin-modules";
 export type { AdminModule } from "./admin-modules";
 export {
   DashboardPage,
+  DashboardHeaderSkeleton,
+  DashboardPanelSkeleton,
   DashboardSubPage,
+  DashboardSubPageSkeleton,
   PageHeader,
   Panel,
   PanelHeader,

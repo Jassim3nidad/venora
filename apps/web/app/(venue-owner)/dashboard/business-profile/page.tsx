@@ -64,7 +64,7 @@ export default async function BusinessProfilePage() {
                 : " Complete the required fields to publish."}
             </p>
           </div>
-          <div className="text-2xl font-black text-[#2563eb]">
+          <div className="text-2xl font-bold text-[#2563eb]">
             {completeness.percentage}%
           </div>
         </div>

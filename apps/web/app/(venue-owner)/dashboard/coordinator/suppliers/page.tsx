@@ -174,7 +174,7 @@ export default async function CoordinatorSuppliersPage({
                 {/* Badges */}
                 <div className="absolute top-4 left-4 flex gap-2">
                   {supplier.supplier_categories ? (
-                    <div className="rounded-full bg-white/95 backdrop-blur-md px-3 py-1 text-[10px] font-black uppercase tracking-wider text-slate-900 shadow-sm">
+                    <div className="rounded-full bg-white/95 backdrop-blur-md px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-900 shadow-sm">
                       {supplier.supplier_categories.name}
                     </div>
                   ) : null}
@@ -182,7 +182,7 @@ export default async function CoordinatorSuppliersPage({
 
                 <div className="absolute top-4 right-4">
                   {supplier.review_count > 0 ? (
-                    <div className="flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-xs font-black text-amber-950 shadow-md">
+                    <div className="flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-xs font-bold text-amber-950 shadow-md">
                       <MaterialIcon
                         name="star"
                         className="text-[14px]"
@@ -191,7 +191,7 @@ export default async function CoordinatorSuppliersPage({
                       {Number(supplier.avg_rating).toFixed(1)}
                     </div>
                   ) : (
-                    <div className="rounded-full bg-blue-500 px-2.5 py-1 text-[10px] font-black text-white shadow-md uppercase tracking-wider">
+                    <div className="rounded-full bg-blue-500 px-2.5 py-1 text-[10px] font-bold text-white shadow-md uppercase tracking-wider">
                       New
                     </div>
                   )}
@@ -222,7 +222,7 @@ export default async function CoordinatorSuppliersPage({
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
                         Starting at
                       </span>
-                      <span className="text-base font-black text-slate-900">
+                      <span className="text-base font-bold text-slate-900">
                         {supplier.base_price
                           ? formatPeso(supplier.base_price)
                           : "Custom Quote"}

@@ -127,7 +127,7 @@ export function CoordinatorInboxClient({
       {/* LEFT PANE: Sidebar List */}
       <div className={`flex w-full flex-col border-r border-[#e5e7eb] bg-[#f8fafc] md:w-[350px] lg:w-[400px] shrink-0 ${selectedThread ? "hidden md:flex" : "flex"}`}>
         <div className="p-5 border-b border-[#e5e7eb] bg-white">
-          <h2 className="text-xl font-black tracking-tight text-[#0f172a] mb-4">
+          <h2 className="text-xl font-bold tracking-tight text-[#0f172a] mb-4">
             Inbox
           </h2>
           <div className="relative">
@@ -219,7 +219,7 @@ export function CoordinatorInboxClient({
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm border border-[#e5e7eb]">
               <Inbox className="h-6 w-6 text-[#94a3b8]" />
             </div>
-            <h3 className="mt-5 text-base font-black text-[#0f172a]">
+            <h3 className="mt-5 text-base font-bold text-[#0f172a]">
               Your messages
             </h3>
             <p className="mt-2 max-w-[250px] text-center text-sm font-medium text-[#64748b]">

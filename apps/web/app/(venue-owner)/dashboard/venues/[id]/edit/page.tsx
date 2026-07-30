@@ -414,7 +414,7 @@ export default async function EditVenuePage({
         >
           <div className="p-5 sm:p-6">
             <div className="mb-5">
-              <h2 className="text-2xl font-black tracking-tight text-[#020617]">
+              <h2 className="text-2xl font-bold tracking-tight text-[#020617]">
                 {venue.name}
               </h2>
               <p className="mt-2 text-sm font-medium leading-6 text-[#4b5563]">
@@ -652,7 +652,7 @@ export default async function EditVenuePage({
                     <p className="text-xs font-extrabold uppercase tracking-wide text-[#2563eb]">
                       Amenities & Features
                     </p>
-                    <h3 className="mt-1 text-lg font-black text-[#0f172a]">
+                    <h3 className="mt-1 text-lg font-bold text-[#0f172a]">
                       Select what this venue offers
                     </h3>
                     <p className="mt-1 text-sm font-medium text-[#64748b]">
@@ -699,7 +699,7 @@ export default async function EditVenuePage({
                       <p className="text-xs font-extrabold uppercase tracking-wide text-[#2563eb]">
                         Packages & Pricing
                       </p>
-                      <h3 className="mt-1 text-lg font-black text-[#0f172a]">
+                      <h3 className="mt-1 text-lg font-bold text-[#0f172a]">
                         Manage customer packages
                       </h3>
                       <p className="mt-1 text-sm font-medium text-[#64748b]">
@@ -751,7 +751,7 @@ export default async function EditVenuePage({
                                       : "Per day"}
                               </p>
                             </div>
-                            <p className="font-black text-[#1d4ed8]">
+                            <p className="font-bold text-[#1d4ed8]">
                               {pkg.price_unit === "per_pax" ? "From " : ""}
                               {formatPeso(pkg.price)}
                             </p>
@@ -771,7 +771,7 @@ export default async function EditVenuePage({
                     <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#2563eb]">
                       Rules, Parking & Accessibility
                     </p>
-                    <h3 className="mt-1 text-lg font-black text-[#111827]">
+                    <h3 className="mt-1 text-lg font-bold text-[#111827]">
                       Operational details customers need before booking
                     </h3>
                   </div>

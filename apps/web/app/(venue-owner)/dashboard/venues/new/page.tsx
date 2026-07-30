@@ -293,7 +293,7 @@ export default async function NewVenuePage({
 
           <form action={createVenueAction} className="space-y-6 p-5 sm:p-6">
             <div className="rounded-[24px] border border-[#e5e7eb] bg-white p-4 sm:p-5">
-              <h2 className="font-display text-base font-black text-[#0f172a]">
+              <h2 className="font-display text-base font-bold text-[#0f172a]">
                 Basic Information
               </h2>
               <p className="mt-1 text-sm text-[#64748b]">
@@ -353,7 +353,7 @@ export default async function NewVenuePage({
             </div>
 
             <div className="rounded-[24px] border border-[#e5e7eb] bg-[#f8fafc] p-4 sm:p-5">
-              <h2 className="font-display text-base font-black text-[#0f172a]">
+              <h2 className="font-display text-base font-bold text-[#0f172a]">
                 Location & Capacity
               </h2>
               <p className="mt-1 text-sm text-[#64748b]">
@@ -495,7 +495,7 @@ export default async function NewVenuePage({
             </div>
 
             <div className="rounded-[24px] border border-[#e5e7eb] bg-white p-4 sm:p-5">
-              <h2 className="font-display text-base font-black text-[#0f172a]">
+              <h2 className="font-display text-base font-bold text-[#0f172a]">
                 Public Description
               </h2>
               <p className="mt-1 text-sm text-[#64748b]">

@@ -240,10 +240,10 @@ export default async function AnalyticsPage(props: AnalyticsPageProps) {
                 />
                 <div className="space-y-4">
                   <div className="rounded-[22px] border border-[#e5e7eb] bg-gradient-to-br from-white to-[#f8fbff] p-4 shadow-sm shadow-slate-200/60">
-                    <p className="text-xs font-black uppercase tracking-wider text-[#64748b]">
+                    <p className="text-xs font-bold uppercase tracking-wider text-[#64748b]">
                       Published Venues
                     </p>
-                    <p className="mt-2 font-display text-3xl font-black tracking-tight text-[#0f172a]">
+                    <p className="mt-2 font-display text-3xl font-bold tracking-tight text-[#0f172a]">
                       {kpis.publishedVenues}/{venueRows.length}
                     </p>
                   </div>

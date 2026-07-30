@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition } from "react";
 import Link from "next/link";
-import { LockKeyhole, Sparkles, KeyRound } from "lucide-react";
+import { Eye, EyeOff, LockKeyhole, KeyRound } from "lucide-react";
 import { resetPasswordAction } from "@/features/auth/actions/auth.actions";
 import { resetPasswordSchema } from "@/features/auth/schemas/auth.schema";
 import { createClient } from "@/lib/supabase/client";
@@ -20,7 +20,6 @@ function ExpiredLinkView() {
           className="mb-[16px] flex items-center justify-center gap-[6px] text-[20px] font-extrabold tracking-tight text-[#2563EB]"
         >
           Venora
-          <Sparkles className="h-[16px] w-[16px] fill-[#2563EB] text-[#2563EB]" />
         </Link>
 
         <div className="mb-[14px] mx-auto flex h-[48px] w-[48px] items-center justify-center rounded-full bg-red-50 text-red-500">
@@ -65,6 +64,8 @@ export default function ResetPasswordPage() {
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -124,7 +125,6 @@ export default function ResetPasswordPage() {
             className="mb-[16px] flex items-center gap-[6px] text-[20px] font-extrabold tracking-tight text-[#2563EB]"
           >
             Venora
-            <Sparkles className="h-[16px] w-[16px] fill-[#2563EB] text-[#2563EB]" />
           </Link>
 
           <div className="mb-[14px] flex h-[48px] w-[48px] items-center justify-center rounded-full bg-[#EFF6FF] text-[#2563EB]">
@@ -162,16 +162,29 @@ export default function ResetPasswordPage() {
               <LockKeyhole className="pointer-events-none absolute left-[14px] top-1/2 h-[17px] w-[17px] -translate-y-1/2 text-[#4B5563]" />
               <input
                 id="new-password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter a password"
                 autoComplete="new-password"
                 disabled={isPending}
-                className={`h-[46px] w-full rounded-[6px] border bg-white !pl-[42px] pr-[16px] text-[16px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
+                className={`h-[46px] w-full rounded-[6px] border bg-white !pl-[42px] pr-[46px] text-[16px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
                   fieldErrors.password ? "border-red-500" : "border-[#E2E8F0]"
                 }`}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((value) => !value)}
+                disabled={isPending}
+                className="absolute right-[9px] top-1/2 inline-flex h-[30px] w-[30px] -translate-y-1/2 items-center justify-center rounded-[6px] text-[#64748B] transition hover:bg-[#EFF6FF] hover:text-[#2563EB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 disabled:cursor-not-allowed disabled:opacity-60"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-[16px] w-[16px]" />
+                ) : (
+                  <Eye className="h-[16px] w-[16px]" />
+                )}
+              </button>
             </div>
 
             {fieldErrors.password?.[0] ? (
@@ -194,18 +207,33 @@ export default function ResetPasswordPage() {
               <LockKeyhole className="pointer-events-none absolute left-[14px] top-1/2 h-[17px] w-[17px] -translate-y-1/2 text-[#4B5563]" />
               <input
                 id="confirm-new-password"
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Re-enter your password"
                 autoComplete="new-password"
                 disabled={isPending}
-                className={`h-[46px] w-full rounded-[6px] border bg-white !pl-[42px] pr-[16px] text-[16px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
+                className={`h-[46px] w-full rounded-[6px] border bg-white !pl-[42px] pr-[46px] text-[16px] font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10 disabled:cursor-not-allowed disabled:opacity-60 ${
                   fieldErrors.confirmPassword
                     ? "border-red-500"
                     : "border-[#E2E8F0]"
                 }`}
               />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((value) => !value)}
+                disabled={isPending}
+                className="absolute right-[9px] top-1/2 inline-flex h-[30px] w-[30px] -translate-y-1/2 items-center justify-center rounded-[6px] text-[#64748B] transition hover:bg-[#EFF6FF] hover:text-[#2563EB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/30 disabled:cursor-not-allowed disabled:opacity-60"
+                aria-label={
+                  showConfirmPassword ? "Hide password" : "Show password"
+                }
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="h-[16px] w-[16px]" />
+                ) : (
+                  <Eye className="h-[16px] w-[16px]" />
+                )}
+              </button>
             </div>
 
             {fieldErrors.confirmPassword?.[0] && (
