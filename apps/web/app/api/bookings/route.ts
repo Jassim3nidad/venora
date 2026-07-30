@@ -152,13 +152,52 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
+    let decision: {
+      outcome?: string;
+      confidence?: number | null;
+      explanation?: string | null;
+    } | null = null;
+
+    try {
+      const { data: automationResult, error: automationError } =
+        await supabase.functions.invoke("booking-auto-evaluation", {
+          body: { bookingId: data.id },
+        });
+
+      if (!automationError) {
+        decision = automationResult?.data ?? null;
+      } else {
+        console.error(
+          "[bookings] Auto-accept evaluation unavailable:",
+          automationError.message,
+        );
+      }
+    } catch (automationError) {
+      // Fail closed: booking remains pending for supplier review.
+      console.error(
+        "[bookings] Auto-accept evaluation failed:",
+        automationError,
+      );
+    }
+
+    const { data: finalizedBooking } = await supabase
+      .from("bookings")
+      .select("status, decision_status")
+      .eq("id", data.id)
+      .maybeSingle();
+
     revalidateBookingCreateViews(await getVenueSlug(supabase, input.venueId));
 
     return NextResponse.json(
       {
         data: {
           bookingId: data.id,
-          status: data.status,
+          status: finalizedBooking?.status ?? data.status,
+          decisionStatus:
+            finalizedBooking?.decision_status ??
+            decision?.outcome ??
+            "pending_review",
+          decisionExplanation: decision?.explanation ?? null,
           eventDate: data.event_date,
         },
         error: null,

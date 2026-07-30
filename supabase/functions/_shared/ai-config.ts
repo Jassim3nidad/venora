@@ -18,6 +18,7 @@ export type AiFeature =
   | "venue_description"
   | "cost_estimator"
   | "package_comparison"
+  | "booking_auto_accept"
   | "embeddings";
 
 export type AiConfiguration = {
