@@ -19,6 +19,7 @@ import {
   cancelBookingSchema,
   completeBookingSchema,
   declineBookingSchema,
+  overrideBookingAutomationSchema,
   startBookingPaymentSchema,
 } from "../schemas/booking.schema";
 import { formatCancellationReason } from "../constants/cancellation-reasons";
@@ -112,7 +113,7 @@ async function assertCanManageBooking(
   }
 
   const venueRelation = Array.isArray(booking.venues)
-    ? booking.venues[0] ?? null
+    ? (booking.venues[0] ?? null)
     : (booking.venues ?? null);
 
   const normalizedBooking = {
@@ -310,6 +311,37 @@ export async function declineBookingAction(rawInput: unknown) {
       return {
         bookingId: data.id as string,
         status: data.status as string,
+      };
+    },
+    rawInput,
+  );
+}
+
+export async function overrideBookingAutomationAction(rawInput: unknown) {
+  return createServerAction(
+    overrideBookingAutomationSchema,
+    async (input) => {
+      const supabase = (await createClient()) as any;
+      const { booking } = await assertCanManageBooking(
+        supabase,
+        input.bookingId,
+      );
+
+      const { data, error } = await supabase.rpc(
+        "override_booking_automation_decision",
+        {
+          p_booking_id: input.bookingId,
+          p_action: input.action,
+          p_reason: input.reason,
+        },
+      );
+      throwIfSupabaseError(error);
+
+      revalidateBookingViews(input.bookingId, booking.venues?.slug);
+      return {
+        bookingId: data.id as string,
+        status: data.status as string,
+        decisionStatus: data.decision_status as string,
       };
     },
     rawInput,
