@@ -175,7 +175,21 @@ export async function saveAnonymousEventPlanDraftAction(
 
     return { success: true, data: plan };
   } catch (error) {
-    if (error instanceof EventPlanRepositoryError) return databaseErrorResult();
+    if (error instanceof EventPlanRepositoryError) {
+      try {
+        const existing =
+          await context.repository.findBySourceDraftFingerprintForCustomer(
+            context.userId,
+            parsed.data.sourceDraftFingerprint,
+          );
+
+        if (existing) return { success: true, data: existing };
+      } catch {
+        // Fall through to the safe generic persistence error below.
+      }
+
+      return databaseErrorResult();
+    }
     throw error;
   }
 }

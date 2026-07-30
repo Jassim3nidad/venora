@@ -196,6 +196,30 @@ describe("event plan actions", () => {
     );
   });
 
+  it("returns an existing anonymous draft after a duplicate insert race", async () => {
+    const initialLookupQuery = queryResult({ data: null, error: null });
+    const createQuery = queryResult({
+      data: null,
+      error: {
+        message:
+          'duplicate key value violates unique constraint "idx_event_plans_customer_fingerprint"',
+      },
+    });
+    const retryLookupQuery = queryResult({ data: eventPlanRow, error: null });
+    mockSupabase([initialLookupQuery, createQuery, retryLookupQuery]);
+
+    const result = await saveAnonymousEventPlanDraftAction({
+      draft: validDraft(),
+      sourceDraftFingerprint: "fingerprint-1",
+    });
+
+    expect(result.success).toBe(true);
+    expect(retryLookupQuery.eq).toHaveBeenCalledWith(
+      "source_draft_fingerprint",
+      "fingerprint-1",
+    );
+  });
+
   it("updates only plans owned by the authenticated customer", async () => {
     const updateQuery = queryResult({ data: eventPlanRow, error: null });
     mockSupabase([updateQuery]);
