@@ -235,7 +235,7 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <StatusBadge status={typedBooking.status} />
-                <h2 className="mt-3 text-2xl font-black tracking-tight text-[#0f172a]">
+                <h2 className="mt-3 text-2xl font-bold tracking-tight text-[#0f172a]">
                   Booking request
                 </h2>
               </div>
@@ -273,7 +273,7 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
                       <DetailIcon className="h-3.5 w-3.5 text-[#1d4ed8]" />
                       {label as string}
                     </div>
-                    <p className="mt-2 text-sm font-black text-[#0f172a]">
+                    <p className="mt-2 text-sm font-bold text-[#0f172a]">
                       {value as string}
                     </p>
                   </div>
@@ -283,7 +283,7 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
           </section>
 
           <section className="rounded-[24px] border border-[#e5e7eb] bg-white p-5 shadow-sm shadow-slate-200/60 sm:p-6">
-            <h2 className="flex items-center gap-2 text-xl font-black tracking-tight text-[#0f172a]">
+            <h2 className="flex items-center gap-2 text-xl font-bold tracking-tight text-[#0f172a]">
               <MessageSquareText className="h-5 w-5 text-[#1d4ed8]" />
               Notes
             </h2>
@@ -310,7 +310,7 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
           {/* Booking Conversation */}
           <section className="space-y-4 pb-8 sm:pb-10">
             <div className="flex items-center gap-2 px-1">
-              <h2 className="text-xl font-black tracking-tight text-[#0f172a]">
+              <h2 className="text-xl font-bold tracking-tight text-[#0f172a]">
                 Booking Conversation
               </h2>
               {isReadOnly && (
@@ -342,7 +342,7 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
           </section>
 
           <section className="rounded-[24px] border border-[#e5e7eb] bg-white p-5 shadow-sm shadow-slate-200/60 sm:p-6">
-            <h2 className="text-xl font-black tracking-tight text-[#0f172a]">
+            <h2 className="text-xl font-bold tracking-tight text-[#0f172a]">
               Status history
             </h2>
             <div className="mt-5 grid gap-0">
@@ -351,9 +351,9 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
                   key={`${item.status}-${item.created_at}`}
                   className="flex gap-3 border-l border-[#dbeafe] pb-5 last:border-transparent last:pb-0"
                 >
-                  <span className="-ml-[13px] flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#1d4ed8] text-xs font-black text-white" />
+                  <span className="-ml-[13px] flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#1d4ed8] text-xs font-bold text-white" />
                   <div>
-                    <p className="text-sm font-black capitalize text-[#0f172a]">
+                    <p className="text-sm font-bold capitalize text-[#0f172a]">
                       {item.status.replace(/_/g, " ")}
                     </p>
                     <p className="mt-1 text-xs font-semibold text-[#64748b]">
@@ -378,7 +378,7 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
 
         <aside className="grid gap-5 xl:sticky xl:top-24">
           <section className="rounded-[24px] border border-[#e5e7eb] bg-white p-5 shadow-sm shadow-slate-200/60 sm:p-6">
-            <h2 className="text-xl font-black tracking-tight text-[#0f172a]">
+            <h2 className="text-xl font-bold tracking-tight text-[#0f172a]">
               Owner action
             </h2>
             <div className="mt-4">
@@ -399,7 +399,7 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
           </section>
 
           <section className="rounded-[24px] border border-[#e5e7eb] bg-white p-5 shadow-sm shadow-slate-200/60 sm:p-6">
-            <h2 className="text-xl font-black tracking-tight text-[#0f172a]">
+            <h2 className="text-xl font-bold tracking-tight text-[#0f172a]">
               Transactions
             </h2>
             <div className="mt-4 grid gap-3">
@@ -410,7 +410,7 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
                     className="rounded-2xl border border-[#e5e7eb] bg-[#f8fbff] p-4"
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-black text-[#0f172a]">
+                      <p className="text-sm font-bold text-[#0f172a]">
                         {formatCurrency(transaction.amount)}
                       </p>
                       <StatusBadge status={transaction.status} />

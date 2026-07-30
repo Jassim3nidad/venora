@@ -75,7 +75,7 @@ export default async function AssignSupplierPage({ params }: Props) {
     >
       <div className="mx-auto max-w-2xl">
         <Panel>
-          <h2 className="mb-6 text-xl font-black tracking-tight text-[#0f172a]">
+          <h2 className="mb-6 text-xl font-bold tracking-tight text-[#0f172a]">
             Supplier job details
           </h2>
           {suppliers.length > 0 ? (

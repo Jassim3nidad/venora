@@ -122,7 +122,7 @@ function Sidebar({
             <MaterialIcon name="domain" className="text-xl" filled />
           </div>
           <div>
-            <p className="font-display text-lg font-black tracking-tight text-[#0f172a]">
+            <p className="font-display text-lg font-bold tracking-tight text-[#0f172a]">
               Venora
             </p>
             <p className="text-xs font-bold uppercase tracking-wide text-[#64748b]">
@@ -225,11 +225,11 @@ function DesktopTopBar({
   return (
     <header className="sticky top-0 z-30 hidden items-center justify-between border-b border-[#e5e7eb] bg-white/90 px-6 py-4 backdrop-blur lg:flex">
       <div>
-        <p className="inline-flex rounded-full border border-[#dbeafe] bg-[#eff6ff] px-3 py-1 text-xs font-black uppercase tracking-wider text-[#1d4ed8]">
+        <p className="inline-flex rounded-full border border-[#dbeafe] bg-[#eff6ff] px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#1d4ed8]">
           {ROLE_LABELS[role]}
         </p>
         {businessName ? (
-          <p className="mt-2 font-display text-lg font-black tracking-tight text-[#0f172a]">
+          <p className="mt-2 font-display text-lg font-bold tracking-tight text-[#0f172a]">
             {businessName}
           </p>
         ) : null}

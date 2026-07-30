@@ -697,7 +697,7 @@ export function PackageBuilderForm({
                       <span className="font-bold text-slate-900">
                         Package Total
                       </span>
-                      <span className="text-xl font-black text-slate-900">
+                      <span className="text-xl font-bold text-slate-900">
                         ₱{totalPackagePrice.toLocaleString()}
                       </span>
                     </div>
@@ -838,7 +838,7 @@ function StepSection({
         >
           <Icon className="h-5 w-5" />
         </div>
-        <h2 className="text-lg font-black text-slate-900 tracking-tight">
+        <h2 className="text-lg font-bold text-slate-900 tracking-tight">
           {title}
         </h2>
       </div>

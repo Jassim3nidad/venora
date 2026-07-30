@@ -59,16 +59,15 @@ export function PageHeader({
   badge?: string;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-[28px] border border-[#dbeafe] bg-gradient-to-br from-white via-[#f8fbff] to-[#eff6ff] p-5 shadow-sm shadow-slate-200/70 sm:p-6">
-      <div className="pointer-events-none absolute right-0 top-0 h-32 w-32 rounded-full bg-[#bfdbfe]/30 blur-3xl" />
-      <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
+    <div className="rounded-[24px] border border-[#e5e7eb] bg-white p-5 shadow-sm shadow-slate-200/60 sm:p-6">
+      <div className="flex min-h-[76px] flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
           {badge ? (
-            <span className="mb-3 inline-flex rounded-full border border-[#bfdbfe] bg-white/80 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#1d4ed8] shadow-sm">
+            <span className="mb-3 inline-flex rounded-full border border-[#bfdbfe] bg-[#eff6ff] px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#1d4ed8]">
               {badge}
             </span>
           ) : null}
-          <h1 className="font-display text-2xl font-black tracking-tight text-[#0f172a] sm:text-[2rem] sm:leading-tight">
+          <h1 className="font-display break-words text-2xl font-bold leading-tight tracking-tight text-[#0f172a] sm:text-3xl">
             {title}
           </h1>
           {description ? (
@@ -80,6 +79,77 @@ export function PageHeader({
         {action ? <div className="shrink-0 sm:pt-1">{action}</div> : null}
       </div>
     </div>
+  );
+}
+
+function SkeletonBlock({ className }: { className: string }) {
+  return (
+    <div
+      className={cn(
+        "animate-pulse rounded-xl bg-gradient-to-r from-[#eef2f7] via-[#f8fafc] to-[#eef2f7]",
+        className,
+      )}
+    />
+  );
+}
+
+export function DashboardHeaderSkeleton() {
+  return (
+    <div className="rounded-[24px] border border-[#e5e7eb] bg-white p-5 shadow-sm shadow-slate-200/60 sm:p-6">
+      <div className="flex min-h-[76px] flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="w-full min-w-0">
+          <SkeletonBlock className="h-8 w-64 max-w-[75%]" />
+          <SkeletonBlock className="mt-3 h-4 w-full max-w-2xl" />
+          <SkeletonBlock className="mt-2 h-4 w-full max-w-md" />
+        </div>
+        <SkeletonBlock className="h-11 w-32 shrink-0" />
+      </div>
+    </div>
+  );
+}
+
+export function DashboardPanelSkeleton({
+  rows = 3,
+  className,
+}: {
+  rows?: number;
+  className?: string;
+}) {
+  return (
+    <Panel className={cn("min-h-[180px]", className)}>
+      <SkeletonBlock className="h-5 w-44 max-w-full" />
+      <div className="mt-6 space-y-3">
+        {Array.from({ length: rows }).map((_, index) => (
+          <SkeletonBlock
+            key={index}
+            className={cn("h-4", index % 2 === 0 ? "w-full" : "w-4/5")}
+          />
+        ))}
+      </div>
+    </Panel>
+  );
+}
+
+export function DashboardSubPageSkeleton() {
+  return (
+    <DashboardPage>
+      <DashboardHeaderSkeleton />
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <Panel key={index} className="min-h-[136px]">
+            <SkeletonBlock className="h-10 w-10" />
+            <SkeletonBlock className="mt-7 h-3 w-24" />
+            <SkeletonBlock className="mt-3 h-8 w-20" />
+          </Panel>
+        ))}
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.6fr)]">
+        <DashboardPanelSkeleton rows={6} className="min-h-[320px]" />
+        <DashboardPanelSkeleton rows={5} className="min-h-[320px]" />
+      </div>
+    </DashboardPage>
   );
 }
 
@@ -119,7 +189,7 @@ export function PanelHeader({
   return (
     <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div>
-        <h2 className="font-display text-lg font-black tracking-tight text-[#0f172a]">
+        <h2 className="font-display text-lg font-bold tracking-tight text-[#0f172a]">
           {title}
         </h2>
         {description ? (
@@ -166,7 +236,7 @@ export function KpiCard({
         </p>
         <p
           className={cn(
-            "font-display mt-2 text-3xl font-black tracking-tight",
+            "font-display mt-2 text-3xl font-bold tracking-tight",
             highlight ? "text-[#1d4ed8]" : "text-[#111827]",
           )}
         >
@@ -229,7 +299,7 @@ export function DataTable<T>({
                   <th
                     key={col.key}
                     className={cn(
-                      "px-4 py-3 text-xs font-black uppercase tracking-wider text-[#2563eb]",
+                      "px-4 py-3 text-xs font-bold uppercase tracking-wider text-[#2563eb]",
                       col.className,
                     )}
                   >
@@ -418,7 +488,7 @@ export function EmptyState({
           <MaterialIcon name={icon} className="text-3xl" />
         </div>
       ) : null}
-      <h3 className="font-display text-lg font-black text-[#0f172a]">
+      <h3 className="font-display text-lg font-bold text-[#0f172a]">
         {title}
       </h3>
       {description ? (

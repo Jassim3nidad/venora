@@ -147,7 +147,7 @@ export function EligibleSuppliersPanel({
                     className="h-11 w-11 shrink-0 rounded-xl object-cover"
                   />
                 ) : (
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-700 font-black text-lg">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-700 font-bold text-lg">
                     {supplier.business_name.charAt(0)}
                   </div>
                 )}
@@ -200,7 +200,7 @@ export function EligibleSuppliersPanel({
                   </p>
                 </div>
                 <span
-                  className={`text-base font-black tracking-tight ${
+                  className={`text-base font-bold tracking-tight ${
                     isSelected ? "text-blue-600" : "text-slate-900"
                   }`}
                 >
