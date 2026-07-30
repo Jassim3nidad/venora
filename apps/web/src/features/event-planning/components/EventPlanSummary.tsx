@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil } from "lucide-react";
+import { ArrowRight, Loader2, Pencil, Save } from "lucide-react";
 import type {
   EventPlanDraft,
   EventPlanningStep,
@@ -13,9 +13,19 @@ import {
 export function EventPlanSummary({
   draft,
   onEdit,
+  onSave,
+  onFindVenues,
+  isSaving,
+  saveError,
+  saveMessage,
 }: {
   draft: EventPlanDraft;
   onEdit: (step: EventPlanningStep) => void;
+  onSave: () => void;
+  onFindVenues?: () => void;
+  isSaving: boolean;
+  saveError: string | null;
+  saveMessage: string | null;
 }) {
   const sections = buildEventPlanSummarySections(draft);
   const title = buildEventPlanTitle(draft);
@@ -28,10 +38,50 @@ export function EventPlanSummary({
         </p>
         <h2 className="mt-1 text-xl font-bold text-slate-950">{title}</h2>
         <p className="mt-2 text-sm leading-6 text-slate-600">
-          This summary is based only on the details you entered. Venue matches,
-          supplier recommendations, account saving, and booking handoff will be
-          added later.
+          This summary is based only on the details you entered. Save it to
+          your Venora account when you want to keep planning across devices.
         </p>
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+          <button
+            type="button"
+            onClick={onSave}
+            disabled={isSaving}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-bold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {isSaving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
+            {isSaving ? "Saving..." : "Save event plan"}
+          </button>
+          {onFindVenues ? (
+            <button
+              type="button"
+              onClick={onFindVenues}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-100"
+            >
+              Find matching venues
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          ) : null}
+        </div>
+        {saveMessage ? (
+          <p
+            role="status"
+            className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700"
+          >
+            {saveMessage}
+          </p>
+        ) : null}
+        {saveError ? (
+          <p
+            role="alert"
+            className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700"
+          >
+            {saveError}
+          </p>
+        ) : null}
       </div>
 
       {sections.map((section) => (

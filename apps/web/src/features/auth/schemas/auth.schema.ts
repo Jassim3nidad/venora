@@ -26,6 +26,7 @@ export const registerSchema = z
     email: z.string().trim().toLowerCase().email("Enter a valid email address"),
     password: passwordSchema,
     confirmPassword: z.string(),
+    redirectTo: z.string().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",

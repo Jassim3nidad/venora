@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, RotateCcw } from "lucide-react";
+import { saveAnonymousDraftAfterAuthAction } from "../application/event-plan.actions";
 import {
   createDefaultEventPlanDraft,
   EVENT_PLANNING_STEPS,
@@ -10,12 +11,22 @@ import {
 import type {
   EventPlanDraft,
   EventPlanningStep,
+  PersistedEventPlan,
 } from "../domain/event-plan.types";
+import { eventPlanPersistenceSchema } from "../schemas/event-plan.schema";
+import {
+  clearEventPlanPendingSave,
+  createEventPlanDraftFingerprint,
+  createPlanEventLoginHref,
+  loadEventPlanPendingSave,
+  saveEventPlanPendingSave,
+} from "../utils/event-plan-auth-handoff";
 import {
   clearEventPlanDraft,
   loadEventPlanDraft,
   saveEventPlanDraft,
 } from "../utils/event-plan-draft";
+import { buildEventPlanTitle } from "../utils/event-plan-summary";
 import {
   applyDraftPatch,
   getFirstErrorField,
@@ -92,7 +103,11 @@ function focusField(field: string) {
   }, 0);
 }
 
-export function EventPlanningWizard() {
+export function EventPlanningWizard({
+  isAuthenticated = false,
+}: {
+  isAuthenticated?: boolean;
+}) {
   const [draft, setDraft] = useState<EventPlanDraft>(() =>
     createDefaultEventPlanDraft(),
   );
@@ -102,11 +117,20 @@ export function EventPlanningWizard() {
   const [hasHydrated, setHasHydrated] = useState(false);
   const [hasPendingLocalSave, setHasPendingLocalSave] = useState(false);
   const [returnToSummary, setReturnToSummary] = useState(false);
+  const [savedPlan, setSavedPlan] = useState<PersistedEventPlan | null>(null);
+  const [accountSaveState, setAccountSaveState] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+  const [accountSaveMessage, setAccountSaveMessage] = useState<string | null>(
+    null,
+  );
+  const [accountSaveError, setAccountSaveError] = useState<string | null>(null);
   const [summaryFocusStep, setSummaryFocusStep] =
     useState<EventPlanningStep | null>(null);
   const [startOverOpen, setStartOverOpen] = useState(false);
   const startOverTriggerRef = useRef<HTMLButtonElement | null>(null);
   const headingRef = useRef<HTMLHeadingElement | null>(null);
+  const hasAttemptedAuthReturnSaveRef = useRef(false);
 
   const currentStep = draft.currentStep;
   const currentCopy = STEP_COPY[currentStep];
@@ -132,6 +156,81 @@ export function EventPlanningWizard() {
 
     setHasHydrated(true);
   }, []);
+
+  const saveDraftToAccount = async (draftToSave: EventPlanDraft) => {
+    const parsed = eventPlanPersistenceSchema.safeParse(draftToSave);
+    if (!parsed.success) {
+      setAccountSaveState("error");
+      setAccountSaveMessage(null);
+      setAccountSaveError("Complete the required event plan fields before saving.");
+      return null;
+    }
+
+    const sourceDraftFingerprint = createEventPlanDraftFingerprint(parsed.data);
+    setAccountSaveState("saving");
+    setAccountSaveMessage(null);
+    setAccountSaveError(null);
+
+    const result = await saveAnonymousDraftAfterAuthAction({
+      draft: parsed.data,
+      sourceDraftFingerprint,
+      title: buildEventPlanTitle(parsed.data),
+    });
+
+    if (!result.success) {
+      saveEventPlanPendingSave({ sourceDraftFingerprint });
+      setAccountSaveState("error");
+      setAccountSaveMessage(null);
+      setAccountSaveError(result.error);
+      return null;
+    }
+
+    setSavedPlan(result.data);
+    setDraft(result.data);
+    setAccountSaveState("saved");
+    setAccountSaveMessage("Your event plan is saved to your Venora account.");
+    setAccountSaveError(null);
+    setSaveState("account-saved");
+    clearEventPlanPendingSave();
+    clearEventPlanDraft();
+    setHasPendingLocalSave(false);
+    return result.data;
+  };
+
+  useEffect(() => {
+    if (
+      !hasHydrated ||
+      !isAuthenticated ||
+      hasAttemptedAuthReturnSaveRef.current
+    ) {
+      return;
+    }
+
+    const pendingSave = loadEventPlanPendingSave();
+    if (pendingSave.status !== "loaded") return;
+
+    hasAttemptedAuthReturnSaveRef.current = true;
+    const parsed = eventPlanPersistenceSchema.safeParse(draft);
+    if (!parsed.success) {
+      setAccountSaveState("error");
+      setAccountSaveError(
+        "We could not save the restored plan. Please review the required fields.",
+      );
+      return;
+    }
+
+    const fingerprint = createEventPlanDraftFingerprint(parsed.data);
+    if (fingerprint !== pendingSave.intent.sourceDraftFingerprint) {
+      clearEventPlanPendingSave();
+      setAccountSaveState("error");
+      setAccountSaveError(
+        "The restored plan changed before it could be saved. Review it, then save again.",
+      );
+      return;
+    }
+
+    void saveDraftToAccount(parsed.data);
+  }, [draft, hasHydrated, isAuthenticated]);
 
   useEffect(() => {
     if (!hasHydrated || !hasPendingLocalSave) return;
@@ -162,6 +261,9 @@ export function EventPlanningWizard() {
     setDraft((current) => applyDraftPatch(current, patch));
     setFieldErrors({});
     setRestoreMessage(null);
+    setAccountSaveState("idle");
+    setAccountSaveMessage(null);
+    setAccountSaveError(null);
     setHasPendingLocalSave(true);
   };
 
@@ -169,6 +271,9 @@ export function EventPlanningWizard() {
     setDraft(nextDraft);
     setHasPendingLocalSave(true);
     setFieldErrors({});
+    setAccountSaveState("idle");
+    setAccountSaveMessage(null);
+    setAccountSaveError(null);
   };
 
   const goNext = () => {
@@ -218,14 +323,58 @@ export function EventPlanningWizard() {
 
   const confirmStartOver = () => {
     clearEventPlanDraft();
+    clearEventPlanPendingSave();
     setDraft(resetEventPlanWizard());
     setFieldErrors({});
     setRestoreMessage(null);
     setSaveState("idle");
+    setSavedPlan(null);
+    setAccountSaveState("idle");
+    setAccountSaveMessage(null);
+    setAccountSaveError(null);
     setHasPendingLocalSave(false);
     setReturnToSummary(false);
     setSummaryFocusStep(null);
     setStartOverOpen(false);
+  };
+
+  const saveCurrentPlan = () => {
+    const parsed = eventPlanPersistenceSchema.safeParse(draft);
+    if (!parsed.success) {
+      setAccountSaveState("error");
+      setAccountSaveMessage(null);
+      setAccountSaveError("Complete the required event plan fields before saving.");
+      return;
+    }
+
+    if (!isAuthenticated) {
+      const localResult = saveEventPlanDraft(parsed.data);
+      if (!localResult.success) {
+        setAccountSaveState("error");
+        setAccountSaveMessage(null);
+        setAccountSaveError("Unable to save this plan on your device.");
+        return;
+      }
+
+      const sourceDraftFingerprint = createEventPlanDraftFingerprint(
+        localResult.draft,
+      );
+      const pendingResult = saveEventPlanPendingSave({
+        sourceDraftFingerprint,
+      });
+
+      if (!pendingResult.success) {
+        setAccountSaveState("error");
+        setAccountSaveMessage(null);
+        setAccountSaveError("Unable to prepare this plan for account saving.");
+        return;
+      }
+
+      window.location.assign(createPlanEventLoginHref());
+      return;
+    }
+
+    void saveDraftToAccount(parsed.data);
   };
 
   const stepBody = useMemo(() => {
@@ -245,8 +394,17 @@ export function EventPlanningWizard() {
       return <BookingPreferencesStep {...props} />;
     }
 
-    return <EventPlanSummary draft={draft} onEdit={goToEditStep} />;
-  }, [currentStep, draft, fieldErrors]);
+    return (
+      <EventPlanSummary
+        draft={draft}
+        onEdit={goToEditStep}
+        onSave={saveCurrentPlan}
+        isSaving={accountSaveState === "saving"}
+        saveError={accountSaveError}
+        saveMessage={accountSaveMessage}
+      />
+    );
+  }, [accountSaveError, accountSaveMessage, accountSaveState, currentStep, draft, fieldErrors]);
 
   return (
     <div className="min-h-screen bg-slate-50">
