@@ -2,62 +2,86 @@
 
 Date: July 31, 2026
 
-## Open Issues
+## Open Verification Gaps
 
 ### Live authenticated browser matrix is not complete
 
 Status: Open verification gap
 
-The public `/plan-event` browser suite passes, and event-plan action/repository/migration tests cover ownership and RLS contracts. A full live browser matrix was not completed for:
+The automated action, repository, migration, and database contracts enforce customer-owned event plans. The remaining unverified area is a full browser-backed local Supabase account matrix:
 
 - Customer A saved plan vs Customer B direct access denial.
 - Venue owner direct private-plan access denial.
 - Supplier direct private-plan access denial.
 - Coordinator direct private-plan access denial.
-- Authenticated autosave refresh against a real event_plans row.
+- Authenticated autosave refresh against a real `event_plans` row.
 - Autosave server failure and retry in a real browser session.
 
 Impact:
 
-- No confirmed product failure.
-- Release confidence still depends on unit/action/repository/RLS contract coverage until a full local Supabase browser account matrix is executed.
+- No confirmed product defect.
+- Release confidence still depends on automated contracts until this browser matrix is run.
 
 Next action:
 
-- Run a dedicated browser auth/RLS fixture pass in Task 21 or the release-validation phase.
+- Run a dedicated local browser auth/RLS fixture pass before final production release.
 
 ### Registration return depends on email confirmation boundary
 
 Status: Open verification gap
 
-The anonymous login handoff to `/login?redirectTo=/plan-event` is browser-verified. The registration return flow was not fully completed through real email confirmation.
+Anonymous save redirects to `/login?redirectTo=/plan-event` and stores pending-save state. The real registration email-confirmation return flow has not been completed in a browser session.
 
 Impact:
 
-- Login return is verified.
-- Registration return remains implemented but unverified in browser.
+- Login/registration handoff implementation is contract-covered.
+- Registration return remains implemented but unverified through live email confirmation.
 
 Next action:
 
-- Use local SMTP/Mailpit or a seeded verified test account path to complete the registration callback flow.
+- Use local SMTP/Mailpit or a seeded verified-account path to complete the registration callback test.
 
-### Non-blocking venue image warning during handoff
+### 200% zoom and reduced-motion checks are not separately automated
 
-Status: Existing unrelated warning
+Status: Open verification gap
 
-During `/venues` handoff, Next logged that one seeded Supabase venue image resolved to a private IP and could not be optimized.
+Keyboard, focus, semantics, dialog behavior, and axe smoke checks passed. Dedicated 200% zoom and reduced-motion automation were not added in Phase 1.
 
 Impact:
 
-- Browser test still passed.
-- Not caused by event-planning logic.
+- No confirmed accessibility defect.
+- Manual visual review is still recommended before release.
 
 Next action:
 
-- Review image host configuration or seeded image URL handling outside this Task 19-20 scope.
+- Add these checks to a later accessibility QA pass if required by release policy.
 
-## Closed Issues In This Pass
+## Known Historical Environment Issue
+
+### Local migration drift exists outside event planning
+
+Status: Known historical local environment drift
+
+The repository has historical migration drift unrelated to Customer Event Planning Phase 1. Task 21 did not repair unrelated migration history by design.
+
+Impact:
+
+- Event-planning migration and database contracts pass against the current migration files.
+- Fresh local Supabase resets may still be affected by unrelated historical migration ordering or table drift.
+
+Next action:
+
+- Track and repair unrelated migration drift separately from the event-planning release task.
+
+## Non-Blocking Warnings Observed In Prior QA
+
+- Existing Next module-type warning for Tailwind config and package preset.
+- Existing Next image warning for a seeded Supabase venue image resolving to a private IP during `/venues` handoff.
+- Existing Next scroll-behavior warning during route transitions.
+
+## Closed In Earlier Phase 1 QA
 
 - Start Over dialog focus trap and Escape support.
 - Summary edit return focus.
 - Invalid nested PostgREST OR filter for venue type handoff.
+- Total-event-budget accidentally mapping to venue pricing.
