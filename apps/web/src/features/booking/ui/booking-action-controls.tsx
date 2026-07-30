@@ -7,6 +7,7 @@ import {
   approveBookingAction,
   completeBookingAction,
   declineBookingAction,
+  overrideBookingAutomationAction,
   startBookingPaymentAction,
   submitBookingReviewAction,
 } from "../application/actions";
@@ -254,6 +255,87 @@ export function OwnerBookingDecisionForm({
 
       <ErrorMessage message={error} />
     </div>
+  );
+}
+
+export function OwnerAutomationOverrideForm({
+  bookingId,
+}: {
+  bookingId: string;
+}) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  const submit = (action: "manual_review" | "reject", reason: string) => {
+    setError(null);
+    startTransition(async () => {
+      const result = await overrideBookingAutomationAction({
+        bookingId,
+        action,
+        reason,
+      });
+      if (result.error) {
+        setError(result.error.message);
+        return;
+      }
+      router.refresh();
+    });
+  };
+
+  return (
+    <form
+      className="grid gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        submit(
+          String(formData.get("action")) as "manual_review" | "reject",
+          String(formData.get("reason") ?? ""),
+        );
+      }}
+    >
+      <p className="text-sm font-extrabold text-blue-950">
+        Smart automation approved this request
+      </p>
+      <p className="text-xs font-medium leading-5 text-blue-800">
+        Override remains available during configured review window and before
+        customer starts payment.
+      </p>
+      <textarea
+        name="reason"
+        rows={3}
+        required
+        minLength={5}
+        maxLength={500}
+        placeholder="Reason for override"
+        className="resize-y rounded-xl border border-blue-200 bg-white p-3 text-sm font-semibold"
+      />
+      <div className="grid gap-2 sm:grid-cols-2">
+        <button
+          type="submit"
+          name="action"
+          value="manual_review"
+          disabled={isPending}
+          className="h-11 rounded-xl border border-blue-200 bg-white px-3 text-sm font-bold text-blue-700 disabled:opacity-60"
+        >
+          Send to review
+        </button>
+        <button
+          type="submit"
+          name="action"
+          value="reject"
+          disabled={isPending}
+          className="h-11 rounded-xl border border-red-200 bg-red-50 px-3 text-sm font-bold text-red-700 disabled:opacity-60"
+        >
+          Reject request
+        </button>
+      </div>
+      {isPending ? (
+        <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+      ) : null}
+      <ErrorMessage message={error} />
+    </form>
   );
 }
 
