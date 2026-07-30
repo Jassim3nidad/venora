@@ -3,7 +3,10 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, RotateCcw } from "lucide-react";
-import { saveAnonymousDraftAfterAuthAction } from "../application/event-plan.actions";
+import {
+  saveAnonymousDraftAfterAuthAction,
+  updateEventPlanAction,
+} from "../application/event-plan.actions";
 import {
   createDefaultEventPlanDraft,
   EVENT_PLANNING_STEPS,
@@ -26,7 +29,7 @@ import {
   loadEventPlanDraft,
   saveEventPlanDraft,
 } from "../utils/event-plan-draft";
-import { buildEventPlanTitle } from "../utils/event-plan-summary";
+import { saveEventPlanToAccount } from "../utils/event-plan-account-save";
 import {
   applyDraftPatch,
   getFirstErrorField,
@@ -116,6 +119,7 @@ export function EventPlanningWizard({
   const [saveState, setSaveState] = useState<EventPlanSaveState>("idle");
   const [hasHydrated, setHasHydrated] = useState(false);
   const [hasPendingLocalSave, setHasPendingLocalSave] = useState(false);
+  const [hasPendingAccountSave, setHasPendingAccountSave] = useState(false);
   const [returnToSummary, setReturnToSummary] = useState(false);
   const [savedPlan, setSavedPlan] = useState<PersistedEventPlan | null>(null);
   const [accountSaveState, setAccountSaveState] = useState<
@@ -158,27 +162,18 @@ export function EventPlanningWizard({
   }, []);
 
   const saveDraftToAccount = async (draftToSave: EventPlanDraft) => {
-    const parsed = eventPlanPersistenceSchema.safeParse(draftToSave);
-    if (!parsed.success) {
-      setAccountSaveState("error");
-      setAccountSaveMessage(null);
-      setAccountSaveError("Complete the required event plan fields before saving.");
-      return null;
-    }
-
-    const sourceDraftFingerprint = createEventPlanDraftFingerprint(parsed.data);
     setAccountSaveState("saving");
     setAccountSaveMessage(null);
     setAccountSaveError(null);
 
-    const result = await saveAnonymousDraftAfterAuthAction({
-      draft: parsed.data,
-      sourceDraftFingerprint,
-      title: buildEventPlanTitle(parsed.data),
+    const result = await saveEventPlanToAccount({
+      draft: draftToSave,
+      savedPlanId: savedPlan?.id ?? null,
+      create: saveAnonymousDraftAfterAuthAction,
+      update: updateEventPlanAction,
     });
 
     if (!result.success) {
-      saveEventPlanPendingSave({ sourceDraftFingerprint });
       setAccountSaveState("error");
       setAccountSaveMessage(null);
       setAccountSaveError(result.error);
@@ -188,12 +183,17 @@ export function EventPlanningWizard({
     setSavedPlan(result.data);
     setDraft(result.data);
     setAccountSaveState("saved");
-    setAccountSaveMessage("Your event plan is saved to your Venora account.");
+    setAccountSaveMessage(
+      result.mode === "updated"
+        ? "Your event plan changes are saved."
+        : "Your event plan is saved to your Venora account.",
+    );
     setAccountSaveError(null);
     setSaveState("account-saved");
     clearEventPlanPendingSave();
     clearEventPlanDraft();
     setHasPendingLocalSave(false);
+    setHasPendingAccountSave(false);
     return result.data;
   };
 
@@ -233,6 +233,33 @@ export function EventPlanningWizard({
   }, [draft, hasHydrated, isAuthenticated]);
 
   useEffect(() => {
+    if (
+      !hasHydrated ||
+      !isAuthenticated ||
+      !savedPlan ||
+      !hasPendingAccountSave ||
+      accountSaveState === "saving"
+    ) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      void saveDraftToAccount(draft).finally(() => {
+        setHasPendingAccountSave(false);
+      });
+    }, 900);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [
+    accountSaveState,
+    draft,
+    hasHydrated,
+    hasPendingAccountSave,
+    isAuthenticated,
+    savedPlan,
+  ]);
+
+  useEffect(() => {
     if (!hasHydrated || !hasPendingLocalSave) return;
 
     setSaveState("saving");
@@ -264,6 +291,9 @@ export function EventPlanningWizard({
     setAccountSaveState("idle");
     setAccountSaveMessage(null);
     setAccountSaveError(null);
+    if (isAuthenticated && savedPlan) {
+      setHasPendingAccountSave(true);
+    }
     setHasPendingLocalSave(true);
   };
 
@@ -274,6 +304,9 @@ export function EventPlanningWizard({
     setAccountSaveState("idle");
     setAccountSaveMessage(null);
     setAccountSaveError(null);
+    if (isAuthenticated && savedPlan) {
+      setHasPendingAccountSave(true);
+    }
   };
 
   const goNext = () => {
@@ -333,6 +366,7 @@ export function EventPlanningWizard({
     setAccountSaveMessage(null);
     setAccountSaveError(null);
     setHasPendingLocalSave(false);
+    setHasPendingAccountSave(false);
     setReturnToSummary(false);
     setSummaryFocusStep(null);
     setStartOverOpen(false);
