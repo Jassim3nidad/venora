@@ -136,6 +136,7 @@ export function EventPlanningWizard({
   const startOverTriggerRef = useRef<HTMLButtonElement | null>(null);
   const headingRef = useRef<HTMLHeadingElement | null>(null);
   const hasAttemptedAuthReturnSaveRef = useRef(false);
+  const latestAccountSaveRequestRef = useRef(0);
 
   const currentStep = draft.currentStep;
   const currentCopy = STEP_COPY[currentStep];
@@ -163,6 +164,8 @@ export function EventPlanningWizard({
   }, []);
 
   const saveDraftToAccount = async (draftToSave: EventPlanDraft) => {
+    const requestId = latestAccountSaveRequestRef.current + 1;
+    latestAccountSaveRequestRef.current = requestId;
     setAccountSaveState("saving");
     setAccountSaveMessage(null);
     setAccountSaveError(null);
@@ -173,6 +176,10 @@ export function EventPlanningWizard({
       create: saveAnonymousDraftAfterAuthAction,
       update: updateEventPlanAction,
     });
+
+    if (requestId !== latestAccountSaveRequestRef.current) {
+      return null;
+    }
 
     if (!result.success) {
       setAccountSaveState("error");
