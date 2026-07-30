@@ -52,6 +52,13 @@ export type BookingStatus =
   | "completed"
   | "reviewed"
   | "expired";
+export type BookingDecisionStatus =
+  | "pending_review"
+  | "auto_approved"
+  | "manually_approved"
+  | "rejected_by_rule"
+  | "cancelled"
+  | "expired";
 export type InquiryStatus = "new" | "responded" | "closed";
 export type AccreditationStatus =
   "pending" | "accredited" | "rejected" | "suspended";
@@ -697,6 +704,8 @@ export interface Database {
           event_type_id: string | null;
           guest_count: number;
           status: BookingStatus;
+          decision_status: BookingDecisionStatus;
+          approval_source: "automation" | "human" | null;
           total_amount: number | null;
           deposit_amount: number | null;
           special_requests: string | null;
@@ -725,6 +734,8 @@ export interface Database {
           event_type_id?: string | null;
           guest_count?: number;
           status?: BookingStatus;
+          decision_status?: BookingDecisionStatus;
+          approval_source?: "automation" | "human" | null;
           total_amount?: number | null;
           deposit_amount?: number | null;
           special_requests?: string | null;
@@ -737,6 +748,97 @@ export interface Database {
           completed_at?: string | null;
           reviewed_at?: string | null;
         };
+      };
+
+      booking_automation_decisions: {
+        Row: {
+          id: string;
+          booking_id: string;
+          venue_id: string;
+          outcome: BookingDecisionStatus;
+          rules: Json;
+          ai_verdict:
+            "eligible" | "manual_review" | "high_risk" | "unavailable" | null;
+          ai_confidence: number | null;
+          ai_explanation: string | null;
+          risk_flags: string[];
+          model: string | null;
+          overridden_at: string | null;
+          overridden_by: string | null;
+          override_reason: string | null;
+          created_at: string;
+        };
+        Insert: Omit<
+          Database["public"]["Tables"]["booking_automation_decisions"]["Row"],
+          "id" | "created_at"
+        > & {
+          id?: string;
+          rules?: Json;
+          risk_flags?: string[];
+          created_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["booking_automation_decisions"]["Insert"]
+        >;
+      };
+
+      venue_auto_accept_settings: {
+        Row: {
+          venue_id: string;
+          enabled: boolean;
+          minimum_notice_hours: number;
+          maximum_guest_count: number | null;
+          allowed_weekdays: number[];
+          allowed_start_time: string | null;
+          allowed_end_time: string | null;
+          minimum_duration_minutes: number | null;
+          maximum_duration_minutes: number | null;
+          minimum_booking_amount: number | null;
+          require_standard_package: boolean;
+          require_deposit: boolean;
+          require_verified_customer: boolean;
+          allowed_event_type_ids: string[] | null;
+          confidence_threshold: number;
+          review_window_minutes: number;
+          updated_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<
+          Database["public"]["Tables"]["venue_auto_accept_settings"]["Row"],
+          "created_at" | "updated_at"
+        > & {
+          enabled?: boolean;
+          minimum_notice_hours?: number;
+          allowed_weekdays?: number[];
+          require_standard_package?: boolean;
+          require_deposit?: boolean;
+          require_verified_customer?: boolean;
+          confidence_threshold?: number;
+          review_window_minutes?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["venue_auto_accept_settings"]["Insert"]
+        >;
+      };
+
+      venue_auto_accept_manual_review_customers: {
+        Row: {
+          venue_id: string;
+          customer_id: string;
+          reason: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: Omit<
+          Database["public"]["Tables"]["venue_auto_accept_manual_review_customers"]["Row"],
+          "created_at"
+        > & { created_at?: string };
+        Update: Partial<
+          Database["public"]["Tables"]["venue_auto_accept_manual_review_customers"]["Insert"]
+        >;
       };
 
       event_guests: {
@@ -1777,6 +1879,18 @@ export interface Database {
           member_status: OrgMemberStatus;
         }>;
       };
+      process_booking_auto_accept: {
+        Args: { p_booking_id: string; p_ai_evaluation?: Json | null };
+        Returns: Database["public"]["Tables"]["booking_automation_decisions"]["Row"];
+      };
+      override_booking_automation_decision: {
+        Args: {
+          p_booking_id: string;
+          p_action: "manual_review" | "reject";
+          p_reason: string;
+        };
+        Returns: Database["public"]["Tables"]["bookings"]["Row"];
+      };
 
       // ── Payments (migrations 021, 037-041) ────────────────
       start_booking_payment: {
@@ -1945,6 +2059,7 @@ export interface Database {
       media_type: MediaType;
       availability_status: AvailabilityStatus;
       booking_status: BookingStatus;
+      booking_decision_status: BookingDecisionStatus;
       inquiry_status: InquiryStatus;
       accreditation_status: AccreditationStatus;
       review_status: ReviewStatus;
