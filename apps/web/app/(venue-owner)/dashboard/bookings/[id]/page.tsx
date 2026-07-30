@@ -14,6 +14,7 @@ import {
   StatusBadge,
 } from "@/components/dashboard/enterprise";
 import {
+  OwnerAutomationOverrideForm,
   OwnerBookingDecisionForm,
   OwnerCompleteBookingButton,
 } from "@/src/features/booking/ui/booking-action-controls";
@@ -34,6 +35,8 @@ type BookingRow = {
   event_start_time: string | null;
   event_end_time: string | null;
   status: string;
+  decision_status: string;
+  approval_source: string | null;
   total_amount: number | null;
   deposit_amount: number | null;
   guest_count: number;
@@ -124,6 +127,8 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
       event_start_time,
       event_end_time,
       status,
+      decision_status,
+      approval_source,
       total_amount,
       deposit_amount,
       guest_count,
@@ -160,6 +165,16 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
 
   if (!booking) notFound();
   const typedBooking = booking as BookingRow;
+
+  const { data: automationDecision } = await supabase
+    .from("booking_automation_decisions")
+    .select(
+      "outcome, rules, ai_confidence, ai_explanation, risk_flags, created_at, overridden_at, override_reason",
+    )
+    .eq("booking_id", id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
   const organizationId = typedBooking.venues?.organization_id;
   if (!organizationId) redirect("/unauthorized");
@@ -374,6 +389,78 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
             assignHref={`/dashboard/bookings/${typedBooking.id}/assign-supplier`}
             canAttach={canAttachSuppliers}
           />
+
+          {automationDecision ? (
+            <section className="rounded-[24px] border border-[#e5e7eb] bg-white p-5 shadow-sm shadow-slate-200/60 sm:p-6">
+              <h2 className="text-xl font-black tracking-tight text-[#0f172a]">
+                Automation audit
+              </h2>
+              <div className="mt-4 grid gap-3">
+                <div className="rounded-2xl border border-[#dbeafe] bg-[#eff6ff] p-4">
+                  <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#2563eb]">
+                    {String(automationDecision.outcome).replace(/_/g, " ")}
+                  </p>
+                  <p className="mt-2 text-sm font-semibold leading-6 text-[#334155]">
+                    {automationDecision.ai_explanation ??
+                      "Deterministic booking rules completed without customer notes requiring interpretation."}
+                  </p>
+                  {automationDecision.ai_confidence !== null ? (
+                    <p className="mt-2 text-xs font-bold text-[#64748b]">
+                      AI confidence:{" "}
+                      {Math.round(
+                        Number(automationDecision.ai_confidence) * 100,
+                      )}
+                      %
+                    </p>
+                  ) : null}
+                </div>
+                <div className="grid gap-2">
+                  {(
+                    (automationDecision.rules ?? []) as Array<{
+                      rule: string;
+                      passed: boolean;
+                      result: string;
+                      detail?: string;
+                    }>
+                  ).map((rule, index) => (
+                    <div
+                      key={`${rule.rule}-${index}`}
+                      className="flex items-start justify-between gap-3 rounded-xl border border-[#e5e7eb] px-3 py-2"
+                    >
+                      <div>
+                        <p className="text-sm font-bold capitalize text-[#334155]">
+                          {rule.rule.replace(/_/g, " ")}
+                        </p>
+                        {rule.detail ? (
+                          <p className="mt-1 text-xs font-medium text-[#64748b]">
+                            {rule.detail}
+                          </p>
+                        ) : null}
+                      </div>
+                      <span
+                        className={
+                          rule.passed
+                            ? "text-xs font-extrabold text-emerald-700"
+                            : rule.result === "manual_review"
+                              ? "text-xs font-extrabold text-amber-700"
+                              : "text-xs font-extrabold text-red-700"
+                        }
+                      >
+                        {rule.passed
+                          ? "Passed"
+                          : rule.result.replace(/_/g, " ")}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                {automationDecision.overridden_at ? (
+                  <p className="rounded-xl bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800">
+                    Overridden: {automationDecision.override_reason}
+                  </p>
+                ) : null}
+              </div>
+            </section>
+          ) : null}
         </div>
 
         <aside className="grid gap-5 xl:sticky xl:top-24">
@@ -388,6 +475,10 @@ export default async function OwnerBookingDetailPage({ params }: Props) {
                   suggestedTotal={suggestedTotal}
                   suggestedDeposit={suggestedDeposit}
                 />
+              ) : typedBooking.status === "approved" &&
+                typedBooking.decision_status === "auto_approved" &&
+                typedBooking.approval_source === "automation" ? (
+                <OwnerAutomationOverrideForm bookingId={typedBooking.id} />
               ) : typedBooking.status === "confirmed" ? (
                 <OwnerCompleteBookingButton bookingId={typedBooking.id} />
               ) : (
