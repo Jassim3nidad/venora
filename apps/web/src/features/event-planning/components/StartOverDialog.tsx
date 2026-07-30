@@ -12,10 +12,41 @@ export function StartOverDialog({
   onConfirm: () => void;
 }) {
   const cancelRef = useRef<HTMLButtonElement | null>(null);
+  const confirmRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
-    if (open) cancelRef.current?.focus();
-  }, [open]);
+    if (!open) return;
+
+    cancelRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onCancel();
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const firstButton = cancelRef.current;
+      const lastButton = confirmRef.current;
+      if (!firstButton || !lastButton) return;
+
+      if (event.shiftKey && document.activeElement === firstButton) {
+        event.preventDefault();
+        lastButton.focus();
+        return;
+      }
+
+      if (!event.shiftKey && document.activeElement === lastButton) {
+        event.preventDefault();
+        firstButton.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [onCancel, open]);
 
   if (!open) return null;
 
@@ -54,6 +85,7 @@ export function StartOverDialog({
             Keep planning
           </button>
           <button
+            ref={confirmRef}
             type="button"
             onClick={onConfirm}
             className="inline-flex h-11 items-center justify-center rounded-lg bg-red-600 px-4 text-sm font-bold text-white transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-100"
