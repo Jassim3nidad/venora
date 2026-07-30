@@ -33,6 +33,22 @@ function readEventPlansMigration(): string {
     .toLowerCase();
 }
 
+function readEventPlansDateConstraintMigration(): string {
+  const repoRoot = findRepoRoot(process.cwd());
+  const migrationDir = join(repoRoot, "supabase", "migrations");
+  const migrationName = readdirSync(migrationDir).find((name) =>
+    /^\d+_event_plan_date_shape_constraints\.sql$/.test(name),
+  );
+
+  if (!migrationName) {
+    throw new Error("Missing event plan date-shape constraint migration");
+  }
+
+  return readFileSync(join(migrationDir, migrationName), "utf8")
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+}
+
 describe("event plans migration", () => {
   it("creates the event_plans table with customer-owned planning fields", () => {
     const sql = readEventPlansMigration();
@@ -78,6 +94,20 @@ describe("event plans migration", () => {
     expect(sql).toContain("event_plans_service_selection_mode_check");
     expect(sql).toContain("'needs-services'");
     expect(sql).toContain("'already-complete'");
+  });
+
+  it("enforces DB-level required fields for structured date preferences", () => {
+    const sql = readEventPlansDateConstraintMigration();
+
+    expect(sql).toContain("event_plans_date_preference_required_fields_check");
+    expect(sql).toContain("date_preference_type <> 'exact'");
+    expect(sql).toContain("exact_event_date is not null");
+    expect(sql).toContain("date_preference_type <> 'range'");
+    expect(sql).toContain("date_range_start is not null");
+    expect(sql).toContain("date_range_end is not null");
+    expect(sql).toContain("date_preference_type <> 'month'");
+    expect(sql).toContain("preferred_month is not null");
+    expect(sql).toContain("preferred_year is not null");
   });
 
   it("adds indexes for customer dashboard and future recommendation lookups", () => {
