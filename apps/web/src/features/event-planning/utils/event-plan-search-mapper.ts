@@ -1,8 +1,4 @@
-import {
-  AMENITY_REQUIREMENT_OPTIONS,
-  BUDGET_PREFERENCE_OPTIONS,
-  VENUE_STYLE_OPTIONS,
-} from "../domain/event-plan.constants";
+import { VENUE_STYLE_OPTIONS } from "../domain/event-plan.constants";
 import type { AmenityRequirement, EventPlanDraft } from "../domain/event-plan.types";
 
 const SEARCHABLE_VENUE_TYPES = new Set([
@@ -34,36 +30,6 @@ const AMENITY_SEARCH_LABELS: Partial<Record<AmenityRequirement, string>> = {
 function setIfPresent(params: URLSearchParams, key: string, value: unknown) {
   if (value === null || value === undefined || value === "") return;
   params.set(key, String(value));
-}
-
-function addBudgetParams(params: URLSearchParams, draft: EventPlanDraft) {
-  if (draft.budgetPreference === "custom") {
-    setIfPresent(params, "minBudget", draft.budgetMin);
-    setIfPresent(params, "maxBudget", draft.budgetMax);
-    return;
-  }
-
-  const option = BUDGET_PREFERENCE_OPTIONS.find(
-    (item) => item.value === draft.budgetPreference,
-  );
-
-  const match = option?.value.match(/^(\d+)-(\d+)$/);
-  if (match) {
-    params.set("minBudget", match[1]!);
-    params.set("maxBudget", match[2]!);
-    return;
-  }
-
-  const underMatch = option?.value.match(/^under-(\d+)$/);
-  if (underMatch) {
-    params.set("maxBudget", underMatch[1]!);
-    return;
-  }
-
-  const aboveMatch = option?.value.match(/^above-(\d+)$/);
-  if (aboveMatch) {
-    params.set("minBudget", aboveMatch[1]!);
-  }
 }
 
 function mapVenueTypes(draft: EventPlanDraft) {
@@ -102,7 +68,6 @@ export function mapEventPlanToVenueSearchParams(draft: EventPlanDraft) {
   setIfPresent(params, "province", draft.preferredProvince);
   setIfPresent(params, "city", draft.preferredCity);
   setIfPresent(params, "capacity", draft.expectedGuestCount);
-  addBudgetParams(params, draft);
 
   const venueTypes = mapVenueTypes(draft);
   if (venueTypes.length > 0) params.set("venueTypes", venueTypes.join(","));

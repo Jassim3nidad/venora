@@ -20,15 +20,15 @@ describe("event plan venue search mapper", () => {
     expect(params.get("province")).toBe("Cavite");
     expect(params.get("city")).toBe("Tagaytay");
     expect(params.get("capacity")).toBe("120");
-    expect(params.get("minBudget")).toBe("100001");
-    expect(params.get("maxBudget")).toBe("250000");
+    expect(params.has("minBudget")).toBe(false);
+    expect(params.has("maxBudget")).toBe(false);
     expect(params.get("venueTypes")).toBe("garden,beach");
     expect(params.get("indoorOutdoor")).toBe("outdoor");
     expect(params.get("amenities")).toBe("Parking,Wi-Fi");
     expect(params.get("sort")).toBe("recommended");
   });
 
-  it("uses custom budget ranges and avoids leaking questionnaire notes", () => {
+  it("keeps total event budget out of venue price filters", () => {
     const params = mapEventPlanToVenueSearchParams({
       ...createDefaultEventPlanDraft("2026-07-30T01:00:00.000Z"),
       eventType: "corporate",
@@ -38,8 +38,8 @@ describe("event plan venue search mapper", () => {
       additionalRequirements: "Private executive board dinner details",
     });
 
-    expect(params.get("minBudget")).toBe("75000");
-    expect(params.get("maxBudget")).toBe("175000");
+    expect(params.has("minBudget")).toBe(false);
+    expect(params.has("maxBudget")).toBe(false);
     expect(params.toString()).not.toContain("Private");
     expect(params.toString()).not.toContain("executive");
   });
