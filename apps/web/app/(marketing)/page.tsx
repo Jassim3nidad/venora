@@ -41,6 +41,7 @@ import {
   ScrollReveal,
   ScrollRevealGroup,
 } from "@/src/components/animations/RevealAnimations";
+import { landingPrimaryActions } from "@/src/features/event-planning/utils/landing-actions";
 
 const trustItems = [
   {
@@ -258,6 +259,28 @@ export default async function MarketingHomePage() {
                   venues.
                 </p>
               </RevealItem>
+              <RevealItem
+                yOffset={12}
+                className="mt-6 flex flex-col gap-3 sm:flex-row"
+              >
+                {landingPrimaryActions.map((action) => (
+                  <Link
+                    key={action.href}
+                    href={action.href}
+                    className={[
+                      "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-5 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70",
+                      action.variant === "primary"
+                        ? "bg-white text-[#1D4ED8] hover:bg-[#EFF6FF]"
+                        : "border border-white/35 bg-white/12 text-white backdrop-blur hover:bg-white/20",
+                    ].join(" ")}
+                  >
+                    {action.label}
+                    {action.variant === "primary" ? (
+                      <ArrowRight className="h-4 w-4" />
+                    ) : null}
+                  </Link>
+                ))}
+              </RevealItem>
             </div>
 
             <RevealItem
@@ -268,20 +291,6 @@ export default async function MarketingHomePage() {
                 {...searchSuggestions}
                 variant="hero-panel"
               />
-              <div className="hidden">
-                <Link
-                  className="inline-flex h-11 items-center justify-center rounded-2xl bg-white px-6 text-sm font-bold text-[#1D4ED8] shadow-sm transition-all duration-200 hover:-translate-y-[1px] hover:bg-[#EFF6FF] hover:shadow-md active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-                  href="/venues"
-                >
-                  Browse Venues
-                </Link>
-                <Link
-                  className="inline-flex h-11 items-center justify-center rounded-2xl border border-white/35 bg-white/16 px-6 text-sm font-bold text-white shadow-sm backdrop-blur transition-all duration-200 hover:-translate-y-[1px] hover:bg-white/24 hover:shadow-md active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-                  href="/account/become-partner"
-                >
-                  List Your Venue
-                </Link>
-              </div>
             </RevealItem>
           </RevealGroup>
         </section>
