@@ -431,3 +431,54 @@ describe("structured venue publication access migration", () => {
     expect(sql).not.toContain("using (true)");
   });
 });
+
+describe("package venue spaces migration", () => {
+  it("adds composite package identity needed for same-venue space links", () => {
+    const sql = readMigration("package_venue_spaces");
+
+    expect(sql).toContain(
+      "alter table public.venue_packages add constraint venue_packages_id_venue_id_unique unique (id, venue_id)",
+    );
+  });
+
+  it("creates package-to-space links with same-venue integrity", () => {
+    const sql = readMigration("package_venue_spaces");
+
+    expect(sql).toContain("create table public.package_venue_spaces");
+    expect(sql).toContain("package_id uuid not null");
+    expect(sql).toContain("space_id uuid not null");
+    expect(sql).toContain("venue_id uuid not null");
+    expect(sql).toContain(
+      "foreign key (package_id, venue_id) references public.venue_packages(id, venue_id)",
+    );
+    expect(sql).toContain(
+      "foreign key (space_id, venue_id) references public.venue_spaces(id, venue_id)",
+    );
+    expect(sql).toContain("inclusion_type text not null default 'included'");
+    expect(sql).toContain("inclusion_type in ('included', 'optional', 'upgrade')");
+    expect(sql).toContain("inclusion_notes text");
+    expect(sql).toContain("display_order integer not null default 0");
+    expect(sql).toContain(
+      "constraint package_venue_spaces_package_space_unique unique (package_id, space_id)",
+    );
+  });
+
+  it("adds indexes, trigger, RLS, and published public read policy without writes", () => {
+    const sql = readMigration("package_venue_spaces");
+
+    expect(sql).toContain("create index idx_package_venue_spaces_package");
+    expect(sql).toContain("create index idx_package_venue_spaces_space");
+    expect(sql).toContain("create trigger package_venue_spaces_updated_at");
+    expect(sql).toContain(
+      "alter table public.package_venue_spaces enable row level security",
+    );
+    expect(sql).toContain("create policy package_venue_spaces_public_read");
+    expect(sql).toContain("for select");
+    expect(sql).toContain("package.is_active is true");
+    expect(sql).toContain("published_space.status = 'published'");
+    expect(sql).toContain("published_revision.status = 'published'");
+    expect(sql).not.toContain("for insert");
+    expect(sql).not.toContain("for update");
+    expect(sql).not.toContain("for delete");
+  });
+});
