@@ -84,6 +84,21 @@ export type NotificationChannel = "email" | "sms" | "push" | "in_app";
 export type NotificationPriority = "low" | "normal" | "high" | "urgent";
 export type NotificationDeliveryStatus =
   "queued" | "sent" | "failed" | "skipped";
+export type EventPlanStatus =
+  | "draft"
+  | "completed"
+  | "archived"
+  | "converted_to_inquiry"
+  | "converted_to_booking";
+export type EventPlanCompletionStep =
+  | "event-basics"
+  | "date-location"
+  | "guests-budget"
+  | "venue-style"
+  | "requirements"
+  | "services"
+  | "booking-preferences"
+  | "summary";
 
 // ─── Database ───────────────────────────────────────────────
 
@@ -748,6 +763,112 @@ export interface Database {
           completed_at?: string | null;
           reviewed_at?: string | null;
         };
+      };
+
+      event_plans: {
+        Row: {
+          id: string;
+          customer_id: string;
+          event_type_id: string | null;
+          title: string | null;
+          event_name: string | null;
+          event_type_key: string;
+          custom_event_type: string | null;
+          date_preference_type: string;
+          exact_event_date: string | null;
+          date_range_start: string | null;
+          date_range_end: string | null;
+          preferred_month: number | null;
+          preferred_year: number | null;
+          preferred_day_of_week: string | null;
+          preferred_time_of_day: string | null;
+          province: string | null;
+          city: string | null;
+          nearby_locations_allowed: boolean | null;
+          expected_guest_count: number | null;
+          guest_count_range: string | null;
+          guest_count_min: number | null;
+          guest_count_max: number | null;
+          budget_min: number | null;
+          budget_max: number | null;
+          budget_preference: string | null;
+          currency: "PHP";
+          venue_styles: string[];
+          setting_preference: string | null;
+          ranked_priorities: string[];
+          required_amenities: string[];
+          additional_requirements: string | null;
+          services_needed: string[];
+          custom_service: string | null;
+          service_selection_mode: string;
+          package_preference: string | null;
+          accredited_supplier_preference: string | null;
+          payment_preference: string | null;
+          booking_urgency: string | null;
+          decision_maker_type: string | null;
+          status: EventPlanStatus;
+          completion_step: EventPlanCompletionStep;
+          source_draft_fingerprint: string | null;
+          converted_inquiry_id: string | null;
+          converted_booking_id: string | null;
+          created_at: string;
+          updated_at: string;
+          archived_at: string | null;
+          converted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          customer_id: string;
+          event_type_id?: string | null;
+          title?: string | null;
+          event_name?: string | null;
+          event_type_key: string;
+          custom_event_type?: string | null;
+          date_preference_type?: string;
+          exact_event_date?: string | null;
+          date_range_start?: string | null;
+          date_range_end?: string | null;
+          preferred_month?: number | null;
+          preferred_year?: number | null;
+          preferred_day_of_week?: string | null;
+          preferred_time_of_day?: string | null;
+          province?: string | null;
+          city?: string | null;
+          nearby_locations_allowed?: boolean | null;
+          expected_guest_count?: number | null;
+          guest_count_range?: string | null;
+          guest_count_min?: number | null;
+          guest_count_max?: number | null;
+          budget_min?: number | null;
+          budget_max?: number | null;
+          budget_preference?: string | null;
+          currency?: "PHP";
+          venue_styles?: string[];
+          setting_preference?: string | null;
+          ranked_priorities?: string[];
+          required_amenities?: string[];
+          additional_requirements?: string | null;
+          services_needed?: string[];
+          custom_service?: string | null;
+          service_selection_mode?: string;
+          package_preference?: string | null;
+          accredited_supplier_preference?: string | null;
+          payment_preference?: string | null;
+          booking_urgency?: string | null;
+          decision_maker_type?: string | null;
+          status?: EventPlanStatus;
+          completion_step?: EventPlanCompletionStep;
+          source_draft_fingerprint?: string | null;
+          converted_inquiry_id?: string | null;
+          converted_booking_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          archived_at?: string | null;
+          converted_at?: string | null;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["event_plans"]["Insert"]
+        >;
       };
 
       booking_automation_decisions: {
