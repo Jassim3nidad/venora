@@ -381,3 +381,53 @@ describe("structured venue logistics and FAQ migration", () => {
     expect(sql).not.toContain("create policy");
   });
 });
+
+describe("structured venue publication access migration", () => {
+  it("adds public read policies only for published profile revisions and spaces", () => {
+    const sql = readMigration("structured_venue_publication_access");
+
+    expect(sql).toContain("create policy venue_profile_revisions_public_read");
+    expect(sql).toContain("on public.venue_profile_revisions");
+    expect(sql).toContain("for select");
+    expect(sql).toContain("to anon, authenticated");
+    expect(sql).toContain("using (status = 'published')");
+    expect(sql).toContain("create policy venue_spaces_public_read");
+    expect(sql).toContain("on public.venue_spaces");
+    expect(sql).toContain("venue_spaces.status = 'published'");
+    expect(sql).toContain("published_revision.status = 'published'");
+  });
+
+  it("adds published-revision public reads for relationship and media tables", () => {
+    const sql = readMigration("structured_venue_publication_access");
+
+    for (const policy of [
+      "venue_space_capacity_layouts_public_read",
+      "venue_space_amenities_public_read",
+      "venue_space_event_types_public_read",
+      "venue_media_collections_public_read",
+      "venue_media_items_public_read",
+    ]) {
+      expect(sql).toContain(`create policy ${policy}`);
+    }
+    expect(sql).toContain("published_space.status = 'published'");
+    expect(sql).toContain("published_revision.status = 'published'");
+    expect(sql).toContain("collection.status = 'published'");
+    expect(sql).toContain("venue_media_items.status = 'published'");
+    expect(sql).toContain("venue_media_items.deleted_at is null");
+    expect(sql).toContain("venue_media_items.moderation_status = 'approved'");
+  });
+
+  it("adds published-revision public reads for logistics and FAQs without write access", () => {
+    const sql = readMigration("structured_venue_publication_access");
+
+    expect(sql).toContain("create policy venue_logistics_public_read");
+    expect(sql).toContain("create policy venue_faqs_public_read");
+    expect(sql).toContain("published_revision.status = 'published'");
+    expect(sql).toContain("venue_logistics.status = 'published'");
+    expect(sql).toContain("venue_faqs.status = 'published'");
+    expect(sql).not.toContain("for insert");
+    expect(sql).not.toContain("for update");
+    expect(sql).not.toContain("for delete");
+    expect(sql).not.toContain("using (true)");
+  });
+});
