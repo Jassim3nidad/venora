@@ -99,6 +99,52 @@ export type EventPlanCompletionStep =
   | "services"
   | "booking-preferences"
   | "summary";
+export type VenueProfileRevisionStatus = "draft" | "published" | "archived";
+export type VenueSpaceType =
+  | "ballroom"
+  | "garden"
+  | "pavilion"
+  | "ceremony_area"
+  | "reception_area"
+  | "preparation_suite"
+  | "custom";
+export type VenueSpaceSetting = "indoor" | "outdoor" | "mixed";
+export type VenueSpaceCapacityLayout =
+  | "banquet"
+  | "theatre"
+  | "classroom"
+  | "cocktail"
+  | "u_shape"
+  | "boardroom"
+  | "standing"
+  | "ceremony"
+  | "custom";
+export type VenueMediaCollectionType =
+  | "hero"
+  | "gallery"
+  | "space_gallery"
+  | "video"
+  | "logistics";
+export type VenueMediaMimeType =
+  | "image/jpeg"
+  | "image/png"
+  | "image/webp"
+  | "image/gif"
+  | "video/mp4"
+  | "video/quicktime";
+export type VenueMediaModerationStatus = "approved" | "flagged" | "hidden";
+export type VenueFaqCategory =
+  | "pricing"
+  | "booking"
+  | "logistics"
+  | "suppliers"
+  | "accessibility"
+  | "policies"
+  | "other";
+export type PackageVenueSpaceInclusionType =
+  | "included"
+  | "optional"
+  | "upgrade";
 
 // ─── Database ───────────────────────────────────────────────
 
@@ -672,6 +718,342 @@ export interface Database {
       };
 
       // ── Calendar & Booking ────────────────────────────────
+
+      venue_profile_revisions: {
+        Row: {
+          id: string;
+          venue_id: string;
+          status: VenueProfileRevisionStatus;
+          revision_number: number;
+          created_from_revision_id: string | null;
+          published_at: string | null;
+          published_by: string | null;
+          archived_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          venue_id: string;
+          status?: VenueProfileRevisionStatus;
+          revision_number?: number;
+          created_from_revision_id?: string | null;
+          published_at?: string | null;
+          published_by?: string | null;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["venue_profile_revisions"]["Insert"]
+        >;
+      };
+
+      venue_spaces: {
+        Row: {
+          id: string;
+          revision_id: string;
+          venue_id: string;
+          space_key: string;
+          name: string;
+          slug: string;
+          space_type: VenueSpaceType | null;
+          setting: VenueSpaceSetting;
+          short_description: string | null;
+          description: string | null;
+          capacity_min: number | null;
+          capacity_max: number;
+          accessibility_summary: string | null;
+          restrictions: string | null;
+          operating_notes: string | null;
+          display_order: number;
+          status: VenueProfileRevisionStatus;
+          archived_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          revision_id: string;
+          venue_id: string;
+          space_key?: string;
+          name: string;
+          slug: string;
+          space_type?: VenueSpaceType | null;
+          setting: VenueSpaceSetting;
+          short_description?: string | null;
+          description?: string | null;
+          capacity_min?: number | null;
+          capacity_max: number;
+          accessibility_summary?: string | null;
+          restrictions?: string | null;
+          operating_notes?: string | null;
+          display_order?: number;
+          status?: VenueProfileRevisionStatus;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["venue_spaces"]["Insert"]>;
+      };
+
+      venue_space_capacity_layouts: {
+        Row: {
+          id: string;
+          space_id: string;
+          layout: VenueSpaceCapacityLayout;
+          custom_layout_label: string | null;
+          capacity: number;
+          notes: string | null;
+          display_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          space_id: string;
+          layout: VenueSpaceCapacityLayout;
+          custom_layout_label?: string | null;
+          capacity: number;
+          notes?: string | null;
+          display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["venue_space_capacity_layouts"]["Insert"]
+        >;
+      };
+
+      venue_space_amenities: {
+        Row: {
+          space_id: string;
+          amenity_id: string;
+          notes: string | null;
+          created_at: string;
+        };
+        Insert: {
+          space_id: string;
+          amenity_id: string;
+          notes?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["venue_space_amenities"]["Insert"]
+        >;
+      };
+
+      venue_space_event_types: {
+        Row: {
+          space_id: string;
+          event_type_id: string;
+          notes: string | null;
+          created_at: string;
+        };
+        Insert: {
+          space_id: string;
+          event_type_id: string;
+          notes?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["venue_space_event_types"]["Insert"]
+        >;
+      };
+
+      venue_media_collections: {
+        Row: {
+          id: string;
+          revision_id: string;
+          venue_id: string;
+          space_id: string | null;
+          collection_type: VenueMediaCollectionType;
+          title: string | null;
+          description: string | null;
+          display_order: number;
+          is_cover: boolean;
+          status: VenueProfileRevisionStatus;
+          archived_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          revision_id: string;
+          venue_id: string;
+          space_id?: string | null;
+          collection_type: VenueMediaCollectionType;
+          title?: string | null;
+          description?: string | null;
+          display_order?: number;
+          is_cover?: boolean;
+          status?: VenueProfileRevisionStatus;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["venue_media_collections"]["Insert"]
+        >;
+      };
+
+      venue_media_items: {
+        Row: {
+          id: string;
+          collection_id: string;
+          venue_id: string;
+          space_id: string | null;
+          storage_path: string;
+          legacy_venue_image_id: string | null;
+          media_type: MediaType;
+          mime_type: VenueMediaMimeType | null;
+          alt_text: string | null;
+          caption: string | null;
+          transcript: string | null;
+          width: number | null;
+          height: number | null;
+          duration_seconds: number | null;
+          display_order: number;
+          is_featured: boolean;
+          status: VenueProfileRevisionStatus;
+          moderation_status: VenueMediaModerationStatus;
+          deleted_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          collection_id: string;
+          venue_id: string;
+          space_id?: string | null;
+          storage_path: string;
+          legacy_venue_image_id?: string | null;
+          media_type: MediaType;
+          mime_type?: VenueMediaMimeType | null;
+          alt_text?: string | null;
+          caption?: string | null;
+          transcript?: string | null;
+          width?: number | null;
+          height?: number | null;
+          duration_seconds?: number | null;
+          display_order?: number;
+          is_featured?: boolean;
+          status?: VenueProfileRevisionStatus;
+          moderation_status?: VenueMediaModerationStatus;
+          deleted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["venue_media_items"]["Insert"]
+        >;
+      };
+
+      venue_logistics: {
+        Row: {
+          id: string;
+          revision_id: string;
+          venue_id: string;
+          parking_summary: string | null;
+          parking_capacity: number | null;
+          accessibility_summary: string | null;
+          loading_area_notes: string | null;
+          load_in_notes: string | null;
+          catering_policy: string | null;
+          outside_supplier_policy: string | null;
+          alcohol_policy: string | null;
+          noise_policy: string | null;
+          curfew_time: string | null;
+          security_notes: string | null;
+          restroom_notes: string | null;
+          weather_contingency: string | null;
+          status: VenueProfileRevisionStatus;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          revision_id: string;
+          venue_id: string;
+          parking_summary?: string | null;
+          parking_capacity?: number | null;
+          accessibility_summary?: string | null;
+          loading_area_notes?: string | null;
+          load_in_notes?: string | null;
+          catering_policy?: string | null;
+          outside_supplier_policy?: string | null;
+          alcohol_policy?: string | null;
+          noise_policy?: string | null;
+          curfew_time?: string | null;
+          security_notes?: string | null;
+          restroom_notes?: string | null;
+          weather_contingency?: string | null;
+          status?: VenueProfileRevisionStatus;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["venue_logistics"]["Insert"]
+        >;
+      };
+
+      venue_faqs: {
+        Row: {
+          id: string;
+          revision_id: string;
+          venue_id: string;
+          question: string;
+          answer: string;
+          category: VenueFaqCategory | null;
+          display_order: number;
+          status: VenueProfileRevisionStatus;
+          archived_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          revision_id: string;
+          venue_id: string;
+          question: string;
+          answer: string;
+          category?: VenueFaqCategory | null;
+          display_order?: number;
+          status?: VenueProfileRevisionStatus;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["venue_faqs"]["Insert"]>;
+      };
+
+      package_venue_spaces: {
+        Row: {
+          id: string;
+          package_id: string;
+          space_id: string;
+          venue_id: string;
+          inclusion_type: PackageVenueSpaceInclusionType;
+          inclusion_notes: string | null;
+          display_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          package_id: string;
+          space_id: string;
+          venue_id: string;
+          inclusion_type?: PackageVenueSpaceInclusionType;
+          inclusion_notes?: string | null;
+          display_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["package_venue_spaces"]["Insert"]
+        >;
+      };
 
       venue_availability: {
         Row: {
