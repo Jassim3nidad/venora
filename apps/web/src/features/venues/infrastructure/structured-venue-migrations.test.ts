@@ -317,3 +317,67 @@ describe("structured venue media migration", () => {
     expect(sql).not.toContain("create policy");
   });
 });
+
+describe("structured venue logistics and FAQ migration", () => {
+  it("creates one structured logistics record per venue revision", () => {
+    const sql = readMigration("structured_venue_logistics_faqs");
+
+    expect(sql).toContain("create table public.venue_logistics");
+    expect(sql).toContain(
+      "revision_id uuid not null references public.venue_profile_revisions(id) on delete cascade",
+    );
+    expect(sql).toContain(
+      "foreign key (revision_id, venue_id) references public.venue_profile_revisions(id, venue_id)",
+    );
+    expect(sql).toContain("parking_summary text");
+    expect(sql).toContain("parking_capacity integer");
+    expect(sql).toContain("accessibility_summary text");
+    expect(sql).toContain("catering_policy text");
+    expect(sql).toContain("outside_supplier_policy text");
+    expect(sql).toContain("alcohol_policy text");
+    expect(sql).toContain("noise_policy text");
+    expect(sql).toContain("curfew_time time");
+    expect(sql).toContain("load_in_notes text");
+    expect(sql).toContain("unique (revision_id)");
+    expect(sql).toContain("venue_logistics_parking_capacity_check");
+    expect(sql).toContain("parking_capacity is null or parking_capacity >= 0");
+  });
+
+  it("creates plain-text FAQs with categories and revision ordering", () => {
+    const sql = readMigration("structured_venue_logistics_faqs");
+
+    expect(sql).toContain("create table public.venue_faqs");
+    expect(sql).toContain(
+      "revision_id uuid not null references public.venue_profile_revisions(id) on delete cascade",
+    );
+    expect(sql).toContain("question text not null");
+    expect(sql).toContain("answer text not null");
+    expect(sql).toContain("category text");
+    expect(sql).toContain("display_order integer not null default 0");
+    expect(sql).toContain("venue_faqs_question_check");
+    expect(sql).toContain("length(btrim(question)) between 5 and 200");
+    expect(sql).toContain("venue_faqs_answer_check");
+    expect(sql).toContain("length(btrim(answer)) between 5 and 2000");
+    expect(sql).toContain("venue_faqs_plain_text_check");
+    expect(sql).toContain("question !~ '<[[:alpha:]]'");
+    expect(sql).toContain("answer !~ '<[[:alpha:]]'");
+    expect(sql).toContain("create unique index venue_faqs_revision_question_unique");
+  });
+
+  it("adds indexes, triggers, and RLS without broad writes", () => {
+    const sql = readMigration("structured_venue_logistics_faqs");
+
+    expect(sql).toContain("create index idx_venue_logistics_venue");
+    expect(sql).toContain("create index idx_venue_faqs_revision_order");
+    expect(sql).toContain("create index idx_venue_faqs_category");
+    expect(sql).toContain("create trigger venue_logistics_updated_at");
+    expect(sql).toContain("create trigger venue_faqs_updated_at");
+    expect(sql).toContain(
+      "alter table public.venue_logistics enable row level security",
+    );
+    expect(sql).toContain(
+      "alter table public.venue_faqs enable row level security",
+    );
+    expect(sql).not.toContain("create policy");
+  });
+});
