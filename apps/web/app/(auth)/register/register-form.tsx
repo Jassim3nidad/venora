@@ -2,6 +2,7 @@
 
 import { type FormEvent, useState, useTransition } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   Check,
   Eye,
@@ -27,6 +28,12 @@ const brandPoints = [
 const heroVenue = researchVenues[1] ?? researchVenues[0]!;
 
 export default function RegisterForm() {
+  const searchParams = useSearchParams();
+  const redirectTo =
+    searchParams.get("redirectTo") || searchParams.get("next") || undefined;
+  const loginHref = redirectTo
+    ? `/login?redirectTo=${encodeURIComponent(redirectTo)}`
+    : "/login";
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -52,6 +59,7 @@ export default function RegisterForm() {
       email,
       password,
       confirmPassword,
+      redirectTo,
     });
 
     if (!result.success) {
@@ -65,6 +73,7 @@ export default function RegisterForm() {
         email,
         password,
         confirmPassword,
+        redirectTo,
       });
 
       if (response && !response.success) {
@@ -405,7 +414,7 @@ export default function RegisterForm() {
               Already have an account?{" "}
               <Link
                 className="font-extrabold text-[#2563EB] transition hover:text-[#1D4ED8]"
-                href="/login"
+                href={loginHref}
               >
                 Log in.
               </Link>

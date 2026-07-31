@@ -28,7 +28,10 @@ import {
 } from "../application/auth.usecases";
 import type { ActionResult } from "../types/auth.types";
 import { type RoleName } from "@/lib/rbac/roles";
-import { resolvePostAuthRedirect } from "@/lib/profile-setup";
+import {
+  isSafeInternalRedirect,
+  resolvePostAuthRedirect,
+} from "@/lib/profile-setup";
 import { toErrorMessage } from "@/lib/errors";
 function isUnverifiedEmailError(message: string) {
   const normalized = message.toLowerCase();
@@ -75,11 +78,16 @@ export async function registerAction(rawInput: unknown): Promise<ActionResult> {
   }
 
   try {
+    const safeRedirectTo = isSafeInternalRedirect(parsed.data.redirectTo)
+      ? parsed.data.redirectTo
+      : undefined;
+
     await registerUserUseCase({
       email: parsed.data.email,
       password: parsed.data.password,
       fullName: parsed.data.fullName,
       role: "customer",
+      ...(safeRedirectTo ? { redirectTo: safeRedirectTo } : {}),
     });
 
     try {

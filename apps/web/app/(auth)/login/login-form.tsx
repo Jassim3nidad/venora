@@ -65,6 +65,9 @@ export default function LoginForm() {
   const didVerify = searchParams.get("verified") === "true";
   const redirectTo =
     searchParams.get("redirectTo") || searchParams.get("next") || undefined;
+  const registerHref = redirectTo
+    ? `/register?redirectTo=${encodeURIComponent(redirectTo)}`
+    : "/register";
   const promptParam = searchParams.get("prompt");
   const gatePrompt =
     promptParam === "bookings" ||
@@ -479,7 +482,7 @@ export default function LoginForm() {
             <p className="text-sm font-semibold leading-6 text-[#6B7280]">
               New to Venora?{" "}
               <Link
-                href="/register"
+                href={registerHref}
                 className="font-extrabold text-[#2563EB] transition hover:text-[#1D4ED8]"
               >
                 Create an account.

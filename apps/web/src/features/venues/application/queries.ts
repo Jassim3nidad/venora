@@ -143,25 +143,13 @@ export async function searchMarketplaceVenues(
     );
   }
 
-  if (params.venueTypes && params.venueTypes.length > 0) {
-    const typesFilters = params.venueTypes
-      .map((t) => t.replace(/[,()"]/g, "").trim())
-      .filter(Boolean)
-      .map(
-        (safeT) =>
-          `venue_category_assignments.venue_categories.name.ilike.%${safeT}%`,
-      )
-      .join(",");
-    if (typesFilters) query = query.or(typesFilters);
-  }
+  // Related-table text filters are applied in VenuesClient after this server
+  // fetch. PostgREST rejects nested relation paths inside `.or(...)`, so keep
+  // this query focused on top-level columns and boolean amenities.
 
-  // Handling amenities is tricky in PostgREST for exact matches across a many-to-many.
-  // Using an IN clause on the nested table acts as an OR. To mandate ALL amenities,
-  // we would need multiple joins which PostgREST doesn't support easily.
-  // As a compromise, we'll apply an IN clause (which guarantees AT LEAST one amenity matches)
-  // and then the client can do the strict filtering if needed, OR we can filter strictly on boolean columns.
+  // Filter amenities that have first-class venue columns here. Free-text
+  // amenity names still load with the venue rows and are filtered client-side.
   const booleanAmenities = [];
-  const textAmenities = [];
   for (const am of params.amenities || []) {
     const norm = am.toLowerCase();
     if (norm.includes("park"))
@@ -176,20 +164,10 @@ export async function searchMarketplaceVenues(
       booleanAmenities.push({ col: "has_pool", val: true });
     else if (norm.includes("overnight") || norm.includes("accommodation"))
       booleanAmenities.push({ col: "overnight_accommodation", val: true });
-    else textAmenities.push(am);
   }
 
   for (const { col, val } of booleanAmenities) {
     query = query.eq(col, val);
-  }
-
-  if (textAmenities.length > 0) {
-    const amFilters = textAmenities
-      .map((a) => a.replace(/[,()"]/g, "").trim())
-      .filter(Boolean)
-      .map((safeA) => `venue_amenities.amenities.name.ilike.%${safeA}%`)
-      .join(",");
-    if (amFilters) query = query.or(amFilters);
   }
 
   const page = params.page && params.page > 0 ? params.page : 1;

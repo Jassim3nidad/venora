@@ -10,6 +10,7 @@ export async function registerUserUseCase(input: {
   password: string;
   fullName: string;
   role: RoleName;
+  redirectTo?: string;
 }) {
   // Defense in depth: the registration schema's enum already excludes
   // 'admin' from the selectable options, so this should be unreachable from

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { AuthError } from "@/lib/errors";
 import type { RoleName } from "@/lib/rbac/roles";
+import { isSafeInternalRedirect } from "@/lib/profile-setup";
 import type { AuthRepository } from "../domain/repositories/auth-repository.interface";
 import type { AuthUser } from "../types/auth.types";
 
@@ -30,11 +31,13 @@ export class SupabaseAuthRepository implements AuthRepository {
     password,
     fullName,
     role,
+    redirectTo,
   }: {
     email: string;
     password: string;
     fullName: string;
     role: RoleName;
+    redirectTo?: string;
   }) {
     const supabase = await createClient();
     const siteUrl = this.getSiteUrl();
@@ -46,7 +49,9 @@ export class SupabaseAuthRepository implements AuthRepository {
       password,
       options: {
         data: { full_name: fullName, role },
-        emailRedirectTo: `${siteUrl}/auth/callback?next=/profile/setup`,
+        emailRedirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(
+          isSafeInternalRedirect(redirectTo) ? redirectTo! : "/profile/setup",
+        )}`,
       },
     });
 
