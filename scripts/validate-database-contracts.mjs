@@ -114,6 +114,159 @@ function validateGeneratedTypes() {
       );
     }
   }
+
+  const structuredTables = {
+    venue_profile_revisions: [
+      "id",
+      "venue_id",
+      "status",
+      "revision_number",
+      "created_from_revision_id",
+      "published_at",
+      "published_by",
+      "archived_at",
+      "created_at",
+      "updated_at",
+    ],
+    venue_spaces: [
+      "id",
+      "revision_id",
+      "venue_id",
+      "space_key",
+      "name",
+      "slug",
+      "space_type",
+      "setting",
+      "short_description",
+      "description",
+      "capacity_min",
+      "capacity_max",
+      "accessibility_summary",
+      "restrictions",
+      "operating_notes",
+      "display_order",
+      "status",
+      "archived_at",
+      "created_at",
+      "updated_at",
+    ],
+    venue_space_capacity_layouts: [
+      "id",
+      "space_id",
+      "layout",
+      "custom_layout_label",
+      "capacity",
+      "notes",
+      "display_order",
+      "created_at",
+      "updated_at",
+    ],
+    venue_space_amenities: ["space_id", "amenity_id", "notes", "created_at"],
+    venue_space_event_types: [
+      "space_id",
+      "event_type_id",
+      "notes",
+      "created_at",
+    ],
+    venue_media_collections: [
+      "id",
+      "revision_id",
+      "venue_id",
+      "space_id",
+      "collection_type",
+      "title",
+      "description",
+      "display_order",
+      "is_cover",
+      "status",
+      "archived_at",
+      "created_at",
+      "updated_at",
+    ],
+    venue_media_items: [
+      "id",
+      "collection_id",
+      "venue_id",
+      "space_id",
+      "storage_path",
+      "legacy_venue_image_id",
+      "media_type",
+      "mime_type",
+      "alt_text",
+      "caption",
+      "transcript",
+      "width",
+      "height",
+      "duration_seconds",
+      "display_order",
+      "is_featured",
+      "status",
+      "moderation_status",
+      "deleted_at",
+      "created_at",
+      "updated_at",
+    ],
+    venue_logistics: [
+      "id",
+      "revision_id",
+      "venue_id",
+      "parking_summary",
+      "parking_capacity",
+      "accessibility_summary",
+      "loading_area_notes",
+      "load_in_notes",
+      "catering_policy",
+      "outside_supplier_policy",
+      "alcohol_policy",
+      "noise_policy",
+      "curfew_time",
+      "security_notes",
+      "restroom_notes",
+      "weather_contingency",
+      "status",
+      "created_at",
+      "updated_at",
+    ],
+    venue_faqs: [
+      "id",
+      "revision_id",
+      "venue_id",
+      "question",
+      "answer",
+      "category",
+      "display_order",
+      "status",
+      "archived_at",
+      "created_at",
+      "updated_at",
+    ],
+    package_venue_spaces: [
+      "id",
+      "package_id",
+      "space_id",
+      "venue_id",
+      "inclusion_type",
+      "inclusion_notes",
+      "display_order",
+      "created_at",
+      "updated_at",
+    ],
+  };
+
+  for (const [table, fields] of Object.entries(structuredTables)) {
+    const tableTypes = generatedTypes.match(
+      new RegExp(`${table}:\\s*\\{[\\s\\S]*?\\n\\s{6}\\};`),
+    )?.[0];
+    if (!tableTypes) {
+      errors.push(`generated structured venue type missing: ${table}`);
+      continue;
+    }
+    for (const field of fields) {
+      if (!new RegExp(`\\b${field}:`).test(tableTypes)) {
+        errors.push(`structured venue field absent from generated types: ${table}.${field}`);
+      }
+    }
+  }
 }
 
 validateGeneratedTypes();
