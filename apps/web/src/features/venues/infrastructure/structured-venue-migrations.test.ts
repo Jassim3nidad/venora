@@ -240,3 +240,80 @@ describe("structured venue space relationship migration", () => {
     expect(sql).not.toContain("create policy");
   });
 });
+
+describe("structured venue media migration", () => {
+  it("creates media collections scoped to revisions and optional spaces", () => {
+    const sql = readMigration("structured_venue_media");
+
+    expect(sql).toContain("create table public.venue_media_collections");
+    expect(sql).toContain(
+      "revision_id uuid not null references public.venue_profile_revisions(id) on delete cascade",
+    );
+    expect(sql).toContain(
+      "foreign key (revision_id, venue_id) references public.venue_profile_revisions(id, venue_id)",
+    );
+    expect(sql).toContain(
+      "foreign key (space_id, revision_id, venue_id) references public.venue_spaces(id, revision_id, venue_id)",
+    );
+    expect(sql).toContain("collection_type text not null");
+    expect(sql).toContain("is_cover boolean not null default false");
+    expect(sql).toContain("venue_media_collections_collection_type_check");
+    for (const collectionType of [
+      "hero",
+      "gallery",
+      "space_gallery",
+      "video",
+      "logistics",
+    ]) {
+      expect(sql).toContain(`'${collectionType}'`);
+    }
+  });
+
+  it("creates uploaded media items without external provider fields", () => {
+    const sql = readMigration("structured_venue_media");
+
+    expect(sql).toContain("create table public.venue_media_items");
+    expect(sql).toContain(
+      "collection_id uuid not null references public.venue_media_collections(id) on delete cascade",
+    );
+    expect(sql).toContain("storage_path text not null");
+    expect(sql).toContain(
+      "legacy_venue_image_id uuid references public.venue_images(id) on delete set null",
+    );
+    expect(sql).toContain("media_type text not null");
+    expect(sql).toContain("alt_text text");
+    expect(sql).toContain("transcript text");
+    expect(sql).toContain("venue_media_items_media_type_check");
+    expect(sql).toContain("media_type in ('image', 'video')");
+    expect(sql).toContain("venue_media_items_mime_type_check");
+    expect(sql).toContain("'image/jpeg'");
+    expect(sql).toContain("'video/mp4'");
+    expect(sql).not.toContain("external_url");
+    expect(sql).not.toContain("external_provider");
+  });
+
+  it("adds uniqueness, indexes, triggers, and RLS for media tables", () => {
+    const sql = readMigration("structured_venue_media");
+
+    expect(sql).toContain(
+      "constraint venue_media_collections_id_venue_id_unique unique (id, venue_id)",
+    );
+    expect(sql).toContain(
+      "create unique index venue_media_collections_cover_unique",
+    );
+    expect(sql).toContain("where is_cover and status = 'published'");
+    expect(sql).toContain("create unique index venue_media_items_legacy_unique");
+    expect(sql).toContain("create unique index venue_media_items_featured_unique");
+    expect(sql).toContain("create index idx_venue_media_collections_revision");
+    expect(sql).toContain("create index idx_venue_media_items_collection");
+    expect(sql).toContain("create trigger venue_media_collections_updated_at");
+    expect(sql).toContain("create trigger venue_media_items_updated_at");
+    expect(sql).toContain(
+      "alter table public.venue_media_collections enable row level security",
+    );
+    expect(sql).toContain(
+      "alter table public.venue_media_items enable row level security",
+    );
+    expect(sql).not.toContain("create policy");
+  });
+});
