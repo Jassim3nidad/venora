@@ -1,6 +1,6 @@
 # Structured Venue Access Control
 
-Status: static policy and contract coverage implemented; live local RLS verification blocked by unavailable Docker engine on 2026-07-31.
+Status: live local RLS verified on 2026-07-31 through an isolated disposable Supabase database. The full historical local migration-chain replay remains limited by unrelated local migration drift.
 
 ## Boundary
 
@@ -74,16 +74,26 @@ The write policies call `public.structured_media_path_belongs_to_venue(venue_id,
 
 ## RLS Verification Status
 
-Static migration tests cover policy presence and helper definitions. Live local RLS execution is still required before classifying Phase 2.2 as fully live verified.
+Live local RLS execution was completed in disposable database `structured_venue_rls_verify`, then the database was dropped.
 
-Blocked local commands:
+Verified matrices:
 
-- `supabase status`
-- `supabase start`
-- `docker ps --format "table {{.Names}}\t{{.Status}}"`
+- Owner A and Owner B own-venue management.
+- Cross-owner draft read/write/publish denial.
+- Assigned coordinator draft edit with `manage_assigned_venue_listings`.
+- Assigned coordinator preview with `view_assigned_venues`.
+- Coordinator publish denial.
+- Wrong-venue and unassigned coordinator denial.
+- Customer, supplier, and anonymous public-read/draft-private/write-denial behavior.
+- Admin behavior through the existing `is_admin()` helper path.
+- Publication, package-space, and media-path constraints.
 
-Blocking reason:
+Live results:
 
-- Docker Desktop Linux engine pipe was unavailable: `//./pipe/dockerDesktopLinuxEngine`.
+- Main matrix: 38/38 valid assertions passed.
+- Hidden-update row-count matrix: 5/5 passed.
+- Invariant/admin matrix: 5/5 passed.
+- Temporary live repository verification: passed, 1/1.
+- Temporary live server-action verification: passed, 2/2.
 
-No remote or production database was used.
+No remote or production database was used. No source migration was rewritten.

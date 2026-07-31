@@ -10,8 +10,8 @@ Batch E status, 2026-07-31:
 
 - Task 12: complete. Structured table types were added to `packages/database/types/generated.ts` using the repository's hand-maintained generated-type convention because the local generator could not be safely run.
 - Task 13: complete. Backward-compatibility repository contracts were added for no revision, draft-only, published, archived, package fallback, media fallback, no automatic draft creation, and sanitized errors.
-- Task 14: blocked. Local Supabase/Docker could not be started because the Docker Desktop Linux engine pipe was unavailable, so live RLS verification remains incomplete.
-- Task 15: partial. Foundation, access-control, and QA verification docs were added, but Phase 2.2 must not be classified as live verified until Task 14 passes.
+- Task 14: complete with standard migration-chain limitation. Docker Desktop Linux and local Supabase were reachable. The existing local development database still has unrelated historical migration drift, so Task 14 used an isolated disposable database named `structured_venue_rls_verify`. The required dependency closure and structured migrations applied there, and live owner/cross-owner/coordinator/public/customer/supplier/anonymous/admin/package/media/repository/action matrices passed.
+- Task 15: complete for the Phase 2.2 foundation docs. Foundation, access-control, and QA verification docs now record the live RLS evidence and the remaining standard-chain limitation.
 
 Tech stack:
 Next.js, TypeScript, Zod, Supabase PostgreSQL, Supabase RLS, Supabase Storage, Vitest or the repository's existing test framework.
