@@ -47,6 +47,9 @@ CREATE TRIGGER package_venue_spaces_updated_at
 
 ALTER TABLE public.package_venue_spaces ENABLE ROW LEVEL SECURITY;
 
+GRANT SELECT ON public.venue_packages TO anon, authenticated;
+GRANT SELECT ON public.package_venue_spaces TO anon, authenticated;
+
 CREATE POLICY package_venue_spaces_public_read
   ON public.package_venue_spaces
   FOR SELECT

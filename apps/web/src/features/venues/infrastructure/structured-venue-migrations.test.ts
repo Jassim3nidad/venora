@@ -387,6 +387,12 @@ describe("structured venue publication access migration", () => {
     const sql = readMigration("structured_venue_publication_access");
 
     expect(sql).toContain("create policy venue_profile_revisions_public_read");
+    expect(sql).toContain(
+      "grant select on public.venue_profile_revisions to anon, authenticated",
+    );
+    expect(sql).toContain(
+      "grant select on public.venue_spaces to anon, authenticated",
+    );
     expect(sql).toContain("on public.venue_profile_revisions");
     expect(sql).toContain("for select");
     expect(sql).toContain("to anon, authenticated");
@@ -415,6 +421,12 @@ describe("structured venue publication access migration", () => {
     expect(sql).toContain("venue_media_items.status = 'published'");
     expect(sql).toContain("venue_media_items.deleted_at is null");
     expect(sql).toContain("venue_media_items.moderation_status = 'approved'");
+    expect(sql).toContain(
+      "grant select on public.venue_space_capacity_layouts to anon, authenticated",
+    );
+    expect(sql).toContain(
+      "grant select on public.venue_media_items to anon, authenticated",
+    );
   });
 
   it("adds published-revision public reads for logistics and FAQs without write access", () => {
@@ -425,6 +437,12 @@ describe("structured venue publication access migration", () => {
     expect(sql).toContain("published_revision.status = 'published'");
     expect(sql).toContain("venue_logistics.status = 'published'");
     expect(sql).toContain("venue_faqs.status = 'published'");
+    expect(sql).toContain(
+      "grant select on public.venue_logistics to anon, authenticated",
+    );
+    expect(sql).toContain(
+      "grant select on public.venue_faqs to anon, authenticated",
+    );
     expect(sql).not.toContain("for insert");
     expect(sql).not.toContain("for update");
     expect(sql).not.toContain("for delete");
@@ -473,6 +491,12 @@ describe("package venue spaces migration", () => {
       "alter table public.package_venue_spaces enable row level security",
     );
     expect(sql).toContain("create policy package_venue_spaces_public_read");
+    expect(sql).toContain(
+      "grant select on public.venue_packages to anon, authenticated",
+    );
+    expect(sql).toContain(
+      "grant select on public.package_venue_spaces to anon, authenticated",
+    );
     expect(sql).toContain("for select");
     expect(sql).toContain("package.is_active is true");
     expect(sql).toContain("published_space.status = 'published'");

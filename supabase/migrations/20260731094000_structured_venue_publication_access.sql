@@ -1,5 +1,15 @@
 -- Structured venue foundation: public reads for published revisions only.
 
+GRANT SELECT ON public.venue_profile_revisions TO anon, authenticated;
+GRANT SELECT ON public.venue_spaces TO anon, authenticated;
+GRANT SELECT ON public.venue_space_capacity_layouts TO anon, authenticated;
+GRANT SELECT ON public.venue_space_amenities TO anon, authenticated;
+GRANT SELECT ON public.venue_space_event_types TO anon, authenticated;
+GRANT SELECT ON public.venue_media_collections TO anon, authenticated;
+GRANT SELECT ON public.venue_media_items TO anon, authenticated;
+GRANT SELECT ON public.venue_logistics TO anon, authenticated;
+GRANT SELECT ON public.venue_faqs TO anon, authenticated;
+
 CREATE POLICY venue_profile_revisions_public_read
   ON public.venue_profile_revisions
   FOR SELECT
