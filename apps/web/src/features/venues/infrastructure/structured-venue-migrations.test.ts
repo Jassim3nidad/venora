@@ -145,3 +145,98 @@ describe("structured venue core migration", () => {
     expect(sql).not.toContain("insert into public.venue_spaces");
   });
 });
+
+describe("structured venue space relationship migration", () => {
+  it("creates capacity layouts with bounded layout and capacity data", () => {
+    const sql = readMigration("structured_venue_space_relationships");
+
+    expect(sql).toContain("create table public.venue_space_capacity_layouts");
+    expect(sql).toContain(
+      "space_id uuid not null references public.venue_spaces(id) on delete cascade",
+    );
+    expect(sql).toContain("layout text not null");
+    expect(sql).toContain("custom_layout_label text");
+    expect(sql).toContain("capacity integer not null");
+    expect(sql).toContain("display_order integer not null default 0");
+    expect(sql).toContain("venue_space_capacity_layouts_layout_check");
+    for (const layout of [
+      "banquet",
+      "theatre",
+      "classroom",
+      "cocktail",
+      "u_shape",
+      "boardroom",
+      "standing",
+      "ceremony",
+      "custom",
+    ]) {
+      expect(sql).toContain(`'${layout}'`);
+    }
+    expect(sql).toContain("venue_space_capacity_layouts_capacity_check");
+    expect(sql).toContain("capacity between 0 and 100000");
+    expect(sql).toContain("venue_space_capacity_layouts_custom_label_check");
+    expect(sql).toContain(
+      "layout <> 'custom' and custom_layout_label is null",
+    );
+  });
+
+  it("prevents duplicate standard and custom layout rows per space", () => {
+    const sql = readMigration("structured_venue_space_relationships");
+
+    expect(sql).toContain(
+      "create unique index venue_space_capacity_layouts_standard_unique",
+    );
+    expect(sql).toContain("on public.venue_space_capacity_layouts (space_id, layout)");
+    expect(sql).toContain("where layout <> 'custom'");
+    expect(sql).toContain(
+      "create unique index venue_space_capacity_layouts_custom_unique",
+    );
+    expect(sql).toContain(
+      "on public.venue_space_capacity_layouts (space_id, lower(custom_layout_label))",
+    );
+    expect(sql).toContain("where layout = 'custom'");
+  });
+
+  it("creates space amenity and event-type taxonomy relationships", () => {
+    const sql = readMigration("structured_venue_space_relationships");
+
+    expect(sql).toContain("create table public.venue_space_amenities");
+    expect(sql).toContain("primary key (space_id, amenity_id)");
+    expect(sql).toContain(
+      "space_id uuid not null references public.venue_spaces(id) on delete cascade",
+    );
+    expect(sql).toContain(
+      "amenity_id uuid not null references public.amenities(id) on delete restrict",
+    );
+    expect(sql).toContain("create table public.venue_space_event_types");
+    expect(sql).toContain("primary key (space_id, event_type_id)");
+    expect(sql).toContain(
+      "event_type_id uuid not null references public.event_types(id) on delete restrict",
+    );
+    expect(sql).toContain("venue_space_amenities_notes_check");
+    expect(sql).toContain("venue_space_event_types_notes_check");
+  });
+
+  it("adds indexes, updated_at trigger, and RLS without broad writes", () => {
+    const sql = readMigration("structured_venue_space_relationships");
+
+    expect(sql).toContain("create index idx_venue_space_capacity_layouts_space");
+    expect(sql).toContain(
+      "create index idx_venue_space_capacity_layouts_layout_capacity",
+    );
+    expect(sql).toContain("create index idx_venue_space_amenities_amenity");
+    expect(sql).toContain("create index idx_venue_space_event_types_event_type");
+    expect(sql).toContain("create trigger venue_space_capacity_layouts_updated_at");
+    expect(sql).toContain("execute function public.set_updated_at()");
+    expect(sql).toContain(
+      "alter table public.venue_space_capacity_layouts enable row level security",
+    );
+    expect(sql).toContain(
+      "alter table public.venue_space_amenities enable row level security",
+    );
+    expect(sql).toContain(
+      "alter table public.venue_space_event_types enable row level security",
+    );
+    expect(sql).not.toContain("create policy");
+  });
+});
