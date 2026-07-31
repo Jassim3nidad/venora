@@ -6,6 +6,13 @@ Create the secure structured-data foundation for venue spaces, grouped media, lo
 Architecture:
 Use `venue_profile_revisions` as the Draft -> Preview -> Published container. Store spaces, layouts, space amenities, space event types, grouped media, logistics, FAQs, and package-space relationships as normalized rows tied to a revision and venue. Public pages keep current behavior unless a published structured revision exists. Owners and assigned coordinators manage drafts through server-derived authorization. Public reads expose only published structured content.
 
+Batch E status, 2026-07-31:
+
+- Task 12: complete. Structured table types were added to `packages/database/types/generated.ts` using the repository's hand-maintained generated-type convention because the local generator could not be safely run.
+- Task 13: complete. Backward-compatibility repository contracts were added for no revision, draft-only, published, archived, package fallback, media fallback, no automatic draft creation, and sanitized errors.
+- Task 14: blocked. Local Supabase/Docker could not be started because the Docker Desktop Linux engine pipe was unavailable, so live RLS verification remains incomplete.
+- Task 15: partial. Foundation, access-control, and QA verification docs were added, but Phase 2.2 must not be classified as live verified until Task 14 passes.
+
 Tech stack:
 Next.js, TypeScript, Zod, Supabase PostgreSQL, Supabase RLS, Supabase Storage, Vitest or the repository's existing test framework.
 

@@ -2,7 +2,13 @@
 
 Phase: 2.2 Planning - Structured Venue Foundation
 Repository: C:\venora
-Status: implementation-ready design for stakeholder review
+Status: implemented foundation with live local RLS verification pending
+
+Implementation note, 2026-07-31:
+
+- Structured migrations, repository contracts, server-action contracts, generated database types, and backward-compatibility tests are implemented.
+- Live local RLS verification remains pending because Docker Desktop's Linux engine was unavailable during Batch E verification.
+- The owner editor UI and public immersive venue-profile UI remain deferred to later phases.
 
 ## 1. Purpose
 
