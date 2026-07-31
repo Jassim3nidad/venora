@@ -1,6 +1,6 @@
 # Structured Venue Foundation
 
-Status: implemented through repository/server-action contracts; live local RLS verification blocked by unavailable Docker engine on 2026-07-31.
+Status: implemented and live local RLS verified on 2026-07-31 through an isolated disposable Supabase database. The existing local development database still has unrelated historical migration-chain drift, so full historical-chain replay remains a documented limitation.
 
 Phase 2.2 adds the data foundation for future immersive venue profiles. It does not add the venue-owner structured editor UI and does not redesign the public venue page.
 
@@ -75,6 +75,25 @@ Contracts:
 - Coordinators cannot publish.
 - Owner/admin publication is routed through server actions and repository methods.
 - Route revalidation is scoped to dashboard and public venue paths.
+
+## Live Verification
+
+Task 14 live verification used disposable database `structured_venue_rls_verify` inside the local Supabase Postgres container.
+
+Verified live:
+
+- All dependency and structured migrations in the Task 14 closure applied to the disposable database.
+- RLS was enabled on all structured tables.
+- Public reads exposed only published structured content.
+- Draft content remained private.
+- Owners managed only their own venues.
+- Cross-owner writes, reparenting, cross-venue package-space links, and wrong media paths were blocked.
+- Coordinators required an active venue assignment plus explicit permission.
+- Coordinators could not publish.
+- Customers, suppliers, and anonymous users could not write.
+- Repository methods and server actions were exercised against the live disposable database through temporary tests, then those test files were removed.
+
+See `docs/qa/structured-venue-foundation-verification.md` for the command/result log.
 
 ## Backward Compatibility
 
