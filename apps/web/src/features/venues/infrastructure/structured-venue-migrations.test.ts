@@ -506,3 +506,111 @@ describe("package venue spaces migration", () => {
     expect(sql).not.toContain("for delete");
   });
 });
+
+describe("structured venue write access migration", () => {
+  it("adds scoped helper functions for owner, admin, and assigned coordinator access", () => {
+    const sql = readMigration("structured_venue_write_access");
+
+    expect(sql).toContain(
+      "create or replace function public.can_manage_venue_structured_content",
+    );
+    expect(sql).toContain(
+      "create or replace function public.can_preview_venue_structured_content",
+    );
+    expect(sql).toContain(
+      "create or replace function public.can_publish_venue_structured_content",
+    );
+    expect(sql).toContain("security definer");
+    expect(sql).toContain("set search_path = public, pg_catalog");
+    expect(sql).toContain("public.is_admin()");
+    expect(sql).toContain("public.is_org_owner(venue.organization_id)");
+    expect(sql).toContain("join public.venue_coordinator_assignments assignment");
+    expect(sql).toContain("member.role = 'coordinator'");
+    expect(sql).toContain("member.status = 'active'");
+    expect(sql).toContain(
+      "'manage_assigned_venue_listings' = any(member.permissions)",
+    );
+    expect(sql).toContain("'view_assigned_venues' = any(member.permissions)");
+    expect(sql).not.toContain("role = 'event_coordinator'");
+  });
+
+  it("keeps publication authority limited to owners and admins", () => {
+    const sql = readMigration("structured_venue_write_access");
+    const publishFunction = sql.slice(
+      sql.indexOf(
+        "create or replace function public.can_publish_venue_structured_content",
+      ),
+      sql.indexOf(
+        "create or replace function public.structured_revision_allows_draft_write",
+      ),
+    );
+
+    expect(publishFunction).toContain("public.is_admin()");
+    expect(publishFunction).toContain(
+      "public.is_org_owner(venue.organization_id)",
+    );
+    expect(publishFunction).not.toContain("organization_members");
+    expect(publishFunction).not.toContain("venue_coordinator_assignments");
+    expect(publishFunction).not.toContain("manage_assigned_venue_listings");
+    expect(publishFunction).not.toContain("view_assigned_venues");
+  });
+
+  it("grants authenticated writes but requires RLS policies for every structured table", () => {
+    const sql = readMigration("structured_venue_write_access");
+
+    for (const table of [
+      "venue_profile_revisions",
+      "venue_spaces",
+      "venue_space_capacity_layouts",
+      "venue_space_amenities",
+      "venue_space_event_types",
+      "venue_media_collections",
+      "venue_media_items",
+      "venue_logistics",
+      "venue_faqs",
+      "package_venue_spaces",
+    ]) {
+      expect(sql).toContain(
+        `grant insert, update, delete on public.${table} to authenticated`,
+      );
+      expect(sql).toContain(`on public.${table} for select`);
+      expect(sql).toContain(`on public.${table} for insert`);
+      expect(sql).toContain(`on public.${table} for update`);
+      expect(sql).toContain(`on public.${table} for delete`);
+    }
+  });
+
+  it("confines normal edits to draft structured content and checks media path ownership", () => {
+    const sql = readMigration("structured_venue_write_access");
+
+    expect(sql).toContain(
+      "create or replace function public.structured_revision_allows_draft_write",
+    );
+    expect(sql).toContain(
+      "create or replace function public.structured_space_allows_draft_write",
+    );
+    expect(sql).toContain(
+      "create or replace function public.structured_media_path_belongs_to_venue",
+    );
+    expect(sql).toContain("revision.status = 'draft'");
+    expect(sql).toContain("space.status = 'draft'");
+    expect(sql).toContain(
+      "p_storage_path like venue.organization_id::text || '/' || p_venue_id::text || '/%'",
+    );
+    expect(sql).toContain(
+      "status = 'draft' and public.structured_media_collection_allows_draft_write(collection_id)",
+    );
+  });
+
+  it("does not introduce broad bypass policies or anonymous writes", () => {
+    const sql = readMigration("structured_venue_write_access");
+
+    expect(sql).toContain("revoke all on function");
+    expect(sql).toContain("grant execute on function");
+    expect(sql).not.toContain("to anon");
+    expect(sql).not.toContain("using (true)");
+    expect(sql).not.toContain("with check (true)");
+    expect(sql).not.toContain("disable row level security");
+    expect(sql).not.toContain("service_role");
+  });
+});
