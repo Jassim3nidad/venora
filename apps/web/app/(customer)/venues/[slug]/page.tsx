@@ -30,6 +30,15 @@ import type {
   VenueSpaceCapacityLayout,
   VenueSpaceLayout,
 } from "@/src/features/venues/domain/structured-venue.types";
+import {
+  createEventPlanRepository,
+  type EventPlanClient,
+} from "@/src/features/event-planning/infrastructure/event-plan.repository";
+import {
+  buildEventPlanVenueFit,
+  selectLatestUsableEventPlan,
+  type EventPlanVenueFit,
+} from "@/src/features/venues/application/event-plan-venue-fit";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -427,6 +436,22 @@ export default async function VenueDetailPage({ params }: Props) {
     ownerProfile,
   });
 
+  let eventPlanFit: EventPlanVenueFit | null = null;
+  if (user) {
+    try {
+      const eventPlanRepository = createEventPlanRepository(
+        supabase as unknown as EventPlanClient,
+      );
+      const plans = await eventPlanRepository.listForCustomer(user.id);
+      const activePlan = selectLatestUsableEventPlan(plans);
+      if (activePlan) {
+        eventPlanFit = buildEventPlanVenueFit(activePlan, publicProfile);
+      }
+    } catch {
+      eventPlanFit = null;
+    }
+  }
+
   let eligibleReviewBooking: { id: string; event_date: string | null } | null =
     null;
   if (user && dbVenue) {
@@ -497,6 +522,7 @@ export default async function VenueDetailPage({ params }: Props) {
       <VenueDetails
         venue={venueWithMap}
         profile={publicProfile}
+        eventPlanFit={eventPlanFit}
         reviews={reviews || []}
         nearbyVenues={nearbyVenues}
         initialIsFavorited={initialIsFavorited}
