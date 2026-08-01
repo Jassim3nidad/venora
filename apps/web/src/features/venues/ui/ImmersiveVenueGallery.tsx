@@ -104,6 +104,7 @@ export default function ImmersiveVenueGallery({
   const [activeIndex, setActiveIndex] = useState(0);
   const [open, setOpen] = useState(false);
   const touchStartX = useRef<number | null>(null);
+  const lastTriggerRef = useRef<HTMLButtonElement | null>(null);
   const activeGroup =
     groups.find((group) => group.key === activeGroupKey) ?? groups[0] ?? null;
   const activeMedia = activeGroup?.media[activeIndex] ?? null;
@@ -134,9 +135,16 @@ export default function ImmersiveVenueGallery({
   if (!activeGroup || !activeMedia) return null;
 
   const visibleMedia = activeGroup.media.slice(0, 5);
-  const openAt = (index: number) => {
+  const openAt = (index: number, trigger: HTMLButtonElement) => {
+    lastTriggerRef.current = trigger;
     setActiveIndex(index);
     setOpen(true);
+  };
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      requestAnimationFrame(() => lastTriggerRef.current?.focus());
+    }
   };
   const handleTouchStart = (event: TouchEvent) => {
     touchStartX.current = event.touches[0]?.clientX ?? null;
@@ -193,7 +201,7 @@ export default function ImmersiveVenueGallery({
             <button
               key={item.id}
               type="button"
-              onClick={() => openAt(index)}
+              onClick={(event) => openAt(index, event.currentTarget)}
               aria-label={`Open ${item.mediaType === "video" ? "video" : "photo"} ${index + 1} of ${activeGroup.media.length}${item.caption ? `: ${item.caption}` : ""}`}
               className={`group relative min-h-11 overflow-hidden bg-[#E6E2DA] text-left focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-white ${
                 isLead ? "col-span-2 row-span-2 lg:col-span-2" : "hidden sm:block"
@@ -210,7 +218,7 @@ export default function ImmersiveVenueGallery({
         })}
         <Button
           type="button"
-          onClick={() => openAt(0)}
+          onClick={(event) => openAt(0, event.currentTarget)}
           variant="outline"
           className="absolute bottom-4 right-4 z-10 h-11 rounded-lg border-white/70 bg-white px-4 text-sm font-bold text-[#151C27] shadow-sm hover:bg-[#F7F5F1]"
         >
@@ -219,7 +227,7 @@ export default function ImmersiveVenueGallery({
         </Button>
       </div>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="flex h-dvh max-h-dvh w-screen max-w-none flex-col overflow-hidden rounded-none border-0 bg-[#101412] p-0 text-white sm:rounded-none">
           <DialogTitle className="sr-only">{venueName} gallery</DialogTitle>
           <DialogDescription className="sr-only">

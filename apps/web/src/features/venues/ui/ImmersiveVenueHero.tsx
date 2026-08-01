@@ -253,7 +253,7 @@ export default function ImmersiveVenueHero({
               {profile.venue.name}
             </h1>
             {profile.venue.shortDescription ? (
-              <p className="mt-5 max-w-2xl text-base leading-7 text-white/88 sm:text-lg sm:leading-8">
+              <p className="mt-5 line-clamp-6 max-w-2xl text-base leading-7 text-white/88 sm:line-clamp-4 sm:text-lg sm:leading-8">
                 {profile.venue.shortDescription}
               </p>
             ) : null}

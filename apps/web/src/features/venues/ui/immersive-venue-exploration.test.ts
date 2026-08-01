@@ -111,5 +111,6 @@ describe("immersive venue exploration", () => {
     expect(gallerySource).toContain('aria-label="Next gallery item"');
     expect(gallerySource).toContain('event.key === "ArrowLeft"');
     expect(gallerySource).toContain("onTouchStart");
+    expect(gallerySource).toContain("lastTriggerRef.current?.focus()");
   });
 });
