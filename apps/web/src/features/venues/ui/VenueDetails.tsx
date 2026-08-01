@@ -37,6 +37,7 @@ import { useAuthRequiredPrompt } from "@/components/layout/AuthRequiredPrompt";
 import { isOptimizableImageSrc } from "@/src/lib/image-host";
 import type { PublicOwnerProfile } from "@/src/features/owners/application/queries";
 import type { SmartVenueSearchVenue } from "@/features/search/schemas/search.schema";
+import type { PublicVenueProfileViewModel } from "../application/public-venue-profile";
 import { toggleFavoriteAction } from "../application/actions";
 import { mergeAmenityNames } from "../utils/venue-mappers";
 import { pickGalleryImages, pickPromotionalVideo } from "../utils/venue-media";
@@ -55,6 +56,7 @@ const VenueMap = dynamic(() => import("@/src/components/VenueMap"), {
 
 interface VenueDetailsProps {
   venue: any;
+  profile: PublicVenueProfileViewModel;
   reviews: any[];
   nearbyVenues: any[];
   initialIsFavorited: boolean;
@@ -88,6 +90,7 @@ function formatDate(value?: string | null) {
 
 export default function VenueDetails({
   venue,
+  profile,
   reviews = [],
   nearbyVenues = [],
   initialIsFavorited,
@@ -177,23 +180,8 @@ export default function VenueDetails({
     .filter(Boolean);
   const promotionalVideo = pickPromotionalVideo(venue.venue_images ?? []);
   const galleryImages = pickGalleryImages(venue.venue_images ?? []);
-  const loadedReviewCount = reviews.length;
-  const effectiveReviewCount = Math.max(
-    Number(venue.review_count ?? 0),
-    loadedReviewCount,
-  );
-  const loadedAverageRating =
-    loadedReviewCount > 0
-      ? reviews.reduce(
-          (sum: number, review: any) =>
-            sum + Number(review.overall_rating ?? 0),
-          0,
-        ) / loadedReviewCount
-      : 0;
-  const effectiveAvgRating =
-    effectiveReviewCount > 0 && Number(venue.avg_rating ?? 0) > 0
-      ? Number(venue.avg_rating)
-      : loadedAverageRating;
+  const effectiveReviewCount = profile.rating.count;
+  const effectiveAvgRating = profile.rating.average;
   const hostName =
     ownerProfile?.name ?? venue.organizations?.name ?? "Venora Host";
   const hostInitials =
