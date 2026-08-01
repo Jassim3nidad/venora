@@ -398,13 +398,22 @@ export default async function EditVenuePage({
       title="Edit Venue"
       description="Update core venue details, guest capacity, media, and packages for this listing."
       action={
-        <DashButton
-          href={venuesBackHref}
-          variant="secondary"
-          icon="arrow_back"
-        >
-          Back to Venues
-        </DashButton>
+        <div className="flex flex-wrap gap-2">
+          <DashButton
+            href={`/dashboard/venues/${id}/experience`}
+            variant="secondary"
+            icon="auto_awesome"
+          >
+            Structured Experience
+          </DashButton>
+          <DashButton
+            href={venuesBackHref}
+            variant="secondary"
+            icon="arrow_back"
+          >
+            Back to Venues
+          </DashButton>
+        </div>
       }
     >
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
