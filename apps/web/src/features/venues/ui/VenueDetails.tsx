@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import Image from "next/image";
@@ -11,41 +10,29 @@ import {
   Clock,
   Compass,
   FileText,
-  Heart,
   Image as ImageIcon,
   MapPin,
   ParkingCircle,
-  Share2,
   ShieldCheck,
-  Snowflake,
   Sparkles,
   Star,
-  TreePine,
   Users,
-  Wifi,
 } from "lucide-react";
-import {
-  Button,
-  Separator,
-  Toast,
-  ToastDescription,
-  ToastTitle,
-} from "@venora/ui";
+import { Separator } from "@venora/ui";
 import CostEstimatorPanel from "@/features/ai/ui/CostEstimatorPanel";
 import RecommendedVenues from "@/features/ai/ui/RecommendedVenues";
-import { useAuthRequiredPrompt } from "@/components/layout/AuthRequiredPrompt";
 import { isOptimizableImageSrc } from "@/src/lib/image-host";
 import type { PublicOwnerProfile } from "@/src/features/owners/application/queries";
 import type { SmartVenueSearchVenue } from "@/features/search/schemas/search.schema";
 import type { PublicVenueProfileViewModel } from "../application/public-venue-profile";
-import { toggleFavoriteAction } from "../application/actions";
 import { mergeAmenityNames } from "../utils/venue-mappers";
-import { pickGalleryImages, pickPromotionalVideo } from "../utils/venue-media";
 import BookingSidebar from "./BookingSidebar";
+import ImmersiveVenueHero, {
+  getImmersiveSectionLinks,
+  ImmersiveVenueSectionNav,
+} from "./ImmersiveVenueHero";
 import PackageComparePicker from "./PackageComparePicker";
 import ReviewsSection from "./ReviewsSection";
-import VenueGallery from "./VenueGallery";
-import VenuePromotionalVideo from "./VenuePromotionalVideo";
 
 const VenueMap = dynamic(() => import("@/src/components/VenueMap"), {
   ssr: false,
@@ -100,60 +87,9 @@ export default function VenueDetails({
   ownerProfile = null,
   recommendedFallbackVenues = [],
 }: VenueDetailsProps) {
-  const [isFavorited, setIsFavorited] = useState(initialIsFavorited);
-  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
-  const [toastOpen, setToastOpen] = useState(false);
-  const { openAuthPrompt, authPrompt } = useAuthRequiredPrompt(
-    `/venues/${venue.slug ?? venue.id}`,
-    "favorites",
-  );
-  const [toastMessage, setToastMessage] = useState({
-    title: "",
-    description: "",
-  });
   const supabaseUrl =
     process.env.NEXT_PUBLIC_SUPABASE_URL ||
     "https://szmjjkywcsnzkgqevinz.supabase.co";
-
-  const triggerToast = (title: string, description: string) => {
-    setToastMessage({ title, description });
-    setToastOpen(true);
-  };
-
-  const handleFavoriteToggle = async () => {
-    if (!currentUser) {
-      openAuthPrompt(`/venues/${venue.slug ?? venue.id}`);
-      return;
-    }
-
-    setIsFavorited((prev) => !prev);
-    setIsTogglingFavorite(true);
-
-    const result = await toggleFavoriteAction({ venueId: venue.id });
-    setIsTogglingFavorite(false);
-
-    if (result.error) {
-      setIsFavorited((prev) => !prev);
-      triggerToast("Error", result.error.message);
-    } else {
-      triggerToast(
-        result.data.isFavorited
-          ? "Saved to Favorites"
-          : "Removed from Favorites",
-        result.data.isFavorited
-          ? "You can view this venue anytime in your account dashboard."
-          : "This venue has been removed from your saved list.",
-      );
-    }
-  };
-
-  const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
-    triggerToast(
-      "Link Copied",
-      "The venue page link has been copied to your clipboard.",
-    );
-  };
 
   const mapLatitude = venue.mapLatitude ?? venue.latitude;
   const mapLongitude = venue.mapLongitude ?? venue.longitude;
@@ -178,8 +114,6 @@ export default function VenueDetails({
     .split(/\r?\n/)
     .map((rule) => rule.trim())
     .filter(Boolean);
-  const promotionalVideo = pickPromotionalVideo(venue.venue_images ?? []);
-  const galleryImages = pickGalleryImages(venue.venue_images ?? []);
   const effectiveReviewCount = profile.rating.count;
   const effectiveAvgRating = profile.rating.average;
   const hostName =
@@ -192,140 +126,48 @@ export default function VenueDetails({
       .map((part: string) => part[0]?.toUpperCase())
       .join("") || "VO";
   const cityLabel = [venue.city, venue.province].filter(Boolean).join(", ");
-  const quickFacts = [
-    {
-      label: `Up to ${Number(venue.capacity_max ?? 0).toLocaleString("en-PH")} pax`,
-      icon: Users,
-      show: Boolean(venue.capacity_max),
-    },
-    {
-      label: venue.parking_available ? "Parking available" : "Nearby parking",
-      icon: ParkingCircle,
-      show: true,
-    },
-    {
-      label: "High-speed WiFi",
-      icon: Wifi,
-      show: amenitiesList.some((amenity: string) =>
-        /wifi|wi-fi|internet/i.test(amenity),
-      ),
-    },
-    {
-      label: "Fully Air-conditioned",
-      icon: Snowflake,
-      show: Boolean(venue.air_conditioned),
-    },
-    {
-      label:
-        venue.indoor_outdoor === "both"
-          ? "Indoor & Outdoor"
-          : venue.indoor_outdoor === "outdoor"
-            ? "Outdoor"
-            : "Indoor",
-      icon: TreePine,
-      show: Boolean(venue.indoor_outdoor),
-    },
-  ].filter((item) => item.show);
+  const renderedSectionIds = [
+    "overview",
+    ...(activePackages.length > 0 ? ["packages"] : []),
+    "practical",
+    "reviews",
+  ];
+  const sectionLinks = getImmersiveSectionLinks(
+    profile.sections,
+    renderedSectionIds,
+  );
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 px-4 pb-28 pt-8 font-sans text-[#151C27] sm:px-6 lg:px-8 lg:pb-8">
-      <nav
-        aria-label="Breadcrumb"
-        className="flex flex-wrap items-center gap-2 text-sm font-semibold text-[#434654]"
-      >
-        <Link href="/" className="transition-colors hover:text-[#0052CC]">
-          Home
-        </Link>
-        <ChevronRight className="h-4 w-4" />
-        <Link href="/venues" className="transition-colors hover:text-[#0052CC]">
-          Venues
-        </Link>
-        <ChevronRight className="h-4 w-4" />
-        <span className="text-[#151C27]">{venue.name}</span>
-      </nav>
+    <div className="bg-[#F7F5F1] pb-28 font-sans text-[#151C27] lg:pb-12">
+      <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+        <nav
+          aria-label="Breadcrumb"
+          className="flex flex-wrap items-center gap-2 text-sm font-semibold text-[#5C625E]"
+        >
+          <Link href="/" className="transition-colors hover:text-[#0052CC]">
+            Home
+          </Link>
+          <ChevronRight className="h-4 w-4" />
+          <Link href="/venues" className="transition-colors hover:text-[#0052CC]">
+            Venues
+          </Link>
+          <ChevronRight className="h-4 w-4" />
+          <span className="text-[#151C27]">{venue.name}</span>
+        </nav>
+      </div>
 
-      <header className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
-        <div className="min-w-0">
-          <h1 className="max-w-4xl break-words text-5xl font-bold leading-[1.1] tracking-[-0.04em] text-[#151C27] md:text-6xl">
-            {venue.name}
-          </h1>
-          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-semibold text-[#434654]">
-            <span className="inline-flex items-center gap-1.5">
-              <Star className="h-5 w-5 fill-[#F59E0B] text-[#F59E0B]" />
-              <span className="font-bold text-[#151C27]">
-                {effectiveAvgRating.toFixed(1)}
-              </span>
-              <span className="underline underline-offset-2">
-                ({effectiveReviewCount} review
-                {effectiveReviewCount === 1 ? "" : "s"})
-              </span>
-            </span>
-            <span className="hidden text-[#E5E7EB] sm:inline">|</span>
-            <span className="inline-flex items-center gap-1.5 text-emerald-500">
-              <ShieldCheck className="h-5 w-5" />
-              Verified
-            </span>
-            <span className="hidden text-[#E5E7EB] sm:inline">|</span>
-            <span className="inline-flex items-center gap-1.5">
-              <MapPin className="h-5 w-5" />
-              {venue.city}
-            </span>
-          </div>
-        </div>
+      <ImmersiveVenueHero
+        profile={profile}
+        initialIsFavorited={initialIsFavorited}
+        currentUser={currentUser}
+        isOwnVenue={isOwnVenue}
+      />
+      <ImmersiveVenueSectionNav links={sectionLinks} />
 
-        <div className="flex gap-3">
-          <Button
-            onClick={handleShare}
-            variant="outline"
-            className="flex h-12 items-center gap-2 rounded-xl border-[#E5E7EB] bg-white px-5 text-sm font-bold text-[#151C27] hover:bg-[#F9FAFB]"
-          >
-            <Share2 className="h-5 w-5" />
-            Share
-          </Button>
-          {!isOwnVenue && (
-            <Button
-              onClick={handleFavoriteToggle}
-              variant="outline"
-              disabled={isTogglingFavorite}
-              className={`flex h-12 items-center gap-2 rounded-xl border-[#E5E7EB] bg-white px-5 text-sm font-bold transition-colors hover:bg-[#F9FAFB] ${
-                isFavorited ? "border-red-200 bg-red-50/50 text-red-500" : ""
-              }`}
-            >
-              <Heart
-                className={`h-5 w-5 ${isFavorited ? "fill-current" : ""}`}
-              />
-              {isFavorited ? "Saved" : "Save"}
-            </Button>
-          )}
-        </div>
-      </header>
-
-      <VenueGallery media={galleryImages} venueName={venue.name} />
-
-      {promotionalVideo ? (
-        <VenuePromotionalVideo
-          video={promotionalVideo}
-          venueName={venue.name}
-        />
-      ) : null}
-
+      <div className="mx-auto max-w-7xl space-y-12 px-4 pt-12 sm:px-6 lg:px-8 lg:pt-16">
       <div className="relative grid grid-cols-1 items-start gap-12 lg:grid-cols-3">
         <div className="space-y-12 lg:col-span-2">
-          {quickFacts.length > 0 ? (
-            <div className="grid gap-x-8 gap-y-5 border-b border-[#E5E7EB] pb-8 sm:grid-cols-2 lg:grid-cols-3">
-              {quickFacts.map(({ label, icon: Icon }) => (
-                <div
-                  key={label}
-                  className="flex items-center gap-3 text-base font-bold text-[#151C27]"
-                >
-                  <Icon className="h-6 w-6 shrink-0 text-[#434654]" />
-                  <span>{label}</span>
-                </div>
-              ))}
-            </div>
-          ) : null}
-
-          <section className="space-y-5">
+          <section id="overview" className="scroll-mt-40 space-y-5">
             <h2 className="text-3xl font-bold tracking-[-0.02em] text-[#151C27]">
               About this venue
             </h2>
@@ -404,7 +246,7 @@ export default function VenueDetails({
 
           {activePackages.length > 0 ? (
             <>
-              <section className="space-y-5">
+              <section id="packages" className="scroll-mt-40 space-y-5">
                 <h2 className="text-3xl font-bold tracking-[-0.02em] text-[#151C27]">
                   Available Packages
                 </h2>
@@ -494,7 +336,10 @@ export default function VenueDetails({
             </>
           ) : null}
 
-          <section className="grid grid-cols-1 gap-8 md:grid-cols-2">
+          <section
+            id="practical"
+            className="scroll-mt-40 grid grid-cols-1 gap-8 md:grid-cols-2"
+          >
             <div className="space-y-3">
               <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#151C27]">
                 <ParkingCircle className="h-[18px] w-[18px] text-[#0052CC]" />
@@ -670,7 +515,7 @@ export default function VenueDetails({
           />
         </div>
 
-        <div className="space-y-4 lg:col-span-1 lg:self-stretch">
+        <div id="booking" className="scroll-mt-40 space-y-4 lg:col-span-1 lg:self-stretch">
           {isOwnVenue ? (
             <div className="sticky top-[9.5rem] flex flex-col gap-5 rounded-2xl border border-[#DCE2F3] bg-[#F0F3FF] p-6 shadow-[0px_4px_20px_rgba(0,0,0,0.05)]">
               <div>
@@ -821,17 +666,7 @@ export default function VenueDetails({
       ) : null}
 
       <RecommendedVenues fallbackVenues={recommendedFallbackVenues} />
-
-      {toastOpen ? (
-        <Toast onOpenChange={setToastOpen}>
-          <div className="flex flex-col gap-1">
-            <ToastTitle>{toastMessage.title}</ToastTitle>
-            <ToastDescription>{toastMessage.description}</ToastDescription>
-          </div>
-        </Toast>
-      ) : null}
-
-      {authPrompt}
+      </div>
     </div>
   );
 }
