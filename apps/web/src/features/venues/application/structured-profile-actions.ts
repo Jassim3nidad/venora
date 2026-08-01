@@ -61,6 +61,34 @@ const archiveVenueSpaceActionSchema = z
     spaceId: z.string().uuid(),
   })
   .strict();
+const archiveVenueFaqActionSchema = z
+  .object({
+    venueId: z.string().uuid(),
+    revisionId: z.string().uuid(),
+    faqId: z.string().uuid(),
+  })
+  .strict();
+const reorderVenueFaqsActionSchema = z
+  .object({
+    venueId: z.string().uuid(),
+    revisionId: z.string().uuid(),
+    orderedIds: z.array(z.string().uuid()).min(1),
+  })
+  .strict();
+const archiveMediaItemActionSchema = z
+  .object({
+    venueId: z.string().uuid(),
+    collectionId: z.string().uuid(),
+    itemId: z.string().uuid(),
+  })
+  .strict();
+const reorderMediaItemsActionSchema = z
+  .object({
+    venueId: z.string().uuid(),
+    collectionId: z.string().uuid(),
+    orderedIds: z.array(z.string().uuid()).min(1),
+  })
+  .strict();
 
 async function createStructuredVenueClient() {
   return (await createClient()) as unknown as StructuredVenueServerClient;
@@ -382,6 +410,40 @@ export async function saveVenueMediaItemAction(rawInput: unknown) {
   );
 }
 
+export async function reorderVenueMediaItemsAction(rawInput: unknown) {
+  return createServerAction(
+    reorderMediaItemsActionSchema,
+    async (input) => {
+      const { supabase } = await requireStructuredVenueMutationUser();
+      const reordered = await structuredVenueProfileRepository.reorderMediaItems(
+        supabase,
+        input,
+      );
+      const data = unwrapRepositoryResult(reordered);
+      await revalidateStructuredVenuePaths(supabase, input.venueId);
+      return data;
+    },
+    rawInput,
+  );
+}
+
+export async function archiveVenueMediaItemAction(rawInput: unknown) {
+  return createServerAction(
+    archiveMediaItemActionSchema,
+    async (input) => {
+      const { supabase } = await requireStructuredVenueMutationUser();
+      const archived = await structuredVenueProfileRepository.archiveMediaItem(
+        supabase,
+        input,
+      );
+      const data = unwrapRepositoryResult(archived);
+      await revalidateStructuredVenuePaths(supabase, input.venueId);
+      return data;
+    },
+    rawInput,
+  );
+}
+
 export async function saveVenueLogisticsAction(rawInput: unknown) {
   return createServerAction(
     venueLogisticsSchema,
@@ -410,6 +472,40 @@ export async function createVenueFaqAction(rawInput: unknown) {
         input,
       );
       const data = unwrapRepositoryResult(faq);
+      await revalidateStructuredVenuePaths(supabase, input.venueId);
+      return data;
+    },
+    rawInput,
+  );
+}
+
+export async function reorderVenueFaqsAction(rawInput: unknown) {
+  return createServerAction(
+    reorderVenueFaqsActionSchema,
+    async (input) => {
+      const { supabase } = await requireStructuredVenueMutationUser();
+      const reordered = await structuredVenueProfileRepository.reorderVenueFaqs(
+        supabase,
+        input,
+      );
+      const data = unwrapRepositoryResult(reordered);
+      await revalidateStructuredVenuePaths(supabase, input.venueId);
+      return data;
+    },
+    rawInput,
+  );
+}
+
+export async function archiveVenueFaqAction(rawInput: unknown) {
+  return createServerAction(
+    archiveVenueFaqActionSchema,
+    async (input) => {
+      const { supabase } = await requireStructuredVenueMutationUser();
+      const archived = await structuredVenueProfileRepository.archiveVenueFaq(
+        supabase,
+        input,
+      );
+      const data = unwrapRepositoryResult(archived);
       await revalidateStructuredVenuePaths(supabase, input.venueId);
       return data;
     },

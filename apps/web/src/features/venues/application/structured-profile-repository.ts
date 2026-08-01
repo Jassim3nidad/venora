@@ -887,6 +887,48 @@ export const structuredVenueProfileRepository = {
     return result.ok ? ok(mapMediaItem(result.data)) : result;
   },
 
+  async reorderMediaItems(
+    client: StructuredVenueDataClient,
+    input: { venueId: string; collectionId: string; orderedIds: string[] },
+  ): Promise<StructuredVenueRepositoryResult<true>> {
+    for (const [displayOrder, itemId] of input.orderedIds.entries()) {
+      const result = await runMutation(
+        client
+          .from("venue_media_items")
+          .update({ display_order: displayOrder })
+          .eq("id", itemId)
+          .eq("venue_id", input.venueId)
+          .eq("collection_id", input.collectionId)
+          .eq("status", "draft"),
+      );
+      if (!result.ok) return result;
+    }
+
+    return ok(true);
+  },
+
+  async archiveMediaItem(
+    client: StructuredVenueDataClient,
+    input: { venueId: string; collectionId: string; itemId: string },
+  ): Promise<StructuredVenueRepositoryResult<VenueMediaItem>> {
+    const result = await runQuery(
+      client
+        .from<MediaItemRow>("venue_media_items")
+        .update({
+          status: "archived",
+          deleted_at: new Date().toISOString(),
+        })
+        .eq("id", input.itemId)
+        .eq("venue_id", input.venueId)
+        .eq("collection_id", input.collectionId)
+        .eq("status", "draft")
+        .select(mediaItemColumns)
+        .single(),
+    );
+
+    return result.ok ? ok(mapMediaItem(result.data)) : result;
+  },
+
   async upsertVenueLogistics(
     client: StructuredVenueDataClient,
     input: VenueLogisticsInput,
@@ -918,6 +960,45 @@ export const structuredVenueProfileRepository = {
           display_order: input.displayOrder,
           status: "draft",
         })
+        .select(faqColumns)
+        .single(),
+    );
+
+    return result.ok ? ok(mapFaq(result.data)) : result;
+  },
+
+  async reorderVenueFaqs(
+    client: StructuredVenueDataClient,
+    input: { venueId: string; revisionId: string; orderedIds: string[] },
+  ): Promise<StructuredVenueRepositoryResult<true>> {
+    for (const [displayOrder, faqId] of input.orderedIds.entries()) {
+      const result = await runMutation(
+        client
+          .from("venue_faqs")
+          .update({ display_order: displayOrder })
+          .eq("id", faqId)
+          .eq("venue_id", input.venueId)
+          .eq("revision_id", input.revisionId)
+          .eq("status", "draft"),
+      );
+      if (!result.ok) return result;
+    }
+
+    return ok(true);
+  },
+
+  async archiveVenueFaq(
+    client: StructuredVenueDataClient,
+    input: { venueId: string; revisionId: string; faqId: string },
+  ): Promise<StructuredVenueRepositoryResult<VenueFaq>> {
+    const result = await runQuery(
+      client
+        .from<FaqRow>("venue_faqs")
+        .update({ status: "archived" })
+        .eq("id", input.faqId)
+        .eq("venue_id", input.venueId)
+        .eq("revision_id", input.revisionId)
+        .eq("status", "draft")
         .select(faqColumns)
         .single(),
     );
