@@ -32,12 +32,17 @@ import {
   ImagineYourEventHere,
   PropertyOverview,
 } from "./ImagineYourEventHere";
+import ImmersiveVenueGallery from "./ImmersiveVenueGallery";
 import ImmersiveVenueHero, {
   getImmersiveSectionLinks,
   ImmersiveVenueSectionNav,
 } from "./ImmersiveVenueHero";
 import PackageComparePicker from "./PackageComparePicker";
 import ReviewsSection from "./ReviewsSection";
+import VenueSpaceExplorer, {
+  getSpaceEventFilters,
+  VenueJourney,
+} from "./VenueSpaceExplorer";
 
 const VenueMap = dynamic(() => import("@/src/components/VenueMap"), {
   ssr: false,
@@ -133,8 +138,19 @@ export default function VenueDetails({
       .map((part: string) => part[0]?.toUpperCase())
       .join("") || "VO";
   const cityLabel = [venue.city, venue.province].filter(Boolean).join(", ");
+  const immersiveMedia = [
+    ...profile.gallery,
+    ...(profile.hero.video &&
+    !profile.gallery.some((item) => item.id === profile.hero.video?.id)
+      ? [profile.hero.video]
+      : []),
+  ];
+  const hasEventTypeExperience = getSpaceEventFilters(profile.spaces).length >= 2;
   const renderedSectionIds = [
     "overview",
+    ...(profile.spaces.length > 0 ? ["spaces"] : []),
+    ...(hasEventTypeExperience ? ["experiences"] : []),
+    ...(profile.sections.includes("gallery") ? ["gallery"] : []),
     ...(activePackages.length > 0 ? ["packages"] : []),
     "practical",
     "reviews",
@@ -173,14 +189,22 @@ export default function VenueDetails({
 
       <div className="mx-auto max-w-7xl space-y-12 px-4 pt-12 sm:px-6 lg:px-8 lg:pt-16">
         <ImagineYourEventHere fit={eventPlanFit} />
+        <div id="overview" className="scroll-mt-40">
+          <PropertyOverview profile={profile} />
+        </div>
+        {profile.spaces.length > 0 ? (
+          <VenueSpaceExplorer spaces={profile.spaces} packages={profile.packages} />
+        ) : null}
+        <VenueJourney spaces={profile.spaces} />
+        {profile.sections.includes("gallery") ? (
+          <ImmersiveVenueGallery
+            media={immersiveMedia}
+            spaces={profile.spaces}
+            venueName={profile.venue.name}
+          />
+        ) : null}
       <div className="relative grid grid-cols-1 items-start gap-12 lg:grid-cols-3">
         <div className="space-y-12 lg:col-span-2">
-          <div id="overview" className="scroll-mt-40">
-            <PropertyOverview profile={profile} />
-          </div>
-
-          <Separator />
-
           <section className="space-y-5">
             <h2 className="text-3xl font-bold tracking-[-0.02em] text-[#151C27]">
               About this venue
