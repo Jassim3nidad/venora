@@ -9,24 +9,20 @@ import {
   Panel,
   StatusBadge,
 } from "@/components/dashboard/enterprise";
-import {
-  getVenueFaqCategoryLabel,
-  getVenueSpaceLayoutLabel,
-  getVenueSpaceSettingLabel,
-  getVenueSpaceTypeLabel,
-} from "@/src/features/venues/domain/structured-venue.types";
 import { structuredVenueProfileRepository } from "@/src/features/venues/application/structured-profile-repository";
+import { buildPublicVenueProfile } from "@/src/features/venues/application/public-venue-profile";
+import type { VenueSpaceLayout } from "@/src/features/venues/domain/structured-venue.types";
 import {
   getOwnerDashboardContext,
   getOwnerVenueById,
   hasCoordinatorPermission,
 } from "@/src/lib/dashboard/org-dashboard-data";
 import { getPublishBlockingIssues } from "@/src/features/venues/utils/structured-editor";
-import { getVenueMediaUrl } from "@/src/features/venues/utils/venue-media";
 import { StructuredPreviewActions } from "./preview-actions";
 
 export const metadata: Metadata = {
   title: "Preview Structured Venue Experience",
+  robots: { index: false, follow: false },
 };
 
 type IdParams = {
@@ -39,6 +35,10 @@ type CapacityLayoutRow = {
   layout: string;
   custom_layout_label: string | null;
   capacity: number;
+  notes: string | null;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
 };
 
 function unwrapRepoResult<T>(result: {
@@ -115,25 +115,47 @@ export default async function StructuredVenuePreviewPage({
     );
   }
 
-  const activeSpaces = draftProfile.spaces.filter(
+  const draftSpaces = draftProfile.spaces.filter(
     (space) => space.status !== "archived",
   );
-  const activeSpaceIds = activeSpaces.map((space) => space.id);
+  const activeSpaceIds = draftSpaces.map((space) => space.id);
   const capacityLayoutsResult =
     activeSpaceIds.length > 0
       ? await context.supabase
           .from("venue_space_capacity_layouts")
-          .select("id, space_id, layout, custom_layout_label, capacity")
+          .select("id, space_id, layout, custom_layout_label, capacity, notes, display_order, created_at, updated_at")
           .in("space_id", activeSpaceIds)
           .order("display_order", { ascending: true })
       : { data: [], error: null };
   const capacityLayouts = (capacityLayoutsResult.data ?? []) as CapacityLayoutRow[];
-  const activeMediaItems = draftProfile.mediaItems.filter(
-    (item) => item.status !== "archived" && item.storagePath,
-  );
-  const activeFaqs = draftProfile.faqs.filter(
-    (faq) => faq.status !== "archived",
-  );
+  const previewProfile = buildPublicVenueProfile({
+    mode: "preview",
+    venue,
+    structuredProfile: draftProfile,
+    spaceRelations: {
+      capacityLayouts: capacityLayouts.map((layout) => ({
+        id: layout.id,
+        spaceId: layout.space_id,
+        layout: layout.layout as VenueSpaceLayout,
+        customLayoutLabel: layout.custom_layout_label,
+        capacity: layout.capacity,
+        notes: layout.notes,
+        displayOrder: layout.display_order,
+        createdAt: layout.created_at,
+        updatedAt: layout.updated_at,
+      })),
+      amenities: [],
+      eventTypes: [],
+    },
+    reviews: [],
+    ownerProfile: null,
+  });
+  const activeSpaces = previewProfile.spaces;
+  const activeMediaItems = [
+    ...previewProfile.gallery,
+    ...(previewProfile.hero.video ? [previewProfile.hero.video] : []),
+  ];
+  const activeFaqs = previewProfile.faqs;
   const publishIssues = getPublishBlockingIssues(draftProfile);
 
   return (
@@ -169,10 +191,10 @@ export default async function StructuredVenuePreviewPage({
       <Panel padding={false} className="mt-5 overflow-hidden">
         <div className="grid min-h-[360px] gap-0 lg:grid-cols-[1.3fr_0.7fr]">
           <div className="relative min-h-[320px] bg-[#e2e8f0]">
-            {activeMediaItems[0]?.storagePath ? (
+            {activeMediaItems[0] ? (
               <Image
-                src={getVenueMediaUrl(activeMediaItems[0].storagePath)}
-                alt={activeMediaItems[0].altText ?? venue.name}
+                src={activeMediaItems[0].src}
+                alt={activeMediaItems[0].altText}
                 fill
                 sizes="(min-width: 1024px) 60vw, 100vw"
                 className="object-cover"
@@ -228,15 +250,13 @@ export default async function StructuredVenuePreviewPage({
                     className="rounded-2xl border border-[#dbe3ef] p-4"
                   >
                     <p className="text-xs font-bold uppercase tracking-wider text-[#1d4ed8]">
-                      {getVenueSpaceSettingLabel(space.setting)}
+                      {space.setting}
                     </p>
                     <h3 className="mt-2 text-lg font-bold text-[#0f172a]">
                       {space.name}
                     </h3>
                     <p className="mt-1 text-sm text-[#64748b]">
-                      {space.spaceType
-                        ? getVenueSpaceTypeLabel(space.spaceType)
-                        : "Flexible space"}{" "}
+                      {space.type ?? "Flexible space"}{" "}
                       - up to {space.capacityMax} guests
                     </p>
                     {space.shortDescription || space.description ? (
@@ -263,11 +283,11 @@ export default async function StructuredVenuePreviewPage({
                     key={item.id}
                     className="overflow-hidden rounded-2xl border border-[#dbe3ef]"
                   >
-                    {item.storagePath ? (
+                    {item.mediaType === "image" ? (
                       <div className="relative aspect-[4/3] bg-[#e2e8f0]">
                         <Image
-                          src={getVenueMediaUrl(item.storagePath)}
-                          alt={item.altText ?? venue.name}
+                          src={item.src}
+                          alt={item.altText}
                           fill
                           sizes="(min-width: 1024px) 20vw, 50vw"
                           className="object-cover"
@@ -295,13 +315,11 @@ export default async function StructuredVenuePreviewPage({
               ) : (
                 activeFaqs.map((faq) => (
                   <article
-                    key={faq.id}
+                    key={faq.question}
                     className="rounded-2xl border border-[#dbe3ef] p-4"
                   >
                     <p className="text-xs font-bold uppercase tracking-wider text-[#64748b]">
-                      {faq.category
-                        ? getVenueFaqCategoryLabel(faq.category)
-                        : "General"}
+                      {faq.category?.replaceAll("_", " ") ?? "General"}
                     </p>
                     <h3 className="mt-2 text-base font-bold text-[#0f172a]">
                       {faq.question}
@@ -321,38 +339,15 @@ export default async function StructuredVenuePreviewPage({
             <h2 className="text-lg font-bold text-[#0f172a]">
               Practical details
             </h2>
-            {draftProfile.logistics ? (
+            {previewProfile.logistics.length > 0 ? (
               <dl className="mt-4 space-y-4 text-sm">
-                <PreviewDetail
-                  label="Parking"
-                  value={
-                    draftProfile.logistics.parkingCapacity !== null
-                      ? `${draftProfile.logistics.parkingCapacity} spaces`
-                      : draftProfile.logistics.parkingNotes
-                  }
-                />
-                <PreviewDetail
-                  label="Arrival"
-                  value={draftProfile.logistics.arrivalNotes}
-                />
-                <PreviewDetail
-                  label="Weather backup"
-                  value={
-                    draftProfile.logistics.weatherBackupAvailable === null
-                      ? draftProfile.logistics.weatherBackupNotes
-                      : draftProfile.logistics.weatherBackupAvailable
-                        ? "Available"
-                        : "Not available"
-                  }
-                />
-                <PreviewDetail
-                  label="Curfew"
-                  value={draftProfile.logistics.curfewTime}
-                />
-                <PreviewDetail
-                  label="Supplier rules"
-                  value={draftProfile.logistics.externalSupplierRules}
-                />
+                {previewProfile.logistics.map((item) => (
+                  <PreviewDetail
+                    key={item.key}
+                    label={item.label}
+                    value={item.value}
+                  />
+                ))}
               </dl>
             ) : (
               <p className="mt-3 text-sm leading-6 text-[#64748b]">
@@ -367,24 +362,16 @@ export default async function StructuredVenuePreviewPage({
             </h2>
             <div className="mt-4 space-y-3">
               {activeSpaces.flatMap((space) =>
-                capacityLayouts
-                  .filter((layout) => layout.space_id === space.id)
-                  .map((layout) => (
+                space.capacityLayouts.map((layout) => (
                   <div
-                    key={`${space.id}-${layout.id}`}
+                    key={`${space.key}-${layout.label}-${layout.capacity}`}
                     className="rounded-2xl border border-[#dbe3ef] p-3"
                   >
                     <p className="text-sm font-bold text-[#0f172a]">
                       {space.name}
                     </p>
                     <p className="mt-1 text-sm text-[#64748b]">
-                      {layout.layout === "custom"
-                        ? layout.custom_layout_label
-                        : getVenueSpaceLayoutLabel(
-                            layout.layout as Parameters<
-                              typeof getVenueSpaceLayoutLabel
-                            >[0],
-                          )}{" "}
+                      {layout.label}{" "}
                       - {layout.capacity} guests
                     </p>
                   </div>

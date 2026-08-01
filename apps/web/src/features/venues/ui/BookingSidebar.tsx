@@ -28,6 +28,7 @@ import { format, startOfMonth } from "date-fns";
 import { checkAvailabilityAction } from "../application/actions";
 import { isPastDate, PAST_DATE_MESSAGE } from "@/src/lib/date-only";
 import { useCalendar } from "@/src/features/calendar/hooks/use-calendar";
+import InquiryDialog from "./InquiryDialog";
 
 interface Package {
   id: string;
@@ -458,17 +459,19 @@ export default function BookingSidebar({
         >
           Book Now
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => {
-            const target = document.getElementById("venue-owner");
-            target?.scrollIntoView({ behavior: "smooth", block: "center" });
-          }}
-          className="h-12 w-full rounded-xl border-[#E5E7EB] bg-white font-bold text-[#151C27] hover:bg-[#F9FAFB]"
-        >
-          Contact Venue
-        </Button>
+        <InquiryDialog
+          venueId={venueId}
+          venueName={venueName}
+          trigger={
+            <Button
+              type="button"
+              variant="outline"
+              className="h-12 w-full rounded-xl border-[#E5E7EB] bg-white font-bold text-[#151C27] hover:bg-[#F9FAFB]"
+            >
+              Ask the venue a question
+            </Button>
+          }
+        />
         {typeof children === "function" ? children(guests) : children}
       </div>
 

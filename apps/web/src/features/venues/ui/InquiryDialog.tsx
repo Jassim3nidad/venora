@@ -92,9 +92,9 @@ export default function InquiryDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] rounded-3xl border border-[var(--border-default)] bg-[var(--bg-base)] p-6 shadow-2xl">
+      <DialogContent className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-base)] p-6 shadow-2xl sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="font-sora text-xl font-bold tracking-tight text-[var(--text-primary)]">
+          <DialogTitle className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
             Inquire About {venueName}
           </DialogTitle>
           <DialogDescription className="text-sm text-[var(--text-secondary)] mt-1">
@@ -109,8 +109,8 @@ export default function InquiryDialog({
             className="space-y-4 mt-4"
           >
             {error && (
-              <div className="p-3.5 rounded-xl border border-red-200/20 bg-red-500/10 text-red-600 text-xs font-medium">
-                ⚠️ {error}
+              <div className="rounded-lg border border-red-200 bg-red-50 p-3.5 text-xs font-medium text-red-700">
+                {error}
               </div>
             )}
 
@@ -119,15 +119,15 @@ export default function InquiryDialog({
               name="message"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-semibold text-[var(--text-primary)] tracking-wide uppercase">
-                    Your Message
+                  <FormLabel className="text-sm font-semibold text-[var(--text-primary)]">
+                    Your message
                   </FormLabel>
                   <FormControl>
                     <textarea
                       {...field}
                       rows={5}
                       placeholder="Hi! I am interested in booking your venue for a wedding next year. Could you let me know if catering is included in your base package?"
-                      className="w-full rounded-2xl border border-[var(--border-default)] bg-[var(--bg-subtle)] p-4 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-500)]/20 focus:border-[var(--color-brand-500)] transition-all resize-none"
+                      className="w-full resize-none rounded-lg border border-[var(--border-default)] bg-[var(--bg-subtle)] p-4 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] transition-all focus:border-[var(--color-brand-500)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-500)]/20"
                     />
                   </FormControl>
                   <FormMessage className="text-xs text-red-500 font-medium" />
@@ -141,14 +141,14 @@ export default function InquiryDialog({
                 variant="outline"
                 onClick={() => setOpen(false)}
                 disabled={isSubmitting}
-                className="h-11 rounded-xl px-5 text-sm font-medium border-[var(--border-default)]"
+                className="h-11 rounded-lg border-[var(--border-default)] px-5 text-sm font-medium"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="h-11 rounded-xl px-5 text-sm font-semibold bg-[var(--color-brand-600)] text-white hover:bg-[var(--color-brand-700)] focus:ring-2 focus:ring-[var(--color-brand-500)]/20 transition-all flex items-center gap-2"
+                className="flex h-11 items-center gap-2 rounded-lg bg-[var(--color-brand-600)] px-5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-brand-700)] focus:ring-2 focus:ring-[var(--color-brand-500)]/20"
               >
                 {isSubmitting ? (
                   <>

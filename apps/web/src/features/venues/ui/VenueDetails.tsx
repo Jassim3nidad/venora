@@ -4,19 +4,13 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import {
-  AlertCircle,
   Check,
   ChevronRight,
-  Clock,
   Compass,
-  FileText,
   Image as ImageIcon,
   MapPin,
-  ParkingCircle,
   ShieldCheck,
-  Sparkles,
   Star,
-  Users,
 } from "lucide-react";
 import { Separator } from "@venora/ui";
 import CostEstimatorPanel from "@/features/ai/ui/CostEstimatorPanel";
@@ -37,7 +31,12 @@ import ImmersiveVenueHero, {
   getImmersiveSectionLinks,
   ImmersiveVenueSectionNav,
 } from "./ImmersiveVenueHero";
-import PackageComparePicker from "./PackageComparePicker";
+import {
+  VenueFaqs,
+  VenueFinalDecision,
+  VenuePackageExperiences,
+  VenuePracticalDetails,
+} from "./ImmersiveVenueDecisionSections";
 import ReviewsSection from "./ReviewsSection";
 import VenueSpaceExplorer, {
   getSpaceEventFilters,
@@ -146,13 +145,18 @@ export default function VenueDetails({
       : []),
   ];
   const hasEventTypeExperience = getSpaceEventFilters(profile.spaces).length >= 2;
+  const hasPracticalDetails =
+    profile.logistics.length > 0 ||
+    rulesList.length > 0 ||
+    Boolean(venue.cancellation_policy);
   const renderedSectionIds = [
     "overview",
     ...(profile.spaces.length > 0 ? ["spaces"] : []),
     ...(hasEventTypeExperience ? ["experiences"] : []),
     ...(profile.sections.includes("gallery") ? ["gallery"] : []),
-    ...(activePackages.length > 0 ? ["packages"] : []),
-    "practical",
+    ...(profile.packages.length > 0 ? ["packages"] : []),
+    ...(hasPracticalDetails ? ["practical"] : []),
+    ...(profile.faqs.length > 0 ? ["faqs"] : []),
     "reviews",
   ];
   const sectionLinks = getImmersiveSectionLinks(
@@ -203,29 +207,20 @@ export default function VenueDetails({
             venueName={profile.venue.name}
           />
         ) : null}
-      <div className="relative grid grid-cols-1 items-start gap-12 lg:grid-cols-3">
-        <div className="space-y-12 lg:col-span-2">
-          <section className="space-y-5">
-            <h2 className="text-3xl font-bold tracking-[-0.02em] text-[#151C27]">
-              About this venue
-            </h2>
-            <p className="whitespace-pre-line text-lg font-normal leading-8 text-[#434654]">
-              {venue.description || "No description provided for this venue."}
-            </p>
-            {venue.ai_generated_description ? (
-              <div className="space-y-2 rounded-xl border border-[#DCE2F3] bg-white p-5">
-                <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.12em] text-[#0052CC]">
-                  <Sparkles className="h-4 w-4" />
-                  AI Generated Overview
-                </span>
-                <p className="text-base font-normal leading-7 text-[#434654]">
-                  "{venue.ai_generated_description}"
+        <div className="relative grid grid-cols-1 items-start gap-12 lg:grid-cols-3">
+          <div className="space-y-12 lg:col-span-2">
+            {profile.venue.description ? (
+              <section className="space-y-5">
+                <h2 className="text-3xl font-bold tracking-[-0.02em] text-[#151C27]">
+                  About this venue
+                </h2>
+                <p className="whitespace-pre-line text-lg font-normal leading-8 text-[#434654]">
+                  {profile.venue.description}
                 </p>
-              </div>
+              </section>
             ) : null}
-          </section>
 
-          <Separator />
+          {profile.venue.description ? <Separator /> : null}
 
           <section className="space-y-5">
             <div>
@@ -257,208 +252,42 @@ export default function VenueDetails({
 
           <Separator />
 
-          <section className="space-y-5">
-            <h2 className="text-3xl font-bold tracking-[-0.02em] text-[#151C27]">
-              Amenities & Features
-            </h2>
             {amenitiesList.length > 0 ? (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {amenitiesList.map((amenity: string) => (
-                  <div
-                    key={amenity}
-                    className="flex items-center gap-3 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 text-base font-medium text-[#434654]"
-                  >
-                    <Check className="h-5 w-5 flex-shrink-0 text-emerald-500" />
-                    <span>{amenity}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-medium text-[#434654]">
-                Amenities have not been added for this venue yet.
-              </div>
-            )}
-          </section>
-
-          <Separator />
-
-          {activePackages.length > 0 ? (
-            <>
-              <section id="packages" className="scroll-mt-40 space-y-5">
+              <section className="space-y-5">
                 <h2 className="text-3xl font-bold tracking-[-0.02em] text-[#151C27]">
-                  Available Packages
+                  Amenities & Features
                 </h2>
-                <p className="text-lg font-normal leading-8 text-[#434654]">
-                  Choose from our carefully curated packages designed to fit
-                  your event needs.
-                </p>
-                <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {activePackages.map((pkg: any) => (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {amenitiesList.map((amenity: string) => (
                     <div
-                      key={pkg.id}
-                      className="group relative flex flex-col overflow-hidden rounded-xl border border-[#E5E7EB] bg-white p-5 shadow-sm transition-colors hover:border-[#0052CC]"
+                      key={amenity}
+                      className="flex items-center gap-3 border-b border-[#D9D4C9] py-3 text-base font-medium text-[#434654]"
                     >
-                      <div className="mb-3 flex items-start justify-between gap-4">
-                        <h4 className="text-base font-bold text-[#151C27] transition-colors group-hover:text-[#0052CC]">
-                          {pkg.name}
-                        </h4>
-                        <div className="shrink-0 text-right">
-                          <span className="block font-bold text-[#0052CC]">
-                            {formatCurrency(pkg.price)}
-                          </span>
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-[#737685]">
-                            / {pkg.price_unit.replace("per_", "")}
-                          </span>
-                        </div>
-                      </div>
-
-                      {pkg.description ? (
-                        <p className="mb-5 flex-grow text-sm leading-relaxed text-[#434654]">
-                          {pkg.description}
-                        </p>
-                      ) : null}
-
-                      {pkg.min_guests || pkg.max_guests ? (
-                        <div className="mb-4 flex w-max items-center gap-2 rounded-full border border-[#E5E7EB] bg-[#F9FAFB] px-3 py-1.5 text-xs font-semibold text-[#737685]">
-                          <Users className="h-3.5 w-3.5 text-[#0052CC]" />
-                          <span>
-                            {pkg.min_guests ?? 1} - {pkg.max_guests ?? "Any"}{" "}
-                            guests
-                          </span>
-                        </div>
-                      ) : null}
-
-                      {pkg.inclusions?.length > 0 ? (
-                        <div className="mt-auto border-t border-[#E5E7EB] pt-4">
-                          <span className="mb-3 block text-[10px] font-bold uppercase tracking-widest text-[#737685]">
-                            Inclusions
-                          </span>
-                          <ul className="space-y-2">
-                            {pkg.inclusions.map(
-                              (inclusion: string, i: number) => (
-                                <li
-                                  key={i}
-                                  className="flex items-start gap-2.5 text-xs font-medium text-[#434654]"
-                                >
-                                  <div className="mt-0.5 shrink-0 rounded-full bg-emerald-100 p-0.5">
-                                    <Check
-                                      className="h-2.5 w-2.5 text-emerald-600"
-                                      strokeWidth={3}
-                                    />
-                                  </div>
-                                  <span>{inclusion}</span>
-                                </li>
-                              ),
-                            )}
-                          </ul>
-                        </div>
-                      ) : null}
+                      <Check className="h-5 w-5 flex-shrink-0 text-emerald-700" />
+                      <span>{amenity}</span>
                     </div>
                   ))}
                 </div>
-
-                {activePackages.length >= 2 ? (
-                  <div className="mt-6 rounded-2xl border border-[#DBEAFE] bg-[#F8FBFF] p-5">
-                    <PackageComparePicker
-                      packages={activePackages.map((pkg: any) => ({
-                        id: pkg.id,
-                        name: pkg.name,
-                        price: Number(pkg.price),
-                        price_unit: pkg.price_unit,
-                      }))}
-                    />
-                  </div>
-                ) : null}
               </section>
-              <Separator />
-            </>
-          ) : null}
+            ) : null}
 
-          <section
-            id="practical"
-            className="scroll-mt-40 grid grid-cols-1 gap-8 md:grid-cols-2"
-          >
-            <div className="space-y-3">
-              <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#151C27]">
-                <ParkingCircle className="h-[18px] w-[18px] text-[#0052CC]" />
-                Parking & Accessibility
-              </span>
-              <div className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 text-sm font-medium leading-6 text-[#434654]">
-                <div className="flex gap-3">
-                  {venue.parking_available ? (
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                  ) : (
-                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
-                  )}
-                  <p>
-                    {venue.parking_available
-                      ? "Secure on-site private parking is available for all guests and coordinators."
-                      : "Private on-site parking is not available. Street parking or public pay lots are nearby."}
-                  </p>
-                </div>
+          {amenitiesList.length > 0 ? <Separator /> : null}
 
-                {venue.wheelchair_accessible ? (
-                  <div className="mt-3 flex gap-3 border-t border-[#E5E7EB] pt-3">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                    <p>
-                      Accessible routes and ramps are fully prepared on-site.
-                    </p>
-                  </div>
-                ) : null}
-                {venue.overnight_accommodation ? (
-                  <div className="mt-3 flex gap-3 border-t border-[#E5E7EB] pt-3">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                    <p>Overnight accommodation is available.</p>
-                  </div>
-                ) : null}
-                {venue.pet_friendly ? (
-                  <div className="mt-3 flex gap-3 border-t border-[#E5E7EB] pt-3">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                    <p>Pet-friendly arrangements are supported.</p>
-                  </div>
-                ) : null}
-              </div>
-            </div>
+          <VenuePackageExperiences profile={profile} />
 
-            <div className="space-y-3">
-              <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#151C27]">
-                <Clock className="h-[18px] w-[18px] text-[#0052CC]" />
-                Venue Rules
-              </span>
-              {rulesList.length > 0 ? (
-                <ul className="space-y-2 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
-                  {rulesList.map((rule) => (
-                    <li
-                      key={rule}
-                      className="flex gap-2 text-xs leading-relaxed text-[#434654]"
-                    >
-                      <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#0052CC]" />
-                      <span>{rule}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-xs leading-relaxed text-[#434654]">
-                  Standard booking policies apply. Respect operating hours,
-                  maximum guest capacity constraints, and municipal noise
-                  ordinances.
-                </p>
-              )}
-            </div>
+          {profile.packages.length > 0 ? <Separator /> : null}
 
-            <div className="space-y-3 md:col-span-2">
-              <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#151C27]">
-                <FileText className="h-[18px] w-[18px] text-[#0052CC]" />
-                Cancellation Policy
-              </span>
-              <p className="rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 text-xs leading-relaxed text-[#434654]">
-                {venue.cancellation_policy ||
-                  "Full refund is supported for cancellations requested at least 14 days before the event schedule date. Cancellations inside 14 days forfeit the initial deposit amount."}
-              </p>
-            </div>
-          </section>
+          <VenuePracticalDetails
+            profile={profile}
+            rules={rulesList}
+            cancellationPolicy={venue.cancellation_policy ?? null}
+          />
 
-          <Separator />
+          {hasPracticalDetails ? <Separator /> : null}
+
+          <VenueFaqs profile={profile} />
+
+          {profile.faqs.length > 0 ? <Separator /> : null}
 
           <section
             id="venue-owner"
@@ -618,6 +447,8 @@ export default function VenueDetails({
           )}
         </div>
       </div>
+
+      {!isOwnVenue ? <VenueFinalDecision profile={profile} /> : null}
 
       {nearbyVenues.length > 0 ? (
         <section className="space-y-6 border-t border-[#E5E7EB] pt-8">
