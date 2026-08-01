@@ -25,8 +25,13 @@ import { isOptimizableImageSrc } from "@/src/lib/image-host";
 import type { PublicOwnerProfile } from "@/src/features/owners/application/queries";
 import type { SmartVenueSearchVenue } from "@/features/search/schemas/search.schema";
 import type { PublicVenueProfileViewModel } from "../application/public-venue-profile";
+import type { EventPlanVenueFit } from "../application/event-plan-venue-fit";
 import { mergeAmenityNames } from "../utils/venue-mappers";
 import BookingSidebar from "./BookingSidebar";
+import {
+  ImagineYourEventHere,
+  PropertyOverview,
+} from "./ImagineYourEventHere";
 import ImmersiveVenueHero, {
   getImmersiveSectionLinks,
   ImmersiveVenueSectionNav,
@@ -44,6 +49,7 @@ const VenueMap = dynamic(() => import("@/src/components/VenueMap"), {
 interface VenueDetailsProps {
   venue: any;
   profile: PublicVenueProfileViewModel;
+  eventPlanFit?: EventPlanVenueFit | null;
   reviews: any[];
   nearbyVenues: any[];
   initialIsFavorited: boolean;
@@ -78,6 +84,7 @@ function formatDate(value?: string | null) {
 export default function VenueDetails({
   venue,
   profile,
+  eventPlanFit = null,
   reviews = [],
   nearbyVenues = [],
   initialIsFavorited,
@@ -165,9 +172,16 @@ export default function VenueDetails({
       <ImmersiveVenueSectionNav links={sectionLinks} />
 
       <div className="mx-auto max-w-7xl space-y-12 px-4 pt-12 sm:px-6 lg:px-8 lg:pt-16">
+        <ImagineYourEventHere fit={eventPlanFit} />
       <div className="relative grid grid-cols-1 items-start gap-12 lg:grid-cols-3">
         <div className="space-y-12 lg:col-span-2">
-          <section id="overview" className="scroll-mt-40 space-y-5">
+          <div id="overview" className="scroll-mt-40">
+            <PropertyOverview profile={profile} />
+          </div>
+
+          <Separator />
+
+          <section className="space-y-5">
             <h2 className="text-3xl font-bold tracking-[-0.02em] text-[#151C27]">
               About this venue
             </h2>
