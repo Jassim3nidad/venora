@@ -246,7 +246,7 @@ export default async function StructuredVenuePreviewPage({
               ) : (
                 activeSpaces.map((space) => (
                   <article
-                    key={space.id}
+                    key={space.key}
                     className="rounded-2xl border border-[#dbe3ef] p-4"
                   >
                     <p className="text-xs font-bold uppercase tracking-wider text-[#1d4ed8]">

@@ -493,7 +493,7 @@ export default function BookingSidebar({
       </div>
 
       {/* Mobile: Airbnb-style floating bar that reveals the full booking sheet */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border-default)] bg-[var(--bg-base)]/95 px-4 pb-[max(0.875rem,env(safe-area-inset-bottom))] pt-3.5 shadow-[0_-8px_24px_-8px_rgba(0,0,0,0.15)] backdrop-blur-lg lg:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border-default)] bg-[var(--bg-base)]/95 pl-4 pr-[5.5rem] pb-[max(0.875rem,env(safe-area-inset-bottom))] pt-3.5 shadow-[0_-8px_24px_-8px_rgba(0,0,0,0.15)] backdrop-blur-lg lg:hidden">
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0 space-y-0.5">
             <div className="flex items-baseline gap-1">

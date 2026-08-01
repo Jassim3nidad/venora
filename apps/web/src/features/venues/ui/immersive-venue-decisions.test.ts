@@ -46,6 +46,7 @@ describe("immersive venue decision sections", () => {
     expect(bookingSource).toContain('data-testid="venue-booking-sidebar"');
     expect(bookingSource).toContain("max-h-[calc(100vh-10.5rem)]");
     expect(bookingSource).toContain("env(safe-area-inset-bottom)");
+    expect(bookingSource).toContain("pr-[5.5rem]");
   });
 
   it("does not render invented fallback policies", () => {

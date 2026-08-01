@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   getImmersiveSectionLinks,
@@ -23,5 +24,14 @@ describe("immersive venue hero behavior", () => {
       { id: "packages", label: "Packages", href: "#packages" },
       { id: "reviews", label: "Reviews", href: "#reviews" },
     ]);
+  });
+
+  it("keeps legacy descriptions compact in the cinematic hero", () => {
+    const source = readFileSync(
+      new URL("./ImmersiveVenueHero.tsx", import.meta.url),
+      "utf8",
+    );
+    expect(source).toContain("line-clamp-6");
+    expect(source).toContain("sm:line-clamp-4");
   });
 });
