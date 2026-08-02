@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   isAccountCenterRoute,
+  isImmersiveVenueProfileRoute,
   isMarketplaceRoute,
 } from "./is-marketplace-route";
 
@@ -23,5 +24,23 @@ describe("isMarketplaceRoute", () => {
     expect(isAccountCenterRoute("/account")).toBe(true);
     expect(isAccountCenterRoute("/account/personal-details")).toBe(true);
     expect(isAccountCenterRoute("/settings")).toBe(false);
+  });
+});
+
+describe("isImmersiveVenueProfileRoute", () => {
+  it("targets only a public venue detail route", () => {
+    expect(isImmersiveVenueProfileRoute("/venues/amorita-resort")).toBe(true);
+    expect(isImmersiveVenueProfileRoute("/venues")).toBe(false);
+    expect(isImmersiveVenueProfileRoute("/venues/amorita-resort/book")).toBe(
+      false,
+    );
+    expect(isImmersiveVenueProfileRoute("/suppliers/sai-s-photography")).toBe(
+      false,
+    );
+    expect(
+      isImmersiveVenueProfileRoute(
+        "/dashboard/venues/venue-id/experience/preview",
+      ),
+    ).toBe(false);
   });
 });
