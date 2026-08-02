@@ -157,10 +157,11 @@ type Props = {
 };
 
 const inputClass =
-  "h-11 w-full rounded-xl border border-[#dbe3ef] bg-white px-3 text-sm font-semibold text-[#0f172a] outline-none transition placeholder:text-[#94a3b8] focus:border-[#2563eb] focus:ring-4 focus:ring-[#dbeafe]";
+  "min-h-12 w-full rounded-lg border border-[#cbd5e1] bg-white px-4 py-3 text-base font-semibold text-[#0f172a] outline-none transition placeholder:text-[#94a3b8] focus:border-[#2563eb] focus:ring-4 focus:ring-[#dbeafe]";
 const textareaClass =
-  "w-full rounded-xl border border-[#dbe3ef] bg-white px-3 py-3 text-sm font-semibold text-[#0f172a] outline-none transition placeholder:text-[#94a3b8] focus:border-[#2563eb] focus:ring-4 focus:ring-[#dbeafe]";
+  "w-full rounded-lg border border-[#cbd5e1] bg-white px-4 py-3 text-base font-semibold leading-7 text-[#0f172a] outline-none transition placeholder:text-[#94a3b8] focus:border-[#2563eb] focus:ring-4 focus:ring-[#dbeafe]";
 const labelClass = "text-sm font-bold text-[#334155]";
+const editorCardClass = "rounded-xl border border-[#dbe3ef] bg-white p-5 sm:p-6";
 
 function peso(amount: number) {
   return `PHP ${Number(amount).toLocaleString("en-PH")}`;
@@ -677,8 +678,22 @@ export function StructuredVenueEditorClient({
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[240px_minmax(0,1fr)_320px]">
-      <Panel className="hidden h-max xl:block">
+    <div className="space-y-6">
+      <StatusPanel
+        venue={venue}
+        profileStatus={profileStatus}
+        actionState={actionState}
+        canPublish={canPublish}
+        isCoordinatorOnly={isCoordinatorOnly}
+        publishIssues={publishIssues}
+        onPublish={publishDraft}
+        onDiscard={discardDraft}
+        hasDraft
+        variant="bar"
+      />
+
+      <div className="grid gap-6 2xl:grid-cols-[260px_minmax(0,1fr)]">
+      <Panel className="hidden h-max 2xl:block">
         <p className="text-xs font-bold uppercase tracking-wider text-[#64748b]">
           Sections
         </p>
@@ -702,8 +717,8 @@ export function StructuredVenueEditorClient({
         </nav>
       </Panel>
 
-      <div className="min-w-0 space-y-5">
-        <div className="xl:hidden">
+      <div className="min-w-0 space-y-6">
+        <div className="2xl:hidden">
           <label htmlFor="structured-section" className={labelClass}>
             Editor section
           </label>
@@ -788,18 +803,7 @@ export function StructuredVenueEditorClient({
           />
         ) : null}
       </div>
-
-      <StatusPanel
-        venue={venue}
-        profileStatus={profileStatus}
-        actionState={actionState}
-        canPublish={canPublish}
-        isCoordinatorOnly={isCoordinatorOnly}
-        publishIssues={publishIssues}
-        onPublish={publishDraft}
-        onDiscard={discardDraft}
-        hasDraft
-      />
+      </div>
     </div>
   );
 }
@@ -814,6 +818,7 @@ function StatusPanel({
   onPublish,
   onDiscard,
   hasDraft,
+  variant = "sidebar",
 }: {
   venue: Venue;
   profileStatus: string;
@@ -824,47 +829,86 @@ function StatusPanel({
   onPublish: () => void;
   onDiscard: () => void;
   hasDraft: boolean;
+  variant?: "sidebar" | "bar";
 }) {
+  const isBar = variant === "bar";
+
   return (
-    <Panel className="h-max xl:sticky xl:top-24">
-      <div className="flex items-start justify-between gap-4">
-        <div>
+    <Panel className={cn("h-max", !isBar && "xl:sticky xl:top-24")}>
+      <div
+        className={cn(
+          "grid gap-5",
+          isBar && "xl:grid-cols-[minmax(0,1fr)_minmax(240px,0.55fr)_auto] xl:items-start",
+        )}
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-[#64748b]">
+              Venue
+            </p>
+            <h2 className="mt-1 text-lg font-bold text-[#0f172a]">{venue.name}</h2>
+            <p className="mt-1 text-sm text-[#64748b]">
+              {[venue.city, venue.province].filter(Boolean).join(", ") ||
+                "Location pending"}
+            </p>
+          </div>
+          <StatusBadge status={profileStatus.toLowerCase().replace(/\s/g, "_")} label={profileStatus} />
+        </div>
+
+        <div className="rounded-lg border border-[#dbe3ef] bg-[#f8fbff] p-4">
           <p className="text-xs font-bold uppercase tracking-wider text-[#64748b]">
-            Venue
+            Save state
           </p>
-          <h2 className="mt-1 text-lg font-bold text-[#0f172a]">{venue.name}</h2>
-          <p className="mt-1 text-sm text-[#64748b]">
-            {[venue.city, venue.province].filter(Boolean).join(", ") ||
-              "Location pending"}
+          <p
+            className={cn(
+              "mt-2 text-sm font-bold",
+              actionState.status === "error" ? "text-red-700" : "text-[#0f172a]",
+            )}
+            aria-live="polite"
+          >
+            {actionState.message}
           </p>
         </div>
-        <StatusBadge status={profileStatus.toLowerCase().replace(/\s/g, "_")} label={profileStatus} />
-      </div>
 
-      <div className="mt-5 rounded-xl border border-[#dbe3ef] bg-[#f8fbff] p-4">
-        <p className="text-xs font-bold uppercase tracking-wider text-[#64748b]">
-          Save state
-        </p>
-        <p
-          className={cn(
-            "mt-2 text-sm font-bold",
-            actionState.status === "error" ? "text-red-700" : "text-[#0f172a]",
-          )}
-          aria-live="polite"
-        >
-          {actionState.message}
-        </p>
+        <div className={cn("flex flex-col gap-2", isBar && "sm:flex-row xl:flex-col")}>
+          <DashButton
+            href={`/dashboard/venues/${venue.id}/experience/preview`}
+            variant="secondary"
+            icon="visibility"
+          >
+            Preview
+          </DashButton>
+          <button
+            type="button"
+            onClick={onPublish}
+            disabled={!hasDraft || !canPublish || publishIssues.length > 0}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#1d4ed8] px-4 py-2.5 text-sm font-bold text-white shadow-sm shadow-blue-200/70 transition hover:bg-[#1e40af] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Send className="h-4 w-4" />
+            Publish changes
+          </button>
+          {hasDraft && canPublish ? (
+            <button
+              type="button"
+              onClick={onDiscard}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-bold text-red-700 transition hover:bg-red-100"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Discard draft
+            </button>
+          ) : null}
+        </div>
       </div>
 
       {isCoordinatorOnly ? (
-        <div className="mt-4 flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">
+        <div className="mt-4 flex gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">
           <Lock className="mt-0.5 h-4 w-4 shrink-0" />
           Coordinators can edit assigned profile content, but publishing requires the venue owner.
         </div>
       ) : null}
 
       {publishIssues.length > 0 ? (
-        <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
+        <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
           <p className="flex items-center gap-2 text-sm font-bold text-amber-900">
             <AlertCircle className="h-4 w-4" />
             Before publishing
@@ -876,35 +920,6 @@ function StatusPanel({
           </ul>
         </div>
       ) : null}
-
-      <div className="mt-5 flex flex-col gap-2">
-        <DashButton
-          href={`/dashboard/venues/${venue.id}/experience/preview`}
-          variant="secondary"
-          icon="visibility"
-        >
-          Preview
-        </DashButton>
-        <button
-          type="button"
-          onClick={onPublish}
-          disabled={!hasDraft || !canPublish || publishIssues.length > 0}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-[#1d4ed8] px-4 py-2.5 text-sm font-bold text-white shadow-sm shadow-blue-200/70 transition hover:bg-[#1e40af] disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <Send className="h-4 w-4" />
-          Publish changes
-        </button>
-        {hasDraft && canPublish ? (
-          <button
-            type="button"
-            onClick={onDiscard}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-bold text-red-700 transition hover:bg-red-100"
-          >
-            <RotateCcw className="h-4 w-4" />
-            Discard draft
-          </button>
-        ) : null}
-      </div>
     </Panel>
   );
 }
@@ -1030,10 +1045,10 @@ function SpacesSection({
         title="Spaces"
         description="Create customer-readable spaces such as ballrooms, gardens, ceremony areas, and preparation suites."
       />
-      <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
+      <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
         <div className="space-y-3">
           {spaces.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-5 text-sm text-[#64748b]">
+            <div className="rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-5 text-sm leading-6 text-[#64748b]">
               No spaces yet. Add a ballroom, garden, pavilion, ceremony area, reception area, or preparation suite.
             </div>
           ) : (
@@ -1041,7 +1056,7 @@ function SpacesSection({
               <div
                 key={space.id}
                 className={cn(
-                  "rounded-xl border p-3",
+                  "rounded-xl border p-4",
                   selectedSpaceId === space.id
                     ? "border-[#93c5fd] bg-[#eff6ff]"
                     : "border-[#dbe3ef] bg-white",
@@ -1052,8 +1067,8 @@ function SpacesSection({
                   onClick={() => setSelectedSpaceId(space.id)}
                   className="w-full text-left"
                 >
-                  <p className="font-bold text-[#0f172a]">{space.name}</p>
-                  <p className="mt-1 text-xs font-semibold text-[#64748b]">
+                  <p className="text-base font-bold text-[#0f172a]">{space.name}</p>
+                  <p className="mt-1 text-sm font-semibold text-[#64748b]">
                     {getVenueSpaceSettingLabel(space.setting)} · up to{" "}
                     {space.capacityMax} guests
                   </p>
@@ -1092,19 +1107,19 @@ function SpacesSection({
           <button
             type="button"
             onClick={() => setSelectedSpaceId("")}
-            className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-[#dbe3ef] bg-white px-3 text-sm font-bold text-[#1d4ed8]"
+            className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg border border-[#dbe3ef] bg-white px-3 text-sm font-bold text-[#1d4ed8] transition hover:border-[#93c5fd]"
           >
             <Plus className="h-4 w-4" />
             Add Space
           </button>
         </div>
 
-        <div className="space-y-5">
-          <form onSubmit={onSaveSpace} className="rounded-xl border border-[#dbe3ef] p-4">
+        <div className="space-y-6">
+          <form onSubmit={onSaveSpace} className={editorCardClass}>
             <h3 className="text-lg font-bold text-[#0f172a]">
               {selectedSpace ? "Edit space" : "Add space"}
             </h3>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div className="mt-5 grid gap-5 lg:grid-cols-2">
               <Field label="Name">
                 <input name="name" required defaultValue={selectedSpace?.name ?? ""} className={inputClass} />
               </Field>
@@ -1152,16 +1167,16 @@ function SpacesSection({
           </form>
 
           {selectedSpace ? (
-            <form onSubmit={onSaveRelationships} className="rounded-xl border border-[#dbe3ef] p-4">
+            <form onSubmit={onSaveRelationships} className={editorCardClass}>
               <h3 className="text-lg font-bold text-[#0f172a]">Capacity, amenities, and event fit</h3>
-              <div className="mt-4 space-y-5">
+              <div className="mt-5 space-y-6">
                 <div>
                   <p className={labelClass}>Capacity layouts</p>
-                  <div className="mt-2 grid gap-3">
+                  <div className="mt-3 grid gap-4">
                     {Array.from({ length: 4 }).map((_, index) => {
                       const layout = selectedLayouts[index];
                       return (
-                        <div key={index} className="grid gap-2 sm:grid-cols-[1fr_1fr_120px]">
+                        <div key={index} className="grid gap-3 rounded-lg border border-[#e5e7eb] bg-[#f8fafc] p-3 lg:grid-cols-[minmax(160px,0.8fr)_minmax(180px,1fr)_140px]">
                           <select name={`layout-${index}`} defaultValue={layout?.layout ?? ""} className={inputClass}>
                             <option value="">Layout</option>
                             {VENUE_SPACE_LAYOUTS.map((value) => (
@@ -1170,7 +1185,7 @@ function SpacesSection({
                           </select>
                           <input name={`customLayoutLabel-${index}`} defaultValue={layout?.custom_layout_label ?? ""} placeholder="Custom label" className={inputClass} />
                           <input name={`layoutCapacity-${index}`} type="number" min="0" defaultValue={layout?.capacity ?? ""} placeholder="Capacity" className={inputClass} />
-                          <input name={`layoutNotes-${index}`} defaultValue={layout?.notes ?? ""} placeholder="Notes" className={cn(inputClass, "sm:col-span-3")} />
+                          <input name={`layoutNotes-${index}`} defaultValue={layout?.notes ?? ""} placeholder="Notes" className={cn(inputClass, "lg:col-span-3")} />
                         </div>
                       );
                     })}
@@ -1222,10 +1237,10 @@ function MediaSection({
         title="Media"
         description="Organize existing venue-owned uploads into structured galleries. Upload new files from the base listing page first."
       />
-      <div className="grid gap-5 lg:grid-cols-2">
-        <form onSubmit={onCreateCollection} className="rounded-xl border border-[#dbe3ef] p-4">
-          <h3 className="font-bold text-[#0f172a]">Create collection</h3>
-          <div className="mt-4 grid gap-3">
+      <div className="grid gap-6 xl:grid-cols-2">
+        <form onSubmit={onCreateCollection} className={editorCardClass}>
+          <h3 className="text-lg font-bold text-[#0f172a]">Create collection</h3>
+          <div className="mt-5 grid gap-4">
             <Field label="Collection type">
               <select name="collectionType" className={inputClass} defaultValue="gallery">
                 {VENUE_MEDIA_COLLECTION_TYPES.filter((type) => type !== "video").map((value) => (
@@ -1255,14 +1270,14 @@ function MediaSection({
           <SubmitButton label="Create collection" />
         </form>
 
-        <form onSubmit={onAddExistingMedia} className="rounded-xl border border-[#dbe3ef] p-4">
-          <h3 className="font-bold text-[#0f172a]">Add existing upload</h3>
+        <form onSubmit={onAddExistingMedia} className={editorCardClass}>
+          <h3 className="text-lg font-bold text-[#0f172a]">Add existing upload</h3>
           {profile.mediaCollections.length === 0 || venueImages.length === 0 ? (
-            <div className="mt-4 rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-5 text-sm text-[#64748b]">
+            <div className="mt-5 rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-5 text-sm leading-6 text-[#64748b]">
               Create a collection and upload venue images in Base Listing before adding structured media metadata.
             </div>
           ) : (
-            <div className="mt-4 grid gap-3">
+            <div className="mt-5 grid gap-4">
               <Field label="Collection">
                 <select name="collectionId" className={inputClass}>
                   {profile.mediaCollections.map((collection) => (
@@ -1300,7 +1315,7 @@ function MediaSection({
         </form>
       </div>
 
-      <div className="mt-6 space-y-4">
+      <div className="mt-7 space-y-5">
         {profile.mediaCollections.length === 0 ? (
           <div className="rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-8 text-center text-sm text-[#64748b]">
             No structured media collections yet.
@@ -1314,7 +1329,7 @@ function MediaSection({
                 !item.deletedAt,
             );
             return (
-              <div key={collection.id} className="rounded-xl border border-[#dbe3ef] p-4">
+              <div key={collection.id} className={editorCardClass}>
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="font-bold text-[#0f172a]">
@@ -1327,7 +1342,7 @@ function MediaSection({
                   </div>
                   {collection.isCover ? <StatusBadge status="active" label="Cover" /> : null}
                 </div>
-                <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   {items.length === 0 ? (
                     <div className="rounded-xl bg-[#f8fafc] p-4 text-sm text-[#64748b]">
                       No media added yet.
@@ -1405,7 +1420,7 @@ function LogisticsSection({
         title="Logistics"
         description="Give customers the practical information they need before booking."
       />
-      <form onSubmit={onSave} className="grid gap-4 sm:grid-cols-2">
+      <form onSubmit={onSave} className="grid gap-5 lg:grid-cols-2">
         <Field label="Parking capacity">
           <input name="parkingCapacity" type="number" min="0" defaultValue={logistics?.parkingCapacity ?? ""} className={inputClass} />
         </Field>
@@ -1478,16 +1493,16 @@ function FaqSection({
         title="FAQs"
         description="Answers are stored and rendered as plain text only."
       />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="space-y-3">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+        <div className="space-y-5">
           {activeFaqs.length === 0 ? (
             <div className="rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-8 text-center text-sm text-[#64748b]">
               No FAQs yet.
             </div>
           ) : (
             activeFaqs.map((faq) => (
-              <details key={faq.id} className="rounded-xl border border-[#dbe3ef] bg-white p-4">
-                <summary className="cursor-pointer font-bold text-[#0f172a]">
+              <details key={faq.id} className={editorCardClass}>
+                <summary className="cursor-pointer text-base font-bold text-[#0f172a]">
                   {faq.question}
                 </summary>
                 <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-[#475569]">
@@ -1523,9 +1538,9 @@ function FaqSection({
             ))
           )}
         </div>
-        <form onSubmit={onCreate} className="rounded-xl border border-[#dbe3ef] p-4">
-          <h3 className="font-bold text-[#0f172a]">Add FAQ</h3>
-          <div className="mt-4 grid gap-3">
+        <form onSubmit={onCreate} className={editorCardClass}>
+          <h3 className="text-lg font-bold text-[#0f172a]">Add FAQ</h3>
+          <div className="mt-5 grid gap-4">
             <Field label="Category">
               <select name="category" className={inputClass}>
                 <option value="">General</option>
@@ -1581,18 +1596,18 @@ function PackagesSection({
               <form
                 key={pkg.id}
                 onSubmit={(event) => onSave(event, pkg.id)}
-                className="rounded-xl border border-[#dbe3ef] p-4"
+                className={editorCardClass}
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <h3 className="font-bold text-[#0f172a]">{pkg.name}</h3>
+                    <h3 className="text-lg font-bold text-[#0f172a]">{pkg.name}</h3>
                     <p className="mt-1 text-sm text-[#64748b]">
                       {peso(pkg.price)} · {pkg.price_unit.replace(/_/g, " ")}
                     </p>
                   </div>
                   <StatusBadge status="active" label={`${linked.length} spaces`} />
                 </div>
-                <div className="mt-4 grid gap-3">
+                <div className="mt-5 grid gap-4">
                   {spaces.length === 0 ? (
                     <p className="text-sm text-[#64748b]">
                       Add a space before linking packages.
@@ -1601,8 +1616,8 @@ function PackagesSection({
                     spaces.map((space) => {
                       const link = linked.find((item) => item.spaceId === space.id);
                       return (
-                        <div key={space.id} className="rounded-xl border border-[#e5e7eb] p-3">
-                          <label className="flex items-center gap-3 font-bold text-[#0f172a]">
+                        <div key={space.id} className="rounded-lg border border-[#e5e7eb] bg-[#f8fafc] p-4">
+                          <label className="flex items-center gap-3 text-base font-bold text-[#0f172a]">
                             <input
                               name="spaceIds"
                               type="checkbox"
@@ -1611,7 +1626,7 @@ function PackagesSection({
                             />
                             {space.name}
                           </label>
-                          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                          <div className="mt-4 grid gap-3 md:grid-cols-2">
                             <select
                               name={`inclusionType-${space.id}`}
                               defaultValue={link?.inclusionType ?? "included"}
@@ -1718,11 +1733,11 @@ function SectionTitle({
   description: string;
 }) {
   return (
-    <div className="mb-5">
-      <h2 className="text-xl font-bold tracking-tight text-[#0f172a]">
+    <div className="mb-6">
+      <h2 className="text-2xl font-bold tracking-tight text-[#0f172a]">
         {title}
       </h2>
-      <p className="mt-1 max-w-2xl text-sm leading-6 text-[#64748b]">
+      <p className="mt-2 max-w-3xl text-sm leading-6 text-[#64748b]">
         {description}
       </p>
     </div>
@@ -1739,7 +1754,7 @@ function Field({
   className?: string;
 }) {
   return (
-    <label className={cn("block space-y-2", className)}>
+    <label className={cn("block space-y-2.5", className)}>
       <span className={labelClass}>{label}</span>
       {children}
     </label>
@@ -1760,11 +1775,11 @@ function CheckboxGrid({
   return (
     <div>
       <p className={labelClass}>{label}</p>
-      <div className="mt-2 grid gap-2 sm:grid-cols-2">
+      <div className="mt-3 grid gap-3 md:grid-cols-2">
         {items.map((item) => (
           <label
             key={item.id}
-            className="flex items-center gap-3 rounded-xl border border-[#dbe3ef] bg-white px-3 py-2 text-sm font-semibold text-[#334155]"
+            className="flex min-h-12 items-center gap-3 rounded-lg border border-[#dbe3ef] bg-white px-4 py-3 text-sm font-semibold text-[#334155]"
           >
             <input
               type="checkbox"
@@ -1785,7 +1800,7 @@ function SubmitButton({ label }: { label: string }) {
   return (
     <button
       type="submit"
-      className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-[#1d4ed8] px-4 py-2.5 text-sm font-bold text-white shadow-sm shadow-blue-200/70 transition hover:bg-[#1e40af]"
+      className="mt-6 inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#1d4ed8] px-5 py-3 text-sm font-bold text-white shadow-sm shadow-blue-200/70 transition hover:bg-[#1e40af]"
     >
       <Save className="h-4 w-4" />
       {label}
