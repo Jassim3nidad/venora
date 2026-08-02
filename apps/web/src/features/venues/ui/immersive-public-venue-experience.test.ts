@@ -64,6 +64,18 @@ describe("immersive public venue experience contract", () => {
     expect(booking).toContain("pr-[5.5rem]");
   });
 
+  it("keeps the lower page image-led without inventing Event Plan scoring", () => {
+    const eventPlan = uiSource("ImagineYourEventHere.tsx");
+    const gallery = uiSource("ImmersiveVenueGallery.tsx");
+    const spaces = uiSource("VenueSpaceExplorer.tsx");
+
+    expect(eventPlan).toContain("profile.hero.image ?? profile.gallery[0]");
+    expect(eventPlan).toMatch(/real\s+spaces,\s+capacities,\s+and\s+features/);
+    expect(eventPlan).not.toMatch(/match (?:percentage|score)/i);
+    expect(gallery).toContain("isOnlyItem");
+    expect(spaces).toContain("max-w-[90rem]");
+  });
+
   it("keeps authenticated drafts noindex and on the shared preview model", () => {
     const preview = repositorySource(
       "app/(venue-owner)/dashboard/venues/[id]/experience/preview/page.tsx",

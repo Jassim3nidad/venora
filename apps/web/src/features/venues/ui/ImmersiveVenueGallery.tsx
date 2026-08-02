@@ -153,25 +153,40 @@ export default function ImmersiveVenueGallery({
     const start = touchStartX.current;
     const end = event.changedTouches[0]?.clientX;
     touchStartX.current = null;
-    if (start === null || end === undefined || Math.abs(start - end) < 45) return;
+    if (start === null || end === undefined || Math.abs(start - end) < 45)
+      return;
     if (start > end) next();
     else previous();
   };
 
   return (
-    <section id="gallery" aria-labelledby="gallery-heading" className="scroll-mt-40 space-y-7">
+    <section
+      id="gallery"
+      aria-labelledby="gallery-heading"
+      className="scroll-mt-40 space-y-7"
+    >
       <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
-          <p className="text-sm font-bold text-[#876946]">Published venue media</p>
+          <p className="text-sm font-bold text-[#876946]">
+            Published venue media
+          </p>
           <h2
             id="gallery-heading"
             className="mt-2 text-3xl font-bold tracking-[-0.025em] text-[#151C27] sm:text-4xl"
           >
             See the property in detail
           </h2>
+          <p className="mt-3 max-w-2xl text-base leading-7 text-[#5C625E]">
+            Move from the wider property into the spaces and details the venue
+            has chosen to publish.
+          </p>
         </div>
         {groups.length > 1 ? (
-          <div className="flex gap-2 overflow-x-auto" role="group" aria-label="Gallery collections">
+          <div
+            className="flex gap-2 overflow-x-auto"
+            role="group"
+            aria-label="Gallery collections"
+          >
             {groups.map((group) => (
               <button
                 key={group.key}
@@ -194,9 +209,10 @@ export default function ImmersiveVenueGallery({
         ) : null}
       </div>
 
-      <div className="relative grid h-[26rem] grid-cols-2 grid-rows-2 gap-2 overflow-hidden sm:h-[32rem] lg:grid-cols-4">
+      <div className="relative grid h-[28rem] grid-cols-2 grid-rows-2 gap-2 overflow-hidden sm:h-[36rem] lg:h-[42rem] lg:grid-cols-5">
         {visibleMedia.map((item, index) => {
           const isLead = index === 0;
+          const isOnlyItem = activeGroup.media.length === 1;
           return (
             <button
               key={item.id}
@@ -204,10 +220,15 @@ export default function ImmersiveVenueGallery({
               onClick={(event) => openAt(index, event.currentTarget)}
               aria-label={`Open ${item.mediaType === "video" ? "video" : "photo"} ${index + 1} of ${activeGroup.media.length}${item.caption ? `: ${item.caption}` : ""}`}
               className={`group relative min-h-11 overflow-hidden bg-[#E6E2DA] text-left focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-white ${
-                isLead ? "col-span-2 row-span-2 lg:col-span-2" : "hidden sm:block"
+                isLead
+                  ? `col-span-2 row-span-2 ${isOnlyItem ? "lg:col-span-5" : "lg:col-span-3"}`
+                  : "hidden sm:block"
               } ${index > 2 ? "lg:block" : ""}`}
             >
-              <GalleryMedia item={item} sizes={isLead ? "(max-width: 1024px) 100vw, 50vw" : "25vw"} />
+              <GalleryMedia
+                item={item}
+                sizes={isLead ? "(max-width: 1024px) 100vw, 50vw" : "25vw"}
+              />
               {item.caption ? (
                 <span className="absolute inset-x-0 bottom-0 bg-black/60 px-4 py-3 text-sm font-semibold text-white">
                   {item.caption}
@@ -231,7 +252,8 @@ export default function ImmersiveVenueGallery({
         <DialogContent className="flex h-dvh max-h-dvh w-screen max-w-none flex-col overflow-hidden rounded-none border-0 bg-[#101412] p-0 text-white sm:rounded-none">
           <DialogTitle className="sr-only">{venueName} gallery</DialogTitle>
           <DialogDescription className="sr-only">
-            Use the previous and next buttons or arrow keys to explore published venue media.
+            Use the previous and next buttons or arrow keys to explore published
+            venue media.
           </DialogDescription>
 
           <header className="flex min-h-16 items-center justify-between border-b border-white/15 px-4 sm:px-6">
