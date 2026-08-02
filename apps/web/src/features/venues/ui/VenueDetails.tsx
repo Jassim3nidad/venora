@@ -189,7 +189,7 @@ export default function VenueDetails({
       />
       <ImmersiveVenueSectionNav links={sectionLinks} />
 
-      <main>
+      <div>
         <ImagineYourEventHere fit={eventPlanFit} profile={profile} />
         <div id="overview" className="scroll-mt-40">
           <PropertyOverview profile={profile} />
@@ -545,7 +545,7 @@ export default function VenueDetails({
 
           <RecommendedVenues fallbackVenues={recommendedFallbackVenues} />
         </div>
-      </main>
+      </div>
     </div>
   );
 }
