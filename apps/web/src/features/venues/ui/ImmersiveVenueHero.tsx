@@ -13,12 +13,7 @@ import {
   ShieldCheck,
   Star,
 } from "lucide-react";
-import {
-  Button,
-  Toast,
-  ToastDescription,
-  ToastTitle,
-} from "@venora/ui";
+import { Button, Toast, ToastDescription, ToastTitle } from "@venora/ui";
 import { useAuthRequiredPrompt } from "@/components/layout/AuthRequiredPrompt";
 import { isOptimizableImageSrc } from "@/src/lib/image-host";
 import type { PublicVenueProfileViewModel } from "../application/public-venue-profile";
@@ -161,7 +156,10 @@ export default function ImmersiveVenueHero({
       triggerToast("Link copied", "The venue link is ready to share.");
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return;
-      triggerToast("Unable to share", "Copy the page address from your browser.");
+      triggerToast(
+        "Unable to share",
+        "Copy the page address from your browser.",
+      );
     }
   };
 
@@ -185,6 +183,7 @@ export default function ImmersiveVenueHero({
     <>
       <section
         aria-labelledby="venue-title"
+        data-immersive-venue-hero
         className="relative isolate min-h-[72dvh] overflow-hidden bg-[#18201D] text-white sm:min-h-[78dvh] lg:min-h-[86dvh]"
       >
         {heroImage ? (
@@ -220,7 +219,6 @@ export default function ImmersiveVenueHero({
         ) : null}
 
         <div className="absolute inset-0 bg-black/50" aria-hidden="true" />
-
         <div className="relative mx-auto flex min-h-[72dvh] max-w-7xl flex-col justify-end px-4 pb-7 pt-28 sm:min-h-[78dvh] sm:px-6 sm:pb-10 lg:min-h-[86dvh] lg:px-8 lg:pb-12">
           <div className="max-w-4xl">
             <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-semibold text-white/90">
@@ -241,7 +239,8 @@ export default function ImmersiveVenueHero({
                 className="inline-flex items-center gap-1.5 underline-offset-4 hover:underline"
               >
                 <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                {profile.rating.average.toFixed(1)} ({profile.rating.count} review
+                {profile.rating.average.toFixed(1)} ({profile.rating.count}{" "}
+                review
                 {profile.rating.count === 1 ? "" : "s"})
               </a>
             </div>
@@ -253,7 +252,7 @@ export default function ImmersiveVenueHero({
               {profile.venue.name}
             </h1>
             {profile.venue.shortDescription ? (
-              <p className="mt-5 line-clamp-6 max-w-2xl text-base leading-7 text-white/88 sm:line-clamp-4 sm:text-lg sm:leading-8">
+              <p className="mt-5 line-clamp-4 max-w-2xl text-base leading-7 text-white/88 sm:text-lg sm:leading-8">
                 {profile.venue.shortDescription}
               </p>
             ) : null}
@@ -302,13 +301,15 @@ export default function ImmersiveVenueHero({
           </div>
 
           {profile.quickFacts.length > 0 ? (
-            <dl className="mt-8 grid max-w-5xl grid-cols-2 border-t border-white/35 pt-5 sm:grid-cols-4">
+            <dl className="mt-8 grid max-w-5xl grid-cols-3 border-t border-white/35 pt-5 sm:grid-cols-4">
               {profile.quickFacts.map((fact) => (
                 <div
                   key={fact.key}
                   className="min-w-0 border-white/25 py-2 pr-4 sm:border-l sm:px-5 sm:first:border-l-0 sm:first:pl-0"
                 >
-                  <dt className="text-xs font-semibold text-white/70">{fact.label}</dt>
+                  <dt className="text-xs font-semibold text-white/70">
+                    {fact.label}
+                  </dt>
                   <dd className="mt-1 break-words text-sm font-bold text-white sm:text-base">
                     {fact.value}
                   </dd>
@@ -322,11 +323,17 @@ export default function ImmersiveVenueHero({
           <button
             type="button"
             onClick={() => void toggleVideo()}
-            className="absolute right-4 top-5 inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/50 bg-black/45 px-4 text-sm font-bold text-white backdrop-blur-sm transition hover:bg-black/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:right-6 lg:right-8"
+            className="absolute right-4 top-44 inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/50 bg-black/45 px-4 text-sm font-bold text-white backdrop-blur-sm transition hover:bg-black/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:right-6 lg:right-8 lg:top-36"
             aria-label={videoPlaying ? "Pause venue video" : "Play venue video"}
           >
-            {videoPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-            <span className="hidden sm:inline">{videoPlaying ? "Pause" : "Play"}</span>
+            {videoPlaying ? (
+              <Pause className="h-4 w-4" />
+            ) : (
+              <Play className="h-4 w-4" />
+            )}
+            <span className="hidden sm:inline">
+              {videoPlaying ? "Pause" : "Play"}
+            </span>
           </button>
         ) : null}
       </section>
@@ -354,7 +361,7 @@ export function ImmersiveVenueSectionNav({
   return (
     <nav
       aria-label="Venue page sections"
-      className="sticky top-[4.25rem] z-30 border-b border-[#E2E2DE] bg-[#F7F5F1]/95 backdrop-blur lg:top-[8.5rem]"
+      className="sticky top-32 z-30 border-b border-[#E2E2DE] bg-[#F7F5F1]/95 backdrop-blur"
     >
       <div className="mx-auto flex max-w-7xl gap-6 overflow-x-auto px-4 sm:px-6 lg:px-8">
         {links.map((link) => (

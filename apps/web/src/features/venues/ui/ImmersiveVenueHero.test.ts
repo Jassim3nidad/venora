@@ -31,7 +31,7 @@ describe("immersive venue hero behavior", () => {
       new URL("./ImmersiveVenueHero.tsx", import.meta.url),
       "utf8",
     );
-    expect(source).toContain("line-clamp-6");
-    expect(source).toContain("sm:line-clamp-4");
+    expect(source).toContain("line-clamp-4");
+    expect(source).not.toContain("line-clamp-6");
   });
 });
