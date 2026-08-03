@@ -84,13 +84,15 @@ describe("cinematic venue navbar contract", () => {
     expect(source).toContain('appearance={immersiveVenueProfile ? "immersive"');
   });
 
-  it("provides readable top, scrolled, fallback, and reduced-motion states", () => {
+  it("provides readable glass top, scrolled, fallback, and reduced-motion states", () => {
     const source = readSource("src/components/layout/MarketingNavbar.tsx");
 
     expect(source).toContain("data-navbar-state=");
-    expect(source).toContain("bg-[#07100D]/82");
-    expect(source).toContain("bg-[#07100D]/90");
-    expect(source).toContain("supports-[backdrop-filter]:backdrop-blur-[16px]");
+    expect(source).toContain("bg-[#07100D]/[0.30]");
+    expect(source).toContain("bg-[#07100D]/[0.55]");
+    expect(source).toContain("supports-[backdrop-filter]:bg-white/[0.08]");
+    expect(source).toContain("supports-[backdrop-filter]:backdrop-blur-[22px]");
+    expect(source).toContain("supports-[backdrop-filter]:backdrop-saturate-150");
     expect(source).toContain("motion-reduce:transition-none");
     expect(source).toContain('aria-current={active ? "page" : undefined}');
   });

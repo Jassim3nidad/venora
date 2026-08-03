@@ -123,8 +123,8 @@ export function CustomerNavbar({
             "shrink-0 border-b transition-[background-color,border-color,box-shadow] duration-200 motion-reduce:transition-none",
             immersive
               ? scrolled
-                ? "border-white/10 bg-[#07100D]/90 shadow-[0_8px_24px_rgba(0,0,0,0.18)] supports-[backdrop-filter]:bg-[#07100D]/85 supports-[backdrop-filter]:backdrop-blur-[18px]"
-                : "border-white/10 bg-[#07100D]/82 supports-[backdrop-filter]:bg-[#07100D]/30 supports-[backdrop-filter]:backdrop-blur-[16px]"
+                ? "border-white/[0.18] bg-[#07100D]/[0.55] shadow-[0_8px_24px_rgba(0,0,0,0.16)] supports-[backdrop-filter]:bg-[#07100D]/[0.36] supports-[backdrop-filter]:backdrop-blur-[22px] supports-[backdrop-filter]:backdrop-saturate-150"
+                : "border-white/[0.18] bg-[#07100D]/[0.30] supports-[backdrop-filter]:bg-white/[0.08] supports-[backdrop-filter]:backdrop-blur-[22px] supports-[backdrop-filter]:backdrop-saturate-150"
               : "border-[#E5E7EB]/80 bg-white/95 backdrop-blur-xl",
           ].join(" ")}
         >
