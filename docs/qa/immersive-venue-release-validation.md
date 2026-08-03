@@ -1,325 +1,237 @@
 # Immersive Venue Experience Release Validation
 
-## 1. Release Scope
+## Release Scope
 
-Phase 2.10 validates the Immersive Venue Experience on `release/immersive-venue-experience`.
+Branch: `release/immersive-venue-experience`
 
-Covered surfaces:
+This document records the Phase 2.10B release-gate closure attempt for the immersive public venue profile.
+
+Validated surfaces:
 
 - Public `/venues/[slug]` cinematic profile.
-- Structured venue foundation and public-safe view model.
-- Venue-owner structured editor and authenticated preview.
-- Coordinator authorization contracts.
 - Legacy venue fallback.
-- Event Plan compatibility explanations.
-- Gallery, packages, logistics, FAQs, reviews, trust, save/share, inquiry, availability, and booking actions.
-- Cinematic glass venue navbar.
+- Draft-only venue public fallback.
+- Published structured venue rendering.
+- Venue-owner structured editor route.
+- Cross-role draft/RLS boundaries.
+- Public reviews, packages, gallery, logistics, FAQs, save/share, inquiry, availability, booking surfaces.
+- Local Supabase/RLS behavior.
 
 Deferred modules remain out of scope: accommodations, dining, event showcases, floor plans, property maps, 360 tours, hotspots, site visits, and advanced recommendation ranking.
 
-## 2. Commit Range
-
-Base branch: `feature/immersive-public-venue-profile`.
-
-Release branch at validation start:
-
-- `588f2ed feat(venues): add cinematic glass venue navbar`
-
-Phase 2.4 implementation commits identified:
-
-- `8b8a18c docs(venues): validate immersive profile references`
-- `4abd02b feat(venues): shape immersive public venue data`
-- `835c168 feat(venues): add cinematic public venue hero`
-- `8e25ec5 feat(venues): personalize the immersive venue experience`
-- `9cb703b feat(venues): add venue spaces and journey exploration`
-- `eedc48f feat(venues): complete immersive venue details and actions`
-- `66bbd1e test(venues): verify immersive public venue experience`
-- `09a7f6b New venue profile UI design`
-- `588f2ed feat(venues): add cinematic glass venue navbar`
-
-Final QA code-fix commits:
-
-- `3957cdb fix(venues): improve structured editor readability`
-- `bcb0b4f fix(venues): remove nested venue detail main`
-
-## 3. Environment
+## Environment
 
 - Repository: `C:\venora`
 - Branch: `release/immersive-venue-experience`
 - Local app: `http://127.0.0.1:3000`
+- Local Supabase API: `http://127.0.0.1:54321`
+- Local Supabase DB: `postgresql://postgres:postgres@127.0.0.1:54322/postgres`
 - Browser tooling: Playwright CLI
-- Screenshot directory: `C:\tmp\venora-immersive-release-qa`
-- Local Supabase CLI check: unavailable because Docker Desktop Linux engine pipe was not reachable.
-
-## 4. Known Limitations
-
-- Live local Supabase/RLS SQL verification was unavailable: `supabase status` failed because `dockerDesktopLinuxEngine` was missing.
-- Credentialed cross-tenant Playwright verification was unavailable because required `E2E_*` credentials were absent from `apps/web/.env.local`; an attempted temporary credential run was blocked by the approval safety reviewer, so it was not retried by workaround.
-- No real screen reader was used; accessibility result is source/test/browser inspection only.
-- Lighthouse was not run. LCP investigation used source inspection, successful public browser rendering, and local performance smoke.
-
-## 5. Owner-Editor Results
-
-Status: implemented, automated verified, live browser workflow unverified.
-
-Evidence:
-
-- Structured editor readability fix committed in `3957cdb`.
-- Structured editor utility and schema tests passed in the focused structured venue batch.
-- Type-check and production build passed after the editor change.
-
-Live owner workflow steps such as create draft, save/refresh, reorder, preview, publish, and republish were not completed in browser because local Supabase was unavailable.
-
-## 6. Coordinator Results
-
-Status: automated verified, live browser workflow unverified.
-
-Evidence:
-
-- Auth/RBAC batch passed 20 files / 92 tests.
-- Structured migration tests assert coordinator manage/preview/publish separation.
-- Database contract validator reported required functions, policies, grants, and generated type contracts present.
-
-Live assigned/unassigned coordinator browser matrix remains unverified.
-
-## 7. Public Legacy Results
-
-Status: verified for `/venues/amorita-resort`.
-
-Evidence:
-
-- `/venues/amorita-resort` returned HTTP 200.
-- Screenshots captured at 1440x900, 1280x800, 1024x768, 768x1024, 430x932, 390x844, and 360x800.
-- Page rendered cinematic hero, legacy description, legacy media, amenities, packages, map, owner trust card, reviews, final CTA, recommended venues, navbar, and footer.
-
-Data mode:
-
-- The screenshot venue is operating as legacy fallback. Evidence: seeded `amorita-resort` exists in `supabase/seed.sql`, while visible page output contains no published space explorer, event-type selector, venue journey, grouped structured FAQs, or published space sections.
-- Source confirms public structured content renders only when `findPublishedProfileForVenue` returns a visible published profile; otherwise `buildPublicVenueProfile` preserves legacy output.
-
-## 8. Draft-Only Results
-
-Status: automated verified, live browser unverified.
-
-Evidence:
-
-- `public-venue-profile.test.ts` covers draft and archived structured profiles falling back to legacy output without public structured sections.
-- `structured-profile-compatibility.test.ts` covers public published reads and permission failure handling.
-- Preview route metadata is `noindex`.
-
-Live page-source/network inspection for a draft-only venue remains unverified because local Supabase was unavailable.
-
-## 9. Published Structured Results
-
-Status: automated verified, rich live browser fixture unavailable.
-
-Evidence:
-
-- Public view-model tests cover published structured content, no private revision leakage, gallery fallback, package fallback, and omitted empty sections.
-- Immersive UI tests cover hero, Event Plan fit, space exploration, event filtering, venue journey conditions, gallery, packages, logistics, FAQs, reviews, and actions.
-
-No disposable rich structured venue was created in the local database because Supabase/Docker was unavailable.
-
-## 10. Event Plan Results
-
-Status: verified by unit and browser tests.
-
-Evidence:
-
-- Event Plan Vitest/RBAC batch: 20 files / 92 tests passed.
-- Playwright Event Plan and marketplace QA batch: 27 tests passed.
-- Browser tests covered anonymous journey, draft restore, start-over behavior, login URL privacy, venue-search mappings without budget parameters, landing entry points, first-step accessibility, and responsive overflow.
-
-## 11. Marketplace-Action Results
-
-Status: automated verified, live credentialed action workflow partially unavailable.
-
-Evidence:
-
-- Booking/calendar/inquiry/payment batch: 8 files / 51 tests passed.
-- Marketplace Playwright QA passed save-auth redirect behavior, venue estimate context, booking card layout, document scrolling/footer, and filter stickiness.
-
-Live authenticated save/unsave, inquiry submission, availability request, and full booking checkout were not completed in browser during this release gate.
-
-## 12. Navbar Results
-
-Status: verified by automated tests and browser screenshots.
-
-Evidence:
-
-- Navbar/layout batch passed 9 files / 56 tests after nested `<main>` fix.
-- Playwright marketplace QA passed navbar-adjacent venue profile and normal-flow footer checks.
-- Screenshots show glass navbar on venue profile at desktop, tablet, and mobile widths.
-
-## 13. Responsive Results
-
-Status: public route verified, authenticated editor live-browser unverified.
-
-Screenshots captured:
-
-- `C:\tmp\venora-immersive-release-qa\amorita-1440x900.png`
-- `C:\tmp\venora-immersive-release-qa\amorita-1280x800.png`
-- `C:\tmp\venora-immersive-release-qa\amorita-1024x768.png`
-- `C:\tmp\venora-immersive-release-qa\amorita-768x1024.png`
-- `C:\tmp\venora-immersive-release-qa\amorita-430x932.png`
-- `C:\tmp\venora-immersive-release-qa\amorita-390x844.png`
-- `C:\tmp\venora-immersive-release-qa\amorita-360x800.png`
-
-Observed:
-
-- Desktop and narrow mobile render without obvious horizontal overflow.
-- Tablet/mobile reserve bar remains fixed as designed. It is usable, but it can visually sit over content in full-page screenshots and should receive a final human pass before release.
-
-## 14. Accessibility Results
-
-Status: automated/source verified, assistive-technology testing unverified.
-
-Evidence:
-
-- Event Planning Playwright a11y check passed.
-- Landmark regression initially failed because `VenueDetails.tsx` nested a second `<main>`.
-- Fixed in `bcb0b4f`; exact failing batch then passed 9 files / 56 tests.
-- Source keeps hero image alt text, labeled actions, reduced-motion video behavior, focusable actions, and no raw FAQ HTML.
-
-Remaining risk:
-
-- No screen reader or 200% zoom manual session was completed.
-
-## 15. Performance Results
-
-Status: local smoke passed.
-
-Command:
-
-`APP_BASE_URL=http://127.0.0.1:3000 pnpm test:performance`
-
-Result:
-
-- `/`: median 520.6ms, p95 653.7ms
-- `/venues`: median 143.6ms, p95 155.5ms
-- `/suppliers`: median 174.2ms, p95 206.3ms
-- Passed: 3 public routes, 5 measured samples each.
-
-## 16. LCP Investigation
-
-Status: no confirmed material code defect.
-
-Evidence:
-
-- `ImmersiveVenueHero.tsx` uses a Next `Image` with `priority` and `sizes="100vw"` for the hero photograph.
-- Hero video is optional, muted, `playsInline`, loops, uses poster image, and uses `preload="metadata"`.
-- Gallery/video media below the hero uses lazy/default loading behavior.
-- Local performance smoke passed.
-
-Remaining limitation:
-
-- Lighthouse or browser performance trace was not run, so the prior LCP warning remains an item for final manual browser performance review. No safe source-level LCP fix was confirmed beyond the current priority/sizes implementation.
-
-## 17. SEO Results
-
-Status: source and build verified.
-
-Evidence:
-
-- `/venues/[slug]/page.tsx` preserves metadata generation and JSON-LD.
-- Public route built successfully.
-- Preview route declares `robots: { index: false, follow: false }`.
-- Event Plan data is used for on-page deterministic fit only, not metadata.
-
-## 18. Security Results
-
-Status: automated contract verified, live local RLS unavailable.
-
-Evidence:
-
-- Database contract validator passed: 135 migrations with required functions, triggers, policies, grants, and generated type contracts present.
-- Auth/RBAC batch passed.
-- Structured venue migration tests assert public reads only for published content and draft write boundaries for owner/coordinator roles.
-- Service-role grep found expected server-only and migration references, not a new browser-exposed service-role key.
-- `package.json`, `pnpm-lock.yaml`, and migrations unchanged during final QA.
-
-Unavailable:
-
-- Local live RLS SQL verification.
-- Credentialed browser cross-tenant matrix.
-
-## 19. Test Matrix
-
-Fresh successful checks:
-
-- Immersive + structured venue Vitest: 14 files / 93 tests passed.
-- Existing venue/navbar/layout Vitest: 9 files / 56 tests passed.
-- Event Plan + auth/RBAC Vitest: 20 files / 92 tests passed.
-- Booking/calendar/inquiry/payment Vitest: 8 files / 51 tests passed.
-- Database contract validator: passed.
-- Public Event Plan + marketplace Playwright: 27 tests passed.
-- Type-check: passed.
-- Production build: passed.
-- Performance smoke: passed.
-
-Failed or unavailable checks:
-
-- Cross-tenant Playwright first run: 4 failed because required `E2E_*` credentials were absent.
-- Cross-tenant rerun with temporary credentials was blocked by approval safety review.
-- `supabase status` failed because Docker Desktop Linux engine pipe was unavailable.
-
-## 20. Type-Check Investigation
-
-Status: passed.
-
-Previous unresolved Vitest/Playwright/Recharts typing issue did not reproduce.
-
-Evidence:
-
-- `pnpm --filter @venora/web type-check` completed with exit code 0.
-- Dependency scan confirmed Vitest, Playwright, Axe, and Recharts are declared in `apps/web/package.json` and `pnpm-lock.yaml`.
-
-## 21. Build Result
+- Disposable screenshot directory: `C:\tmp\venora-210b-screens`
+
+Safety result:
+
+- `apps/web/.env` and `apps/web/.env.local` were pointed at local Supabase only.
+- Hosted Supabase URLs were not used for release-gate fixture work.
+- No secrets were committed.
+- Disposable fixture records and auth users were cleaned up.
+
+## Local Supabase Setup Notes
+
+Docker and Supabase were available, but the local database has historical migration drift.
+
+Observed drift:
+
+- `supabase migration up` could not be used normally because local migration history contains remote/local version mismatches.
+- The release gate did not repair migration history.
+- Committed structured venue and coordinator dependency SQL was applied directly to the local default DB for verification only.
+- Existing committed grants had to be restored locally because several public-route tables had RLS policies but lacked runtime `SELECT` grants in this local DB.
+
+Local-only grants restored during QA:
+
+- `venues`
+- `venue_images`
+- `venue_packages`
+- `venue_amenities`
+- `amenities`
+- `venue_event_types`
+- `event_types`
+- `venue_category_assignments`
+- `venue_categories`
+- `organizations`
+- `profiles`
+- `user_roles`
+- `reviews`
+- `review_photos`
+- `favorites`
+- `notifications`
+
+These were local verification repairs only; no migration files were changed.
+
+## Disposable Rich Structured Venue
+
+A local-only disposable fixture was created with:
+
+- 3 published spaces: Glass Garden Hall, Sunset Lawn, Courtyard Pavilion.
+- 1 draft-only private space: Private Draft Studio.
+- Multiple capacity layouts.
+- Space amenities.
+- Space event types.
+- Grouped venue and space media using local static app images.
+- 2 published packages and package-space relationships.
+- Logistics.
+- FAQs.
+- Owner A, Owner B, assigned coordinator, unassigned/wrong coordinator, customer, supplier, and admin test users.
+
+Cleanup result:
+
+- Fixture venues remaining: `0`
+- Fixture auth users remaining: `0`
+
+## RLS Result
 
 Status: passed.
 
 Command:
 
-`pnpm --filter @venora/web build`
+`pnpm --filter @venora/web exec node C:\tmp\venora-210b-fixture.mjs rls`
 
 Result:
 
-- Next.js production build completed successfully.
-- Warning only: Node module type warnings for Tailwind config files.
-- Generated page list included `/venues/[slug]` and `/dashboard/venues/[id]/experience/preview`.
+- Owner could read own draft.
+- Other owner could not read draft.
+- Public/authenticated users could read published spaces.
+- Customer, supplier, anonymous user could not read draft revision.
+- View-only coordinator could not write.
+- Wrong/unassigned coordinator could not read draft.
+- Coordinator could not publish.
+- Cross-venue package-space relationship was rejected.
 
-## 22. Remaining Risks
+## Public Legacy Result
 
-Release blockers:
+Status: partially verified.
 
-- Live authenticated browser matrix is not complete.
-- Local live Supabase/RLS SQL verification is not complete.
-- Rich published structured venue browser fixture was not created because local Supabase was unavailable.
+Evidence:
 
-Non-blocking limitations:
+- `/venues/amorita-resort` rendered the expected legacy venue heading.
+- Draft-only fixture public route rendered its legacy venue heading.
+- Draft-only structured content did not appear publicly.
 
-- Tablet/mobile reserve bar needs final human review for overlay comfort.
-- Prior hero-image LCP warning needs Lighthouse/trace confirmation.
-- No screen-reader pass was performed.
+Blocker:
 
-## 23. Release Decision
+- Console captured repeated `401 Unauthorized` resource failures during public route verification.
+- This prevents classifying browser verification as clean.
 
-Classification: partial, not release-ready.
+## Published Structured Browser Result
+
+Status: failed release gate.
+
+Evidence:
+
+- The rich structured venue did render structured section content during Playwright inspection.
+- The failure trace resolved multiple visible `Glass Garden Hall` occurrences across legitimate immersive sections, proving space explorer / journey / package contexts were present.
+- Screenshots were captured at several sizes before the run timed out:
+  - `rich-1440x900.png`
+  - `rich-1280x800.png`
+  - `rich-1024x768.png`
+  - `rich-768x1024.png`
+  - `rich-430x932.png`
+  - `rich-390x844.png`
+
+Blockers:
+
+- Full seven-viewport rich structured browser verification timed out.
+- Public route emitted React hydration mismatch warnings.
+- Hydration mismatch evidence pointed at client/server differences in form-control inline styles such as `caret-color: transparent`.
+- Because hydration warnings were present, this release gate must stop instead of certifying the page.
+
+## Authenticated Browser Matrix Result
+
+Status: failed release gate.
+
+Evidence:
+
+- Owner login reached venue-owner dashboard content after local `user_roles` grants were restored.
+- Owner/editor route began loading for the disposable venue.
+
+Blockers:
+
+- The authenticated editor matrix timed out.
+- Login helper later timed out waiting for `#login-email`, likely after dev-server instability caused by the same long-running browser pass.
+- Venue-owner dashboard also emitted React hydration mismatch warnings involving `MaterialIcon` server/client style differences and icon text visibility.
+
+## Accessibility Result
+
+Status: not release-certified.
 
 Reason:
 
-Application-level automated tests, production build, public browser QA, database contract validation, and performance smoke passed, but required live authenticated authorization/RLS and rich structured browser workflows remain unavailable in this environment.
+- Browser verification stopped on hydration/timeouts before completing the required full responsive accessibility pass.
+- No screen-reader or 200% zoom pass was performed in this run.
 
-## 24. Post-Deployment Smoke-Test Checklist
+## Performance and Lighthouse Result
 
-Run before merging/releasing:
+Status: not run in this closure attempt.
 
-- Apply migrations in a clean QA database and verify Supabase local/hosted health.
-- Log in as owner, assigned coordinator, unassigned coordinator, customer, supplier, and anonymous visitor.
-- Verify owner draft create/save/reorder/preview/publish/republish.
-- Verify coordinator can edit assigned venues but cannot publish or access other venues.
-- Verify Owner B, customer, supplier, and anonymous users cannot access draft/editor/preview.
-- Verify legacy, draft-only, and published structured public venue modes.
-- Verify save, share, inquiry, availability, booking, package compare, and review surfaces.
-- Run Lighthouse or equivalent on `/venues/[slug]` desktop and mobile.
-- Perform one keyboard-only and one screen-reader smoke pass on the public venue page.
+Reason:
+
+- Browser gate found hydration/timeouts first.
+- Per stop conditions, Lighthouse/LCP verification was not expanded after a browser release blocker was discovered.
+
+## Automated Regression Result
+
+Status: not rerun in this closure attempt.
+
+Reason:
+
+- The task stop condition says to stop and report when a code defect is discovered instead of expanding scope.
+- Browser hydration mismatch and release-gate browser timeouts were found before the final automated regression batch.
+
+Previously recorded successful checks remain useful context but are not fresh Phase 2.10B closure evidence.
+
+## Protected Scope Confirmation
+
+Unchanged:
+
+- `package.json`
+- `pnpm-lock.yaml`
+- Supabase migration files
+- Application source files
+- Tests after temporary Playwright spec removal
+
+Temporary files:
+
+- A temporary Playwright spec was created and removed.
+- Disposable SQL/fixture scripts remained in `C:\tmp` only and were not committed.
+- No disposable fixture DB rows or auth users remain.
+
+## Release Decision
+
+Classification: partial, not release-ready.
+
+Release blockers:
+
+- Rich structured public venue browser matrix timed out.
+- Public route emitted React hydration mismatch warnings.
+- Venue-owner dashboard emitted React hydration mismatch warnings.
+- Public routes emitted unauthenticated `401` console noise.
+- Authenticated cross-role browser matrix did not complete.
+- Lighthouse/LCP verification did not run after the blocker was found.
+
+Non-blocking context:
+
+- Local RLS contract for the disposable structured venue passed.
+- Local rich structured fixture proved structured sections can render.
+- Legacy and draft-only public fallback did not expose draft-only structured text before browser verification stopped.
+
+## Next Required Fixes
+
+Before release-ready classification:
+
+- Fix hydration mismatch in public venue package compare / booking controls.
+- Fix hydration mismatch in dashboard `MaterialIcon` rendering.
+- Identify and eliminate unauthenticated public-route `401` console requests or explicitly gate those calls.
+- Rerun the rich structured browser matrix at all required viewports.
+- Rerun authenticated owner/coordinator/customer/supplier/browser matrix.
+- Run Lighthouse or equivalent mobile/desktop performance checks.
+- Run final fresh type-check, build, focused tests, conflict-marker scan, and diff checks.
