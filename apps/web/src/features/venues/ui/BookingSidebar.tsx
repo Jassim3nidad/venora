@@ -90,7 +90,11 @@ export default function BookingSidebar({
     startOfMonth(new Date()),
   );
 
-  const { availability } = useCalendar(venueId, calendarMonth);
+  const { availability } = useCalendar(venueId, calendarMonth, {
+    includeAvailability: false,
+    includeBookings: false,
+    realtime: false,
+  });
   const calendarAvailability = useMemo(() => {
     return availability.reduce<
       Record<
@@ -254,8 +258,8 @@ export default function BookingSidebar({
           {showCalendar && (
             <div className="absolute top-16 left-0 right-0 z-50 bg-[var(--bg-base)] border border-[var(--border-default)] shadow-2xl rounded-2xl p-2">
               <div className="px-2 pt-2 pb-3 text-[11px] text-[var(--text-muted)] text-center leading-relaxed">
-                Choose an available date for your event. Unavailable dates are
-                disabled.
+                Choose a future date for your event. Venora confirms
+                availability before booking.
               </div>
               <Calendar
                 selectedDate={selectedDate as any}
