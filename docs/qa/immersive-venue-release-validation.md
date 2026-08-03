@@ -235,3 +235,96 @@ Before release-ready classification:
 - Rerun authenticated owner/coordinator/customer/supplier/browser matrix.
 - Run Lighthouse or equivalent mobile/desktop performance checks.
 - Run final fresh type-check, build, focused tests, conflict-marker scan, and diff checks.
+
+## Phase 2.10C Browser Blocker Repair Update
+
+Branch: `fix/immersive-release-browser-blockers`
+
+Status: partial, not release-ready.
+
+### Root Causes Confirmed
+
+- Anonymous public venue `401` noise came from public/customer booking widgets mounting `useCalendar()` with owner-level monthly reads. The hook queried `bookings` with customer/profile/package joins and `venue_availability` on anonymous public routes before a customer selected a date.
+- Dashboard `MaterialIcon` hydration mismatch came from client-only font readiness state. Server markup rendered hidden icon text, while the first client render could render visible icon text after the module-level font flag changed.
+- The screenshot venue `/venues/amorita-resort` is legacy mode in the current local database. It has no published structured revision, no published spaces, no grouped structured media, no structured logistics, and no structured FAQs. Missing immersive structured sections on that venue are expected for legacy fallback.
+- The previous rich structured fixture had already been cleaned up. A new local-only disposable fixture was needed to verify structured rendering.
+
+### Fixes Applied
+
+- `useCalendar()` now accepts explicit options to disable availability reads, booking reads, and realtime subscriptions for public/customer contexts.
+- Public venue booking sidebar and customer booking workflow now use `useCalendar()` without protected monthly prefetch. Date submission still goes through the existing availability/booking validation path.
+- Public booking helper copy now says availability is confirmed before booking/request submission instead of claiming a full blocked-date list is loaded.
+- `MaterialIcon` now renders deterministic markup without font-readiness visibility state.
+- The Material Symbols stylesheet uses `display=block` to reduce raw icon text flash while keeping deterministic React markup.
+
+### Regression Coverage Added
+
+- `apps/web/e2e/immersive-release-blockers.spec.ts`
+  - Opens anonymous `/venues/amorita-resort`.
+  - Fails on hydration warnings.
+  - Fails on unexpected anonymous `401` responses.
+  - Confirms the public venue still renders.
+- `apps/web/src/components/dashboard/enterprise/MaterialIcon.test.tsx`
+  - Confirms MaterialIcon server markup contains the icon text and class.
+  - Confirms it no longer emits `visibility` state that can differ during hydration.
+
+### Focused Results
+
+- Public anonymous blocker test: passed.
+- MaterialIcon regression test: passed.
+- Rich structured local fixture created with:
+  - 1 published structured revision.
+  - 3 published spaces.
+  - 3 published media collections.
+  - 4 published media items.
+  - 2 active packages.
+  - 3 published FAQs.
+- Rich structured browser matrix checked at:
+  - `1440x900`
+  - `1280x800`
+  - `1024x768`
+  - `768x1024`
+  - `430x932`
+  - `390x844`
+  - `360x800`
+- Rich structured matrix result:
+  - Heading rendered.
+  - Space explorer content rendered.
+  - Package content rendered.
+  - FAQ content rendered.
+  - No horizontal overflow.
+  - No failed HTTP responses.
+  - No page errors.
+  - No React hydration warnings captured.
+- Disposable fixture cleanup result:
+  - Fixture venues remaining: `0`.
+
+### Remaining Browser Warnings
+
+The rich structured matrix still emitted non-hydration console warnings:
+
+- Repeated `Expected value to be of type number, but found null instead.`
+- Mobile-only Next image LCP hint for the rich fixture hero image.
+
+These were not the original hydration or anonymous `401` blockers, but they must be investigated before a release-ready classification.
+
+### Verification Commands
+
+- `pnpm --filter @venora/web test -- src/components/dashboard/enterprise/MaterialIcon.test.tsx`: passed.
+- `playwright test e2e/immersive-release-blockers.spec.ts --project=chromium --reporter=line`: passed.
+- `pnpm --filter @venora/web type-check`: passed.
+- `pnpm --filter @venora/web build`: passed.
+- `git grep -n -E "^(<<<<<<<|=======|>>>>>>>)"`: clean.
+- `git diff --check`: clean, with Windows line-ending warnings only.
+
+### Still Not Release-Ready
+
+Not completed in Phase 2.10C:
+
+- Authenticated owner/coordinator/customer/supplier browser matrix.
+- Dashboard browser verification after login, because the local seeded `owner@venora.local` password login failed in the clean Playwright context.
+- Root-cause investigation for the remaining rich-route `Expected value to be of type number, but found null instead.` warnings.
+- Lighthouse and measured LCP.
+- Full release regression batch.
+
+The release remains `partial, not release-ready` until those checks pass.

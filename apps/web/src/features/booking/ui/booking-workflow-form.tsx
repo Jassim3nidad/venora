@@ -144,7 +144,11 @@ export function BookingWorkflowForm({
     availability,
     isLoading: isLoadingAvailability,
     error: availabilityError,
-  } = useCalendar(venueId, calendarMonth);
+  } = useCalendar(venueId, calendarMonth, {
+    includeAvailability: false,
+    includeBookings: false,
+    realtime: false,
+  });
 
   const price = selectedPackage?.price ?? basePrice ?? 0;
   const unit = selectedPackage?.price_unit ?? priceUnit;
@@ -294,7 +298,8 @@ export function BookingWorkflowForm({
                     />
                     {!isLoadingAvailability && availability.length === 0 ? (
                       <p className="mt-3 rounded-2xl bg-[#F8FAFC] px-3 py-2 text-xs font-semibold text-slate-500">
-                        No blocked dates listed for this month.
+                        Availability is confirmed before your request is
+                        submitted.
                       </p>
                     ) : null}
                   </>
