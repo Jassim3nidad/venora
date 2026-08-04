@@ -1,0 +1,380 @@
+{
+  "schemaVersion": "1.0",
+  "venueSlug": "venora-immersive-demo-estate",
+  "displayName": "Venora Immersive Demo Estate",
+  "contentSourceNotes": "Generated as a safe, public demo fixture.",
+  "spaces": [
+    {
+      "spaceKey": "grand-ballroom",
+      "name": "Grand Ballroom",
+      "slug": "grand-ballroom",
+      "spaceType": "banquet_hall",
+      "setting": "indoor",
+      "capacityMax": 700,
+      "displayOrder": 0
+    },
+    {
+      "spaceKey": "the-pavilion",
+      "name": "The Pavilion",
+      "slug": "the-pavilion",
+      "spaceType": "event_pavilion",
+      "setting": "indoor",
+      "capacityMax": 700,
+      "displayOrder": 1
+    },
+    {
+      "spaceKey": "garden-ceremony-area",
+      "name": "Garden Ceremony Area",
+      "slug": "garden-ceremony-area",
+      "spaceType": "garden",
+      "setting": "outdoor",
+      "capacityMax": 700,
+      "displayOrder": 2
+    }
+  ],
+  "capacities": [
+    {
+      "spaceKey": "grand-ballroom",
+      "layout": "banquet",
+      "capacity": 700,
+      "displayOrder": 0
+    },
+    {
+      "spaceKey": "the-pavilion",
+      "layout": "banquet",
+      "capacity": 700,
+      "displayOrder": 0
+    },
+    {
+      "spaceKey": "garden-ceremony-area",
+      "layout": "banquet",
+      "capacity": 700,
+      "displayOrder": 0
+    }
+  ],
+  "amenities": [
+    {
+      "spaceKey": "grand-ballroom",
+      "amenityName": "Air Conditioning"
+    },
+    {
+      "spaceKey": "grand-ballroom",
+      "amenityName": "Chairs Included"
+    },
+    {
+      "spaceKey": "grand-ballroom",
+      "amenityName": "Garden"
+    },
+    {
+      "spaceKey": "grand-ballroom",
+      "amenityName": "LED Wall"
+    },
+    {
+      "spaceKey": "grand-ballroom",
+      "amenityName": "Overnight Accommodation"
+    },
+    {
+      "spaceKey": "grand-ballroom",
+      "amenityName": "Parking"
+    },
+    {
+      "spaceKey": "grand-ballroom",
+      "amenityName": "Projector"
+    },
+    {
+      "spaceKey": "grand-ballroom",
+      "amenityName": "Security"
+    },
+    {
+      "spaceKey": "grand-ballroom",
+      "amenityName": "Sound System"
+    },
+    {
+      "spaceKey": "grand-ballroom",
+      "amenityName": "Stage"
+    },
+    {
+      "spaceKey": "grand-ballroom",
+      "amenityName": "Swimming Pool"
+    },
+    {
+      "spaceKey": "grand-ballroom",
+      "amenityName": "Tables Included"
+    },
+    {
+      "spaceKey": "grand-ballroom",
+      "amenityName": "WiFi"
+    },
+    {
+      "spaceKey": "the-pavilion",
+      "amenityName": "Air Conditioning"
+    },
+    {
+      "spaceKey": "the-pavilion",
+      "amenityName": "Chairs Included"
+    },
+    {
+      "spaceKey": "the-pavilion",
+      "amenityName": "Garden"
+    },
+    {
+      "spaceKey": "the-pavilion",
+      "amenityName": "LED Wall"
+    },
+    {
+      "spaceKey": "the-pavilion",
+      "amenityName": "Overnight Accommodation"
+    },
+    {
+      "spaceKey": "the-pavilion",
+      "amenityName": "Parking"
+    },
+    {
+      "spaceKey": "the-pavilion",
+      "amenityName": "Projector"
+    },
+    {
+      "spaceKey": "the-pavilion",
+      "amenityName": "Security"
+    },
+    {
+      "spaceKey": "the-pavilion",
+      "amenityName": "Sound System"
+    },
+    {
+      "spaceKey": "the-pavilion",
+      "amenityName": "Stage"
+    },
+    {
+      "spaceKey": "the-pavilion",
+      "amenityName": "Swimming Pool"
+    },
+    {
+      "spaceKey": "the-pavilion",
+      "amenityName": "Tables Included"
+    },
+    {
+      "spaceKey": "the-pavilion",
+      "amenityName": "WiFi"
+    },
+    {
+      "spaceKey": "garden-ceremony-area",
+      "amenityName": "Air Conditioning"
+    },
+    {
+      "spaceKey": "garden-ceremony-area",
+      "amenityName": "Chairs Included"
+    },
+    {
+      "spaceKey": "garden-ceremony-area",
+      "amenityName": "Garden"
+    },
+    {
+      "spaceKey": "garden-ceremony-area",
+      "amenityName": "LED Wall"
+    },
+    {
+      "spaceKey": "garden-ceremony-area",
+      "amenityName": "Overnight Accommodation"
+    },
+    {
+      "spaceKey": "garden-ceremony-area",
+      "amenityName": "Parking"
+    },
+    {
+      "spaceKey": "garden-ceremony-area",
+      "amenityName": "Projector"
+    },
+    {
+      "spaceKey": "garden-ceremony-area",
+      "amenityName": "Security"
+    },
+    {
+      "spaceKey": "garden-ceremony-area",
+      "amenityName": "Sound System"
+    },
+    {
+      "spaceKey": "garden-ceremony-area",
+      "amenityName": "Stage"
+    },
+    {
+      "spaceKey": "garden-ceremony-area",
+      "amenityName": "Swimming Pool"
+    },
+    {
+      "spaceKey": "garden-ceremony-area",
+      "amenityName": "Tables Included"
+    },
+    {
+      "spaceKey": "garden-ceremony-area",
+      "amenityName": "WiFi"
+    }
+  ],
+  "eventTypes": [
+    {
+      "spaceKey": "grand-ballroom",
+      "eventTypeName": "Wedding"
+    },
+    {
+      "spaceKey": "grand-ballroom",
+      "eventTypeName": "Corporate Event"
+    },
+    {
+      "spaceKey": "grand-ballroom",
+      "eventTypeName": "Team Building"
+    },
+    {
+      "spaceKey": "grand-ballroom",
+      "eventTypeName": "Debut"
+    },
+    {
+      "spaceKey": "grand-ballroom",
+      "eventTypeName": "Staycation Event"
+    },
+    {
+      "spaceKey": "the-pavilion",
+      "eventTypeName": "Wedding"
+    },
+    {
+      "spaceKey": "the-pavilion",
+      "eventTypeName": "Corporate Event"
+    },
+    {
+      "spaceKey": "the-pavilion",
+      "eventTypeName": "Team Building"
+    },
+    {
+      "spaceKey": "the-pavilion",
+      "eventTypeName": "Debut"
+    },
+    {
+      "spaceKey": "the-pavilion",
+      "eventTypeName": "Staycation Event"
+    },
+    {
+      "spaceKey": "garden-ceremony-area",
+      "eventTypeName": "Wedding"
+    },
+    {
+      "spaceKey": "garden-ceremony-area",
+      "eventTypeName": "Corporate Event"
+    },
+    {
+      "spaceKey": "garden-ceremony-area",
+      "eventTypeName": "Team Building"
+    },
+    {
+      "spaceKey": "garden-ceremony-area",
+      "eventTypeName": "Debut"
+    },
+    {
+      "spaceKey": "garden-ceremony-area",
+      "eventTypeName": "Staycation Event"
+    }
+  ],
+  "mediaCollections": [
+    {
+      "collectionKey": "main-gallery",
+      "title": "Main Gallery",
+      "collectionType": "venue_gallery",
+      "isCover": true,
+      "displayOrder": 0
+    }
+  ],
+  "mediaItems": [
+    {
+      "collectionKey": "main-gallery",
+      "storagePath": "https://www.hillcreekgardenstagaytay.com/wp-content/uploads/2022/03/EVENTS-MAIN-edited.jpg",
+      "mediaType": "image",
+      "altText": "Hillcreek Gardens Tagaytay photo 1",
+      "isFeatured": true,
+      "displayOrder": 0
+    },
+    {
+      "collectionKey": "main-gallery",
+      "storagePath": "https://www.hillcreekgardenstagaytay.com/wp-content/uploads/2022/03/EVENTS-3-edited.jpg",
+      "mediaType": "image",
+      "altText": "Hillcreek Gardens Tagaytay photo 2",
+      "isFeatured": false,
+      "displayOrder": 1
+    },
+    {
+      "collectionKey": "main-gallery",
+      "storagePath": "https://www.hillcreekgardenstagaytay.com/wp-content/uploads/2022/03/EVENTS-4-edited.jpg",
+      "mediaType": "image",
+      "altText": "Hillcreek Gardens Tagaytay photo 3",
+      "isFeatured": false,
+      "displayOrder": 2
+    },
+    {
+      "collectionKey": "main-gallery",
+      "storagePath": "https://www.hillcreekgardenstagaytay.com/wp-content/uploads/2022/03/EVENTS-2-edited.jpg",
+      "mediaType": "image",
+      "altText": "Hillcreek Gardens Tagaytay photo 4",
+      "isFeatured": false,
+      "displayOrder": 3
+    },
+    {
+      "collectionKey": "main-gallery",
+      "storagePath": "https://www.hillcreekgardenstagaytay.com/wp-content/uploads/2022/03/HOTEL-MAIN-edited.jpg",
+      "mediaType": "image",
+      "altText": "Hillcreek Gardens Tagaytay photo 5",
+      "isFeatured": false,
+      "displayOrder": 4
+    }
+  ],
+  "logistics": {
+    "parkingCapacity": null,
+    "parkingNotes": "Available on-site — exact vehicle count not publicly listed",
+    "noiseRestrictions": "Standard local noise ordinance hours apply",
+    "curfewTime": "00:00"
+  },
+  "faqs": [],
+  "packageSpaces": [
+    {
+      "packageName": "Silver Package",
+      "spaceKey": "grand-ballroom",
+      "inclusionType": "primary"
+    },
+    {
+      "packageName": "Silver Package",
+      "spaceKey": "the-pavilion",
+      "inclusionType": "primary"
+    },
+    {
+      "packageName": "Silver Package",
+      "spaceKey": "garden-ceremony-area",
+      "inclusionType": "primary"
+    },
+    {
+      "packageName": "Gold Package",
+      "spaceKey": "grand-ballroom",
+      "inclusionType": "primary"
+    },
+    {
+      "packageName": "Gold Package",
+      "spaceKey": "the-pavilion",
+      "inclusionType": "primary"
+    },
+    {
+      "packageName": "Gold Package",
+      "spaceKey": "garden-ceremony-area",
+      "inclusionType": "primary"
+    },
+    {
+      "packageName": "Premium Package",
+      "spaceKey": "grand-ballroom",
+      "inclusionType": "primary"
+    },
+    {
+      "packageName": "Premium Package",
+      "spaceKey": "the-pavilion",
+      "inclusionType": "primary"
+    },
+    {
+      "packageName": "Premium Package",
+      "spaceKey": "garden-ceremony-area",
+      "inclusionType": "primary"
+    }
+  ]
+}
