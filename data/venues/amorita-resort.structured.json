@@ -1,0 +1,254 @@
+{
+  "schemaVersion": "1.0",
+  "venueSlug": "amorita-resort",
+  "displayName": "Amorita Resort",
+  "contentSourceNotes": "Extracted from previously approved venues.json.",
+  "spaces": [
+    {
+      "spaceKey": "cliff-deck",
+      "name": "Cliff Deck",
+      "slug": "cliff-deck",
+      "spaceType": "viewing_deck",
+      "setting": "outdoor",
+      "capacityMax": 150,
+      "displayOrder": 0
+    },
+    {
+      "spaceKey": "poolside",
+      "name": "Poolside Area",
+      "slug": "poolside-area",
+      "spaceType": "poolside",
+      "setting": "outdoor",
+      "capacityMax": 150,
+      "displayOrder": 1
+    }
+  ],
+  "capacities": [
+    {
+      "spaceKey": "cliff-deck",
+      "layout": "banquet",
+      "capacity": 150,
+      "displayOrder": 0
+    },
+    {
+      "spaceKey": "poolside",
+      "layout": "banquet",
+      "capacity": 150,
+      "displayOrder": 0
+    }
+  ],
+  "amenities": [
+    {
+      "spaceKey": "cliff-deck",
+      "amenityName": "Air Conditioning"
+    },
+    {
+      "spaceKey": "cliff-deck",
+      "amenityName": "Beachfront"
+    },
+    {
+      "spaceKey": "cliff-deck",
+      "amenityName": "Chairs Included"
+    },
+    {
+      "spaceKey": "cliff-deck",
+      "amenityName": "Garden"
+    },
+    {
+      "spaceKey": "cliff-deck",
+      "amenityName": "Overnight Accommodation"
+    },
+    {
+      "spaceKey": "cliff-deck",
+      "amenityName": "Parking"
+    },
+    {
+      "spaceKey": "cliff-deck",
+      "amenityName": "Security"
+    },
+    {
+      "spaceKey": "cliff-deck",
+      "amenityName": "Sound System"
+    },
+    {
+      "spaceKey": "cliff-deck",
+      "amenityName": "Swimming Pool"
+    },
+    {
+      "spaceKey": "cliff-deck",
+      "amenityName": "Tables Included"
+    },
+    {
+      "spaceKey": "cliff-deck",
+      "amenityName": "WiFi"
+    },
+    {
+      "spaceKey": "poolside",
+      "amenityName": "Air Conditioning"
+    },
+    {
+      "spaceKey": "poolside",
+      "amenityName": "Beachfront"
+    },
+    {
+      "spaceKey": "poolside",
+      "amenityName": "Chairs Included"
+    },
+    {
+      "spaceKey": "poolside",
+      "amenityName": "Garden"
+    },
+    {
+      "spaceKey": "poolside",
+      "amenityName": "Overnight Accommodation"
+    },
+    {
+      "spaceKey": "poolside",
+      "amenityName": "Parking"
+    },
+    {
+      "spaceKey": "poolside",
+      "amenityName": "Security"
+    },
+    {
+      "spaceKey": "poolside",
+      "amenityName": "Sound System"
+    },
+    {
+      "spaceKey": "poolside",
+      "amenityName": "Swimming Pool"
+    },
+    {
+      "spaceKey": "poolside",
+      "amenityName": "Tables Included"
+    },
+    {
+      "spaceKey": "poolside",
+      "amenityName": "WiFi"
+    }
+  ],
+  "eventTypes": [
+    {
+      "spaceKey": "cliff-deck",
+      "eventTypeName": "Wedding"
+    },
+    {
+      "spaceKey": "cliff-deck",
+      "eventTypeName": "Destination Wedding"
+    },
+    {
+      "spaceKey": "cliff-deck",
+      "eventTypeName": "Honeymoon Event"
+    },
+    {
+      "spaceKey": "cliff-deck",
+      "eventTypeName": "Corporate Retreat"
+    },
+    {
+      "spaceKey": "poolside",
+      "eventTypeName": "Wedding"
+    },
+    {
+      "spaceKey": "poolside",
+      "eventTypeName": "Destination Wedding"
+    },
+    {
+      "spaceKey": "poolside",
+      "eventTypeName": "Honeymoon Event"
+    },
+    {
+      "spaceKey": "poolside",
+      "eventTypeName": "Corporate Retreat"
+    }
+  ],
+  "mediaCollections": [
+    {
+      "collectionKey": "main-gallery",
+      "title": "Main Gallery",
+      "collectionType": "venue_gallery",
+      "isCover": true,
+      "displayOrder": 0
+    }
+  ],
+  "mediaItems": [
+    {
+      "collectionKey": "main-gallery",
+      "storagePath": "https://images.squarespace-cdn.com/content/v1/6632f53a115e9d5c41defdab/672a0dfe-a6b7-45cc-9c45-e5eaf1c8f341/Overlooking+Alona+Beach%2C+Amorita+Resort%2C+Panglao+Bohol.jpg",
+      "mediaType": "image",
+      "altText": "Amorita Resort photo 1",
+      "isFeatured": true,
+      "displayOrder": 0
+    },
+    {
+      "collectionKey": "main-gallery",
+      "storagePath": "https://images.squarespace-cdn.com/content/v1/6632f53a115e9d5c41defdab/d1e97270-5b39-41ca-a57b-b843b283f045/DSC06043+copy.jpg?format=1500w",
+      "mediaType": "image",
+      "altText": "Amorita Resort photo 2",
+      "isFeatured": false,
+      "displayOrder": 1
+    },
+    {
+      "collectionKey": "main-gallery",
+      "storagePath": "https://images.squarespace-cdn.com/content/v1/6632f53a115e9d5c41defdab/330a5dcc-feb5-49cc-a8ff-cd730e1915d6/DSC00857.jpg?format=1500w",
+      "mediaType": "image",
+      "altText": "Amorita Resort photo 3",
+      "isFeatured": false,
+      "displayOrder": 2
+    },
+    {
+      "collectionKey": "main-gallery",
+      "storagePath": "https://images.squarespace-cdn.com/content/v1/6632f53a115e9d5c41defdab/76c77a12-166e-4664-a9b6-6b70aaec5494/flower+2.png?format=1500w",
+      "mediaType": "image",
+      "altText": "Amorita Resort photo 4",
+      "isFeatured": false,
+      "displayOrder": 3
+    },
+    {
+      "collectionKey": "main-gallery",
+      "storagePath": "https://images.squarespace-cdn.com/content/v1/6632f53a115e9d5c41defdab/d1e97270-5b39-41ca-a57b-b843b283f045/DSC06043+copy.jpg?format=1000w",
+      "mediaType": "image",
+      "altText": "Amorita Resort photo 5",
+      "isFeatured": false,
+      "displayOrder": 4
+    }
+  ],
+  "logistics": {
+    "parkingCapacity": null,
+    "parkingNotes": "Available on-site — exact vehicle count not publicly listed",
+    "noiseRestrictions": "Standard local noise ordinance hours apply",
+    "curfewTime": "00:00"
+  },
+  "faqs": [],
+  "packageSpaces": [
+    {
+      "packageName": "Silver Package",
+      "spaceKey": "cliff-deck",
+      "inclusionType": "primary"
+    },
+    {
+      "packageName": "Silver Package",
+      "spaceKey": "poolside",
+      "inclusionType": "primary"
+    },
+    {
+      "packageName": "Gold Package",
+      "spaceKey": "cliff-deck",
+      "inclusionType": "primary"
+    },
+    {
+      "packageName": "Gold Package",
+      "spaceKey": "poolside",
+      "inclusionType": "primary"
+    },
+    {
+      "packageName": "Premium Package",
+      "spaceKey": "cliff-deck",
+      "inclusionType": "primary"
+    },
+    {
+      "packageName": "Premium Package",
+      "spaceKey": "poolside",
+      "inclusionType": "primary"
+    }
+  ]
+}
