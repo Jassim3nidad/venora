@@ -145,9 +145,13 @@ function isActive(pathname: string, href: string, label?: string) {
 export default function MarketingNavbar({
   embedded = false,
   mobileContext = "marketing",
+  variant = "default",
+  scrolled = false,
 }: {
   embedded?: boolean;
   mobileContext?: "marketing" | "marketplace";
+  variant?: "default" | "immersive";
+  scrolled?: boolean;
 }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -173,12 +177,15 @@ export default function MarketingNavbar({
     profile?.full_name || user?.email?.split("@")[0] || "Venora User";
   const email = user?.email ?? "";
   const isAuthenticated = Boolean(user);
+  const immersive = variant === "immersive";
 
   const navLinksForUser = getMarketingNavLinks();
   const mobileLinks = getMarketingMobileLinks({ user, mobileContext });
-  const mobilePanelPosition = embedded
-    ? "top-[8.75rem] max-h-[calc(100dvh-9.25rem)]"
-    : "top-24 max-h-[calc(100dvh-6.5rem)]";
+  const mobilePanelPosition = immersive
+    ? "top-20 max-h-[calc(100dvh-5.5rem)]"
+    : embedded
+      ? "top-[8.75rem] max-h-[calc(100dvh-9.25rem)]"
+      : "top-24 max-h-[calc(100dvh-6.5rem)]";
 
   const handleGatedNavClick = (
     event: MouseEvent<HTMLAnchorElement>,
@@ -194,23 +201,45 @@ export default function MarketingNavbar({
   return (
     <>
       <header
+        data-navbar-appearance={variant}
+        data-navbar-state={
+          immersive ? (scrolled ? "scrolled" : "top") : undefined
+        }
         className={[
-          "w-full bg-white/90 backdrop-blur-xl",
-          embedded
-            ? "border-b border-[#E5E7EB]/60"
-            : "sticky top-0 z-50 border-b border-[#E5E7EB]/80",
+          "w-full border-b transition-[background-color,border-color,box-shadow] duration-200 motion-reduce:transition-none",
+          immersive
+            ? scrolled
+              ? "border-white/[0.18] bg-[#07100D]/[0.55] shadow-[0_8px_24px_rgba(0,0,0,0.16)] supports-[backdrop-filter]:bg-[#07100D]/[0.36] supports-[backdrop-filter]:backdrop-blur-[22px] supports-[backdrop-filter]:backdrop-saturate-150"
+              : "border-white/[0.18] bg-[#07100D]/[0.30] supports-[backdrop-filter]:bg-white/[0.08] supports-[backdrop-filter]:backdrop-blur-[22px] supports-[backdrop-filter]:backdrop-saturate-150"
+            : [
+                "bg-white/90 backdrop-blur-xl",
+                embedded
+                  ? "border-[#E5E7EB]/60"
+                  : "sticky top-0 z-50 border-[#E5E7EB]/80",
+              ].join(" "),
         ].join(" ")}
       >
         <div className="mx-auto grid h-20 w-full max-w-7xl grid-cols-[1fr_auto] items-center gap-5 px-4 sm:px-6 md:grid-cols-[1fr_auto_1fr] lg:px-8">
           <Link
-            className="justify-self-start text-xl font-bold tracking-[-0.04em] text-[#2563EB] transition hover:text-[#1d4ed8]"
+            className={[
+              "justify-self-start text-xl font-bold tracking-[-0.04em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4",
+              immersive
+                ? "text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.28)] hover:text-[#F5D99D] focus-visible:outline-[#F5D99D]"
+                : "text-[#2563EB] hover:text-[#1d4ed8] focus-visible:outline-[#2563EB]",
+            ].join(" ")}
             href="/"
+            aria-label="Venora home"
           >
             Venora
           </Link>
 
           <nav
-            className="hidden items-center justify-center gap-1 rounded-full border border-[#E5E7EB]/80 bg-white p-1 shadow-sm md:flex"
+            className={[
+              "hidden items-center justify-center gap-1 md:flex",
+              immersive
+                ? "h-full self-stretch"
+                : "rounded-full border border-[#E5E7EB]/80 bg-white p-1 shadow-sm",
+            ].join(" ")}
             aria-label="Main navigation"
           >
             {navLinksForUser.map(({ label, href, icon: Icon }) => {
@@ -219,11 +248,22 @@ export default function MarketingNavbar({
               return (
                 <Link
                   key={label}
+                  aria-current={active ? "page" : undefined}
                   className={[
-                    "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition",
-                    active
-                      ? "bg-[#EFF6FF] text-[#2563EB] font-extrabold"
-                      : "text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
+                    "inline-flex items-center gap-2 text-sm font-bold transition focus-visible:outline focus-visible:outline-2",
+                    immersive
+                      ? [
+                          "h-full border-b-2 px-4 [text-shadow:0_1px_8px_rgba(0,0,0,0.24)] focus-visible:outline-[#F5D99D] focus-visible:outline-offset-[-4px]",
+                          active
+                            ? "border-[#D1AA62] text-[#F5D99D]"
+                            : "border-transparent text-white/80 hover:border-white/35 hover:text-white",
+                        ].join(" ")
+                      : [
+                          "rounded-full px-4 py-2",
+                          active
+                            ? "bg-[#EFF6FF] font-extrabold text-[#2563EB]"
+                            : "text-[#6B7280] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
+                        ].join(" "),
                   ].join(" ")}
                   href={href}
                   onClick={(event) => handleGatedNavClick(event, href)}
@@ -238,28 +278,53 @@ export default function MarketingNavbar({
           <div className="hidden items-center justify-end gap-3 justify-self-end md:flex">
             {user && !menuOpen ? (
               <>
-                <NotificationBell />
-                <ProfileMenu
-                  displayName={displayName}
-                  email={email}
-                  avatarUrl={profile?.avatar_url}
-                  showEnterVenueDashboard={profile?.isVenueOwner ?? false}
-                  showEnterCoordinatorDashboard={
-                    profile?.isCoordinator ?? false
-                  }
-                  showEnterSupplierDashboard={profile?.isSupplier ?? false}
+                <NotificationBell
+                  {...(immersive
+                    ? {
+                        className:
+                          "border-white/20 text-white/80 hover:border-white/35 hover:bg-white/10 hover:text-white focus-visible:ring-[#F5D99D]/60",
+                      }
+                    : {})}
                 />
+                <div
+                  className={
+                    immersive
+                      ? "[&_button]:border-white/25 [&_button]:bg-white/10 [&_button]:text-white [&_button]:shadow-none"
+                      : undefined
+                  }
+                >
+                  <ProfileMenu
+                    displayName={displayName}
+                    email={email}
+                    avatarUrl={profile?.avatar_url}
+                    showEnterVenueDashboard={profile?.isVenueOwner ?? false}
+                    showEnterCoordinatorDashboard={
+                      profile?.isCoordinator ?? false
+                    }
+                    showEnterSupplierDashboard={profile?.isSupplier ?? false}
+                  />
+                </div>
               </>
             ) : (
               <>
                 <Link
-                  className="text-sm font-extrabold text-[#6B7280] transition hover:text-[#2563EB]"
+                  className={[
+                    "text-sm font-extrabold transition",
+                    immersive
+                      ? "text-white/85 hover:text-white"
+                      : "text-[#6B7280] hover:text-[#2563EB]",
+                  ].join(" ")}
                   href="/login"
                 >
                   Log In
                 </Link>
                 <Link
-                  className="inline-flex h-11 items-center justify-center rounded-full bg-[#2563EB] px-6 text-sm font-extrabold text-white shadow-sm shadow-[#2563EB]/20 transition hover:bg-[#1d4ed8]"
+                  className={[
+                    "inline-flex h-11 items-center justify-center rounded-full px-6 text-sm font-extrabold transition",
+                    immersive
+                      ? "border border-white/20 bg-[#F4E8CF] text-[#152019] hover:bg-white"
+                      : "bg-[#2563EB] text-white shadow-sm shadow-[#2563EB]/20 hover:bg-[#1d4ed8]",
+                  ].join(" ")}
                   href="/register"
                 >
                   Sign Up
@@ -271,23 +336,43 @@ export default function MarketingNavbar({
           <div className="flex items-center justify-self-end gap-2 md:hidden">
             {user ? (
               <>
-                <NotificationBell />
-                <ProfileMenu
-                  displayName={displayName}
-                  email={email}
-                  avatarUrl={profile?.avatar_url}
-                  showEnterVenueDashboard={profile?.isVenueOwner ?? false}
-                  showEnterCoordinatorDashboard={
-                    profile?.isCoordinator ?? false
-                  }
-                  showEnterSupplierDashboard={profile?.isSupplier ?? false}
+                <NotificationBell
+                  {...(immersive
+                    ? {
+                        className:
+                          "border-white/20 text-white/80 hover:border-white/35 hover:bg-white/10 hover:text-white",
+                      }
+                    : {})}
                 />
+                <div
+                  className={
+                    immersive
+                      ? "[&_button]:border-white/25 [&_button]:bg-white/10 [&_button]:text-white"
+                      : undefined
+                  }
+                >
+                  <ProfileMenu
+                    displayName={displayName}
+                    email={email}
+                    avatarUrl={profile?.avatar_url}
+                    showEnterVenueDashboard={profile?.isVenueOwner ?? false}
+                    showEnterCoordinatorDashboard={
+                      profile?.isCoordinator ?? false
+                    }
+                    showEnterSupplierDashboard={profile?.isSupplier ?? false}
+                  />
+                </div>
               </>
             ) : null}
 
             <button
               ref={triggerRef}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#E5E7EB] bg-white text-[#1D4ED8] transition hover:bg-[#EFF6FF]"
+              className={[
+                "inline-flex h-11 w-11 items-center justify-center rounded-full border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
+                immersive
+                  ? "border-white/25 bg-black/20 text-white hover:bg-white/10 focus-visible:outline-[#F5D99D]"
+                  : "border-[#E5E7EB] bg-white text-[#1D4ED8] hover:bg-[#EFF6FF] focus-visible:outline-[#2563EB]",
+              ].join(" ")}
               type="button"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
@@ -319,12 +404,20 @@ export default function MarketingNavbar({
             />
             <div
               className={[
-                "fixed inset-x-3 z-[61] overflow-y-auto rounded-[28px] border border-[#E5E7EB] bg-white p-4 shadow-2xl shadow-slate-300/50",
+                "fixed inset-x-3 z-[61] overflow-y-auto rounded-2xl border p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl",
+                immersive
+                  ? "border-white/10 bg-[#07100D] shadow-black/40"
+                  : "border-[#E5E7EB] bg-white shadow-slate-300/50",
                 mobilePanelPosition,
               ].join(" ")}
             >
               <button
-                className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#F8FAFC] text-[#111827]"
+                className={[
+                  "absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-full",
+                  immersive
+                    ? "bg-white/10 text-white hover:bg-white/15"
+                    : "bg-[#F8FAFC] text-[#111827]",
+                ].join(" ")}
                 type="button"
                 aria-label="Close menu"
                 onClick={closeMenu}
@@ -332,7 +425,12 @@ export default function MarketingNavbar({
                 <X className="h-5 w-5" />
               </button>
 
-              <p className="mb-5 text-xl font-bold tracking-[-0.04em] text-[#2563EB]">
+              <p
+                className={[
+                  "mb-5 text-xl font-bold tracking-[-0.04em]",
+                  immersive ? "text-white" : "text-[#2563EB]",
+                ].join(" ")}
+              >
                 Venora
               </p>
 
@@ -352,10 +450,14 @@ export default function MarketingNavbar({
                         mobileContext,
                       })}
                       className={[
-                        "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold transition",
-                        active
-                          ? "bg-[#EFF6FF] text-[#2563EB]"
-                          : "text-[#111827] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
+                        "flex min-h-11 items-center gap-3 rounded-xl px-4 py-3 text-sm font-extrabold transition",
+                        immersive
+                          ? active
+                            ? "bg-white/12 text-[#F5D99D]"
+                            : "text-white/85 hover:bg-white/10 hover:text-white"
+                          : active
+                            ? "bg-[#EFF6FF] text-[#2563EB]"
+                            : "text-[#111827] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
                       ].join(" ")}
                       onClick={(event) => {
                         handleGatedNavClick(event, href);
@@ -376,7 +478,12 @@ export default function MarketingNavbar({
                   {profile?.isVenueOwner ? (
                     <Link
                       href="/dashboard/venue-owner"
-                      className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold text-[#1D4ED8] bg-[#EFF6FF] transition hover:bg-[#DBEAFE]"
+                      className={[
+                        "flex min-h-11 items-center gap-3 rounded-xl px-4 py-3 text-sm font-extrabold transition",
+                        immersive
+                          ? "bg-white/10 text-[#F5D99D] hover:bg-white/15"
+                          : "bg-[#EFF6FF] text-[#1D4ED8] hover:bg-[#DBEAFE]",
+                      ].join(" ")}
                       onClick={closeMenu}
                     >
                       <Store className="h-5 w-5" />
@@ -386,7 +493,12 @@ export default function MarketingNavbar({
                   {profile?.isCoordinator ? (
                     <Link
                       href="/dashboard/coordinator"
-                      className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold text-[#1D4ED8] bg-[#EFF6FF] transition hover:bg-[#DBEAFE]"
+                      className={[
+                        "flex min-h-11 items-center gap-3 rounded-xl px-4 py-3 text-sm font-extrabold transition",
+                        immersive
+                          ? "bg-white/10 text-[#F5D99D] hover:bg-white/15"
+                          : "bg-[#EFF6FF] text-[#1D4ED8] hover:bg-[#DBEAFE]",
+                      ].join(" ")}
                       onClick={closeMenu}
                     >
                       <ClipboardCheck className="h-5 w-5" />
@@ -396,7 +508,12 @@ export default function MarketingNavbar({
                   {profile?.isSupplier ? (
                     <Link
                       href="/dashboard/supplier"
-                      className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold text-[#1D4ED8] bg-[#EFF6FF] transition hover:bg-[#DBEAFE]"
+                      className={[
+                        "flex min-h-11 items-center gap-3 rounded-xl px-4 py-3 text-sm font-extrabold transition",
+                        immersive
+                          ? "bg-white/10 text-[#F5D99D] hover:bg-white/15"
+                          : "bg-[#EFF6FF] text-[#1D4ED8] hover:bg-[#DBEAFE]",
+                      ].join(" ")}
                       onClick={closeMenu}
                     >
                       <Store className="h-5 w-5" />
@@ -405,7 +522,12 @@ export default function MarketingNavbar({
                   ) : null}
                   <Link
                     href="/account"
-                    className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold text-[#111827] transition hover:bg-[#EFF6FF] hover:text-[#2563EB]"
+                    className={[
+                      "flex min-h-11 items-center gap-3 rounded-xl px-4 py-3 text-sm font-extrabold transition",
+                      immersive
+                        ? "text-white/85 hover:bg-white/10 hover:text-white"
+                        : "text-[#111827] hover:bg-[#EFF6FF] hover:text-[#2563EB]",
+                    ].join(" ")}
                     onClick={closeMenu}
                   >
                     <UserRound className="h-5 w-5" />
@@ -413,7 +535,12 @@ export default function MarketingNavbar({
                   </Link>
                   <Link
                     href="/logout"
-                    className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-extrabold text-[#6B7280] transition hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+                    className={[
+                      "flex min-h-11 items-center gap-3 rounded-xl px-4 py-3 text-sm font-extrabold transition",
+                      immersive
+                        ? "text-red-200 hover:bg-red-500/10 hover:text-red-100"
+                        : "text-[#6B7280] hover:bg-[#FEF2F2] hover:text-[#DC2626]",
+                    ].join(" ")}
                     onClick={closeMenu}
                   >
                     <LogOut className="h-5 w-5" />
@@ -424,14 +551,24 @@ export default function MarketingNavbar({
                 <div className="mt-5 grid gap-3">
                   <Link
                     href="/login"
-                    className="inline-flex h-12 items-center justify-center rounded-2xl border border-[#E5E7EB] text-sm font-extrabold text-[#1D4ED8]"
+                    className={[
+                      "inline-flex h-12 items-center justify-center rounded-xl border text-sm font-extrabold",
+                      immersive
+                        ? "border-white/20 text-white hover:bg-white/10"
+                        : "border-[#E5E7EB] text-[#1D4ED8]",
+                    ].join(" ")}
                     onClick={closeMenu}
                   >
                     Log In
                   </Link>
                   <Link
                     href="/register"
-                    className="inline-flex h-12 items-center justify-center rounded-2xl bg-[#2563EB] text-sm font-extrabold text-white"
+                    className={[
+                      "inline-flex h-12 items-center justify-center rounded-xl text-sm font-extrabold",
+                      immersive
+                        ? "bg-[#F4E8CF] text-[#152019] hover:bg-white"
+                        : "bg-[#2563EB] text-white",
+                    ].join(" ")}
                     onClick={closeMenu}
                   >
                     Sign Up

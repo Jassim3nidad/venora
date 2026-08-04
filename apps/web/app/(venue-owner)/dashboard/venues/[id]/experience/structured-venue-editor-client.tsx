@@ -1,0 +1,1809 @@
+"use client";
+
+import { useMemo, useState, useTransition, type FormEvent, type ReactNode } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  AlertCircle,
+  ArrowDown,
+  ArrowUp,
+  CheckCircle2,
+  ImageIcon,
+  Lock,
+  Plus,
+  RotateCcw,
+  Save,
+  Send,
+  Trash2,
+} from "lucide-react";
+import { cn } from "@venora/lib";
+import {
+  DashButton,
+  Panel,
+  StatusBadge,
+} from "@/components/dashboard/enterprise";
+import {
+  archiveVenueFaqAction,
+  archiveVenueMediaItemAction,
+  archiveVenueSpaceAction,
+  createVenueFaqAction,
+  createVenueSpaceAction,
+  discardDraftStructuredVenueProfileAction,
+  getOrCreateDraftStructuredVenueProfileAction,
+  publishStructuredVenueProfileAction,
+  reorderVenueFaqsAction,
+  reorderVenueMediaItemsAction,
+  reorderVenueSpacesAction,
+  replaceCapacityLayoutsAction,
+  replacePackageVenueSpacesAction,
+  replaceSpaceAmenitiesAction,
+  replaceSpaceEventTypesAction,
+  saveVenueLogisticsAction,
+  saveVenueMediaCollectionAction,
+  saveVenueMediaItemAction,
+  updateVenueSpaceAction,
+} from "@/src/features/venues/application/structured-profile-actions";
+import {
+  getPackageVenueSpaceInclusionTypeLabel,
+  getVenueFaqCategoryLabel,
+  getVenueMediaCollectionTypeLabel,
+  getVenueSpaceLayoutLabel,
+  getVenueSpaceSettingLabel,
+  getVenueSpaceTypeLabel,
+  PACKAGE_VENUE_SPACE_INCLUSION_TYPES,
+  VENUE_FAQ_CATEGORIES,
+  VENUE_MEDIA_COLLECTION_TYPES,
+  VENUE_SPACE_LAYOUTS,
+  VENUE_SPACE_SETTINGS,
+  VENUE_SPACE_TYPES,
+  type DraftStructuredVenueProfile,
+  type PackageVenueSpaceInclusionType,
+  type PublishedStructuredVenueProfile,
+  type VenueFaqCategory,
+  type VenueFaq,
+  type VenueMediaCollectionType,
+  type VenueMediaItem,
+  type VenueSpace,
+  type VenueSpaceLayout,
+  type VenueSpaceSetting,
+  type VenueSpaceType,
+} from "@/src/features/venues/domain/structured-venue.types";
+import {
+  STRUCTURED_EDITOR_SECTIONS,
+  getPublishBlockingIssues,
+  getStructuredProfileDisplayStatus,
+  getStructuredSectionStatuses,
+  type StructuredEditorSectionId,
+  type StructuredEditorSectionStatus,
+} from "@/src/features/venues/utils/structured-editor";
+import { getVenueMediaUrl } from "@/src/features/venues/utils/venue-media";
+
+type Venue = {
+  id: string;
+  organization_id: string;
+  name: string;
+  slug: string | null;
+  status: string;
+  city: string | null;
+  province: string | null;
+  address: string | null;
+  description: string | null;
+  capacity_min: number | null;
+  capacity_max: number;
+  indoor_outdoor: string | null;
+  base_price: number;
+  price_unit: string;
+};
+
+type Amenity = { id: string; name: string };
+type EventType = { id: string; name: string };
+type PackageRow = {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  price_unit: string;
+  min_guests: number | null;
+  max_guests: number | null;
+  is_active: boolean;
+};
+type VenueImage = {
+  id: string;
+  storage_path: string;
+  media_type: string;
+  alt_text: string | null;
+  display_order: number | null;
+  is_featured: boolean | null;
+};
+type CapacityLayoutRow = {
+  id: string;
+  space_id: string;
+  layout: string;
+  custom_layout_label: string | null;
+  capacity: number;
+  notes: string | null;
+  display_order: number;
+};
+type SpaceAmenityRow = {
+  space_id: string;
+  amenity_id: string;
+  notes: string | null;
+};
+type SpaceEventTypeRow = {
+  space_id: string;
+  event_type_id: string;
+  notes: string | null;
+};
+
+type ActionState = {
+  status: "idle" | "saving" | "saved" | "error";
+  message: string;
+};
+
+type Props = {
+  venue: Venue;
+  draftProfile: DraftStructuredVenueProfile | null;
+  publishedProfile: PublishedStructuredVenueProfile | null;
+  amenities: Amenity[];
+  eventTypes: EventType[];
+  packages: PackageRow[];
+  venueImages: VenueImage[];
+  capacityLayouts: CapacityLayoutRow[];
+  spaceAmenities: SpaceAmenityRow[];
+  spaceEventTypes: SpaceEventTypeRow[];
+  canPublish: boolean;
+  isCoordinatorOnly: boolean;
+};
+
+const inputClass =
+  "min-h-12 w-full rounded-lg border border-[#cbd5e1] bg-white px-4 py-3 text-base font-semibold text-[#0f172a] outline-none transition placeholder:text-[#94a3b8] focus:border-[#2563eb] focus:ring-4 focus:ring-[#dbeafe]";
+const textareaClass =
+  "w-full rounded-lg border border-[#cbd5e1] bg-white px-4 py-3 text-base font-semibold leading-7 text-[#0f172a] outline-none transition placeholder:text-[#94a3b8] focus:border-[#2563eb] focus:ring-4 focus:ring-[#dbeafe]";
+const labelClass = "text-sm font-bold text-[#334155]";
+const editorCardClass = "rounded-xl border border-[#dbe3ef] bg-white p-5 sm:p-6";
+
+function peso(amount: number) {
+  return `PHP ${Number(amount).toLocaleString("en-PH")}`;
+}
+
+function actionMessage(error?: { message: string } | null) {
+  return error?.message ?? "Unable to save. Please try again.";
+}
+
+function statusLabel(status: StructuredEditorSectionStatus) {
+  if (status === "needs_attention") return "Needs attention";
+  return status.replace("_", " ");
+}
+
+function statusTone(status: StructuredEditorSectionStatus) {
+  if (status === "complete") return "text-emerald-700 bg-emerald-50 ring-emerald-200";
+  if (status === "needs_attention") return "text-amber-800 bg-amber-50 ring-amber-200";
+  if (status === "optional") return "text-slate-600 bg-slate-50 ring-slate-200";
+  return "text-red-700 bg-red-50 ring-red-200";
+}
+
+function field(form: FormData, name: string) {
+  return String(form.get(name) ?? "").trim();
+}
+
+function nullableField(form: FormData, name: string) {
+  const value = field(form, name);
+  return value ? value : null;
+}
+
+function nullableNumber(form: FormData, name: string) {
+  const value = field(form, name);
+  return value ? Number(value) : null;
+}
+
+function toSlug(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 100);
+}
+
+function SectionBadge({ status }: { status: StructuredEditorSectionStatus }) {
+  return (
+    <span
+      className={cn(
+        "rounded-full px-2 py-0.5 text-[11px] font-bold capitalize ring-1",
+        statusTone(status),
+      )}
+    >
+      {statusLabel(status)}
+    </span>
+  );
+}
+
+export function StructuredVenueEditorClient({
+  venue,
+  draftProfile,
+  publishedProfile,
+  amenities,
+  eventTypes,
+  packages,
+  venueImages,
+  capacityLayouts,
+  spaceAmenities,
+  spaceEventTypes,
+  canPublish,
+  isCoordinatorOnly,
+}: Props) {
+  const router = useRouter();
+  const [section, setSection] =
+    useState<StructuredEditorSectionId>("overview");
+  const [selectedSpaceId, setSelectedSpaceId] = useState(
+    draftProfile?.spaces.find((space) => space.status !== "archived")?.id ?? "",
+  );
+  const [actionState, setActionState] = useState<ActionState>({
+    status: "idle",
+    message: "No changes in progress.",
+  });
+  const [isPending, startTransition] = useTransition();
+  const activeSpaces = useMemo(
+    () => (draftProfile?.spaces ?? []).filter((space) => space.status !== "archived"),
+    [draftProfile],
+  );
+  const selectedSpace =
+    activeSpaces.find((space) => space.id === selectedSpaceId) ??
+    activeSpaces[0] ??
+    null;
+  const statuses = getStructuredSectionStatuses(
+    draftProfile,
+    packages.filter((item) => item.is_active).length,
+  );
+  const publishIssues = getPublishBlockingIssues(draftProfile);
+  const profileStatus = getStructuredProfileDisplayStatus(
+    draftProfile,
+    publishedProfile?.revision.publishedAt,
+  );
+
+  function runAction<T>(
+    message: string,
+    fn: () => Promise<{ data: T | null; error: { message: string } | null }>,
+  ) {
+    setActionState({ status: "saving", message });
+    startTransition(async () => {
+      const result = await fn();
+      if (result.error) {
+        setActionState({ status: "error", message: actionMessage(result.error) });
+        return;
+      }
+      setActionState({ status: "saved", message: "Saved." });
+      router.refresh();
+    });
+  }
+
+  function createDraft() {
+    runAction("Creating draft...", () =>
+      getOrCreateDraftStructuredVenueProfileAction({ venueId: venue.id }),
+    );
+  }
+
+  function publishDraft() {
+    if (!draftProfile || publishIssues.length > 0) return;
+    if (!window.confirm("Publish this structured profile to customers?")) return;
+    runAction("Publishing...", () =>
+      publishStructuredVenueProfileAction({
+        venueId: venue.id,
+        revisionId: draftProfile.revision.id,
+      }),
+    );
+  }
+
+  function discardDraft() {
+    if (!draftProfile) return;
+    if (
+      !window.confirm(
+        "Discard unpublished structured changes? Your current published venue remains visible.",
+      )
+    ) {
+      return;
+    }
+    runAction("Discarding draft...", () =>
+      discardDraftStructuredVenueProfileAction({
+        venueId: venue.id,
+        revisionId: draftProfile.revision.id,
+      }),
+    );
+  }
+
+  function saveSpace(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!draftProfile) return;
+    const form = new FormData(event.currentTarget);
+    const name = field(form, "name");
+    const payload = {
+      venueId: venue.id,
+      revisionId: draftProfile.revision.id,
+      name,
+      slug: field(form, "slug") || toSlug(name),
+      spaceType: (field(form, "spaceType") || null) as VenueSpaceType | null,
+      setting: field(form, "setting") as VenueSpaceSetting,
+      shortDescription: nullableField(form, "shortDescription"),
+      description: nullableField(form, "description"),
+      capacityMin: nullableNumber(form, "capacityMin"),
+      capacityMax: Number(field(form, "capacityMax") || 0),
+      accessibilitySummary: nullableField(form, "accessibilitySummary"),
+      restrictions: nullableField(form, "restrictions"),
+      operatingNotes: nullableField(form, "operatingNotes"),
+      displayOrder: selectedSpace?.displayOrder ?? activeSpaces.length,
+    };
+
+    runAction(selectedSpace ? "Saving space..." : "Adding space...", async () => {
+      const result = selectedSpace
+        ? await updateVenueSpaceAction({
+            ...payload,
+            spaceId: selectedSpace.id,
+          })
+        : await createVenueSpaceAction(payload);
+      if (result.data && !selectedSpace) setSelectedSpaceId(result.data.id);
+      return result;
+    });
+  }
+
+  function saveSpaceRelationships(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!draftProfile || !selectedSpace) return;
+    const form = new FormData(event.currentTarget);
+    const selectedAmenities = form
+      .getAll("amenityIds")
+      .map((id) => ({ amenityId: String(id) }));
+    const selectedEventTypes = form
+      .getAll("eventTypeIds")
+      .map((id) => ({ eventTypeId: String(id) }));
+    const layouts = [0, 1, 2, 3]
+      .map((index) => {
+        const layout = field(form, `layout-${index}`);
+        const capacity = field(form, `layoutCapacity-${index}`);
+        if (!layout || !capacity) return null;
+        return {
+          layout: layout as VenueSpaceLayout,
+          customLayoutLabel: nullableField(form, `customLayoutLabel-${index}`),
+          capacity: Number(capacity),
+          notes: nullableField(form, `layoutNotes-${index}`),
+          displayOrder: index,
+        };
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null);
+
+    runAction("Saving space details...", async () => {
+      const layoutResult =
+        layouts.length > 0
+          ? await replaceCapacityLayoutsAction({
+              venueId: venue.id,
+              revisionId: draftProfile.revision.id,
+              spaceId: selectedSpace.id,
+              spaceCapacityMax: selectedSpace.capacityMax,
+              layouts,
+            })
+          : { data: [], error: null };
+      if (layoutResult.error) return layoutResult;
+
+      const amenitiesResult = await replaceSpaceAmenitiesAction({
+        venueId: venue.id,
+        revisionId: draftProfile.revision.id,
+        spaceId: selectedSpace.id,
+        amenities: selectedAmenities,
+      });
+      if (amenitiesResult.error) return amenitiesResult;
+
+      return replaceSpaceEventTypesAction({
+        venueId: venue.id,
+        revisionId: draftProfile.revision.id,
+        spaceId: selectedSpace.id,
+        eventTypes: selectedEventTypes,
+      });
+    });
+  }
+
+  function reorderSpace(spaceId: string, direction: "up" | "down") {
+    if (!draftProfile) return;
+    const index = activeSpaces.findIndex((space) => space.id === spaceId);
+    const nextIndex = direction === "up" ? index - 1 : index + 1;
+    if (index < 0 || nextIndex < 0 || nextIndex >= activeSpaces.length) return;
+    const next = [...activeSpaces];
+    const [moved] = next.splice(index, 1);
+    if (!moved) return;
+    next.splice(nextIndex, 0, moved);
+    runAction("Reordering spaces...", () =>
+      reorderVenueSpacesAction({
+        venueId: venue.id,
+        revisionId: draftProfile.revision.id,
+        orderedIds: next.map((space) => space.id),
+      }),
+    );
+  }
+
+  function archiveSpace(space: VenueSpace) {
+    if (!draftProfile) return;
+    if (!window.confirm(`Archive ${space.name}? Existing packages are not deleted.`)) {
+      return;
+    }
+    runAction("Archiving space...", () =>
+      archiveVenueSpaceAction({
+        venueId: venue.id,
+        revisionId: draftProfile.revision.id,
+        spaceId: space.id,
+      }),
+    );
+  }
+
+  function saveLogistics(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!draftProfile) return;
+    const form = new FormData(event.currentTarget);
+    runAction("Saving logistics...", () =>
+      saveVenueLogisticsAction({
+        venueId: venue.id,
+        revisionId: draftProfile.revision.id,
+        parkingCapacity: nullableNumber(form, "parkingCapacity"),
+        parkingNotes: nullableField(form, "parkingNotes"),
+        accessibilityNotes: nullableField(form, "accessibilityNotes"),
+        arrivalNotes: nullableField(form, "arrivalNotes"),
+        publicTransportationNotes: nullableField(
+          form,
+          "publicTransportationNotes",
+        ),
+        weatherBackupAvailable: form.get("weatherBackupAvailable") === "on",
+        weatherBackupNotes: nullableField(form, "weatherBackupNotes"),
+        curfewTime: nullableField(form, "curfewTime"),
+        noiseRestrictions: nullableField(form, "noiseRestrictions"),
+        setupRules: nullableField(form, "setupRules"),
+        teardownRules: nullableField(form, "teardownRules"),
+        externalSupplierRules: nullableField(form, "externalSupplierRules"),
+        petPolicy: nullableField(form, "petPolicy"),
+        smokingPolicy: nullableField(form, "smokingPolicy"),
+        otherNotes: nullableField(form, "otherNotes"),
+      }),
+    );
+  }
+
+  function createFaq(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!draftProfile) return;
+    const form = new FormData(event.currentTarget);
+    runAction("Adding FAQ...", () =>
+      createVenueFaqAction({
+        venueId: venue.id,
+        revisionId: draftProfile.revision.id,
+        question: field(form, "question"),
+        answer: field(form, "answer"),
+        category: (field(form, "category") || null) as VenueFaqCategory | null,
+        displayOrder: draftProfile.faqs.length,
+      }),
+    );
+    event.currentTarget.reset();
+  }
+
+  function reorderFaq(faqId: string, direction: "up" | "down") {
+    if (!draftProfile) return;
+    const activeFaqs = draftProfile.faqs.filter(
+      (faq) => faq.status !== "archived",
+    );
+    const index = activeFaqs.findIndex((faq) => faq.id === faqId);
+    const nextIndex = direction === "up" ? index - 1 : index + 1;
+    if (index < 0 || nextIndex < 0 || nextIndex >= activeFaqs.length) return;
+    const next = [...activeFaqs];
+    const [moved] = next.splice(index, 1);
+    if (!moved) return;
+    next.splice(nextIndex, 0, moved);
+    runAction("Reordering FAQs...", () =>
+      reorderVenueFaqsAction({
+        venueId: venue.id,
+        revisionId: draftProfile.revision.id,
+        orderedIds: next.map((faq) => faq.id),
+      }),
+    );
+  }
+
+  function archiveFaq(faq: VenueFaq) {
+    if (!draftProfile) return;
+    if (!window.confirm(`Archive this FAQ?\n\n${faq.question}`)) return;
+    runAction("Archiving FAQ...", () =>
+      archiveVenueFaqAction({
+        venueId: venue.id,
+        revisionId: draftProfile.revision.id,
+        faqId: faq.id,
+      }),
+    );
+  }
+
+  function createCollection(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!draftProfile) return;
+    const form = new FormData(event.currentTarget);
+    runAction("Creating media collection...", () =>
+      saveVenueMediaCollectionAction({
+        venueId: venue.id,
+        revisionId: draftProfile.revision.id,
+        spaceId: field(form, "spaceId") || null,
+        collectionType: field(form, "collectionType") as VenueMediaCollectionType,
+        title: nullableField(form, "title"),
+        description: nullableField(form, "description"),
+        displayOrder: draftProfile.mediaCollections.length,
+        isCover: form.get("isCover") === "on",
+      }),
+    );
+  }
+
+  function addExistingMedia(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!draftProfile) return;
+    const form = new FormData(event.currentTarget);
+    const collectionId = field(form, "collectionId");
+    const imageId = field(form, "imageId");
+    const image = venueImages.find((item) => item.id === imageId);
+    const collection = draftProfile.mediaCollections.find(
+      (item) => item.id === collectionId,
+    );
+    if (!image || !collection) return;
+
+    runAction("Adding media metadata...", () =>
+      saveVenueMediaItemAction({
+        venueId: venue.id,
+        collectionId,
+        spaceId: collection.spaceId,
+        storagePath: image.storage_path,
+        legacyVenueImageId: image.id,
+        mediaType: image.media_type === "video" ? "video" : "image",
+        altText: nullableField(form, "altText") ?? image.alt_text,
+        caption: nullableField(form, "caption"),
+        transcript: nullableField(form, "transcript"),
+        displayOrder: draftProfile.mediaItems.filter(
+          (item) => item.collectionId === collectionId,
+        ).length,
+        isFeatured: form.get("isFeatured") === "on",
+      }),
+    );
+  }
+
+  function reorderMediaItem(item: VenueMediaItem, direction: "up" | "down") {
+    if (!draftProfile) return;
+    const collectionItems = draftProfile.mediaItems.filter(
+      (mediaItem) =>
+        mediaItem.collectionId === item.collectionId &&
+        mediaItem.status !== "archived" &&
+        !mediaItem.deletedAt,
+    );
+    const index = collectionItems.findIndex(
+      (mediaItem) => mediaItem.id === item.id,
+    );
+    const nextIndex = direction === "up" ? index - 1 : index + 1;
+    if (index < 0 || nextIndex < 0 || nextIndex >= collectionItems.length) {
+      return;
+    }
+    const next = [...collectionItems];
+    const [moved] = next.splice(index, 1);
+    if (!moved) return;
+    next.splice(nextIndex, 0, moved);
+    runAction("Reordering media...", () =>
+      reorderVenueMediaItemsAction({
+        venueId: venue.id,
+        collectionId: item.collectionId,
+        orderedIds: next.map((mediaItem) => mediaItem.id),
+      }),
+    );
+  }
+
+  function archiveMediaItem(item: VenueMediaItem) {
+    if (!window.confirm("Archive this media item from the structured draft?")) {
+      return;
+    }
+    runAction("Archiving media...", () =>
+      archiveVenueMediaItemAction({
+        venueId: venue.id,
+        collectionId: item.collectionId,
+        itemId: item.id,
+      }),
+    );
+  }
+
+  function savePackageSpaces(event: FormEvent<HTMLFormElement>, packageId: string) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const links = form.getAll("spaceIds").map((spaceId, index) => ({
+      spaceId: String(spaceId),
+      inclusionType: field(form, `inclusionType-${spaceId}`) as PackageVenueSpaceInclusionType,
+      inclusionNotes: nullableField(form, `notes-${spaceId}`),
+      displayOrder: index,
+    }));
+
+    runAction("Saving package spaces...", () =>
+      replacePackageVenueSpacesAction({
+        venueId: venue.id,
+        packageId,
+        spaces: links,
+      }),
+    );
+  }
+
+  if (!draftProfile) {
+    return (
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <Panel className="min-h-[420px]">
+          <div className="max-w-3xl">
+            <span className="inline-flex rounded-full bg-[#eff6ff] px-3 py-1 text-xs font-bold uppercase tracking-wide text-[#1d4ed8]">
+              Structured profile
+            </span>
+            <h2 className="mt-5 text-2xl font-bold tracking-tight text-[#0f172a]">
+              Prepare a richer venue experience
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-[#475569]">
+              Your current public venue page remains visible while you build a
+              private structured draft for spaces, media groups, logistics,
+              FAQs, and package-space relationships.
+            </p>
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              {["Private draft", "Preview before publish", "Owner approval"].map(
+                (item) => (
+                  <div
+                    key={item}
+                    className="rounded-xl border border-[#dbe3ef] bg-[#f8fbff] p-4 text-sm font-bold text-[#0f172a]"
+                  >
+                    <CheckCircle2 className="mb-3 h-5 w-5 text-[#1d4ed8]" />
+                    {item}
+                  </div>
+                ),
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={createDraft}
+              disabled={isPending}
+              className="mt-8 inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-[#1d4ed8] px-5 py-2.5 text-sm font-bold text-white shadow-sm shadow-blue-200/70 transition hover:bg-[#1e40af] disabled:opacity-60"
+            >
+              <Plus className="h-4 w-4" />
+              Create structured profile
+            </button>
+          </div>
+        </Panel>
+        <StatusPanel
+          venue={venue}
+          profileStatus={profileStatus}
+          actionState={actionState}
+          canPublish={canPublish}
+          isCoordinatorOnly={isCoordinatorOnly}
+          publishIssues={publishIssues}
+          onPublish={publishDraft}
+          onDiscard={discardDraft}
+          hasDraft={false}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <StatusPanel
+        venue={venue}
+        profileStatus={profileStatus}
+        actionState={actionState}
+        canPublish={canPublish}
+        isCoordinatorOnly={isCoordinatorOnly}
+        publishIssues={publishIssues}
+        onPublish={publishDraft}
+        onDiscard={discardDraft}
+        hasDraft
+        variant="bar"
+      />
+
+      <div className="grid gap-6 2xl:grid-cols-[260px_minmax(0,1fr)]">
+      <Panel className="hidden h-max 2xl:block">
+        <p className="text-xs font-bold uppercase tracking-wider text-[#64748b]">
+          Sections
+        </p>
+        <nav className="mt-4 space-y-1.5" aria-label="Structured editor sections">
+          {STRUCTURED_EDITOR_SECTIONS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setSection(item.id)}
+              className={cn(
+                "flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-bold transition",
+                section === item.id
+                  ? "bg-[#eff6ff] text-[#1d4ed8]"
+                  : "text-[#475569] hover:bg-[#f8fbff] hover:text-[#1d4ed8]",
+              )}
+            >
+              <span>{item.label}</span>
+              <SectionBadge status={statuses[item.id]} />
+            </button>
+          ))}
+        </nav>
+      </Panel>
+
+      <div className="min-w-0 space-y-6">
+        <div className="2xl:hidden">
+          <label htmlFor="structured-section" className={labelClass}>
+            Editor section
+          </label>
+          <select
+            id="structured-section"
+            value={section}
+            onChange={(event) =>
+              setSection(event.target.value as StructuredEditorSectionId)
+            }
+            className={cn(inputClass, "mt-2")}
+          >
+            {STRUCTURED_EDITOR_SECTIONS.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.label} - {statusLabel(statuses[item.id])}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {section === "overview" ? (
+          <OverviewSection
+            venue={venue}
+            draftProfile={draftProfile}
+            publishedProfile={publishedProfile}
+            statuses={statuses}
+          />
+        ) : null}
+        {section === "spaces" ? (
+          <SpacesSection
+            spaces={activeSpaces}
+            selectedSpace={selectedSpace}
+            selectedSpaceId={selectedSpaceId}
+            setSelectedSpaceId={setSelectedSpaceId}
+            capacityLayouts={capacityLayouts}
+            spaceAmenities={spaceAmenities}
+            spaceEventTypes={spaceEventTypes}
+            amenities={amenities}
+            eventTypes={eventTypes}
+            onSaveSpace={saveSpace}
+            onSaveRelationships={saveSpaceRelationships}
+            onReorder={reorderSpace}
+            onArchive={archiveSpace}
+          />
+        ) : null}
+        {section === "media" ? (
+          <MediaSection
+            profile={draftProfile}
+            spaces={activeSpaces}
+            venueImages={venueImages}
+            onCreateCollection={createCollection}
+            onAddExistingMedia={addExistingMedia}
+            onArchiveItem={archiveMediaItem}
+            onReorderItem={reorderMediaItem}
+          />
+        ) : null}
+        {section === "logistics" ? (
+          <LogisticsSection profile={draftProfile} onSave={saveLogistics} />
+        ) : null}
+        {section === "faqs" ? (
+          <FaqSection
+            profile={draftProfile}
+            onCreate={createFaq}
+            onArchive={archiveFaq}
+            onReorder={reorderFaq}
+          />
+        ) : null}
+        {section === "packages" ? (
+          <PackagesSection
+            packages={packages}
+            spaces={activeSpaces}
+            profile={draftProfile}
+            onSave={savePackageSpaces}
+          />
+        ) : null}
+        {section === "preview" ? (
+          <PreviewSection
+            venue={venue}
+            profile={draftProfile}
+            publishIssues={publishIssues}
+            canPublish={canPublish}
+            onPublish={publishDraft}
+          />
+        ) : null}
+      </div>
+      </div>
+    </div>
+  );
+}
+
+function StatusPanel({
+  venue,
+  profileStatus,
+  actionState,
+  canPublish,
+  isCoordinatorOnly,
+  publishIssues,
+  onPublish,
+  onDiscard,
+  hasDraft,
+  variant = "sidebar",
+}: {
+  venue: Venue;
+  profileStatus: string;
+  actionState: ActionState;
+  canPublish: boolean;
+  isCoordinatorOnly: boolean;
+  publishIssues: string[];
+  onPublish: () => void;
+  onDiscard: () => void;
+  hasDraft: boolean;
+  variant?: "sidebar" | "bar";
+}) {
+  const isBar = variant === "bar";
+
+  return (
+    <Panel className={cn("h-max", !isBar && "xl:sticky xl:top-24")}>
+      <div
+        className={cn(
+          "grid gap-5",
+          isBar && "xl:grid-cols-[minmax(0,1fr)_minmax(240px,0.55fr)_auto] xl:items-start",
+        )}
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-[#64748b]">
+              Venue
+            </p>
+            <h2 className="mt-1 text-lg font-bold text-[#0f172a]">{venue.name}</h2>
+            <p className="mt-1 text-sm text-[#64748b]">
+              {[venue.city, venue.province].filter(Boolean).join(", ") ||
+                "Location pending"}
+            </p>
+          </div>
+          <StatusBadge status={profileStatus.toLowerCase().replace(/\s/g, "_")} label={profileStatus} />
+        </div>
+
+        <div className="rounded-lg border border-[#dbe3ef] bg-[#f8fbff] p-4">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#64748b]">
+            Save state
+          </p>
+          <p
+            className={cn(
+              "mt-2 text-sm font-bold",
+              actionState.status === "error" ? "text-red-700" : "text-[#0f172a]",
+            )}
+            aria-live="polite"
+          >
+            {actionState.message}
+          </p>
+        </div>
+
+        <div className={cn("flex flex-col gap-2", isBar && "sm:flex-row xl:flex-col")}>
+          <DashButton
+            href={`/dashboard/venues/${venue.id}/experience/preview`}
+            variant="secondary"
+            icon="visibility"
+          >
+            Preview
+          </DashButton>
+          <button
+            type="button"
+            onClick={onPublish}
+            disabled={!hasDraft || !canPublish || publishIssues.length > 0}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#1d4ed8] px-4 py-2.5 text-sm font-bold text-white shadow-sm shadow-blue-200/70 transition hover:bg-[#1e40af] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Send className="h-4 w-4" />
+            Publish changes
+          </button>
+          {hasDraft && canPublish ? (
+            <button
+              type="button"
+              onClick={onDiscard}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-bold text-red-700 transition hover:bg-red-100"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Discard draft
+            </button>
+          ) : null}
+        </div>
+      </div>
+
+      {isCoordinatorOnly ? (
+        <div className="mt-4 flex gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">
+          <Lock className="mt-0.5 h-4 w-4 shrink-0" />
+          Coordinators can edit assigned profile content, but publishing requires the venue owner.
+        </div>
+      ) : null}
+
+      {publishIssues.length > 0 ? (
+        <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
+          <p className="flex items-center gap-2 text-sm font-bold text-amber-900">
+            <AlertCircle className="h-4 w-4" />
+            Before publishing
+          </p>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-amber-900">
+            {publishIssues.map((issue) => (
+              <li key={issue}>{issue}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </Panel>
+  );
+}
+
+function OverviewSection({
+  venue,
+  draftProfile,
+  publishedProfile,
+  statuses,
+}: {
+  venue: Venue;
+  draftProfile: DraftStructuredVenueProfile;
+  publishedProfile: PublishedStructuredVenueProfile | null;
+  statuses: Record<StructuredEditorSectionId, StructuredEditorSectionStatus>;
+}) {
+  return (
+    <Panel>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-[#0f172a]">Overview</h2>
+          <p className="mt-1 max-w-2xl text-sm leading-6 text-[#64748b]">
+            This draft is private. It becomes customer-visible only after an owner publishes it.
+          </p>
+        </div>
+        <StatusBadge status={venue.status} />
+      </div>
+      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Metric label="Draft revision" value={`#${draftProfile.revision.revisionNumber}`} />
+        <Metric label="Spaces" value={String(draftProfile.spaces.length)} />
+        <Metric label="Media items" value={String(draftProfile.mediaItems.length)} />
+        <Metric
+          label="Published"
+          value={
+            publishedProfile?.revision.publishedAt
+              ? new Date(publishedProfile.revision.publishedAt).toLocaleDateString()
+              : "Not yet"
+          }
+        />
+      </div>
+      <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        {STRUCTURED_EDITOR_SECTIONS.filter((item) => item.id !== "overview").map(
+          (item) => (
+            <div
+              key={item.id}
+              className="rounded-xl border border-[#dbe3ef] bg-[#f8fbff] p-4"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <p className="font-bold text-[#0f172a]">{item.label}</p>
+                <SectionBadge status={statuses[item.id]} />
+              </div>
+              <p className="mt-1 text-sm leading-5 text-[#64748b]">
+                {item.description}
+              </p>
+            </div>
+          ),
+        )}
+      </div>
+    </Panel>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-[#dbe3ef] bg-white p-4">
+      <p className="text-xs font-bold uppercase tracking-wider text-[#64748b]">
+        {label}
+      </p>
+      <p className="mt-2 text-2xl font-bold text-[#0f172a]">{value}</p>
+    </div>
+  );
+}
+
+function SpacesSection({
+  spaces,
+  selectedSpace,
+  selectedSpaceId,
+  setSelectedSpaceId,
+  capacityLayouts,
+  spaceAmenities,
+  spaceEventTypes,
+  amenities,
+  eventTypes,
+  onSaveSpace,
+  onSaveRelationships,
+  onReorder,
+  onArchive,
+}: {
+  spaces: VenueSpace[];
+  selectedSpace: VenueSpace | null;
+  selectedSpaceId: string;
+  setSelectedSpaceId: (value: string) => void;
+  capacityLayouts: CapacityLayoutRow[];
+  spaceAmenities: SpaceAmenityRow[];
+  spaceEventTypes: SpaceEventTypeRow[];
+  amenities: Amenity[];
+  eventTypes: EventType[];
+  onSaveSpace: (event: FormEvent<HTMLFormElement>) => void;
+  onSaveRelationships: (event: FormEvent<HTMLFormElement>) => void;
+  onReorder: (spaceId: string, direction: "up" | "down") => void;
+  onArchive: (space: VenueSpace) => void;
+}) {
+  const selectedLayouts = selectedSpace
+    ? capacityLayouts.filter((layout) => layout.space_id === selectedSpace.id)
+    : [];
+  const selectedAmenityIds = new Set(
+    selectedSpace
+      ? spaceAmenities
+          .filter((row) => row.space_id === selectedSpace.id)
+          .map((row) => row.amenity_id)
+      : [],
+  );
+  const selectedEventTypeIds = new Set(
+    selectedSpace
+      ? spaceEventTypes
+          .filter((row) => row.space_id === selectedSpace.id)
+          .map((row) => row.event_type_id)
+      : [],
+  );
+
+  return (
+    <Panel>
+      <SectionTitle
+        title="Spaces"
+        description="Create customer-readable spaces such as ballrooms, gardens, ceremony areas, and preparation suites."
+      />
+      <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
+        <div className="space-y-3">
+          {spaces.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-5 text-sm leading-6 text-[#64748b]">
+              No spaces yet. Add a ballroom, garden, pavilion, ceremony area, reception area, or preparation suite.
+            </div>
+          ) : (
+            spaces.map((space, index) => (
+              <div
+                key={space.id}
+                className={cn(
+                  "rounded-xl border p-4",
+                  selectedSpaceId === space.id
+                    ? "border-[#93c5fd] bg-[#eff6ff]"
+                    : "border-[#dbe3ef] bg-white",
+                )}
+              >
+                <button
+                  type="button"
+                  onClick={() => setSelectedSpaceId(space.id)}
+                  className="w-full text-left"
+                >
+                  <p className="text-base font-bold text-[#0f172a]">{space.name}</p>
+                  <p className="mt-1 text-sm font-semibold text-[#64748b]">
+                    {getVenueSpaceSettingLabel(space.setting)} · up to{" "}
+                    {space.capacityMax} guests
+                  </p>
+                </button>
+                <div className="mt-3 flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => onReorder(space.id, "up")}
+                    disabled={index === 0}
+                    className="rounded-lg border border-[#dbe3ef] p-1.5 text-[#475569] disabled:opacity-40"
+                    aria-label={`Move ${space.name} up`}
+                  >
+                    <ArrowUp className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onReorder(space.id, "down")}
+                    disabled={index === spaces.length - 1}
+                    className="rounded-lg border border-[#dbe3ef] p-1.5 text-[#475569] disabled:opacity-40"
+                    aria-label={`Move ${space.name} down`}
+                  >
+                    <ArrowDown className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onArchive(space)}
+                    className="ml-auto rounded-lg border border-red-200 p-1.5 text-red-700"
+                    aria-label={`Archive ${space.name}`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+          <button
+            type="button"
+            onClick={() => setSelectedSpaceId("")}
+            className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg border border-[#dbe3ef] bg-white px-3 text-sm font-bold text-[#1d4ed8] transition hover:border-[#93c5fd]"
+          >
+            <Plus className="h-4 w-4" />
+            Add Space
+          </button>
+        </div>
+
+        <div className="space-y-6">
+          <form onSubmit={onSaveSpace} className={editorCardClass}>
+            <h3 className="text-lg font-bold text-[#0f172a]">
+              {selectedSpace ? "Edit space" : "Add space"}
+            </h3>
+            <div className="mt-5 grid gap-5 lg:grid-cols-2">
+              <Field label="Name">
+                <input name="name" required defaultValue={selectedSpace?.name ?? ""} className={inputClass} />
+              </Field>
+              <Field label="Slug">
+                <input name="slug" defaultValue={selectedSpace?.slug ?? ""} placeholder="garden-pavilion" className={inputClass} />
+              </Field>
+              <Field label="Space type">
+                <select name="spaceType" defaultValue={selectedSpace?.spaceType ?? ""} className={inputClass}>
+                  <option value="">Choose a type</option>
+                  {VENUE_SPACE_TYPES.map((value) => (
+                    <option key={value} value={value}>{getVenueSpaceTypeLabel(value)}</option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Setting">
+                <select name="setting" defaultValue={selectedSpace?.setting ?? "indoor"} className={inputClass}>
+                  {VENUE_SPACE_SETTINGS.map((value) => (
+                    <option key={value} value={value}>{getVenueSpaceSettingLabel(value)}</option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Minimum capacity">
+                <input name="capacityMin" type="number" min="0" defaultValue={selectedSpace?.capacityMin ?? ""} className={inputClass} />
+              </Field>
+              <Field label="Maximum capacity">
+                <input name="capacityMax" type="number" min="1" required defaultValue={selectedSpace?.capacityMax ?? ""} className={inputClass} />
+              </Field>
+              <Field label="Short description" className="sm:col-span-2">
+                <input name="shortDescription" defaultValue={selectedSpace?.shortDescription ?? ""} className={inputClass} />
+              </Field>
+              <Field label="Full description" className="sm:col-span-2">
+                <textarea name="description" rows={4} defaultValue={selectedSpace?.description ?? ""} className={textareaClass} />
+              </Field>
+              <Field label="Accessibility summary" className="sm:col-span-2">
+                <textarea name="accessibilitySummary" rows={3} defaultValue={selectedSpace?.accessibilitySummary ?? ""} className={textareaClass} />
+              </Field>
+              <Field label="Restrictions">
+                <textarea name="restrictions" rows={3} defaultValue={selectedSpace?.restrictions ?? ""} className={textareaClass} />
+              </Field>
+              <Field label="Operating notes">
+                <textarea name="operatingNotes" rows={3} defaultValue={selectedSpace?.operatingNotes ?? ""} className={textareaClass} />
+              </Field>
+            </div>
+            <SubmitButton label={selectedSpace ? "Save space" : "Add space"} />
+          </form>
+
+          {selectedSpace ? (
+            <form onSubmit={onSaveRelationships} className={editorCardClass}>
+              <h3 className="text-lg font-bold text-[#0f172a]">Capacity, amenities, and event fit</h3>
+              <div className="mt-5 space-y-6">
+                <div>
+                  <p className={labelClass}>Capacity layouts</p>
+                  <div className="mt-3 grid gap-4">
+                    {Array.from({ length: 4 }).map((_, index) => {
+                      const layout = selectedLayouts[index];
+                      return (
+                        <div key={index} className="grid gap-3 rounded-lg border border-[#e5e7eb] bg-[#f8fafc] p-3 lg:grid-cols-[minmax(160px,0.8fr)_minmax(180px,1fr)_140px]">
+                          <select name={`layout-${index}`} defaultValue={layout?.layout ?? ""} className={inputClass}>
+                            <option value="">Layout</option>
+                            {VENUE_SPACE_LAYOUTS.map((value) => (
+                              <option key={value} value={value}>{getVenueSpaceLayoutLabel(value)}</option>
+                            ))}
+                          </select>
+                          <input name={`customLayoutLabel-${index}`} defaultValue={layout?.custom_layout_label ?? ""} placeholder="Custom label" className={inputClass} />
+                          <input name={`layoutCapacity-${index}`} type="number" min="0" defaultValue={layout?.capacity ?? ""} placeholder="Capacity" className={inputClass} />
+                          <input name={`layoutNotes-${index}`} defaultValue={layout?.notes ?? ""} placeholder="Notes" className={cn(inputClass, "lg:col-span-3")} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <CheckboxGrid
+                  label="Space-specific amenities"
+                  name="amenityIds"
+                  items={amenities}
+                  selectedIds={selectedAmenityIds}
+                />
+                <CheckboxGrid
+                  label="Supported event types"
+                  name="eventTypeIds"
+                  items={eventTypes}
+                  selectedIds={selectedEventTypeIds}
+                />
+              </div>
+              <SubmitButton label="Save space details" />
+            </form>
+          ) : null}
+        </div>
+      </div>
+    </Panel>
+  );
+}
+
+function MediaSection({
+  profile,
+  spaces,
+  venueImages,
+  onCreateCollection,
+  onAddExistingMedia,
+  onArchiveItem,
+  onReorderItem,
+}: {
+  profile: DraftStructuredVenueProfile;
+  spaces: VenueSpace[];
+  venueImages: VenueImage[];
+  onCreateCollection: (event: FormEvent<HTMLFormElement>) => void;
+  onAddExistingMedia: (event: FormEvent<HTMLFormElement>) => void;
+  onArchiveItem: (item: VenueMediaItem) => void;
+  onReorderItem: (item: VenueMediaItem, direction: "up" | "down") => void;
+}) {
+  return (
+    <Panel>
+      <SectionTitle
+        title="Media"
+        description="Organize existing venue-owned uploads into structured galleries. Upload new files from the base listing page first."
+      />
+      <div className="grid gap-6 xl:grid-cols-2">
+        <form onSubmit={onCreateCollection} className={editorCardClass}>
+          <h3 className="text-lg font-bold text-[#0f172a]">Create collection</h3>
+          <div className="mt-5 grid gap-4">
+            <Field label="Collection type">
+              <select name="collectionType" className={inputClass} defaultValue="gallery">
+                {VENUE_MEDIA_COLLECTION_TYPES.filter((type) => type !== "video").map((value) => (
+                  <option key={value} value={value}>{getVenueMediaCollectionTypeLabel(value)}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Space">
+              <select name="spaceId" className={inputClass}>
+                <option value="">Venue-level collection</option>
+                {spaces.map((space) => (
+                  <option key={space.id} value={space.id}>{space.name}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Title">
+              <input name="title" className={inputClass} placeholder="Main gallery" />
+            </Field>
+            <Field label="Description">
+              <textarea name="description" className={textareaClass} rows={3} />
+            </Field>
+            <label className="flex items-center gap-3 text-sm font-bold text-[#334155]">
+              <input name="isCover" type="checkbox" className="h-4 w-4" />
+              Use as cover collection
+            </label>
+          </div>
+          <SubmitButton label="Create collection" />
+        </form>
+
+        <form onSubmit={onAddExistingMedia} className={editorCardClass}>
+          <h3 className="text-lg font-bold text-[#0f172a]">Add existing upload</h3>
+          {profile.mediaCollections.length === 0 || venueImages.length === 0 ? (
+            <div className="mt-5 rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-5 text-sm leading-6 text-[#64748b]">
+              Create a collection and upload venue images in Base Listing before adding structured media metadata.
+            </div>
+          ) : (
+            <div className="mt-5 grid gap-4">
+              <Field label="Collection">
+                <select name="collectionId" className={inputClass}>
+                  {profile.mediaCollections.map((collection) => (
+                    <option key={collection.id} value={collection.id}>
+                      {collection.title || getVenueMediaCollectionTypeLabel(collection.collectionType)}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Uploaded media">
+                <select name="imageId" className={inputClass}>
+                  {venueImages.map((image) => (
+                    <option key={image.id} value={image.id}>
+                      {image.media_type} - {image.storage_path.split("/").pop()}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Alt text">
+                <input name="altText" className={inputClass} />
+              </Field>
+              <Field label="Caption">
+                <input name="caption" className={inputClass} />
+              </Field>
+              <Field label="Transcript">
+                <textarea name="transcript" rows={3} className={textareaClass} />
+              </Field>
+              <label className="flex items-center gap-3 text-sm font-bold text-[#334155]">
+                <input name="isFeatured" type="checkbox" className="h-4 w-4" />
+                Feature inside collection
+              </label>
+              <SubmitButton label="Add media" />
+            </div>
+          )}
+        </form>
+      </div>
+
+      <div className="mt-7 space-y-5">
+        {profile.mediaCollections.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-8 text-center text-sm text-[#64748b]">
+            No structured media collections yet.
+          </div>
+        ) : (
+          profile.mediaCollections.map((collection) => {
+            const items = profile.mediaItems.filter(
+              (item) =>
+                item.collectionId === collection.id &&
+                item.status !== "archived" &&
+                !item.deletedAt,
+            );
+            return (
+              <div key={collection.id} className={editorCardClass}>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="font-bold text-[#0f172a]">
+                      {collection.title ||
+                        getVenueMediaCollectionTypeLabel(collection.collectionType)}
+                    </p>
+                    <p className="text-sm text-[#64748b]">
+                      {items.length} item{items.length === 1 ? "" : "s"}
+                    </p>
+                  </div>
+                  {collection.isCover ? <StatusBadge status="active" label="Cover" /> : null}
+                </div>
+                <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {items.length === 0 ? (
+                    <div className="rounded-xl bg-[#f8fafc] p-4 text-sm text-[#64748b]">
+                      No media added yet.
+                    </div>
+                  ) : (
+                    items.map((item) => (
+                      <div key={item.id} className="overflow-hidden rounded-xl border border-[#dbe3ef]">
+                        <div className="relative aspect-video bg-[#f1f5f9]">
+                          {item.mediaType === "image" && item.storagePath ? (
+                            <Image
+                              src={getVenueMediaUrl(item.storagePath)}
+                              alt={item.altText || item.caption || "Venue media"}
+                              fill
+                              className="object-cover"
+                              sizes="240px"
+                            />
+                          ) : (
+                            <div className="flex h-full items-center justify-center text-[#64748b]">
+                              <ImageIcon className="h-6 w-6" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-3">
+                          <p className="text-sm font-bold text-[#0f172a]">
+                            {item.caption || item.altText || "Media item"}
+                          </p>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <button
+                              type="button"
+                              onClick={() => onReorderItem(item, "up")}
+                              className="rounded-full border border-[#dbe3ef] px-2.5 py-1 text-xs font-bold text-[#475569] hover:border-[#93c5fd] hover:text-[#1d4ed8]"
+                            >
+                              Move up
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => onReorderItem(item, "down")}
+                              className="rounded-full border border-[#dbe3ef] px-2.5 py-1 text-xs font-bold text-[#475569] hover:border-[#93c5fd] hover:text-[#1d4ed8]"
+                            >
+                              Move down
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => onArchiveItem(item)}
+                              className="rounded-full border border-red-200 px-2.5 py-1 text-xs font-bold text-red-700 hover:bg-red-50"
+                            >
+                              Archive
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </Panel>
+  );
+}
+
+function LogisticsSection({
+  profile,
+  onSave,
+}: {
+  profile: DraftStructuredVenueProfile;
+  onSave: (event: FormEvent<HTMLFormElement>) => void;
+}) {
+  const logistics = profile.logistics;
+  return (
+    <Panel>
+      <SectionTitle
+        title="Logistics"
+        description="Give customers the practical information they need before booking."
+      />
+      <form onSubmit={onSave} className="grid gap-5 lg:grid-cols-2">
+        <Field label="Parking capacity">
+          <input name="parkingCapacity" type="number" min="0" defaultValue={logistics?.parkingCapacity ?? ""} className={inputClass} />
+        </Field>
+        <Field label="Curfew time">
+          <input name="curfewTime" type="time" defaultValue={logistics?.curfewTime ?? ""} className={inputClass} />
+        </Field>
+        <Field label="Parking notes" className="sm:col-span-2">
+          <textarea name="parkingNotes" rows={3} defaultValue={logistics?.parkingNotes ?? ""} className={textareaClass} />
+        </Field>
+        <Field label="Accessibility notes">
+          <textarea name="accessibilityNotes" rows={4} defaultValue={logistics?.accessibilityNotes ?? ""} className={textareaClass} />
+        </Field>
+        <Field label="Arrival directions">
+          <textarea name="arrivalNotes" rows={4} defaultValue={logistics?.arrivalNotes ?? ""} className={textareaClass} />
+        </Field>
+        <Field label="Public transportation">
+          <textarea name="publicTransportationNotes" rows={3} defaultValue={logistics?.publicTransportationNotes ?? ""} className={textareaClass} />
+        </Field>
+        <Field label="Weather backup">
+          <textarea name="weatherBackupNotes" rows={3} defaultValue={logistics?.weatherBackupNotes ?? ""} className={textareaClass} />
+          <label className="mt-2 flex items-center gap-2 text-sm font-bold text-[#334155]">
+            <input name="weatherBackupAvailable" type="checkbox" defaultChecked={Boolean(logistics?.weatherBackupAvailable)} />
+            Backup area available
+          </label>
+        </Field>
+        <Field label="Noise restrictions">
+          <textarea name="noiseRestrictions" rows={3} defaultValue={logistics?.noiseRestrictions ?? ""} className={textareaClass} />
+        </Field>
+        <Field label="Setup rules">
+          <textarea name="setupRules" rows={3} defaultValue={logistics?.setupRules ?? ""} className={textareaClass} />
+        </Field>
+        <Field label="Teardown rules">
+          <textarea name="teardownRules" rows={3} defaultValue={logistics?.teardownRules ?? ""} className={textareaClass} />
+        </Field>
+        <Field label="External supplier rules">
+          <textarea name="externalSupplierRules" rows={3} defaultValue={logistics?.externalSupplierRules ?? ""} className={textareaClass} />
+        </Field>
+        <Field label="Pet policy">
+          <textarea name="petPolicy" rows={3} defaultValue={logistics?.petPolicy ?? ""} className={textareaClass} />
+        </Field>
+        <Field label="Smoking policy">
+          <textarea name="smokingPolicy" rows={3} defaultValue={logistics?.smokingPolicy ?? ""} className={textareaClass} />
+        </Field>
+        <Field label="Other practical notes" className="sm:col-span-2">
+          <textarea name="otherNotes" rows={4} defaultValue={logistics?.otherNotes ?? ""} className={textareaClass} />
+        </Field>
+        <div className="sm:col-span-2">
+          <SubmitButton label="Save logistics" />
+        </div>
+      </form>
+    </Panel>
+  );
+}
+
+function FaqSection({
+  profile,
+  onCreate,
+  onArchive,
+  onReorder,
+}: {
+  profile: DraftStructuredVenueProfile;
+  onCreate: (event: FormEvent<HTMLFormElement>) => void;
+  onArchive: (faq: VenueFaq) => void;
+  onReorder: (faqId: string, direction: "up" | "down") => void;
+}) {
+  const activeFaqs = profile.faqs.filter((faq) => faq.status !== "archived");
+  return (
+    <Panel>
+      <SectionTitle
+        title="FAQs"
+        description="Answers are stored and rendered as plain text only."
+      />
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+        <div className="space-y-5">
+          {activeFaqs.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-8 text-center text-sm text-[#64748b]">
+              No FAQs yet.
+            </div>
+          ) : (
+            activeFaqs.map((faq) => (
+              <details key={faq.id} className={editorCardClass}>
+                <summary className="cursor-pointer text-base font-bold text-[#0f172a]">
+                  {faq.question}
+                </summary>
+                <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-[#475569]">
+                  {faq.answer}
+                </p>
+                <p className="mt-3 text-xs font-bold text-[#64748b]">
+                  {faq.category ? getVenueFaqCategoryLabel(faq.category) : "General"}
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onReorder(faq.id, "up")}
+                    className="rounded-full border border-[#dbe3ef] px-2.5 py-1 text-xs font-bold text-[#475569] hover:border-[#93c5fd] hover:text-[#1d4ed8]"
+                  >
+                    Move up
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onReorder(faq.id, "down")}
+                    className="rounded-full border border-[#dbe3ef] px-2.5 py-1 text-xs font-bold text-[#475569] hover:border-[#93c5fd] hover:text-[#1d4ed8]"
+                  >
+                    Move down
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onArchive(faq)}
+                    className="rounded-full border border-red-200 px-2.5 py-1 text-xs font-bold text-red-700 hover:bg-red-50"
+                  >
+                    Archive
+                  </button>
+                </div>
+              </details>
+            ))
+          )}
+        </div>
+        <form onSubmit={onCreate} className={editorCardClass}>
+          <h3 className="text-lg font-bold text-[#0f172a]">Add FAQ</h3>
+          <div className="mt-5 grid gap-4">
+            <Field label="Category">
+              <select name="category" className={inputClass}>
+                <option value="">General</option>
+                {VENUE_FAQ_CATEGORIES.map((value) => (
+                  <option key={value} value={value}>{getVenueFaqCategoryLabel(value)}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Question">
+              <input name="question" required maxLength={200} className={inputClass} />
+            </Field>
+            <Field label="Answer">
+              <textarea name="answer" required maxLength={2000} rows={6} className={textareaClass} />
+            </Field>
+          </div>
+          <SubmitButton label="Add FAQ" />
+        </form>
+      </div>
+    </Panel>
+  );
+}
+
+function PackagesSection({
+  packages,
+  spaces,
+  profile,
+  onSave,
+}: {
+  packages: PackageRow[];
+  spaces: VenueSpace[];
+  profile: DraftStructuredVenueProfile;
+  onSave: (event: FormEvent<HTMLFormElement>, packageId: string) => void;
+}) {
+  const activePackages = packages.filter((pkg) => pkg.is_active);
+  return (
+    <Panel>
+      <SectionTitle
+        title="Packages"
+        description="Connect existing packages to one or more spaces without changing package pricing."
+      />
+      {activePackages.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-8 text-center text-sm text-[#64748b]">
+          No active packages yet. Create packages from the package dashboard first.
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {activePackages.map((pkg) => {
+            const linked = profile.packageSpaces.filter(
+              (link) => link.packageId === pkg.id,
+            );
+            const linkedIds = new Set(linked.map((link) => link.spaceId));
+            return (
+              <form
+                key={pkg.id}
+                onSubmit={(event) => onSave(event, pkg.id)}
+                className={editorCardClass}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <h3 className="text-lg font-bold text-[#0f172a]">{pkg.name}</h3>
+                    <p className="mt-1 text-sm text-[#64748b]">
+                      {peso(pkg.price)} · {pkg.price_unit.replace(/_/g, " ")}
+                    </p>
+                  </div>
+                  <StatusBadge status="active" label={`${linked.length} spaces`} />
+                </div>
+                <div className="mt-5 grid gap-4">
+                  {spaces.length === 0 ? (
+                    <p className="text-sm text-[#64748b]">
+                      Add a space before linking packages.
+                    </p>
+                  ) : (
+                    spaces.map((space) => {
+                      const link = linked.find((item) => item.spaceId === space.id);
+                      return (
+                        <div key={space.id} className="rounded-lg border border-[#e5e7eb] bg-[#f8fafc] p-4">
+                          <label className="flex items-center gap-3 text-base font-bold text-[#0f172a]">
+                            <input
+                              name="spaceIds"
+                              type="checkbox"
+                              value={space.id}
+                              defaultChecked={linkedIds.has(space.id)}
+                            />
+                            {space.name}
+                          </label>
+                          <div className="mt-4 grid gap-3 md:grid-cols-2">
+                            <select
+                              name={`inclusionType-${space.id}`}
+                              defaultValue={link?.inclusionType ?? "included"}
+                              className={inputClass}
+                            >
+                              {PACKAGE_VENUE_SPACE_INCLUSION_TYPES.map((value) => (
+                                <option key={value} value={value}>
+                                  {getPackageVenueSpaceInclusionTypeLabel(value)}
+                                </option>
+                              ))}
+                            </select>
+                            <input
+                              name={`notes-${space.id}`}
+                              defaultValue={link?.inclusionNotes ?? ""}
+                              className={inputClass}
+                              placeholder="Inclusion notes"
+                            />
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+                <SubmitButton label="Save package spaces" />
+              </form>
+            );
+          })}
+        </div>
+      )}
+    </Panel>
+  );
+}
+
+function PreviewSection({
+  venue,
+  profile,
+  publishIssues,
+  canPublish,
+  onPublish,
+}: {
+  venue: Venue;
+  profile: DraftStructuredVenueProfile;
+  publishIssues: string[];
+  canPublish: boolean;
+  onPublish: () => void;
+}) {
+  return (
+    <Panel padding={false} className="overflow-hidden">
+      <div className="border-b border-[#e5e7eb] bg-amber-50 px-5 py-3 text-sm font-bold text-amber-900">
+        Preview - these changes are not visible to customers yet.
+      </div>
+      <div className="p-5 sm:p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-[#0f172a]">{venue.name}</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#64748b]">
+              {venue.description || "Venue description will use the current base listing until structured copy is added in a later phase."}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <DashButton href={`/dashboard/venues/${venue.id}/experience/preview`} variant="secondary" icon="visibility">
+              Full Preview
+            </DashButton>
+            <button
+              type="button"
+              onClick={onPublish}
+              disabled={!canPublish || publishIssues.length > 0}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-[#1d4ed8] px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"
+            >
+              <Send className="h-4 w-4" />
+              Publish
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-8 grid gap-4 sm:grid-cols-2">
+          {profile.spaces.filter((space) => space.status !== "archived").map((space) => (
+            <div key={space.id} className="rounded-xl border border-[#dbe3ef] p-4">
+              <p className="text-xs font-bold uppercase tracking-wider text-[#1d4ed8]">
+                {getVenueSpaceSettingLabel(space.setting)}
+              </p>
+              <h3 className="mt-2 text-lg font-bold text-[#0f172a]">{space.name}</h3>
+              <p className="mt-2 text-sm text-[#64748b]">
+                Up to {space.capacityMax} guests
+              </p>
+              {space.description ? (
+                <p className="mt-3 text-sm leading-6 text-[#475569]">
+                  {space.description}
+                </p>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      </div>
+    </Panel>
+  );
+}
+
+function SectionTitle({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="mb-6">
+      <h2 className="text-2xl font-bold tracking-tight text-[#0f172a]">
+        {title}
+      </h2>
+      <p className="mt-2 max-w-3xl text-sm leading-6 text-[#64748b]">
+        {description}
+      </p>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  children,
+  className,
+}: {
+  label: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <label className={cn("block space-y-2.5", className)}>
+      <span className={labelClass}>{label}</span>
+      {children}
+    </label>
+  );
+}
+
+function CheckboxGrid({
+  label,
+  name,
+  items,
+  selectedIds,
+}: {
+  label: string;
+  name: string;
+  items: Array<{ id: string; name: string }>;
+  selectedIds: Set<string>;
+}) {
+  return (
+    <div>
+      <p className={labelClass}>{label}</p>
+      <div className="mt-3 grid gap-3 md:grid-cols-2">
+        {items.map((item) => (
+          <label
+            key={item.id}
+            className="flex min-h-12 items-center gap-3 rounded-lg border border-[#dbe3ef] bg-white px-4 py-3 text-sm font-semibold text-[#334155]"
+          >
+            <input
+              type="checkbox"
+              name={name}
+              value={item.id}
+              defaultChecked={selectedIds.has(item.id)}
+              className="h-4 w-4"
+            />
+            {item.name}
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SubmitButton({ label }: { label: string }) {
+  return (
+    <button
+      type="submit"
+      className="mt-6 inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#1d4ed8] px-5 py-3 text-sm font-bold text-white shadow-sm shadow-blue-200/70 transition hover:bg-[#1e40af]"
+    >
+      <Save className="h-4 w-4" />
+      {label}
+    </button>
+  );
+}

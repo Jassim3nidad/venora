@@ -128,14 +128,24 @@ export default async function OwnerVenuesPage() {
       key: "actions",
       header: "Actions",
       cell: (row) => (
-        <DashButton
-          href={`/dashboard/venues/${row.id}/edit`}
-          variant="secondary"
-          icon="edit"
-          className="px-3 py-2 text-xs"
-        >
-          Edit
-        </DashButton>
+        <div className="flex flex-wrap gap-2">
+          <DashButton
+            href={`/dashboard/venues/${row.id}/experience`}
+            variant="secondary"
+            icon="auto_awesome"
+            className="px-3 py-2 text-xs"
+          >
+            Experience
+          </DashButton>
+          <DashButton
+            href={`/dashboard/venues/${row.id}/edit`}
+            variant="secondary"
+            icon="edit"
+            className="px-3 py-2 text-xs"
+          >
+            Edit
+          </DashButton>
+        </div>
       ),
     },
   ];
@@ -214,14 +224,24 @@ export default async function OwnerVenuesPage() {
                     </span>
                     <span className="font-medium">{row.rating}</span>
                   </div>
-                  <DashButton
-                    href={`/dashboard/venues/${row.id}/edit`}
-                    variant="secondary"
-                    icon="edit"
-                    className="h-8 min-h-0 px-3 py-1 text-xs"
-                  >
-                    Edit
-                  </DashButton>
+                  <div className="flex flex-wrap justify-end gap-2">
+                    <DashButton
+                      href={`/dashboard/venues/${row.id}/experience`}
+                      variant="secondary"
+                      icon="auto_awesome"
+                      className="h-8 min-h-0 px-3 py-1 text-xs"
+                    >
+                      Experience
+                    </DashButton>
+                    <DashButton
+                      href={`/dashboard/venues/${row.id}/edit`}
+                      variant="secondary"
+                      icon="edit"
+                      className="h-8 min-h-0 px-3 py-1 text-xs"
+                    >
+                      Edit
+                    </DashButton>
+                  </div>
                 </div>
               </div>
             )}

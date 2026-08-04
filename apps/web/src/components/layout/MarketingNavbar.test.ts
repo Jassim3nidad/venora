@@ -1,8 +1,14 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   getMarketingMobileLinks,
   resolveMarketingMobileHref,
 } from "./MarketingNavbar";
+
+const appRoot = resolve(import.meta.dirname, "../../..");
+const readSource = (path: string) =>
+  readFileSync(resolve(appRoot, path), "utf8");
 
 describe("MarketingNavbar mobile links", () => {
   it("uses customer marketplace routes in embedded marketplace mode", () => {
@@ -62,5 +68,54 @@ describe("MarketingNavbar mobile links", () => {
         mobileContext: "marketplace",
       }),
     ).toContain("redirectTo=%2Fnotifications");
+  });
+});
+
+describe("cinematic venue navbar contract", () => {
+  it("selects the immersive variant through one observed marketplace shell", () => {
+    const source = readSource("src/components/layout/MarketplaceLayout.tsx");
+
+    expect(source).toContain("isImmersiveVenueProfileRoute(pathname)");
+    expect(source).toContain("new MutationObserver");
+    expect(source).toContain('window.addEventListener("scroll", handleScroll');
+    expect(source).toContain("window.requestAnimationFrame(updateState)");
+    expect(source).toContain('window.addEventListener("resize", handleResize)');
+    expect(source).toContain('variant={immersiveVenueProfile ? "immersive"');
+    expect(source).toContain('appearance={immersiveVenueProfile ? "immersive"');
+  });
+
+  it("provides readable glass top, scrolled, fallback, and reduced-motion states", () => {
+    const source = readSource("src/components/layout/MarketingNavbar.tsx");
+
+    expect(source).toContain("data-navbar-state=");
+    expect(source).toContain("bg-[#07100D]/[0.30]");
+    expect(source).toContain("bg-[#07100D]/[0.55]");
+    expect(source).toContain("supports-[backdrop-filter]:bg-white/[0.08]");
+    expect(source).toContain("supports-[backdrop-filter]:backdrop-blur-[22px]");
+    expect(source).toContain("supports-[backdrop-filter]:backdrop-saturate-150");
+    expect(source).toContain("motion-reduce:transition-none");
+    expect(source).toContain('aria-current={active ? "page" : undefined}');
+  });
+
+  it("keeps the mobile drawer solid and all existing interaction semantics", () => {
+    const source = readSource("src/components/layout/MarketingNavbar.tsx");
+
+    expect(source).toContain('role="dialog"');
+    expect(source).toContain('aria-modal="true"');
+    expect(source).toContain("aria-expanded={menuOpen}");
+    expect(source).toContain("bg-[#07100D] shadow-black/40");
+    expect(source).toContain("useFocusTrap(menuOpen, closeMenu)");
+  });
+
+  it("integrates with the hero and preserves the dashboard-only preview", () => {
+    const hero = readSource("src/features/venues/ui/ImmersiveVenueHero.tsx");
+    const preview = readSource(
+      "app/(venue-owner)/dashboard/venues/[id]/experience/preview/page.tsx",
+    );
+
+    expect(hero).toContain("data-immersive-venue-hero");
+    expect(hero).toContain('className="sticky top-32');
+    expect(preview).not.toContain("MarketingNavbar");
+    expect(preview).not.toContain('variant="immersive"');
   });
 });
