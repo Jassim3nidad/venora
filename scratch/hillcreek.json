@@ -1,0 +1,212 @@
+{
+  "id": "1c138672-bffe-4462-abd9-728ccef680b8",
+  "name": "Hillcreek Gardens Tagaytay",
+  "slug": "hillcreek-gardens-tagaytay",
+  "category": "Garden Resort & Hotel",
+  "event_types_supported": [
+    "Wedding",
+    "Corporate Event",
+    "Team Building",
+    "Debut",
+    "Staycation Event"
+  ],
+  "short_description": "A 3.2-hectare former coffee farm and family estate near Tagaytay, now a one-stop garden wedding venue with an on-site hotel and chapel.",
+  "full_description": "Hillcreek Gardens Tagaytay is a one-stop wedding destination set on a 3.2-hectare working coffee farm and private family estate in Alfonso, Cavite, just minutes from Tagaytay City. Established in 2008, the property has grown to include the Grand Ballroom, The Pavilion, a garden ceremony area, an on-site hotel, and its own restaurant, making it popular for weddings, corporate events, and staycations alike.",
+  "location": {
+    "province": "Cavite",
+    "city": "Alfonso",
+    "address": "134 Tagaytay-Alfonso Road, Brgy. Sikat, Alfonso, 4123 Cavite",
+    "postal_code": "4123",
+    "coordinates": {
+      "latitude": 14.1372,
+      "longitude": 120.8494
+    },
+    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=14.1372,120.8494"
+  },
+  "contact": {
+    "official_website": "https://www.hillcreekgardenstagaytay.com/",
+    "facebook": "https://www.facebook.com/hillcreekgardenstagaytay",
+    "instagram": null,
+    "email": "hillcreekgardens@yahoo.com",
+    "phone": "+63 917 553 5413",
+    "business_hours": "Not independently verified — contact venue directly to confirm current hours"
+  },
+  "capacity": {
+    "minimum_guests": 50,
+    "maximum_guests": 700,
+    "indoor_outdoor": "Both",
+    "number_of_function_rooms": 4
+  },
+  "features": {
+    "parking_capacity": "Available on-site — exact vehicle count not publicly listed",
+    "wheelchair_accessible": "Not publicly confirmed",
+    "pet_friendly": "Not publicly confirmed",
+    "air_conditioned": true,
+    "generator_available": "Not publicly confirmed",
+    "wifi_available": true,
+    "swimming_pool": true,
+    "garden": true,
+    "beachfront": false,
+    "church_nearby": true,
+    "overnight_accommodation": true,
+    "bridal_suite": true,
+    "changing_room": true,
+    "stage": true,
+    "led_wall": true,
+    "projector": true,
+    "sound_system": true,
+    "lighting_system": true,
+    "tables_included": true,
+    "chairs_included": true,
+    "catering_allowed": true,
+    "outside_catering_allowed": "Subject to venue's accredited-supplier policy — confirm directly",
+    "alcohol_allowed": true,
+    "smoking_area": "Designated areas only, per standard Philippine venue policy",
+    "noise_restrictions": "Standard local noise ordinance hours apply",
+    "curfew": "Typically 12:00 AM–1:00 AM per local ordinance — confirm with venue"
+  },
+  "pricing": {
+    "currency": "PHP",
+    "starting_price_estimate": 80000,
+    "pricing_note": "ESTIMATED RANGE based on comparable published venue rates in the same category/region as of the 2026 collection date. This is NOT a confirmed rate from the venue — always verify directly before quoting to customers.",
+    "typical_wedding_package_price_estimate": 104000,
+    "corporate_event_price_estimate": 72000,
+    "reservation_fee_estimate": 16000,
+    "security_deposit_estimate": 12000,
+    "payment_terms": "Typically 50% down payment upon booking, balance due before event date — confirm exact terms with venue",
+    "cancellation_policy": "Varies by venue — confirm directly; many Philippine venues apply a non-refundable reservation fee",
+    "peak_season_pricing_note": "December–May and weekends typically carry premium rates",
+    "off_season_pricing_note": "June–November weekdays typically offer lower rates"
+  },
+  "packages": [
+    {
+      "id": "aa3f44eb-a2c2-460d-b15c-a39b0ef81f4a",
+      "name": "Silver Package",
+      "price_php": 64000,
+      "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+      "max_guests": 80,
+      "inclusions": [
+        "Venue rental (standard hours as posted by venue)",
+        "Basic tables and chairs",
+        "Basic sound system",
+        "Standard lighting"
+      ],
+      "optional_addons": [
+        "Catering upgrade",
+        "Additional hours",
+        "Outside caterer corkage",
+        "Styling/décor package"
+      ]
+    },
+    {
+      "id": "f3d464a6-892e-4dde-9bcb-90777ec2944a",
+      "name": "Gold Package",
+      "price_php": 80000,
+      "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+      "max_guests": 100,
+      "inclusions": [
+        "Venue rental (standard hours as posted by venue)",
+        "Basic tables and chairs",
+        "Basic sound system",
+        "Standard lighting",
+        "Bridal/VIP room access"
+      ],
+      "optional_addons": [
+        "Catering upgrade",
+        "Additional hours",
+        "Outside caterer corkage",
+        "Styling/décor package"
+      ]
+    },
+    {
+      "id": "4b929796-1e8b-47a7-b78a-35c7355837a1",
+      "name": "Premium Package",
+      "price_php": 112000,
+      "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+      "max_guests": 140,
+      "inclusions": [
+        "Venue rental (standard hours as posted by venue)",
+        "Basic tables and chairs",
+        "Basic sound system",
+        "Standard lighting",
+        "Bridal/VIP room access",
+        "LED wall",
+        "Extended hours"
+      ],
+      "optional_addons": [
+        "Catering upgrade",
+        "Additional hours",
+        "Outside caterer corkage",
+        "Styling/décor package"
+      ]
+    }
+  ],
+  "amenities": [
+    "Air Conditioning",
+    "Chairs Included",
+    "Garden",
+    "LED Wall",
+    "Overnight Accommodation",
+    "Parking",
+    "Projector",
+    "Security",
+    "Sound System",
+    "Stage",
+    "Swimming Pool",
+    "Tables Included",
+    "WiFi"
+  ],
+  "photos": {
+    "note": "Real photo URLs sourced from the venue's own official website/Facebook page — hotlink or request licensing before redistributing.",
+    "cover_photo_source": "https://www.hillcreekgardenstagaytay.com/",
+    "gallery_sources": [
+      "https://www.hillcreekgardenstagaytay.com/",
+      "https://www.facebook.com/hillcreekgardenstagaytay"
+    ],
+    "cover_image_url": "https://www.hillcreekgardenstagaytay.com/wp-content/uploads/2022/03/EVENTS-MAIN-edited.jpg",
+    "image_urls": [
+      "https://www.hillcreekgardenstagaytay.com/wp-content/uploads/2022/03/EVENTS-MAIN-edited.jpg",
+      "https://www.hillcreekgardenstagaytay.com/wp-content/uploads/2022/03/EVENTS-3-edited.jpg",
+      "https://www.hillcreekgardenstagaytay.com/wp-content/uploads/2022/03/EVENTS-4-edited.jpg",
+      "https://www.hillcreekgardenstagaytay.com/wp-content/uploads/2022/03/EVENTS-2-edited.jpg",
+      "https://www.hillcreekgardenstagaytay.com/wp-content/uploads/2022/03/HOTEL-MAIN-edited.jpg"
+    ]
+  },
+  "reviews": [],
+  "ai_tags": [
+    "garden wedding",
+    "coffee farm",
+    "mountain view",
+    "destination wedding",
+    "church wedding nearby",
+    "staycation"
+  ],
+  "search_filters": {
+    "budget_range": "Mid-range",
+    "guest_capacity_range": "50-700",
+    "venue_type": "Garden Resort & Hotel",
+    "indoor": true,
+    "outdoor": true,
+    "garden": true,
+    "beach": false,
+    "hotel": true,
+    "restaurant": false,
+    "resort": true,
+    "function_hall": false,
+    "pet_friendly": false,
+    "parking": true,
+    "accommodation": true,
+    "church_ceremony": false,
+    "reception": true
+  },
+  "data_verification": {
+    "existence_verified": true,
+    "address_verified": true,
+    "coordinates_verified": "Approximate — sourced from public map/geo listings, recommend on-the-ground confirmation",
+    "contact_info_verified": true,
+    "official_website_verified": true,
+    "pricing_verified": false,
+    "reviews_verified": false,
+    "reviews_are_synthetic_seed_data": true
+  }
+}
