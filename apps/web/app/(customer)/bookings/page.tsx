@@ -226,7 +226,7 @@ async function getCustomerBookings(userId: string) {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("[bookings/page] Supabase fetch error:", error.message);
+    console.warn("[bookings/page] Supabase fetch error:", error.message);
     return [];
   }
 

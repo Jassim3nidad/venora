@@ -219,7 +219,7 @@ export default function ImmersiveVenueHero({
         ) : null}
 
         <div className="absolute inset-0 bg-black/50" aria-hidden="true" />
-        <div className="relative mx-auto flex min-h-[72dvh] max-w-7xl flex-col justify-end px-4 pb-7 pt-28 sm:min-h-[78dvh] sm:px-6 sm:pb-10 lg:min-h-[86dvh] lg:px-8 lg:pb-12">
+        <div className="relative mx-auto flex min-h-[72dvh] max-w-7xl flex-col justify-end px-4 pb-7 pt-40 sm:min-h-[78dvh] sm:px-6 sm:pb-10 sm:pt-48 lg:min-h-[86dvh] lg:px-8 lg:pb-12">
           <div className="max-w-4xl">
             <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-semibold text-white/90">
               {profile.venue.verified ? (

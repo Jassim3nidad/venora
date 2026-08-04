@@ -97,7 +97,7 @@ export default async function BillingPage() {
     .order("event_date", { ascending: true });
 
   if (bookingsError) {
-    console.error("[account/billing] Bookings fetch error:", bookingsError.message);
+    console.warn("[account/billing] Bookings fetch error:", bookingsError.message);
   }
 
   const bookingRows = (bookings ?? []);

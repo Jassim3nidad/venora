@@ -146,7 +146,7 @@ export default async function MarketingHomePage() {
       .eq("customer_id", user.id);
 
     if (favoritesError) {
-      console.error(
+      console.warn(
         "[marketing/page] Favorites fetch error:",
         favoritesError.message,
       );
@@ -170,10 +170,10 @@ export default async function MarketingHomePage() {
   const { data: dbVenues, error } = featuredResult;
 
   if (error) {
-    console.error("[marketing/page] Supabase fetch error:", error.message);
+    console.warn("[marketing/page] Supabase fetch error:", error.message);
   }
   if (suggestionResult.error) {
-    console.error(
+    console.warn(
       "[marketing/page] Suggestion fetch error:",
       suggestionResult.error.message,
     );

@@ -54,7 +54,7 @@ export default async function VenuesMarketplacePage({
   );
 
   if (error) {
-    console.error("[venues/page] Supabase fetch error:", error.message);
+    console.warn("[venues/page] Supabase fetch error:", error.message);
   }
 
   const {
@@ -71,7 +71,7 @@ export default async function VenuesMarketplacePage({
       .eq("customer_id", user.id);
 
     if (favoritesError) {
-      console.error(
+      console.warn(
         "[venues/page] Favorites fetch error:",
         favoritesError.message,
       );
@@ -99,7 +99,7 @@ export default async function VenuesMarketplacePage({
       : { data: [], error: null };
 
   if (reviewsError) {
-    console.error("[venues/page] Reviews fetch error:", reviewsError.message);
+    console.warn("[venues/page] Reviews fetch error:", reviewsError.message);
   }
 
   const dbRowsWithReviewSummaries = applyReviewSummariesToVenues(

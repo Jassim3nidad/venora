@@ -164,7 +164,7 @@ export default function VenueDetails({
 
   return (
     <div className="relative bg-[#F7F5F1] pb-28 font-sans text-[#151C27] lg:pb-12">
-      <div className="sr-only sm:not-sr-only sm:pointer-events-none sm:absolute sm:inset-x-0 sm:top-32 sm:z-20 sm:mx-auto sm:max-w-7xl sm:px-6 sm:pt-3 lg:px-8">
+      <div className="sr-only sm:not-sr-only sm:pointer-events-none sm:absolute sm:inset-x-0 sm:top-28 sm:z-20 sm:mx-auto sm:max-w-7xl sm:px-6 sm:pt-3 lg:px-8">
         <nav
           aria-label="Breadcrumb"
           className="pointer-events-auto flex flex-wrap items-center gap-2 text-xs font-semibold text-white/75 [text-shadow:0_1px_8px_rgba(0,0,0,0.45)] sm:text-sm"
