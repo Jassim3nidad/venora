@@ -1,0 +1,209 @@
+{
+  "id": "d131d99a-5300-4de4-a23f-03abf6c61c1d",
+  "name": "Amorita Resort",
+  "slug": "amorita-resort",
+  "category": "Beach Resort",
+  "event_types_supported": [
+    "Wedding",
+    "Destination Wedding",
+    "Honeymoon Event",
+    "Corporate Retreat"
+  ],
+  "short_description": "An award-winning clifftop beach resort on Panglao Island, Bohol, with a Cliff Deck ceremony spot overlooking the Bohol Sea.",
+  "full_description": "Amorita Resort sits atop a limestone cliff on Panglao Island, Bohol, offering sweeping views of the Bohol Sea. The multi-award-winning boutique resort has 98 rooms, suites, and villas, two infinity pools, and several distinct wedding spaces — including the Cliff Deck for sunset ceremonies and poolside areas for receptions — making it a favored destination-wedding venue for couples wanting an island backdrop.",
+  "location": {
+    "province": "Bohol",
+    "city": "Panglao Island",
+    "address": "1 Ester A. Lim Drive, Brgy. Tawala, Panglao Island, Bohol 6340",
+    "postal_code": "6340",
+    "coordinates": {
+      "latitude": 9.547,
+      "longitude": 123.762
+    },
+    "google_maps_url": "https://www.google.com/maps/search/?api=1&query=9.547,123.762"
+  },
+  "contact": {
+    "official_website": "https://www.amoritaresort.com/",
+    "facebook": "https://www.facebook.com/AmoritaResort/",
+    "instagram": null,
+    "email": "inquiries@one-ofcollection.com",
+    "phone": "+63 2 8856 1443",
+    "business_hours": "Not independently verified — contact venue directly to confirm current hours"
+  },
+  "capacity": {
+    "minimum_guests": 20,
+    "maximum_guests": 150,
+    "indoor_outdoor": "Outdoor",
+    "number_of_function_rooms": 2
+  },
+  "features": {
+    "parking_capacity": "Available on-site — exact vehicle count not publicly listed",
+    "wheelchair_accessible": "Not publicly confirmed",
+    "pet_friendly": "Not publicly confirmed",
+    "air_conditioned": "Mixed indoor/outdoor",
+    "generator_available": "Not publicly confirmed",
+    "wifi_available": true,
+    "swimming_pool": true,
+    "garden": true,
+    "beachfront": true,
+    "church_nearby": false,
+    "overnight_accommodation": true,
+    "bridal_suite": true,
+    "changing_room": true,
+    "stage": false,
+    "led_wall": false,
+    "projector": false,
+    "sound_system": true,
+    "lighting_system": true,
+    "tables_included": true,
+    "chairs_included": true,
+    "catering_allowed": true,
+    "outside_catering_allowed": "Subject to venue's accredited-supplier policy — confirm directly",
+    "alcohol_allowed": true,
+    "smoking_area": "Designated areas only, per standard Philippine venue policy",
+    "noise_restrictions": "Standard local noise ordinance hours apply",
+    "curfew": "Typically 12:00 AM–1:00 AM per local ordinance — confirm with venue"
+  },
+  "pricing": {
+    "currency": "PHP",
+    "starting_price_estimate": 80000,
+    "pricing_note": "ESTIMATED RANGE based on comparable published venue rates in the same category/region as of the 2026 collection date. This is NOT a confirmed rate from the venue — always verify directly before quoting to customers.",
+    "typical_wedding_package_price_estimate": 104000,
+    "corporate_event_price_estimate": 72000,
+    "reservation_fee_estimate": 16000,
+    "security_deposit_estimate": 12000,
+    "payment_terms": "Typically 50% down payment upon booking, balance due before event date — confirm exact terms with venue",
+    "cancellation_policy": "Varies by venue — confirm directly; many Philippine venues apply a non-refundable reservation fee",
+    "peak_season_pricing_note": "December–May and weekends typically carry premium rates",
+    "off_season_pricing_note": "June–November weekdays typically offer lower rates"
+  },
+  "packages": [
+    {
+      "id": "96107b85-7dbc-4442-932c-c1790b5eae44",
+      "name": "Silver Package",
+      "price_php": 64000,
+      "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+      "max_guests": 80,
+      "inclusions": [
+        "Venue rental (standard hours as posted by venue)",
+        "Basic tables and chairs",
+        "Basic sound system",
+        "Standard lighting"
+      ],
+      "optional_addons": [
+        "Catering upgrade",
+        "Additional hours",
+        "Outside caterer corkage",
+        "Styling/décor package"
+      ]
+    },
+    {
+      "id": "11ca398e-c696-4fbc-9580-ad883969425b",
+      "name": "Gold Package",
+      "price_php": 80000,
+      "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+      "max_guests": 100,
+      "inclusions": [
+        "Venue rental (standard hours as posted by venue)",
+        "Basic tables and chairs",
+        "Basic sound system",
+        "Standard lighting",
+        "Bridal/VIP room access"
+      ],
+      "optional_addons": [
+        "Catering upgrade",
+        "Additional hours",
+        "Outside caterer corkage",
+        "Styling/décor package"
+      ]
+    },
+    {
+      "id": "66b44eb5-6898-4198-813a-ae5009a493cd",
+      "name": "Premium Package",
+      "price_php": 112000,
+      "price_note": "ESTIMATED — based on comparable published venue rates, not a confirmed quote from this venue",
+      "max_guests": 140,
+      "inclusions": [
+        "Venue rental (standard hours as posted by venue)",
+        "Basic tables and chairs",
+        "Basic sound system",
+        "Standard lighting",
+        "Bridal/VIP room access",
+        "LED wall",
+        "Extended hours"
+      ],
+      "optional_addons": [
+        "Catering upgrade",
+        "Additional hours",
+        "Outside caterer corkage",
+        "Styling/décor package"
+      ]
+    }
+  ],
+  "amenities": [
+    "Air Conditioning",
+    "Beachfront",
+    "Chairs Included",
+    "Garden",
+    "Overnight Accommodation",
+    "Parking",
+    "Security",
+    "Sound System",
+    "Swimming Pool",
+    "Tables Included",
+    "WiFi"
+  ],
+  "photos": {
+    "note": "Real photo URLs sourced from the venue's own official website/Facebook page — hotlink or request licensing before redistributing.",
+    "cover_photo_source": "https://www.amoritaresort.com/",
+    "gallery_sources": [
+      "https://www.amoritaresort.com/",
+      "https://www.facebook.com/AmoritaResort/"
+    ],
+    "cover_image_url": "https://images.squarespace-cdn.com/content/v1/6632f53a115e9d5c41defdab/672a0dfe-a6b7-45cc-9c45-e5eaf1c8f341/Overlooking+Alona+Beach%2C+Amorita+Resort%2C+Panglao+Bohol.jpg",
+    "image_urls": [
+      "https://images.squarespace-cdn.com/content/v1/6632f53a115e9d5c41defdab/672a0dfe-a6b7-45cc-9c45-e5eaf1c8f341/Overlooking+Alona+Beach%2C+Amorita+Resort%2C+Panglao+Bohol.jpg",
+      "https://images.squarespace-cdn.com/content/v1/6632f53a115e9d5c41defdab/d1e97270-5b39-41ca-a57b-b843b283f045/DSC06043+copy.jpg?format=1500w",
+      "https://images.squarespace-cdn.com/content/v1/6632f53a115e9d5c41defdab/330a5dcc-feb5-49cc-a8ff-cd730e1915d6/DSC00857.jpg?format=1500w",
+      "https://images.squarespace-cdn.com/content/v1/6632f53a115e9d5c41defdab/76c77a12-166e-4664-a9b6-6b70aaec5494/flower+2.png?format=1500w",
+      "https://images.squarespace-cdn.com/content/v1/6632f53a115e9d5c41defdab/d1e97270-5b39-41ca-a57b-b843b283f045/DSC06043+copy.jpg?format=1000w"
+    ]
+  },
+  "reviews": [],
+  "ai_tags": [
+    "beachfront",
+    "luxury",
+    "destination wedding",
+    "sunset",
+    "intimate wedding",
+    "island wedding"
+  ],
+  "search_filters": {
+    "budget_range": "Mid-range",
+    "guest_capacity_range": "20-150",
+    "venue_type": "Beach Resort",
+    "indoor": false,
+    "outdoor": true,
+    "garden": true,
+    "beach": true,
+    "hotel": false,
+    "restaurant": false,
+    "resort": true,
+    "function_hall": false,
+    "pet_friendly": false,
+    "parking": true,
+    "accommodation": true,
+    "church_ceremony": false,
+    "reception": true
+  },
+  "data_verification": {
+    "existence_verified": true,
+    "address_verified": true,
+    "coordinates_verified": "Approximate — sourced from public map/geo listings, recommend on-the-ground confirmation",
+    "contact_info_verified": true,
+    "official_website_verified": true,
+    "pricing_verified": false,
+    "reviews_verified": false,
+    "reviews_are_synthetic_seed_data": true
+  }
+}
