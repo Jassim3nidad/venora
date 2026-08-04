@@ -74,7 +74,7 @@ export default async function VenueSuppliersPage({ params }: Props) {
     .order("is_preferred", { ascending: false });
 
   if (error) {
-    console.error("[venue-suppliers] fetch error:", error.message);
+    console.warn("[venue-suppliers] fetch error:", error.message);
   }
 
   const links = ((associations ?? []) as SupplierLink[]).filter(

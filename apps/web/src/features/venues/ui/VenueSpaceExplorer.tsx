@@ -44,7 +44,7 @@ function capacityLabel(space: PublicVenueSpace) {
 function SpaceImage({ space }: { space: PublicVenueSpace }) {
   const image = space.media.find((item) => item.mediaType === "image") ?? null;
   return (
-    <div className="relative min-h-72 overflow-hidden bg-[#D8D0C3] sm:min-h-96 lg:min-h-full">
+    <div className="relative aspect-[16/9] w-full overflow-hidden bg-[#D8D0C3] lg:aspect-[21/9]">
       {image ? (
         <Image
           src={image.src}
@@ -251,146 +251,166 @@ export default function VenueSpaceExplorer({
           {selectedSpace ? (
             <article
               id={`space-${selectedSpace.slug}`}
-              className="scroll-mt-40 grid overflow-hidden border border-[#C9BEAB] bg-white shadow-[0_18px_45px_rgba(49,42,31,0.08)] lg:grid-cols-[minmax(0,1.08fr)_minmax(24rem,0.92fr)]"
+              className="scroll-mt-40 flex flex-col overflow-hidden border border-[#C9BEAB] bg-white shadow-[0_18px_45px_rgba(49,42,31,0.08)]"
             >
-              <SpaceImage space={selectedSpace} />
-              <div className="space-y-7 p-5 sm:p-8 lg:p-9">
-                <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
-                  <div>
+              <div className="w-full">
+                <SpaceImage space={selectedSpace} />
+              </div>
+
+              <div className="p-5 sm:p-8 lg:p-10">
+                {/* Intro Area */}
+                <div className="flex flex-col gap-5 border-b border-[#D9D4C9] pb-8 md:flex-row md:items-start md:justify-between">
+                  <div className="max-w-3xl">
                     <p className="text-sm font-bold text-[#876946]">
                       {selectedSpace.setting}
                     </p>
-                    <h3 className="mt-1 text-2xl font-bold tracking-[-0.02em] text-[#151C27] sm:text-3xl">
+                    <h3 className="mt-1 text-3xl font-bold tracking-[-0.02em] text-[#151C27] sm:text-4xl">
                       {selectedSpace.name}
                     </h3>
                     {(selectedSpace.description ??
-                    selectedSpace.shortDescription) ? (
-                      <p className="mt-3 max-w-2xl text-base leading-7 text-[#5C625E]">
+                      selectedSpace.shortDescription) ? (
+                      <p className="mt-4 text-base leading-7 text-[#5C625E]">
                         {selectedSpace.description ??
                           selectedSpace.shortDescription}
                       </p>
                     ) : null}
                   </div>
-                  <div className="flex items-center gap-2 text-sm font-bold text-[#151C27]">
+                  <div className="flex shrink-0 items-center gap-2 rounded-full bg-[#F3EFE8] px-4 py-2 text-sm font-bold text-[#151C27]">
                     <Users className="h-5 w-5 text-[#876946]" />
                     {capacityLabel(selectedSpace)}
                   </div>
                 </div>
 
-                {selectedSpace.capacityLayouts.length > 0 ? (
-                  <div>
-                    <h4 className="flex items-center gap-2 text-sm font-bold text-[#151C27]">
-                      <LayoutGrid className="h-4 w-4 text-[#876946]" />
-                      Capacity by layout
-                    </h4>
-                    <dl className="mt-3 grid gap-3 sm:grid-cols-2">
-                      {selectedSpace.capacityLayouts.map((layout) => (
-                        <div
-                          key={`${layout.label}-${layout.capacity}`}
-                          className="border-t border-[#D9D4C9] pt-3"
-                        >
-                          <dt className="text-sm font-semibold text-[#5C625E]">
-                            {layout.label}
-                          </dt>
-                          <dd className="mt-1 text-base font-bold text-[#151C27]">
-                            {layout.capacity.toLocaleString("en-PH")} guests
-                          </dd>
-                          {layout.notes ? (
-                            <dd className="mt-1 text-xs leading-5 text-[#77746D]">
-                              {layout.notes}
-                            </dd>
-                          ) : null}
+                {/* Data Grid Area */}
+                <div className="mt-8 grid gap-x-12 gap-y-10 md:grid-cols-2">
+                  {/* Column 1 */}
+                  <div className="space-y-10">
+                    {selectedSpace.capacityLayouts.length > 0 ? (
+                      <div>
+                        <h4 className="flex items-center gap-2 text-sm font-bold text-[#151C27]">
+                          <LayoutGrid className="h-4 w-4 text-[#876946]" />
+                          Capacity by layout
+                        </h4>
+                        <dl className="mt-4 grid gap-4 sm:grid-cols-2">
+                          {selectedSpace.capacityLayouts.map((layout) => (
+                            <div
+                              key={`${layout.label}-${layout.capacity}`}
+                              className="rounded-lg bg-[#F8F6F2] p-4"
+                            >
+                              <dt className="text-sm font-semibold text-[#5C625E]">
+                                {layout.label}
+                              </dt>
+                              <dd className="mt-1 text-base font-bold text-[#151C27]">
+                                {layout.capacity.toLocaleString("en-PH")} guests
+                              </dd>
+                              {layout.notes ? (
+                                <dd className="mt-2 text-xs leading-5 text-[#77746D]">
+                                  {layout.notes}
+                                </dd>
+                              ) : null}
+                            </div>
+                          ))}
+                        </dl>
+                      </div>
+                    ) : null}
+
+                    {selectedSpace.amenities.length > 0 ? (
+                      <div>
+                        <h4 className="text-sm font-bold text-[#151C27]">
+                          Included features
+                        </h4>
+                        <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+                          {selectedSpace.amenities.map((amenity) => (
+                            <li
+                              key={amenity}
+                              className="flex gap-2 text-sm leading-6 text-[#5C625E]"
+                            >
+                              <Check className="mt-1 h-4 w-4 shrink-0 text-emerald-700" />
+                              {amenity}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {/* Column 2 */}
+                  <div className="space-y-10">
+                    {selectedSpace.eventTypes.length > 0 ? (
+                      <div>
+                        <h4 className="flex items-center gap-2 text-sm font-bold text-[#151C27]">
+                          <CalendarHeart className="h-4 w-4 text-[#876946]" />
+                          Supported events
+                        </h4>
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {selectedSpace.eventTypes.map((type) => (
+                            <span
+                              key={type}
+                              className="inline-flex rounded-md bg-[#F8F6F2] px-3 py-1.5 text-xs font-semibold text-[#5C625E]"
+                            >
+                              {type}
+                            </span>
+                          ))}
                         </div>
-                      ))}
-                    </dl>
-                  </div>
-                ) : null}
+                      </div>
+                    ) : null}
 
-                <div className="grid gap-6 sm:grid-cols-2">
-                  {selectedSpace.amenities.length > 0 ? (
-                    <div>
-                      <h4 className="text-sm font-bold text-[#151C27]">
-                        Included features
-                      </h4>
-                      <ul className="mt-3 space-y-2">
-                        {selectedSpace.amenities.map((amenity) => (
-                          <li
-                            key={amenity}
-                            className="flex gap-2 text-sm leading-6 text-[#5C625E]"
-                          >
-                            <Check className="mt-1 h-4 w-4 shrink-0 text-emerald-700" />
-                            {amenity}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null}
-                  {selectedSpace.eventTypes.length > 0 ? (
-                    <div>
-                      <h4 className="flex items-center gap-2 text-sm font-bold text-[#151C27]">
-                        <CalendarHeart className="h-4 w-4 text-[#876946]" />
-                        Supported events
-                      </h4>
-                      <p className="mt-3 text-sm leading-6 text-[#5C625E]">
-                        {selectedSpace.eventTypes.join(", ")}
-                      </p>
-                    </div>
-                  ) : null}
+                    {selectedSpace.accessibility ? (
+                      <div>
+                        <h4 className="flex items-center gap-2 text-sm font-bold text-[#151C27]">
+                          <Accessibility className="h-4 w-4 text-[#876946]" />
+                          Accessibility
+                        </h4>
+                        <p className="mt-3 text-sm leading-6 text-[#5C625E]">
+                          {selectedSpace.accessibility}
+                        </p>
+                      </div>
+                    ) : null}
+
+                    {selectedSpace.restrictions ||
+                    selectedSpace.operatingNotes ? (
+                      <div className="grid gap-6 sm:grid-cols-2">
+                        {selectedSpace.restrictions ? (
+                          <div>
+                            <h4 className="text-sm font-bold text-[#151C27]">
+                              Restrictions
+                            </h4>
+                            <p className="mt-2 text-sm leading-6 text-[#5C625E]">
+                              {selectedSpace.restrictions}
+                            </p>
+                          </div>
+                        ) : null}
+                        {selectedSpace.operatingNotes ? (
+                          <div>
+                            <h4 className="text-sm font-bold text-[#151C27]">
+                              Operating notes
+                            </h4>
+                            <p className="mt-2 text-sm leading-6 text-[#5C625E]">
+                              {selectedSpace.operatingNotes}
+                            </p>
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
+
+                    {relatedPackages.length > 0 ? (
+                      <div>
+                        <h4 className="text-sm font-bold text-[#151C27]">
+                          Packages using this space
+                        </h4>
+                        <p className="mt-2 text-sm leading-6 text-[#5C625E]">
+                          {relatedPackages.map((item) => item.name).join(", ")}
+                        </p>
+                        <a
+                          href="#packages"
+                          className="mt-3 inline-flex min-h-11 items-center text-sm font-bold text-[#0052CC] underline underline-offset-4 hover:text-[#003D9B]"
+                        >
+                          View package details
+                        </a>
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
-
-                {selectedSpace.accessibility ? (
-                  <div className="border-t border-[#D9D4C9] pt-5">
-                    <h4 className="flex items-center gap-2 text-sm font-bold text-[#151C27]">
-                      <Accessibility className="h-4 w-4 text-[#876946]" />
-                      Accessibility
-                    </h4>
-                    <p className="mt-2 text-sm leading-6 text-[#5C625E]">
-                      {selectedSpace.accessibility}
-                    </p>
-                  </div>
-                ) : null}
-
-                {selectedSpace.restrictions || selectedSpace.operatingNotes ? (
-                  <div className="grid gap-5 border-t border-[#D9D4C9] pt-5 sm:grid-cols-2">
-                    {selectedSpace.restrictions ? (
-                      <div>
-                        <h4 className="text-sm font-bold text-[#151C27]">
-                          Restrictions
-                        </h4>
-                        <p className="mt-2 text-sm leading-6 text-[#5C625E]">
-                          {selectedSpace.restrictions}
-                        </p>
-                      </div>
-                    ) : null}
-                    {selectedSpace.operatingNotes ? (
-                      <div>
-                        <h4 className="text-sm font-bold text-[#151C27]">
-                          Operating notes
-                        </h4>
-                        <p className="mt-2 text-sm leading-6 text-[#5C625E]">
-                          {selectedSpace.operatingNotes}
-                        </p>
-                      </div>
-                    ) : null}
-                  </div>
-                ) : null}
-
-                {relatedPackages.length > 0 ? (
-                  <div className="border-t border-[#D9D4C9] pt-5">
-                    <h4 className="text-sm font-bold text-[#151C27]">
-                      Packages using this space
-                    </h4>
-                    <p className="mt-2 text-sm leading-6 text-[#5C625E]">
-                      {relatedPackages.map((item) => item.name).join(", ")}
-                    </p>
-                    <a
-                      href="#packages"
-                      className="mt-3 inline-flex min-h-11 items-center text-sm font-bold text-[#0052CC] underline underline-offset-4"
-                    >
-                      View package details
-                    </a>
-                  </div>
-                ) : null}
               </div>
             </article>
           ) : null}
