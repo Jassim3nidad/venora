@@ -16,6 +16,12 @@ import type {
   AvailabilityStatusValue,
 } from "../types/calendar.types";
 
+type UseCalendarOptions = {
+  includeAvailability?: boolean;
+  includeBookings?: boolean;
+  realtime?: boolean;
+};
+
 export interface Booking {
   id: string;
   event_date: string;
@@ -50,11 +56,18 @@ export interface VenueAvailability {
   note: string | null;
 }
 
-export function useCalendar(venueId: string, currentMonth: Date) {
+export function useCalendar(
+  venueId: string,
+  currentMonth: Date,
+  options: UseCalendarOptions = {},
+) {
   const supabase = useMemo(() => createClient(), []);
   const queryClient = useQueryClient();
   const channelInstanceId = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const monthStr = format(currentMonth, "yyyy-MM");
+  const includeAvailability = options.includeAvailability ?? true;
+  const includeBookings = options.includeBookings ?? true;
+  const enableRealtime = options.realtime ?? true;
 
   // Format bounds for the queries
   const startDate = format(startOfMonth(currentMonth), "yyyy-MM-dd");
@@ -87,7 +100,7 @@ export function useCalendar(venueId: string, currentMonth: Date) {
       if (error) throw error;
       return (data as unknown as Booking[]) || [];
     },
-    enabled: !!venueId,
+    enabled: !!venueId && includeBookings,
   });
 
   const {
@@ -108,30 +121,19 @@ export function useCalendar(venueId: string, currentMonth: Date) {
       if (error) throw error;
       return (data as VenueAvailability[]) || [];
     },
-    enabled: !!venueId,
+    enabled: !!venueId && includeAvailability,
   });
 
   // Setup Realtime listeners
   useEffect(() => {
-    if (!venueId) return;
+    if (!venueId || !enableRealtime) return;
 
-    const channel = supabase
-      .channel(`calendar-updates-${venueId}-${monthStr}-${channelInstanceId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "bookings",
-          filter: `venue_id=eq.${venueId}`,
-        },
-        () => {
-          queryClient.invalidateQueries({
-            queryKey: queryKeys.calendar.bookings(venueId, monthStr),
-          });
-        },
-      )
-      .on(
+    const channel = supabase.channel(
+      `calendar-updates-${venueId}-${monthStr}-${channelInstanceId}`,
+    );
+
+    if (includeAvailability) {
+      channel.on(
         "postgres_changes",
         {
           event: "*",
@@ -144,13 +146,41 @@ export function useCalendar(venueId: string, currentMonth: Date) {
             queryKey: queryKeys.calendar.availability(venueId, monthStr),
           });
         },
-      )
-      .subscribe();
+      );
+    }
+
+    if (includeBookings) {
+      channel.on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "bookings",
+          filter: `venue_id=eq.${venueId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.calendar.bookings(venueId, monthStr),
+          });
+        },
+      );
+    }
+
+    channel.subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [venueId, monthStr, channelInstanceId, supabase, queryClient]);
+  }, [
+    venueId,
+    monthStr,
+    channelInstanceId,
+    supabase,
+    queryClient,
+    enableRealtime,
+    includeAvailability,
+    includeBookings,
+  ]);
 
   // Helper functions
   const getBookingsForDay = (day: Date) =>

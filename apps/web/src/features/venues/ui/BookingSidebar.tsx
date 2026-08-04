@@ -28,6 +28,7 @@ import { format, startOfMonth } from "date-fns";
 import { checkAvailabilityAction } from "../application/actions";
 import { isPastDate, PAST_DATE_MESSAGE } from "@/src/lib/date-only";
 import { useCalendar } from "@/src/features/calendar/hooks/use-calendar";
+import InquiryDialog from "./InquiryDialog";
 
 interface Package {
   id: string;
@@ -89,7 +90,11 @@ export default function BookingSidebar({
     startOfMonth(new Date()),
   );
 
-  const { availability } = useCalendar(venueId, calendarMonth);
+  const { availability } = useCalendar(venueId, calendarMonth, {
+    includeAvailability: false,
+    includeBookings: false,
+    realtime: false,
+  });
   const calendarAvailability = useMemo(() => {
     return availability.reduce<
       Record<
@@ -253,8 +258,8 @@ export default function BookingSidebar({
           {showCalendar && (
             <div className="absolute top-16 left-0 right-0 z-50 bg-[var(--bg-base)] border border-[var(--border-default)] shadow-2xl rounded-2xl p-2">
               <div className="px-2 pt-2 pb-3 text-[11px] text-[var(--text-muted)] text-center leading-relaxed">
-                Choose an available date for your event. Unavailable dates are
-                disabled.
+                Choose a future date for your event. Venora confirms
+                availability before booking.
               </div>
               <Calendar
                 selectedDate={selectedDate as any}
@@ -458,17 +463,19 @@ export default function BookingSidebar({
         >
           Book Now
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => {
-            const target = document.getElementById("venue-owner");
-            target?.scrollIntoView({ behavior: "smooth", block: "center" });
-          }}
-          className="h-12 w-full rounded-xl border-[#E5E7EB] bg-white font-bold text-[#151C27] hover:bg-[#F9FAFB]"
-        >
-          Contact Venue
-        </Button>
+        <InquiryDialog
+          venueId={venueId}
+          venueName={venueName}
+          trigger={
+            <Button
+              type="button"
+              variant="outline"
+              className="h-12 w-full rounded-xl border-[#E5E7EB] bg-white font-bold text-[#151C27] hover:bg-[#F9FAFB]"
+            >
+              Ask the venue a question
+            </Button>
+          }
+        />
         {typeof children === "function" ? children(guests) : children}
       </div>
 
@@ -490,7 +497,7 @@ export default function BookingSidebar({
       </div>
 
       {/* Mobile: Airbnb-style floating bar that reveals the full booking sheet */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border-default)] bg-[var(--bg-base)]/95 px-4 pb-[max(0.875rem,env(safe-area-inset-bottom))] pt-3.5 shadow-[0_-8px_24px_-8px_rgba(0,0,0,0.15)] backdrop-blur-lg lg:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border-default)] bg-[var(--bg-base)]/95 pl-4 pr-[5.5rem] pb-[max(0.875rem,env(safe-area-inset-bottom))] pt-3.5 shadow-[0_-8px_24px_-8px_rgba(0,0,0,0.15)] backdrop-blur-lg lg:hidden">
         <div className="flex items-center justify-between gap-4">
           <div className="min-w-0 space-y-0.5">
             <div className="flex items-baseline gap-1">

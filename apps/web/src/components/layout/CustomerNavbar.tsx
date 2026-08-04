@@ -69,10 +69,14 @@ export function CustomerNavbar({
   user,
   profile,
   variant = "full",
+  appearance = "default",
+  scrolled = false,
 }: {
   user?: { email?: string | null } | null;
   profile?: CustomerNavbarProfile | null;
   variant?: "full" | "subnav";
+  appearance?: "default" | "immersive";
+  scrolled?: boolean;
 }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -106,9 +110,24 @@ export function CustomerNavbar({
   );
 
   if (variant === "subnav") {
+    const immersive = appearance === "immersive";
+
     return (
       <>
-        <header className="shrink-0 border-b border-[#E5E7EB]/80 bg-white/95 backdrop-blur-xl">
+        <header
+          data-navbar-appearance={appearance}
+          data-navbar-state={
+            immersive ? (scrolled ? "scrolled" : "top") : undefined
+          }
+          className={[
+            "shrink-0 border-b transition-[background-color,border-color,box-shadow] duration-200 motion-reduce:transition-none",
+            immersive
+              ? scrolled
+                ? "border-white/[0.18] bg-[#07100D]/[0.55] shadow-[0_8px_24px_rgba(0,0,0,0.16)] supports-[backdrop-filter]:bg-[#07100D]/[0.36] supports-[backdrop-filter]:backdrop-blur-[22px] supports-[backdrop-filter]:backdrop-saturate-150"
+                : "border-white/[0.18] bg-[#07100D]/[0.30] supports-[backdrop-filter]:bg-white/[0.08] supports-[backdrop-filter]:backdrop-blur-[22px] supports-[backdrop-filter]:backdrop-saturate-150"
+              : "border-[#E5E7EB]/80 bg-white/95 backdrop-blur-xl",
+          ].join(" ")}
+        >
           <nav
             aria-label="Marketplace navigation"
             className="mx-auto flex w-full max-w-[1600px] overflow-x-auto px-2 sm:px-4 lg:px-8"
@@ -121,11 +140,16 @@ export function CustomerNavbar({
                   key={item.href}
                   href={resolveMarketplaceNavHref(item.href, isAuthenticated)}
                   onClick={(event) => handleGatedNavClick(event, item.href)}
+                  aria-current={active ? "page" : undefined}
                   className={[
                     "inline-flex min-w-[5.5rem] flex-1 items-center justify-center gap-2 whitespace-nowrap border-b-2 px-3 py-3 text-center text-sm font-bold transition sm:px-4 sm:py-3.5",
-                    active
-                      ? "border-[#2563EB] bg-[#EFF6FF]/60 text-[#1D4ED8]"
-                      : "border-transparent text-[#6B7280] hover:border-[#BFDBFE] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
+                    immersive
+                      ? active
+                        ? "border-[#D1AA62] text-[#F5D99D]"
+                        : "border-transparent text-white/75 hover:border-white/30 hover:text-white"
+                      : active
+                        ? "border-[#2563EB] bg-[#EFF6FF]/60 text-[#1D4ED8]"
+                        : "border-transparent text-[#6B7280] hover:border-[#BFDBFE] hover:bg-[#F8FAFC] hover:text-[#2563EB]",
                   ].join(" ")}
                 >
                   {item.icon ? <item.icon className="h-4 w-4" /> : null}

@@ -112,7 +112,7 @@ export default function ReviewsSection({
   const ratingPercentage = (val: number) => `${(val / 5) * 100}%`;
 
   return (
-    <section className="space-y-6">
+    <section id="reviews" className="scroll-mt-40 space-y-6">
       <div className="flex flex-wrap items-center gap-3 border-b border-[#E5E7EB] pb-5">
         <h2 className="text-3xl font-bold tracking-[-0.02em] text-[#151C27]">
           Reviews

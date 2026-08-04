@@ -18,6 +18,27 @@ import { userOwnsVenue } from "@/src/lib/rbac/ownership";
 import { buildVenueImageUrl } from "@/src/features/venues/utils/venue-mappers";
 import { absoluteUrl } from "@/src/lib/site-url";
 import type { SmartVenueSearchVenue } from "@/features/search/schemas/search.schema";
+import {
+  structuredVenueProfileRepository,
+  type StructuredVenueDataClient,
+} from "@/src/features/venues/application/structured-profile-repository";
+import {
+  buildPublicVenueProfile,
+  type PublicVenueSpaceRelations,
+} from "@/src/features/venues/application/public-venue-profile";
+import type {
+  VenueSpaceCapacityLayout,
+  VenueSpaceLayout,
+} from "@/src/features/venues/domain/structured-venue.types";
+import {
+  createEventPlanRepository,
+  type EventPlanClient,
+} from "@/src/features/event-planning/infrastructure/event-plan.repository";
+import {
+  buildEventPlanVenueFit,
+  selectLatestUsableEventPlan,
+  type EventPlanVenueFit,
+} from "@/src/features/venues/application/event-plan-venue-fit";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -28,6 +49,7 @@ const VENUE_DETAIL_SELECT = `
   venue_packages(*),
   venue_images(*),
   venue_amenities(amenities(name)),
+  venue_event_types(event_types(name)),
   organizations(*)
 `;
 
@@ -169,6 +191,71 @@ async function getPublishedFallbackRecommendations(
 
   const { data } = await query;
   return (data ?? []).map(toRecommendationVenue);
+}
+
+async function getPublicSpaceRelations(
+  supabase: any,
+  spaceIds: string[],
+): Promise<PublicVenueSpaceRelations> {
+  if (spaceIds.length === 0) {
+    return { capacityLayouts: [], amenities: [], eventTypes: [] };
+  }
+
+  const [layoutResult, amenityResult, eventTypeResult] = await Promise.all([
+    supabase
+      .from("venue_space_capacity_layouts")
+      .select(
+        "id, space_id, layout, custom_layout_label, capacity, notes, display_order, created_at, updated_at",
+      )
+      .in("space_id", spaceIds)
+      .order("display_order", { ascending: true }),
+    supabase
+      .from("venue_space_amenities")
+      .select("space_id, amenities(name)")
+      .in("space_id", spaceIds),
+    supabase
+      .from("venue_space_event_types")
+      .select("space_id, event_types(name)")
+      .in("space_id", spaceIds),
+  ]);
+
+  const capacityLayouts: VenueSpaceCapacityLayout[] = (
+    layoutResult.data ?? []
+  ).map((row: any) => ({
+    id: String(row.id),
+    spaceId: String(row.space_id),
+    layout: row.layout as VenueSpaceLayout,
+    customLayoutLabel: row.custom_layout_label ?? null,
+    capacity: Number(row.capacity),
+    notes: row.notes ?? null,
+    displayOrder: Number(row.display_order ?? 0),
+    createdAt: String(row.created_at),
+    updatedAt: String(row.updated_at),
+  }));
+
+  return {
+    capacityLayouts,
+    amenities: (amenityResult.data ?? [])
+      .map((row: any) => ({
+        spaceId: String(row.space_id),
+        name: String(
+          (Array.isArray(row.amenities) ? row.amenities[0] : row.amenities)
+            ?.name ?? "",
+        ),
+      }))
+      .filter((item: { name: string }) => item.name),
+    eventTypes: (eventTypeResult.data ?? [])
+      .map((row: any) => ({
+        spaceId: String(row.space_id),
+        name: String(
+          (Array.isArray(row.event_types)
+            ? row.event_types[0]
+            : row.event_types
+          )?.name ?? "",
+        ),
+      }))
+      .filter((item: { name: string }) => item.name),
+  };
 }
 
 function uniqueRecommendationVenues(
@@ -325,6 +412,46 @@ export default async function VenueDetailPage({ params }: Props) {
     ? await getPublishedVenueReviewsRaw(supabase, venue.id)
     : getPublicResearchReviews();
 
+  const structuredProfileResult = dbVenue
+    ? await structuredVenueProfileRepository.findPublishedProfileForVenue(
+        supabase as unknown as StructuredVenueDataClient,
+        venue.id,
+      )
+    : null;
+  const structuredProfile =
+    structuredProfileResult?.ok && structuredProfileResult.data
+      ? structuredProfileResult.data
+      : null;
+  const spaceRelations = structuredProfile
+    ? await getPublicSpaceRelations(
+        supabase,
+        structuredProfile.spaces.map((space) => space.id),
+      )
+    : undefined;
+  const publicProfile = buildPublicVenueProfile({
+    venue: venueWithMap,
+    structuredProfile,
+    ...(spaceRelations ? { spaceRelations } : {}),
+    reviews: reviews ?? [],
+    ownerProfile,
+  });
+
+  let eventPlanFit: EventPlanVenueFit | null = null;
+  if (user) {
+    try {
+      const eventPlanRepository = createEventPlanRepository(
+        supabase as unknown as EventPlanClient,
+      );
+      const plans = await eventPlanRepository.listForCustomer(user.id);
+      const activePlan = selectLatestUsableEventPlan(plans);
+      if (activePlan) {
+        eventPlanFit = buildEventPlanVenueFit(activePlan, publicProfile);
+      }
+    } catch {
+      eventPlanFit = null;
+    }
+  }
+
   let eligibleReviewBooking: { id: string; event_date: string | null } | null =
     null;
   if (user && dbVenue) {
@@ -394,6 +521,8 @@ export default async function VenueDetailPage({ params }: Props) {
       />
       <VenueDetails
         venue={venueWithMap}
+        profile={publicProfile}
+        eventPlanFit={eventPlanFit}
         reviews={reviews || []}
         nearbyVenues={nearbyVenues}
         initialIsFavorited={initialIsFavorited}
