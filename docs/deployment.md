@@ -41,7 +41,7 @@ workflow to compare Vercel metadata with the approved full commit SHA.
 - Configure Supabase Auth site/redirect URLs for every intended origin.
 - Register PayMongo HTTPS webhook and matching secret; configure test/live keys
   in the correct scope and validate return URLs.
-- Verify Resend domain/sender, VAPID pair/subject, the OpenRouter key, exact
+- Verify SMTP sender/credentials, VAPID pair/subject, the OpenRouter key, exact
   `qwen/qwen3.7-flash` runtime configuration, and production app origin. Google
   Maps and alternate AI-provider settings are not applicable.
 
@@ -60,7 +60,7 @@ workflow to compare Vercel metadata with the approved full commit SHA.
 7. Trigger or verify Vercel deployment through the externally configured flow.
 8. Compare Vercel source commit and production URL to the approved release.
 9. Run safe public/authenticated smoke tests using dedicated accounts.
-10. Verify PayMongo webhook/test evidence as appropriate, Resend, push, Storage,
+10. Verify PayMongo webhook/test evidence as appropriate, SMTP, push, Storage,
     analytics, and AI status.
 11. Generate the [release manifest](release-manifest.md) and record warnings,
     dashboard checks, and follow-up.
