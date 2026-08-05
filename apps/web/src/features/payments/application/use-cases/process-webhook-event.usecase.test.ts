@@ -36,6 +36,7 @@ function makeFakeGateway(
     id: "paymongo",
     createCheckoutSession: vi.fn(),
     createRefund: vi.fn(),
+    createDisbursement: vi.fn(),
     verifyWebhookSignature: vi.fn().mockReturnValue(true),
     parseWebhookEvent: vi.fn(),
     ...overrides,
