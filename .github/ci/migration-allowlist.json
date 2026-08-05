@@ -41,7 +41,13 @@
     }
   ],
   "mutableMigrationFiles": [],
-  "destructiveStatements": [],
+  "destructiveStatements": [
+    {
+      "file": "supabase/migrations/20260805130000_payout_ledger_hardening.sql",
+      "kind": "ALTER_COLUMN_TYPE",
+      "reason": "payouts.status is converted from unguarded free text to the payout_status enum so a settled payout cannot be moved back to a claimable state and withdrawn twice. The USING cast is value-preserving (every existing value is a member of the new enum), the DEFAULT is dropped and restored around the change, and the conversion is idempotent behind a pg_attribute type check."
+    }
+  ],
   "sensitiveStatements": [
     {
       "file": "supabase/migrations/076_admin_disputes.sql",
@@ -77,6 +83,21 @@
       "file": "supabase/migrations/20260730090000_booking_auto_accept.sql",
       "kind": "SECURITY_DEFINER",
       "reason": "Booking automation RPCs need atomic cross-table rule evaluation, approval, invoice, decision-audit, and override writes. Every function fixes search_path, checks venue authorization where user-callable, and restricts the final decision RPC to service_role."
+    },
+    {
+      "file": "supabase/migrations/20260805130000_payout_ledger_hardening.sql",
+      "kind": "SECURITY_DEFINER",
+      "reason": "Replaces the existing SECURITY DEFINER complete_booking_event() (021) to fix the org+amount payout dedupe collision and emit supplier payouts. Permission checks (is_org_member_for_booking OR is_admin) and the fixed search_path are unchanged from the definition it replaces; no grant is widened."
+    },
+    {
+      "file": "supabase/migrations/20260805131000_payout_accounts.sql",
+      "kind": "SECURITY_DEFINER",
+      "reason": "Only the payout_accounts audit trigger is SECURITY DEFINER, so it can write audit_logs via the internal-only log_audit(). It uses a fixed search_path, is a trigger function reachable only through the table it is attached to, and EXECUTE is revoked from PUBLIC/anon/authenticated in 20260805133000."
+    },
+    {
+      "file": "supabase/migrations/20260805132000_withdrawal_requests.sql",
+      "kind": "SECURITY_DEFINER",
+      "reason": "The money-out path. request_withdrawal() must bypass the deliberately absent INSERT policy on withdrawal_requests and take FOR UPDATE locks on payouts, so recipients cannot forge or double-claim a payout. Every function re-derives the caller from auth.uid() and re-checks is_org_member/is_supplier_owner/is_admin, uses a fixed search_path, and writes log_audit. Disbursement-lifecycle functions are restricted to service_role and internal helpers to no client role at all in 20260805133000."
     }
   ]
 }
