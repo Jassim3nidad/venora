@@ -6,7 +6,7 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS public.venue_suppliers (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   venue_id UUID NOT NULL REFERENCES public.venues(id) ON DELETE CASCADE,
-  supplier_id UUID NOT NULL REFERENCES public.suppliers(id) ON DELETE CASCADE,
+  supplier_id UUID NOT NULL REFERENCES public.supplier_profiles(id) ON DELETE CASCADE,
   status TEXT NOT NULL CHECK (status IN ('pending', 'active', 'declined', 'suspended', 'removed')) DEFAULT 'pending',
   requested_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
   notes TEXT,
@@ -35,7 +35,7 @@ CREATE POLICY "Venue owners and coordinators can manage venue suppliers"
     ) OR
     EXISTS (
       SELECT 1 FROM public.user_roles ur
-      WHERE ur.user_id = auth.uid() AND ur.role = 'admin'::public.app_role
+      WHERE ur.user_id = auth.uid() AND ur.role = 'admin'::public.user_role
     )
   );
 

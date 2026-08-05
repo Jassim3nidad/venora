@@ -31,7 +31,7 @@ CREATE POLICY "Venue owners can manage seasonal pricing"
     ) OR
     EXISTS (
       SELECT 1 FROM public.user_roles ur
-      WHERE ur.user_id = auth.uid() AND ur.role = 'admin'::public.app_role
+      WHERE ur.user_id = auth.uid() AND ur.role = 'admin'::public.user_role
     )
   );
 

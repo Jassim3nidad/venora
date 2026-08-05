@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS public.event_timeline_tasks (
   start_time TIMESTAMPTZ,
   end_time TIMESTAMPTZ,
   owner_name TEXT,
-  supplier_id UUID REFERENCES public.suppliers(id) ON DELETE SET NULL,
+  supplier_id UUID REFERENCES public.supplier_profiles(id) ON DELETE SET NULL,
   status TEXT NOT NULL CHECK (status IN ('todo', 'in_progress', 'completed', 'cancelled')) DEFAULT 'todo',
   priority TEXT NOT NULL CHECK (priority IN ('low', 'medium', 'high', 'urgent')) DEFAULT 'medium',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

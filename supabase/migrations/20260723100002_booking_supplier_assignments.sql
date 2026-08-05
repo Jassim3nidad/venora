@@ -6,7 +6,7 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS public.booking_suppliers (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   booking_id UUID NOT NULL REFERENCES public.bookings(id) ON DELETE CASCADE,
-  supplier_id UUID NOT NULL REFERENCES public.suppliers(id) ON DELETE CASCADE,
+  supplier_id UUID NOT NULL REFERENCES public.supplier_profiles(id) ON DELETE CASCADE,
   service_category TEXT,
   agreed_price NUMERIC(12, 2),
   currency TEXT NOT NULL DEFAULT 'PHP',
@@ -39,7 +39,7 @@ CREATE POLICY "Authorized participants can view booking suppliers"
     ) OR
     EXISTS (
       SELECT 1 FROM public.user_roles ur
-      WHERE ur.user_id = auth.uid() AND ur.role = 'admin'::public.app_role
+      WHERE ur.user_id = auth.uid() AND ur.role = 'admin'::public.user_role
     )
   );
 
@@ -57,7 +57,7 @@ CREATE POLICY "Venue staff and assigned suppliers can update booking suppliers"
     ) OR
     EXISTS (
       SELECT 1 FROM public.user_roles ur
-      WHERE ur.user_id = auth.uid() AND ur.role = 'admin'::public.app_role
+      WHERE ur.user_id = auth.uid() AND ur.role = 'admin'::public.user_role
     )
   );
 
