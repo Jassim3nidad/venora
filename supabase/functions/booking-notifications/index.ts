@@ -11,6 +11,11 @@ import {
   sendNotification,
   setVapidDetails,
 } from "https://esm.sh/web-push@3.6.7";
+import {
+  type BookingApprovalEmailDetails,
+  renderNotificationEmail,
+} from "../_shared/booking-email-template.ts";
+import { sendSmtpEmail } from "../_shared/smtp-mailer.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -71,20 +76,6 @@ function absoluteUrl(link: string | null) {
   }
 }
 
-function escapeHtml(value: string) {
-  return value.replace(
-    /[&<>"']/g,
-    (character) =>
-      ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;",
-      })[character]!,
-  );
-}
-
 function constantTimeEqual(left: string, right: string) {
   const encoder = new TextEncoder();
   const leftBytes = encoder.encode(left);
@@ -101,89 +92,48 @@ function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Unknown delivery error";
 }
 
-function resendErrorMessage(payload: { message?: string; error?: string }) {
-  const message = payload?.message ?? payload?.error ?? "Resend request failed";
-  const normalized = message.toLowerCase();
-
-  if (
-    normalized.includes("domain is not verified") ||
-    normalized.includes("sender")
-  ) {
-    return `Resend sender is not verified: ${message}`;
-  }
-
-  return message;
-}
-
 async function sendEmail(
   email: string | undefined,
   notification: NotificationPayload,
+  approvalDetails?: BookingApprovalEmailDetails | null,
 ): Promise<DispatchResult> {
-  const apiKey = Deno.env.get("RESEND_API_KEY");
-  if (!apiKey) {
-    return {
-      status: "failed",
-      provider: "resend",
-      errorMessage: "RESEND_API_KEY is not configured",
-    };
-  }
-
-  const from = Deno.env.get("RESEND_FROM");
-  if (!from) {
-    return {
-      status: "failed",
-      provider: "resend",
-      errorMessage: "RESEND_FROM is not configured with a verified sender",
-    };
-  }
-
   if (!email) {
     return {
       status: "failed",
-      provider: "resend",
+      provider: "smtp",
       errorMessage: "Recipient email not found",
     };
   }
 
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
+  const rendered = renderNotificationEmail(
+    {
+      title: notification.title,
+      body: notification.body,
+      actionUrl: absoluteUrl(notification.link),
+      metadata: notification.metadata,
     },
-    body: JSON.stringify({
-      from,
-      to: [email],
+    approvalDetails,
+  );
+
+  try {
+    const result = await sendSmtpEmail({
+      to: email,
       subject: notification.title,
-      html: `
-        <div style="font-family:Inter,Arial,sans-serif;color:#111827;line-height:1.6">
-          <h2>${escapeHtml(notification.title)}</h2>
-          ${notification.body ? `<p>${escapeHtml(notification.body)}</p>` : ""}
-          <p><a href="${
-        escapeHtml(
-          absoluteUrl(notification.link),
-        )
-      }" style="color:#2563eb;font-weight:700">Open in Venora</a></p>
-        </div>
-      `,
-    }),
-  });
-
-  const payload = await response.json().catch(() => ({}));
-
-  if (!response.ok) {
+      html: rendered.html,
+      text: rendered.text,
+    });
+    return {
+      status: "sent",
+      provider: "smtp",
+      providerMessageId: result.providerMessageId,
+    };
+  } catch (error) {
     return {
       status: "failed",
-      provider: "resend",
-      errorMessage: resendErrorMessage(payload),
+      provider: "smtp",
+      errorMessage: errorMessage(error),
     };
   }
-
-  return {
-    status: "sent",
-    provider: "resend",
-    providerMessageId: payload?.id,
-  };
 }
 
 async function sendPush(
@@ -307,6 +257,71 @@ async function updateDelivery(
     .eq("id", deliveryId);
 }
 
+function numberValue(value: unknown) {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : undefined;
+  }
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+  return undefined;
+}
+
+async function loadBookingApprovalDetails(
+  supabase: ServiceClient,
+  notification: NotificationPayload,
+): Promise<BookingApprovalEmailDetails | null> {
+  if (notification.metadata?.status !== "approved") return null;
+
+  const bookingId = notification.metadata.booking_id;
+  if (typeof bookingId !== "string" || !bookingId) {
+    return {
+      eventDate: typeof notification.metadata.event_date === "string"
+        ? notification.metadata.event_date
+        : undefined,
+    };
+  }
+
+  const { data: booking } = await supabase
+    .from("bookings")
+    .select(
+      "id, venue_id, event_date, event_time, guest_count, total_amount, deposit_amount, decision_status",
+    )
+    .eq("id", bookingId)
+    .maybeSingle();
+
+  if (!booking) {
+    return {
+      bookingReference: bookingId.slice(0, 8).toUpperCase(),
+      eventDate: typeof notification.metadata.event_date === "string"
+        ? notification.metadata.event_date
+        : undefined,
+    };
+  }
+
+  const { data: venue } = await supabase
+    .from("venues")
+    .select("name")
+    .eq("id", booking.venue_id)
+    .maybeSingle();
+
+  return {
+    bookingReference: String(booking.id).slice(0, 8).toUpperCase(),
+    venueName: typeof venue?.name === "string" ? venue.name : undefined,
+    eventDate: typeof booking.event_date === "string"
+      ? booking.event_date
+      : undefined,
+    eventTime: typeof booking.event_time === "string"
+      ? booking.event_time
+      : undefined,
+    guestCount: numberValue(booking.guest_count),
+    totalAmount: numberValue(booking.total_amount),
+    depositAmount: numberValue(booking.deposit_amount),
+    autoApproved: booking.decision_status === "auto_approved",
+  };
+}
+
 async function processDelivery(record: DeliveryRecord) {
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -370,7 +385,15 @@ async function processDelivery(record: DeliveryRecord) {
       const userResponse = await supabase.auth.admin.getUserById(
         delivery.user_id,
       );
-      result = await sendEmail(userResponse.data.user?.email, notification);
+      const approvalDetails = await loadBookingApprovalDetails(
+        supabase,
+        notification,
+      );
+      result = await sendEmail(
+        userResponse.data.user?.email,
+        notification,
+        approvalDetails,
+      );
     } else if (delivery.channel === "sms") {
       result = {
         status: "skipped",
@@ -383,7 +406,7 @@ async function processDelivery(record: DeliveryRecord) {
   } catch (error) {
     result = {
       status: "failed",
-      provider: delivery.channel === "email" ? "resend" : "web-push",
+      provider: delivery.channel === "email" ? "smtp" : "web-push",
       errorMessage: errorMessage(error),
     };
   }
