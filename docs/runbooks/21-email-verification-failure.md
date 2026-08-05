@@ -60,4 +60,4 @@ Supabase Auth configuration/log read, mail-provider evidence, dedicated test acc
 ## Related documentation
 
 [Authentication](../authentication.md), [callback](20-auth-callback-failure.md), and
-[Resend delivery](16-resend-delivery-failure.md).
+[SMTP delivery](16-smtp-delivery-failure.md).
