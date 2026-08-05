@@ -2128,7 +2128,7 @@
     "/rsvp-notifications": {
       "post": {
         "summary": "Deliver RSVP invitations or reminders",
-        "description": "Invitation mode requires the signed-in guest-list owner's bearer and rechecks guest ownership through RLS. Reminder mode requires the dedicated reminder secret, conditionally claims due pending rows, and sends a bounded Resend batch.",
+        "description": "Invitation mode requires the signed-in guest-list owner's bearer and rechecks guest ownership through RLS. Reminder mode requires the dedicated reminder secret, conditionally claims due pending rows, and sends a bounded SMTP batch.",
         "operationId": "postRsvpNotifications",
         "tags": ["Notifications", "Internal"],
         "x-venora-surface": "supabase-edge-function",
