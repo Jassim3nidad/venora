@@ -81,6 +81,35 @@ if (hasTwilio) {
   console.log("OK: SMS is disabled (No Twilio configuration).");
 }
 
+// Payout account encryption. Not in requiredEnvVars: an environment that
+// never touches the earnings pages runs fine without it. But a malformed
+// key must fail loudly here rather than at the moment someone submits a
+// bank account, and an under-length key silently weakens AES-256.
+const payoutKey = process.env.PAYOUT_ENCRYPTION_KEY?.trim();
+
+if (!payoutKey) {
+  console.log(
+    "WARNING: PAYOUT_ENCRYPTION_KEY is not set. Payout accounts and withdrawals will be unavailable.",
+  );
+} else if (Buffer.from(payoutKey, "base64").length !== 32) {
+  console.error(
+    "ERROR: PAYOUT_ENCRYPTION_KEY must decode to exactly 32 bytes. Generate one with: openssl rand -base64 32",
+  );
+  hasErrors = true;
+} else {
+  console.log("OK: PAYOUT_ENCRYPTION_KEY is a valid 32-byte key.");
+}
+
+if (
+  process.env.PAYMONGO_DISBURSEMENTS_ENABLED === "true" &&
+  !process.env.PAYMONGO_SECRET_KEY?.trim()
+) {
+  console.error(
+    "ERROR: PAYMONGO_DISBURSEMENTS_ENABLED is true but PAYMONGO_SECRET_KEY is missing.",
+  );
+  hasErrors = true;
+}
+
 if (hasErrors) {
   console.error(
     "\nEnvironment validation failed. Please check your .env file.",
