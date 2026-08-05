@@ -42,6 +42,11 @@ export const NAV_BY_ROLE: Record<EnterpriseRole, NavItem[]> = {
     },
     { label: "Analytics", href: "/dashboard/analytics", icon: "analytics" },
     {
+      label: "Earnings",
+      href: "/dashboard/earnings",
+      icon: "account_balance_wallet",
+    },
+    {
       label: "Settings",
       href: "/dashboard/venue-owner/settings",
       icon: "settings",
@@ -151,6 +156,11 @@ export const NAV_BY_ROLE: Record<EnterpriseRole, NavItem[]> = {
       icon: "trending_up",
     },
     {
+      label: "Earnings",
+      href: "/dashboard/supplier/earnings",
+      icon: "account_balance_wallet",
+    },
+    {
       label: "Settings",
       href: "/dashboard/supplier/settings",
       icon: "settings",
@@ -227,6 +237,12 @@ export const NAV_BY_ROLE: Record<EnterpriseRole, NavItem[]> = {
       label: "Payments",
       href: "/admin/payments",
       icon: "account_balance_wallet",
+      permission: "commissions.view",
+    },
+    {
+      label: "Withdrawals",
+      href: "/admin/withdrawals",
+      icon: "outbound",
       permission: "commissions.view",
     },
     {
