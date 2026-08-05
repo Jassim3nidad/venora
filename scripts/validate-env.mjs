@@ -8,8 +8,11 @@ const requiredEnvVars = [
   "NEXT_PUBLIC_SUPABASE_URL",
   "NEXT_PUBLIC_SUPABASE_ANON_KEY",
   "SUPABASE_SERVICE_ROLE_KEY",
-  "RESEND_API_KEY",
-  "RESEND_FROM",
+  "SMTP_HOST",
+  "SMTP_PORT",
+  "SMTP_USER",
+  "SMTP_PASS",
+  "SMTP_FROM",
   "VAPID_PUBLIC_KEY",
   "VAPID_PRIVATE_KEY",
   "VAPID_SUBJECT",
@@ -24,6 +27,13 @@ for (const envVar of requiredEnvVars) {
     );
     hasErrors = true;
   }
+}
+
+if (!["465", "2465"].includes(process.env.SMTP_PORT?.trim())) {
+  console.error(
+    "ERROR: SMTP_PORT must use an implicit TLS port supported by hosted Edge (465 or 2465).",
+  );
+  hasErrors = true;
 }
 
 const publicSupabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
