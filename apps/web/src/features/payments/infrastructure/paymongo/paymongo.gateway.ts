@@ -3,7 +3,9 @@ import { PaymentError } from "@/lib/errors";
 import type {
   CheckoutSession,
   CreateCheckoutSessionParams,
+  CreateDisbursementParams,
   CreateRefundParams,
+  DisbursementResult,
   NormalizedWebhookEvent,
   PaymentGateway,
   RefundResult,
@@ -18,9 +20,26 @@ const PAYMENT_METHOD_TYPES = ["card", "gcash", "grab_pay"];
 /** PayMongo only settles in Philippine pesos today. */
 const SUPPORTED_CURRENCIES = ["PHP"];
 
+/** Our payout methods mapped onto PayMongo's disbursement channels. */
+const DISBURSEMENT_CHANNELS: Record<
+  CreateDisbursementParams["method"],
+  string
+> = {
+  bank: "bank_transfer",
+  gcash: "gcash",
+  paymaya: "paymaya",
+};
+
 interface PayMongoConfig {
   secretKey: string;
   webhookSecret: string;
+  /**
+   * Disbursements are a separately-provisioned PayMongo product, not part
+   * of the standard Checkout/Refunds credentials. Left unset, the gateway
+   * refuses to disburse instead of firing requests at an endpoint the
+   * account cannot serve.
+   */
+  disbursementsEnabled: boolean;
 }
 
 interface PayMongoResource<A> {
@@ -229,6 +248,77 @@ export class PayMongoGateway implements PaymentGateway {
   }
 
   /**
+   * Send money out to a recipient's bank account or e-wallet.
+   *
+   * NOTE ON THE REQUEST SHAPE — verify before enabling in production.
+   * PayMongo's public reference documents money-in (Checkout Sessions,
+   * Payment Intents, Refunds); disbursements are provisioned per-merchant
+   * and their exact attribute names are account-specific. The envelope
+   * below follows PayMongo's uniform `{ data: { attributes } }` contract
+   * and their centavo amount convention, but the attribute names must be
+   * confirmed against the disbursement docs issued for this merchant
+   * account. Until PAYMONGO_DISBURSEMENTS_ENABLED is set, this method
+   * refuses rather than guessing at a live money-out call — the caller
+   * then marks the withdrawal failed and releases the claimed payouts,
+   * which is the safe outcome.
+   */
+  async createDisbursement(
+    params: CreateDisbursementParams,
+  ): Promise<DisbursementResult> {
+    if (!this.config.disbursementsEnabled) {
+      throw new PaymentError(
+        "DISBURSEMENT_NOT_SUPPORTED",
+        "Automated payouts are not enabled for this account. This withdrawal must be settled manually by finance.",
+      );
+    }
+
+    if (!SUPPORTED_CURRENCIES.includes(params.currency.toUpperCase())) {
+      throw new PaymentError(
+        "UNSUPPORTED_CURRENCY",
+        `PayMongo does not disburse in ${params.currency}. Supported: ${SUPPORTED_CURRENCIES.join(", ")}.`,
+      );
+    }
+
+    const disbursement = await this.request<{ status?: string }>(
+      "/disbursements",
+      {
+        amount: params.amountMinor,
+        currency: params.currency,
+        channel: DISBURSEMENT_CHANNELS[params.method],
+        description: params.description,
+        // Correlates the webhook back to our withdrawal even if storing
+        // the provider reference has not committed yet.
+        reference_number: params.withdrawalId,
+        destination: {
+          account_name: params.accountName,
+          account_number: params.accountIdentifier,
+          ...(params.bankName ? { bank_name: params.bankName } : {}),
+        },
+        metadata: { ...params.metadata, withdrawal_id: params.withdrawalId },
+      },
+    );
+
+    if (!disbursement.id) {
+      console.error("[paymongo] createDisbursement returned no id");
+      throw new PaymentError(
+        "PAYMENT_PROVIDER_ERROR",
+        "The payment provider returned an unexpected response for the payout. Please try again.",
+      );
+    }
+
+    return {
+      provider: this.id,
+      disbursementReference: disbursement.id,
+      status:
+        disbursement.attributes?.status === "succeeded"
+          ? "succeeded"
+          : disbursement.attributes?.status === "failed"
+            ? "failed"
+            : "pending",
+    };
+  }
+
+  /**
    * Header format: `t=<timestamp>,te=<test-mode sig>,li=<live-mode sig>`.
    * The signature is HMAC-SHA256 of `<timestamp>.<rawBody>` with the
    * webhook secret. We accept whichever mode signature is present.
@@ -377,6 +467,38 @@ export class PayMongoGateway implements PaymentGateway {
           amountMinor: typeof attrs.amount === "number" ? attrs.amount : null,
         };
 
+      // Money-out lifecycle. `reference_number` is the withdrawal id we
+      // set ourselves on the disbursement; metadata is the fallback.
+      case "disbursement.succeeded":
+      case "disbursement.paid":
+        return {
+          eventId,
+          eventType,
+          kind: "disbursement.succeeded",
+          disbursementReference: resource.id,
+          withdrawalId:
+            metadataValue(metadata, "withdrawal_id") ??
+            (typeof attrs["reference_number"] === "string"
+              ? attrs["reference_number"]
+              : null),
+          amountMinor: typeof attrs.amount === "number" ? attrs.amount : null,
+        };
+
+      case "disbursement.failed":
+        return {
+          eventId,
+          eventType,
+          kind: "disbursement.failed",
+          disbursementReference: resource.id,
+          withdrawalId:
+            metadataValue(metadata, "withdrawal_id") ??
+            (typeof attrs["reference_number"] === "string"
+              ? attrs["reference_number"]
+              : null),
+          failureReason:
+            attrs.failed_message ?? attrs.failed_code ?? attrs.status ?? null,
+        };
+
       case "payment.refund.updated": {
         if (attrs.status === "succeeded") {
           return {
@@ -410,5 +532,7 @@ export function createPayMongoGateway(): PayMongoGateway {
   return new PayMongoGateway({
     secretKey: process.env.PAYMONGO_SECRET_KEY ?? "",
     webhookSecret: process.env.PAYMONGO_WEBHOOK_SECRET ?? "",
+    disbursementsEnabled:
+      process.env.PAYMONGO_DISBURSEMENTS_ENABLED === "true",
   });
 }
