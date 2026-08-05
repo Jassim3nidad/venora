@@ -1642,7 +1642,7 @@ const definitions = [
     security: bearer,
     edge: true,
     description:
-      "Invitation mode requires the signed-in guest-list owner's bearer and rechecks guest ownership through RLS. Reminder mode requires the dedicated reminder secret, conditionally claims due pending rows, and sends a bounded Resend batch.",
+      "Invitation mode requires the signed-in guest-list owner's bearer and rechecks guest ownership through RLS. Reminder mode requires the dedicated reminder secret, conditionally claims due pending rows, and sends a bounded SMTP batch.",
     requestBody: body("GenericObject", {
       mode: "invitation",
       guestId: "00000000-0000-4000-8000-000000000001",
