@@ -22,7 +22,7 @@ history, or manually change payment/booking state without approved reconciliatio
 | 13  | [Paid but booking not confirmed](13-paid-booking-pending.md)               | CURRENT |
 | 14  | [Receipt or invoice missing](14-missing-payment-documents.md)              | CURRENT |
 | 15  | [Refund mismatch](15-refund-mismatch.md)                                   | CURRENT |
-| 16  | [Resend delivery failure](16-resend-delivery-failure.md)                   | CURRENT |
+| 16  | [SMTP delivery failure](16-smtp-delivery-failure.md)                       | CURRENT |
 | 17  | [Web Push delivery failure](17-web-push-delivery-failure.md)               | CURRENT |
 | 18  | [Storage upload denial](18-storage-upload-denial.md)                       | CURRENT |
 | 19  | [Verification-document access](19-verification-document-access.md)         | CURRENT |
