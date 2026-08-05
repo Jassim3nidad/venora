@@ -63,7 +63,7 @@ OpenAPI security schemes:
 - `supabaseSession` — cookie session for Next.js handlers
 - `supabaseBearer` — JWT for Edge Functions
 
-**Never** send `SUPABASE_SERVICE_ROLE_KEY`, PayMongo secrets, Resend keys, or
+**Never** send `SUPABASE_SERVICE_ROLE_KEY`, PayMongo secrets, SMTP credentials, or
 VAPID private keys from a browser.
 
 ### 2.2 Example authenticated browser request
@@ -1216,7 +1216,7 @@ Batch:
 reminder mode uses an anon bearer plus `x-rsvp-reminder-secret`.
 **Body:** `{ "mode": "invitation", "guestId": "<uuid>" }` or
 `{ "mode": "reminders", "limit": 100 }`.
-**Effect:** sends Resend email, records delivery/error evidence, and
+**Effect:** sends SMTP email, records delivery/error evidence, and
 conditionally claims reminder rows to prevent duplicate concurrent sends.
 
 ---
