@@ -8,6 +8,7 @@ import {
   HelpCircle,
   LogOut,
   Settings,
+  ShieldCheck,
   Store,
   UserRound,
 } from "lucide-react";
@@ -32,6 +33,7 @@ interface ProfileMenuProps {
    */
   showExitDashboard?: boolean | undefined;
   exitDashboardHref?: string | undefined;
+  showEnterAdminDashboard?: boolean | undefined;
   showEnterVenueDashboard?: boolean | undefined;
   showEnterSupplierDashboard?: boolean | undefined;
   showEnterCoordinatorDashboard?: boolean | undefined;
@@ -59,6 +61,7 @@ export default function ProfileMenu({
   logoutAction,
   showExitDashboard = false,
   exitDashboardHref = "/venues",
+  showEnterAdminDashboard = false,
   showEnterVenueDashboard = false,
   showEnterSupplierDashboard = false,
   showEnterCoordinatorDashboard = false,
@@ -119,6 +122,19 @@ export default function ProfileMenu({
         </div>
 
         <DropdownMenuSeparator />
+
+        {showEnterAdminDashboard ? (
+          <DropdownMenuItem asChild>
+            <Link href="/admin" className="cursor-pointer">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#EFF6FF] text-[#1D4ED8]">
+                <ShieldCheck className="h-4 w-4" />
+              </div>
+              <span className="font-bold text-[#1D4ED8]">
+                Enter Admin Dashboard
+              </span>
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
 
         {showEnterVenueDashboard ? (
           <DropdownMenuItem asChild>

@@ -36,6 +36,7 @@ interface MarketingNavbarProfile {
   isVenueOwner?: boolean;
   isSupplier?: boolean;
   isCoordinator?: boolean;
+  isAdmin?: boolean;
 }
 
 const HOST_VENUE_PATH = "/account/become-partner";
@@ -170,6 +171,7 @@ export default function MarketingNavbar({
         isVenueOwner: currentUser.roles.includes("venue_owner"),
         isSupplier: currentUser.roles.includes("supplier"),
         isCoordinator: currentUser.roles.includes("event_coordinator"),
+        isAdmin: currentUser.roles.includes("admin"),
       }
     : null;
 
@@ -297,6 +299,7 @@ export default function MarketingNavbar({
                     displayName={displayName}
                     email={email}
                     avatarUrl={profile?.avatar_url}
+                    showEnterAdminDashboard={profile?.isAdmin ?? false}
                     showEnterVenueDashboard={profile?.isVenueOwner ?? false}
                     showEnterCoordinatorDashboard={
                       profile?.isCoordinator ?? false
@@ -355,6 +358,7 @@ export default function MarketingNavbar({
                     displayName={displayName}
                     email={email}
                     avatarUrl={profile?.avatar_url}
+                    showEnterAdminDashboard={profile?.isAdmin ?? false}
                     showEnterVenueDashboard={profile?.isVenueOwner ?? false}
                     showEnterCoordinatorDashboard={
                       profile?.isCoordinator ?? false
