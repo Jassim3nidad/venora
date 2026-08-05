@@ -71,6 +71,16 @@ export type TransactionStatus =
 export type RefundStatus =
   "pending" | "processing" | "succeeded" | "failed" | "cancelled";
 export type InvoiceStatus = "issued" | "paid" | "void" | "refunded";
+export type PayoutStatus = "scheduled" | "processing" | "paid" | "failed";
+export type PayoutMethod = "bank" | "gcash" | "paymaya";
+export type WithdrawalStatus =
+  | "pending"
+  | "approved"
+  | "processing"
+  | "paid"
+  | "failed"
+  | "rejected"
+  | "cancelled";
 export type VerificationType = "venue_owner" | "supplier" | "venue";
 export type VerificationStatus = "pending" | "approved" | "rejected";
 export type NotificationKind =
@@ -2129,17 +2139,107 @@ export interface Database {
       payouts: {
         Row: {
           id: string;
+          booking_id: string | null;
           organization_id: string | null;
           supplier_id: string | null;
           amount: number;
-          status: string;
+          currency: string;
+          status: PayoutStatus;
           scheduled_at: string | null;
           paid_at: string | null;
+          withdrawal_request_id: string | null;
+          parent_payout_id: string | null;
+          created_at: string;
+          updated_at: string;
         };
         Insert: Omit<Database["public"]["Tables"]["payouts"]["Row"], "id"> & {
           id?: string;
         };
-        Update: { status?: string; paid_at?: string };
+        Update: { status?: PayoutStatus; paid_at?: string };
+      };
+
+      payout_accounts: {
+        Row: {
+          id: string;
+          organization_id: string | null;
+          supplier_id: string | null;
+          method: PayoutMethod;
+          account_name: string;
+          bank_name: string | null;
+          account_number_last4: string;
+          /**
+           * AES-256-GCM envelope produced in the app layer. `authenticated`
+           * holds no SELECT grant on this column — only service_role can
+           * read it back.
+           */
+          account_identifier_ciphertext: string;
+          account_fingerprint: string;
+          is_default: boolean;
+          verified_at: string | null;
+          verification_reference: string | null;
+          archived_at: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<
+          Database["public"]["Tables"]["payout_accounts"]["Row"],
+          | "id"
+          | "bank_name"
+          | "is_default"
+          | "verified_at"
+          | "verification_reference"
+          | "archived_at"
+          | "created_by"
+          | "created_at"
+          | "updated_at"
+        > & {
+          id?: string;
+          bank_name?: string | null;
+          is_default?: boolean;
+          created_by?: string | null;
+        };
+        Update: Partial<
+          Pick<
+            Database["public"]["Tables"]["payout_accounts"]["Row"],
+            | "account_name"
+            | "bank_name"
+            | "account_number_last4"
+            | "account_identifier_ciphertext"
+            | "account_fingerprint"
+            | "is_default"
+            | "archived_at"
+          >
+        >;
+      };
+
+      withdrawal_requests: {
+        Row: {
+          id: string;
+          organization_id: string | null;
+          supplier_id: string | null;
+          payout_account_id: string;
+          amount: number;
+          currency: string;
+          status: WithdrawalStatus;
+          idempotency_key: string;
+          requested_by: string;
+          requested_at: string;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          review_note: string | null;
+          payment_provider: PaymentProvider | null;
+          provider_reference: string | null;
+          failure_reason: string | null;
+          processed_at: string | null;
+          metadata: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        // Rows are created only by request_withdrawal(); there is no
+        // INSERT policy or grant for any client role.
+        Insert: never;
+        Update: never;
       };
 
       verification_requests: {
