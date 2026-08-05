@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { sendSmtpEmail } from "../_shared/smtp-mailer.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -89,15 +90,6 @@ async function sendEmail(
     return { status: "failed", error: "Guest RSVP token is missing" };
   }
 
-  const apiKey = Deno.env.get("RESEND_API_KEY");
-  const from = Deno.env.get("RESEND_FROM");
-  if (!apiKey || !from) {
-    return {
-      status: "failed",
-      error: "RSVP email provider is not configured",
-    };
-  }
-
   const guestName = `${guest.first_name} ${guest.last_name}`.trim();
   const title = kind === "reminder"
     ? "Reminder: please respond to your Venora invitation"
@@ -111,15 +103,9 @@ async function sendEmail(
     }`;
   const link = invitationUrl(guest.rsvp_token);
 
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from,
-      to: [guest.email],
+  try {
+    await sendSmtpEmail({
+      to: guest.email,
       subject: title,
       html: `
         <div style="font-family:Inter,Arial,sans-serif;color:#111827;line-height:1.6">
@@ -132,18 +118,26 @@ async function sendEmail(
           <p style="color:#64748b;font-size:13px">This personal link can submit your RSVP. Do not forward it.</p>
         </div>
       `,
-    }),
-  });
-
-  if (!response.ok) {
-    const payload = await response.json().catch(() => ({}));
-    const providerMessage = typeof payload?.message === "string"
-      ? payload.message
-      : "Email provider rejected the request";
-    return { status: "failed", error: providerMessage.slice(0, 500) };
+      text: [
+        title,
+        "",
+        `Hello ${guestName || "guest"},`,
+        "",
+        message,
+        "",
+        `Respond to invitation: ${link}`,
+        "",
+        "This personal link can submit your RSVP. Do not forward it.",
+      ].join("\n"),
+    });
+    return { status: "sent" };
+  } catch (error) {
+    return {
+      status: "failed",
+      error: (error instanceof Error ? error.message : "SMTP delivery failed")
+        .slice(0, 500),
+    };
   }
-
-  return { status: "sent" };
 }
 
 async function recordDelivery(
