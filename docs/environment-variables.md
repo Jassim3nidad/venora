@@ -40,8 +40,11 @@ below are names and placeholders only.
 | `PAYMONGO_WEBHOOK_SECRET` | SERVER-ONLY, RUNTIME; required for PayMongo webhook                           | webhook environment                             | `<paymongo-test-webhook-secret>`; mismatch rejects signatures; coordinate endpoint rotation               |
 | `STRIPE_SECRET_KEY`       | DEPRECATED/CONFIGURATION ONLY                                                 | comments/examples, no registered gateway        | Do not set expecting working checkout                                                                     |
 | `STRIPE_WEBHOOK_SECRET`   | DEPRECATED/CONFIGURATION ONLY                                                 | old examples only                               | Do not set expecting working webhooks                                                                     |
-| `RESEND_API_KEY`          | SERVER-ONLY/EDGE-FUNCTION SECRET, RUNTIME                                     | web/Edge/test; never browser                    | `<resend-test-api-key>`; missing email delivery fails; rotate and send test mail                          |
-| `RESEND_FROM`             | SERVER-ONLY/EDGE-FUNCTION SECRET, RUNTIME                                     | web/Edge/test                                   | `Venora <notifications@example.test>`; invalid sender is rejected; no credential rotation                 |
+| `SMTP_HOST`               | SERVER-ONLY/EDGE-FUNCTION SECRET, RUNTIME                                     | Edge; never browser                             | SMTP hostname used by booking and RSVP notifications                                                      |
+| `SMTP_PORT`               | SERVER-ONLY/EDGE-FUNCTION SECRET, RUNTIME                                     | Edge; never browser                             | Use `465` for hosted Supabase Edge; ports 25 and 587 are blocked                                          |
+| `SMTP_USER`               | SERVER-ONLY/EDGE-FUNCTION SECRET, RUNTIME                                     | Edge; never browser                             | SMTP account username; rotate with provider credentials                                                   |
+| `SMTP_PASS`               | SERVER-ONLY/EDGE-FUNCTION SECRET, RUNTIME                                     | Edge; never browser                             | SMTP account password/app password; rotate immediately after suspected exposure                           |
+| `SMTP_FROM`               | SERVER-ONLY/EDGE-FUNCTION SECRET, RUNTIME                                     | Edge; never browser                             | Verified sender, preferably matching Supabase Auth custom SMTP                                            |
 | `RSVP_REMINDER_SECRET`    | EDGE-FUNCTION/CI SECRET, RUNTIME; required for scheduled RSVP reminders       | Supabase Edge and GitHub production environment | Random shared secret; mismatch rejects reminder batches; rotate both scopes together                      |
 | `VAPID_PUBLIC_KEY`        | SERVER-ONLY RUNTIME value shared with subscribers                             | web/Edge; not a private credential              | `<vapid-public-key>`; missing prevents subscription/delivery; key-pair rotation invalidates subscriptions |
 | `VAPID_PRIVATE_KEY`       | SERVER-ONLY/EDGE-FUNCTION SECRET, RUNTIME                                     | web/Edge only                                   | `<vapid-private-key>`; missing delivery fails; rotate pair and resubscribe                                |
@@ -85,13 +88,12 @@ requires it.
 
 ## Existing validation matrix
 
-| Validator                            | Variables checked                                                                               | External effect               |
-| ------------------------------------ | ----------------------------------------------------------------------------------------------- | ----------------------------- |
-| `node scripts/validate-env.mjs`      | Supabase public/server keys, Resend, VAPID; forbids public service/secret keys; warns on Twilio | Reads local env only          |
-| `node scripts/validate-resend.mjs`   | Resend key/from and notification test email                                                     | Sends a test email            |
-| `node scripts/validate-db.mjs`       | Supabase URL/service/anon configuration                                                         | Queries configured database   |
-| `node scripts/validate-pipeline.mjs` | Supabase public URL, service key, notification test user                                        | Writes test notification data |
-| `pnpm docs:technical:validate`       | Variable names documented; secret/local-path patterns                                           | Repository files only         |
+| Validator                            | Variables checked                                                                             | External effect               |
+| ------------------------------------ | --------------------------------------------------------------------------------------------- | ----------------------------- |
+| `node scripts/validate-env.mjs`      | Supabase public/server keys, SMTP, VAPID; forbids public service/secret keys; warns on Twilio | Reads local env only          |
+| `node scripts/validate-db.mjs`       | Supabase URL/service/anon configuration                                                       | Queries configured database   |
+| `node scripts/validate-pipeline.mjs` | Supabase public URL, service key, notification test user                                      | Writes test notification data |
+| `pnpm docs:technical:validate`       | Variable names documented; secret/local-path patterns                                         | Repository files only         |
 
 Provider validators are not part of the default unit suite because they need
 credentials and can create external effects. See [Testing](testing.md) and
