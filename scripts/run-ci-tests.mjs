@@ -136,7 +136,7 @@ const hosted = [
     skipped: 0,
     blocked: 1,
     reason:
-      "Requires authorized staging Resend/Web Push/provider credentials and fixtures",
+      "Requires authorized staging SMTP/Web Push/provider credentials and fixtures",
   },
 ];
 
