@@ -61,7 +61,7 @@ types, deterministic tests, migration/type contracts, documentation, security
 regressions, or build. Hosted browser/stateful suites remain a separate visible
 protected stage rather than a path-filtered green result.
 
-Provider-safe notification, PayMongo, Resend, Web Push, and AI hosted checks
+Provider-safe notification, PayMongo, SMTP, Web Push, and AI hosted checks
 remain explicitly BLOCKED because no authorized staging provider credentials or
 fixtures are available to repository CI. Deterministic mocked/contract security
 tests still run; they are not represented as hosted proof.
