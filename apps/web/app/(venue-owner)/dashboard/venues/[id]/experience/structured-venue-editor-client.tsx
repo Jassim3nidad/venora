@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { cn } from "@venora/lib";
 import { SpacesWorkspace } from "./_components/spaces-workspace/spaces-workspace";
+import { MediaWorkspace } from "./_components/media-workspace/media-workspace";
 import {
   DashButton,
   Panel,
@@ -26,6 +27,7 @@ import {
 } from "@/components/dashboard/enterprise";
 import { VenueProfileHeader } from "./_components/venue-profile-header";
 import { SubmitButton } from "./_components/submit-button";
+import { SectionTitle } from "./_components/section-title";
 import { ProfileSectionNavigation } from "./_components/profile-section-navigation";
 import { SectionBadge } from "./_components/profile-section-status";
 import {
@@ -113,7 +115,7 @@ type PackageRow = {
   max_guests: number | null;
   is_active: boolean;
 };
-type VenueImage = {
+export type VenueImage = {
   id: string;
   storage_path: string;
   media_type: string;
@@ -716,7 +718,7 @@ export function StructuredVenueEditorClient({
           />
         ) : null}
         {section === "media" ? (
-          <MediaSection
+          <MediaWorkspace
             profile={draftProfile}
             spaces={activeSpaces}
             venueImages={venueImages}
@@ -761,6 +763,17 @@ export function StructuredVenueEditorClient({
 }
 
 
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-[#dbe3ef] bg-white p-4">
+      <p className="text-xs font-bold uppercase tracking-wider text-[#64748b]">
+        {label}
+      </p>
+      <p className="mt-2 text-2xl font-bold text-[#0f172a]">{value}</p>
+    </div>
+  );
+}
 
 function OverviewSection({
   venue,
@@ -819,209 +832,6 @@ function OverviewSection({
   );
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-[#dbe3ef] bg-white p-4">
-      <p className="text-xs font-bold uppercase tracking-wider text-[#64748b]">
-        {label}
-      </p>
-      <p className="mt-2 text-2xl font-bold text-[#0f172a]">{value}</p>
-    </div>
-  );
-}
-
-
-function MediaSection({
-  profile,
-  spaces,
-  venueImages,
-  onCreateCollection,
-  onAddExistingMedia,
-  onArchiveItem,
-  onReorderItem,
-}: {
-  profile: DraftStructuredVenueProfile;
-  spaces: VenueSpace[];
-  venueImages: VenueImage[];
-  onCreateCollection: (event: FormEvent<HTMLFormElement>) => void;
-  onAddExistingMedia: (event: FormEvent<HTMLFormElement>) => void;
-  onArchiveItem: (item: VenueMediaItem) => void;
-  onReorderItem: (item: VenueMediaItem, direction: "up" | "down") => void;
-}) {
-  return (
-    <Panel>
-      <SectionTitle
-        title="Media"
-        description="Organize existing venue-owned uploads into structured galleries. Upload new files from the base listing page first."
-      />
-      <div className="grid gap-6 xl:grid-cols-2">
-        <form onSubmit={onCreateCollection} className={editorCardClass}>
-          <h3 className="text-lg font-bold text-[#0f172a]">Create collection</h3>
-          <div className="mt-5 grid gap-4">
-            <Field label="Collection type">
-              <select name="collectionType" className={inputClass} defaultValue="gallery">
-                {VENUE_MEDIA_COLLECTION_TYPES.filter((type) => type !== "video").map((value) => (
-                  <option key={value} value={value}>{getVenueMediaCollectionTypeLabel(value)}</option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Space">
-              <select name="spaceId" className={inputClass}>
-                <option value="">Venue-level collection</option>
-                {spaces.map((space) => (
-                  <option key={space.id} value={space.id}>{space.name}</option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Title">
-              <input name="title" className={inputClass} placeholder="Main gallery" />
-            </Field>
-            <Field label="Description">
-              <textarea name="description" className={textareaClass} rows={3} />
-            </Field>
-            <label className="flex items-center gap-3 text-sm font-bold text-[#334155]">
-              <input name="isCover" type="checkbox" className="h-4 w-4" />
-              Use as cover collection
-            </label>
-          </div>
-          <SubmitButton label="Create collection" />
-        </form>
-
-        <form onSubmit={onAddExistingMedia} className={editorCardClass}>
-          <h3 className="text-lg font-bold text-[#0f172a]">Add existing upload</h3>
-          {profile.mediaCollections.length === 0 || venueImages.length === 0 ? (
-            <div className="mt-5 rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-5 text-sm leading-6 text-[#64748b]">
-              Create a collection and upload venue images in Base Listing before adding structured media metadata.
-            </div>
-          ) : (
-            <div className="mt-5 grid gap-4">
-              <Field label="Collection">
-                <select name="collectionId" className={inputClass}>
-                  {profile.mediaCollections.map((collection) => (
-                    <option key={collection.id} value={collection.id}>
-                      {collection.title || getVenueMediaCollectionTypeLabel(collection.collectionType)}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-              <Field label="Uploaded media">
-                <select name="imageId" className={inputClass}>
-                  {venueImages.map((image) => (
-                    <option key={image.id} value={image.id}>
-                      {image.media_type} - {image.storage_path.split("/").pop()}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-              <Field label="Alt text">
-                <input name="altText" className={inputClass} />
-              </Field>
-              <Field label="Caption">
-                <input name="caption" className={inputClass} />
-              </Field>
-              <Field label="Transcript">
-                <textarea name="transcript" rows={3} className={textareaClass} />
-              </Field>
-              <label className="flex items-center gap-3 text-sm font-bold text-[#334155]">
-                <input name="isFeatured" type="checkbox" className="h-4 w-4" />
-                Feature inside collection
-              </label>
-              <SubmitButton label="Add media" />
-            </div>
-          )}
-        </form>
-      </div>
-
-      <div className="mt-7 space-y-5">
-        {profile.mediaCollections.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-8 text-center text-sm text-[#64748b]">
-            No structured media collections yet.
-          </div>
-        ) : (
-          profile.mediaCollections.map((collection) => {
-            const items = profile.mediaItems.filter(
-              (item) =>
-                item.collectionId === collection.id &&
-                item.status !== "archived" &&
-                !item.deletedAt,
-            );
-            return (
-              <div key={collection.id} className={editorCardClass}>
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="font-bold text-[#0f172a]">
-                      {collection.title ||
-                        getVenueMediaCollectionTypeLabel(collection.collectionType)}
-                    </p>
-                    <p className="text-sm text-[#64748b]">
-                      {items.length} item{items.length === 1 ? "" : "s"}
-                    </p>
-                  </div>
-                  {collection.isCover ? <StatusBadge status="active" label="Cover" /> : null}
-                </div>
-                <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {items.length === 0 ? (
-                    <div className="rounded-xl bg-[#f8fafc] p-4 text-sm text-[#64748b]">
-                      No media added yet.
-                    </div>
-                  ) : (
-                    items.map((item) => (
-                      <div key={item.id} className="overflow-hidden rounded-xl border border-[#dbe3ef]">
-                        <div className="relative aspect-video bg-[#f1f5f9]">
-                          {item.mediaType === "image" && item.storagePath ? (
-                            <Image
-                              src={getVenueMediaUrl(item.storagePath)}
-                              alt={item.altText || item.caption || "Venue media"}
-                              fill
-                              className="object-cover"
-                              sizes="240px"
-                            />
-                          ) : (
-                            <div className="flex h-full items-center justify-center text-[#64748b]">
-                              <ImageIcon className="h-6 w-6" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="p-3">
-                          <p className="text-sm font-bold text-[#0f172a]">
-                            {item.caption || item.altText || "Media item"}
-                          </p>
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            <button
-                              type="button"
-                              onClick={() => onReorderItem(item, "up")}
-                              className="rounded-full border border-[#dbe3ef] px-2.5 py-1 text-xs font-bold text-[#475569] hover:border-[#93c5fd] hover:text-[#1d4ed8]"
-                            >
-                              Move up
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => onReorderItem(item, "down")}
-                              className="rounded-full border border-[#dbe3ef] px-2.5 py-1 text-xs font-bold text-[#475569] hover:border-[#93c5fd] hover:text-[#1d4ed8]"
-                            >
-                              Move down
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => onArchiveItem(item)}
-                              className="rounded-full border border-red-200 px-2.5 py-1 text-xs font-bold text-red-700 hover:bg-red-50"
-                            >
-                              Archive
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            );
-          })
-        )}
-      </div>
-    </Panel>
-  );
-}
 
 function LogisticsSection({
   profile,
@@ -1342,24 +1152,7 @@ function PreviewSection({
   );
 }
 
-function SectionTitle({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="mb-6">
-      <h2 className="text-2xl font-bold tracking-tight text-[#0f172a]">
-        {title}
-      </h2>
-      <p className="mt-2 max-w-3xl text-sm leading-6 text-[#64748b]">
-        {description}
-      </p>
-    </div>
-  );
-}
+
 
 function Field({
   label,

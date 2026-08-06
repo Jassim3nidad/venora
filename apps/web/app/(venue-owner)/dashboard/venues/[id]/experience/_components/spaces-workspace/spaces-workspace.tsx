@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { SectionTitle } from "../section-title";
 import { Panel } from "@/components/dashboard/enterprise";
 import { SpaceList } from "./space-list";
 import { SpaceEditor } from "./space-editor";
@@ -46,8 +47,12 @@ export function SpacesWorkspace({
   const isAdding = selectedSpaceId === "" || (!selectedSpace && spaces.length === 0);
 
   return (
-    <Panel className="p-0 overflow-hidden">
-      <div className="flex flex-col xl:flex-row">
+    <Panel>
+      <SectionTitle
+        title="Spaces"
+        description="Create customer-readable spaces such as ballrooms, gardens, ceremony areas, and preparation suites."
+      />
+      <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
         {/* Master List */}
         <div className="border-r border-[#dbe3ef] bg-[#f8fbff] p-5 xl:w-[360px] shrink-0">
           <div className="mb-6">
