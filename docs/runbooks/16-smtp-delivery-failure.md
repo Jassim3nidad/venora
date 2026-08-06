@@ -1,4 +1,4 @@
-# Resend Email Delivery Failure
+# SMTP Email Delivery Failure
 
 ## Purpose
 
@@ -18,7 +18,7 @@ Notification/delivery ID, recipient (redacted), template/type, provider time/sta
 
 ## Safety warnings
 
-Do not log the API key or resend bulk mail. Use a dedicated test recipient for validation.
+Do not log SMTP credentials or resend bulk mail. Use a dedicated test recipient for validation.
 
 ## Investigation steps
 
@@ -56,7 +56,7 @@ Production-wide delivery failure, domain compromise, high bounce rate, or sensit
 
 ## Required secrets or permissions
 
-Resend dashboard/server env access and notification read/retry permission.
+SMTP provider/server env access and notification read/retry permission.
 
 ## Related documentation
 

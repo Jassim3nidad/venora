@@ -17,7 +17,7 @@ flowchart LR
   Webhook --> DB
   Browser --> Edge["Supabase Edge Functions"]
   Edge --> DB
-  Edge --> Resend["Resend"]
+  Edge --> SMTP["SMTP provider"]
   Edge --> Push["Web Push endpoints"]
   Edge --> AI["OpenRouter: qwen/qwen3.7-flash"]
   Browser --> Maps["OpenFreeMap / Nominatim"]
@@ -126,7 +126,7 @@ claiming, reconciliation, and idempotent database operations are mandatory.
 flowchart LR
   Event["Booking/payment/review/admin event"] --> DB["Create notification + delivery records"]
   DB --> Inbox["In-app inbox"]
-  DB --> Email["Resend email"]
+  DB --> Email["SMTP email"]
   DB --> Push["Web Push with VAPID"]
   Email --> Status["Delivery status / retry evidence"]
   Push --> Status
@@ -221,7 +221,7 @@ defenses, data minimization, timeouts, cost limits, and safe failure behavior.
 | Edge Functions            | AI and booking-notification compute; JWT/service secrets        | External timeout/error; retry only idempotent work; deployed JWT config is externally verified                      |
 | Storage                   | Public/private objects with policies                            | Signed URLs expire; retry uploads carefully; path/policy and MIME spoofing are risks                                |
 | PayMongo                  | Hosted checkout, webhook events                                 | Duplicate/late events expected; signature, event claim, and reconciliation required                                 |
-| Resend/Web Push           | Outbound delivery                                               | At-least-once/failed delivery possible; use delivery records and user preferences; never log credentials            |
+| SMTP/Web Push             | Outbound delivery                                               | At-least-once/failed delivery possible; use delivery records and user preferences; never log credentials            |
 | Map providers             | Tiles and geocoding for public venue data                       | Network/rate-policy failure; graceful map/search fallback; no Google Maps integration                               |
 | OpenRouter                | Generated output and search intent using `qwen/qwen3.7-flash`   | Timeout, rate limit, unsafe output; bound context, validate output, log metadata only                               |
 | GitHub/Vercel integration | Source and deployment orchestration                             | Configuration is outside repository and unverified; no repo workflow/vercel config exists                           |

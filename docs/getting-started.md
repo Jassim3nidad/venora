@@ -91,7 +91,7 @@ shortcut. See [Database](database.md), [Migrations](migrations.md), and
   `http://localhost:3000/auth/callback`; enable the desired email provider.
 - **PayMongo:** use test-mode secret and webhook credentials. Point the test
   webhook at `/api/webhooks/paymongo`; never use live keys locally.
-- **Resend:** use a test key and a sender/domain permitted by the account.
+- **SMTP:** use an implicit TLS test account on port 465 with an authorized sender.
 - **Web Push:** generate a VAPID key pair; private key and subject stay
   server-only.
 - **Maps:** no Google Maps setup exists. MapLibre/OpenFreeMap and OSM Nominatim

@@ -56,6 +56,36 @@ export interface RefundResult {
   status: "pending" | "succeeded" | "failed";
 }
 
+export type DisbursementMethod = "bank" | "gcash" | "paymaya";
+
+export interface CreateDisbursementParams {
+  /** Our withdrawal_requests id. Propagated as provider metadata so a
+   *  webhook can be correlated even before we store the provider ref. */
+  withdrawalId: string;
+  /** Amount in minor units (centavos). */
+  amountMinor: number;
+  currency: string;
+  method: DisbursementMethod;
+  /**
+   * The full destination account or mobile number, decrypted in memory
+   * immediately before this call. Never logged, never persisted in the
+   * clear — see features/payouts/application/payout-encryption.
+   */
+  accountIdentifier: string;
+  accountName: string;
+  /** Required for `bank`, absent for e-wallets. */
+  bankName?: string | null;
+  description: string;
+  metadata: Record<string, string>;
+}
+
+export interface DisbursementResult {
+  provider: PaymentProviderId;
+  /** Provider disbursement reference used for webhook correlation. */
+  disbursementReference: string;
+  status: "pending" | "succeeded" | "failed";
+}
+
 /**
  * Provider webhook payloads normalized to a small internal event union.
  * `ignored` carries events we intentionally do not act on.
@@ -101,6 +131,22 @@ export type NormalizedWebhookEvent = {
       refundReference: string;
       failureReason: string | null;
     }
+  // Money-out lifecycle. `withdrawalId` comes from the metadata we set on
+  // the disbursement ourselves, so it is trustworthy for correlation in a
+  // way webhook-supplied booking ids are not — the reconciler still
+  // reverifies the withdrawal's own state before settling it.
+  | {
+      kind: "disbursement.succeeded";
+      disbursementReference: string;
+      withdrawalId: string | null;
+      amountMinor: number | null;
+    }
+  | {
+      kind: "disbursement.failed";
+      disbursementReference: string;
+      withdrawalId: string | null;
+      failureReason: string | null;
+    }
   | { kind: "ignored" }
 );
 
@@ -114,6 +160,19 @@ export interface PaymentGateway {
 
   /** Issue a (full or partial) refund against a captured payment. */
   createRefund(params: CreateRefundParams): Promise<RefundResult>;
+
+  /**
+   * Send money out to a venue owner's or supplier's payout account.
+   *
+   * Not every provider or every merchant account has disbursements
+   * enabled. Implementations that cannot disburse must throw a
+   * `PaymentError` with code `DISBURSEMENT_NOT_SUPPORTED` rather than
+   * silently reporting success — the caller marks the withdrawal failed
+   * and releases the claimed payouts.
+   */
+  createDisbursement(
+    params: CreateDisbursementParams,
+  ): Promise<DisbursementResult>;
 
   /**
    * Verify the webhook signature against the raw request body.

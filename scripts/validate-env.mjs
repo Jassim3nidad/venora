@@ -8,8 +8,11 @@ const requiredEnvVars = [
   "NEXT_PUBLIC_SUPABASE_URL",
   "NEXT_PUBLIC_SUPABASE_ANON_KEY",
   "SUPABASE_SERVICE_ROLE_KEY",
-  "RESEND_API_KEY",
-  "RESEND_FROM",
+  "SMTP_HOST",
+  "SMTP_PORT",
+  "SMTP_USER",
+  "SMTP_PASS",
+  "SMTP_FROM",
   "VAPID_PUBLIC_KEY",
   "VAPID_PRIVATE_KEY",
   "VAPID_SUBJECT",
@@ -24,6 +27,13 @@ for (const envVar of requiredEnvVars) {
     );
     hasErrors = true;
   }
+}
+
+if (!["465", "2465"].includes(process.env.SMTP_PORT?.trim())) {
+  console.error(
+    "ERROR: SMTP_PORT must use an implicit TLS port supported by hosted Edge (465 or 2465).",
+  );
+  hasErrors = true;
 }
 
 const publicSupabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
@@ -69,6 +79,35 @@ if (hasTwilio) {
   );
 } else {
   console.log("OK: SMS is disabled (No Twilio configuration).");
+}
+
+// Payout account encryption. Not in requiredEnvVars: an environment that
+// never touches the earnings pages runs fine without it. But a malformed
+// key must fail loudly here rather than at the moment someone submits a
+// bank account, and an under-length key silently weakens AES-256.
+const payoutKey = process.env.PAYOUT_ENCRYPTION_KEY?.trim();
+
+if (!payoutKey) {
+  console.log(
+    "WARNING: PAYOUT_ENCRYPTION_KEY is not set. Payout accounts and withdrawals will be unavailable.",
+  );
+} else if (Buffer.from(payoutKey, "base64").length !== 32) {
+  console.error(
+    "ERROR: PAYOUT_ENCRYPTION_KEY must decode to exactly 32 bytes. Generate one with: openssl rand -base64 32",
+  );
+  hasErrors = true;
+} else {
+  console.log("OK: PAYOUT_ENCRYPTION_KEY is a valid 32-byte key.");
+}
+
+if (
+  process.env.PAYMONGO_DISBURSEMENTS_ENABLED === "true" &&
+  !process.env.PAYMONGO_SECRET_KEY?.trim()
+) {
+  console.error(
+    "ERROR: PAYMONGO_DISBURSEMENTS_ENABLED is true but PAYMONGO_SECRET_KEY is missing.",
+  );
+  hasErrors = true;
 }
 
 if (hasErrors) {
