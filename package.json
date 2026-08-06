@@ -66,10 +66,10 @@
     "test:bookings:cancellation-history": "node scripts/validate-cancellation-history.mjs"
   },
   "devDependencies": {
-    "@redocly/cli": "2.39.0",
-    "prettier": "^3.3.3",
-    "prettier-plugin-tailwindcss": "^0.6.11",
-    "turbo": "^2.3.3",
+    "@redocly/cli": "2.43.1",
+    "prettier": "^3.9.6",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "turbo": "^2.10.7",
     "yaml": "^2.9.0"
   },
   "packageManager": "pnpm@11.13.1",
