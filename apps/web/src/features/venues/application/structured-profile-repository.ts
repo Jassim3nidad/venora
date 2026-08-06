@@ -53,6 +53,7 @@ export type StructuredVenueQuery<T = unknown> = PromiseLike<DbResponse<T>> & {
 
 export type StructuredVenueDataClient = {
   from<T = unknown>(table: string): StructuredVenueQuery<T>;
+  rpc<T = unknown>(fn: string, args: unknown): StructuredVenueQuery<T>;
 };
 
 export type StructuredVenueRepositoryErrorCode =
@@ -527,6 +528,28 @@ async function listRows<T>(
   return ok(data ?? []);
 }
 
+export type StructuredProfileLifecycleState =
+  | {
+      kind: "none";
+      draftRevision: null;
+      publishedRevision: null;
+    }
+  | {
+      kind: "draft_only";
+      draftRevision: VenueProfileRevision;
+      publishedRevision: null;
+    }
+  | {
+      kind: "published_only";
+      draftRevision: null;
+      publishedRevision: VenueProfileRevision;
+    }
+  | {
+      kind: "published_with_draft";
+      draftRevision: VenueProfileRevision;
+      publishedRevision: VenueProfileRevision;
+    };
+
 export const structuredVenueProfileRepository = {
   async findDraftRevisionForVenue(
     client: StructuredVenueDataClient,
@@ -558,6 +581,32 @@ export const structuredVenueProfileRepository = {
     return ok(data ? mapRevision(data) : null);
   },
 
+  async resolveStructuredProfileLifecycle(
+    client: StructuredVenueDataClient,
+    venueId: string,
+  ): Promise<StructuredVenueRepositoryResult<StructuredProfileLifecycleState>> {
+    const draft = await this.findDraftRevisionForVenue(client, venueId);
+    if (!draft.ok) return draft;
+
+    const published = await this.findPublishedRevisionForVenue(client, venueId);
+    if (!published.ok) return published;
+
+    if (!draft.data && !published.data) {
+      return ok({ kind: "none", draftRevision: null, publishedRevision: null });
+    }
+    if (draft.data && !published.data) {
+      return ok({ kind: "draft_only", draftRevision: draft.data, publishedRevision: null });
+    }
+    if (!draft.data && published.data) {
+      return ok({ kind: "published_only", draftRevision: null, publishedRevision: published.data });
+    }
+    return ok({
+      kind: "published_with_draft",
+      draftRevision: draft.data!,
+      publishedRevision: published.data!,
+    });
+  },
+
   async getOrCreateDraftRevisionForVenue(
     client: StructuredVenueDataClient,
     venueId: string,
@@ -568,7 +617,7 @@ export const structuredVenueProfileRepository = {
 
     const latest = await client
       .from<RevisionRow>("venue_profile_revisions")
-      .select(revisionColumns)
+      .select("revision_number")
       .eq("venue_id", venueId)
       .order("revision_number", { ascending: false })
       .limit(1)
@@ -576,20 +625,47 @@ export const structuredVenueProfileRepository = {
 
     if (latest.error) return fail(mapError(latest.error));
 
-    const created = await runQuery(
-      client
-        .from<RevisionRow>("venue_profile_revisions")
-        .insert({
-          venue_id: venueId,
-          status: "draft",
-          revision_number: latest.data ? latest.data.revision_number + 1 : 1,
-          created_from_revision_id: latest.data?.id ?? null,
-        })
-        .select(revisionColumns)
-        .single(),
-    );
+    const newRevisionNumber = latest.data ? latest.data.revision_number + 1 : 1;
 
-    return created.ok ? ok(mapRevision(created.data)) : created;
+    const published = await this.findPublishedRevisionForVenue(client, venueId);
+    if (!published.ok) return published;
+
+    let newRevisionId: string;
+
+    if (published.data) {
+      const cloned = await runQuery(
+        client.rpc<string>("clone_structured_venue_revision", {
+          p_venue_id: venueId,
+          p_source_revision_id: published.data.id,
+          p_new_revision_number: newRevisionNumber,
+        })
+      );
+      if (!cloned.ok) return fail(mapError(cloned.error));
+      newRevisionId = cloned.data;
+    } else {
+      const created = await runQuery(
+        client
+          .from<RevisionRow>("venue_profile_revisions")
+          .insert({
+            venue_id: venueId,
+            status: "draft",
+            revision_number: newRevisionNumber,
+            created_from_revision_id: null,
+          })
+          .select("id")
+          .single(),
+      );
+      if (!created.ok) return fail(mapError(created.error));
+      newRevisionId = created.data.id;
+    }
+
+    const fetched = await client
+      .from<RevisionRow>("venue_profile_revisions")
+      .select(revisionColumns)
+      .eq("id", newRevisionId)
+      .single();
+
+    return fetched.error ? fail(mapError(fetched.error)) : ok(mapRevision(fetched.data!));
   },
 
   async publishDraftRevisionForVenue(
@@ -880,6 +956,29 @@ export const structuredVenueProfileRepository = {
           is_featured: input.isFeatured,
           status: "draft",
         })
+        .select(mediaItemColumns)
+        .single(),
+    );
+
+    return result.ok ? ok(mapMediaItem(result.data)) : result;
+  },
+
+  async updateMediaItem(
+    client: StructuredVenueDataClient,
+    input: { venueId: string; collectionId: string; itemId: string; altText?: string | null | undefined; caption?: string | null | undefined; isFeatured?: boolean },
+  ): Promise<StructuredVenueRepositoryResult<VenueMediaItem>> {
+    const updateData: any = {};
+    if (input.altText !== undefined) updateData.alt_text = input.altText;
+    if (input.caption !== undefined) updateData.caption = input.caption;
+    if (input.isFeatured !== undefined) updateData.is_featured = input.isFeatured;
+
+    const result = await runQuery(
+      client
+        .from<MediaItemRow>("venue_media_items")
+        .update(updateData)
+        .eq("id", input.itemId)
+        .eq("venue_id", input.venueId)
+        .eq("collection_id", input.collectionId)
         .select(mediaItemColumns)
         .single(),
     );

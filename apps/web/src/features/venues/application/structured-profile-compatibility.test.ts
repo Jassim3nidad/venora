@@ -103,6 +103,10 @@ class MockStructuredVenueClient implements StructuredVenueDataClient {
     return new MockQuery<T>(this, table);
   }
 
+  rpc<T = unknown>(fn: string, args: unknown) {
+    return new MockQuery<T>(this, `rpc:${fn}`);
+  }
+
   resolve<T>(query: MockQuery<T>): MockResponse<T> {
     this.calls.push({
       table: query.table,

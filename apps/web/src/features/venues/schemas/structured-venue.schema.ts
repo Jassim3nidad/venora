@@ -15,8 +15,7 @@ const MAX_CAPACITY = 100_000;
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const rawHtmlPattern = /<[a-z][\s\S]*>/i;
 const timePattern = /^([01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/;
-const storagePathPattern =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\/[^<>\\]+$/i;
+const storagePathPattern = /^[^<>\\]+$/i;
 
 const uuidSchema = z.string().uuid();
 const nonnegativeIntSchema = z.number().int().min(0);
@@ -65,9 +64,21 @@ function assertNoDuplicateIds(
 function parseStoragePath(value: string) {
   const parts = value.split("/");
 
+  if (parts.length >= 3) {
+    return {
+      organizationId: parts[0],
+      venueId: parts[1],
+    };
+  } else if (parts.length === 2) {
+    return {
+      organizationId: null,
+      venueId: parts[0],
+    };
+  }
+
   return {
-    organizationId: parts[0],
-    venueId: parts[1],
+    organizationId: null,
+    venueId: null,
   };
 }
 
@@ -341,7 +352,7 @@ export const mediaItemSchema = z
 
     if (value.storagePath) {
       const pathParts = parseStoragePath(value.storagePath);
-      if (pathParts.venueId !== value.venueId) {
+      if (pathParts.venueId && pathParts.venueId !== value.venueId) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["storagePath"],
@@ -383,6 +394,19 @@ export const mediaItemSchema = z
   });
 
 export type MediaItemInput = z.infer<typeof mediaItemSchema>;
+
+export const updateMediaItemSchema = z
+  .object({
+    venueId: uuidSchema,
+    collectionId: uuidSchema,
+    itemId: uuidSchema,
+    altText: optionalPlainText(300),
+    caption: optionalPlainText(500),
+    isFeatured: z.boolean().default(false),
+  })
+  .strict();
+
+export type UpdateMediaItemInput = z.infer<typeof updateMediaItemSchema>;
 
 export const venueLogisticsSchema = baseVenueRevisionScopeSchema
   .extend({

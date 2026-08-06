@@ -10,7 +10,6 @@
  * instead of optimizing through Next's image loader.
  */
 const OPTIMIZABLE_HOST_PATTERNS: RegExp[] = [
-  /(^|\.)supabase\.co$/,
   /^images\.unsplash\.com$/,
   /^lh3\.googleusercontent\.com$/,
 ];

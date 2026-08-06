@@ -103,6 +103,12 @@ class MockStructuredVenueClient implements StructuredVenueDataClient {
     return new MockQuery<T>(this, table);
   }
 
+  rpc<T = unknown>(fn: string, args: unknown) {
+    const query = new MockQuery<T>(this, `rpc:${fn}`);
+    query.operations.push({ name: "rpc", args: [args] });
+    return query;
+  }
+
   resolve<T>(query: MockQuery<T>): MockResponse<T> {
     this.calls.push({
       table: query.table,
@@ -180,9 +186,11 @@ describe("structured venue profile repository", () => {
       created_from_revision_id: revisionRow.id,
     };
     const client = new MockStructuredVenueClient([
-      { data: null, error: null },
-      { data: revisionRow, error: null },
-      { data: createdRow, error: null },
+      { data: null, error: null }, // draft
+      { data: { revision_number: 3 }, error: null }, // latest revision number
+      { data: revisionRow, error: null }, // published
+      { data: createdRow.id, error: null }, // rpc returns string
+      { data: createdRow, error: null }, // final select
     ]);
 
     const result =
@@ -192,17 +200,96 @@ describe("structured venue profile repository", () => {
       );
 
     expect(result.ok).toBe(true);
-    const insertCall = client.calls.find((call) =>
-      call.operations.some((operation) => operation.name === "insert"),
+    const rpcCall = client.calls.find((call) =>
+      call.table === "rpc:clone_structured_venue_revision",
     );
-    const insertOperation = insertCall?.operations.find(
-      (operation) => operation.name === "insert",
+    const rpcOperation = rpcCall?.operations.find(
+      (operation) => operation.name === "rpc",
     );
-    expect(insertOperation?.args[0]).toMatchObject({
-      venue_id: revisionRow.venue_id,
-      status: "draft",
-      revision_number: 4,
-      created_from_revision_id: revisionRow.id,
+    expect(rpcOperation?.args[0]).toMatchObject({
+      p_venue_id: revisionRow.venue_id,
+      p_source_revision_id: revisionRow.id,
+      p_new_revision_number: 4,
+    });
+  });
+
+  describe("resolveStructuredProfileLifecycle", () => {
+    it("returns none when no revisions exist", async () => {
+      const client = new MockStructuredVenueClient([
+        { data: null, error: null }, // draft
+        { data: null, error: null }, // published
+      ]);
+
+      const result = await structuredVenueProfileRepository.resolveStructuredProfileLifecycle(
+        client,
+        revisionRow.venue_id,
+      );
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data.kind).toBe("none");
+        expect(result.data.draftRevision).toBeNull();
+        expect(result.data.publishedRevision).toBeNull();
+      }
+    });
+
+    it("returns draft_only when only a draft exists", async () => {
+      const client = new MockStructuredVenueClient([
+        { data: revisionRow, error: null }, // draft
+        { data: null, error: null }, // published
+      ]);
+
+      const result = await structuredVenueProfileRepository.resolveStructuredProfileLifecycle(
+        client,
+        revisionRow.venue_id,
+      );
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data.kind).toBe("draft_only");
+        expect(result.data.draftRevision).toBeDefined();
+        expect(result.data.publishedRevision).toBeNull();
+      }
+    });
+
+    it("returns published_only when only a published revision exists", async () => {
+      const publishedRow = { ...revisionRow, status: "published" };
+      const client = new MockStructuredVenueClient([
+        { data: null, error: null }, // draft
+        { data: publishedRow, error: null }, // published
+      ]);
+
+      const result = await structuredVenueProfileRepository.resolveStructuredProfileLifecycle(
+        client,
+        revisionRow.venue_id,
+      );
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data.kind).toBe("published_only");
+        expect(result.data.draftRevision).toBeNull();
+        expect(result.data.publishedRevision).toBeDefined();
+      }
+    });
+
+    it("returns published_with_draft when both exist", async () => {
+      const publishedRow = { ...revisionRow, status: "published", id: "published-id" };
+      const client = new MockStructuredVenueClient([
+        { data: revisionRow, error: null }, // draft
+        { data: publishedRow, error: null }, // published
+      ]);
+
+      const result = await structuredVenueProfileRepository.resolveStructuredProfileLifecycle(
+        client,
+        revisionRow.venue_id,
+      );
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data.kind).toBe("published_with_draft");
+        expect(result.data.draftRevision).toBeDefined();
+        expect(result.data.publishedRevision).toBeDefined();
+      }
     });
   });
 

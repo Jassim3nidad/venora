@@ -16,6 +16,7 @@ import {
   Save,
   Send,
   Trash2,
+  PenLine,
 } from "lucide-react";
 import { cn } from "@venora/lib";
 import { SpacesWorkspace } from "./_components/spaces-workspace/spaces-workspace";
@@ -41,7 +42,7 @@ import {
   createVenueFaqAction,
   createVenueSpaceAction,
   discardDraftStructuredVenueProfileAction,
-  getOrCreateDraftStructuredVenueProfileAction,
+  beginStructuredProfileEditAction,
   publishStructuredVenueProfileAction,
   reorderVenueFaqsAction,
   reorderVenueMediaItemsAction,
@@ -53,6 +54,7 @@ import {
   saveVenueLogisticsAction,
   saveVenueMediaCollectionAction,
   saveVenueMediaItemAction,
+  updateVenueMediaItemAction,
   updateVenueSpaceAction,
 } from "@/src/features/venues/application/structured-profile-actions";
 import {
@@ -266,7 +268,7 @@ export function StructuredVenueEditorClient({
 
   function createDraft() {
     runAction("Creating draft...", () =>
-      getOrCreateDraftStructuredVenueProfileAction({ venueId: venue.id }),
+      beginStructuredProfileEditAction({ venueId: venue.id }),
     );
   }
 
@@ -529,35 +531,42 @@ export function StructuredVenueEditorClient({
     );
   }
 
-  function addExistingMedia(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  function addExistingMedia(collectionId: string, images: VenueImage[]) {
     if (!draftProfile) return;
-    const form = new FormData(event.currentTarget);
-    const collectionId = field(form, "collectionId");
-    const imageId = field(form, "imageId");
-    const image = venueImages.find((item) => item.id === imageId);
     const collection = draftProfile.mediaCollections.find(
       (item) => item.id === collectionId,
     );
-    if (!image || !collection) return;
+    if (!collection) return;
 
-    runAction("Adding media metadata...", () =>
-      saveVenueMediaItemAction({
-        venueId: venue.id,
-        collectionId,
-        spaceId: collection.spaceId,
-        storagePath: image.storage_path,
-        legacyVenueImageId: image.id,
-        mediaType: image.media_type === "video" ? "video" : "image",
-        altText: nullableField(form, "altText") ?? image.alt_text,
-        caption: nullableField(form, "caption"),
-        transcript: nullableField(form, "transcript"),
-        displayOrder: draftProfile.mediaItems.filter(
-          (item) => item.collectionId === collectionId,
-        ).length,
-        isFeatured: form.get("isFeatured") === "on",
-      }),
-    );
+    runAction("Adding media to gallery...", async () => {
+      let lastResult: any = { error: null };
+      
+      for (const image of images) {
+        if (!image) continue;
+
+        // Since we are adding sequentially, we compute a rising display order locally or rely on the backend.
+        // We just pass a basic 0 order since backend will append, or we use the current length.
+        // For simplicity, we can pass 0 or a fixed length (it might overlap if done rapidly without waiting, but await fixes that)
+        lastResult = await saveVenueMediaItemAction({
+          venueId: venue.id,
+          collectionId,
+          spaceId: collection.spaceId,
+          storagePath: image.storage_path,
+          legacyVenueImageId: image.id,
+          mediaType: image.media_type === "video" ? "video" : "image",
+          altText: image.alt_text,
+          caption: null,
+          transcript: null,
+          displayOrder: 999, // push to end
+          isFeatured: false,
+        });
+        
+        if (lastResult?.error) {
+          break; // Stop on first error
+        }
+      }
+      return lastResult;
+    });
   }
 
   function reorderMediaItem(item: VenueMediaItem, direction: "up" | "down") {
@@ -584,6 +593,19 @@ export function StructuredVenueEditorClient({
         venueId: venue.id,
         collectionId: item.collectionId,
         orderedIds: next.map((mediaItem) => mediaItem.id),
+      }),
+    );
+  }
+
+  function updateMediaItem(item: VenueMediaItem, updates: Partial<VenueMediaItem>) {
+    return runAction("Updating media...", () =>
+      updateVenueMediaItemAction({
+        venueId: venue.id,
+        collectionId: item.collectionId,
+        itemId: item.id,
+        altText: updates.altText,
+        caption: updates.caption,
+        isFeatured: updates.isFeatured,
       }),
     );
   }
@@ -621,6 +643,82 @@ export function StructuredVenueEditorClient({
   }
 
   if (!draftProfile) {
+    const isUpdating = !!publishedProfile;
+
+    if (isUpdating) {
+      const activeSpaces = publishedProfile.spaces;
+      const activeCollections = publishedProfile.mediaCollections;
+      const activeFaqs = publishedProfile.faqs;
+      const activePackages = packages.filter(p => p.is_active);
+
+      return (
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <Panel className="min-h-[420px]">
+            <div className="max-w-3xl">
+              <span className="inline-flex rounded-full bg-[#ecfdf5] px-3 py-1 text-xs font-bold uppercase tracking-wide text-[#047857]">
+                Structured profile published
+              </span>
+              <h2 className="mt-5 text-2xl font-bold tracking-tight text-[#0f172a]">
+                Your structured profile is live
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-[#475569]">
+                Your current structured profile is visible to customers. Editing creates a private draft, and the published version remains live until you publish the updates.
+              </p>
+              
+              <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-xl border border-[#dbe3ef] bg-white p-4">
+                  <span className="block text-xl font-bold text-[#0f172a]">{activeSpaces.length}</span>
+                  <span className="text-xs font-medium text-[#64748b] uppercase tracking-wider">Spaces</span>
+                </div>
+                <div className="rounded-xl border border-[#dbe3ef] bg-white p-4">
+                  <span className="block text-xl font-bold text-[#0f172a]">{activeCollections.length}</span>
+                  <span className="text-xs font-medium text-[#64748b] uppercase tracking-wider">Galleries</span>
+                </div>
+                <div className="rounded-xl border border-[#dbe3ef] bg-white p-4">
+                  <span className="block text-xl font-bold text-[#0f172a]">{activeFaqs.length}</span>
+                  <span className="text-xs font-medium text-[#64748b] uppercase tracking-wider">FAQs</span>
+                </div>
+                <div className="rounded-xl border border-[#dbe3ef] bg-white p-4">
+                  <span className="block text-xl font-bold text-[#0f172a]">{activePackages.length}</span>
+                  <span className="text-xs font-medium text-[#64748b] uppercase tracking-wider">Packages</span>
+                </div>
+              </div>
+
+              <div className="mt-8 flex flex-wrap gap-4">
+                <button
+                  type="button"
+                  onClick={createDraft}
+                  disabled={isPending}
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#1d4ed8] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#1e40af] disabled:opacity-60"
+                >
+                  <PenLine className="h-4 w-4" />
+                  Edit profile
+                </button>
+                <DashButton
+                  href={`/venues/${venue.slug ?? venue.id}`}
+                  variant="secondary"
+                  icon="visibility"
+                  className="h-11 rounded-xl bg-white"
+                >
+                  View public profile
+                </DashButton>
+              </div>
+            </div>
+          </Panel>
+          <VenueProfileHeader
+            venue={venue}
+            profileStatus={profileStatus}
+            actionState={actionState}
+            canPublish={canPublish}
+            publishIssues={publishIssues}
+            hasDraft={false}
+            onPublish={publishDraft}
+            onDiscard={discardDraft}
+          />
+        </div>
+      );
+    }
+
     return (
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <Panel className="min-h-[420px]">
@@ -632,9 +730,7 @@ export function StructuredVenueEditorClient({
               Prepare a richer venue experience
             </h2>
             <p className="mt-3 text-sm leading-6 text-[#475569]">
-              Your current public venue page remains visible while you build a
-              private structured draft for spaces, media groups, logistics,
-              FAQs, and package-space relationships.
+              Your current public venue page remains visible while you build a private structured draft for spaces, media groups, logistics, FAQs, and package-space relationships.
             </p>
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
               {["Private draft", "Preview before publish", "Owner approval"].map(
@@ -730,6 +826,7 @@ export function StructuredVenueEditorClient({
             onAddExistingMedia={addExistingMedia}
             onArchiveItem={archiveMediaItem}
             onReorderItem={reorderMediaItem}
+            onUpdateItem={updateMediaItem}
             organizationId={venue.organization_id}
           />
         ) : null}

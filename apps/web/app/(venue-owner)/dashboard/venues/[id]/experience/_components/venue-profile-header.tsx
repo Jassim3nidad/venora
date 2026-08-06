@@ -39,10 +39,17 @@ export function VenueProfileHeader({
   const location = [venue.city, venue.province].filter(Boolean).join(", ");
   
   return (
-    <div className="sticky top-0 z-40 mb-6 flex flex-col gap-4 border-b border-[#dbe3ef] bg-white/95 px-5 py-4 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between sm:px-8">
-      <div>
-        <h1 className="text-xl font-bold text-[#0f172a]">{venue.name}</h1>
-        <div className="mt-1 flex items-center gap-2 text-sm text-[#64748b]">
+    <div 
+      className={cn(
+        "sticky top-0 z-40 mb-6 flex gap-4 border-b border-[#dbe3ef] bg-white/95 px-5 py-4 backdrop-blur-md",
+        hasDraft 
+          ? "flex-col sm:flex-row sm:items-center sm:justify-between sm:px-8" 
+          : "flex-col items-start"
+      )}
+    >
+      <div className="min-w-0 flex-1">
+        <h1 className="truncate text-xl font-bold text-[#0f172a]" title={venue.name}>{venue.name}</h1>
+        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-[#64748b]">
           {location ? <span>{location}</span> : null}
           {location ? <span className="text-[#cbd5e1]">&bull;</span> : null}
           <span className="font-semibold text-[#0f172a]">{profileStatus}</span>
@@ -60,7 +67,7 @@ export function VenueProfileHeader({
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className={cn("flex flex-wrap items-center gap-2", hasDraft ? "shrink-0" : "w-full")}>
         <DashButton
           href={`/dashboard/venues/${venue.id}/edit`}
           variant="secondary"

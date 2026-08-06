@@ -24,6 +24,7 @@ import {
   updateVenueSpaceSchema,
   venueFaqSchema,
   venueLogisticsSchema,
+  updateMediaItemSchema,
 } from "../schemas/structured-venue.schema";
 import {
   structuredVenueProfileRepository,
@@ -193,19 +194,36 @@ async function revalidateStructuredVenuePaths(
   }
 }
 
-export async function getOrCreateDraftStructuredVenueProfileAction(
+export async function beginStructuredProfileEditAction(
   rawInput: unknown,
 ) {
   return createServerAction(
     venueScopeSchema,
     async (input) => {
       const { supabase } = await requireStructuredVenueMutationUser();
-      const draft =
-        await structuredVenueProfileRepository.getOrCreateDraftRevisionForVenue(
+      
+      const lifecycleResult = await structuredVenueProfileRepository.resolveStructuredProfileLifecycle(
+        supabase,
+        input.venueId,
+      );
+      const lifecycle = unwrapRepositoryResult(lifecycleResult);
+
+      let draftResult;
+      
+      if (lifecycle.kind === "draft_only" || lifecycle.kind === "published_with_draft") {
+        draftResult = { ok: true as const, data: lifecycle.draftRevision };
+      } else {
+        // This internally handles cloning from published if published_only, or creating fresh if none
+        draftResult = await structuredVenueProfileRepository.getOrCreateDraftRevisionForVenue(
           supabase,
           input.venueId,
         );
-      const data = unwrapRepositoryResult(draft);
+      }
+
+      if (draftResult.ok === false) {
+        console.error("Draft creation error:", draftResult.error);
+      }
+      const data = unwrapRepositoryResult(draftResult);
       await revalidateStructuredVenuePaths(supabase, input.venueId);
       return data;
     },
@@ -399,6 +417,23 @@ export async function saveVenueMediaItemAction(rawInput: unknown) {
     async (input) => {
       const { supabase } = await requireStructuredVenueMutationUser();
       const item = await structuredVenueProfileRepository.upsertMediaItem(
+        supabase,
+        input,
+      );
+      const data = unwrapRepositoryResult(item);
+      await revalidateStructuredVenuePaths(supabase, input.venueId);
+      return data;
+    },
+    rawInput,
+  );
+}
+
+export async function updateVenueMediaItemAction(rawInput: unknown) {
+  return createServerAction(
+    updateMediaItemSchema,
+    async (input) => {
+      const { supabase } = await requireStructuredVenueMutationUser();
+      const item = await structuredVenueProfileRepository.updateMediaItem(
         supabase,
         input,
       );
