@@ -20,6 +20,7 @@ import {
 import { cn } from "@venora/lib";
 import { SpacesWorkspace } from "./_components/spaces-workspace/spaces-workspace";
 import { MediaWorkspace } from "./_components/media-workspace/media-workspace";
+import { LogisticsWorkspace } from "./_components/logistics-workspace/logistics-workspace";
 import {
   DashButton,
   Panel,
@@ -729,7 +730,7 @@ export function StructuredVenueEditorClient({
           />
         ) : null}
         {section === "logistics" ? (
-          <LogisticsSection profile={draftProfile} onSave={saveLogistics} />
+          <LogisticsWorkspace profile={draftProfile} onSave={saveLogistics} />
         ) : null}
         {section === "faqs" ? (
           <FaqSection
@@ -833,74 +834,7 @@ function OverviewSection({
 }
 
 
-function LogisticsSection({
-  profile,
-  onSave,
-}: {
-  profile: DraftStructuredVenueProfile;
-  onSave: (event: FormEvent<HTMLFormElement>) => void;
-}) {
-  const logistics = profile.logistics;
-  return (
-    <Panel>
-      <SectionTitle
-        title="Logistics"
-        description="Give customers the practical information they need before booking."
-      />
-      <form onSubmit={onSave} className="grid gap-5 lg:grid-cols-2">
-        <Field label="Parking capacity">
-          <input name="parkingCapacity" type="number" min="0" defaultValue={logistics?.parkingCapacity ?? ""} className={inputClass} />
-        </Field>
-        <Field label="Curfew time">
-          <input name="curfewTime" type="time" defaultValue={logistics?.curfewTime ?? ""} className={inputClass} />
-        </Field>
-        <Field label="Parking notes" className="sm:col-span-2">
-          <textarea name="parkingNotes" rows={3} defaultValue={logistics?.parkingNotes ?? ""} className={textareaClass} />
-        </Field>
-        <Field label="Accessibility notes">
-          <textarea name="accessibilityNotes" rows={4} defaultValue={logistics?.accessibilityNotes ?? ""} className={textareaClass} />
-        </Field>
-        <Field label="Arrival directions">
-          <textarea name="arrivalNotes" rows={4} defaultValue={logistics?.arrivalNotes ?? ""} className={textareaClass} />
-        </Field>
-        <Field label="Public transportation">
-          <textarea name="publicTransportationNotes" rows={3} defaultValue={logistics?.publicTransportationNotes ?? ""} className={textareaClass} />
-        </Field>
-        <Field label="Weather backup">
-          <textarea name="weatherBackupNotes" rows={3} defaultValue={logistics?.weatherBackupNotes ?? ""} className={textareaClass} />
-          <label className="mt-2 flex items-center gap-2 text-sm font-bold text-[#334155]">
-            <input name="weatherBackupAvailable" type="checkbox" defaultChecked={Boolean(logistics?.weatherBackupAvailable)} />
-            Backup area available
-          </label>
-        </Field>
-        <Field label="Noise restrictions">
-          <textarea name="noiseRestrictions" rows={3} defaultValue={logistics?.noiseRestrictions ?? ""} className={textareaClass} />
-        </Field>
-        <Field label="Setup rules">
-          <textarea name="setupRules" rows={3} defaultValue={logistics?.setupRules ?? ""} className={textareaClass} />
-        </Field>
-        <Field label="Teardown rules">
-          <textarea name="teardownRules" rows={3} defaultValue={logistics?.teardownRules ?? ""} className={textareaClass} />
-        </Field>
-        <Field label="External supplier rules">
-          <textarea name="externalSupplierRules" rows={3} defaultValue={logistics?.externalSupplierRules ?? ""} className={textareaClass} />
-        </Field>
-        <Field label="Pet policy">
-          <textarea name="petPolicy" rows={3} defaultValue={logistics?.petPolicy ?? ""} className={textareaClass} />
-        </Field>
-        <Field label="Smoking policy">
-          <textarea name="smokingPolicy" rows={3} defaultValue={logistics?.smokingPolicy ?? ""} className={textareaClass} />
-        </Field>
-        <Field label="Other practical notes" className="sm:col-span-2">
-          <textarea name="otherNotes" rows={4} defaultValue={logistics?.otherNotes ?? ""} className={textareaClass} />
-        </Field>
-        <div className="sm:col-span-2">
-          <SubmitButton label="Save logistics" />
-        </div>
-      </form>
-    </Panel>
-  );
-}
+
 
 function FaqSection({
   profile,
