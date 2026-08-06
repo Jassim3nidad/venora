@@ -10,7 +10,7 @@
   "devDependencies": {
     "@next/eslint-plugin-next": "15.3.3",
     "eslint": "^9.0.0",
-    "eslint-config-next": "15.3.3",
+    "eslint-config-next": "16.2.12",
     "eslint-plugin-tailwindcss": "^3.17.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jsx-a11y": "^6.10.0",
