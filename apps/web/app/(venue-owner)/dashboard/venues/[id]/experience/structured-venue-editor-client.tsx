@@ -22,6 +22,7 @@ import { SpacesWorkspace } from "./_components/spaces-workspace/spaces-workspace
 import { MediaWorkspace } from "./_components/media-workspace/media-workspace";
 import { LogisticsWorkspace } from "./_components/logistics-workspace/logistics-workspace";
 import { FaqWorkspace } from "./_components/faq-workspace/faq-workspace";
+import { PackageSpaceWorkspace } from "./_components/package-space-workspace/package-space-workspace";
 import {
   DashButton,
   Panel,
@@ -742,7 +743,7 @@ export function StructuredVenueEditorClient({
           />
         ) : null}
         {section === "packages" ? (
-          <PackagesSection
+          <PackageSpaceWorkspace
             packages={packages}
             spaces={activeSpaces}
             profile={draftProfile}
@@ -839,102 +840,7 @@ function OverviewSection({
 
 
 
-function PackagesSection({
-  packages,
-  spaces,
-  profile,
-  onSave,
-}: {
-  packages: PackageRow[];
-  spaces: VenueSpace[];
-  profile: DraftStructuredVenueProfile;
-  onSave: (event: FormEvent<HTMLFormElement>, packageId: string) => void;
-}) {
-  const activePackages = packages.filter((pkg) => pkg.is_active);
-  return (
-    <Panel>
-      <SectionTitle
-        title="Packages"
-        description="Connect existing packages to one or more spaces without changing package pricing."
-      />
-      {activePackages.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-8 text-center text-sm text-[#64748b]">
-          No active packages yet. Create packages from the package dashboard first.
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {activePackages.map((pkg) => {
-            const linked = profile.packageSpaces.filter(
-              (link) => link.packageId === pkg.id,
-            );
-            const linkedIds = new Set(linked.map((link) => link.spaceId));
-            return (
-              <form
-                key={pkg.id}
-                onSubmit={(event) => onSave(event, pkg.id)}
-                className={editorCardClass}
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <h3 className="text-lg font-bold text-[#0f172a]">{pkg.name}</h3>
-                    <p className="mt-1 text-sm text-[#64748b]">
-                      {peso(pkg.price)} · {pkg.price_unit.replace(/_/g, " ")}
-                    </p>
-                  </div>
-                  <StatusBadge status="active" label={`${linked.length} spaces`} />
-                </div>
-                <div className="mt-5 grid gap-4">
-                  {spaces.length === 0 ? (
-                    <p className="text-sm text-[#64748b]">
-                      Add a space before linking packages.
-                    </p>
-                  ) : (
-                    spaces.map((space) => {
-                      const link = linked.find((item) => item.spaceId === space.id);
-                      return (
-                        <div key={space.id} className="rounded-lg border border-[#e5e7eb] bg-[#f8fafc] p-4">
-                          <label className="flex items-center gap-3 text-base font-bold text-[#0f172a]">
-                            <input
-                              name="spaceIds"
-                              type="checkbox"
-                              value={space.id}
-                              defaultChecked={linkedIds.has(space.id)}
-                            />
-                            {space.name}
-                          </label>
-                          <div className="mt-4 grid gap-3 md:grid-cols-2">
-                            <select
-                              name={`inclusionType-${space.id}`}
-                              defaultValue={link?.inclusionType ?? "included"}
-                              className={inputClass}
-                            >
-                              {PACKAGE_VENUE_SPACE_INCLUSION_TYPES.map((value) => (
-                                <option key={value} value={value}>
-                                  {getPackageVenueSpaceInclusionTypeLabel(value)}
-                                </option>
-                              ))}
-                            </select>
-                            <input
-                              name={`notes-${space.id}`}
-                              defaultValue={link?.inclusionNotes ?? ""}
-                              className={inputClass}
-                              placeholder="Inclusion notes"
-                            />
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-                <SubmitButton label="Save package spaces" />
-              </form>
-            );
-          })}
-        </div>
-      )}
-    </Panel>
-  );
-}
+
 
 function PreviewSection({
   venue,
