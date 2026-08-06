@@ -197,7 +197,22 @@ export function getProfileSectionStatuses(
     });
   }
 
+  const mediaIssues: ProfileIssue[] = [];
+  if (!hasMedia) {
+    mediaIssues.push({
+      id: "no-media",
+      sectionId: "media",
+      severity: "recommended",
+      title: "Add venue photos",
+      description: "Listings with photos receive significantly more inquiries.",
+      actionLabel: "Add media",
+      target: { sectionId: "media" }
+    });
+  }
+
   const allRequiredIssues = [...spacesIssues, ...logisticsIssues].filter(i => i.severity === "required");
+  const allRecommendedIssues = [...mediaIssues].filter(i => i.severity === "recommended");
+  const allIssues = [...allRequiredIssues, ...allRecommendedIssues];
 
   return {
     overview: {
@@ -228,7 +243,7 @@ export function getProfileSectionStatuses(
       completedItems: profile.mediaItems.length,
       totalItems: profile.mediaItems.length,
       summary: hasMedia ? `${profile.mediaCollections.length} galleries` : "Not started",
-      issues: [],
+      issues: mediaIssues,
     },
     logistics: {
       id: "logistics",
@@ -268,7 +283,7 @@ export function getProfileSectionStatuses(
       completedItems: allRequiredIssues.length === 0 ? 1 : 0,
       totalItems: 1,
       summary: allRequiredIssues.length > 0 ? `${allRequiredIssues.length} issues` : "Ready to publish",
-      issues: allRequiredIssues,
+      issues: allIssues,
     },
   };
 }

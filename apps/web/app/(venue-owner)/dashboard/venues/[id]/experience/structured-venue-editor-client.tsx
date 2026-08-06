@@ -23,6 +23,7 @@ import { MediaWorkspace } from "./_components/media-workspace/media-workspace";
 import { LogisticsWorkspace } from "./_components/logistics-workspace/logistics-workspace";
 import { FaqWorkspace } from "./_components/faq-workspace/faq-workspace";
 import { PackageSpaceWorkspace } from "./_components/package-space-workspace/package-space-workspace";
+import { ReviewPublishWorkspace } from "./_components/review-publish-workspace/review-publish-workspace";
 import {
   DashButton,
   Panel,
@@ -751,12 +752,13 @@ export function StructuredVenueEditorClient({
           />
         ) : null}
         {section === "review" ? (
-          <PreviewSection
+          <ReviewPublishWorkspace
             venue={venue}
             profile={draftProfile}
-            publishIssues={publishIssues}
+            statuses={statuses}
             canPublish={canPublish}
             onPublish={publishDraft}
+            onNavigate={(id) => setSection(id)}
           />
         ) : null}
       </div>
@@ -842,70 +844,7 @@ function OverviewSection({
 
 
 
-function PreviewSection({
-  venue,
-  profile,
-  publishIssues,
-  canPublish,
-  onPublish,
-}: {
-  venue: Venue;
-  profile: DraftStructuredVenueProfile;
-  publishIssues: string[];
-  canPublish: boolean;
-  onPublish: () => void;
-}) {
-  return (
-    <Panel padding={false} className="overflow-hidden">
-      <div className="border-b border-[#e5e7eb] bg-amber-50 px-5 py-3 text-sm font-bold text-amber-900">
-        Preview - these changes are not visible to customers yet.
-      </div>
-      <div className="p-5 sm:p-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-[#0f172a]">{venue.name}</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#64748b]">
-              {venue.description || "Venue description will use the current base listing until structured copy is added in a later phase."}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <DashButton href={`/dashboard/venues/${venue.id}/experience/preview`} variant="secondary" icon="visibility">
-              Full Preview
-            </DashButton>
-            <button
-              type="button"
-              onClick={onPublish}
-              disabled={!canPublish || publishIssues.length > 0}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-[#1d4ed8] px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"
-            >
-              <Send className="h-4 w-4" />
-              Publish
-            </button>
-          </div>
-        </div>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2">
-          {profile.spaces.filter((space) => space.status !== "archived").map((space) => (
-            <div key={space.id} className="rounded-xl border border-[#dbe3ef] p-4">
-              <p className="text-xs font-bold uppercase tracking-wider text-[#1d4ed8]">
-                {getVenueSpaceSettingLabel(space.setting)}
-              </p>
-              <h3 className="mt-2 text-lg font-bold text-[#0f172a]">{space.name}</h3>
-              <p className="mt-2 text-sm text-[#64748b]">
-                Up to {space.capacityMax} guests
-              </p>
-              {space.description ? (
-                <p className="mt-3 text-sm leading-6 text-[#475569]">
-                  {space.description}
-                </p>
-              ) : null}
-            </div>
-          ))}
-        </div>
-      </div>
-    </Panel>
-  );
-}
 
 
 
