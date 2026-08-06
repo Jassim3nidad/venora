@@ -47,28 +47,36 @@ export function SpaceCapacityEditor({ space, layouts: initialLayouts, onSubmit }
 
       <div className="space-y-4">
         {rows.map((layout, index) => (
-          <div key={index} className="grid gap-3 rounded-lg border border-[#e5e7eb] bg-[#f8fafc] p-4 lg:grid-cols-[minmax(160px,0.8fr)_minmax(180px,1fr)_140px_auto]">
-            <select name={`layout-${index}`} defaultValue={layout?.layout ?? ""} required className={inputClass}>
-              <option value="">Select layout style</option>
-              {VENUE_SPACE_LAYOUTS.map((value: VenueSpaceLayout) => (
-                <option key={value} value={value}>{getVenueSpaceLayoutLabel(value)}</option>
-              ))}
-            </select>
-            <input name={`customLayoutLabel-${index}`} defaultValue={layout?.custom_layout_label ?? ""} placeholder="Custom label (optional)" className={inputClass} />
-            <input name={`layoutCapacity-${index}`} type="number" min="1" required defaultValue={layout?.capacity ?? ""} placeholder="Capacity" className={inputClass} />
-            <button
-              type="button"
-              onClick={() => {
-                const next = [...rows];
-                next.splice(index, 1);
-                setRows(next);
-              }}
-              className="flex h-[38px] w-[38px] items-center justify-center rounded-lg border border-[#dbe3ef] text-[#475569] hover:bg-white hover:text-red-600 transition"
-              title="Remove layout"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-            <input name={`layoutNotes-${index}`} defaultValue={layout?.notes ?? ""} placeholder="Notes (e.g., 'Includes dance floor space')" className={cn(inputClass, "lg:col-span-4")} />
+          <div key={index} className="flex flex-col gap-3 rounded-lg border border-[#e5e7eb] bg-[#f8fafc] p-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex-1 min-w-[180px]">
+                <select name={`layout-${index}`} defaultValue={layout?.layout ?? ""} required className={inputClass}>
+                  <option value="">Select layout style</option>
+                  {VENUE_SPACE_LAYOUTS.map((value: VenueSpaceLayout) => (
+                    <option key={value} value={value}>{getVenueSpaceLayoutLabel(value)}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex-1 min-w-[180px]">
+                <input name={`customLayoutLabel-${index}`} defaultValue={layout?.custom_layout_label ?? ""} placeholder="Custom label (optional)" className={inputClass} />
+              </div>
+              <div className="flex flex-1 min-w-[200px] items-center gap-3">
+                <input name={`layoutCapacity-${index}`} type="number" min="1" required defaultValue={layout?.capacity ?? ""} placeholder="Capacity" className={cn(inputClass, "flex-1")} />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = [...rows];
+                    next.splice(index, 1);
+                    setRows(next);
+                  }}
+                  className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-lg border border-[#dbe3ef] bg-white text-[#475569] transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                  title="Remove layout"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+            <input name={`layoutNotes-${index}`} defaultValue={layout?.notes ?? ""} placeholder="Notes (e.g., 'Includes dance floor space')" className={inputClass} />
           </div>
         ))}
         {rows.length === 0 && (

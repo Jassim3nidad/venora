@@ -51,16 +51,16 @@ export function EventTypeSelector({ space, eventTypes, spaceEventTypes, onSubmit
               {(grouped[group] || []).map((item) => (
                 <label
                   key={item.id}
-                  className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-[#dbe3ef] bg-[#f8fbff] px-4 py-3 text-sm font-semibold text-[#334155] transition hover:border-[#cbd5e1] has-[:checked]:border-[#93c5fd] has-[:checked]:bg-[#eff6ff] has-[:checked]:text-[#1d4ed8]"
+                  className="flex min-w-0 min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-[#dbe3ef] bg-[#f8fbff] px-4 py-3 text-sm font-semibold text-[#334155] transition hover:border-[#cbd5e1] has-[:checked]:border-[#93c5fd] has-[:checked]:bg-[#eff6ff] has-[:checked]:text-[#1d4ed8]"
                 >
                   <input
                     type="checkbox"
                     name="eventTypeIds"
                     value={item.id}
                     defaultChecked={selectedIds.has(item.id)}
-                    className="h-4 w-4 rounded border-[#cbd5e1] text-[#1d4ed8] focus:ring-[#93c5fd]"
+                    className="h-4 w-4 shrink-0 rounded border-[#cbd5e1] text-[#1d4ed8] focus:ring-[#93c5fd]"
                   />
-                  {item.name}
+                  <span className="flex-1 min-w-0 break-words leading-tight">{item.name}</span>
                 </label>
               ))}
             </div>

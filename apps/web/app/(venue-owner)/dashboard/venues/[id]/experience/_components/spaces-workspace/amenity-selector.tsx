@@ -17,8 +17,21 @@ type Props = {
 export function AmenitySelector({ space, amenities, spaceAmenities, onSubmit }: Props) {
   const selectedIds = new Set(spaceAmenities.map((sa) => sa.amenity_id));
 
+  // Deduplicate amenities (e.g., "WiFi" and "Wi-Fi") based on alphanumeric normalized names.
+  // We prefer to keep the specific ID that the user has already selected, if any.
+  const normMap = new Map<string, Amenity>();
+  amenities.forEach((a) => {
+    const norm = a.name.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (!normMap.has(norm)) {
+      normMap.set(norm, a);
+    } else if (selectedIds.has(a.id) && !selectedIds.has(normMap.get(norm)!.id)) {
+      normMap.set(norm, a);
+    }
+  });
+  const uniqueAmenities = Array.from(normMap.values());
+
   // Group amenities by first letter for easier scanning, or by keywords if desired
-  const grouped = amenities.reduce((acc, amenity) => {
+  const grouped = uniqueAmenities.reduce((acc, amenity) => {
     // Simple alphabetic grouping
     const group = amenity.name.charAt(0).toUpperCase() || "Other";
     if (!acc[group]) acc[group] = [];
@@ -43,16 +56,16 @@ export function AmenitySelector({ space, amenities, spaceAmenities, onSubmit }: 
               {(grouped[group] || []).map((item) => (
                 <label
                   key={item.id}
-                  className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-[#dbe3ef] bg-[#f8fbff] px-4 py-3 text-sm font-semibold text-[#334155] transition hover:border-[#cbd5e1] has-[:checked]:border-[#93c5fd] has-[:checked]:bg-[#eff6ff] has-[:checked]:text-[#1d4ed8]"
+                  className="flex min-w-0 min-h-12 cursor-pointer items-center gap-3 rounded-lg border border-[#dbe3ef] bg-[#f8fbff] px-4 py-3 text-sm font-semibold text-[#334155] transition hover:border-[#cbd5e1] has-[:checked]:border-[#93c5fd] has-[:checked]:bg-[#eff6ff] has-[:checked]:text-[#1d4ed8]"
                 >
                   <input
                     type="checkbox"
                     name="amenityIds"
                     value={item.id}
                     defaultChecked={selectedIds.has(item.id)}
-                    className="h-4 w-4 rounded border-[#cbd5e1] text-[#1d4ed8] focus:ring-[#93c5fd]"
+                    className="h-4 w-4 shrink-0 rounded border-[#cbd5e1] text-[#1d4ed8] focus:ring-[#93c5fd]"
                   />
-                  {item.name}
+                  <span className="flex-1 min-w-0 break-words leading-tight">{item.name}</span>
                 </label>
               ))}
             </div>

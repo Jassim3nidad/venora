@@ -15,6 +15,7 @@ import {
 } from "@/src/features/venues/domain/structured-venue.types";
 import { getVenueMediaUrl } from "@/src/features/venues/utils/venue-media";
 import type { VenueImage } from "../../structured-venue-editor-client";
+import VenuePhotoUpload from "@/src/components/venues/VenuePhotoUpload";
 
 const inputClass = "w-full rounded-lg border border-[#dbe3ef] bg-[#f8fbff] px-3 py-2 text-sm text-[#0f172a] shadow-sm outline-none transition focus:border-[#93c5fd] focus:bg-white focus:ring-4 focus:ring-blue-50";
 const textareaClass = "w-full rounded-lg border border-[#dbe3ef] bg-[#f8fbff] px-3 py-2 text-sm text-[#0f172a] shadow-sm outline-none transition focus:border-[#93c5fd] focus:bg-white focus:ring-4 focus:ring-blue-50";
@@ -35,8 +36,8 @@ type Props = {
   venueImages: VenueImage[];
   onCreateCollection: (event: FormEvent<HTMLFormElement>) => void;
   onAddExistingMedia: (event: FormEvent<HTMLFormElement>) => void;
-  onArchiveItem: (item: VenueMediaItem) => void;
   onReorderItem: (item: VenueMediaItem, direction: "up" | "down") => void;
+  organizationId: string;
 };
 
 export function MediaWorkspace({
@@ -47,6 +48,7 @@ export function MediaWorkspace({
   onAddExistingMedia,
   onArchiveItem,
   onReorderItem,
+  organizationId,
 }: Props) {
   return (
     <Panel>
@@ -136,6 +138,11 @@ export function MediaWorkspace({
               </div>
             )}
           </form>
+
+          <div className={editorCardClass}>
+            <h3 className="text-lg font-bold text-[#0f172a] mb-4">Upload new local media</h3>
+            <VenuePhotoUpload venueId={profile.venueId} organizationId={organizationId} />
+          </div>
         </div>
 
         <div className="space-y-6">

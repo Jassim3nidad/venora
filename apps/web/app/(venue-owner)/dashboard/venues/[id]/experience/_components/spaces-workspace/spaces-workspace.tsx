@@ -75,6 +75,7 @@ export function SpacesWorkspace({
         {/* Detail Editor */}
         <div className="flex-1 bg-white p-5 xl:p-8">
           <SpaceEditor
+            key={selectedSpaceId || "new-space"}
             space={selectedSpace}
             isAdding={isAdding}
             capacityLayouts={capacityLayouts}

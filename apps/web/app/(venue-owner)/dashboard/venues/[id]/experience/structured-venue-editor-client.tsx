@@ -235,9 +235,9 @@ export function StructuredVenueEditorClient({
     [draftProfile],
   );
   const selectedSpace =
-    activeSpaces.find((space) => space.id === selectedSpaceId) ??
-    activeSpaces[0] ??
-    null;
+    selectedSpaceId === ""
+      ? null
+      : activeSpaces.find((space) => space.id === selectedSpaceId) ?? null;
   const statuses = getProfileSectionStatuses(
     draftProfile,
     packages.filter((item) => item.is_active).length,
@@ -344,7 +344,7 @@ export function StructuredVenueEditorClient({
         if (!layout || !capacity) return null;
         return {
           layout: layout as VenueSpaceLayout,
-          customLayoutLabel: nullableField(form, `customLayoutLabel-${index}`),
+          customLayoutLabel: layout === "custom" ? nullableField(form, `customLayoutLabel-${index}`) : null,
           capacity: Number(capacity),
           notes: nullableField(form, `layoutNotes-${index}`),
           displayOrder: index,
@@ -730,6 +730,7 @@ export function StructuredVenueEditorClient({
             onAddExistingMedia={addExistingMedia}
             onArchiveItem={archiveMediaItem}
             onReorderItem={reorderMediaItem}
+            organizationId={venue.organization_id}
           />
         ) : null}
         {section === "logistics" ? (
