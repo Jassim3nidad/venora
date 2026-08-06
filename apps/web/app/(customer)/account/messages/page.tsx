@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/src/lib/supabase/server";
-import {
-  CustomerInboxClient,
-  type CustomerInboxThread,
-} from "./CustomerInboxClient";
+import { CustomerInboxClient, type CustomerInboxThread } from "./CustomerInboxClient";
+import AccountNav from "../_components/AccountNav";
+import AccountMobileMenu from "../_components/AccountMobileMenu";
 
 export const metadata = {
   title: "Messages | Venora",
@@ -13,9 +12,7 @@ export const dynamic = "force-dynamic";
 
 export default async function CustomerMessagesPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
     redirect("/login");
@@ -36,9 +33,7 @@ export default async function CustomerMessagesPage() {
   // 3. Fetch Supplier Inquiries
   const { data: supplierInquiriesRaw } = await supabase
     .from("supplier_contact_requests")
-    .select(
-      "id, status, event_date, supplier_services(name), supplier_profiles(business_name, slug)",
-    )
+    .select("id, status, event_date, supplier_services(name), supplier_profiles(business_name, slug)")
     .eq("customer_id", user.id);
 
   // Now fetch latest messages for each
@@ -64,9 +59,7 @@ export default async function CustomerMessagesPage() {
     latestVenueInquiryMessages = data || [];
   }
 
-  const supplierInquiryIds = ((supplierInquiriesRaw as any[]) || []).map(
-    (i) => i.id,
-  );
+  const supplierInquiryIds = ((supplierInquiriesRaw as any[]) || []).map((i) => i.id);
   let latestSupplierInquiryMessages: any[] = [];
   if (supplierInquiryIds.length > 0) {
     const { data } = await supabase
@@ -81,11 +74,9 @@ export default async function CustomerMessagesPage() {
 
   for (const b of (bookingsRaw as any[]) || []) {
     const venue = Array.isArray(b.venues) ? b.venues[0] : b.venues;
-    const pkg = Array.isArray(venue?.venue_packages)
-      ? venue?.venue_packages[0]
-      : venue?.venue_packages;
-    const latestMsg = latestBookingMessages.find((m) => m.booking_id === b.id);
-
+    const pkg = Array.isArray(venue?.venue_packages) ? venue?.venue_packages[0] : venue?.venue_packages;
+    const latestMsg = latestBookingMessages.find(m => m.booking_id === b.id);
+    
     threads.push({
       id: b.id,
       kind: "booking",
@@ -94,22 +85,18 @@ export default async function CustomerMessagesPage() {
       serviceName: pkg?.name,
       eventDate: b.event_date,
       status: b.status,
-      latestMessage: latestMsg
-        ? {
-            message: latestMsg.message,
-            created_at: latestMsg.created_at,
-            sender_role: latestMsg.sender_role,
-          }
-        : undefined,
+      latestMessage: latestMsg ? {
+        message: latestMsg.message,
+        created_at: latestMsg.created_at,
+        sender_role: latestMsg.sender_role,
+      } : undefined,
     });
   }
 
   for (const i of (venueInquiriesRaw as any[]) || []) {
     const venue = Array.isArray(i.venues) ? i.venues[0] : i.venues;
-    const latestMsg = latestVenueInquiryMessages.find(
-      (m) => m.inquiry_id === i.id,
-    );
-
+    const latestMsg = latestVenueInquiryMessages.find(m => m.inquiry_id === i.id);
+    
     threads.push({
       id: i.id,
       kind: "venue_inquiry",
@@ -118,27 +105,19 @@ export default async function CustomerMessagesPage() {
       serviceName: "General Inquiry",
       eventDate: i.created_at,
       status: i.status,
-      latestMessage: latestMsg
-        ? {
-            message: latestMsg.message,
-            created_at: latestMsg.created_at,
-            sender_role: latestMsg.sender_role,
-          }
-        : undefined,
+      latestMessage: latestMsg ? {
+        message: latestMsg.message,
+        created_at: latestMsg.created_at,
+        sender_role: latestMsg.sender_role,
+      } : undefined,
     });
   }
 
   for (const s of (supplierInquiriesRaw as any[]) || []) {
-    const profile = Array.isArray(s.supplier_profiles)
-      ? s.supplier_profiles[0]
-      : s.supplier_profiles;
-    const service = Array.isArray(s.supplier_services)
-      ? s.supplier_services[0]
-      : s.supplier_services;
-    const latestMsg = latestSupplierInquiryMessages.find(
-      (m) => m.inquiry_id === s.id,
-    );
-
+    const profile = Array.isArray(s.supplier_profiles) ? s.supplier_profiles[0] : s.supplier_profiles;
+    const service = Array.isArray(s.supplier_services) ? s.supplier_services[0] : s.supplier_services;
+    const latestMsg = latestSupplierInquiryMessages.find(m => m.inquiry_id === s.id);
+    
     threads.push({
       id: s.id,
       kind: "supplier_inquiry",
@@ -147,20 +126,26 @@ export default async function CustomerMessagesPage() {
       serviceName: service?.name,
       eventDate: s.event_date,
       status: s.status,
-      latestMessage: latestMsg
-        ? {
-            message: latestMsg.message,
-            created_at: latestMsg.created_at,
-            sender_role:
-              latestMsg.sender_id === user.id ? "customer" : "partner",
-          }
-        : undefined,
+      latestMessage: latestMsg ? {
+        message: latestMsg.message,
+        created_at: latestMsg.created_at,
+        sender_role: latestMsg.sender_id === user.id ? "customer" : "partner",
+      } : undefined,
     });
   }
 
   return (
-    <div className="h-[calc(100vh-15rem)] min-h-[640px] overflow-hidden">
-      <CustomerInboxClient threads={threads} currentUserId={user.id} />
+    <div className="flex flex-col lg:flex-row min-h-[calc(100vh-64px)] bg-[#f8fafc]">
+      <div className="hidden lg:block w-64 shrink-0 border-r border-[#e5e7eb] bg-white p-6">
+        <AccountNav />
+      </div>
+      <div className="lg:hidden border-b border-[#e5e7eb] bg-white">
+        <AccountMobileMenu />
+      </div>
+
+      <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-hidden h-[calc(100vh-64px)]">
+        <CustomerInboxClient threads={threads} currentUserId={user.id} />
+      </div>
     </div>
   );
 }

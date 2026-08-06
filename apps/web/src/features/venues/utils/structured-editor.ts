@@ -3,23 +3,51 @@ import type {
   VenueLogistics,
 } from "../domain/structured-venue.types";
 
-export type StructuredEditorSectionId =
+export type ProfileSectionId =
   | "overview"
   | "spaces"
   | "media"
   | "logistics"
   | "faqs"
   | "packages"
-  | "preview";
+  | "review";
 
-export type StructuredEditorSectionStatus =
+export type CompletionState =
   | "complete"
-  | "incomplete"
-  | "optional"
-  | "needs_attention";
+  | "in_progress"
+  | "not_started"
+  | "needs_attention"
+  | "blocked";
+
+export type RequirementLevel = "required" | "recommended" | "optional";
+
+export interface ProfileIssue {
+  id: string;
+  sectionId: ProfileSectionId;
+  severity: "required" | "recommended";
+  title: string;
+  description: string;
+  actionLabel: string;
+  target: {
+    sectionId: ProfileSectionId;
+    entityId?: string;
+    field?: string;
+  };
+}
+
+export interface ProfileSectionStatus {
+  id: ProfileSectionId;
+  label: string;
+  completionState: CompletionState;
+  requirementLevel: RequirementLevel;
+  completedItems: number;
+  totalItems: number;
+  summary: string;
+  issues: ProfileIssue[];
+}
 
 export type StructuredEditorSection = {
-  id: StructuredEditorSectionId;
+  id: ProfileSectionId;
   label: string;
   description: string;
 };
@@ -56,8 +84,8 @@ export const STRUCTURED_EDITOR_SECTIONS: StructuredEditorSection[] = [
     description: "Connect existing packages to spaces.",
   },
   {
-    id: "preview",
-    label: "Preview and Publish",
+    id: "review",
+    label: "Review and publish",
     description: "Review private draft content before publication.",
   },
 ];
@@ -89,44 +117,159 @@ function logisticsHasPublicValue(logistics: VenueLogistics | null) {
   );
 }
 
-export function getStructuredSectionStatuses(
+export function getProfileSectionStatuses(
   profile: DraftStructuredVenueProfile | null,
   packageCount = 0,
-): Record<StructuredEditorSectionId, StructuredEditorSectionStatus> {
+): Record<ProfileSectionId, ProfileSectionStatus> {
+  const defaultStatus = (
+    id: ProfileSectionId,
+    label: string,
+    requirementLevel: RequirementLevel,
+    completionState: CompletionState = "not_started",
+    summary = "",
+  ): ProfileSectionStatus => ({
+    id,
+    label,
+    completionState,
+    requirementLevel,
+    completedItems: 0,
+    totalItems: 0,
+    summary,
+    issues: [],
+  });
+
   if (!profile) {
     return {
-      overview: "incomplete",
-      spaces: "incomplete",
-      media: "optional",
-      logistics: "incomplete",
-      faqs: "optional",
-      packages: "optional",
-      preview: "needs_attention",
+      overview: defaultStatus("overview", "Overview", "required", "not_started", "Not started"),
+      spaces: defaultStatus("spaces", "Spaces", "required", "not_started", "Not started"),
+      media: defaultStatus("media", "Media", "recommended", "not_started", "Not started"),
+      logistics: defaultStatus("logistics", "Logistics", "required", "not_started", "Not started"),
+      faqs: defaultStatus("faqs", "FAQs", "optional", "not_started", "Not started"),
+      packages: defaultStatus("packages", "Packages", "optional", "not_started", "Not started"),
+      review: defaultStatus("review", "Review and publish", "required", "blocked", "Blocked"),
     };
   }
 
-  const activeSpaces = profile.spaces.filter(
-    (space) => space.status !== "archived",
-  );
-  const hasValidSpace = activeSpaces.some(
-    (space) => hasText(space.name) && hasText(space.slug) && space.capacityMax > 0,
-  );
-  const hasMedia = profile.mediaItems.some(
-    (item) => item.status !== "archived" && !item.deletedAt,
-  );
-  const hasFaqs = profile.faqs.some((faq) => faq.status !== "archived");
+  const activeSpaces = profile.spaces.filter((space) => space.status !== "archived");
+  const validSpaces = activeSpaces.filter((space) => hasText(space.name) && hasText(space.slug) && space.capacityMax > 0);
+  
+  const hasValidSpace = validSpaces.length > 0;
+  
+  const hasMedia = profile.mediaItems.some((item) => item.status !== "archived" && !item.deletedAt);
+  const activeFaqs = profile.faqs.filter((faq) => faq.status !== "archived");
+  
   const hasPackageLinks = profile.packageSpaces.length > 0;
   const hasLogistics = logisticsHasPublicValue(profile.logistics);
 
+  const spacesIssues: ProfileIssue[] = [];
+  if (activeSpaces.length === 0) {
+    spacesIssues.push({
+      id: "no-spaces",
+      sectionId: "spaces",
+      severity: "required",
+      title: "Add at least one venue space",
+      description: "Customers need to know what spaces they can book.",
+      actionLabel: "Add space",
+      target: { sectionId: "spaces" }
+    });
+  } else if (!hasValidSpace) {
+    spacesIssues.push({
+      id: "invalid-spaces",
+      sectionId: "spaces",
+      severity: "required",
+      title: "Complete space details",
+      description: "One or more spaces are missing a name, slug, or capacity.",
+      actionLabel: "Edit spaces",
+      target: { sectionId: "spaces" }
+    });
+  }
+
+  const logisticsIssues: ProfileIssue[] = [];
+  if (!hasLogistics) {
+    logisticsIssues.push({
+      id: "no-logistics",
+      sectionId: "logistics",
+      severity: "required",
+      title: "Add logistics information",
+      description: "Practical information for customers is missing.",
+      actionLabel: "Add logistics",
+      target: { sectionId: "logistics" }
+    });
+  }
+
+  const allRequiredIssues = [...spacesIssues, ...logisticsIssues].filter(i => i.severity === "required");
+
   return {
-    overview: "complete",
-    spaces: hasValidSpace ? "complete" : "incomplete",
-    media: hasMedia ? "complete" : "optional",
-    logistics: hasLogistics ? "complete" : "incomplete",
-    faqs: hasFaqs ? "complete" : "optional",
-    packages:
-      packageCount === 0 ? "optional" : hasPackageLinks ? "complete" : "optional",
-    preview: hasValidSpace && hasLogistics ? "complete" : "needs_attention",
+    overview: {
+      id: "overview",
+      label: "Overview",
+      completionState: "complete",
+      requirementLevel: "required",
+      completedItems: 1,
+      totalItems: 1,
+      summary: "Complete",
+      issues: [],
+    },
+    spaces: {
+      id: "spaces",
+      label: "Spaces",
+      completionState: hasValidSpace ? "complete" : activeSpaces.length > 0 ? "in_progress" : "not_started",
+      requirementLevel: "required",
+      completedItems: validSpaces.length,
+      totalItems: activeSpaces.length || 1,
+      summary: `${activeSpaces.length} space${activeSpaces.length === 1 ? "" : "s"}`,
+      issues: spacesIssues,
+    },
+    media: {
+      id: "media",
+      label: "Media",
+      completionState: hasMedia ? "complete" : "not_started",
+      requirementLevel: "recommended",
+      completedItems: profile.mediaItems.length,
+      totalItems: profile.mediaItems.length,
+      summary: hasMedia ? `${profile.mediaCollections.length} galleries` : "Not started",
+      issues: [],
+    },
+    logistics: {
+      id: "logistics",
+      label: "Logistics",
+      completionState: hasLogistics ? "complete" : "not_started",
+      requirementLevel: "required",
+      completedItems: hasLogistics ? 1 : 0,
+      totalItems: 1,
+      summary: hasLogistics ? "Complete" : "Missing fields",
+      issues: logisticsIssues,
+    },
+    faqs: {
+      id: "faqs",
+      label: "FAQs",
+      completionState: activeFaqs.length > 0 ? "complete" : "not_started",
+      requirementLevel: "optional",
+      completedItems: activeFaqs.length,
+      totalItems: activeFaqs.length,
+      summary: activeFaqs.length > 0 ? `${activeFaqs.length} questions` : "Not started",
+      issues: [],
+    },
+    packages: {
+      id: "packages",
+      label: "Packages",
+      completionState: packageCount === 0 ? "not_started" : hasPackageLinks ? "complete" : "not_started",
+      requirementLevel: "optional",
+      completedItems: profile.packageSpaces.length,
+      totalItems: packageCount,
+      summary: packageCount > 0 ? `${profile.packageSpaces.length} links` : "No packages",
+      issues: [],
+    },
+    review: {
+      id: "review",
+      label: "Review and publish",
+      completionState: allRequiredIssues.length > 0 ? "blocked" : "needs_attention",
+      requirementLevel: "required",
+      completedItems: allRequiredIssues.length === 0 ? 1 : 0,
+      totalItems: 1,
+      summary: allRequiredIssues.length > 0 ? `${allRequiredIssues.length} issues` : "Ready to publish",
+      issues: allRequiredIssues,
+    },
   };
 }
 
@@ -135,29 +278,8 @@ export function getPublishBlockingIssues(
 ) {
   if (!profile) return ["Create a structured profile draft first."];
 
-  const issues: string[] = [];
-  const activeSpaces = profile.spaces.filter(
-    (space) => space.status !== "archived",
-  );
-
-  if (activeSpaces.length === 0) {
-    issues.push("Add at least one venue space.");
-  }
-
-  if (
-    !activeSpaces.some(
-      (space) =>
-        hasText(space.name) && hasText(space.slug) && space.capacityMax > 0,
-    )
-  ) {
-    issues.push("Complete one space with a name, slug, and capacity.");
-  }
-
-  if (!logisticsHasPublicValue(profile.logistics)) {
-    issues.push("Add practical logistics information for customers.");
-  }
-
-  return issues;
+  const statuses = getProfileSectionStatuses(profile);
+  return statuses.review.issues.map(i => i.title);
 }
 
 export function getStructuredProfileDisplayStatus(
@@ -169,3 +291,8 @@ export function getStructuredProfileDisplayStatus(
   if (profile && !publishedAt) return "Draft";
   return "Unpublished changes";
 }
+
+// Backwards compatibility aliases
+export type StructuredEditorSectionId = ProfileSectionId;
+export type StructuredEditorSectionStatus = CompletionState;
+export const getStructuredSectionStatuses = getProfileSectionStatuses;

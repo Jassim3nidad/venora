@@ -23,6 +23,9 @@ import {
   Panel,
   StatusBadge,
 } from "@/components/dashboard/enterprise";
+import { VenueProfileHeader } from "./_components/venue-profile-header";
+import { ProfileSectionNavigation } from "./_components/profile-section-navigation";
+import { SectionBadge } from "./_components/profile-section-status";
 import {
   archiveVenueFaqAction,
   archiveVenueMediaItemAction,
@@ -73,9 +76,9 @@ import {
   STRUCTURED_EDITOR_SECTIONS,
   getPublishBlockingIssues,
   getStructuredProfileDisplayStatus,
-  getStructuredSectionStatuses,
-  type StructuredEditorSectionId,
-  type StructuredEditorSectionStatus,
+  getProfileSectionStatuses,
+  type ProfileSectionId,
+  type ProfileSectionStatus,
 } from "@/src/features/venues/utils/structured-editor";
 import { getVenueMediaUrl } from "@/src/features/venues/utils/venue-media";
 
@@ -136,7 +139,7 @@ type SpaceEventTypeRow = {
   notes: string | null;
 };
 
-type ActionState = {
+export type ActionState = {
   status: "idle" | "saving" | "saved" | "error";
   message: string;
 };
@@ -171,18 +174,6 @@ function actionMessage(error?: { message: string } | null) {
   return error?.message ?? "Unable to save. Please try again.";
 }
 
-function statusLabel(status: StructuredEditorSectionStatus) {
-  if (status === "needs_attention") return "Needs attention";
-  return status.replace("_", " ");
-}
-
-function statusTone(status: StructuredEditorSectionStatus) {
-  if (status === "complete") return "text-emerald-700 bg-emerald-50 ring-emerald-200";
-  if (status === "needs_attention") return "text-amber-800 bg-amber-50 ring-amber-200";
-  if (status === "optional") return "text-slate-600 bg-slate-50 ring-slate-200";
-  return "text-red-700 bg-red-50 ring-red-200";
-}
-
 function field(form: FormData, name: string) {
   return String(form.get(name) ?? "").trim();
 }
@@ -206,19 +197,6 @@ function toSlug(value: string) {
     .slice(0, 100);
 }
 
-function SectionBadge({ status }: { status: StructuredEditorSectionStatus }) {
-  return (
-    <span
-      className={cn(
-        "rounded-full px-2 py-0.5 text-[11px] font-bold capitalize ring-1",
-        statusTone(status),
-      )}
-    >
-      {statusLabel(status)}
-    </span>
-  );
-}
-
 export function StructuredVenueEditorClient({
   venue,
   draftProfile,
@@ -235,7 +213,7 @@ export function StructuredVenueEditorClient({
 }: Props) {
   const router = useRouter();
   const [section, setSection] =
-    useState<StructuredEditorSectionId>("overview");
+    useState<ProfileSectionId>("overview");
   const [selectedSpaceId, setSelectedSpaceId] = useState(
     draftProfile?.spaces.find((space) => space.status !== "archived")?.id ?? "",
   );
@@ -252,7 +230,7 @@ export function StructuredVenueEditorClient({
     activeSpaces.find((space) => space.id === selectedSpaceId) ??
     activeSpaces[0] ??
     null;
-  const statuses = getStructuredSectionStatuses(
+  const statuses = getProfileSectionStatuses(
     draftProfile,
     packages.filter((item) => item.is_active).length,
   );
@@ -662,16 +640,15 @@ export function StructuredVenueEditorClient({
             </button>
           </div>
         </Panel>
-        <StatusPanel
+        <VenueProfileHeader
           venue={venue}
           profileStatus={profileStatus}
           actionState={actionState}
           canPublish={canPublish}
-          isCoordinatorOnly={isCoordinatorOnly}
           publishIssues={publishIssues}
+          hasDraft={false}
           onPublish={publishDraft}
           onDiscard={discardDraft}
-          hasDraft={false}
         />
       </div>
     );
@@ -679,65 +656,25 @@ export function StructuredVenueEditorClient({
 
   return (
     <div className="space-y-6">
-      <StatusPanel
+      <VenueProfileHeader
         venue={venue}
         profileStatus={profileStatus}
         actionState={actionState}
         canPublish={canPublish}
-        isCoordinatorOnly={isCoordinatorOnly}
         publishIssues={publishIssues}
+        hasDraft={true}
         onPublish={publishDraft}
         onDiscard={discardDraft}
-        hasDraft
-        variant="bar"
       />
 
-      <div className="grid gap-6 2xl:grid-cols-[260px_minmax(0,1fr)]">
-      <Panel className="hidden h-max 2xl:block">
-        <p className="text-xs font-bold uppercase tracking-wider text-[#64748b]">
-          Sections
-        </p>
-        <nav className="mt-4 space-y-1.5" aria-label="Structured editor sections">
-          {STRUCTURED_EDITOR_SECTIONS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => setSection(item.id)}
-              className={cn(
-                "flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-bold transition",
-                section === item.id
-                  ? "bg-[#eff6ff] text-[#1d4ed8]"
-                  : "text-[#475569] hover:bg-[#f8fbff] hover:text-[#1d4ed8]",
-              )}
-            >
-              <span>{item.label}</span>
-              <SectionBadge status={statuses[item.id]} />
-            </button>
-          ))}
-        </nav>
-      </Panel>
+      <div className="grid gap-6 2xl:grid-cols-[280px_minmax(0,1fr)]">
+        <ProfileSectionNavigation
+          currentSection={section}
+          onSectionChange={setSection}
+          statuses={statuses}
+        />
 
       <div className="min-w-0 space-y-6">
-        <div className="2xl:hidden">
-          <label htmlFor="structured-section" className={labelClass}>
-            Editor section
-          </label>
-          <select
-            id="structured-section"
-            value={section}
-            onChange={(event) =>
-              setSection(event.target.value as StructuredEditorSectionId)
-            }
-            className={cn(inputClass, "mt-2")}
-          >
-            {STRUCTURED_EDITOR_SECTIONS.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.label} - {statusLabel(statuses[item.id])}
-              </option>
-            ))}
-          </select>
-        </div>
-
         {section === "overview" ? (
           <OverviewSection
             venue={venue}
@@ -793,7 +730,7 @@ export function StructuredVenueEditorClient({
             onSave={savePackageSpaces}
           />
         ) : null}
-        {section === "preview" ? (
+        {section === "review" ? (
           <PreviewSection
             venue={venue}
             profile={draftProfile}
@@ -808,121 +745,7 @@ export function StructuredVenueEditorClient({
   );
 }
 
-function StatusPanel({
-  venue,
-  profileStatus,
-  actionState,
-  canPublish,
-  isCoordinatorOnly,
-  publishIssues,
-  onPublish,
-  onDiscard,
-  hasDraft,
-  variant = "sidebar",
-}: {
-  venue: Venue;
-  profileStatus: string;
-  actionState: ActionState;
-  canPublish: boolean;
-  isCoordinatorOnly: boolean;
-  publishIssues: string[];
-  onPublish: () => void;
-  onDiscard: () => void;
-  hasDraft: boolean;
-  variant?: "sidebar" | "bar";
-}) {
-  const isBar = variant === "bar";
 
-  return (
-    <Panel className={cn("h-max", !isBar && "xl:sticky xl:top-24")}>
-      <div
-        className={cn(
-          "grid gap-5",
-          isBar && "xl:grid-cols-[minmax(0,1fr)_minmax(240px,0.55fr)_auto] xl:items-start",
-        )}
-      >
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-[#64748b]">
-              Venue
-            </p>
-            <h2 className="mt-1 text-lg font-bold text-[#0f172a]">{venue.name}</h2>
-            <p className="mt-1 text-sm text-[#64748b]">
-              {[venue.city, venue.province].filter(Boolean).join(", ") ||
-                "Location pending"}
-            </p>
-          </div>
-          <StatusBadge status={profileStatus.toLowerCase().replace(/\s/g, "_")} label={profileStatus} />
-        </div>
-
-        <div className="rounded-lg border border-[#dbe3ef] bg-[#f8fbff] p-4">
-          <p className="text-xs font-bold uppercase tracking-wider text-[#64748b]">
-            Save state
-          </p>
-          <p
-            className={cn(
-              "mt-2 text-sm font-bold",
-              actionState.status === "error" ? "text-red-700" : "text-[#0f172a]",
-            )}
-            aria-live="polite"
-          >
-            {actionState.message}
-          </p>
-        </div>
-
-        <div className={cn("flex flex-col gap-2", isBar && "sm:flex-row xl:flex-col")}>
-          <DashButton
-            href={`/dashboard/venues/${venue.id}/experience/preview`}
-            variant="secondary"
-            icon="visibility"
-          >
-            Preview
-          </DashButton>
-          <button
-            type="button"
-            onClick={onPublish}
-            disabled={!hasDraft || !canPublish || publishIssues.length > 0}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#1d4ed8] px-4 py-2.5 text-sm font-bold text-white shadow-sm shadow-blue-200/70 transition hover:bg-[#1e40af] disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <Send className="h-4 w-4" />
-            Publish changes
-          </button>
-          {hasDraft && canPublish ? (
-            <button
-              type="button"
-              onClick={onDiscard}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-bold text-red-700 transition hover:bg-red-100"
-            >
-              <RotateCcw className="h-4 w-4" />
-              Discard draft
-            </button>
-          ) : null}
-        </div>
-      </div>
-
-      {isCoordinatorOnly ? (
-        <div className="mt-4 flex gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">
-          <Lock className="mt-0.5 h-4 w-4 shrink-0" />
-          Coordinators can edit assigned profile content, but publishing requires the venue owner.
-        </div>
-      ) : null}
-
-      {publishIssues.length > 0 ? (
-        <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
-          <p className="flex items-center gap-2 text-sm font-bold text-amber-900">
-            <AlertCircle className="h-4 w-4" />
-            Before publishing
-          </p>
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-amber-900">
-            {publishIssues.map((issue) => (
-              <li key={issue}>{issue}</li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-    </Panel>
-  );
-}
 
 function OverviewSection({
   venue,
@@ -933,7 +756,7 @@ function OverviewSection({
   venue: Venue;
   draftProfile: DraftStructuredVenueProfile;
   publishedProfile: PublishedStructuredVenueProfile | null;
-  statuses: Record<StructuredEditorSectionId, StructuredEditorSectionStatus>;
+  statuses: Record<ProfileSectionId, ProfileSectionStatus>;
 }) {
   return (
     <Panel>
@@ -968,7 +791,7 @@ function OverviewSection({
             >
               <div className="flex items-center justify-between gap-3">
                 <p className="font-bold text-[#0f172a]">{item.label}</p>
-                <SectionBadge status={statuses[item.id]} />
+                <SectionBadge status={statuses[item.id].completionState} />
               </div>
               <p className="mt-1 text-sm leading-5 text-[#64748b]">
                 {item.description}

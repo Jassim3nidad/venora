@@ -1,6 +1,9 @@
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { NextConfig } from "next";
 import withBundleAnalyzerInit from "@next/bundle-analyzer";
+
+const configDir = path.dirname(fileURLToPath(import.meta.url));
 
 const withBundleAnalyzer = withBundleAnalyzerInit({
   enabled: process.env.ANALYZE === "true",
@@ -123,7 +126,7 @@ const nextConfig: NextConfig = {
   // with ENOENT even though the local build otherwise completes. Safe to
   // try dropping --webpack again on a future Next.js upgrade.
   turbopack: {
-    root: path.join(__dirname, "../.."),
+    root: path.join(configDir, "../.."),
   },
 };
 

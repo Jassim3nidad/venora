@@ -58,3 +58,27 @@ If you make a decision that affects other team members, write it to:
 .squad/decisions/inbox/copilot-{brief-slug}.md
 ```
 The Scribe will merge it into the shared decisions file.
+
+
+
+## Project
+
+- Repository: Venora
+- Monorepo root: C:\venora
+- Web application: apps/web
+- Package: @venora/web
+- Package manager: pnpm
+- Framework: Next.js, React, TypeScript
+- Database and authentication: Supabase
+
+## Required commands
+
+Inspect scripts before running them.
+
+At minimum, when available:
+
+```powershell
+pnpm --filter @venora/web type-check
+pnpm --filter @venora/web build
+git grep -n -E "^(<<<<<<<|=======|>>>>>>>)"
+git diff --check
