@@ -21,6 +21,7 @@ import { cn } from "@venora/lib";
 import { SpacesWorkspace } from "./_components/spaces-workspace/spaces-workspace";
 import { MediaWorkspace } from "./_components/media-workspace/media-workspace";
 import { LogisticsWorkspace } from "./_components/logistics-workspace/logistics-workspace";
+import { FaqWorkspace } from "./_components/faq-workspace/faq-workspace";
 import {
   DashButton,
   Panel,
@@ -733,7 +734,7 @@ export function StructuredVenueEditorClient({
           <LogisticsWorkspace profile={draftProfile} onSave={saveLogistics} />
         ) : null}
         {section === "faqs" ? (
-          <FaqSection
+          <FaqWorkspace
             profile={draftProfile}
             onCreate={createFaq}
             onArchive={archiveFaq}
@@ -836,93 +837,7 @@ function OverviewSection({
 
 
 
-function FaqSection({
-  profile,
-  onCreate,
-  onArchive,
-  onReorder,
-}: {
-  profile: DraftStructuredVenueProfile;
-  onCreate: (event: FormEvent<HTMLFormElement>) => void;
-  onArchive: (faq: VenueFaq) => void;
-  onReorder: (faqId: string, direction: "up" | "down") => void;
-}) {
-  const activeFaqs = profile.faqs.filter((faq) => faq.status !== "archived");
-  return (
-    <Panel>
-      <SectionTitle
-        title="FAQs"
-        description="Answers are stored and rendered as plain text only."
-      />
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
-        <div className="space-y-5">
-          {activeFaqs.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-8 text-center text-sm text-[#64748b]">
-              No FAQs yet.
-            </div>
-          ) : (
-            activeFaqs.map((faq) => (
-              <details key={faq.id} className={editorCardClass}>
-                <summary className="cursor-pointer text-base font-bold text-[#0f172a]">
-                  {faq.question}
-                </summary>
-                <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-[#475569]">
-                  {faq.answer}
-                </p>
-                <p className="mt-3 text-xs font-bold text-[#64748b]">
-                  {faq.category ? getVenueFaqCategoryLabel(faq.category) : "General"}
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => onReorder(faq.id, "up")}
-                    className="rounded-full border border-[#dbe3ef] px-2.5 py-1 text-xs font-bold text-[#475569] hover:border-[#93c5fd] hover:text-[#1d4ed8]"
-                  >
-                    Move up
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onReorder(faq.id, "down")}
-                    className="rounded-full border border-[#dbe3ef] px-2.5 py-1 text-xs font-bold text-[#475569] hover:border-[#93c5fd] hover:text-[#1d4ed8]"
-                  >
-                    Move down
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onArchive(faq)}
-                    className="rounded-full border border-red-200 px-2.5 py-1 text-xs font-bold text-red-700 hover:bg-red-50"
-                  >
-                    Archive
-                  </button>
-                </div>
-              </details>
-            ))
-          )}
-        </div>
-        <form onSubmit={onCreate} className={editorCardClass}>
-          <h3 className="text-lg font-bold text-[#0f172a]">Add FAQ</h3>
-          <div className="mt-5 grid gap-4">
-            <Field label="Category">
-              <select name="category" className={inputClass}>
-                <option value="">General</option>
-                {VENUE_FAQ_CATEGORIES.map((value) => (
-                  <option key={value} value={value}>{getVenueFaqCategoryLabel(value)}</option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Question">
-              <input name="question" required maxLength={200} className={inputClass} />
-            </Field>
-            <Field label="Answer">
-              <textarea name="answer" required maxLength={2000} rows={6} className={textareaClass} />
-            </Field>
-          </div>
-          <SubmitButton label="Add FAQ" />
-        </form>
-      </div>
-    </Panel>
-  );
-}
+
 
 function PackagesSection({
   packages,
