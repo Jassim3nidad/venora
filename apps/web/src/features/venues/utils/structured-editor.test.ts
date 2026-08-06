@@ -19,16 +19,12 @@ const baseProfile: DraftStructuredVenueProfile = {
     createdAt: "2026-08-01T00:00:00.000Z",
     updatedAt: "2026-08-01T00:00:00.000Z",
   },
-  id: "1",
-  venueId: "758c437f-6a9c-434a-a5aa-e6290787bd7f",
   spaces: [],
   mediaCollections: [],
   mediaItems: [],
   logistics: null,
   faqs: [],
   packageSpaces: [],
-  createdAt: "2026-08-01T00:00:00.000Z",
-  updatedAt: "2026-08-01T00:00:00.000Z",
 };
 
 describe("structured profile engine", () => {

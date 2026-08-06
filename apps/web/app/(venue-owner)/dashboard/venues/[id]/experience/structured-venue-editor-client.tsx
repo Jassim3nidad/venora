@@ -18,12 +18,14 @@ import {
   Trash2,
 } from "lucide-react";
 import { cn } from "@venora/lib";
+import { SpacesWorkspace } from "./_components/spaces-workspace/spaces-workspace";
 import {
   DashButton,
   Panel,
   StatusBadge,
 } from "@/components/dashboard/enterprise";
 import { VenueProfileHeader } from "./_components/venue-profile-header";
+import { SubmitButton } from "./_components/submit-button";
 import { ProfileSectionNavigation } from "./_components/profile-section-navigation";
 import { SectionBadge } from "./_components/profile-section-status";
 import {
@@ -324,18 +326,13 @@ export function StructuredVenueEditorClient({
     });
   }
 
-  function saveSpaceRelationships(event: FormEvent<HTMLFormElement>) {
+  function saveSpaceCapacity(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!draftProfile || !selectedSpace) return;
     const form = new FormData(event.currentTarget);
-    const selectedAmenities = form
-      .getAll("amenityIds")
-      .map((id) => ({ amenityId: String(id) }));
-    const selectedEventTypes = form
-      .getAll("eventTypeIds")
-      .map((id) => ({ eventTypeId: String(id) }));
-    const layouts = [0, 1, 2, 3]
-      .map((index) => {
+    const layoutCount = Number(form.get("layoutCount") || 0);
+    const layouts = Array.from({ length: layoutCount })
+      .map((_, index) => {
         const layout = field(form, `layout-${index}`);
         const capacity = field(form, `layoutCapacity-${index}`);
         if (!layout || !capacity) return null;
@@ -349,34 +346,51 @@ export function StructuredVenueEditorClient({
       })
       .filter((item): item is NonNullable<typeof item> => item !== null);
 
-    runAction("Saving space details...", async () => {
-      const layoutResult =
-        layouts.length > 0
-          ? await replaceCapacityLayoutsAction({
-              venueId: venue.id,
-              revisionId: draftProfile.revision.id,
-              spaceId: selectedSpace.id,
-              spaceCapacityMax: selectedSpace.capacityMax,
-              layouts,
-            })
-          : { data: [], error: null };
-      if (layoutResult.error) return layoutResult;
+    runAction("Saving capacity layouts...", () =>
+      replaceCapacityLayoutsAction({
+        venueId: venue.id,
+        revisionId: draftProfile.revision.id,
+        spaceId: selectedSpace.id,
+        spaceCapacityMax: selectedSpace.capacityMax,
+        layouts,
+      })
+    );
+  }
 
-      const amenitiesResult = await replaceSpaceAmenitiesAction({
+  function saveSpaceAmenities(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!draftProfile || !selectedSpace) return;
+    const form = new FormData(event.currentTarget);
+    const selectedAmenities = form
+      .getAll("amenityIds")
+      .map((id) => ({ amenityId: String(id) }));
+
+    runAction("Saving amenities...", () =>
+      replaceSpaceAmenitiesAction({
         venueId: venue.id,
         revisionId: draftProfile.revision.id,
         spaceId: selectedSpace.id,
         amenities: selectedAmenities,
-      });
-      if (amenitiesResult.error) return amenitiesResult;
+      })
+    );
+  }
 
-      return replaceSpaceEventTypesAction({
+  function saveSpaceEventTypes(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!draftProfile || !selectedSpace) return;
+    const form = new FormData(event.currentTarget);
+    const selectedEventTypes = form
+      .getAll("eventTypeIds")
+      .map((id) => ({ eventTypeId: String(id) }));
+
+    runAction("Saving event types...", () =>
+      replaceSpaceEventTypesAction({
         venueId: venue.id,
         revisionId: draftProfile.revision.id,
         spaceId: selectedSpace.id,
         eventTypes: selectedEventTypes,
-      });
-    });
+      })
+    );
   }
 
   function reorderSpace(spaceId: string, direction: "up" | "down") {
@@ -684,9 +698,8 @@ export function StructuredVenueEditorClient({
           />
         ) : null}
         {section === "spaces" ? (
-          <SpacesSection
+          <SpacesWorkspace
             spaces={activeSpaces}
-            selectedSpace={selectedSpace}
             selectedSpaceId={selectedSpaceId}
             setSelectedSpaceId={setSelectedSpaceId}
             capacityLayouts={capacityLayouts}
@@ -695,7 +708,9 @@ export function StructuredVenueEditorClient({
             amenities={amenities}
             eventTypes={eventTypes}
             onSaveSpace={saveSpace}
-            onSaveRelationships={saveSpaceRelationships}
+            onSaveCapacity={saveSpaceCapacity}
+            onSaveAmenities={saveSpaceAmenities}
+            onSaveEventTypes={saveSpaceEventTypes}
             onReorder={reorderSpace}
             onArchive={archiveSpace}
           />
@@ -815,227 +830,6 @@ function Metric({ label, value }: { label: string; value: string }) {
   );
 }
 
-function SpacesSection({
-  spaces,
-  selectedSpace,
-  selectedSpaceId,
-  setSelectedSpaceId,
-  capacityLayouts,
-  spaceAmenities,
-  spaceEventTypes,
-  amenities,
-  eventTypes,
-  onSaveSpace,
-  onSaveRelationships,
-  onReorder,
-  onArchive,
-}: {
-  spaces: VenueSpace[];
-  selectedSpace: VenueSpace | null;
-  selectedSpaceId: string;
-  setSelectedSpaceId: (value: string) => void;
-  capacityLayouts: CapacityLayoutRow[];
-  spaceAmenities: SpaceAmenityRow[];
-  spaceEventTypes: SpaceEventTypeRow[];
-  amenities: Amenity[];
-  eventTypes: EventType[];
-  onSaveSpace: (event: FormEvent<HTMLFormElement>) => void;
-  onSaveRelationships: (event: FormEvent<HTMLFormElement>) => void;
-  onReorder: (spaceId: string, direction: "up" | "down") => void;
-  onArchive: (space: VenueSpace) => void;
-}) {
-  const selectedLayouts = selectedSpace
-    ? capacityLayouts.filter((layout) => layout.space_id === selectedSpace.id)
-    : [];
-  const selectedAmenityIds = new Set(
-    selectedSpace
-      ? spaceAmenities
-          .filter((row) => row.space_id === selectedSpace.id)
-          .map((row) => row.amenity_id)
-      : [],
-  );
-  const selectedEventTypeIds = new Set(
-    selectedSpace
-      ? spaceEventTypes
-          .filter((row) => row.space_id === selectedSpace.id)
-          .map((row) => row.event_type_id)
-      : [],
-  );
-
-  return (
-    <Panel>
-      <SectionTitle
-        title="Spaces"
-        description="Create customer-readable spaces such as ballrooms, gardens, ceremony areas, and preparation suites."
-      />
-      <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
-        <div className="space-y-3">
-          {spaces.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-[#cbd5e1] bg-[#f8fafc] p-5 text-sm leading-6 text-[#64748b]">
-              No spaces yet. Add a ballroom, garden, pavilion, ceremony area, reception area, or preparation suite.
-            </div>
-          ) : (
-            spaces.map((space, index) => (
-              <div
-                key={space.id}
-                className={cn(
-                  "rounded-xl border p-4",
-                  selectedSpaceId === space.id
-                    ? "border-[#93c5fd] bg-[#eff6ff]"
-                    : "border-[#dbe3ef] bg-white",
-                )}
-              >
-                <button
-                  type="button"
-                  onClick={() => setSelectedSpaceId(space.id)}
-                  className="w-full text-left"
-                >
-                  <p className="text-base font-bold text-[#0f172a]">{space.name}</p>
-                  <p className="mt-1 text-sm font-semibold text-[#64748b]">
-                    {getVenueSpaceSettingLabel(space.setting)} · up to{" "}
-                    {space.capacityMax} guests
-                  </p>
-                </button>
-                <div className="mt-3 flex gap-1">
-                  <button
-                    type="button"
-                    onClick={() => onReorder(space.id, "up")}
-                    disabled={index === 0}
-                    className="rounded-lg border border-[#dbe3ef] p-1.5 text-[#475569] disabled:opacity-40"
-                    aria-label={`Move ${space.name} up`}
-                  >
-                    <ArrowUp className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onReorder(space.id, "down")}
-                    disabled={index === spaces.length - 1}
-                    className="rounded-lg border border-[#dbe3ef] p-1.5 text-[#475569] disabled:opacity-40"
-                    aria-label={`Move ${space.name} down`}
-                  >
-                    <ArrowDown className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onArchive(space)}
-                    className="ml-auto rounded-lg border border-red-200 p-1.5 text-red-700"
-                    aria-label={`Archive ${space.name}`}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
-          <button
-            type="button"
-            onClick={() => setSelectedSpaceId("")}
-            className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg border border-[#dbe3ef] bg-white px-3 text-sm font-bold text-[#1d4ed8] transition hover:border-[#93c5fd]"
-          >
-            <Plus className="h-4 w-4" />
-            Add Space
-          </button>
-        </div>
-
-        <div className="space-y-6">
-          <form onSubmit={onSaveSpace} className={editorCardClass}>
-            <h3 className="text-lg font-bold text-[#0f172a]">
-              {selectedSpace ? "Edit space" : "Add space"}
-            </h3>
-            <div className="mt-5 grid gap-5 lg:grid-cols-2">
-              <Field label="Name">
-                <input name="name" required defaultValue={selectedSpace?.name ?? ""} className={inputClass} />
-              </Field>
-              <Field label="Slug">
-                <input name="slug" defaultValue={selectedSpace?.slug ?? ""} placeholder="garden-pavilion" className={inputClass} />
-              </Field>
-              <Field label="Space type">
-                <select name="spaceType" defaultValue={selectedSpace?.spaceType ?? ""} className={inputClass}>
-                  <option value="">Choose a type</option>
-                  {VENUE_SPACE_TYPES.map((value) => (
-                    <option key={value} value={value}>{getVenueSpaceTypeLabel(value)}</option>
-                  ))}
-                </select>
-              </Field>
-              <Field label="Setting">
-                <select name="setting" defaultValue={selectedSpace?.setting ?? "indoor"} className={inputClass}>
-                  {VENUE_SPACE_SETTINGS.map((value) => (
-                    <option key={value} value={value}>{getVenueSpaceSettingLabel(value)}</option>
-                  ))}
-                </select>
-              </Field>
-              <Field label="Minimum capacity">
-                <input name="capacityMin" type="number" min="0" defaultValue={selectedSpace?.capacityMin ?? ""} className={inputClass} />
-              </Field>
-              <Field label="Maximum capacity">
-                <input name="capacityMax" type="number" min="1" required defaultValue={selectedSpace?.capacityMax ?? ""} className={inputClass} />
-              </Field>
-              <Field label="Short description" className="sm:col-span-2">
-                <input name="shortDescription" defaultValue={selectedSpace?.shortDescription ?? ""} className={inputClass} />
-              </Field>
-              <Field label="Full description" className="sm:col-span-2">
-                <textarea name="description" rows={4} defaultValue={selectedSpace?.description ?? ""} className={textareaClass} />
-              </Field>
-              <Field label="Accessibility summary" className="sm:col-span-2">
-                <textarea name="accessibilitySummary" rows={3} defaultValue={selectedSpace?.accessibilitySummary ?? ""} className={textareaClass} />
-              </Field>
-              <Field label="Restrictions">
-                <textarea name="restrictions" rows={3} defaultValue={selectedSpace?.restrictions ?? ""} className={textareaClass} />
-              </Field>
-              <Field label="Operating notes">
-                <textarea name="operatingNotes" rows={3} defaultValue={selectedSpace?.operatingNotes ?? ""} className={textareaClass} />
-              </Field>
-            </div>
-            <SubmitButton label={selectedSpace ? "Save space" : "Add space"} />
-          </form>
-
-          {selectedSpace ? (
-            <form onSubmit={onSaveRelationships} className={editorCardClass}>
-              <h3 className="text-lg font-bold text-[#0f172a]">Capacity, amenities, and event fit</h3>
-              <div className="mt-5 space-y-6">
-                <div>
-                  <p className={labelClass}>Capacity layouts</p>
-                  <div className="mt-3 grid gap-4">
-                    {Array.from({ length: 4 }).map((_, index) => {
-                      const layout = selectedLayouts[index];
-                      return (
-                        <div key={index} className="grid gap-3 rounded-lg border border-[#e5e7eb] bg-[#f8fafc] p-3 lg:grid-cols-[minmax(160px,0.8fr)_minmax(180px,1fr)_140px]">
-                          <select name={`layout-${index}`} defaultValue={layout?.layout ?? ""} className={inputClass}>
-                            <option value="">Layout</option>
-                            {VENUE_SPACE_LAYOUTS.map((value) => (
-                              <option key={value} value={value}>{getVenueSpaceLayoutLabel(value)}</option>
-                            ))}
-                          </select>
-                          <input name={`customLayoutLabel-${index}`} defaultValue={layout?.custom_layout_label ?? ""} placeholder="Custom label" className={inputClass} />
-                          <input name={`layoutCapacity-${index}`} type="number" min="0" defaultValue={layout?.capacity ?? ""} placeholder="Capacity" className={inputClass} />
-                          <input name={`layoutNotes-${index}`} defaultValue={layout?.notes ?? ""} placeholder="Notes" className={cn(inputClass, "lg:col-span-3")} />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <CheckboxGrid
-                  label="Space-specific amenities"
-                  name="amenityIds"
-                  items={amenities}
-                  selectedIds={selectedAmenityIds}
-                />
-                <CheckboxGrid
-                  label="Supported event types"
-                  name="eventTypeIds"
-                  items={eventTypes}
-                  selectedIds={selectedEventTypeIds}
-                />
-              </div>
-              <SubmitButton label="Save space details" />
-            </form>
-          ) : null}
-        </div>
-      </div>
-    </Panel>
-  );
-}
 
 function MediaSection({
   profile,
@@ -1619,14 +1413,4 @@ function CheckboxGrid({
   );
 }
 
-function SubmitButton({ label }: { label: string }) {
-  return (
-    <button
-      type="submit"
-      className="mt-6 inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#1d4ed8] px-5 py-3 text-sm font-bold text-white shadow-sm shadow-blue-200/70 transition hover:bg-[#1e40af]"
-    >
-      <Save className="h-4 w-4" />
-      {label}
-    </button>
-  );
-}
+
