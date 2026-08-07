@@ -98,15 +98,13 @@ export async function POST(request: NextRequest) {
     );
     results.push(outcome.result);
 
-    // 5xx so PayMongo retries: the transfer is real but we could not
-    // confirm its state.
-    if (!outcome.ok && outcome.result === "needs_reconciliation") {
+    // needs_review means the outcome could not be determined from
+    // verified provider data and the withdrawal has been parked for an
+    // operator. A 200 is correct: retrying the callback cannot resolve it,
+    // and the funds stay held either way.
+    if (!outcome.ok && outcome.result === "needs_review") {
       console.error(
-        `[treasury-webhook] Could not confirm ${withdrawalId}: ${outcome.error}`,
-      );
-      return NextResponse.json(
-        { error: "Status lookup failed" },
-        { status: 503 },
+        `[treasury-webhook] Withdrawal ${withdrawalId} parked for review: ${outcome.error}`,
       );
     }
   }
