@@ -11,6 +11,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { requirePermissionOrRedirect } from "@/lib/rbac/admin-context";
 import { AdminWithdrawalActions } from "@/features/payouts/ui/AdminWithdrawalActions";
+import { VerifyPayoutAccountButton } from "@/features/payouts/ui/VerifyPayoutAccountButton";
 import {
   PAYOUT_METHOD_LABELS,
   WITHDRAWAL_STATUS_LABELS,
@@ -38,6 +39,17 @@ type AdminWithdrawalRow = {
     account_number_last4: string;
     verified_at: string | null;
   } | null;
+};
+
+type PendingAccountRow = {
+  id: string;
+  method: PayoutMethod;
+  account_name: string;
+  bank_name: string | null;
+  account_number_last4: string;
+  created_at: string;
+  organizations: { name: string } | null;
+  supplier_profiles: { business_name: string } | null;
 };
 
 const OPEN: WithdrawalStatus[] = ["pending", "approved", "processing"];
@@ -68,6 +80,22 @@ export default async function AdminWithdrawalsPage() {
     )
     .order("requested_at", { ascending: false })
     .limit(100);
+
+  // Destinations waiting on a human. A recipient cannot request a
+  // withdrawal until one of these is verified, so if this list is
+  // non-empty the withdrawal queue below will stay empty no matter what.
+  const { data: pendingAccountData } = await supabase
+    .from("payout_accounts")
+    .select(
+      "id, method, account_name, bank_name, account_number_last4, created_at, " +
+        "organizations(name), supplier_profiles(business_name)",
+    )
+    .is("verified_at", null)
+    .is("archived_at", null)
+    .order("created_at", { ascending: true })
+    .limit(50);
+
+  const pendingAccounts = (pendingAccountData ?? []) as PendingAccountRow[];
 
   const rows = (data ?? []) as AdminWithdrawalRow[];
   const awaitingReview = rows.filter((row) => row.status === "pending");
@@ -165,6 +193,38 @@ export default async function AdminWithdrawalsPage() {
           icon="account_balance_wallet"
         />
       </div>
+
+      {pendingAccounts.length > 0 ? (
+        <Panel>
+          <PanelHeader
+            title={`Payout accounts awaiting verification (${pendingAccounts.length})`}
+            description="Confirm the account holder out of band before verifying. Until an account is verified its owner cannot request a withdrawal at all, so nothing will appear in the queue below."
+          />
+          <ul className="grid gap-3">
+            {pendingAccounts.map((account) => (
+              <li
+                key={account.id}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50/60 px-4 py-3"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-[#0f172a]">
+                    {account.organizations?.name ??
+                      account.supplier_profiles?.business_name ??
+                      "Unknown recipient"}
+                  </p>
+                  <p className="mt-0.5 text-xs font-medium text-[#64748b]">
+                    {PAYOUT_METHOD_LABELS[account.method]}
+                    {account.bank_name ? ` — ${account.bank_name}` : ""} ••••
+                    {account.account_number_last4} · {account.account_name} ·
+                    added {formatDate(account.created_at)}
+                  </p>
+                </div>
+                <VerifyPayoutAccountButton payoutAccountId={account.id} />
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      ) : null}
 
       <Panel>
         <PanelHeader
