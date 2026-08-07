@@ -80,6 +80,18 @@ export interface DisbursementGateway {
    */
   getTransfer(transferId: string): Promise<TransferResult>;
 
+  /**
+   * Looks up a transfer already created for `reference`, or null.
+   *
+   * The provider documents no idempotency key, so duplicate protection is
+   * read-before-write: the service calls this before creating a transfer
+   * whenever a previous attempt may have succeeded unseen.
+   */
+  findTransferByReference(
+    reference: string,
+    description: string,
+  ): Promise<TransferResult | null>;
+
   /** Institutions reachable on a rail, for the payout-account picker. */
   listReceivingInstitutions(
     network: TransferNetwork,

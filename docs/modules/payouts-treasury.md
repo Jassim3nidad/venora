@@ -5,6 +5,27 @@ an assumed `POST /v1/disbursements` endpoint that does not exist. Every
 endpoint and field below is taken from PayMongo's published Treasury /
 Money Movement documentation.
 
+## Verification status of every claim in this document
+
+| Claim                                                                           | Status                                   |
+| ------------------------------------------------------------------------------- | ---------------------------------------- |
+| `POST /v2/batch_transfers` + full payload                                       | **Verified** in docs                     |
+| `GET /v2/transfers/{id}` + response                                             | **Verified** in docs                     |
+| `GET /v2/transfers` filters: `limit`, `after_id`, `before_id`, `description`    | **Verified** in docs                     |
+| `GET /v1/wallets/receiving_institutions?provider=` → `attributes.provider_code` | **Verified** in docs                     |
+| Statuses `pending` / `succeeded` / `failed`                                     | **Verified** in docs                     |
+| Providers `paymongo` / `instapay` / `pesonet`                                   | **Verified** in docs                     |
+| InstaPay ≤ PHP 50,000, PESONet ≤ PHP 10,000,000                                 | **Verified** in docs                     |
+| Test mode supported for disbursements                                           | **Verified** in docs                     |
+| Callback payload shape / event names                                            | **UNRESOLVED — not documented**          |
+| Callback signature scheme                                                       | **UNRESOLVED — not documented**          |
+| Idempotency key on transfer creation                                            | **UNRESOLVED — none documented**         |
+| Insufficient-balance error code                                                 | **UNRESOLVED — matched on message text** |
+
+Everything marked UNRESOLVED is handled by a design that does not depend
+on it. Nothing in this implementation asserts undocumented behaviour as
+fact.
+
 ## Known gap — read before enabling
 
 **The `callback_url` payload is undocumented.** PayMongo's Transfer V2
@@ -17,8 +38,23 @@ body for status**. It scrapes any identifier it can find, then re-reads the
 authoritative state from `GET /v2/transfers/{id}`. A forged callback can at
 worst make us re-read our own transfer and reach the correct answer.
 
-If PayMongo later publishes the payload, the handler can be tightened — but
-the current design is deliberately not dependent on it.
+**Callback authenticity cannot be verified.** PayMongo documents an HMAC
+scheme for its _payments_ webhooks, but publishes nothing equivalent for
+money-movement callbacks. No signature check is implemented, because
+inventing one would give false assurance. The design compensates: since
+the body is never trusted, an attacker who forges a callback only causes
+an authenticated re-read of our own transfer.
+
+**No idempotency key is documented** for transfer creation. Duplicate
+protection is therefore read-before-write: the service calls
+`GET /v2/transfers?description=…` and matches on `reference_number` (our
+withdrawal id) before creating anything. `description` is the only
+documented filter and we control its value. This is backed by the
+`approved → processing` state claim, which is the primary guard.
+
+If PayMongo later publishes the callback payload or an idempotency header,
+both can be tightened — the current design is deliberately not dependent
+on either.
 
 ## Architecture
 
@@ -144,10 +180,37 @@ approved --begin_withdrawal_disbursement--> processing
 A withdrawal is marked `paid` only on an explicit `succeeded`. An
 unrecognised status is treated as `pending`, never as success.
 
-Provider errors are split by whether the transfer may already exist:
-timeouts and unreachable-host leave the withdrawal `processing` for
-reconciliation; explicit rejections release the funds. Releasing on an
-ambiguous error risks paying twice.
+### Error taxonomy
+
+| Condition           | Code                                | Funds                |
+| ------------------- | ----------------------------------- | -------------------- |
+| Money-out disabled  | `DISBURSEMENT_NOT_ENABLED`          | released             |
+| Missing config      | `DISBURSEMENT_NOT_CONFIGURED`       | released             |
+| 401 / 403           | `DISBURSEMENT_AUTH_FAILED`          | released             |
+| 400 / 422 rejection | `DISBURSEMENT_REJECTED`             | released             |
+| Underfunded wallet  | `DISBURSEMENT_INSUFFICIENT_BALANCE` | released             |
+| Timeout             | `DISBURSEMENT_PROVIDER_TIMEOUT`     | **held, reconciled** |
+| Unreachable         | `DISBURSEMENT_PROVIDER_UNREACHABLE` | **held, reconciled** |
+| 5xx                 | `DISBURSEMENT_PROVIDER_UNAVAILABLE` | **held, reconciled** |
+
+The split is by one question only: _could a transfer exist?_ A 4xx means
+the provider rejected the request outright, so no money moved and release
+is safe. A timeout or 5xx is ambiguous, so funds stay held until
+reconciliation asks the provider directly. Releasing on ambiguity risks
+paying twice.
+
+### Reconciliation
+
+`POST /api/payouts/reconcile` (shared secret, constant-time compare)
+sweeps everything in `processing`:
+
+- **with** a transfer id → re-read `GET /v2/transfers/{id}`
+- **without** one → ask `GET /v2/transfers?description=…` whether a
+  transfer exists. Only if the provider confirms none does the sweep
+  release the funds.
+
+This is what makes "never release on ambiguity" workable rather than a
+permanent stuck state.
 
 ## Callback flow
 

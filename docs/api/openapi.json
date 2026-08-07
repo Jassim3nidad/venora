@@ -1926,6 +1926,96 @@
         }
       }
     },
+    "/api/payouts/reconcile": {
+      "post": {
+        "summary": "Reconcile stuck withdrawals",
+        "description": "Scheduled sweep. Resolves withdrawals left in `processing` against PayMongo's authoritative transfer status. Withdrawals with no transfer id are checked against the provider before any decision, because an ambiguous create (timeout or 5xx) must never release funds on assumption. Authenticated with the PAYOUT_RECONCILE_SECRET shared secret compared in constant time.",
+        "operationId": "postApiPayoutsReconcile",
+        "tags": ["Payments"],
+        "x-venora-surface": "next-route-handler",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["received", "result"],
+                  "properties": {
+                    "received": {
+                      "const": true
+                    },
+                    "result": {
+                      "type": "string",
+                      "enum": ["processed", "duplicate", "skipped"]
+                    }
+                  }
+                },
+                "example": {
+                  "received": true,
+                  "result": "processed"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid signature",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "error": "Invalid signature"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Processing failed; provider should retry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "error": "Processing failed"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Gateway not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "error": "Provider not configured"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/suppliers": {
       "get": {
         "summary": "List public suppliers",

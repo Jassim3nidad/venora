@@ -191,8 +191,27 @@ export class PayMongoTreasuryAdapter implements DisbursementGateway {
         );
       }
       if (response.status === 422 || response.status === 400) {
+        // PayMongo does not document a machine-readable code for an
+        // underfunded wallet, so this is matched on message text. It only
+        // ever changes the message shown to the operator -- both branches
+        // are terminal rejections that release the funds -- so a missed
+        // match degrades the wording, never the money handling.
+        if (/insufficient|balance/i.test(detail)) {
+          throw new PaymentError(
+            "DISBURSEMENT_INSUFFICIENT_BALANCE",
+            "The PayMongo wallet does not have enough balance for this payout. Top up the wallet and retry.",
+          );
+        }
         throw new PaymentError("DISBURSEMENT_REJECTED", detail);
       }
+
+      // 5xx is ambiguous: the transfer may have been created before the
+      // failure. Distinct from a 4xx rejection so the caller leaves the
+      // withdrawal in flight instead of releasing funds that may move.
+      if (response.status >= 500) {
+        throw new PaymentError("DISBURSEMENT_PROVIDER_UNAVAILABLE", detail);
+      }
+
       throw new PaymentError("DISBURSEMENT_PROVIDER_ERROR", detail);
     }
 
@@ -295,6 +314,34 @@ export class PayMongoTreasuryAdapter implements DisbursementGateway {
       `/v2/transfers/${encodeURIComponent(transferId)}`,
     );
     return this.toResult(data);
+  }
+
+  /**
+   * Finds an already-created transfer for a withdrawal.
+   *
+   * PayMongo documents no idempotency key for transfer creation, so
+   * duplicate protection has to be read-before-write. `description` is the
+   * only documented filter on GET /v2/transfers, and we control its value
+   * (one unique string per withdrawal), so it is used as the lookup key.
+   * The returned `reference_number` — our withdrawal id — is then matched
+   * exactly, because `description` filtering may be a substring match.
+   */
+  async findTransferByReference(
+    reference: string,
+    description: string,
+  ): Promise<TransferResult | null> {
+    this.assertConfigured();
+
+    const data = await this.request<TransferPayload[]>(
+      "GET",
+      `/v2/transfers?limit=50&description=${encodeURIComponent(description)}`,
+    );
+
+    const match = (Array.isArray(data) ? data : []).find(
+      (item) => item.reference_number === reference,
+    );
+
+    return match ? this.toResult(match) : null;
   }
 
   async listReceivingInstitutions(

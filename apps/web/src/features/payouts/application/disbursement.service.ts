@@ -47,7 +47,13 @@ interface PayoutAccountSecret {
 const AMBIGUOUS_ERROR_CODES = new Set([
   "DISBURSEMENT_PROVIDER_TIMEOUT",
   "DISBURSEMENT_PROVIDER_UNREACHABLE",
+  "DISBURSEMENT_PROVIDER_UNAVAILABLE",
 ]);
+
+/** One stable string per withdrawal — also the duplicate-detection key. */
+function transferDescription(withdrawalId: string): string {
+  return `Venora payout ${withdrawalId}`;
+}
 
 function toAccountNetwork(value: string | null): TransferNetwork | null {
   return value === "instapay" || value === "pesonet" ? value : null;
@@ -140,6 +146,43 @@ export async function dispatchWithdrawal(
     );
   }
 
+  const description = transferDescription(withdrawal.id);
+
+  // Read before write. PayMongo documents no idempotency key, so the only
+  // way to stop a retry creating a second transfer is to ask whether one
+  // already exists for this withdrawal. A lookup failure is not fatal --
+  // the claim in begin_withdrawal_disbursement() is still the primary
+  // guard -- so it degrades to proceeding rather than blocking a payout.
+  try {
+    const existing = await gateway.findTransferByReference(
+      withdrawal.id,
+      description,
+    );
+    if (existing) {
+      console.warn(
+        `[payouts] Withdrawal ${withdrawal.id} already has transfer ${existing.transferId}; adopting instead of creating a second.`,
+      );
+      await serviceClient.rpc("attach_withdrawal_transfer", {
+        p_request_id: withdrawal.id,
+        p_provider: gateway.id,
+        p_transfer_id: existing.transferId,
+        p_batch_transfer_id: existing.batchTransferId,
+        p_provider_reference_number: existing.providerReferenceNumber,
+      });
+      return applyTransferStatus(
+        serviceClient,
+        gateway,
+        withdrawal.id,
+        existing,
+      );
+    }
+  } catch (error) {
+    console.warn(
+      `[payouts] Duplicate check failed for ${withdrawal.id}; relying on the state claim.`,
+      error instanceof Error ? error.message : error,
+    );
+  }
+
   let transfer: TransferResult;
   try {
     // Plaintext exists only within this call's stack — never logged,
@@ -159,7 +202,7 @@ export async function dispatchWithdrawal(
         institutionCode: account.institution_code,
         institutionName: account.institution_name,
       },
-      description: `Venora payout ${withdrawal.id}`,
+      description,
       metadata: { withdrawal_id: withdrawal.id, network_reason: networkReason },
     });
   } catch (error) {
@@ -239,6 +282,97 @@ export async function syncWithdrawalStatus(
   }
 
   return applyTransferStatus(serviceClient, gateway, data.id, transfer);
+}
+
+/**
+ * Resolves every withdrawal stuck in `processing`.
+ *
+ * Two distinct cases:
+ *
+ *   with a transfer id     — re-read authoritative status.
+ *   without a transfer id  — the create call was ambiguous (timeout, 5xx).
+ *                            Ask the provider whether a transfer exists for
+ *                            this withdrawal before deciding anything.
+ *
+ * The second case is the whole reason ambiguous failures do not release
+ * funds: only the provider can say whether the money moved.
+ */
+export async function reconcileStuckWithdrawals(
+  serviceClient: SupabaseClient,
+  gateway: DisbursementGateway,
+  limit = 50,
+): Promise<{
+  checked: number;
+  settled: number;
+  failed: number;
+  pending: number;
+}> {
+  const { data } = await serviceClient
+    .from("withdrawal_requests")
+    .select("id, provider_reference")
+    .eq("status", "processing")
+    .order("requested_at", { ascending: true })
+    .limit(limit);
+
+  const rows = (data ?? []) as Array<{
+    id: string;
+    provider_reference: string | null;
+  }>;
+
+  const tally = { checked: rows.length, settled: 0, failed: 0, pending: 0 };
+
+  for (const row of rows) {
+    try {
+      let outcome: DisbursementOutcome;
+
+      if (row.provider_reference) {
+        outcome = await syncWithdrawalStatus(serviceClient, gateway, row.id);
+      } else {
+        const existing = await gateway.findTransferByReference(
+          row.id,
+          transferDescription(row.id),
+        );
+
+        if (!existing) {
+          // No transfer was ever created, so no money moved. Safe to
+          // release — and only safe because the provider confirmed it.
+          outcome = await failWithdrawal(
+            serviceClient,
+            gateway,
+            row.id,
+            "No transfer was created at the provider; the payout was not sent.",
+          );
+        } else {
+          await serviceClient.rpc("attach_withdrawal_transfer", {
+            p_request_id: row.id,
+            p_provider: gateway.id,
+            p_transfer_id: existing.transferId,
+            p_batch_transfer_id: existing.batchTransferId,
+            p_provider_reference_number: existing.providerReferenceNumber,
+          });
+          outcome = await applyTransferStatus(
+            serviceClient,
+            gateway,
+            row.id,
+            existing,
+          );
+        }
+      }
+
+      if (outcome.ok && outcome.result === "settled") tally.settled += 1;
+      else if (!outcome.ok && outcome.result === "failed") tally.failed += 1;
+      else tally.pending += 1;
+    } catch (error) {
+      // One unreachable withdrawal must not stop the sweep.
+      tally.pending += 1;
+      console.error(
+        `[payouts] Reconciliation failed for ${row.id}:`,
+        error instanceof Error ? error.message : error,
+      );
+    }
+  }
+
+  return tally;
 }
 
 /**
