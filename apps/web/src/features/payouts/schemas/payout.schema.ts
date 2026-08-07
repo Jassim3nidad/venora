@@ -43,12 +43,11 @@ export const payoutAccountSchema = z.object({
     .max(32),
   institutionName: z.string().trim().min(1).max(200),
   network: transferNetworkSchema,
-  accountType: z
-    .preprocess(
-      (value) =>
-        typeof value === "string" && value.trim() === "" ? undefined : value,
-      z.string().trim().max(60).optional(),
-    ),
+  accountType: z.preprocess(
+    (value) =>
+      typeof value === "string" && value.trim() === "" ? undefined : value,
+    z.string().trim().max(60).optional(),
+  ),
   accountIdentifier: accountIdentifierSchema,
   makeDefault: z.coerce.boolean().default(false),
 });

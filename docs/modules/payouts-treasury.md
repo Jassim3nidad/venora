@@ -43,11 +43,11 @@ means writing one new `DisbursementGateway` implementation.
 
 ## Endpoints used
 
-| Purpose | Method | Path |
-|---|---|---|
-| Create a transfer | POST | `/v2/batch_transfers` |
-| Authoritative status | GET | `/v2/transfers/{id}` |
-| Institution / BIC list | GET | `/v1/wallets/receiving_institutions?provider=` |
+| Purpose                | Method | Path                                           |
+| ---------------------- | ------ | ---------------------------------------------- |
+| Create a transfer      | POST   | `/v2/batch_transfers`                          |
+| Authoritative status   | GET    | `/v2/transfers/{id}`                           |
+| Institution / BIC list | GET    | `/v1/wallets/receiving_institutions?provider=` |
 
 Auth is HTTP Basic with the secret key as username and an empty password.
 Amounts are integers in centavos. The version split (transfers v2,
@@ -59,6 +59,7 @@ fail independently. Batching is for bulk payroll, which this is not.
 ## Files changed
 
 **Added**
+
 - `features/payouts/domain/gateways/disbursement-gateway.port.ts` — money-out port
 - `features/payouts/domain/transfer-network.ts` — rail selection (pure)
 - `features/payouts/infrastructure/paymongo/paymongo-treasury.adapter.ts` — adapter
@@ -68,6 +69,7 @@ fail independently. Batching is for bulk payroll, which this is not.
 - `supabase/migrations/20260807120000_payout_institutions.sql`
 
 **Removed**
+
 - `features/payouts/application/use-cases/execute-disbursement.usecase.ts`
 - `createDisbursement`, `CreateDisbursementParams`, `DisbursementResult`,
   `DisbursementMethod` from the payments port
@@ -76,6 +78,7 @@ fail independently. Batching is for bulk payroll, which this is not.
   webhook union and use-case — those event names were guessed
 
 **Modified**
+
 - `payout.schema.ts`, `payout.types.ts`, `payout-actions.ts`, `queries.ts` —
   structured institution fields
 - `PayoutAccountManager.tsx` — searchable institution picker
@@ -104,16 +107,16 @@ that cannot be paid.
 
 ## Environment variables
 
-| Variable | Purpose |
-|---|---|
-| `PAYMONGO_SECRET_KEY` | Basic-auth username (existing) |
-| `PAYMONGO_DISBURSEMENTS_ENABLED` | Kill switch; `false` refuses cleanly |
+| Variable                         | Purpose                                 |
+| -------------------------------- | --------------------------------------- |
+| `PAYMONGO_SECRET_KEY`            | Basic-auth username (existing)          |
+| `PAYMONGO_DISBURSEMENTS_ENABLED` | Kill switch; `false` refuses cleanly    |
 | `PAYMONGO_SOURCE_ACCOUNT_NUMBER` | Wallet account, `source_account.number` |
-| `PAYMONGO_SOURCE_ACCOUNT_NAME` | `source_account.name` |
-| `PAYMONGO_SOURCE_ACCOUNT_BIC` | `source_account.bic` |
-| `PAYMONGO_CALLBACK_URL` | Absolute URL of the callback route |
-| `PAYMONGO_TRANSFER_PURPOSE` | `purpose` field, default `Disbursement` |
-| `PAYMONGO_TRANSFER_NETWORK_MODE` | `auto` \| `instapay` \| `pesonet` |
+| `PAYMONGO_SOURCE_ACCOUNT_NAME`   | `source_account.name`                   |
+| `PAYMONGO_SOURCE_ACCOUNT_BIC`    | `source_account.bic`                    |
+| `PAYMONGO_CALLBACK_URL`          | Absolute URL of the callback route      |
+| `PAYMONGO_TRANSFER_PURPOSE`      | `purpose` field, default `Disbursement` |
+| `PAYMONGO_TRANSFER_NETWORK_MODE` | `auto` \| `instapay` \| `pesonet`       |
 
 No value is hardcoded. Missing config is reported by name.
 

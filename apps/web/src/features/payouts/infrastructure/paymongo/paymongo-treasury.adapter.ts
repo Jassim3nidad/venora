@@ -87,10 +87,10 @@ export class PayMongoTreasuryAdapter implements DisbursementGateway {
   isConfigured(): boolean {
     return Boolean(
       this.config.enabled &&
-        this.config.secretKey &&
-        this.config.sourceAccountNumber &&
-        this.config.sourceAccountName &&
-        this.config.sourceAccountBic,
+      this.config.secretKey &&
+      this.config.sourceAccountNumber &&
+      this.config.sourceAccountName &&
+      this.config.sourceAccountBic,
     );
   }
 
@@ -169,8 +169,7 @@ export class PayMongoTreasuryAdapter implements DisbursementGateway {
     }
 
     const json = (await response.json().catch(() => null)) as
-      | (TreasuryErrorBody & { data?: T })
-      | null;
+      (TreasuryErrorBody & { data?: T }) | null;
 
     if (!response.ok) {
       const detail =
@@ -314,7 +313,11 @@ export class PayMongoTreasuryAdapter implements DisbursementGateway {
     const data = await this.request<
       Array<{
         id?: string;
-        attributes?: { name?: string; provider?: string; provider_code?: string };
+        attributes?: {
+          name?: string;
+          provider?: string;
+          provider_code?: string;
+        };
       }>
     >("GET", `/v1/wallets/receiving_institutions?provider=${network}`);
 

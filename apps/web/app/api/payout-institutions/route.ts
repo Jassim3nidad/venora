@@ -53,8 +53,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const institutions = await createPayMongoTreasuryAdapter()
-      .listReceivingInstitutions(network);
+    const institutions =
+      await createPayMongoTreasuryAdapter().listReceivingInstitutions(network);
 
     cache.set(network, { at: Date.now(), institutions });
     return NextResponse.json({ data: institutions, cached: false });

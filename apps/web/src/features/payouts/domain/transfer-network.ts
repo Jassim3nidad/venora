@@ -50,7 +50,9 @@ export function resolveTransferNetwork(input: {
   const { amountMinor, accountNetwork, mode } = input;
 
   if (amountMinor <= 0) {
-    throw new TransferNetworkError("Transfer amount must be greater than zero.");
+    throw new TransferNetworkError(
+      "Transfer amount must be greater than zero.",
+    );
   }
 
   if (amountMinor > PESONET_MAX_MINOR) {

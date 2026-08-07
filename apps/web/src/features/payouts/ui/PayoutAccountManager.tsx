@@ -251,8 +251,8 @@ export function PayoutAccountManager({
               </ul>
             ) : null}
             <span className="text-xs font-medium text-slate-500">
-              Chosen from the provider's supported list — a typed-in name
-              cannot be paid out.
+              Chosen from the provider's supported list — a typed-in name cannot
+              be paid out.
             </span>
           </label>
 

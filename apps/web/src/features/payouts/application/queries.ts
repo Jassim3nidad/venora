@@ -33,7 +33,9 @@ function scopeColumn(scope: PayoutScope) {
 }
 
 function scopeId(scope: PayoutScope) {
-  return scope.kind === "organization" ? scope.organizationId : scope.supplierId;
+  return scope.kind === "organization"
+    ? scope.organizationId
+    : scope.supplierId;
 }
 
 export async function getBalance(
@@ -41,7 +43,8 @@ export async function getBalance(
   scope: PayoutScope,
 ): Promise<Balance> {
   const { data, error } = await supabase.rpc("get_available_balance", {
-    p_organization_id: scope.kind === "organization" ? scope.organizationId : null,
+    p_organization_id:
+      scope.kind === "organization" ? scope.organizationId : null,
     p_supplier_id: scope.kind === "supplier" ? scope.supplierId : null,
   });
 
