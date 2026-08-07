@@ -18,16 +18,11 @@ function sign(
 }
 
 function makeGateway(
-  overrides: Partial<{
-    secretKey: string;
-    webhookSecret: string;
-    disbursementsEnabled: boolean;
-  }> = {},
+  overrides: Partial<{ secretKey: string; webhookSecret: string }> = {},
 ) {
   return new PayMongoGateway({
     secretKey: overrides.secretKey ?? "sk_test_dummy",
     webhookSecret: overrides.webhookSecret ?? WEBHOOK_SECRET,
-    disbursementsEnabled: overrides.disbursementsEnabled ?? false,
   });
 }
 

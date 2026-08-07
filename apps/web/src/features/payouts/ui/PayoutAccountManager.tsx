@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Plus, ShieldCheck, Clock, Trash2 } from "lucide-react";
 import {
@@ -11,7 +11,10 @@ import {
   PAYOUT_METHOD_LABELS,
   type PayoutAccountRow,
   type PayoutMethod,
+  type TransferNetwork,
 } from "../types/payout.types";
+
+type Institution = { code: string; name: string; network: TransferNetwork };
 
 const INPUT_CLASS =
   "rounded-2xl border border-[#E5E7EB] bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-[#2563EB] focus:ring-4 focus:ring-[#2563EB]/10";
@@ -31,22 +34,62 @@ export function PayoutAccountManager({
   const [open, setOpen] = useState(accounts.length === 0);
   const [method, setMethod] = useState<PayoutMethod>("bank");
   const [accountName, setAccountName] = useState("");
-  const [bankName, setBankName] = useState("");
+  const [network, setNetwork] = useState<TransferNetwork>("instapay");
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
+  const [institutionQuery, setInstitutionQuery] = useState("");
+  const [institution, setInstitution] = useState<Institution | null>(null);
+  const [loadingInstitutions, setLoadingInstitutions] = useState(false);
   const [accountIdentifier, setAccountIdentifier] = useState("");
   const [makeDefault, setMakeDefault] = useState(accounts.length === 0);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  // Loaded per network from an authenticated proxy; the provider's
+  // institution list needs a secret key and cannot be fetched directly.
+  useEffect(() => {
+    let cancelled = false;
+    setLoadingInstitutions(true);
+    fetch(`/api/payout-institutions?network=${network}`)
+      .then((response) => (response.ok ? response.json() : { data: [] }))
+      .then((json) => {
+        if (!cancelled) setInstitutions(json.data ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setInstitutions([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingInstitutions(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [network]);
+
+  const matchingInstitutions = useMemo(() => {
+    const query = institutionQuery.trim().toLowerCase();
+    if (!query) return [];
+    return institutions
+      .filter((item) => item.name.toLowerCase().includes(query))
+      .slice(0, 25);
+  }, [institutions, institutionQuery]);
+
   function submit() {
     setError(null);
 
     startTransition(async () => {
+      if (!institution) {
+        setError("Choose where the money should be sent.");
+        return;
+      }
+
       const result = await addPayoutAccountAction({
         scope,
         scopeId,
         method,
         accountName,
-        bankName: method === "bank" ? bankName : undefined,
+        institutionCode: institution.code,
+        institutionName: institution.name,
+        network,
         accountIdentifier,
         makeDefault,
       });
@@ -60,7 +103,8 @@ export function PayoutAccountManager({
       // component state after it has been sent for encryption.
       setAccountIdentifier("");
       setAccountName("");
-      setBankName("");
+      setInstitution(null);
+      setInstitutionQuery("");
       setOpen(false);
       router.refresh();
     });
@@ -151,18 +195,66 @@ export function PayoutAccountManager({
             </select>
           </label>
 
-          {method === "bank" ? (
-            <label className="grid gap-2 text-sm font-bold text-slate-700">
-              Bank
-              <input
-                value={bankName}
-                onChange={(event) => setBankName(event.target.value)}
-                maxLength={160}
-                placeholder="BPI, BDO, UnionBank…"
-                className={INPUT_CLASS}
-              />
-            </label>
-          ) : null}
+          <label className="grid gap-2 text-sm font-bold text-slate-700">
+            Transfer network
+            <select
+              value={network}
+              onChange={(event) => {
+                setNetwork(event.target.value as TransferNetwork);
+                setInstitution(null);
+              }}
+              className={INPUT_CLASS}
+            >
+              <option value="instapay">InstaPay (up to PHP 50,000)</option>
+              <option value="pesonet">PESONet (larger amounts)</option>
+            </select>
+          </label>
+
+          <label className="grid gap-2 text-sm font-bold text-slate-700">
+            Receiving institution
+            <input
+              value={institution ? institution.name : institutionQuery}
+              onChange={(event) => {
+                setInstitution(null);
+                setInstitutionQuery(event.target.value);
+              }}
+              placeholder={
+                loadingInstitutions
+                  ? "Loading institutions…"
+                  : "Search for your bank or e-wallet"
+              }
+              disabled={loadingInstitutions}
+              className={INPUT_CLASS}
+            />
+            {!institution && institutionQuery.trim().length > 0 ? (
+              <ul className="max-h-56 overflow-y-auto rounded-2xl border border-[#E5E7EB]">
+                {matchingInstitutions.length > 0 ? (
+                  matchingInstitutions.map((item) => (
+                    <li key={item.code}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setInstitution(item);
+                          setInstitutionQuery("");
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm font-semibold hover:bg-[#eff6ff]"
+                      >
+                        {item.name}
+                      </button>
+                    </li>
+                  ))
+                ) : (
+                  <li className="px-4 py-2 text-sm text-slate-500">
+                    No match on this network. Try the other one.
+                  </li>
+                )}
+              </ul>
+            ) : null}
+            <span className="text-xs font-medium text-slate-500">
+              Chosen from the provider's supported list — a typed-in name
+              cannot be paid out.
+            </span>
+          </label>
 
           <label className="grid gap-2 text-sm font-bold text-slate-700">
             Account holder name

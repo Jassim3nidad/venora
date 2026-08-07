@@ -7,9 +7,8 @@ import { createServerAction } from "@/src/lib/server-action";
 import { ValidationError } from "@/src/lib/errors";
 import { requirePermission } from "@/lib/rbac/admin-context";
 import { createServiceClient } from "@/src/lib/supabase/service";
-import "@/src/features/payments/infrastructure/register-gateways";
-import { getGateway } from "@/features/payments/application/gateway-registry";
-import { executeDisbursement } from "./use-cases/execute-disbursement.usecase";
+import { createPayMongoTreasuryAdapter } from "../infrastructure/paymongo/paymongo-treasury.adapter";
+import { dispatchWithdrawal } from "./disbursement.service";
 import type { WithdrawalRequestRow } from "../types/payout.types";
 
 /**
@@ -125,20 +124,21 @@ export async function dispatchWithdrawalAction(rawInput: unknown) {
     async (input) => {
       await requirePermission("commissions.manage");
 
-      let gateway;
-      try {
-        gateway = getGateway("paymongo");
-      } catch {
-        throw new ValidationError(
-          "The payment provider is not configured on this environment.",
-        );
-      }
-
-      const outcome = await executeDisbursement(
+      const outcome = await dispatchWithdrawal(
         createServiceClient(),
-        gateway,
+        createPayMongoTreasuryAdapter(),
         input.withdrawalId,
       );
+
+      // A transfer left in flight is not an error the admin can act on by
+      // retrying -- the money may already be moving. Surface it as a
+      // distinct message and leave reconciliation to sync the outcome.
+      if (!outcome.ok && outcome.result === "needs_reconciliation") {
+        revalidateAdmin();
+        throw new ValidationError(
+          `${outcome.error} The withdrawal stays in flight and will be reconciled automatically.`,
+        );
+      }
 
       if (!outcome.ok) throw new ValidationError(outcome.error);
 

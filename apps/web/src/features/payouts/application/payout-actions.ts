@@ -90,7 +90,10 @@ export async function addPayoutAccountAction(rawInput: unknown) {
           supplier_id: input.scope === "supplier" ? input.scopeId : null,
           method: input.method,
           account_name: input.accountName,
-          bank_name: input.bankName ?? null,
+          institution_code: input.institutionCode,
+          institution_name: input.institutionName,
+          network: input.network,
+          account_type: input.accountType ?? null,
           account_number_last4: last4,
           account_identifier_ciphertext: ciphertext,
           account_fingerprint: fingerprint,
@@ -99,6 +102,7 @@ export async function addPayoutAccountAction(rawInput: unknown) {
         })
         .select(
           "id, organization_id, supplier_id, method, account_name, bank_name, " +
+            "institution_code, institution_name, network, account_type, " +
             "account_number_last4, is_default, verified_at, archived_at, created_at",
         )
         .single();

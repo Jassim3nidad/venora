@@ -155,33 +155,6 @@ export async function processWebhookEvent(
         break;
       }
 
-      // Money-out. Correlation prefers our own withdrawal id (set as
-      // provider metadata when the disbursement was created) and falls
-      // back to the provider reference, because a fast webhook can beat
-      // attach_withdrawal_provider_reference to the database. The RPC
-      // reverifies the withdrawal's own state before settling, so neither
-      // path can settle something that is not in flight.
-      case "disbursement.succeeded": {
-        const { error } = await serviceClient.rpc("settle_withdrawal_request", {
-          p_provider: gateway.id,
-          p_withdrawal_id: event.withdrawalId,
-          p_provider_reference: event.disbursementReference,
-        });
-        if (error) throw new Error(error.message);
-        break;
-      }
-
-      case "disbursement.failed": {
-        const { error } = await serviceClient.rpc("fail_withdrawal_request", {
-          p_provider: gateway.id,
-          p_withdrawal_id: event.withdrawalId,
-          p_provider_reference: event.disbursementReference,
-          p_failure_reason: event.failureReason,
-        });
-        if (error) throw new Error(error.message);
-        break;
-      }
-
       case "ignored":
         await finish("skipped");
         return { ok: true, result: "skipped" };

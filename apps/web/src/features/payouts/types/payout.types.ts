@@ -9,6 +9,9 @@ export type PayoutStatus = "scheduled" | "processing" | "paid" | "failed";
 
 export type PayoutMethod = "bank" | "gcash" | "paymaya";
 
+/** Treasury rails a payout account can be reached on. */
+export type TransferNetwork = "instapay" | "pesonet";
+
 export type WithdrawalStatus =
   | "pending"
   | "approved"
@@ -45,6 +48,10 @@ export interface PayoutAccountRow {
   method: PayoutMethod;
   account_name: string;
   bank_name: string | null;
+  institution_code: string | null;
+  institution_name: string | null;
+  network: TransferNetwork | null;
+  account_type: string | null;
   account_number_last4: string;
   is_default: boolean;
   verified_at: string | null;

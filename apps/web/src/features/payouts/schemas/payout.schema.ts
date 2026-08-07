@@ -20,29 +20,38 @@ const accountIdentifierSchema = z
     message: "Enter the full account or mobile number",
   });
 
-export const payoutAccountSchema = z
-  .object({
-    scope: z.enum(["organization", "supplier"]),
-    scopeId: z.string().uuid(),
-    method: payoutMethodSchema,
-    accountName: z
-      .string()
-      .trim()
-      .min(2, "Account holder name is required")
-      .max(160),
-    bankName: z
-      .preprocess(
-        (value) =>
-          typeof value === "string" && value.trim() === "" ? undefined : value,
-        z.string().trim().max(160).optional(),
-      ),
-    accountIdentifier: accountIdentifierSchema,
-    makeDefault: z.coerce.boolean().default(false),
-  })
-  .refine((input) => input.method !== "bank" || Boolean(input.bankName), {
-    message: "Bank name is required for a bank transfer",
-    path: ["bankName"],
-  });
+export const transferNetworkSchema = z.enum(["instapay", "pesonet"]);
+
+/**
+ * Routing is structured, not typed. `institutionCode` is a BIC chosen from
+ * the provider's own institution list -- a free-text bank name cannot be
+ * validated and cannot be disbursed.
+ */
+export const payoutAccountSchema = z.object({
+  scope: z.enum(["organization", "supplier"]),
+  scopeId: z.string().uuid(),
+  method: payoutMethodSchema,
+  accountName: z
+    .string()
+    .trim()
+    .min(2, "Account holder name is required")
+    .max(160),
+  institutionCode: z
+    .string()
+    .trim()
+    .min(1, "Choose where the money should be sent")
+    .max(32),
+  institutionName: z.string().trim().min(1).max(200),
+  network: transferNetworkSchema,
+  accountType: z
+    .preprocess(
+      (value) =>
+        typeof value === "string" && value.trim() === "" ? undefined : value,
+      z.string().trim().max(60).optional(),
+    ),
+  accountIdentifier: accountIdentifierSchema,
+  makeDefault: z.coerce.boolean().default(false),
+});
 
 export const withdrawalRequestSchema = z.object({
   payoutAccountId: z.string().uuid("Choose a payout account"),

@@ -72,6 +72,7 @@ export async function listPayoutAccounts(
     // so requesting it would fail the whole query.
     .select(
       "id, organization_id, supplier_id, method, account_name, bank_name, " +
+        "institution_code, institution_name, network, account_type, " +
         "account_number_last4, is_default, verified_at, archived_at, created_at",
     )
     .eq(scopeColumn(scope), scopeId(scope))
