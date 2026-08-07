@@ -75,3 +75,6 @@ artifacts/ci/
 .squad/.cache/
 # Squad: SubSquad activation file (local to this machine)
 .squad-workstream
+
+# Vercel CLI writes a real (short-lived) OIDC token here - never commit it.
+.env.vercel
