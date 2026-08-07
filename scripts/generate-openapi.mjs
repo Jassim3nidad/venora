@@ -1381,6 +1381,47 @@ const definitions = [
   },
   {
     method: "post",
+    path: "/api/webhooks/paymongo-treasury",
+    summary: "Receive PayMongo Treasury transfer callback",
+    tags: ["Webhooks", "Payments"],
+    security: [],
+    description:
+      "Target of callback_url on a Treasury transfer. The body is NOT trusted: PayMongo publishes no money-movement callback payload or signature scheme, so the handler only extracts an identifier, matches it to a withdrawal, and re-reads authoritative status from GET /v2/transfers/{id}. Returns 503 when status cannot be confirmed so PayMongo retries.",
+    requestBody: body("PayMongoWebhook", {}),
+    webhook: "paymongo",
+  },
+  {
+    method: "get",
+    path: "/api/payout-institutions",
+    summary: "List supported receiving institutions",
+    tags: ["Payments"],
+    description:
+      "Authenticated proxy for PayMongo's receiving-institution list, used by the payout-account picker. Proxied because the upstream requires the secret key. Cached per network; serves a stale list if the upstream is unavailable.",
+    parameters: [
+      {
+        name: "network",
+        in: "query",
+        required: false,
+        description: "Transfer rail to list institutions for.",
+        schema: {
+          type: "string",
+          enum: ["instapay", "pesonet"],
+          default: "instapay",
+        },
+      },
+    ],
+  },
+  {
+    method: "post",
+    path: "/api/payouts/reconcile",
+    summary: "Reconcile stuck withdrawals",
+    tags: ["Payments"],
+    security: [],
+    description:
+      "Scheduled sweep. Resolves withdrawals left in processing against PayMongo's authoritative transfer status. Withdrawals with no transfer id are checked against the provider before any decision, because an ambiguous create (timeout or 5xx) must never release funds on assumption. Authenticated with the PAYOUT_RECONCILE_SECRET shared secret compared in constant time.",
+  },
+  {
+    method: "post",
     path: "/api/webhooks/paymongo",
     summary: "Receive PayMongo webhook",
     tags: ["Webhooks", "Payments"],
