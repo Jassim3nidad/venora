@@ -283,7 +283,7 @@ export function DataTable<T>({
       <div
         className={cn(
           "overflow-hidden rounded-[22px] border border-[#e5e7eb] bg-white",
-          renderMobileCard && "hidden md:block"
+          renderMobileCard && "hidden md:block",
         )}
       >
         <div
@@ -376,20 +376,18 @@ const STATUS_STYLES: Record<string, string> = {
   inactive: "bg-slate-50 text-slate-600 ring-1 ring-slate-200/70",
   open: "bg-amber-50 text-amber-800 ring-1 ring-amber-200/60",
   under_review: "bg-blue-50 text-blue-800 ring-1 ring-blue-200/60",
+  needs_review: "bg-orange-50 text-orange-800 ring-1 ring-orange-200/60",
   resolved: "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200/60",
   rejected: "bg-red-50 text-red-800 ring-1 ring-red-200/60",
   matched: "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200/60",
   pending_provider_confirmation:
     "bg-amber-50 text-amber-800 ring-1 ring-amber-200/60",
-  missing_provider_reference:
-    "bg-red-50 text-red-800 ring-1 ring-red-200/60",
-  missing_provider_transaction:
-    "bg-red-50 text-red-800 ring-1 ring-red-200/60",
+  missing_provider_reference: "bg-red-50 text-red-800 ring-1 ring-red-200/60",
+  missing_provider_transaction: "bg-red-50 text-red-800 ring-1 ring-red-200/60",
   amount_mismatch: "bg-red-50 text-red-800 ring-1 ring-red-200/60",
   currency_mismatch: "bg-red-50 text-red-800 ring-1 ring-red-200/60",
   status_mismatch: "bg-red-50 text-red-800 ring-1 ring-red-200/60",
-  requires_manual_review:
-    "bg-amber-50 text-amber-800 ring-1 ring-amber-200/60",
+  requires_manual_review: "bg-amber-50 text-amber-800 ring-1 ring-amber-200/60",
   informational: "bg-slate-50 text-slate-700 ring-1 ring-slate-200/70",
   warning: "bg-amber-50 text-amber-800 ring-1 ring-amber-200/60",
   high: "bg-orange-50 text-orange-800 ring-1 ring-orange-200/70",
@@ -488,9 +486,7 @@ export function EmptyState({
           <MaterialIcon name={icon} className="text-3xl" />
         </div>
       ) : null}
-      <h3 className="font-display text-lg font-bold text-[#0f172a]">
-        {title}
-      </h3>
+      <h3 className="font-display text-lg font-bold text-[#0f172a]">{title}</h3>
       {description ? (
         <p className="mt-2 max-w-md text-sm leading-relaxed text-[#64748b]">
           {description}

@@ -82,6 +82,11 @@
       "file": "supabase/migrations/20260807120000_payout_institutions.sql",
       "kind": "SECURITY_DEFINER",
       "reason": "Two SECURITY DEFINER functions. attach_withdrawal_transfer() records PayMongo Treasury transfer identifiers on a withdrawal and must bypass the deliberately absent UPDATE policy on withdrawal_requests; it is revoked from PUBLIC/anon/authenticated and granted only to service_role, uses a fixed search_path, and writes log_audit. payout_accounts_reset_verification() is a replacement of an existing trigger function (20260805131000) that adds institution_code to the set of routing fields whose change revokes verification; it is trigger-only and unreachable from any client role."
+    },
+    {
+      "file": "supabase/migrations/20260807140000_withdrawal_needs_review.sql",
+      "kind": "SECURITY_DEFINER",
+      "reason": "Three SECURITY DEFINER functions on the money-out path. begin_withdrawal_disbursement() is replaced to add a database-level duplicate guard (refuses any withdrawal that already carries a provider_reference). flag_withdrawal_for_review() parks a withdrawal whose outcome cannot be determined from verified provider data and deliberately does not release claimed payouts; it is service_role only. resolve_withdrawal_review() lets an admin move a reviewed withdrawal to a terminal state, re-checks is_admin() internally, and requires a note recording how the outcome was verified. All use a fixed search_path and write log_audit."
     }
   ]
 }

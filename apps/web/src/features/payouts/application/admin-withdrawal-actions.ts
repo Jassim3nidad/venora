@@ -130,13 +130,13 @@ export async function dispatchWithdrawalAction(rawInput: unknown) {
         input.withdrawalId,
       );
 
-      // A transfer left in flight is not an error the admin can act on by
-      // retrying -- the money may already be moving. Surface it as a
-      // distinct message and leave reconciliation to sync the outcome.
-      if (!outcome.ok && outcome.result === "needs_reconciliation") {
+      // needs_review is not something the admin can fix by retrying: the
+      // outcome is genuinely unknown and the funds stay held until someone
+      // confirms with the provider.
+      if (!outcome.ok && outcome.result === "needs_review") {
         revalidateAdmin();
         throw new ValidationError(
-          `${outcome.error} The withdrawal stays in flight and will be reconciled automatically.`,
+          `${outcome.error} This payout is held for manual review — do not retry it until the outcome is confirmed with PayMongo.`,
         );
       }
 

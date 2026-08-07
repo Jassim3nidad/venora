@@ -79,6 +79,7 @@ export type WithdrawalStatus =
   | "processing"
   | "paid"
   | "failed"
+  | "needs_review"
   | "rejected"
   | "cancelled";
 export type VerificationType = "venue_owner" | "supplier" | "venue";
@@ -130,11 +131,7 @@ export type VenueSpaceCapacityLayout =
   | "ceremony"
   | "custom";
 export type VenueMediaCollectionType =
-  | "hero"
-  | "gallery"
-  | "space_gallery"
-  | "video"
-  | "logistics";
+  "hero" | "gallery" | "space_gallery" | "video" | "logistics";
 export type VenueMediaMimeType =
   | "image/jpeg"
   | "image/png"
@@ -152,9 +149,7 @@ export type VenueFaqCategory =
   | "policies"
   | "other";
 export type PackageVenueSpaceInclusionType =
-  | "included"
-  | "optional"
-  | "upgrade";
+  "included" | "optional" | "upgrade";
 
 // ─── Database ───────────────────────────────────────────────
 
@@ -1258,9 +1253,7 @@ export interface Database {
           archived_at?: string | null;
           converted_at?: string | null;
         };
-        Update: Partial<
-          Database["public"]["Tables"]["event_plans"]["Insert"]
-        >;
+        Update: Partial<Database["public"]["Tables"]["event_plans"]["Insert"]>;
       };
 
       booking_automation_decisions: {

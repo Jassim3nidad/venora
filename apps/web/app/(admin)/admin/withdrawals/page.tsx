@@ -53,6 +53,8 @@ type PendingAccountRow = {
 };
 
 const OPEN: WithdrawalStatus[] = ["pending", "approved", "processing"];
+/** Held with an unknown outcome — funds are NOT released. */
+const REVIEW: WithdrawalStatus = "needs_review";
 
 function formatPeso(amount: number, currency = "PHP") {
   return `${currency} ${Number(amount).toLocaleString("en-PH", {
@@ -100,6 +102,7 @@ export default async function AdminWithdrawalsPage() {
   const rows = (data ?? []) as AdminWithdrawalRow[];
   const awaitingReview = rows.filter((row) => row.status === "pending");
   const inFlight = rows.filter((row) => OPEN.includes(row.status));
+  const needsReview = rows.filter((row) => row.status === REVIEW);
   const inFlightTotal = inFlight.reduce(
     (sum, row) => sum + Number(row.amount),
     0,
@@ -175,7 +178,7 @@ export default async function AdminWithdrawalsPage() {
       title="Withdrawals"
       description="Review and release payouts to venue owners and suppliers. Approving clears a request; sending hands it to the payment provider."
     >
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           label="Awaiting review"
           value={String(awaitingReview.length)}
@@ -186,6 +189,11 @@ export default async function AdminWithdrawalsPage() {
           label="In flight"
           value={String(inFlight.length)}
           icon="local_shipping"
+        />
+        <KpiCard
+          label="Needs review"
+          value={String(needsReview.length)}
+          icon="report"
         />
         <KpiCard
           label="In-flight value"

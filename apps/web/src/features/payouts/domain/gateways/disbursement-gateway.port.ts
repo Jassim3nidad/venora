@@ -15,8 +15,13 @@
 /** The rails PayMongo Treasury exposes. */
 export type TransferNetwork = "instapay" | "pesonet";
 
-/** Documented Transfer V2 status values. */
-export type TransferStatus = "pending" | "succeeded" | "failed";
+/**
+ * The three documented Transfer V2 status values, plus `unknown` for
+ * anything the provider returns that is not one of them. `unknown` is not
+ * a PayMongo value — it is how the adapter reports "undocumented", so the
+ * service can route to human review instead of guessing.
+ */
+export type TransferStatus = "pending" | "succeeded" | "failed" | "unknown";
 
 /**
  * A payout destination, already resolved to routing data. `institutionCode`

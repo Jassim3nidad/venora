@@ -70,7 +70,9 @@ export function AdminWithdrawalActions({
           <button
             type="button"
             disabled={isPending}
-            onClick={() => run(() => dispatchWithdrawalAction({ withdrawalId }))}
+            onClick={() =>
+              run(() => dispatchWithdrawalAction({ withdrawalId }))
+            }
             className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#2563EB] transition hover:underline disabled:opacity-50"
           >
             {isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : null}

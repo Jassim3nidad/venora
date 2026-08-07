@@ -59,9 +59,7 @@ describe("payout account encryption", () => {
     process.env.PAYOUT_ENCRYPTION_KEY = crypto
       .randomBytes(16)
       .toString("base64");
-    expect(() => encryptAccountIdentifier("1234567890123")).toThrow(
-      /32 bytes/,
-    );
+    expect(() => encryptAccountIdentifier("1234567890123")).toThrow(/32 bytes/);
   });
 
   it("rejects a missing key", () => {

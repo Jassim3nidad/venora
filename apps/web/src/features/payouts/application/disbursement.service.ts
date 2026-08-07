@@ -12,6 +12,11 @@ import {
   TransferNetworkError,
 } from "../domain/transfer-network";
 import { decryptAccountIdentifier } from "./payout-encryption";
+import {
+  newCorrelationId,
+  payoutLog,
+  type PayoutLogContext,
+} from "./payout-logger";
 
 /**
  * Orchestrates one withdrawal → one Treasury transfer.
@@ -26,7 +31,7 @@ import { decryptAccountIdentifier } from "./payout-encryption";
 
 export type DisbursementOutcome =
   | { ok: true; result: "sent" | "settled" | "not_claimable" }
-  | { ok: false; result: "failed" | "needs_reconciliation"; error: string };
+  | { ok: false; result: "failed" | "needs_review"; error: string };
 
 interface PayoutAccountSecret {
   method: string;
@@ -38,17 +43,6 @@ interface PayoutAccountSecret {
   verified_at: string | null;
   archived_at: string | null;
 }
-
-/**
- * Provider errors where the transfer may already exist. Releasing funds on
- * these risks paying twice once the transfer lands, so the withdrawal is
- * left in `processing` for reconciliation instead.
- */
-const AMBIGUOUS_ERROR_CODES = new Set([
-  "DISBURSEMENT_PROVIDER_TIMEOUT",
-  "DISBURSEMENT_PROVIDER_UNREACHABLE",
-  "DISBURSEMENT_PROVIDER_UNAVAILABLE",
-]);
 
 /** One stable string per withdrawal — also the duplicate-detection key. */
 function transferDescription(withdrawalId: string): string {
@@ -64,8 +58,14 @@ export async function dispatchWithdrawal(
   gateway: DisbursementGateway,
   withdrawalId: string,
 ): Promise<DisbursementOutcome> {
-  // Claim first: flips approved -> processing and only succeeds once, so a
-  // retried or concurrent dispatch cannot create a second transfer.
+  const log: PayoutLogContext = {
+    correlationId: newCorrelationId(),
+    withdrawalId,
+  };
+
+  // Claim first: flips approved -> processing and only succeeds once. The
+  // RPC also refuses any withdrawal that already carries a transfer id, so
+  // duplicate creation is prevented in the database, not here.
   const { data: claimed, error: claimError } = await serviceClient.rpc(
     "begin_withdrawal_disbursement",
     { p_request_id: withdrawalId, p_provider: gateway.id },
@@ -100,6 +100,7 @@ export async function dispatchWithdrawal(
       gateway,
       withdrawalId,
       accountError?.message ?? "Payout account not found",
+      log,
     );
   }
 
@@ -111,6 +112,7 @@ export async function dispatchWithdrawal(
       gateway,
       withdrawalId,
       "Payout account is no longer verified.",
+      log,
     );
   }
 
@@ -120,6 +122,7 @@ export async function dispatchWithdrawal(
       gateway,
       withdrawalId,
       "Payout account has no institution code. It must be re-entered with a supported institution.",
+      log,
     );
   }
 
@@ -143,6 +146,7 @@ export async function dispatchWithdrawal(
       error instanceof TransferNetworkError
         ? error.message
         : "Could not determine a transfer network.",
+      log,
     );
   }
 
@@ -159,8 +163,10 @@ export async function dispatchWithdrawal(
       description,
     );
     if (existing) {
-      console.warn(
-        `[payouts] Withdrawal ${withdrawal.id} already has transfer ${existing.transferId}; adopting instead of creating a second.`,
+      payoutLog(
+        "warn",
+        { ...log, transferId: existing.transferId },
+        "transfer.duplicate_adopted",
       );
       await serviceClient.rpc("attach_withdrawal_transfer", {
         p_request_id: withdrawal.id,
@@ -174,13 +180,13 @@ export async function dispatchWithdrawal(
         gateway,
         withdrawal.id,
         existing,
+        log,
       );
     }
   } catch (error) {
-    console.warn(
-      `[payouts] Duplicate check failed for ${withdrawal.id}; relying on the state claim.`,
-      error instanceof Error ? error.message : error,
-    );
+    payoutLog("warn", log, "transfer.duplicate_check_failed", {
+      detail: error instanceof Error ? error.message : String(error),
+    });
   }
 
   let transfer: TransferResult;
@@ -206,18 +212,24 @@ export async function dispatchWithdrawal(
       metadata: { withdrawal_id: withdrawal.id, network_reason: networkReason },
     });
   } catch (error) {
-    const code = error instanceof PaymentError ? error.code : "";
     const message =
       error instanceof Error ? error.message : "Disbursement failed";
+    const code = error instanceof PaymentError ? error.code : "unknown";
 
-    if (AMBIGUOUS_ERROR_CODES.has(code)) {
-      console.error(
-        `[payouts] Withdrawal ${withdrawalId} left in flight after ${code}; awaiting reconciliation.`,
-      );
-      return { ok: false, result: "needs_reconciliation", error: message };
-    }
+    payoutLog("error", log, "transfer.create_failed", { code, message });
 
-    return failWithdrawal(serviceClient, gateway, withdrawalId, message);
+    // The create call failed, but that does NOT tell us whether a transfer
+    // was created -- PayMongo publishes no error taxonomy, so neither the
+    // HTTP status nor the message can be read as "nothing happened".
+    // Ask the provider instead. Only a confirmed absence releases funds.
+    return await resolveAfterUncertainCreate(
+      serviceClient,
+      gateway,
+      withdrawal.id,
+      description,
+      message,
+      log,
+    );
   }
 
   // Persist identifiers before acting on status, so a crash here still
@@ -230,7 +242,13 @@ export async function dispatchWithdrawal(
     p_provider_reference_number: transfer.providerReferenceNumber,
   });
 
-  return applyTransferStatus(serviceClient, gateway, withdrawal.id, transfer);
+  return applyTransferStatus(
+    serviceClient,
+    gateway,
+    withdrawal.id,
+    transfer,
+    log,
+  );
 }
 
 /**
@@ -244,7 +262,13 @@ export async function syncWithdrawalStatus(
   serviceClient: SupabaseClient,
   gateway: DisbursementGateway,
   withdrawalId: string,
+  parentLog?: PayoutLogContext,
 ): Promise<DisbursementOutcome> {
+  const log: PayoutLogContext = parentLog ?? {
+    correlationId: newCorrelationId(),
+    withdrawalId,
+  };
+
   const { data, error } = await serviceClient
     .from("withdrawal_requests")
     .select("id, status, provider_reference")
@@ -256,6 +280,9 @@ export async function syncWithdrawalStatus(
     }>();
 
   if (error || !data) {
+    payoutLog("error", log, "withdrawal.lookup_failed", {
+      detail: error?.message ?? "not found",
+    });
     return {
       ok: false,
       result: "failed",
@@ -263,10 +290,20 @@ export async function syncWithdrawalStatus(
     };
   }
 
-  // Terminal states are never revisited.
+  // Terminal states were reached from verified data and are never revisited.
   if (data.status === "paid" || data.status === "failed") {
     return { ok: true, result: "settled" };
   }
+
+  // needs_review is terminal for automation: only an operator moves it on.
+  if (data.status === "needs_review") {
+    return {
+      ok: false,
+      result: "needs_review",
+      error: "Awaiting operator review",
+    };
+  }
+
   if (data.status !== "processing" || !data.provider_reference) {
     return { ok: true, result: "not_claimable" };
   }
@@ -277,11 +314,120 @@ export async function syncWithdrawalStatus(
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Status lookup failed";
-    // A failed lookup says nothing about the transfer; leave it in flight.
-    return { ok: false, result: "needs_reconciliation", error: message };
+    payoutLog(
+      "error",
+      { ...log, transferId: data.provider_reference },
+      "transfer.status_lookup_failed",
+      { detail: message },
+    );
+    // We hold a transfer id but cannot read its state. Neither terminal
+    // state is justified, so this is an operator's call.
+    return flagForReview(
+      serviceClient,
+      gateway,
+      data.id,
+      `A transfer exists but its status could not be read from the provider: ${message}`,
+      data.provider_reference,
+      log,
+    );
   }
 
-  return applyTransferStatus(serviceClient, gateway, data.id, transfer);
+  return applyTransferStatus(serviceClient, gateway, data.id, transfer, log);
+}
+
+/**
+ * Determines what actually happened after a create call failed.
+ *
+ * This is the only place allowed to release funds after a failure, and it
+ * may only do so on a positive statement from the provider that no
+ * transfer exists. Three deterministic outcomes:
+ *
+ *   transfer found            -> adopt it and apply its real status
+ *   confirmed absent          -> fail, release the claimed payouts
+ *   cannot determine          -> needs_review, funds stay held
+ */
+async function resolveAfterUncertainCreate(
+  serviceClient: SupabaseClient,
+  gateway: DisbursementGateway,
+  withdrawalId: string,
+  description: string,
+  originalError: string,
+  log: PayoutLogContext,
+): Promise<DisbursementOutcome> {
+  let existing: TransferResult | null;
+  try {
+    existing = await gateway.findTransferByReference(withdrawalId, description);
+  } catch (lookupError) {
+    const detail =
+      lookupError instanceof Error ? lookupError.message : "lookup failed";
+    payoutLog("error", log, "transfer.confirmation_failed", { detail });
+    return flagForReview(
+      serviceClient,
+      gateway,
+      withdrawalId,
+      `${originalError} — and we could not confirm with the provider whether a transfer was created (${detail}). Funds are held pending manual verification.`,
+      null,
+      log,
+    );
+  }
+
+  if (existing) {
+    payoutLog(
+      "warn",
+      { ...log, transferId: existing.transferId },
+      "transfer.recovered_after_failure",
+    );
+    await serviceClient.rpc("attach_withdrawal_transfer", {
+      p_request_id: withdrawalId,
+      p_provider: gateway.id,
+      p_transfer_id: existing.transferId,
+      p_batch_transfer_id: existing.batchTransferId,
+      p_provider_reference_number: existing.providerReferenceNumber,
+    });
+    return applyTransferStatus(
+      serviceClient,
+      gateway,
+      withdrawalId,
+      existing,
+      log,
+    );
+  }
+
+  // Verified: the provider has no transfer for this withdrawal, so no
+  // money moved and releasing the payouts is safe.
+  payoutLog("info", log, "transfer.confirmed_absent");
+  return failWithdrawal(
+    serviceClient,
+    gateway,
+    withdrawalId,
+    originalError,
+    log,
+  );
+}
+
+/** Parks a withdrawal for an operator. Never releases the claimed payouts. */
+async function flagForReview(
+  serviceClient: SupabaseClient,
+  gateway: DisbursementGateway,
+  withdrawalId: string,
+  reason: string,
+  transferId: string | null,
+  log: PayoutLogContext,
+): Promise<DisbursementOutcome> {
+  const { error } = await serviceClient.rpc("flag_withdrawal_for_review", {
+    p_withdrawal_id: withdrawalId,
+    p_provider: gateway.id,
+    p_reason: reason,
+    p_transfer_id: transferId,
+  });
+
+  if (error) {
+    payoutLog("error", log, "review.flag_failed", { detail: error.message });
+  } else {
+    payoutLog("warn", log, "withdrawal.needs_review", { reason });
+  }
+
+  return { ok: false, result: "needs_review", error: reason };
 }
 
 /**
@@ -319,14 +465,31 @@ export async function reconcileStuckWithdrawals(
     provider_reference: string | null;
   }>;
 
-  const tally = { checked: rows.length, settled: 0, failed: 0, pending: 0 };
+  const tally = {
+    checked: rows.length,
+    settled: 0,
+    failed: 0,
+    pending: 0,
+    needsReview: 0,
+  };
 
   for (const row of rows) {
+    const log: PayoutLogContext = {
+      correlationId: newCorrelationId(),
+      withdrawalId: row.id,
+      transferId: row.provider_reference,
+    };
+
     try {
       let outcome: DisbursementOutcome;
 
       if (row.provider_reference) {
-        outcome = await syncWithdrawalStatus(serviceClient, gateway, row.id);
+        outcome = await syncWithdrawalStatus(
+          serviceClient,
+          gateway,
+          row.id,
+          log,
+        );
       } else {
         const existing = await gateway.findTransferByReference(
           row.id,
@@ -341,6 +504,7 @@ export async function reconcileStuckWithdrawals(
             gateway,
             row.id,
             "No transfer was created at the provider; the payout was not sent.",
+            log,
           );
         } else {
           await serviceClient.rpc("attach_withdrawal_transfer", {
@@ -355,20 +519,30 @@ export async function reconcileStuckWithdrawals(
             gateway,
             row.id,
             existing,
+            log,
           );
         }
       }
 
       if (outcome.ok && outcome.result === "settled") tally.settled += 1;
       else if (!outcome.ok && outcome.result === "failed") tally.failed += 1;
+      else if (!outcome.ok && outcome.result === "needs_review")
+        tally.needsReview += 1;
       else tally.pending += 1;
     } catch (error) {
-      // One unreachable withdrawal must not stop the sweep.
-      tally.pending += 1;
-      console.error(
-        `[payouts] Reconciliation failed for ${row.id}:`,
-        error instanceof Error ? error.message : error,
+      // One unreachable withdrawal must not stop the sweep -- but it also
+      // must not be left silently in flight, so it is escalated.
+      const detail = error instanceof Error ? error.message : String(error);
+      payoutLog("error", log, "reconcile.failed", { detail });
+      await flagForReview(
+        serviceClient,
+        gateway,
+        row.id,
+        `Reconciliation could not determine this withdrawal's outcome: ${detail}`,
+        row.provider_reference,
+        log,
       );
+      tally.needsReview += 1;
     }
   }
 
@@ -386,14 +560,29 @@ async function applyTransferStatus(
   gateway: DisbursementGateway,
   withdrawalId: string,
   transfer: TransferResult,
+  log: PayoutLogContext,
 ): Promise<DisbursementOutcome> {
+  const scoped = { ...log, transferId: transfer.transferId };
+  payoutLog("info", scoped, "transfer.status", { status: transfer.status });
+
   if (transfer.status === "succeeded") {
     const { error } = await serviceClient.rpc("settle_withdrawal_request", {
       p_provider: gateway.id,
       p_withdrawal_id: withdrawalId,
       p_provider_reference: transfer.transferId,
     });
-    if (error) return { ok: false, result: "failed", error: error.message };
+    if (error) {
+      // The transfer succeeded but we could not record it. Releasing or
+      // retrying would both be wrong; an operator must reconcile.
+      return flagForReview(
+        serviceClient,
+        gateway,
+        withdrawalId,
+        `Provider reported the transfer succeeded but the settlement could not be recorded: ${error.message}`,
+        transfer.transferId,
+        scoped,
+      );
+    }
     return { ok: true, result: "settled" };
   }
 
@@ -403,19 +592,38 @@ async function applyTransferStatus(
       gateway,
       withdrawalId,
       "The payout provider reported the transfer as failed.",
+      scoped,
       transfer.transferId,
+    );
+  }
+
+  if (transfer.status === "unknown") {
+    // An undocumented status value. Coercing it to pending or failed would
+    // assert behaviour PayMongo has not published.
+    return flagForReview(
+      serviceClient,
+      gateway,
+      withdrawalId,
+      "The payout provider returned a transfer status outside the documented set. Manual verification required.",
+      transfer.transferId,
+      scoped,
     );
   }
 
   return { ok: true, result: "sent" };
 }
 
-/** Marks the withdrawal failed, releasing its payouts back to available. */
+/**
+ * Marks the withdrawal failed, releasing its payouts back to available.
+ *
+ * Only ever called when it is established that no money moved.
+ */
 async function failWithdrawal(
   serviceClient: SupabaseClient,
   gateway: DisbursementGateway,
   withdrawalId: string,
   reason: string,
+  log: PayoutLogContext,
   providerReference?: string,
 ): Promise<DisbursementOutcome> {
   const { error } = await serviceClient.rpc("fail_withdrawal_request", {
@@ -426,11 +634,19 @@ async function failWithdrawal(
   });
 
   if (error) {
-    console.error(
-      `[payouts] Could not mark withdrawal ${withdrawalId} failed:`,
-      error.message,
+    payoutLog("error", log, "withdrawal.fail_failed", {
+      detail: error.message,
+    });
+    return flagForReview(
+      serviceClient,
+      gateway,
+      withdrawalId,
+      `The payout did not go through, but the failure could not be recorded: ${error.message}`,
+      providerReference ?? null,
+      log,
     );
   }
 
+  payoutLog("warn", log, "withdrawal.failed", { reason });
   return { ok: false, result: "failed", error: reason };
 }

@@ -92,7 +92,9 @@ export function WithdrawalRequestForm({
       return;
     }
     if (parsed < minimum) {
-      setError(`Minimum withdrawal is ${formatPeso(minimum, balance.currency)}.`);
+      setError(
+        `Minimum withdrawal is ${formatPeso(minimum, balance.currency)}.`,
+      );
       return;
     }
     if (parsed > balance.available) {
@@ -159,8 +161,8 @@ export function WithdrawalRequestForm({
           className={INPUT_CLASS}
         />
         <span className="text-xs font-medium text-slate-500">
-          Available: {formatPeso(balance.available, balance.currency)} · Minimum:{" "}
-          {formatPeso(minimum, balance.currency)}
+          Available: {formatPeso(balance.available, balance.currency)} ·
+          Minimum: {formatPeso(minimum, balance.currency)}
         </span>
       </label>
 

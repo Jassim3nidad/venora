@@ -61,13 +61,18 @@ interface TransferPayload {
 
 const TRANSFER_STATUSES: TransferStatus[] = ["pending", "succeeded", "failed"];
 
+/**
+ * Maps a provider status onto the documented set.
+ *
+ * Anything outside `pending | succeeded | failed` becomes `unknown`
+ * rather than being coerced into a documented value. Coercion would mean
+ * asserting undocumented behaviour; `unknown` routes the withdrawal to
+ * human review instead.
+ */
 function toTransferStatus(value: unknown): TransferStatus {
   return TRANSFER_STATUSES.includes(value as TransferStatus)
     ? (value as TransferStatus)
-    : // An unrecognised status must never be read as success. Treating it
-      // as pending keeps the withdrawal in flight for getTransfer() to
-      // resolve, rather than settling or releasing on a guess.
-      "pending";
+    : "unknown";
 }
 
 function toMinorOrNull(value: number | string | undefined): number | null {
@@ -190,29 +195,13 @@ export class PayMongoTreasuryAdapter implements DisbursementGateway {
           "The payout provider rejected our credentials. Check PAYMONGO_SECRET_KEY and that Money Movement is enabled.",
         );
       }
-      if (response.status === 422 || response.status === 400) {
-        // PayMongo does not document a machine-readable code for an
-        // underfunded wallet, so this is matched on message text. It only
-        // ever changes the message shown to the operator -- both branches
-        // are terminal rejections that release the funds -- so a missed
-        // match degrades the wording, never the money handling.
-        if (/insufficient|balance/i.test(detail)) {
-          throw new PaymentError(
-            "DISBURSEMENT_INSUFFICIENT_BALANCE",
-            "The PayMongo wallet does not have enough balance for this payout. Top up the wallet and retry.",
-          );
-        }
-        throw new PaymentError("DISBURSEMENT_REJECTED", detail);
-      }
-
-      // 5xx is ambiguous: the transfer may have been created before the
-      // failure. Distinct from a 4xx rejection so the caller leaves the
-      // withdrawal in flight instead of releasing funds that may move.
-      if (response.status >= 500) {
-        throw new PaymentError("DISBURSEMENT_PROVIDER_UNAVAILABLE", detail);
-      }
-
-      throw new PaymentError("DISBURSEMENT_PROVIDER_ERROR", detail);
+      // No branching on message text. PayMongo publishes no machine-
+      // readable error taxonomy for Treasury, so the response body cannot
+      // be classified without inferring undocumented behaviour. The HTTP
+      // status is carried through for diagnostics only; the caller decides
+      // what happened by asking the provider whether a transfer exists,
+      // never by reading this string.
+      throw new PaymentError("DISBURSEMENT_REQUEST_FAILED", detail);
     }
 
     if (!json?.data) {

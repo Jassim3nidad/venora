@@ -18,6 +18,7 @@ export type WithdrawalStatus =
   | "processing"
   | "paid"
   | "failed"
+  | "needs_review"
   | "rejected"
   | "cancelled";
 
@@ -93,6 +94,7 @@ export const WITHDRAWAL_STATUS_LABELS: Record<WithdrawalStatus, string> = {
   processing: "Sending",
   paid: "Paid",
   failed: "Failed",
+  needs_review: "Needs review",
   rejected: "Declined",
   cancelled: "Cancelled",
 };
