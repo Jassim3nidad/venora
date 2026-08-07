@@ -25,10 +25,13 @@ export function AdminWithdrawalActions({
     setError(null);
     startTransition(async () => {
       const result = await fn();
-      if (result.error) {
-        setError(result.error.message);
-        return;
-      }
+      if (result.error) setError(result.error.message);
+
+      // Refresh on failure too. A failed dispatch is not a no-op: the
+      // provider was refused, so the withdrawal has already moved to
+      // `failed` and its payouts have been released back to the
+      // recipient's available balance. Leaving the row rendered as
+      // "Approved" tells the admin the opposite of what happened.
       router.refresh();
     });
   }
