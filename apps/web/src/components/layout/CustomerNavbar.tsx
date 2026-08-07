@@ -36,6 +36,7 @@ type CustomerNavbarProfile = {
   isVenueOwner?: boolean;
   isSupplier?: boolean;
   isCoordinator?: boolean;
+  isAdmin?: boolean;
 };
 
 type NavLink = {
@@ -230,6 +231,7 @@ export function CustomerNavbar({
                   displayName={displayName}
                   email={email}
                   avatarUrl={profile?.avatar_url}
+                  showEnterAdminDashboard={profile?.isAdmin}
                   showEnterVenueDashboard={profile?.isVenueOwner}
                   showEnterCoordinatorDashboard={profile?.isCoordinator}
                   showEnterSupplierDashboard={profile?.isSupplier}
