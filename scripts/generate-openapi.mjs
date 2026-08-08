@@ -555,6 +555,41 @@ const schemas = {
       },
     },
   },
+  GenerateThemePreviewRequest: {
+    type: "object",
+    additionalProperties: false,
+    required: ["venueId", "photoId", "theme"],
+    properties: {
+      venueId: { type: "string", format: "uuid" },
+      photoId: {
+        type: "string",
+        format: "uuid",
+        description: "A public.venue_images row id.",
+      },
+      theme: {
+        type: "string",
+        enum: [
+          "horror",
+          "winter_wonderland",
+          "beach_sunset",
+          "fairytale_garden",
+          "rustic_vintage",
+          "modern_minimalist",
+          "tropical",
+          "christmas",
+          "custom",
+        ],
+      },
+      customPrompt: {
+        type: "string",
+        minLength: 3,
+        maxLength: 200,
+        nullable: true,
+        description:
+          "Required when theme is 'custom', and must be null otherwise. Sanitised server-side.",
+      },
+    },
+  },
   AISearchRequest: {
     type: "object",
     additionalProperties: false,
@@ -1490,6 +1525,34 @@ const definitions = [
         description: "Not found; diagnostic endpoint is disabled",
       },
     },
+  },
+  {
+    method: "post",
+    path: "/generate-theme-preview",
+    summary: "Render a venue photo under a visual theme",
+    tags: ["AI", "Venues"],
+    security: optionalBearer,
+    edge: true,
+    description:
+      "Re-renders a venue's photo under a built-in theme or customer-supplied theme text, preserving the venue's architecture. Results are cached per (photo, theme, prompt hash), so a repeated combination never calls the model again. Runs in mock mode unless THEME_PREVIEW_MODE=live; live calls are additionally bounded by a spend cap and refused in CI. Failures degrade to the original photo.",
+    requestBody: body("GenerateThemePreviewRequest", {
+      venueId: "00000000-0000-4000-8000-000000000001",
+      photoId: "00000000-0000-4000-8000-000000000002",
+      theme: "winter_wonderland",
+    }),
+    successSchema: dataEnvelope(schemaRef("GenericObject")),
+    successExample: {
+      data: {
+        preview: {
+          status: "ready",
+          theme: "winter_wonderland",
+          url: "https://example.supabase.co/storage/v1/object/public/theme-previews/venue/photo/winter_wonderland.jpg",
+          cached: true,
+        },
+      },
+      error: null,
+    },
+    errors: [400, 404, 429, 500, 502],
   },
   {
     method: "post",

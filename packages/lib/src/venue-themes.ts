@@ -86,7 +86,8 @@ export const venueThemeConfig: Record<VenueTheme, VenueThemeConfig> = {
 
 export function isVenueTheme(value: unknown): value is VenueTheme {
   return (
-    typeof value === "string" && (venueThemes as readonly string[]).includes(value)
+    typeof value === "string" &&
+    (venueThemes as readonly string[]).includes(value)
   );
 }
 

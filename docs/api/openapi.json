@@ -1782,6 +1782,75 @@
         "deprecated": true
       }
     },
+    "/generate-theme-preview": {
+      "post": {
+        "summary": "Render a venue photo under a visual theme",
+        "description": "Re-renders a venue's photo under a built-in theme or customer-supplied theme text, preserving the venue's architecture. Results are cached per (photo, theme, prompt hash), so a repeated combination never calls the model again. Runs in mock mode unless THEME_PREVIEW_MODE=live; live calls are additionally bounded by a spend cap and refused in CI. Failures degrade to the original photo.",
+        "operationId": "postGenerateThemePreview",
+        "tags": ["AI", "Venues"],
+        "x-venora-surface": "supabase-edge-function",
+        "security": [{ "bearerAuth": [] }, {}],
+        "requestBody": {
+          "required": true,
+          "description": "JSON request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateThemePreviewRequest"
+              },
+              "example": {
+                "venueId": "00000000-0000-4000-8000-000000000001",
+                "photoId": "00000000-0000-4000-8000-000000000002",
+                "theme": "winter_wonderland"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "error"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": { "$ref": "#/components/schemas/GenericObject" },
+                    "error": { "type": "null" }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "preview": {
+                      "status": "ready",
+                      "theme": "winter_wonderland",
+                      "url": "https://example.supabase.co/storage/v1/object/public/theme-previews/venue/photo/winter_wonderland.jpg",
+                      "cached": true
+                    }
+                  },
+                  "error": null
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" },
+          "500": { "$ref": "#/components/responses/InternalError" },
+          "502": { "$ref": "#/components/responses/InternalError" }
+        },
+        "servers": [
+          {
+            "url": "{supabaseUrl}/functions/v1",
+            "description": "Supabase Edge Functions",
+            "variables": {
+              "supabaseUrl": { "default": "http://localhost:54321" }
+            }
+          }
+        ]
+      }
+    },
     "/ai-search": {
       "post": {
         "summary": "Search venues with AI parsing",
@@ -2931,6 +3000,40 @@
                 }
               }
             }
+          }
+        }
+      },
+      "GenerateThemePreviewRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["venueId", "photoId", "theme"],
+        "properties": {
+          "venueId": { "type": "string", "format": "uuid" },
+          "photoId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "A public.venue_images row id."
+          },
+          "theme": {
+            "type": "string",
+            "enum": [
+              "horror",
+              "winter_wonderland",
+              "beach_sunset",
+              "fairytale_garden",
+              "rustic_vintage",
+              "modern_minimalist",
+              "tropical",
+              "christmas",
+              "custom"
+            ]
+          },
+          "customPrompt": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 200,
+            "nullable": true,
+            "description": "Required when theme is 'custom', and must be null otherwise. Sanitised server-side."
           }
         }
       },

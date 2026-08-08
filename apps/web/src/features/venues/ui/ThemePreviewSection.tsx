@@ -54,7 +54,9 @@ export default function ThemePreviewSection({
   const featuredPhoto = useMemo(() => {
     const images = media.filter((item) => item.media_type === "image");
     const heroMatch = heroImageSrc
-      ? images.find((item) => getVenueMediaUrl(item.storage_path) === heroImageSrc)
+      ? images.find(
+          (item) => getVenueMediaUrl(item.storage_path) === heroImageSrc,
+        )
       : undefined;
     // Residual gap: a structured hero with no matching venue_images
     // storage_path silently falls back here, reintroducing the very mismatch
@@ -84,7 +86,8 @@ export default function ThemePreviewSection({
   const activeLabel =
     selectedTheme === CUSTOM_THEME
       ? (request?.customPrompt ?? "Custom")
-      : venueThemeOptions.find((option) => option.value === selectedTheme)?.label;
+      : venueThemeOptions.find((option) => option.value === selectedTheme)
+          ?.label;
 
   // Anything short of a finished render falls back to the original photo.
   const isGenerating =
@@ -147,7 +150,9 @@ export default function ThemePreviewSection({
             <button
               key={option.value}
               type="button"
-              onClick={() => select({ theme: option.value, customPrompt: null })}
+              onClick={() =>
+                select({ theme: option.value, customPrompt: null })
+              }
               aria-pressed={isActive}
               disabled={isGenerating && !isActive}
               className={`flex items-center gap-1.5 rounded-2xl border px-4 py-2 text-xs font-bold transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
@@ -164,7 +169,10 @@ export default function ThemePreviewSection({
       </div>
 
       {/* Describe your own theme */}
-      <form onSubmit={handleCustomSubmit} className="flex flex-col gap-2 sm:flex-row">
+      <form
+        onSubmit={handleCustomSubmit}
+        className="flex flex-col gap-2 sm:flex-row"
+      >
         <div className="relative flex-1">
           <Wand2 className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-[#9CA3AF]" />
           <input
@@ -235,7 +243,9 @@ export default function ThemePreviewSection({
               min={0}
               max={100}
               value={sliderPosition}
-              onChange={(event) => setSliderPosition(Number(event.target.value))}
+              onChange={(event) =>
+                setSliderPosition(Number(event.target.value))
+              }
               aria-label={`Compare the original photo with the ${activeLabel ?? "themed"} preview`}
               className="absolute inset-0 z-20 h-full w-full cursor-ew-resize opacity-0"
             />

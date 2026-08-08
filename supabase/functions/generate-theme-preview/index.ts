@@ -73,11 +73,13 @@ const STALE_PENDING_MS = 2 * 60 * 1000;
 const FAILED_RETRY_COOLDOWN_MS = 10 * 60 * 1000;
 
 const HF_PROVIDER = Deno.env.get("THEME_PREVIEW_HF_PROVIDER") ?? "fal-ai";
-const HF_MODEL =
-  Deno.env.get("THEME_PREVIEW_HF_MODEL") ?? "Qwen/Qwen-Image-Edit-2511";
+const HF_MODEL = Deno.env.get("THEME_PREVIEW_HF_MODEL") ??
+  "Qwen/Qwen-Image-Edit-2511";
 
 /** Mock latency, so loading states are exercised without provider cost. */
-const MOCK_DELAY_MS = Number(Deno.env.get("THEME_PREVIEW_MOCK_DELAY_MS") ?? "2000");
+const MOCK_DELAY_MS = Number(
+  Deno.env.get("THEME_PREVIEW_MOCK_DELAY_MS") ?? "2000",
+);
 
 /** Live provider timeout — real calls land around 20s. */
 const LIVE_TIMEOUT_MS = Number(
@@ -271,7 +273,10 @@ async function recordImageRequest(
         sum + (row.estimated_cost_cents ?? 0),
       0,
     );
-    const line = `[generate-theme-preview] billing period spend: ${spent}c/${SPEND_CAP_CENTS}c cap (model=${entry.model}, mocked=${Boolean(entry.mocked)}, success=${entry.success})`;
+    const line =
+      `[generate-theme-preview] billing period spend: ${spent}c/${SPEND_CAP_CENTS}c cap (model=${entry.model}, mocked=${
+        Boolean(entry.mocked)
+      }, success=${entry.success})`;
     if (spent >= SPEND_CAP_CENTS) {
       console.error(`${line} — SPEND CAP REACHED, live calls now refused`);
     } else if (spent >= SPEND_CAP_CENTS * 0.6) {
@@ -280,7 +285,10 @@ async function recordImageRequest(
       console.log(line);
     }
   } catch (error) {
-    console.error("[generate-theme-preview] usage logging failed (non-fatal):", error);
+    console.error(
+      "[generate-theme-preview] usage logging failed (non-fatal):",
+      error,
+    );
   }
 }
 
@@ -365,7 +373,8 @@ async function loadSourceImage(
  * small credit balance.
  */
 function resolveMode(): { mode: "mock" | "live"; refusal?: string } {
-  const raw = (Deno.env.get("THEME_PREVIEW_MODE") ?? "mock").trim().toLowerCase();
+  const raw = (Deno.env.get("THEME_PREVIEW_MODE") ?? "mock").trim()
+    .toLowerCase();
 
   if (raw !== "live") return { mode: "mock" };
 
@@ -385,12 +394,14 @@ function resolveMode(): { mode: "mock" | "live"; refusal?: string } {
   ];
   const trippedBy = ciSignals.find((name) => {
     const value = Deno.env.get(name);
-    return value !== undefined && value !== "" && value.toLowerCase() !== "false";
+    return value !== undefined && value !== "" &&
+      value.toLowerCase() !== "false";
   });
   if (trippedBy) {
     return {
       mode: "mock",
-      refusal: `live mode refused: automated context detected (${trippedBy} is set)`,
+      refusal:
+        `live mode refused: automated context detected (${trippedBy} is set)`,
     };
   }
 
@@ -491,7 +502,9 @@ async function generateThemedImage(
   // the cache miss earlier in the request — never for a cached combination.
   const hfToken = Deno.env.get("HF_TOKEN");
   if (!hfToken) {
-    throw new Error("HF_TOKEN is not configured; cannot run a live generation.");
+    throw new Error(
+      "HF_TOKEN is not configured; cannot run a live generation.",
+    );
   }
 
   await assertLiveSpendAllowed(supabase);
@@ -521,9 +534,10 @@ async function generateThemedImage(
     }),
     new Promise((_, reject) =>
       setTimeout(
-        () => reject(new Error(`Provider timed out after ${LIVE_TIMEOUT_MS}ms`)),
+        () =>
+          reject(new Error(`Provider timed out after ${LIVE_TIMEOUT_MS}ms`)),
         LIVE_TIMEOUT_MS,
-      ),
+      )
     ),
   ])) as Blob;
 
@@ -595,14 +609,19 @@ serve(async (req) => {
     // custom prompts are cached exactly like the built-in themes are.
     const { data: existing, error: existingError } = await supabase
       .from("venue_theme_previews")
-      .select("id, status, output_storage_path, model_used, created_at, updated_at")
+      .select(
+        "id, status, output_storage_path, model_used, created_at, updated_at",
+      )
       .eq("source_image_id", input.photoId)
       .eq("theme", input.theme)
       .eq("prompt_hash", promptHash)
       .maybeSingle();
 
     if (existingError) {
-      console.error("[generate-theme-preview] Cache lookup failed:", existingError);
+      console.error(
+        "[generate-theme-preview] Cache lookup failed:",
+        existingError,
+      );
       return errorResponse(
         "CACHE_LOOKUP_FAILED",
         "Could not look up existing previews.",
@@ -616,8 +635,7 @@ serve(async (req) => {
     // demo run would silently serve placeholders from cache and we'd only
     // find out by looking at the images.
     const cachedIsMock = existing?.model_used === MOCK_MODEL_ID;
-    const cacheUsable =
-      existing?.status === "ready" &&
+    const cacheUsable = existing?.status === "ready" &&
       existing.output_storage_path &&
       (currentMode === "mock" || !cachedIsMock);
 
@@ -649,7 +667,12 @@ serve(async (req) => {
     ) {
       return jsonResponse({
         data: {
-          preview: { status: "pending", theme: input.theme, url: null, cached: false },
+          preview: {
+            status: "pending",
+            theme: input.theme,
+            url: null,
+            cached: false,
+          },
         },
         error: null,
       });
@@ -657,11 +680,17 @@ serve(async (req) => {
 
     if (
       existing?.status === "failed" &&
-      Date.now() - new Date(existing.updated_at).getTime() < FAILED_RETRY_COOLDOWN_MS
+      Date.now() - new Date(existing.updated_at).getTime() <
+        FAILED_RETRY_COOLDOWN_MS
     ) {
       return jsonResponse({
         data: {
-          preview: { status: "failed", theme: input.theme, url: null, cached: false },
+          preview: {
+            status: "failed",
+            theme: input.theme,
+            url: null,
+            cached: false,
+          },
         },
         error: null,
       });
@@ -763,7 +792,10 @@ serve(async (req) => {
       .single();
 
     if (claimError || !claimed) {
-      console.error("[generate-theme-preview] Could not claim row:", claimError);
+      console.error(
+        "[generate-theme-preview] Could not claim row:",
+        claimError,
+      );
       return errorResponse(
         "CLAIM_FAILED",
         "Could not start theme preview generation.",
@@ -774,10 +806,9 @@ serve(async (req) => {
 
     // ── 5. Generate ──
     const source = await loadSourceImage(supabase, photo.storage_path);
-    const prompt =
-      input.customPrompt && !isVenueTheme(input.theme)
-        ? buildCustomThemePrompt(input.customPrompt)
-        : buildThemePrompt(input.theme as Exclude<ThemeSelection, "custom">);
+    const prompt = input.customPrompt && !isVenueTheme(input.theme)
+      ? buildCustomThemePrompt(input.customPrompt)
+      : buildThemePrompt(input.theme as Exclude<ThemeSelection, "custom">);
     // Every generation is metered, success or failure, so spend is visible
     // before the account limit is the thing that tells us. Mock rows are
     // logged at 0c so they never consume the live budget.
@@ -786,7 +817,8 @@ serve(async (req) => {
     try {
       generated = await generateThemedImage(prompt, source, supabase);
     } catch (generationError) {
-      const blockedBySpendCap = generationError instanceof SpendCapExceededError;
+      const blockedBySpendCap = generationError instanceof
+        SpendCapExceededError;
       await recordImageRequest(supabase, {
         model: HF_MODEL,
         success: false,
@@ -816,7 +848,9 @@ serve(async (req) => {
       });
 
     if (uploadError) {
-      throw new Error(`Could not store the themed image: ${uploadError.message}`);
+      throw new Error(
+        `Could not store the themed image: ${uploadError.message}`,
+      );
     }
 
     const { error: readyError } = await supabase
@@ -831,7 +865,9 @@ serve(async (req) => {
       .eq("id", previewRowId);
 
     if (readyError) {
-      throw new Error(`Could not save the preview record: ${readyError.message}`);
+      throw new Error(
+        `Could not save the preview record: ${readyError.message}`,
+      );
     }
 
     return jsonResponse({
@@ -847,7 +883,9 @@ serve(async (req) => {
     });
   } catch (error) {
     const message = redactSecrets(
-      error instanceof Error ? error.message : "Theme preview generation failed.",
+      error instanceof Error
+        ? error.message
+        : "Theme preview generation failed.",
     );
     console.error("[generate-theme-preview] Generation failed:", message);
 

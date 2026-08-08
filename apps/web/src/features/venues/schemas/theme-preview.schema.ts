@@ -18,13 +18,21 @@ export const generateThemePreviewRequestSchema = z
     venueId: z.string().uuid(),
     photoId: z.string().uuid(),
     theme: themeSelectionSchema,
-    customPrompt: z.string().trim().min(3).max(MAX_CUSTOM_PROMPT_LENGTH).nullable(),
+    customPrompt: z
+      .string()
+      .trim()
+      .min(3)
+      .max(MAX_CUSTOM_PROMPT_LENGTH)
+      .nullable(),
   })
   // Custom text and the `custom` theme imply each other, mirroring the CHECK
   // constraint on venue_theme_previews.
   .refine(
     (value) => (value.theme === CUSTOM_THEME) === (value.customPrompt !== null),
-    { message: "Custom theme text is required for the custom theme, and only for it." },
+    {
+      message:
+        "Custom theme text is required for the custom theme, and only for it.",
+    },
   );
 export type GenerateThemePreviewRequest = z.infer<
   typeof generateThemePreviewRequestSchema
