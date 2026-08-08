@@ -26,11 +26,13 @@ export function WithdrawalRequestForm({
   accounts,
   minimum,
   hasOpenWithdrawal,
+  blockedReason,
 }: {
   balance: Balance;
   accounts: PayoutAccountRow[];
   minimum: number;
   hasOpenWithdrawal: boolean;
+  blockedReason?: "under_review" | "in_progress" | null;
 }) {
   const router = useRouter();
   const verified = useMemo(
@@ -47,7 +49,15 @@ export function WithdrawalRequestForm({
   const [isPending, startTransition] = useTransition();
 
   if (hasOpenWithdrawal) {
-    return (
+    // A withdrawal under review is not "in progress" — its outcome is
+    // being confirmed, and saying otherwise would misrepresent it.
+    return blockedReason === "under_review" ? (
+      <p className="rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm font-semibold text-orange-900">
+        A previous withdrawal is under review while we confirm its outcome with
+        our payment provider. Your funds are safe. You can request another once
+        it is resolved.
+      </p>
+    ) : (
       <p className="rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-800">
         You have a withdrawal in progress. You can request another once it
         settles.

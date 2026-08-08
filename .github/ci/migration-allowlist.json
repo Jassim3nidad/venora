@@ -87,6 +87,11 @@
       "file": "supabase/migrations/20260807140000_withdrawal_needs_review.sql",
       "kind": "SECURITY_DEFINER",
       "reason": "Three SECURITY DEFINER functions on the money-out path. begin_withdrawal_disbursement() is replaced to add a database-level duplicate guard (refuses any withdrawal that already carries a provider_reference). flag_withdrawal_for_review() parks a withdrawal whose outcome cannot be determined from verified provider data and deliberately does not release claimed payouts; it is service_role only. resolve_withdrawal_review() lets an admin move a reviewed withdrawal to a terminal state, re-checks is_admin() internally, and requires a note recording how the outcome was verified. All use a fixed search_path and write log_audit."
+    },
+    {
+      "file": "supabase/migrations/20260807160000_needs_review_is_open.sql",
+      "kind": "SECURITY_DEFINER",
+      "reason": "Replaces two existing SECURITY DEFINER functions with no widening of privilege. request_withdrawal() gains needs_review in its one-open-withdrawal guard, so a recipient cannot start a second payout while an earlier outcome is unknown; all other logic, permission checks and the FOR UPDATE payout claim are unchanged. resolve_withdrawal_review() adds previous_status/new_status to its audit entry; it still requires is_admin(), restricts outcomes to paid/failed, demands a verification note, and only acts on a row already in needs_review. Both use a fixed search_path."
     }
   ]
 }

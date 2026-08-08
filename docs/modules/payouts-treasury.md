@@ -277,26 +277,65 @@ PayMongo --POST--> /api/webhooks/paymongo-treasury
 
 Returns 503 when status cannot be confirmed, so PayMongo retries.
 
-## Open gaps found by audit
+## The one-open-withdrawal rule
 
-Both are real and neither is fixed here — this pass was scoped to
-documentation.
+A recipient may not create a withdrawal while any earlier one is
+`pending`, `approved`, `processing` or `needs_review`.
 
-1. **`needs_review` has no admin control.** `resolve_withdrawal_review()`
-   exists and is granted to `authenticated`, but no server action or button
-   calls it. `AdminWithdrawalActions` returns null for any status other
-   than `pending` or `approved`, so a withdrawal in `needs_review` is
-   visible in the KPI count but cannot be resolved from the UI. Funds stay
-   held until this is wired or the RPC is called directly.
+**Enforced in `request_withdrawal()`**, not in the client. `EarningsView`
+mirrors the rule through `isOpenWithdrawalStatus()` so the UI can explain
+the block before submitting, but the database refuses a second request
+regardless of what any client believes.
 
-2. **`needs_review` is not treated as in-flight.** `request_withdrawal()`
-   guards on `status IN ('pending','approved','processing')`, and
-   `EarningsView` uses the same three in `OPEN_STATUSES`. A recipient with a
-   withdrawal parked in `needs_review` can therefore request another one.
-   No double-spend results — the parked withdrawal still holds its payouts
-   as `processing`, so those pesos are not claimable again — but it breaks
-   the one-in-flight-per-recipient invariant at exactly the moment an
-   outcome is unknown. Both lists should include `needs_review`.
+`needs_review` counts as open. A withdrawal under review still holds its
+claimed payouts and its real outcome is unknown — it may already have been
+paid — so it is the worst possible moment to send more money. Terminal
+states (`paid`, `failed`, `rejected`, `cancelled`) do not block.
+
+## Resolving a needs_review withdrawal
+
+Administrators see these on `/admin/withdrawals` with their own KPI count
+and an orange badge reading **"Needs review"**, never "Failed".
+
+The row offers two actions, deliberately phrased as statements of fact
+about what PayMongo did:
+
+- **Provider settled it** → withdrawal `paid`, claimed payouts `paid`
+- **Provider did not send it** → withdrawal `failed`, payouts released
+
+Both require a free-text note (minimum 10 characters) recording _how_ the
+outcome was confirmed — a transfer id, a dashboard reference, a support
+ticket. The note and the acting administrator are written to `audit_logs`
+alongside the previous and new status.
+
+### Administrator responsibilities
+
+Do not resolve from the dashboard's appearance alone. Confirm the transfer
+in PayMongo first — `GET /v2/transfers/{id}` if a transfer id was
+recorded, otherwise the Wallets transaction history. Resolving as
+"provider settled it" marks the payouts paid permanently; resolving as
+"did not send it" returns the money to the recipient's available balance
+where it can be withdrawn again. Getting it wrong either loses the money
+or pays it twice.
+
+### What may release funds
+
+Funds return to the recipient's available balance in exactly three cases,
+all requiring positive evidence:
+
+1. PayMongo reports the transfer `failed`.
+2. A confirmation lookup establishes **no transfer exists** for the
+   withdrawal.
+3. An administrator resolves a review as "provider did not send it", with
+   a recorded note.
+
+Never on a client request, a callback body, an undocumented error message,
+an unknown provider status, a timeout, or a 5xx. All of those hold the
+funds and route to reconciliation or `needs_review`.
+
+All transition and fund-movement logic lives in
+`resolve_withdrawal_review()`. The server action validates shape and
+forwards; the UI decides nothing about payouts.
 
 ## Testing checklist
 

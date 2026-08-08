@@ -9,6 +9,10 @@ import {
 import { PayoutAccountManager } from "./PayoutAccountManager";
 import { WithdrawalHistory } from "./WithdrawalHistory";
 import { WithdrawalRequestForm } from "./WithdrawalRequestForm";
+import {
+  hasOpenWithdrawal,
+  openWithdrawalReason,
+} from "../domain/withdrawal-status";
 import type {
   Balance,
   PayoutAccountRow,
@@ -22,8 +26,6 @@ import type {
  * every balance and row is already RLS-scoped by the queries that
  * produced it.
  */
-
-const OPEN_STATUSES = new Set(["pending", "approved", "processing"]);
 
 function formatPeso(value: number, currency: string) {
   return new Intl.NumberFormat("en-PH", {
@@ -57,9 +59,8 @@ export function EarningsView({
   minimumWithdrawal: number;
   holdDays: number;
 }) {
-  const hasOpenWithdrawal = withdrawals.some((w) =>
-    OPEN_STATUSES.has(w.status),
-  );
+  const blocked = hasOpenWithdrawal(withdrawals);
+  const blockedReason = openWithdrawalReason(withdrawals);
 
   const ledgerColumns: DataTableColumn<PayoutLedgerRow>[] = [
     {
@@ -129,7 +130,8 @@ export function EarningsView({
               balance={balance}
               accounts={accounts}
               minimum={minimumWithdrawal}
-              hasOpenWithdrawal={hasOpenWithdrawal}
+              hasOpenWithdrawal={blocked}
+              blockedReason={blockedReason}
             />
           </Panel>
 

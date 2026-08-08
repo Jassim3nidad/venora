@@ -30,6 +30,23 @@ const rejectSchema = z.object({
   note: z.string().trim().min(3, "A reason is required").max(500),
 });
 
+/**
+ * Resolution of an ambiguous payout.
+ *
+ * `outcome` is deliberately not defaulted and the note is mandatory: the
+ * admin is asserting what the provider actually did, and that assertion
+ * has to be attributable. The RPC re-checks both.
+ */
+const resolveReviewSchema = z.object({
+  withdrawalId: z.string().uuid(),
+  outcome: z.enum(["paid", "failed"]),
+  note: z
+    .string()
+    .trim()
+    .min(10, "Record how the outcome was confirmed with the provider")
+    .max(500),
+});
+
 const verifyAccountSchema = z.object({
   payoutAccountId: z.string().uuid(),
   reference: z.string().trim().max(160).optional(),
@@ -102,6 +119,41 @@ export async function verifyPayoutAccountAction(rawInput: unknown) {
 
       revalidateAdmin();
       return data;
+    },
+    rawInput,
+  );
+}
+
+/**
+ * Records the real outcome of a withdrawal that could not be classified
+ * automatically.
+ *
+ * All state transition and fund-movement logic lives in
+ * resolve_withdrawal_review(): it re-checks is_admin(), rejects any
+ * outcome other than paid/failed, requires the note, refuses a withdrawal
+ * that is not in needs_review, and performs the payout settlement or
+ * release itself. This action only validates shape and forwards — it does
+ * not decide anything about payouts, so the UI cannot drift from the
+ * database's rules.
+ */
+export async function resolveWithdrawalReviewAction(rawInput: unknown) {
+  return createServerAction(
+    resolveReviewSchema,
+    async (input) => {
+      await requirePermission("commissions.manage");
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const supabase = (await createClient()) as any;
+      const { data, error } = await supabase.rpc("resolve_withdrawal_review", {
+        p_withdrawal_id: input.withdrawalId,
+        p_outcome: input.outcome,
+        p_note: input.note,
+      });
+
+      if (error) throw new ValidationError(error.message);
+
+      revalidateAdmin();
+      return data as WithdrawalRequestRow;
     },
     rawInput,
   );
