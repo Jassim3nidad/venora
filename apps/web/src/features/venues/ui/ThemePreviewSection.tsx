@@ -56,6 +56,10 @@ export default function ThemePreviewSection({
     const heroMatch = heroImageSrc
       ? images.find((item) => getVenueMediaUrl(item.storage_path) === heroImageSrc)
       : undefined;
+    // Residual gap: a structured hero with no matching venue_images
+    // storage_path silently falls back here, reintroducing the very mismatch
+    // this logic fixes. Closing it needs source_image_id to reference
+    // venue_media_items, i.e. a migration — see docs/modules/ai-theme-preview.md.
     return heroMatch ?? pickFeaturedMedia(images);
   }, [media, heroImageSrc]);
 
