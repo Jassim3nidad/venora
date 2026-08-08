@@ -101,6 +101,10 @@ export const queryKeys = {
       ["ai", "packageComparison", [...packageIds].sort()] as const,
     conversation: (sessionId: string) =>
       ["ai", "conversation", sessionId] as const,
+    // promptKey distinguishes custom-theme renders from each other; "" for
+    // the built-in themes.
+    themePreview: (photoId: string, theme: string, promptKey = "") =>
+      ["ai", "themePreview", photoId, theme, promptKey] as const,
   },
 } as const;
 
