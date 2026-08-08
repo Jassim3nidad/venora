@@ -7,20 +7,20 @@ Money Movement documentation.
 
 ## Verification status of every claim in this document
 
-| Claim                                                                           | Status                                   |
-| ------------------------------------------------------------------------------- | ---------------------------------------- |
-| `POST /v2/batch_transfers` + full payload                                       | **Verified** in docs                     |
-| `GET /v2/transfers/{id}` + response                                             | **Verified** in docs                     |
-| `GET /v2/transfers` filters: `limit`, `after_id`, `before_id`, `description`    | **Verified** in docs                     |
-| `GET /v1/wallets/receiving_institutions?provider=` → `attributes.provider_code` | **Verified** in docs                     |
-| Statuses `pending` / `succeeded` / `failed`                                     | **Verified** in docs                     |
-| Providers `paymongo` / `instapay` / `pesonet`                                   | **Verified** in docs                     |
-| InstaPay ≤ PHP 50,000, PESONet ≤ PHP 10,000,000                                 | **Verified** in docs                     |
-| Test mode supported for disbursements                                           | **Verified** in docs                     |
-| Callback payload shape / event names                                            | **UNRESOLVED — not documented**          |
-| Callback signature scheme                                                       | **UNRESOLVED — not documented**          |
-| Idempotency key on transfer creation                                            | **UNRESOLVED — none documented**         |
-| Insufficient-balance error code                                                 | **UNRESOLVED — matched on message text** |
+| Claim                                                                           | Status                             |
+| ------------------------------------------------------------------------------- | ---------------------------------- |
+| `POST /v2/batch_transfers` + full payload                                       | **Verified** in docs               |
+| `GET /v2/transfers/{id}` + response                                             | **Verified** in docs               |
+| `GET /v2/transfers` filters: `limit`, `after_id`, `before_id`, `description`    | **Verified** in docs               |
+| `GET /v1/wallets/receiving_institutions?provider=` → `attributes.provider_code` | **Verified** in docs               |
+| Statuses `pending` / `succeeded` / `failed`                                     | **Verified** in docs               |
+| Providers `paymongo` / `instapay` / `pesonet`                                   | **Verified** in docs               |
+| InstaPay ≤ PHP 50,000, PESONet ≤ PHP 10,000,000                                 | **Verified** in docs               |
+| Test mode supported for disbursements                                           | **Verified** in docs               |
+| Callback payload shape / event names                                            | **UNRESOLVED — not documented**    |
+| Callback signature scheme                                                       | **UNRESOLVED — not documented**    |
+| Idempotency key on transfer creation                                            | **UNRESOLVED — none documented**   |
+| Insufficient-balance error code                                                 | **UNRESOLVED — no code confirmed** |
 
 Everything marked UNRESOLVED is handled by a design that does not depend
 on it. Nothing in this implementation asserts undocumented behaviour as
@@ -46,11 +46,15 @@ the body is never trusted, an attacker who forges a callback only causes
 an authenticated re-read of our own transfer.
 
 **No idempotency key is documented** for transfer creation. Duplicate
-protection is therefore read-before-write: the service calls
-`GET /v2/transfers?description=…` and matches on `reference_number` (our
-withdrawal id) before creating anything. `description` is the only
-documented filter and we control its value. This is backed by the
-`approved → processing` state claim, which is the primary guard.
+protection is therefore layered, with the database as the primary guard:
+
+1. `begin_withdrawal_disbursement()` claims `approved → processing` and
+   refuses any withdrawal that already carries a `provider_reference`. A
+   second transfer for the same withdrawal is impossible at the SQL level.
+2. As recovery after an uncertain failure, the service looks up
+   `GET /v2/transfers?description=…` and matches exactly on
+   `reference_number` (our withdrawal id). `description` is the only
+   documented filter and we control its value.
 
 If PayMongo later publishes the callback payload or an idempotency header,
 both can be tightened — the current design is deliberately not dependent
@@ -166,38 +170,83 @@ amount would guarantee rejection.
 - InstaPay: real time, ≤ PHP 50,000
 - PESONet: same/next banking day, ≤ PHP 10,000,000
 
-## Status flow
+## Withdrawal state machine
 
 ```
-approved --begin_withdrawal_disbursement--> processing
-                                              |
-                        POST /v2/batch_transfers
-                                              |
-              succeeded -> paid        failed -> failed (payouts released)
-              pending   -> stays processing, awaits callback or sweep
+pending ──approve──> approved ──begin_withdrawal_disbursement──> processing
+   │                    │                                            │
+   │                    │                    POST /v2/batch_transfers │
+   │                    │                                            │
+   ├─cancel─> cancelled │                    succeeded ──> paid  (terminal)
+   └─reject─> rejected  └─reject─> rejected  failed    ──> failed (terminal,
+                                                            funds released)
+                                             pending   ──> stays processing
+                                             unknown /
+                                             unresolvable ──> needs_review
+                                                              (funds HELD)
+
+needs_review ──resolve_withdrawal_review(admin + note)──> paid | failed
 ```
 
-A withdrawal is marked `paid` only on an explicit `succeeded`. An
-unrecognised status is treated as `pending`, never as success.
+`paid` and `failed` are terminal and are only ever reached from verified
+provider data. `pending` legitimately stays `processing` — the transfer is
+genuinely in flight and the reconciliation sweep will resolve it.
 
-### Error taxonomy
+### needs_review
 
-| Condition           | Code                                | Funds                |
-| ------------------- | ----------------------------------- | -------------------- |
-| Money-out disabled  | `DISBURSEMENT_NOT_ENABLED`          | released             |
-| Missing config      | `DISBURSEMENT_NOT_CONFIGURED`       | released             |
-| 401 / 403           | `DISBURSEMENT_AUTH_FAILED`          | released             |
-| 400 / 422 rejection | `DISBURSEMENT_REJECTED`             | released             |
-| Underfunded wallet  | `DISBURSEMENT_INSUFFICIENT_BALANCE` | released             |
-| Timeout             | `DISBURSEMENT_PROVIDER_TIMEOUT`     | **held, reconciled** |
-| Unreachable         | `DISBURSEMENT_PROVIDER_UNREACHABLE` | **held, reconciled** |
-| 5xx                 | `DISBURSEMENT_PROVIDER_UNAVAILABLE` | **held, reconciled** |
+A withdrawal whose outcome cannot be established. Reached from:
 
-The split is by one question only: _could a transfer exist?_ A 4xx means
-the provider rejected the request outright, so no money moved and release
-is safe. A timeout or 5xx is ambiguous, so funds stay held until
-reconciliation asks the provider directly. Releasing on ambiguity risks
-paying twice.
+- an undocumented status value from the provider
+- the confirmation lookup failing after a create failure
+- the status read failing on a withdrawal that has a transfer id
+- `settle_withdrawal_request` or `fail_withdrawal_request` erroring
+- the reconciliation sweep throwing on that withdrawal
+
+It **does not release the claimed payouts**. Releasing would assert the
+money did not move, which is exactly what is unknown. The funds stay held
+until `resolve_withdrawal_review()` is called by an admin, which requires a
+note recording how the real outcome was confirmed with PayMongo.
+
+Admins and the recipient are both notified; the admin notification is
+`urgent`.
+
+### Error handling
+
+**No provider error is classified.** PayMongo publishes no machine-readable
+error taxonomy for Treasury, so neither the HTTP status nor the message
+text can be interpreted without asserting undocumented behaviour. In
+particular there is **no confirmed code for an underfunded wallet**, and
+the implementation does not match on message text to detect one — an
+earlier version did, and that was removed.
+
+The adapter therefore raises a small set of codes that describe _where_
+the call stopped, never _why the provider refused_:
+
+| Condition                     | Code                                |
+| ----------------------------- | ----------------------------------- |
+| Money-out switched off        | `DISBURSEMENT_NOT_ENABLED`          |
+| Required config missing       | `DISBURSEMENT_NOT_CONFIGURED`       |
+| 401 / 403                     | `DISBURSEMENT_AUTH_FAILED`          |
+| Any other non-2xx             | `DISBURSEMENT_REQUEST_FAILED`       |
+| Request timed out             | `DISBURSEMENT_PROVIDER_TIMEOUT`     |
+| Host unreachable              | `DISBURSEMENT_PROVIDER_UNREACHABLE` |
+| 2xx with no `data` envelope   | `DISBURSEMENT_PROVIDER_ERROR`       |
+| Currency not PHP              | `UNSUPPORTED_CURRENCY`              |
+| Transfer object without an id | `DISBURSEMENT_PROVIDER_ERROR`       |
+
+**The service does not branch on any of them.** Every failure of
+`createTransfer` — whatever its code — goes to the same resolver, which
+asks the provider what actually happened:
+
+| Provider answer               | Outcome                             |
+| ----------------------------- | ----------------------------------- |
+| A transfer exists             | adopt it, apply its real status     |
+| Confirmed: no transfer exists | fail, release the claimed payouts   |
+| Cannot determine              | `needs_review`, **funds stay held** |
+
+Funds are released only on a positive statement from PayMongo that no
+transfer was created. An unknown error is never assumed to mean "nothing
+happened" — it takes the reconciliation / `needs_review` path.
 
 ### Reconciliation
 
@@ -227,6 +276,27 @@ PayMongo --POST--> /api/webhooks/paymongo-treasury
 ```
 
 Returns 503 when status cannot be confirmed, so PayMongo retries.
+
+## Open gaps found by audit
+
+Both are real and neither is fixed here — this pass was scoped to
+documentation.
+
+1. **`needs_review` has no admin control.** `resolve_withdrawal_review()`
+   exists and is granted to `authenticated`, but no server action or button
+   calls it. `AdminWithdrawalActions` returns null for any status other
+   than `pending` or `approved`, so a withdrawal in `needs_review` is
+   visible in the KPI count but cannot be resolved from the UI. Funds stay
+   held until this is wired or the RPC is called directly.
+
+2. **`needs_review` is not treated as in-flight.** `request_withdrawal()`
+   guards on `status IN ('pending','approved','processing')`, and
+   `EarningsView` uses the same three in `OPEN_STATUSES`. A recipient with a
+   withdrawal parked in `needs_review` can therefore request another one.
+   No double-spend results — the parked withdrawal still holds its payouts
+   as `processing`, so those pesos are not claimable again — but it breaks
+   the one-in-flight-per-recipient invariant at exactly the moment an
+   outcome is unknown. Both lists should include `needs_review`.
 
 ## Testing checklist
 
