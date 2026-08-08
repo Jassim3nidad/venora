@@ -13,14 +13,23 @@
  * everything RLS would otherwise do: the venue must be published and the
  * photo must belong to it.
  *
- * Image generation goes straight to Google's Generative Language API via
- * generateThemedImage(), the single provider seam. This function does NOT
- * use _shared/openrouter.ts or _shared/ai-config.ts — the OpenRouter Qwen
- * Flash chat model those provide powers the other ai-* functions and is
- * deliberately untouched here.
+ * Image generation goes through generateThemedImage(), the single provider
+ * seam, which also decides mock vs live. THEME_PREVIEW_MODE defaults to
+ * "mock" everywhere: real Hugging Face calls cost ~$0.03 against a ~$0.10
+ * monthly credit, so they are opt-in, refused in CI, and further bounded by
+ * a spend cap checked before the provider is contacted.
+ *
+ * This function does NOT use _shared/openrouter.ts or _shared/ai-config.ts.
+ * The qwen/qwen3.7-flash *chat* model those provide powers the other ai-*
+ * functions and is a separate feature, deliberately untouched here.
  */
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+// esm.sh, not npm:, to match the supabase-js import above — Deno resolves
+// npm: specifiers against node_modules, which this monorepo's package.json
+// makes ambiguous inside the functions directory.
+import { InferenceClient } from "https://esm.sh/@huggingface/inference@4.13.25";
+import { MOCK_IMAGE_BASE64, MOCK_IMAGE_MIME } from "./mock-image.ts";
 import {
   buildCustomThemePrompt,
   buildThemePrompt,
@@ -52,17 +61,32 @@ const STALE_PENDING_MS = 2 * 60 * 1000;
  */
 const FAILED_RETRY_COOLDOWN_MS = 10 * 60 * 1000;
 
-const GEMINI_MODEL =
-  Deno.env.get("THEME_PREVIEW_GEMINI_MODEL") ?? "gemini-3.1-flash-image-preview";
+const HF_PROVIDER = Deno.env.get("THEME_PREVIEW_HF_PROVIDER") ?? "fal-ai";
+const HF_MODEL =
+  Deno.env.get("THEME_PREVIEW_HF_MODEL") ?? "Qwen/Qwen-Image-Edit-2511";
+
+/** Mock latency, so loading states are exercised without provider cost. */
+const MOCK_DELAY_MS = Number(Deno.env.get("THEME_PREVIEW_MOCK_DELAY_MS") ?? "2000");
+
+/** Live provider timeout — real calls land around 20s. */
+const LIVE_TIMEOUT_MS = Number(
+  Deno.env.get("THEME_PREVIEW_LIVE_TIMEOUT_MS") ?? "90000",
+);
 
 /**
- * Free-tier daily image quota to report progress against. Not enforced
- * here — it exists so the log line below shows how close today's usage is
- * to the cap, instead of the first sign being a 429.
+ * Budget, in integer cents to match ai_usage_logs.estimated_cost_cents.
+ * ~$0.03 per generation against a $0.10/month credit, so the cap is set to
+ * 8c to leave headroom rather than racing the account limit.
  */
-const DAILY_IMAGE_QUOTA = Number(
-  Deno.env.get("THEME_PREVIEW_DAILY_IMAGE_QUOTA") ?? "500",
+const LIVE_COST_PER_CALL_CENTS = Number(
+  Deno.env.get("THEME_PREVIEW_COST_PER_CALL_CENTS") ?? "3",
 );
+const SPEND_CAP_CENTS = Number(
+  Deno.env.get("THEME_PREVIEW_SPEND_CAP_CENTS") ?? "8",
+);
+
+/** Marks rows whose stored image is the placeholder, not a real render. */
+const MOCK_MODEL_ID = "mock/static-fixture";
 
 /** Feature label used in ai_usage_logs rows written by this function. */
 const USAGE_FEATURE = "theme_preview";
@@ -81,17 +105,6 @@ const CUSTOM_RATE_LIMIT_PER_HOUR = Number(
   Deno.env.get("THEME_PREVIEW_CUSTOM_RATE_LIMIT_PER_HOUR") ?? "3",
 );
 
-/**
- * Gemini bills image output as tokens; rates are env-overridable so pricing
- * changes don't need a redeploy. USD per 1M tokens.
- */
-const GEMINI_INPUT_USD_PER_MTOK = Number(
-  Deno.env.get("THEME_PREVIEW_GEMINI_INPUT_USD_PER_MTOK") ?? "0.30",
-);
-const GEMINI_OUTPUT_USD_PER_MTOK = Number(
-  Deno.env.get("THEME_PREVIEW_GEMINI_OUTPUT_USD_PER_MTOK") ?? "30",
-);
-
 type GenerateInput = {
   venueId: string;
   photoId: string;
@@ -105,20 +118,24 @@ type GeneratedImage = {
   contentType: string;
   modelUsed: string;
   costUsd: number | null;
-  inputTokens: number | null;
-  outputTokens: number | null;
+  /** Integer cents, fed to the spend guard via ai_usage_logs. */
+  costCents: number;
+  /** True when no provider was contacted and nothing was billed. */
+  mocked: boolean;
 };
 
 /**
  * Belt-and-braces scrub before any provider error text is thrown, logged, or
- * written to error_message. Google echoes the request back in some error
+ * written to error_message. Providers echo request details in some error
  * bodies, and error_message is readable by admins.
  */
 function redactSecrets(text: string): string {
-  const apiKey = Deno.env.get("GEMINI_API_KEY");
   let safe = text.slice(0, 800);
-  if (apiKey) safe = safe.split(apiKey).join("[redacted]");
-  return safe.replace(/AIza[0-9A-Za-z_-]{10,}/g, "[redacted]");
+  for (const name of ["HF_TOKEN", "OPENROUTER_API_KEY"]) {
+    const value = Deno.env.get(name);
+    if (value) safe = safe.split(value).join("[redacted]");
+  }
+  return safe.replace(/\bhf_[A-Za-z0-9]{10,}\b/g, "[redacted]");
 }
 
 function jsonResponse(body: unknown, status = 200) {
@@ -176,12 +193,16 @@ async function promptHashFor(input: GenerateInput): Promise<string> {
 }
 
 /**
- * Records one image request in the existing ai_usage_logs table (the same
- * place the ai-* functions report to, so admin reporting picks this up for
- * free) and emits a log line showing today's count against the daily quota.
+ * Records one generation in the existing ai_usage_logs table (the same place
+ * the ai-* functions report to, so admin reporting picks this up for free)
+ * and logs cumulative spend for the billing period.
  *
- * Both are best-effort: a metrics hiccup must never fail a generation the
- * visitor is waiting on. ai_usage_logs has no column for prompt content, so
+ * `estimated_cost_cents` is what the spend guard reads back, so it is the
+ * one field that must be right: mock renders are always 0c, and a call
+ * refused by the guard is 0c because it never reached the provider.
+ *
+ * Best-effort: a metrics hiccup must never fail a generation the visitor is
+ * waiting on. ai_usage_logs has no column for prompt content, so
  * customer-written theme text cannot leak in here even by accident.
  */
 async function recordImageRequest(
@@ -190,37 +211,41 @@ async function recordImageRequest(
     model: string;
     success: boolean;
     durationMs: number;
-    inputTokens?: number | null;
-    outputTokens?: number | null;
+    costCents: number;
+    mocked?: boolean;
     errorCategory?: string | null;
   },
 ): Promise<void> {
   try {
     await supabase.from("ai_usage_logs").insert({
       feature: USAGE_FEATURE,
-      provider: "google",
+      provider: entry.mocked ? "mock" : HF_PROVIDER,
       model: entry.model,
-      input_tokens: entry.inputTokens ?? null,
-      output_tokens: entry.outputTokens ?? null,
+      estimated_cost_cents: entry.costCents,
       duration_ms: entry.durationMs,
       success: entry.success,
       error_category: entry.errorCategory ?? null,
     });
 
-    const startOfDay = new Date();
-    startOfDay.setUTCHours(0, 0, 0, 0);
-    const { count } = await supabase
+    const periodStart = new Date();
+    periodStart.setUTCDate(1);
+    periodStart.setUTCHours(0, 0, 0, 0);
+    const { data } = await supabase
       .from("ai_usage_logs")
-      .select("id", { count: "exact", head: true })
+      .select("estimated_cost_cents")
       .eq("feature", USAGE_FEATURE)
-      .gte("created_at", startOfDay.toISOString());
+      .gte("created_at", periodStart.toISOString());
 
-    const used = count ?? 0;
-    const line = `[generate-theme-preview] gemini image requests today: ${used}/${DAILY_IMAGE_QUOTA} (model=${entry.model}, success=${entry.success})`;
-    if (used >= DAILY_IMAGE_QUOTA) {
-      console.error(`${line} — DAILY QUOTA REACHED`);
-    } else if (used >= DAILY_IMAGE_QUOTA * 0.8) {
-      console.warn(`${line} — approaching daily quota`);
+    const spent = (data ?? []).reduce(
+      (sum: number, row: { estimated_cost_cents: number | null }) =>
+        sum + (row.estimated_cost_cents ?? 0),
+      0,
+    );
+    const line = `[generate-theme-preview] billing period spend: ${spent}c/${SPEND_CAP_CENTS}c cap (model=${entry.model}, mocked=${Boolean(entry.mocked)}, success=${entry.success})`;
+    if (spent >= SPEND_CAP_CENTS) {
+      console.error(`${line} — SPEND CAP REACHED, live calls now refused`);
+    } else if (spent >= SPEND_CAP_CENTS * 0.6) {
+      console.warn(`${line} — approaching spend cap`);
     } else {
       console.log(line);
     }
@@ -305,97 +330,186 @@ async function loadSourceImage(
 }
 
 /**
- * The single provider seam for this feature.
- *
- * Everything above and below is provider-agnostic: the caller hands over a
- * prompt plus the source photo and gets bytes back. Swapping Gemini for
- * another image-edit provider means replacing this function body only.
- *
- * OpenRouter was removed as an option here: it lists no Qwen image-edit
- * model, and its free allowance (~12k tokens) cannot cover an image-edit
- * request (~58k, dominated by the input photo). That is specific to this
- * feature — the Qwen Flash *chat* model that ai-assistant, ai-search and
- * the other ai-* functions use through _shared/openrouter.ts is untouched.
+ * Resolves the run mode. Defaults to "mock" everywhere; "live" has to be
+ * asked for explicitly and is refused outright in anything that smells like
+ * an automated context, because a live call costs real money against a very
+ * small credit balance.
  */
-async function generateThemedImage(
-  apiKey: string,
-  prompt: string,
-  source: { base64: string; mimeType: string },
-): Promise<GeneratedImage> {
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
-    {
-      method: "POST",
-      // Key travels in the header, never a query string — query strings end
-      // up in access logs and proxy history.
-      headers: { "x-goog-api-key": apiKey, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [
-              { text: prompt },
-              {
-                inline_data: {
-                  mime_type: source.mimeType,
-                  data: source.base64,
-                },
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          // Required for the image models to emit an image at all; without
-          // it they answer with text and bill at the text rate.
-          responseModalities: ["TEXT", "IMAGE"],
-        },
-      }),
-    },
-  );
+function resolveMode(): { mode: "mock" | "live"; refusal?: string } {
+  const raw = (Deno.env.get("THEME_PREVIEW_MODE") ?? "mock").trim().toLowerCase();
 
-  if (!response.ok) {
-    // Body may carry the API key back in an error echo — never include it.
-    const detail = await response.text();
-    throw new Error(
-      `Gemini image edit failed (HTTP ${response.status}): ${redactSecrets(detail)}`,
+  if (raw !== "live") return { mode: "mock" };
+
+  // Belt and braces: even with the flag set, never bill an automated run.
+  const ciSignals = [
+    "CI",
+    "CONTINUOUS_INTEGRATION",
+    "GITHUB_ACTIONS",
+    "GITLAB_CI",
+    "BUILDKITE",
+    "CIRCLECI",
+    "VERCEL_ENV",
+    "DENO_TESTING",
+    "VITEST",
+    "JEST_WORKER_ID",
+    "PLAYWRIGHT_TEST_BASE_URL",
+  ];
+  const trippedBy = ciSignals.find((name) => {
+    const value = Deno.env.get(name);
+    return value !== undefined && value !== "" && value.toLowerCase() !== "false";
+  });
+  if (trippedBy) {
+    return {
+      mode: "mock",
+      refusal: `live mode refused: automated context detected (${trippedBy} is set)`,
+    };
+  }
+
+  if ((Deno.env.get("NODE_ENV") ?? "").toLowerCase() === "test") {
+    return { mode: "mock", refusal: "live mode refused: NODE_ENV=test" };
+  }
+
+  return { mode: "live" };
+}
+
+/** Thrown when the spend guard blocks a live call before it fires. */
+class SpendCapExceededError extends Error {}
+
+/**
+ * Hard budget guard. The credit balance behind this feature is ~$0.10/month
+ * and one generation costs ~$0.03, so "a few extra calls" is the difference
+ * between working and a billing surprise. Sums what this billing period has
+ * already cost from ai_usage_logs and refuses *before* the provider is
+ * contacted if this call would push the total past the cap.
+ *
+ * Fails closed: if the spend total cannot be read, the live call does not
+ * happen. An unknown balance is not a safe balance.
+ */
+async function assertLiveSpendAllowed(supabase: any): Promise<void> {
+  const periodStart = new Date();
+  periodStart.setUTCDate(1);
+  periodStart.setUTCHours(0, 0, 0, 0);
+
+  const { data, error } = await supabase
+    .from("ai_usage_logs")
+    .select("estimated_cost_cents")
+    .eq("feature", USAGE_FEATURE)
+    .gte("created_at", periodStart.toISOString());
+
+  if (error) {
+    throw new SpendCapExceededError(
+      "Spend guard could not read usage totals; refusing the live call.",
     );
   }
 
-  const payload = await response.json();
-  const parts = payload?.candidates?.[0]?.content?.parts ?? [];
-  const imagePart = parts.find((part: any) => part?.inlineData ?? part?.inline_data);
-  const inline = imagePart?.inlineData ?? imagePart?.inline_data;
+  const spentCents = (data ?? []).reduce(
+    (sum: number, row: { estimated_cost_cents: number | null }) =>
+      sum + (row.estimated_cost_cents ?? 0),
+    0,
+  );
+  const projected = spentCents + LIVE_COST_PER_CALL_CENTS;
 
-  if (!inline?.data) {
-    // Usually a safety block — surface the reason so failures are debuggable.
-    const reason =
-      payload?.candidates?.[0]?.finishReason ??
-      payload?.promptFeedback?.blockReason ??
-      "no image returned";
-    throw new Error(`Gemini returned no image (${reason}).`);
+  if (projected > SPEND_CAP_CENTS) {
+    throw new SpendCapExceededError(
+      `Spend cap reached: ${spentCents}c already used this period, this call would make ${projected}c against a ${SPEND_CAP_CENTS}c cap.`,
+    );
   }
 
-  const usage = payload?.usageMetadata;
-  const inputTokens = Number.isFinite(usage?.promptTokenCount)
-    ? Number(usage.promptTokenCount)
-    : null;
-  const outputTokens = Number.isFinite(usage?.candidatesTokenCount)
-    ? Number(usage.candidatesTokenCount)
-    : null;
-  const costUsd =
-    inputTokens === null
-      ? null
-      : (inputTokens * GEMINI_INPUT_USD_PER_MTOK +
-          (outputTokens ?? 0) * GEMINI_OUTPUT_USD_PER_MTOK) /
-        1_000_000;
+  console.log(
+    `[generate-theme-preview] spend guard ok: ${spentCents}c used this period, cap ${SPEND_CAP_CENTS}c`,
+  );
+}
+
+/**
+ * The single provider seam for this feature.
+ *
+ * Everything either side of it is provider-agnostic: the caller hands over a
+ * prompt plus the source photo and gets bytes back, so swapping providers
+ * means replacing this function body only. It also decides mock vs live, so
+ * no caller can reach a paid provider by accident.
+ *
+ * Scope: this function never touches _shared/openrouter.ts or
+ * _shared/ai-config.ts — the qwen/qwen3.7-flash *chat* model those serve to
+ * the ai-* functions is a separate feature and is deliberately untouched.
+ */
+async function generateThemedImage(
+  prompt: string,
+  source: { base64: string; mimeType: string },
+  supabase: any,
+): Promise<GeneratedImage> {
+  const { mode, refusal } = resolveMode();
+  if (refusal) console.warn(`[generate-theme-preview] ${refusal}`);
+
+  if (mode === "mock") {
+    // Mimics provider latency so loading states, polling and the cache can
+    // be exercised for free, as often as we like.
+    await new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS));
+    console.log(
+      `[generate-theme-preview] MOCK render (no provider call, no cost); delay ${MOCK_DELAY_MS}ms`,
+    );
+    return {
+      bytes: fromBase64(MOCK_IMAGE_BASE64),
+      contentType: MOCK_IMAGE_MIME,
+      modelUsed: MOCK_MODEL_ID,
+      costUsd: 0,
+      costCents: 0,
+      mocked: true,
+    };
+  }
+
+  // ── live ──────────────────────────────────────────────────
+  // Reached only when THEME_PREVIEW_MODE=live, outside CI, and only after
+  // the cache miss earlier in the request — never for a cached combination.
+  const hfToken = Deno.env.get("HF_TOKEN");
+  if (!hfToken) {
+    throw new Error("HF_TOKEN is not configured; cannot run a live generation.");
+  }
+
+  await assertLiveSpendAllowed(supabase);
+
+  const client = new InferenceClient(hfToken);
+  const inputBytes = fromBase64(source.base64);
+  const inputBlob = new Blob([inputBytes.buffer as ArrayBuffer], {
+    type: source.mimeType,
+  });
+
+  console.warn(
+    `[generate-theme-preview] LIVE provider call to ${HF_MODEL} via ${HF_PROVIDER} — this costs real credit`,
+  );
+
+  // The SDK has no timeout of its own; without this a stalled provider would
+  // hold the Edge Function open until the platform kills it.
+  const result = (await Promise.race([
+    client.imageToImage({
+      // Cast against the SDK's own provider union so the env override stays
+      // configurable without widening it to a bare string.
+      provider: HF_PROVIDER as Parameters<
+        InferenceClient["imageToImage"]
+      >[0]["provider"],
+      model: HF_MODEL,
+      inputs: inputBlob,
+      parameters: { prompt },
+    }),
+    new Promise((_, reject) =>
+      setTimeout(
+        () => reject(new Error(`Provider timed out after ${LIVE_TIMEOUT_MS}ms`)),
+        LIVE_TIMEOUT_MS,
+      ),
+    ),
+  ])) as Blob;
+
+  const bytes = new Uint8Array(await result.arrayBuffer());
+  if (bytes.length === 0) {
+    throw new Error("Provider returned an empty image.");
+  }
 
   return {
-    bytes: fromBase64(inline.data),
-    contentType: inline.mimeType ?? inline.mime_type ?? "image/jpeg",
-    modelUsed: GEMINI_MODEL,
-    costUsd,
-    inputTokens,
-    outputTokens,
+    bytes,
+    contentType: result.type || "image/jpeg",
+    modelUsed: HF_MODEL,
+    costUsd: LIVE_COST_PER_CALL_CENTS / 100,
+    costCents: LIVE_COST_PER_CALL_CENTS,
+    mocked: false,
   };
 }
 
@@ -424,17 +538,10 @@ serve(async (req) => {
     );
   }
 
-  // Read from the environment only — never hardcoded, never logged, and
-  // never echoed back in a response body.
-  const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
-
-  if (!geminiApiKey) {
-    return errorResponse(
-      "MODEL_NOT_CONFIGURED",
-      "GEMINI_API_KEY is not configured for theme previews.",
-      500,
-    );
-  }
+  // HF_TOKEN is read from the environment inside the provider seam only —
+  // never hardcoded, never logged, never echoed in a response. It is not
+  // required up front because mock mode never touches a provider, and mock
+  // is the default: a missing token must not break local development.
 
   const supabase = createClient(supabaseUrl, serviceRoleKey);
   let previewRowId: string | null = null;
@@ -450,13 +557,16 @@ serve(async (req) => {
     }
 
     const promptHash = await promptHashFor(input);
+    // Resolved once per request so the cache decision and the generator
+    // agree on which mode we're in.
+    const { mode: currentMode } = resolveMode();
 
     // ── 1. Cache hit: never call the model twice for the same pair ──
     // Two people typing the same words (in any casing) hash the same, so
     // custom prompts are cached exactly like the built-in themes are.
     const { data: existing, error: existingError } = await supabase
       .from("venue_theme_previews")
-      .select("id, status, output_storage_path, created_at, updated_at")
+      .select("id, status, output_storage_path, model_used, created_at, updated_at")
       .eq("source_image_id", input.photoId)
       .eq("theme", input.theme)
       .eq("prompt_hash", promptHash)
@@ -471,7 +581,18 @@ serve(async (req) => {
       );
     }
 
-    if (existing?.status === "ready" && existing.output_storage_path) {
+    // A row generated in mock mode holds the placeholder fixture, not a real
+    // render. It is a perfectly good cache hit while we're in mock mode, but
+    // a live run must ignore it and regenerate — otherwise the first real
+    // demo run would silently serve placeholders from cache and we'd only
+    // find out by looking at the images.
+    const cachedIsMock = existing?.model_used === MOCK_MODEL_ID;
+    const cacheUsable =
+      existing?.status === "ready" &&
+      existing.output_storage_path &&
+      (currentMode === "mock" || !cachedIsMock);
+
+    if (cacheUsable) {
       return jsonResponse({
         data: {
           preview: {
@@ -483,6 +604,12 @@ serve(async (req) => {
         },
         error: null,
       });
+    }
+
+    if (existing?.status === "ready" && cachedIsMock) {
+      console.warn(
+        `[generate-theme-preview] live run replacing a mock-cached render for ${input.theme}`,
+      );
     }
 
     // Another request is already generating this exact pair — don't duplicate
@@ -622,18 +749,22 @@ serve(async (req) => {
       input.customPrompt && !isVenueTheme(input.theme)
         ? buildCustomThemePrompt(input.customPrompt)
         : buildThemePrompt(input.theme as Exclude<ThemeSelection, "custom">);
-    // Every provider call is metered, success or failure, so quota usage is
-    // visible before a 429 is the thing that tells us.
+    // Every generation is metered, success or failure, so spend is visible
+    // before the account limit is the thing that tells us. Mock rows are
+    // logged at 0c so they never consume the live budget.
     const startedAt = Date.now();
     let generated: GeneratedImage;
     try {
-      generated = await generateThemedImage(geminiApiKey, prompt, source);
+      generated = await generateThemedImage(prompt, source, supabase);
     } catch (generationError) {
+      const blockedBySpendCap = generationError instanceof SpendCapExceededError;
       await recordImageRequest(supabase, {
-        model: GEMINI_MODEL,
+        model: HF_MODEL,
         success: false,
         durationMs: Date.now() - startedAt,
-        errorCategory: "generation_failed",
+        // A refused call never reached the provider, so it cost nothing.
+        costCents: 0,
+        errorCategory: blockedBySpendCap ? "spend_cap" : "generation_failed",
       });
       throw generationError;
     }
@@ -642,8 +773,8 @@ serve(async (req) => {
       model: generated.modelUsed,
       success: true,
       durationMs: Date.now() - startedAt,
-      inputTokens: generated.inputTokens,
-      outputTokens: generated.outputTokens,
+      costCents: generated.costCents,
+      mocked: generated.mocked,
     });
 
     // ── 6. Store and mark ready ──

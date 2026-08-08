@@ -125,65 +125,66 @@ Order of operations, chosen so nothing is spent before it has to be:
 
 ### Model and the provider seam
 
-One model, called directly: **`gemini-3.1-flash-image-preview`** on
-`generativelanguage.googleapis.com` via `:generateContent`, keyed by
-`GEMINI_API_KEY` read from the environment (header `x-goog-api-key`, never
-a query string, never hardcoded).
+**`Qwen/Qwen-Image-Edit-2511`** via Hugging Face Inference Providers, routed
+to the **`fal-ai`** provider, using the official `@huggingface/inference`
+SDK. Imported from esm.sh rather than with an `npm:` specifier, because Deno
+resolves `npm:` against node_modules and this monorepo's package.json makes
+that ambiguous inside the functions directory.
 
-`generateThemedImage(apiKey, prompt, source)` is the **only** place a
-provider is contacted. Everything either side of it is provider-agnostic,
-so swapping providers means replacing that one function body — the cache,
-rate limits, storage, and the caller are all untouched by the choice.
+`generateThemedImage(prompt, source, supabase)` is the **only** place a
+provider is contacted, and it is also what decides mock vs live — so no
+caller can reach a paid provider by accident. Swapping providers means
+replacing that one function body.
 
-Request shape that matters: the input photo goes in as a
-`parts[].inline_data` `{ mime_type, data }` block alongside the text
-prompt, and `generationConfig.responseModalities` **must** include
-`"IMAGE"` — without it the image models reply with text and bill at the
-text rate. The response image comes back at
-`candidates[0].content.parts[].inlineData`, with token counts in
-`usageMetadata`.
+Deno adaptation of the Node reference snippet: there is no `fs.readFileSync`.
+The source photo is pulled from Supabase Storage into memory by
+`loadSourceImage()` and handed over as a `Blob`; `imageToImage` returns a
+`Blob`, which is read to bytes and uploaded. The SDK ships no timeout of its
+own, so the call is wrapped in a `Promise.race` against
+`THEME_PREVIEW_LIVE_TIMEOUT_MS` (default 90s; real calls land around 20s).
 
-> **Scope note — this feature no longer touches OpenRouter at all.**
-> `_shared/openrouter.ts` and `_shared/ai-config.ts` (approved model
-> `qwen/qwen3.7-flash`) are the *chat* path used by `ai-assistant`,
-> `ai-search`, `ai-recommendation`, `ai-venue-description`,
-> `ai-cost-estimator`, `ai-package-comparison` and
-> `booking-auto-evaluation`. This function never imported them and still
-> doesn't. `OPENROUTER_API_KEY` remains set and in use by those functions —
-> do not remove it.
+### Cost control: mock by default
 
-**Why OpenRouter was dropped here:** it lists no Qwen image-edit model
-(`qwen/qwen-image-edit` → `400 not a valid model ID`; its only
-image-*output* models are Google's and OpenAI's), and a free-tier balance
-affords ~12k tokens against the ~58k an image edit needs, so every call
-returned HTTP 402.
+A generation costs ~$0.03 against a ~$0.10/month credit — roughly three real
+calls a month. Real calls are therefore demo content only, enforced in code
+rather than by discipline. Four independent layers:
 
-> **Gemini's free tier does not cover image generation.** Verified
-> 2026-08-08 on this project's key: a free-tier **text** call
-> (`gemini-2.5-flash`) returns 200, while both `gemini-3.1-flash-image` and
-> `gemini-2.5-flash-image` return HTTP 429 with
-> `generate_content_free_tier_requests, limit: 0`. Image generation
-> therefore requires billing enabled on the Google Cloud project — there is
-> no free image quota to fall back on, for either Nano Banana generation.
+1. **`THEME_PREVIEW_MODE` defaults to `mock`.** Mock skips the provider
+   entirely and returns a bundled placeholder after
+   `THEME_PREVIEW_MOCK_DELAY_MS` (default 2000ms), so loading states,
+   polling and the cache are all exercised for free. Live requires the env
+   var to be exactly `live`.
+2. **CI/test refusal.** Even with the flag set, live is downgraded to mock
+   if any of `CI`, `GITHUB_ACTIONS`, `VERCEL_ENV`, `VITEST`,
+   `JEST_WORKER_ID`, `PLAYWRIGHT_TEST_BASE_URL` (and similar) is set, or if
+   `NODE_ENV=test`. The downgrade is logged.
+3. **Cache first, always.** The cache check runs before the provider seam is
+   reached, so a combination that already exists is never regenerated.
+4. **Spend cap.** Before any live call, cumulative `estimated_cost_cents`
+   for `feature = 'theme_preview'` this calendar month is summed; if adding
+   this call would exceed `THEME_PREVIEW_SPEND_CAP_CENTS` (default 8c,
+   headroom under the 10c credit) the call is refused *before* it fires and
+   falls through to the normal graceful-degradation path. It **fails
+   closed**: if the total cannot be read, the live call does not happen.
 
-### Quota observability
+Mock rows are logged at 0c so they never consume the live budget.
 
-Every provider call — success or failure — writes one row to the existing
-`ai_usage_logs` table with `feature = 'theme_preview'`, `provider =
-'google'`, the model id, duration, token counts and success flag. That
-table has no column for prompt content, so customer-written theme text
-cannot leak into it.
+> **Mock renders are cache-tagged.** A row generated in mock mode stores
+> `model_used = 'mock/static-fixture'`. In mock mode that is a normal cache
+> hit, but a **live** run treats it as a miss and regenerates over it —
+> otherwise the first real demo run would silently serve placeholders from
+> cache, and nothing would look wrong until someone examined the images.
 
-Each call also emits a log line:
+### Going live for demo content
 
+One command, then generate, then turn it straight back off:
+
+```bash
+supabase secrets set THEME_PREVIEW_MODE=live
 ```
-[generate-theme-preview] gemini image requests today: 12/500 (model=…, success=true)
-```
 
-It escalates to `console.warn` at 80% of `THEME_PREVIEW_DAILY_IMAGE_QUOTA`
-and `console.error` at the cap, so quota pressure shows up before a 429
-does. The quota number is a reporting target only — nothing enforces it
-here; the real ceiling is whatever Google grants the project.
+`HF_TOKEN` must already be set. Revert with
+`supabase secrets set THEME_PREVIEW_MODE=mock`.
 
 ### Source photos
 
@@ -201,14 +202,17 @@ Set as Edge Function secrets (`supabase secrets set …`), never in
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `GEMINI_API_KEY` | — | **required.** Google AI Studio key (`AIza…`), read via env only |
-| `THEME_PREVIEW_GEMINI_MODEL` | `gemini-3.1-flash-image-preview` | model override |
-| `THEME_PREVIEW_DAILY_IMAGE_QUOTA` | `500` | reporting target for the daily log line (not enforced) |
+| `HF_TOKEN` | — | **required for live only.** Hugging Face token, read via env, never logged |
+| `THEME_PREVIEW_MODE` | `mock` | `mock` or `live`. Live is also refused in CI/test |
+| `THEME_PREVIEW_HF_MODEL` | `Qwen/Qwen-Image-Edit-2511` | model override |
+| `THEME_PREVIEW_HF_PROVIDER` | `fal-ai` | Inference Provider override |
+| `THEME_PREVIEW_MOCK_DELAY_MS` | `2000` | fake latency in mock mode |
+| `THEME_PREVIEW_LIVE_TIMEOUT_MS` | `90000` | live provider timeout |
+| `THEME_PREVIEW_SPEND_CAP_CENTS` | `8` | hard cap; live refused past this |
+| `THEME_PREVIEW_COST_PER_CALL_CENTS` | `3` | assumed cost per live generation |
 | `THEME_PREVIEW_RATE_LIMIT_PER_HOUR` | `10` | new generations per hashed IP |
 | `THEME_PREVIEW_CUSTOM_RATE_LIMIT_PER_HOUR` | `3` | custom-prompt generations per hashed IP |
 | `THEME_PREVIEW_IP_SALT` | `venora-theme-preview` | salt for the IP hash — set a real secret |
-| `THEME_PREVIEW_GEMINI_INPUT_USD_PER_MTOK` | `0.30` | cost model, USD / 1M input tokens |
-| `THEME_PREVIEW_GEMINI_OUTPUT_USD_PER_MTOK` | `30` | cost model, USD / 1M output tokens |
 
 The two Gemini rate variables exist so provider price changes are a secret
 update, not a redeploy. **Verify them against current Gemini pricing before
