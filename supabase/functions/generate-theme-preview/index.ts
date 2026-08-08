@@ -28,6 +28,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 // esm.sh, not npm:, to match the supabase-js import above — Deno resolves
 // npm: specifiers against node_modules, which this monorepo's package.json
 // makes ambiguous inside the functions directory.
+//
+// TODO(theme-preview): this resolves from the esm.sh CDN at deploy time, so
+// esm.sh is in the deploy path. Version-pinned and consistent with the rest
+// of the codebase, so fine for now — vendor the SDK if esm.sh availability
+// ever blocks a deploy.
 import { InferenceClient } from "https://esm.sh/@huggingface/inference@4.13.25";
 import { MOCK_IMAGE_BASE64, MOCK_IMAGE_MIME } from "./mock-image.ts";
 import {
@@ -58,6 +63,12 @@ const STALE_PENDING_MS = 2 * 60 * 1000;
  * Cool-down before a failed pair is retried. Retries reuse the existing row,
  * so without this they would sidestep the per-visitor rate limit (which counts
  * newly created rows) and let one bad photo burn budget in a loop.
+ *
+ * TODO(theme-preview): these two mechanisms are coupled. The per-IP limiter
+ * counts row *creation*, not requests, so a retry against an existing row is
+ * invisible to it — this cool-down is what closes that hole. Do not weaken or
+ * remove either one without replacing the other; a request-level counter
+ * would decouple them properly.
  */
 const FAILED_RETRY_COOLDOWN_MS = 10 * 60 * 1000;
 
@@ -84,6 +95,25 @@ const LIVE_COST_PER_CALL_CENTS = Number(
 const SPEND_CAP_CENTS = Number(
   Deno.env.get("THEME_PREVIEW_SPEND_CAP_CENTS") ?? "8",
 );
+
+/**
+ * Salt for the per-visitor IP hash. Deliberately has NO default.
+ *
+ * The privacy claim this feature makes is "we rate-limit per visitor without
+ * ever storing a raw IP". With a hardcoded fallback salt that claim is false:
+ * the salt would be public knowledge, so the stored hashes become a trivially
+ * reversible lookup over the IPv4 space. Throwing at module load makes a
+ * missing secret impossible to deploy quietly — the function fails to boot
+ * and says why, instead of silently degrading to fake anonymisation.
+ */
+const IP_HASH_SALT = Deno.env.get("THEME_PREVIEW_IP_SALT");
+if (!IP_HASH_SALT) {
+  throw new Error(
+    "THEME_PREVIEW_IP_SALT is not set. Refusing to start: without it, hashed " +
+      "requester IPs would use a public constant salt and would not be anonymous. " +
+      "Set it with `supabase secrets set THEME_PREVIEW_IP_SALT=<random value>`.",
+  );
+}
 
 /** Marks rows whose stored image is the placeholder, not a real render. */
 const MOCK_MODEL_ID = "mock/static-fixture";
@@ -269,8 +299,7 @@ async function hashRequester(req: Request): Promise<string | null> {
   const ip = forwarded.split(",")[0]?.trim();
   if (!ip) return null;
 
-  const salt = Deno.env.get("THEME_PREVIEW_IP_SALT") ?? "venora-theme-preview";
-  return await sha256Hex(`${salt}:${ip}`);
+  return await sha256Hex(`${IP_HASH_SALT}:${ip}`);
 }
 
 function toBase64(bytes: Uint8Array): string {
@@ -822,6 +851,11 @@ serve(async (req) => {
     );
     console.error("[generate-theme-preview] Generation failed:", message);
 
+    // TODO(theme-preview): failed and abandoned-pending rows are never
+    // cleaned up — they accumulate indefinitely, holding an error_message
+    // each. Add a TTL sweep (scheduled function or cron) that deletes
+    // failed/pending rows older than a few days; ready rows must be kept,
+    // they are the cache.
     if (previewRowId) {
       await supabase
         .from("venue_theme_previews")

@@ -19,6 +19,13 @@ interface ThemePreviewSectionProps {
   venueId: string;
   venueName: string;
   media: VenueMedia[];
+  /**
+   * Resolved URL of the hero image the customer actually sees. For venues on
+   * the structured profile system this comes from `venue_media_items`, not
+   * `venue_images`, so it is the only reliable way to know which photo is on
+   * screen. Optional: venues without a structured profile pass nothing.
+   */
+  heroImageSrc?: string | null;
 }
 
 const uuidPattern =
@@ -28,17 +35,29 @@ export default function ThemePreviewSection({
   venueId,
   venueName,
   media = [],
+  heroImageSrc = null,
 }: ThemePreviewSectionProps) {
   const [request, setRequest] = useState<ThemeRequest | null>(null);
   const [sliderPosition, setSliderPosition] = useState(50);
   const [customDraft, setCustomDraft] = useState("");
 
-  // v1 themes only the featured photo, and only real Storage-backed rows —
-  // the dataset fallback venues have no venue_images records to reference.
-  const featuredPhoto = useMemo(
-    () => pickFeaturedMedia(media.filter((item) => item.media_type === "image")),
-    [media],
-  );
+  // v1 themes a single photo, and only real Storage-backed rows — the dataset
+  // fallback venues have no venue_images records to reference.
+  //
+  // Which photo matters: on the structured profile system the hero the
+  // customer sees comes from venue_media_items, while venue_theme_previews
+  // keys on venue_images. Those are different tables holding the same files,
+  // so we match the hero back to its venue_images twin by resolved URL. That
+  // themes the photo actually on screen while keeping the source_image_id
+  // foreign key intact. Legacy venues (no structured hero, or a hero with no
+  // venue_images twin) fall back to the featured venue_images row.
+  const featuredPhoto = useMemo(() => {
+    const images = media.filter((item) => item.media_type === "image");
+    const heroMatch = heroImageSrc
+      ? images.find((item) => getVenueMediaUrl(item.storage_path) === heroImageSrc)
+      : undefined;
+    return heroMatch ?? pickFeaturedMedia(images);
+  }, [media, heroImageSrc]);
 
   const canPreview =
     Boolean(featuredPhoto) &&

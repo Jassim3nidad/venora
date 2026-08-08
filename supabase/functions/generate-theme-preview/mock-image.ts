@@ -8,6 +8,11 @@
  *
  * Deliberately synthetic-looking (hatched gradient, not a venue) so a mock
  * render can never be mistaken for a real one in screenshots or demos.
+ *
+ * TODO(theme-preview): this ~197KB fixture is bundled into every deploy,
+ * including production deploys that only ever run live mode and can never
+ * return it. Exclude it from live-mode bundles (dynamic import behind the
+ * mode check, or a build-time strip) once bundle size matters.
  */
 export const MOCK_IMAGE_MIME = "image/png";
 

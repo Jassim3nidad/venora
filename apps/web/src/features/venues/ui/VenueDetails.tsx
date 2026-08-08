@@ -222,6 +222,7 @@ export default function VenueDetails({
             venueId={venue.id}
             venueName={profile.venue.name}
             media={venue.venue_images ?? []}
+            heroImageSrc={profile.hero.image?.src ?? null}
           />
         </div>
         <div className="mx-auto max-w-[90rem] px-4 pb-14 sm:px-6 lg:px-8 lg:pb-20">
