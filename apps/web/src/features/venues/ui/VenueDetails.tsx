@@ -35,6 +35,7 @@ import {
   VenuePracticalDetails,
 } from "./ImmersiveVenueDecisionSections";
 import ReviewsSection from "./ReviewsSection";
+import ThemePreviewSection from "./ThemePreviewSection";
 import VenueSpaceExplorer, {
   getSpaceEventFilters,
   VenueJourney,
@@ -210,6 +211,20 @@ export default function VenueDetails({
             />
           </div>
         ) : null}
+        {/*
+          Sits below the gallery, matching the feature spec. Renders nothing
+          when the venue has no Storage-backed venue_images row — the AI
+          preview is keyed on a real photo id, and dataset fallback venues
+          have none.
+        */}
+        <div className="mx-auto max-w-[90rem] px-4 pb-12 sm:px-6 lg:px-8">
+          <ThemePreviewSection
+            venueId={venue.id}
+            venueName={profile.venue.name}
+            media={venue.venue_images ?? []}
+            heroImageSrc={profile.hero.image?.src ?? null}
+          />
+        </div>
         <div className="mx-auto max-w-[90rem] px-4 pb-14 sm:px-6 lg:px-8 lg:pb-20">
           <div className="relative grid grid-cols-1 items-start gap-12 lg:grid-cols-[minmax(0,1fr)_22rem] xl:gap-16">
             <div className="min-w-0 space-y-12">
