@@ -47,7 +47,8 @@ export function useThemePreview(
 
   return useQuery<GenerateThemePreviewResponse>({
     queryKey: queryKeys.ai.themePreview(photoId, theme ?? "none", promptKey),
-    enabled: Boolean(theme) && (theme !== CUSTOM_THEME || Boolean(customPrompt)),
+    enabled:
+      Boolean(theme) && (theme !== CUSTOM_THEME || Boolean(customPrompt)),
     queryFn: () =>
       generateThemePreview({ venueId, photoId, theme: theme!, customPrompt }),
     staleTime: Infinity,

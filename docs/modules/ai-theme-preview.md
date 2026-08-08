@@ -12,14 +12,14 @@ Zod-validated `*.client.ts` + TanStack Query hook).
 
 ## Structure
 
-| Layer | Path |
-| --- | --- |
-| Migration | `supabase/migrations/034_venue_theme_previews.sql` |
-| Shared config | `packages/lib/src/venue-themes.ts` |
-| Deno re-export | `supabase/functions/_shared/venue-themes.ts` |
-| Edge Function | `supabase/functions/generate-theme-preview/index.ts` |
+| Layer                  | Path                                                                                                         |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Migration              | `supabase/migrations/034_venue_theme_previews.sql`                                                           |
+| Shared config          | `packages/lib/src/venue-themes.ts`                                                                           |
+| Deno re-export         | `supabase/functions/_shared/venue-themes.ts`                                                                 |
+| Edge Function          | `supabase/functions/generate-theme-preview/index.ts`                                                         |
 | Schema / client / hook | `features/venues/{schemas/theme-preview.schema.ts, api/theme-preview.client.ts, hooks/use-theme-preview.ts}` |
-| UI | `features/venues/ui/ThemePreviewSection.tsx`, mounted from `VenueDetails.tsx` |
+| UI                     | `features/venues/ui/ThemePreviewSection.tsx`, mounted from `VenueDetails.tsx`                                |
 
 ## Shared theme config
 
@@ -163,7 +163,7 @@ rather than by discipline. Four independent layers:
 4. **Spend cap.** Before any live call, cumulative `estimated_cost_cents`
    for `feature = 'theme_preview'` this calendar month is summed; if adding
    this call would exceed `THEME_PREVIEW_SPEND_CAP_CENTS` (default 8c,
-   headroom under the 10c credit) the call is refused *before* it fires and
+   headroom under the 10c credit) the call is refused _before_ it fires and
    falls through to the normal graceful-degradation path. It **fails
    closed**: if the total cannot be read, the live call does not happen.
 
@@ -200,19 +200,19 @@ behaviour rather than something to work around.
 Set as Edge Function secrets (`supabase secrets set …`), never in
 `apps/web/.env*`:
 
-| Variable | Default | Purpose |
-| --- | --- | --- |
-| `HF_TOKEN` | — | **required for live only.** Hugging Face token, read via env, never logged |
-| `THEME_PREVIEW_MODE` | `mock` | `mock` or `live`. Live is also refused in CI/test |
-| `THEME_PREVIEW_HF_MODEL` | `Qwen/Qwen-Image-Edit-2511` | model override |
-| `THEME_PREVIEW_HF_PROVIDER` | `fal-ai` | Inference Provider override |
-| `THEME_PREVIEW_MOCK_DELAY_MS` | `2000` | fake latency in mock mode |
-| `THEME_PREVIEW_LIVE_TIMEOUT_MS` | `90000` | live provider timeout |
-| `THEME_PREVIEW_SPEND_CAP_CENTS` | `8` | hard cap; live refused past this |
-| `THEME_PREVIEW_COST_PER_CALL_CENTS` | `3` | assumed cost per live generation |
-| `THEME_PREVIEW_RATE_LIMIT_PER_HOUR` | `10` | new generations per hashed IP |
-| `THEME_PREVIEW_CUSTOM_RATE_LIMIT_PER_HOUR` | `3` | custom-prompt generations per hashed IP |
-| `THEME_PREVIEW_IP_SALT` | `venora-theme-preview` | salt for the IP hash — set a real secret |
+| Variable                                   | Default                     | Purpose                                                                    |
+| ------------------------------------------ | --------------------------- | -------------------------------------------------------------------------- |
+| `HF_TOKEN`                                 | —                           | **required for live only.** Hugging Face token, read via env, never logged |
+| `THEME_PREVIEW_MODE`                       | `mock`                      | `mock` or `live`. Live is also refused in CI/test                          |
+| `THEME_PREVIEW_HF_MODEL`                   | `Qwen/Qwen-Image-Edit-2511` | model override                                                             |
+| `THEME_PREVIEW_HF_PROVIDER`                | `fal-ai`                    | Inference Provider override                                                |
+| `THEME_PREVIEW_MOCK_DELAY_MS`              | `2000`                      | fake latency in mock mode                                                  |
+| `THEME_PREVIEW_LIVE_TIMEOUT_MS`            | `90000`                     | live provider timeout                                                      |
+| `THEME_PREVIEW_SPEND_CAP_CENTS`            | `8`                         | hard cap; live refused past this                                           |
+| `THEME_PREVIEW_COST_PER_CALL_CENTS`        | `3`                         | assumed cost per live generation                                           |
+| `THEME_PREVIEW_RATE_LIMIT_PER_HOUR`        | `10`                        | new generations per hashed IP                                              |
+| `THEME_PREVIEW_CUSTOM_RATE_LIMIT_PER_HOUR` | `3`                         | custom-prompt generations per hashed IP                                    |
+| `THEME_PREVIEW_IP_SALT`                    | `venora-theme-preview`      | salt for the IP hash — set a real secret                                   |
 
 The two Gemini rate variables exist so provider price changes are a secret
 update, not a redeploy. **Verify them against current Gemini pricing before
@@ -224,7 +224,7 @@ trusting `generation_cost_usd` for reporting.**
 column: an "Original" chip plus one chip per theme, a free-text field for
 describing your own theme, and a before/after comparison viewport. The themed render sits underneath and the original is
 clipped over it with `clip-path`; a full-bleed transparent
-`<input type="range">` drives the divider, which gives drag *and* keyboard
+`<input type="range">` drives the divider, which gives drag _and_ keyboard
 control for free.
 
 The section **returns `null`** unless the featured photo has a real UUID
