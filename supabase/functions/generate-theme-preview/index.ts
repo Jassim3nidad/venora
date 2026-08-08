@@ -12,6 +12,12 @@
  * venue_theme_previews and the theme-previews bucket — so it self-enforces
  * everything RLS would otherwise do: the venue must be published and the
  * photo must belong to it.
+ *
+ * Image generation goes straight to Google's Generative Language API via
+ * generateThemedImage(), the single provider seam. This function does NOT
+ * use _shared/openrouter.ts or _shared/ai-config.ts — the OpenRouter Qwen
+ * Flash chat model those provide powers the other ai-* functions and is
+ * deliberately untouched here.
  */
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -50,23 +56,16 @@ const GEMINI_MODEL =
   Deno.env.get("THEME_PREVIEW_GEMINI_MODEL") ?? "gemini-3.1-flash-image-preview";
 
 /**
- * OpenRouter model id. Qwen-Image-Edit was the intended cost-comparison
- * model, but OpenRouter does not list any Qwen image-editing model — the
- * only image-output models it offers are Google's and OpenAI's. So this
- * path defaults to the same Gemini model routed through OpenRouter, which
- * still gives a real billing/latency comparison against calling Google
- * directly. Override to A/B anything else OpenRouter exposes.
+ * Free-tier daily image quota to report progress against. Not enforced
+ * here — it exists so the log line below shows how close today's usage is
+ * to the cap, instead of the first sign being a 429.
  */
-const OPENROUTER_MODEL =
-  Deno.env.get("THEME_PREVIEW_OPENROUTER_MODEL") ??
-  "google/gemini-3.1-flash-image-preview";
+const DAILY_IMAGE_QUOTA = Number(
+  Deno.env.get("THEME_PREVIEW_DAILY_IMAGE_QUOTA") ?? "500",
+);
 
-/**
- * Feature flag for the cost/quality A/B: "gemini" (direct Google API,
- * default) or "openrouter". Both take image + prompt and return an image,
- * so the caller and the cache are unaffected by which one is active.
- */
-type Provider = "gemini" | "openrouter";
+/** Feature label used in ai_usage_logs rows written by this function. */
+const USAGE_FEATURE = "theme_preview";
 
 const RATE_LIMIT_PER_HOUR = Number(
   Deno.env.get("THEME_PREVIEW_RATE_LIMIT_PER_HOUR") ?? "10",
@@ -106,7 +105,21 @@ type GeneratedImage = {
   contentType: string;
   modelUsed: string;
   costUsd: number | null;
+  inputTokens: number | null;
+  outputTokens: number | null;
 };
+
+/**
+ * Belt-and-braces scrub before any provider error text is thrown, logged, or
+ * written to error_message. Google echoes the request back in some error
+ * bodies, and error_message is readable by admins.
+ */
+function redactSecrets(text: string): string {
+  const apiKey = Deno.env.get("GEMINI_API_KEY");
+  let safe = text.slice(0, 800);
+  if (apiKey) safe = safe.split(apiKey).join("[redacted]");
+  return safe.replace(/AIza[0-9A-Za-z_-]{10,}/g, "[redacted]");
+}
 
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -162,11 +175,58 @@ async function promptHashFor(input: GenerateInput): Promise<string> {
   return hash.slice(0, 32);
 }
 
-function resolveProvider(): Provider {
-  const flag = (Deno.env.get("THEME_PREVIEW_PROVIDER") ?? "gemini").toLowerCase();
-  // "qwen" kept as an alias so existing deployments keep routing to
-  // OpenRouter after the model swap described above.
-  return flag === "openrouter" || flag === "qwen" ? "openrouter" : "gemini";
+/**
+ * Records one image request in the existing ai_usage_logs table (the same
+ * place the ai-* functions report to, so admin reporting picks this up for
+ * free) and emits a log line showing today's count against the daily quota.
+ *
+ * Both are best-effort: a metrics hiccup must never fail a generation the
+ * visitor is waiting on. ai_usage_logs has no column for prompt content, so
+ * customer-written theme text cannot leak in here even by accident.
+ */
+async function recordImageRequest(
+  supabase: any,
+  entry: {
+    model: string;
+    success: boolean;
+    durationMs: number;
+    inputTokens?: number | null;
+    outputTokens?: number | null;
+    errorCategory?: string | null;
+  },
+): Promise<void> {
+  try {
+    await supabase.from("ai_usage_logs").insert({
+      feature: USAGE_FEATURE,
+      provider: "google",
+      model: entry.model,
+      input_tokens: entry.inputTokens ?? null,
+      output_tokens: entry.outputTokens ?? null,
+      duration_ms: entry.durationMs,
+      success: entry.success,
+      error_category: entry.errorCategory ?? null,
+    });
+
+    const startOfDay = new Date();
+    startOfDay.setUTCHours(0, 0, 0, 0);
+    const { count } = await supabase
+      .from("ai_usage_logs")
+      .select("id", { count: "exact", head: true })
+      .eq("feature", USAGE_FEATURE)
+      .gte("created_at", startOfDay.toISOString());
+
+    const used = count ?? 0;
+    const line = `[generate-theme-preview] gemini image requests today: ${used}/${DAILY_IMAGE_QUOTA} (model=${entry.model}, success=${entry.success})`;
+    if (used >= DAILY_IMAGE_QUOTA) {
+      console.error(`${line} — DAILY QUOTA REACHED`);
+    } else if (used >= DAILY_IMAGE_QUOTA * 0.8) {
+      console.warn(`${line} — approaching daily quota`);
+    } else {
+      console.log(line);
+    }
+  } catch (error) {
+    console.error("[generate-theme-preview] usage logging failed (non-fatal):", error);
+  }
 }
 
 function publicUrl(supabaseUrl: string, path: string) {
@@ -244,7 +304,20 @@ async function loadSourceImage(
   };
 }
 
-async function generateWithGemini(
+/**
+ * The single provider seam for this feature.
+ *
+ * Everything above and below is provider-agnostic: the caller hands over a
+ * prompt plus the source photo and gets bytes back. Swapping Gemini for
+ * another image-edit provider means replacing this function body only.
+ *
+ * OpenRouter was removed as an option here: it lists no Qwen image-edit
+ * model, and its free allowance (~12k tokens) cannot cover an image-edit
+ * request (~58k, dominated by the input photo). That is specific to this
+ * feature — the Qwen Flash *chat* model that ai-assistant, ai-search and
+ * the other ai-* functions use through _shared/openrouter.ts is untouched.
+ */
+async function generateThemedImage(
   apiKey: string,
   prompt: string,
   source: { base64: string; mimeType: string },
@@ -253,6 +326,8 @@ async function generateWithGemini(
     `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
     {
       method: "POST",
+      // Key travels in the header, never a query string — query strings end
+      // up in access logs and proxy history.
       headers: { "x-goog-api-key": apiKey, "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [
@@ -269,12 +344,21 @@ async function generateWithGemini(
             ],
           },
         ],
+        generationConfig: {
+          // Required for the image models to emit an image at all; without
+          // it they answer with text and bill at the text rate.
+          responseModalities: ["TEXT", "IMAGE"],
+        },
       }),
     },
   );
 
   if (!response.ok) {
-    throw new Error(`Gemini image edit failed: ${await response.text()}`);
+    // Body may carry the API key back in an error echo — never include it.
+    const detail = await response.text();
+    throw new Error(
+      `Gemini image edit failed (HTTP ${response.status}): ${redactSecrets(detail)}`,
+    );
   }
 
   const payload = await response.json();
@@ -292,78 +376,26 @@ async function generateWithGemini(
   }
 
   const usage = payload?.usageMetadata;
+  const inputTokens = Number.isFinite(usage?.promptTokenCount)
+    ? Number(usage.promptTokenCount)
+    : null;
+  const outputTokens = Number.isFinite(usage?.candidatesTokenCount)
+    ? Number(usage.candidatesTokenCount)
+    : null;
   const costUsd =
-    usage && Number.isFinite(usage.promptTokenCount)
-      ? (usage.promptTokenCount * GEMINI_INPUT_USD_PER_MTOK +
-          (usage.candidatesTokenCount ?? 0) * GEMINI_OUTPUT_USD_PER_MTOK) /
-        1_000_000
-      : null;
+    inputTokens === null
+      ? null
+      : (inputTokens * GEMINI_INPUT_USD_PER_MTOK +
+          (outputTokens ?? 0) * GEMINI_OUTPUT_USD_PER_MTOK) /
+        1_000_000;
 
   return {
     bytes: fromBase64(inline.data),
     contentType: inline.mimeType ?? inline.mime_type ?? "image/jpeg",
     modelUsed: GEMINI_MODEL,
     costUsd,
-  };
-}
-
-async function generateWithOpenRouter(
-  apiKey: string,
-  prompt: string,
-  source: { base64: string; mimeType: string },
-): Promise<GeneratedImage> {
-  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: OPENROUTER_MODEL,
-      modalities: ["image", "text"],
-      // OpenRouter reports the real USD charge back on the response, which is
-      // the whole point of running this provider side-by-side with Gemini.
-      usage: { include: true },
-      messages: [
-        {
-          role: "user",
-          content: [
-            { type: "text", text: prompt },
-            {
-              type: "image_url",
-              image_url: {
-                url: `data:${source.mimeType};base64,${source.base64}`,
-              },
-            },
-          ],
-        },
-      ],
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`OpenRouter image edit failed: ${await response.text()}`);
-  }
-
-  const payload = await response.json();
-  const dataUrl = payload?.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-
-  if (typeof dataUrl !== "string") {
-    throw new Error("OpenRouter returned no image.");
-  }
-
-  const match = /^data:([^;]+);base64,(.+)$/s.exec(dataUrl);
-  if (!match) {
-    throw new Error("OpenRouter returned an unreadable image payload.");
-  }
-
-  const cost = payload?.usage?.cost;
-
-  return {
-    bytes: fromBase64(match[2]!),
-    contentType: match[1] ?? "image/jpeg",
-    modelUsed: OPENROUTER_MODEL,
-    costUsd: Number.isFinite(cost) ? Number(cost) : null,
+    inputTokens,
+    outputTokens,
   };
 }
 
@@ -392,16 +424,14 @@ serve(async (req) => {
     );
   }
 
-  const provider = resolveProvider();
-  const providerKey =
-    provider === "openrouter"
-      ? Deno.env.get("OPENROUTER_API_KEY")
-      : Deno.env.get("GEMINI_API_KEY");
+  // Read from the environment only — never hardcoded, never logged, and
+  // never echoed back in a response body.
+  const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
 
-  if (!providerKey) {
+  if (!geminiApiKey) {
     return errorResponse(
       "MODEL_NOT_CONFIGURED",
-      `No API key configured for the "${provider}" theme preview provider.`,
+      "GEMINI_API_KEY is not configured for theme previews.",
       500,
     );
   }
@@ -592,10 +622,29 @@ serve(async (req) => {
       input.customPrompt && !isVenueTheme(input.theme)
         ? buildCustomThemePrompt(input.customPrompt)
         : buildThemePrompt(input.theme as Exclude<ThemeSelection, "custom">);
-    const generated =
-      provider === "openrouter"
-        ? await generateWithOpenRouter(providerKey, prompt, source)
-        : await generateWithGemini(providerKey, prompt, source);
+    // Every provider call is metered, success or failure, so quota usage is
+    // visible before a 429 is the thing that tells us.
+    const startedAt = Date.now();
+    let generated: GeneratedImage;
+    try {
+      generated = await generateThemedImage(geminiApiKey, prompt, source);
+    } catch (generationError) {
+      await recordImageRequest(supabase, {
+        model: GEMINI_MODEL,
+        success: false,
+        durationMs: Date.now() - startedAt,
+        errorCategory: "generation_failed",
+      });
+      throw generationError;
+    }
+
+    await recordImageRequest(supabase, {
+      model: generated.modelUsed,
+      success: true,
+      durationMs: Date.now() - startedAt,
+      inputTokens: generated.inputTokens,
+      outputTokens: generated.outputTokens,
+    });
 
     // ── 6. Store and mark ready ──
     const outputPath = storagePathFor(input, promptHash);
@@ -637,8 +686,9 @@ serve(async (req) => {
       error: null,
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Theme preview generation failed.";
+    const message = redactSecrets(
+      error instanceof Error ? error.message : "Theme preview generation failed.",
+    );
     console.error("[generate-theme-preview] Generation failed:", message);
 
     if (previewRowId) {

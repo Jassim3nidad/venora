@@ -123,34 +123,67 @@ Order of operations, chosen so nothing is spent before it has to be:
 7. Any throw marks the row `failed` with `error_message` and returns a 502
    so the client can fall back to the original photo.
 
-### Models
+### Model and the provider seam
 
-Selected by the `THEME_PREVIEW_PROVIDER` flag; both take image + prompt and
-return an image, so the cache and the caller are unaffected by the choice.
+One model, called directly: **`gemini-3.1-flash-image-preview`** on
+`generativelanguage.googleapis.com` via `:generateContent`, keyed by
+`GEMINI_API_KEY` read from the environment (header `x-goog-api-key`, never
+a query string, never hardcoded).
 
-- **`gemini`** (default) — `gemini-3.1-flash-image-preview` via
-  `generativelanguage.googleapis.com` `:generateContent`. Cost is derived
-  from `usageMetadata` token counts at env-configurable rates.
-- **`openrouter`** — same call shape through OpenRouter, requesting
-  `usage: { include: true }` so OpenRouter's reported USD charge is
-  recorded directly rather than estimated.
+`generateThemedImage(apiKey, prompt, source)` is the **only** place a
+provider is contacted. Everything either side of it is provider-agnostic,
+so swapping providers means replacing that one function body — the cache,
+rate limits, storage, and the caller are all untouched by the choice.
 
-> **Qwen-Image-Edit is not available.** The spec named it as the
-> cost-comparison model, but OpenRouter lists no Qwen image-editing model —
-> as of 2026-08-08 its only image-*output* models are Google's Gemini
-> image family and OpenAI's `gpt-5-image*`. `qwen/qwen-image-edit` returns
-> `400 not a valid model ID`. The OpenRouter path therefore defaults to
-> `google/gemini-3.1-flash-image-preview`, which still gives a genuine
-> billing and latency comparison against calling Google directly. Point
-> `THEME_PREVIEW_OPENROUTER_MODEL` at anything else OpenRouter exposes to
-> A/B it. `THEME_PREVIEW_PROVIDER=qwen` is kept as an alias for
-> `openrouter` so existing deployments keep working.
+Request shape that matters: the input photo goes in as a
+`parts[].inline_data` `{ mime_type, data }` block alongside the text
+prompt, and `generationConfig.responseModalities` **must** include
+`"IMAGE"` — without it the image models reply with text and bill at the
+text rate. The response image comes back at
+`candidates[0].content.parts[].inlineData`, with token counts in
+`usageMetadata`.
 
-**Free-tier OpenRouter accounts cannot run this.** An image-edit request
-costs roughly 58k tokens (the input photo dominates), while a free-tier
-balance affords ~12k, so every call fails with HTTP 402. Lowering
-`max_tokens` does not close the gap. Either add OpenRouter credits or set
-`GEMINI_API_KEY` and switch `THEME_PREVIEW_PROVIDER` back to `gemini`.
+> **Scope note — this feature no longer touches OpenRouter at all.**
+> `_shared/openrouter.ts` and `_shared/ai-config.ts` (approved model
+> `qwen/qwen3.7-flash`) are the *chat* path used by `ai-assistant`,
+> `ai-search`, `ai-recommendation`, `ai-venue-description`,
+> `ai-cost-estimator`, `ai-package-comparison` and
+> `booking-auto-evaluation`. This function never imported them and still
+> doesn't. `OPENROUTER_API_KEY` remains set and in use by those functions —
+> do not remove it.
+
+**Why OpenRouter was dropped here:** it lists no Qwen image-edit model
+(`qwen/qwen-image-edit` → `400 not a valid model ID`; its only
+image-*output* models are Google's and OpenAI's), and a free-tier balance
+affords ~12k tokens against the ~58k an image edit needs, so every call
+returned HTTP 402.
+
+> **Gemini's free tier does not cover image generation.** Verified
+> 2026-08-08 on this project's key: a free-tier **text** call
+> (`gemini-2.5-flash`) returns 200, while both `gemini-3.1-flash-image` and
+> `gemini-2.5-flash-image` return HTTP 429 with
+> `generate_content_free_tier_requests, limit: 0`. Image generation
+> therefore requires billing enabled on the Google Cloud project — there is
+> no free image quota to fall back on, for either Nano Banana generation.
+
+### Quota observability
+
+Every provider call — success or failure — writes one row to the existing
+`ai_usage_logs` table with `feature = 'theme_preview'`, `provider =
+'google'`, the model id, duration, token counts and success flag. That
+table has no column for prompt content, so customer-written theme text
+cannot leak into it.
+
+Each call also emits a log line:
+
+```
+[generate-theme-preview] gemini image requests today: 12/500 (model=…, success=true)
+```
+
+It escalates to `console.warn` at 80% of `THEME_PREVIEW_DAILY_IMAGE_QUOTA`
+and `console.error` at the cap, so quota pressure shows up before a 429
+does. The quota number is a reporting target only — nothing enforces it
+here; the real ceiling is whatever Google grants the project.
 
 ### Source photos
 
@@ -168,11 +201,9 @@ Set as Edge Function secrets (`supabase secrets set …`), never in
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `GEMINI_API_KEY` | — | required when provider is `gemini` |
-| `OPENROUTER_API_KEY` | — | required when provider is `openrouter` |
-| `THEME_PREVIEW_PROVIDER` | `gemini` | `gemini` \| `openrouter` (`qwen` = alias for `openrouter`) |
+| `GEMINI_API_KEY` | — | **required.** Google AI Studio key (`AIza…`), read via env only |
 | `THEME_PREVIEW_GEMINI_MODEL` | `gemini-3.1-flash-image-preview` | model override |
-| `THEME_PREVIEW_OPENROUTER_MODEL` | `google/gemini-3.1-flash-image-preview` | model override |
+| `THEME_PREVIEW_DAILY_IMAGE_QUOTA` | `500` | reporting target for the daily log line (not enforced) |
 | `THEME_PREVIEW_RATE_LIMIT_PER_HOUR` | `10` | new generations per hashed IP |
 | `THEME_PREVIEW_CUSTOM_RATE_LIMIT_PER_HOUR` | `3` | custom-prompt generations per hashed IP |
 | `THEME_PREVIEW_IP_SALT` | `venora-theme-preview` | salt for the IP hash — set a real secret |
